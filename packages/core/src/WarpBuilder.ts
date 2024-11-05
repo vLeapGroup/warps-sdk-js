@@ -1,4 +1,4 @@
-import { Address, Transaction, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
+import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
 import { Config } from './config'
 import { getChainId } from './helpers'
 import { ChainEnv, Warp, WarpAction } from './types'
@@ -32,6 +32,19 @@ export class WarpBuilder {
       nativeAmount: BigInt(0),
       data: Buffer.from(serialized).valueOf(),
     })
+  }
+
+  static createFromRaw(encoded: string): Warp {
+    return JSON.parse(atob(encoded)) as Warp
+  }
+
+  static createFromTransaction(tx: TransactionOnNetwork): Warp {
+    console.log('createFromTransaction data', tx.data)
+    const warp = WarpBuilder.createFromRaw(tx.data.toString())
+
+    console.log('createFromTransaction warp', warp)
+
+    return warp
   }
 
   setTitle(title: string): WarpBuilder {
