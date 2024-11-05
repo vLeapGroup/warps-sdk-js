@@ -1,14 +1,22 @@
+export type ChainEnv = 'mainnet' | 'testnet' | 'devnet'
+
 export type Warp = {
+  version: string
   name: string
+  title: string
   description: string | null
+  preview: string
   actions: WarpAction[]
+  owner: string
 }
 
 export type WarpAction = WarpContractAction | WarpLinkAction
 
+export type WarpActionType = 'contract' | 'link'
+
 export type WarpContractAction = {
   type: WarpActionType
-  name: string
+  label: string
   description: string | null
   address: string
   endpoint: string | null
@@ -17,9 +25,7 @@ export type WarpContractAction = {
 
 export type WarpLinkAction = {
   type: WarpActionType
-  name: string
+  label: string
   description: string | null
   url: string
 }
-
-export type WarpActionType = 'contract' | 'link'
