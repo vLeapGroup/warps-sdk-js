@@ -41,7 +41,7 @@ export class WarpRegistry {
 
   private async loadRegistryInfo(config: RegistryConfig): Promise<void> {
     const contract = Config.Registry.Contract(config.env)
-    const networkProvider = new ApiNetworkProvider(config.chainApiUrl, { timeout: 30_000 })
+    const networkProvider = new ApiNetworkProvider(config.chainApiUrl || Config.Chain.ApiUrl(config.env), { timeout: 30_000 })
     const queryRunner = new QueryRunnerAdapter({ networkProvider: networkProvider })
     const controller = new SmartContractQueriesController({ queryRunner: queryRunner })
     const query = controller.createQuery({ contract, function: 'getConfig', arguments: [] })
