@@ -3,7 +3,7 @@ import { Config } from './config'
 import { getChainId } from './helpers'
 import { ChainEnv, Warp, WarpAction } from './types'
 
-export class WarpFactory {
+export class WarpBuilder {
   public version: string = Config.LatestVersion
 
   private pendingWarp: Warp = {
@@ -35,27 +35,27 @@ export class WarpFactory {
     })
   }
 
-  setTitle(title: string): WarpFactory {
+  setTitle(title: string): WarpBuilder {
     this.pendingWarp.title = title
     return this
   }
 
-  setDescription(description: string): WarpFactory {
+  setDescription(description: string): WarpBuilder {
     this.pendingWarp.description = description
     return this
   }
 
-  setPreview(preview: string): WarpFactory {
+  setPreview(preview: string): WarpBuilder {
     this.pendingWarp.preview = preview
     return this
   }
 
-  addAction(action: WarpAction): WarpFactory {
+  addAction(action: WarpAction): WarpBuilder {
     this.pendingWarp.actions.push(action)
     return this
   }
 
-  setOwner(owner: string): WarpFactory {
+  setOwner(owner: string): WarpBuilder {
     this.pendingWarp.owner = owner
     return this
   }
