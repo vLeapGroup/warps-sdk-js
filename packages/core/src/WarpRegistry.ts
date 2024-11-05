@@ -15,6 +15,7 @@ import { ChainEnv, Warp } from './types'
 
 type RegistryConfig = {
   env: ChainEnv
+  userAddress: string
   chainApiUrl?: string
 }
 
@@ -28,15 +29,17 @@ export class WarpRegistry {
     this.loadRegistryInfo(config)
   }
 
-  createRegisterTransaction(warp: Warp): Transaction {
+  createRegisterTransaction(txHash: string, alias: string | null = null): Transaction {
     if (this.registerCost === BigInt(0)) throw new Error('registry config not loaded')
+    const costAmount = alias ? this.registerCost * BigInt(2) : this.registerCost
 
     return this.getFactory().createTransactionForExecute({
-      sender: Address.newFromBech32(warp.owner),
+      sender: Address.newFromBech32(this.config.userAddress),
       contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
       function: 'register',
       gasLimit: BigInt(10_000_000),
-      nativeTransferAmount: this.registerCost,
+      nativeTransferAmount: costAmount,
+      arguments: alias ? [BytesValue.fromUTF8(txHash), BytesValue.fromUTF8(alias)] : [BytesValue.fromUTF8(txHash)],
     })
   }
 
