@@ -1,6 +1,6 @@
 {
-  "name": "@vleap/warp-sdk-react",
-  "version": "0.0.1",
+  "name": "@vleap/warps-react",
+  "version": "0.0.3",
   "main": "./src/index.tsx",
   "types": "./src/index.tsx",
   "license": "MIT",
@@ -10,7 +10,7 @@
     "test": "npm run lint"
   },
   "dependencies": {
-    "@vleap/warp-sdk-core": "*"
+    "@vleap/warps": "*"
   },
   "peerDependencies": {
     "react": ">=18.0.0",

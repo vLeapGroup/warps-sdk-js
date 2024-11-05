@@ -1,5 +1,5 @@
 {
-  "name": "@vleap/warp-sdk-core",
+  "name": "@vleap/warps",
   "version": "0.0.3",
   "description": "",
   "main": "./dist/index.js",
