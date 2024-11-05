@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 0.0.9
+
+### Patch Changes
+
+- update tx data encodings
+- update registry alias functions
+
 ## 0.0.8
 
 ### Patch Changes
