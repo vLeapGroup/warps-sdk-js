@@ -7,6 +7,7 @@ import {
   Transaction,
   TransactionsFactoryConfig,
 } from '@multiversx/sdk-core/out'
+import { byteArrayToHex } from '@multiversx/sdk-core/out/utils.codec'
 import { Config } from './config'
 import { getChainId } from './helpers'
 import { ChainEnv, Warp } from './types'
@@ -70,9 +71,10 @@ export class WarpRegistry {
     const controller = new SmartContractQueriesController({ queryRunner: queryRunner })
     const query = controller.createQuery({ contract, function: 'getConfig', arguments: [] })
     const res = await controller.runQuery(query)
-    const [registerCost] = controller.parseQueryResponse(res)
+    console.log('res', res)
+    const [registerCostRaw] = controller.parseQueryResponse(res)
 
-    console.log('registerCost', registerCost, res)
+    const registerCost = BigInt('0x' + byteArrayToHex(registerCostRaw))
 
     this.registerCost = registerCost
   }
