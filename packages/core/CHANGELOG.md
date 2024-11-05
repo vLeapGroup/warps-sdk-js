@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 0.0.10
+
+### Patch Changes
+
+- update tx data encoding
+- add further warp builder instantiation methos
+
 ## 0.0.9
 
 ### Patch Changes
