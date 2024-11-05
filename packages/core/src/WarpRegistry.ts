@@ -27,6 +27,7 @@ export class WarpRegistry {
   }
 
   createRegisterTransaction(warp: Warp): Transaction {
+    if (this.registerCost === BigInt(0)) throw new Error('registry config not loaded')
     const config = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
     const factory = new SmartContractTransactionsFactory({ config })
     return factory.createTransactionForExecute({
