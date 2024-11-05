@@ -74,7 +74,11 @@ export class WarpRegistry {
     console.log('res', res)
     const [registerCostRaw] = controller.parseQueryResponse(res)
 
+    console.log('registerCostRaw', registerCostRaw)
+
     const registerCost = BigInt('0x' + byteArrayToHex(registerCostRaw))
+
+    console.log('registerCost', registerCost)
 
     this.registerCost = registerCost
   }
