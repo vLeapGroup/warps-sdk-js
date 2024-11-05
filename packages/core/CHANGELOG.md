@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.5
+
+### Patch Changes
+
+- configure devent registry address
+
 ## 0.0.4
 
 ### Patch Changes
