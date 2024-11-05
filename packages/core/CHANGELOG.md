@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.11
+
+### Patch Changes
+
+- add alias info to registry register tx
+
 ## 0.0.10
 
 ### Patch Changes
