@@ -1,6 +1,7 @@
 import {
   Address,
   ApiNetworkProvider,
+  BytesValue,
   QueryRunnerAdapter,
   SmartContractQueriesController,
   SmartContractTransactionsFactory,
@@ -39,23 +40,13 @@ export class WarpRegistry {
     })
   }
 
-  createAliasAssignTransaction(warp: Warp, alias: string): Transaction {
+  createAliasAssignTransaction(warp: Warp, txHash: string, alias: string): Transaction {
     return this.getFactory().createTransactionForExecute({
       sender: Address.newFromBech32(warp.owner),
       contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
       function: 'assignAlias',
       gasLimit: BigInt(10_000_000),
-      //   arguments: [BytesValue.fromUTF8(alias)],
-    })
-  }
-
-  reassignAliasTransaction(warp: Warp, alias: string): Transaction {
-    return this.getFactory().createTransactionForExecute({
-      sender: Address.newFromBech32(warp.owner),
-      contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
-      function: 'reassignAlias',
-      gasLimit: BigInt(10_000_000),
-      //   arguments: [BytesValue.fromUTF8(alias)],
+      arguments: [BytesValue.fromUTF8(txHash), BytesValue.fromUTF8(alias)],
     })
   }
 
@@ -71,14 +62,9 @@ export class WarpRegistry {
     const controller = new SmartContractQueriesController({ queryRunner: queryRunner })
     const query = controller.createQuery({ contract, function: 'getConfig', arguments: [] })
     const res = await controller.runQuery(query)
-    console.log('res', res)
     const [registerCostRaw] = controller.parseQueryResponse(res)
 
-    console.log('registerCostRaw', registerCostRaw)
-
     const registerCost = BigInt('0x' + byteArrayToHex(registerCostRaw))
-
-    console.log('registerCost', registerCost)
 
     this.registerCost = registerCost
   }
