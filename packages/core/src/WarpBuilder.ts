@@ -50,13 +50,13 @@ export class WarpBuilder {
     return this
   }
 
-  addAction(action: WarpAction): WarpBuilder {
-    this.pendingWarp.actions.push(action)
+  setOwner(owner: string): WarpBuilder {
+    this.pendingWarp.owner = owner
     return this
   }
 
-  setOwner(owner: string): WarpBuilder {
-    this.pendingWarp.owner = owner
+  addAction(action: WarpAction): WarpBuilder {
+    this.pendingWarp.actions.push(action)
     return this
   }
 
