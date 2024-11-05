@@ -28,15 +28,39 @@ export class WarpRegistry {
 
   createRegisterTransaction(warp: Warp): Transaction {
     if (this.registerCost === BigInt(0)) throw new Error('registry config not loaded')
-    const config = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
-    const factory = new SmartContractTransactionsFactory({ config })
-    return factory.createTransactionForExecute({
+
+    return this.getFactory().createTransactionForExecute({
       sender: Address.newFromBech32(warp.owner),
       contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
       function: 'register',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: this.registerCost,
     })
+  }
+
+  createAliasAssignTransaction(warp: Warp, alias: string): Transaction {
+    return this.getFactory().createTransactionForExecute({
+      sender: Address.newFromBech32(warp.owner),
+      contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
+      function: 'assignAlias',
+      gasLimit: BigInt(10_000_000),
+      //   arguments: [BytesValue.fromUTF8(alias)],
+    })
+  }
+
+  reassignAliasTransaction(warp: Warp, alias: string): Transaction {
+    return this.getFactory().createTransactionForExecute({
+      sender: Address.newFromBech32(warp.owner),
+      contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
+      function: 'reassignAlias',
+      gasLimit: BigInt(10_000_000),
+      //   arguments: [BytesValue.fromUTF8(alias)],
+    })
+  }
+
+  private getFactory(): SmartContractTransactionsFactory {
+    const config = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
+    return new SmartContractTransactionsFactory({ config })
   }
 
   private async loadRegistryInfo(config: RegistryConfig): Promise<void> {
