@@ -39,7 +39,7 @@ export class WarpRegistry {
       function: 'register',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: costAmount,
-      arguments: alias ? [BytesValue.fromUTF8(txHash), BytesValue.fromUTF8(alias)] : [BytesValue.fromUTF8(txHash)],
+      arguments: alias ? [BytesValue.fromHex(txHash), BytesValue.fromUTF8(alias)] : [BytesValue.fromHex(txHash)],
     })
   }
 
