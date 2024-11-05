@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.7
+
+### Patch Changes
+
+- fix registry config decoding
+
 ## 0.0.6
 
 ### Patch Changes
