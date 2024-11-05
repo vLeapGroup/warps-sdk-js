@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.6
+
+### Patch Changes
+
+- add registry alias tx creators
+
 ## 0.0.5
 
 ### Patch Changes
