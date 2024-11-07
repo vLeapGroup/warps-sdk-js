@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.12
+
+### Patch Changes
+
+- 8736f20: add warp builder set actions
+
 ## 0.0.11
 
 ### Patch Changes
