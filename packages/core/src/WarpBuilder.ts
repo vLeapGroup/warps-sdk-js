@@ -38,7 +38,7 @@ export class WarpBuilder {
   }
 
   static createFromRaw(encoded: string): Warp {
-    return JSON.parse(atob(encoded)) as Warp
+    return JSON.parse(encoded) as Warp
   }
 
   static createFromTransaction(tx: TransactionOnNetwork): Warp {
