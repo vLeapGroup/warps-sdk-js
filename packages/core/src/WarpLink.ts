@@ -26,13 +26,13 @@ export class WarpLink {
   async detect(url: string): Promise<DetectionResult> {
     const urlObj = new URL(url)
     const searchParams = urlObj.searchParams
-    const param = searchParams.get('xwarp')
+    const param = searchParams.get(IdParamName)
 
     if (!param) {
       return { match: false, warp: null }
     }
 
-    const [idType, id] = param.split(encodeURIComponent(IdParamSeparator))
+    const [idType, id] = param.split(IdParamSeparator)
     const builder = new WarpBuilder(this.config)
     const registry = new WarpRegistry(this.config)
     let warp: Warp | null = null
