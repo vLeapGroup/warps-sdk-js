@@ -4,6 +4,12 @@ export const Config = {
   ProtocolName: 'warp',
   LatestVersion: '0.1.0',
 
+  DefaultClientUrl: (env: ChainEnv) => {
+    if (env === 'devnet') return 'https://devnet.xwarp.me/to'
+    if (env === 'testnet') return '###Not implemented###'
+    return 'https://xwarp.me/to'
+  },
+
   Chain: {
     ApiUrl: (env: ChainEnv) => {
       if (env === 'devnet') return 'https://devnet-api.multiversx.com'

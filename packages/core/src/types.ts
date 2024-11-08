@@ -1,5 +1,14 @@
 export type ChainEnv = 'mainnet' | 'testnet' | 'devnet'
 
+export type WarpConfig = {
+  env: ChainEnv
+  clientUrl?: string
+  userAddress?: string
+  chainApiUrl?: string
+}
+
+export type WarpIdType = 'hash' | 'alias'
+
 export type Warp = {
   protocol: string
   name: string

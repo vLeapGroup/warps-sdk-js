@@ -1,13 +1,18 @@
-import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
+import {
+  Address,
+  ApiNetworkProvider,
+  Transaction,
+  TransactionOnNetwork,
+  TransactionsFactoryConfig,
+  TransferTransactionsFactory,
+} from '@multiversx/sdk-core'
+import { Config } from './config'
 import { getChainId, getLatestProtocolIdentifier } from './helpers'
-import { ChainEnv, Warp, WarpAction } from './types'
-
-type WarpBuilderConfig = {
-  env: ChainEnv
-  userAddress: string
-}
+import { Warp, WarpAction, WarpConfig } from './types'
 
 export class WarpBuilder {
+  private config: WarpConfig
+
   private pendingWarp: Warp = {
     protocol: getLatestProtocolIdentifier(),
     name: '',
@@ -17,30 +22,48 @@ export class WarpBuilder {
     actions: [],
   }
 
-  constructor(name: string) {
-    this.pendingWarp.name = name
+  constructor(config: WarpConfig) {
+    this.config = config
   }
 
-  static createInscriptionTransaction(warp: Warp, config: WarpBuilderConfig): Transaction {
-    const factoryConfig = new TransactionsFactoryConfig({ chainID: getChainId(config.env) })
+  createInscriptionTransaction(warp: Warp): Transaction {
+    if (!this.config.userAddress) throw new Error('warp builder user address not set')
+    const factoryConfig = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
     const factory = new TransferTransactionsFactory({ config: factoryConfig })
 
     const serialized = JSON.stringify(warp)
 
     return factory.createTransactionForNativeTokenTransfer({
-      sender: Address.newFromBech32(config.userAddress),
-      receiver: Address.newFromBech32(config.userAddress),
+      sender: Address.newFromBech32(this.config.userAddress),
+      receiver: Address.newFromBech32(this.config.userAddress),
       nativeAmount: BigInt(0),
       data: Buffer.from(serialized).valueOf(),
     })
   }
 
-  static createFromRaw(encoded: string): Warp {
+  createFromRaw(encoded: string): Warp {
     return JSON.parse(encoded) as Warp
   }
 
-  static createFromTransaction(tx: TransactionOnNetwork): Warp {
-    return WarpBuilder.createFromRaw(tx.data.toString())
+  createFromTransaction(tx: TransactionOnNetwork): Warp {
+    return this.createFromRaw(tx.data.toString())
+  }
+
+  async createFromTransactionHash(hash: string): Promise<Warp | null> {
+    const networkProvider = new ApiNetworkProvider(this.config.chainApiUrl || Config.Chain.ApiUrl(this.config.env))
+
+    try {
+      const tx = await networkProvider.getTransaction(hash)
+      return this.createFromTransaction(tx)
+    } catch (error) {
+      console.error('Error creating warp from transaction hash', error)
+      return null
+    }
+  }
+
+  setName(name: string): WarpBuilder {
+    this.pendingWarp.name = name
+    return this
   }
 
   setTitle(title: string): WarpBuilder {
