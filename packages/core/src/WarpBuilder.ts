@@ -1,13 +1,10 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
-import { Config } from './config'
-import { getChainId } from './helpers'
+import { getChainId, getLatestProtocolIdentifier } from './helpers'
 import { ChainEnv, Warp, WarpAction } from './types'
 
 export class WarpBuilder {
-  public version: string = Config.LatestVersion
-
   private pendingWarp: Warp = {
-    version: Config.LatestVersion,
+    protocol: getLatestProtocolIdentifier(),
     name: '',
     title: '',
     description: null,
@@ -73,7 +70,7 @@ export class WarpBuilder {
   }
 
   build(): Warp {
-    this.ensure(this.pendingWarp.version, 'version is required')
+    this.ensure(this.pendingWarp.protocol, 'protocol is required')
     this.ensure(this.pendingWarp.name, 'name is required')
     this.ensure(this.pendingWarp.title, 'title is required')
     this.ensure(this.pendingWarp.actions.length > 0, 'actions are required')

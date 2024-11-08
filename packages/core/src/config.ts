@@ -1,6 +1,7 @@
 import { ChainEnv } from './types'
 
 export const Config = {
+  ProtocolName: 'warp',
   LatestVersion: '0.1.0',
 
   Chain: {

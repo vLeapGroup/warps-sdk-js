@@ -1,7 +1,7 @@
 export type ChainEnv = 'mainnet' | 'testnet' | 'devnet'
 
 export type Warp = {
-  version: string
+  protocol: string
   name: string
   title: string
   description: string | null
