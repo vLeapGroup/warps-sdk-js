@@ -1,5 +1,13 @@
 # @vleap/warp-sdk-core
 
+## 0.0.16
+
+### Patch Changes
+
+- refactoring
+- add warp link
+- f283652: change remove explicit warp owner
+
 ## 0.0.15
 
 ### Patch Changes
