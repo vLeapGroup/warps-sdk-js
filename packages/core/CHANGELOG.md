@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.14
+
+### Patch Changes
+
+- 931fd05: update tx data serialization
+
 ## 0.0.13
 
 ### Patch Changes
