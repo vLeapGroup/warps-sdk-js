@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.20
+
+### Patch Changes
+
+- 0011e8b: update build
+
 ## 0.0.19
 
 ### Patch Changes
