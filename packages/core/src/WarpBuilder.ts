@@ -39,9 +39,7 @@ export class WarpBuilder {
   }
 
   static createFromTransaction(tx: TransactionOnNetwork): Warp {
-    const warp = WarpBuilder.createFromRaw(tx.data.toString())
-
-    return warp
+    return WarpBuilder.createFromRaw(tx.data.toString())
   }
 
   setTitle(title: string): WarpBuilder {
