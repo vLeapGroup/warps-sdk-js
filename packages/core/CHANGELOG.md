@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 0.0.19
+
+### Patch Changes
+
+- 1f18142: update warp action contract field name
+- af6290d: add registry mainnet address"
+
 ## 0.0.18
 
 ### Patch Changes
