@@ -24,7 +24,7 @@ export class WarpBuilder {
     const factoryConfig = new TransactionsFactoryConfig({ chainID: getChainId(config.env) })
     const factory = new TransferTransactionsFactory({ config: factoryConfig })
 
-    const serialized = btoa(JSON.stringify(warp))
+    const serialized = JSON.stringify(warp)
 
     return factory.createTransactionForNativeTokenTransfer({
       sender: Address.newFromBech32(warp.owner),
