@@ -7,7 +7,6 @@ export type Warp = {
   description: string | null
   preview: string
   actions: WarpAction[]
-  owner: string
 }
 
 export type WarpAction = WarpContractAction | WarpLinkAction

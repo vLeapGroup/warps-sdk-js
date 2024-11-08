@@ -11,7 +11,7 @@ import {
 import { byteArrayToHex } from '@multiversx/sdk-core/out/utils.codec'
 import { Config } from './config'
 import { getChainId } from './helpers'
-import { ChainEnv, Warp } from './types'
+import { ChainEnv } from './types'
 
 type RegistryConfig = {
   env: ChainEnv
@@ -43,9 +43,9 @@ export class WarpRegistry {
     })
   }
 
-  createAliasAssignTransaction(warp: Warp, txHash: string, alias: string): Transaction {
+  createAliasAssignTransaction(txHash: string, alias: string): Transaction {
     return this.getFactory().createTransactionForExecute({
-      sender: Address.newFromBech32(warp.owner),
+      sender: Address.newFromBech32(this.config.userAddress),
       contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
       function: 'assignAlias',
       gasLimit: BigInt(10_000_000),

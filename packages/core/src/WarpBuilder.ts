@@ -2,6 +2,11 @@ import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, 
 import { getChainId, getLatestProtocolIdentifier } from './helpers'
 import { ChainEnv, Warp, WarpAction } from './types'
 
+type WarpBuilderConfig = {
+  env: ChainEnv
+  userAddress: string
+}
+
 export class WarpBuilder {
   private pendingWarp: Warp = {
     protocol: getLatestProtocolIdentifier(),
@@ -10,22 +15,21 @@ export class WarpBuilder {
     description: null,
     preview: '',
     actions: [],
-    owner: '',
   }
 
   constructor(name: string) {
     this.pendingWarp.name = name
   }
 
-  static createInscriptionTransaction(warp: Warp, config: { env: ChainEnv }): Transaction {
+  static createInscriptionTransaction(warp: Warp, config: WarpBuilderConfig): Transaction {
     const factoryConfig = new TransactionsFactoryConfig({ chainID: getChainId(config.env) })
     const factory = new TransferTransactionsFactory({ config: factoryConfig })
 
     const serialized = JSON.stringify(warp)
 
     return factory.createTransactionForNativeTokenTransfer({
-      sender: Address.newFromBech32(warp.owner),
-      receiver: Address.newFromBech32(warp.owner),
+      sender: Address.newFromBech32(config.userAddress),
+      receiver: Address.newFromBech32(config.userAddress),
       nativeAmount: BigInt(0),
       data: Buffer.from(serialized).valueOf(),
     })
@@ -54,11 +58,6 @@ export class WarpBuilder {
     return this
   }
 
-  setOwner(owner: string): WarpBuilder {
-    this.pendingWarp.owner = owner
-    return this
-  }
-
   setActions(actions: WarpAction[]): WarpBuilder {
     this.pendingWarp.actions = actions
     return this
@@ -74,7 +73,6 @@ export class WarpBuilder {
     this.ensure(this.pendingWarp.name, 'name is required')
     this.ensure(this.pendingWarp.title, 'title is required')
     this.ensure(this.pendingWarp.actions.length > 0, 'actions are required')
-    this.ensure(this.pendingWarp.owner, 'owner is required')
 
     return this.pendingWarp
   }
