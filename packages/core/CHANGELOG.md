@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.15
+
+### Patch Changes
+
+- b7ba5dd: add warp protocol identifier
+
 ## 0.0.14
 
 ### Patch Changes
