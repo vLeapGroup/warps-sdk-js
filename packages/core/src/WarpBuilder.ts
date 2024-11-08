@@ -26,9 +26,6 @@ export class WarpBuilder {
 
     const serialized = btoa(JSON.stringify(warp))
 
-    console.log('createInscriptionTransaction serialized', serialized)
-    console.log('createInscriptionTransaction data', Buffer.from(serialized).valueOf())
-
     return factory.createTransactionForNativeTokenTransfer({
       sender: Address.newFromBech32(warp.owner),
       receiver: Address.newFromBech32(warp.owner),
@@ -42,10 +39,7 @@ export class WarpBuilder {
   }
 
   static createFromTransaction(tx: TransactionOnNetwork): Warp {
-    console.log('createFromTransaction data', tx.data)
     const warp = WarpBuilder.createFromRaw(tx.data.toString())
-
-    console.log('createFromTransaction warp', warp)
 
     return warp
   }
