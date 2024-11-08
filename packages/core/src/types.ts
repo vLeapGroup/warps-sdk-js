@@ -27,7 +27,7 @@ export type WarpContractAction = {
   label: string
   description: string | null
   address: string
-  endpoint: string | null
+  func: string | null
   args: any[]
 }
 
