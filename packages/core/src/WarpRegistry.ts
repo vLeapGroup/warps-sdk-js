@@ -1,6 +1,7 @@
 import {
   Address,
   ApiNetworkProvider,
+  BooleanValue,
   BytesValue,
   QueryRunnerAdapter,
   SmartContractQueriesController,
@@ -11,7 +12,7 @@ import {
 import { byteArrayToHex } from '@multiversx/sdk-core/out/utils.codec'
 import { Config } from './config'
 import { getChainId } from './helpers'
-import { WarpConfig } from './types'
+import { RegistryInfo, WarpConfig } from './types'
 
 export class WarpRegistry {
   private config: WarpConfig
@@ -23,10 +24,10 @@ export class WarpRegistry {
     this.loadRegistryInfo()
   }
 
-  createRegisterTransaction(txHash: string, alias: string | null = null): Transaction {
+  createRegisterTransaction(txHash: string, registryInfo: RegistryInfo): Transaction {
     if (this.registerCost === BigInt(0)) throw new Error('registry config not loaded')
     if (!this.config.userAddress) throw new Error('registry config user address not set')
-    const costAmount = alias ? this.registerCost * BigInt(2) : this.registerCost
+    const costAmount = registryInfo.alias ? this.registerCost * BigInt(2) : this.registerCost
 
     return this.getFactory().createTransactionForExecute({
       sender: Address.newFromBech32(this.config.userAddress),
@@ -34,7 +35,9 @@ export class WarpRegistry {
       function: 'register',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: costAmount,
-      arguments: alias ? [BytesValue.fromHex(txHash), BytesValue.fromUTF8(alias)] : [BytesValue.fromHex(txHash)],
+      arguments: registryInfo.alias
+        ? [BytesValue.fromHex(txHash), new BooleanValue(registryInfo.isPublic), BytesValue.fromUTF8(registryInfo.alias)]
+        : [BytesValue.fromHex(txHash), new BooleanValue(registryInfo.isPublic)],
     })
   }
 

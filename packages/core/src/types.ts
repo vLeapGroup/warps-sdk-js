@@ -38,3 +38,8 @@ export type WarpLinkAction = {
   description: string | null
   url: string
 }
+
+export type RegistryInfo = {
+  alias: string
+  isPublic: boolean
+}
