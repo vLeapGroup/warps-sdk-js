@@ -40,6 +40,6 @@ export type WarpLinkAction = {
 }
 
 export type RegistryInfo = {
-  alias: string
+  alias: string | null
   isPublic: boolean
 }
