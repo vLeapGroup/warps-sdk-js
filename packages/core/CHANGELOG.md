@@ -1,5 +1,13 @@
 # @vleap/warp-sdk-core
 
+## 0.0.23
+
+### Patch Changes
+
+- 9a8f353: add warp action inputs
+- c74fc91: add warp action executor - wip
+- b5ea0c8: add warp contract action value
+
 ## 0.0.22
 
 ### Patch Changes
