@@ -30,6 +30,7 @@ export type WarpContractAction = {
   func: string | null
   args: any[]
   gasLimit: number
+  value?: string
 }
 
 export type WarpLinkAction = {
