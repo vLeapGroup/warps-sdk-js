@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 0.0.21
+
+### Patch Changes
+
+- add gas limit to contract action
+- update registry register tx params
+
 ## 0.0.20
 
 ### Patch Changes
