@@ -31,6 +31,7 @@ export type WarpContractAction = {
   args: any[]
   gasLimit: number
   value?: string
+  inputs?: WarpActionInput[]
 }
 
 export type WarpLinkAction = {
@@ -38,6 +39,14 @@ export type WarpLinkAction = {
   label: string
   description: string | null
   url: string
+  inputs?: WarpActionInput[]
+}
+
+export type WarpActionInput = {
+  type: 'query'
+  name: string
+  value: string
+  position: string
 }
 
 export type RegistryInfo = {
