@@ -21,11 +21,14 @@ export class WarpRegistry {
   constructor(config: WarpConfig) {
     this.config = config
     this.registerCost = BigInt(0)
-    this.loadRegistryInfo()
+  }
+
+  async init(): Promise<void> {
+    await this.loadRegistryInfo()
   }
 
   createRegisterTransaction(txHash: string, registryInfo: RegistryInfo): Transaction {
-    if (this.registerCost === BigInt(0)) throw new Error('registry config not loaded')
+    if (this.registerCost === BigInt(0)) throw new Error('registry config not loaded. forgot to call init()?')
     if (!this.config.userAddress) throw new Error('registry config user address not set')
     const costAmount = registryInfo.alias ? this.registerCost * BigInt(2) : this.registerCost
 
