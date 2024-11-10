@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.26
+
+### Patch Changes
+
+- ddfb9a2: remove action input label
+
 ## 0.0.25
 
 ### Patch Changes
