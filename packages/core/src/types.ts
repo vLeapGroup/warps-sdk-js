@@ -42,11 +42,15 @@ export type WarpLinkAction = {
   inputs?: WarpActionInput[]
 }
 
+export type WarpActionInputSource = 'field' | 'query'
+export type WarpActionInputType = 'text' | 'number' | 'bigint' | 'boolean' | 'address'
+
 export type WarpActionInput = {
-  type: 'query'
   name: string
-  value: string
+  label?: string
+  type: WarpActionInputType
   position: string
+  source: WarpActionInputSource
 }
 
 export type RegistryInfo = {

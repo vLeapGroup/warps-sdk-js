@@ -1,4 +1,4 @@
-import { ChainEnv } from './types'
+import { ChainEnv, WarpActionInputSource } from './types'
 
 export const Config = {
   ProtocolName: 'warp',
@@ -25,4 +25,8 @@ export const Config = {
       return 'erd1qqqqqqqqqqqqqpgq3mrpj3u6q7tejv6d7eqhnyd27n9v5c5tl3ts08mffe'
     },
   },
+
+  AvailableActionInputSources: ['field', 'query'] as WarpActionInputSource[],
+
+  AvailableActionInputPositions: ['value'] as string[],
 }
