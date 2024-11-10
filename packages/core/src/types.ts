@@ -47,7 +47,6 @@ export type WarpActionInputType = 'text' | 'number' | 'bigint' | 'boolean' | 'ad
 
 export type WarpActionInput = {
   name: string
-  label?: string
   type: WarpActionInputType
   position: string
   source: WarpActionInputSource
