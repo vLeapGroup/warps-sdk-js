@@ -3,6 +3,7 @@ import { ChainEnv, WarpActionInputSource, WarpActionInputType } from './types'
 export const Config = {
   ProtocolName: 'warp',
   LatestVersion: '0.1.0',
+  LatestSchemaUrl: 'https://raw.githubusercontent.com/vLeapGroup/warps-specs/refs/heads/main/schemas/v0.1.0.schema.json',
 
   DefaultClientUrl: (env: ChainEnv) => {
     if (env === 'devnet') return 'https://devnet.xwarp.me/to'

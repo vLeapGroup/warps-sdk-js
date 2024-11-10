@@ -5,6 +5,7 @@ export type WarpConfig = {
   clientUrl?: string
   userAddress?: string
   chainApiUrl?: string
+  schemaUrl?: string
 }
 
 export type WarpIdType = 'hash' | 'alias'

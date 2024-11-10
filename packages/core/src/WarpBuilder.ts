@@ -6,6 +6,7 @@ import {
   TransactionsFactoryConfig,
   TransferTransactionsFactory,
 } from '@multiversx/sdk-core'
+import Ajv from 'ajv'
 import { Config } from './config'
 import { getChainId, getLatestProtocolIdentifier } from './helpers'
 import { Warp, WarpAction, WarpConfig } from './types'
@@ -91,11 +92,13 @@ export class WarpBuilder {
     return this
   }
 
-  build(): Warp {
+  async build(): Promise<Warp> {
     this.ensure(this.pendingWarp.protocol, 'protocol is required')
     this.ensure(this.pendingWarp.name, 'name is required')
     this.ensure(this.pendingWarp.title, 'title is required')
     this.ensure(this.pendingWarp.actions.length > 0, 'actions are required')
+
+    await this.ensureValidSchema()
 
     return this.pendingWarp
   }
@@ -103,6 +106,18 @@ export class WarpBuilder {
   private ensure(value: string | null | boolean, errorMessage: string): void {
     if (!value) {
       throw new Error(`Warp: ${errorMessage}`)
+    }
+  }
+
+  private async ensureValidSchema(): Promise<void> {
+    const schemaUrl = this.config.schemaUrl || Config.LatestSchemaUrl
+    const schemaResponse = await fetch(schemaUrl)
+    const schema = await schemaResponse.json()
+    const ajv = new Ajv()
+    const validate = ajv.compile(schema)
+
+    if (!validate(this.pendingWarp)) {
+      throw new Error(`Warp schema validation failed: ${ajv.errorsText(validate.errors)}`)
     }
   }
 }
