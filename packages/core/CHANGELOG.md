@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.27
+
+### Patch Changes
+
+- b73d986: add warp schema validation
+
 ## 0.0.26
 
 ### Patch Changes
