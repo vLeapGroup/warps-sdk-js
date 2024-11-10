@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.25
+
+### Patch Changes
+
+- d1a9c85: add config available action input types
+
 ## 0.0.24
 
 ### Patch Changes
