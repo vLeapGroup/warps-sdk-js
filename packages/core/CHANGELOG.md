@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 0.0.24
+
+### Patch Changes
+
+- 3280e52: add warp action executor export
+- 12be282: update action input types"
+
 ## 0.0.23
 
 ### Patch Changes
