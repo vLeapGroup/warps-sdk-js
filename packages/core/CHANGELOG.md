@@ -1,5 +1,13 @@
 # @vleap/warp-sdk-core
 
+## 0.0.28
+
+### Patch Changes
+
+- bfa6329: update registry tx
+- d6b1e71: update action descriptions
+- bb9672a: add further action input parameters
+
 ## 0.0.27
 
 ### Patch Changes
