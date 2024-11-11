@@ -44,7 +44,7 @@ export type WarpLinkAction = {
 }
 
 export type WarpActionInputSource = 'field' | 'query'
-export type WarpActionInputType = 'text' | 'number' | 'bigint' | 'boolean' | 'address'
+export type WarpActionInputType = 'text' | 'uint8' | 'uint16' | 'uint32' | 'uint64' | 'biguint' | 'boolean' | 'address'
 
 export type WarpActionInput = {
   name: string
