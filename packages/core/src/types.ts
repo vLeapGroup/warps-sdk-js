@@ -56,3 +56,11 @@ export type WarpActionInput = {
   min?: number
   max?: number
 }
+
+export type WarpActionExecutionResult = {
+  action: WarpAction
+  user: {
+    address: string
+  }
+  tx?: string
+}
