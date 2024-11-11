@@ -1,7 +1,6 @@
 import {
   Address,
   ApiNetworkProvider,
-  BooleanValue,
   BytesValue,
   QueryRunnerAdapter,
   SmartContractQueriesController,
@@ -12,7 +11,7 @@ import {
 import { byteArrayToHex } from '@multiversx/sdk-core/out/utils.codec'
 import { Config } from './config'
 import { getChainId } from './helpers'
-import { RegistryInfo, WarpConfig } from './types'
+import { WarpConfig } from './types'
 
 export class WarpRegistry {
   private config: WarpConfig
@@ -24,13 +23,13 @@ export class WarpRegistry {
   }
 
   async init(): Promise<void> {
-    await this.loadRegistryInfo()
+    await this.loadRegistryConfigs()
   }
 
-  createRegisterTransaction(txHash: string, registryInfo: RegistryInfo): Transaction {
+  createRegisterTransaction(txHash: string, alias?: string | null): Transaction {
     if (this.registerCost === BigInt(0)) throw new Error('registry config not loaded. forgot to call init()?')
     if (!this.config.userAddress) throw new Error('registry config user address not set')
-    const costAmount = registryInfo.alias ? this.registerCost * BigInt(2) : this.registerCost
+    const costAmount = alias ? this.registerCost * BigInt(2) : this.registerCost
 
     return this.getFactory().createTransactionForExecute({
       sender: Address.newFromBech32(this.config.userAddress),
@@ -38,9 +37,7 @@ export class WarpRegistry {
       function: 'register',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: costAmount,
-      arguments: registryInfo.alias
-        ? [BytesValue.fromHex(txHash), new BooleanValue(registryInfo.isPublic), BytesValue.fromUTF8(registryInfo.alias)]
-        : [BytesValue.fromHex(txHash), new BooleanValue(registryInfo.isPublic)],
+      arguments: alias ? [BytesValue.fromHex(txHash), BytesValue.fromUTF8(alias)] : [BytesValue.fromHex(txHash)],
     })
   }
 
@@ -67,7 +64,7 @@ export class WarpRegistry {
     return txHashRaw?.toString() || null
   }
 
-  private async loadRegistryInfo(): Promise<void> {
+  private async loadRegistryConfigs(): Promise<void> {
     const contract = Config.Registry.Contract(this.config.env)
     const controller = this.getController()
     const query = controller.createQuery({ contract, function: 'getConfig', arguments: [] })

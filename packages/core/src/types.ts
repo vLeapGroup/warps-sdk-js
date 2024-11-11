@@ -52,8 +52,3 @@ export type WarpActionInput = {
   position: string
   source: WarpActionInputSource
 }
-
-export type RegistryInfo = {
-  alias: string | null
-  isPublic: boolean
-}
