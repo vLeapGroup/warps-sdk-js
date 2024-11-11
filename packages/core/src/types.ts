@@ -26,7 +26,7 @@ export type WarpActionType = 'contract' | 'link'
 export type WarpContractAction = {
   type: WarpActionType
   label: string
-  description: string | null
+  description?: string | null
   address: string
   func: string | null
   args: any[]
@@ -38,7 +38,7 @@ export type WarpContractAction = {
 export type WarpLinkAction = {
   type: WarpActionType
   label: string
-  description: string | null
+  description?: string | null
   url: string
   inputs?: WarpActionInput[]
 }
@@ -48,6 +48,7 @@ export type WarpActionInputType = 'text' | 'number' | 'bigint' | 'boolean' | 'ad
 
 export type WarpActionInput = {
   name: string
+  description?: string | null
   type: WarpActionInputType
   position: string
   source: WarpActionInputSource
