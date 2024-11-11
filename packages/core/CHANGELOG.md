@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.30
+
+### Patch Changes
+
+- d3b4eab: add action execution result type
+
 ## 0.0.29
 
 ### Patch Changes
