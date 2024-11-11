@@ -52,4 +52,7 @@ export type WarpActionInput = {
   type: WarpActionInputType
   position: string
   source: WarpActionInputSource
+  required?: boolean
+  min?: number
+  max?: number
 }
