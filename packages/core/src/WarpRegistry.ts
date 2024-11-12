@@ -82,8 +82,6 @@ export class WarpRegistry {
     const res = await controller.runQuery(query)
     const [registerCostRaw] = controller.parseQueryResponse(res)
 
-    console.log('loadRegistryConfigs registerCostRaw', registerCostRaw)
-
     const registerCost = BigInt(registerCostRaw.toString())
 
     this.registerCost = registerCost
