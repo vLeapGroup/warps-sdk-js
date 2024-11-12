@@ -12,8 +12,8 @@ import {
 import { byteArrayToHex } from '@multiversx/sdk-core/out/utils.codec'
 import RegistryAbi from './abis/registry.abi.json'
 import { Config } from './config'
-import { getChainId } from './helpers'
-import { WarpConfig } from './types'
+import { getChainId, toTypedWarpInfo } from './helpers'
+import { WarpConfig, WarpInfo } from './types'
 
 export class WarpRegistry {
   private config: WarpConfig
@@ -55,15 +55,14 @@ export class WarpRegistry {
     })
   }
 
-  async resolveAlias(alias: string): Promise<string | null> {
+  async getInfoByAlias(alias: string): Promise<WarpInfo | null> {
     const contract = Config.Registry.Contract(this.config.env)
     const controller = this.getController()
     const query = controller.createQuery({ contract, function: 'getInfoByAlias', arguments: [BytesValue.fromUTF8(alias)] })
     const res = await controller.runQuery(query)
-    console.log('resolveAlias res', res)
-    const parsed = controller.parseQueryResponse(res)
-    console.log('resolveAlias parsed', parsed)
-    return parsed[0]?.toString() || null
+    const [warpInfoRaw] = controller.parseQueryResponse(res)
+    console.log('getInfoByAlias parsed', warpInfoRaw)
+    return warpInfoRaw ? toTypedWarpInfo(warpInfoRaw) : null
   }
 
   private async loadRegistryConfigs(): Promise<void> {
@@ -71,11 +70,11 @@ export class WarpRegistry {
     const controller = this.getController()
     const query = controller.createQuery({ contract, function: 'getConfig', arguments: [] })
     const res = await controller.runQuery(query)
-    const parsed = controller.parseQueryResponse(res)
+    const [registerCostRaw] = controller.parseQueryResponse(res)
 
-    console.log('loadRegistryConfigs parsed', parsed)
+    console.log('loadRegistryConfigs registerCostRaw', registerCostRaw)
 
-    const registerCost = BigInt('0x' + byteArrayToHex(parsed[0]))
+    const registerCost = BigInt('0x' + byteArrayToHex(registerCostRaw))
 
     this.registerCost = registerCost
   }

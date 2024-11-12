@@ -72,7 +72,7 @@
             ],
             "outputs": [
                 {
-                    "type": "variadic<WarpInfo>",
+                    "type": "variadic<WarpInfoView>",
                     "multi_result": true
                 }
             ]
@@ -88,7 +88,7 @@
             ],
             "outputs": [
                 {
-                    "type": "WarpInfo"
+                    "type": "WarpInfoView"
                 }
             ]
         },
@@ -103,7 +103,7 @@
             ],
             "outputs": [
                 {
-                    "type": "WarpInfo"
+                    "type": "WarpInfoView"
                 }
             ]
         },
@@ -133,24 +133,7 @@
     "esdtAttributes": [],
     "hasCallback": false,
     "types": {
-        "TrustStatus": {
-            "type": "enum",
-            "variants": [
-                {
-                    "name": "Unverified",
-                    "discriminant": 0
-                },
-                {
-                    "name": "Verified",
-                    "discriminant": 1
-                },
-                {
-                    "name": "Blacklisted",
-                    "discriminant": 2
-                }
-            ]
-        },
-        "WarpInfo": {
+        "WarpInfoView": {
             "type": "struct",
             "fields": [
                 {
@@ -163,11 +146,11 @@
                 },
                 {
                     "name": "trust",
-                    "type": "TrustStatus"
+                    "type": "bytes"
                 },
                 {
                     "name": "creator",
-                    "type": "u32"
+                    "type": "Address"
                 },
                 {
                     "name": "created_at",

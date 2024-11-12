@@ -8,6 +8,16 @@ export type WarpConfig = {
   schemaUrl?: string
 }
 
+export type TrustStatus = 'unverified' | 'verified' | 'blacklisted'
+
+export type WarpInfo = {
+  hash: string
+  alias: string | null
+  trust: TrustStatus
+  creator: string
+  createdAt: number
+}
+
 export type WarpIdType = 'hash' | 'alias'
 
 export type Warp = {
