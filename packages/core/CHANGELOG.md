@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.35
+
+### Patch Changes
+
+- 29106cd: add registry publish function
+
 ## 0.0.34
 
 ### Patch Changes
