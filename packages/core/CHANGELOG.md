@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 0.0.32
+
+### Patch Changes
+
+- 3393eb4: update registry internals
+- 9cdb739: improve link detection
+
 ## 0.0.31
 
 ### Patch Changes
