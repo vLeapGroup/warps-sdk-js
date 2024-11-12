@@ -32,7 +32,10 @@ export class WarpLink {
       return { match: false, warp: null }
     }
 
-    const [idType, id] = param.split(IdParamSeparator)
+    const [idType, id] = param.includes(IdParamSeparator)
+      ? param.split(IdParamSeparator)
+      : param.split(encodeURIComponent(IdParamSeparator))
+
     const builder = new WarpBuilder(this.config)
     const registry = new WarpRegistry(this.config)
     let warp: Warp | null = null
