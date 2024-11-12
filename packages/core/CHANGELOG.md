@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.33
+
+### Patch Changes
+
+- a09e897: fix build
+
 ## 0.0.32
 
 ### Patch Changes
