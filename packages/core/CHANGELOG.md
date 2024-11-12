@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.31
+
+### Patch Changes
+
+- 0349acc: update registry result parsing
+
 ## 0.0.30
 
 ### Patch Changes
