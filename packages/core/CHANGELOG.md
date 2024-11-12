@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 0.0.38
+
+### Patch Changes
+
+- simplify default warp link
+- 42136e9: update link building for default id type
+
 ## 0.0.37
 
 ### Patch Changes
