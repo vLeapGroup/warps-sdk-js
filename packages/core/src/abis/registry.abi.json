@@ -1,0 +1,179 @@
+{
+    "buildInfo": {
+        "rustc": {
+            "version": "1.80.0-nightly",
+            "commitHash": "791adf759cc065316f054961875052d5bc03e16c",
+            "commitDate": "2024-05-21",
+            "channel": "Nightly",
+            "short": "rustc 1.80.0-nightly (791adf759 2024-05-21)"
+        },
+        "contractCrate": {
+            "name": "registry",
+            "version": "0.0.1"
+        },
+        "framework": {
+            "name": "multiversx-sc",
+            "version": "0.50.6"
+        }
+    },
+    "name": "RegistryContract",
+    "constructor": {
+        "inputs": [
+            {
+                "name": "unit_price",
+                "type": "BigUint"
+            }
+        ],
+        "outputs": []
+    },
+    "upgradeConstructor": {
+        "inputs": [],
+        "outputs": []
+    },
+    "endpoints": [
+        {
+            "name": "register",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "EGLD"
+            ],
+            "inputs": [
+                {
+                    "name": "hash",
+                    "type": "bytes"
+                },
+                {
+                    "name": "alias_opt",
+                    "type": "optional<bytes>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "assignAlias",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "alias",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getUserWarps",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "variadic<WarpInfo>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getInfoByAlias",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "alias",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "WarpInfo"
+                }
+            ]
+        },
+        {
+            "name": "getInfoByHash",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "hash",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "WarpInfo"
+                }
+            ]
+        },
+        {
+            "name": "setUnitPrice",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "amount",
+                    "type": "BigUint"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getConfig",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        }
+    ],
+    "esdtAttributes": [],
+    "hasCallback": false,
+    "types": {
+        "TrustStatus": {
+            "type": "enum",
+            "variants": [
+                {
+                    "name": "Unverified",
+                    "discriminant": 0
+                },
+                {
+                    "name": "Verified",
+                    "discriminant": 1
+                },
+                {
+                    "name": "Blacklisted",
+                    "discriminant": 2
+                }
+            ]
+        },
+        "WarpInfo": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "hash",
+                    "type": "bytes"
+                },
+                {
+                    "name": "alias",
+                    "type": "Option<bytes>"
+                },
+                {
+                    "name": "trust",
+                    "type": "TrustStatus"
+                },
+                {
+                    "name": "creator",
+                    "type": "u32"
+                },
+                {
+                    "name": "created_at",
+                    "type": "u64"
+                }
+            ]
+        }
+    }
+}

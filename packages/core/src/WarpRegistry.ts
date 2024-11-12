@@ -1,4 +1,5 @@
 import {
+  AbiRegistry,
   Address,
   ApiNetworkProvider,
   BytesValue,
@@ -9,6 +10,7 @@ import {
   TransactionsFactoryConfig,
 } from '@multiversx/sdk-core/out'
 import { byteArrayToHex } from '@multiversx/sdk-core/out/utils.codec'
+import RegistryAbi from './abis/registry.abi.json'
 import { Config } from './config'
 import { getChainId } from './helpers'
 import { WarpConfig } from './types'
@@ -56,12 +58,12 @@ export class WarpRegistry {
   async resolveAlias(alias: string): Promise<string | null> {
     const contract = Config.Registry.Contract(this.config.env)
     const controller = this.getController()
-    const query = controller.createQuery({ contract, function: 'resolveAlias', arguments: [BytesValue.fromUTF8(alias)] })
+    const query = controller.createQuery({ contract, function: 'getInfoByAlias', arguments: [BytesValue.fromUTF8(alias)] })
     const res = await controller.runQuery(query)
     console.log('resolveAlias res', res)
-    const [txHashRaw] = controller.parseQueryResponse(res)
-    console.log('resolveAlias txHashRaw', txHashRaw)
-    return txHashRaw?.toString() || null
+    const parsed = controller.parseQueryResponse(res)
+    console.log('resolveAlias parsed', parsed)
+    return parsed[0]?.toString() || null
   }
 
   private async loadRegistryConfigs(): Promise<void> {
@@ -69,22 +71,26 @@ export class WarpRegistry {
     const controller = this.getController()
     const query = controller.createQuery({ contract, function: 'getConfig', arguments: [] })
     const res = await controller.runQuery(query)
-    const [registerCostRaw] = controller.parseQueryResponse(res)
+    const parsed = controller.parseQueryResponse(res)
 
-    const registerCost = BigInt('0x' + byteArrayToHex(registerCostRaw))
+    console.log('loadRegistryConfigs parsed', parsed)
+
+    const registerCost = BigInt('0x' + byteArrayToHex(parsed[0]))
 
     this.registerCost = registerCost
   }
 
   private getFactory(): SmartContractTransactionsFactory {
     const config = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
-    return new SmartContractTransactionsFactory({ config })
+    const abi = AbiRegistry.create(RegistryAbi)
+    return new SmartContractTransactionsFactory({ config, abi })
   }
 
   private getController(): SmartContractQueriesController {
     const apiUrl = this.config.chainApiUrl || Config.Chain.ApiUrl(this.config.env)
     const networkProvider = new ApiNetworkProvider(apiUrl, { timeout: 30_000 })
     const queryRunner = new QueryRunnerAdapter({ networkProvider: networkProvider })
-    return new SmartContractQueriesController({ queryRunner: queryRunner })
+    const abi = AbiRegistry.create(RegistryAbi)
+    return new SmartContractQueriesController({ queryRunner, abi })
   }
 }
