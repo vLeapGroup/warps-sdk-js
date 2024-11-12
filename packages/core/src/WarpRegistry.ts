@@ -9,7 +9,6 @@ import {
   Transaction,
   TransactionsFactoryConfig,
 } from '@multiversx/sdk-core/out'
-import { byteArrayToHex } from '@multiversx/sdk-core/out/utils.codec'
 import RegistryAbi from './abis/registry.abi.json'
 import { Config } from './config'
 import { getChainId, toTypedWarpInfo } from './helpers'
@@ -85,7 +84,7 @@ export class WarpRegistry {
 
     console.log('loadRegistryConfigs registerCostRaw', registerCostRaw)
 
-    const registerCost = BigInt('0x' + byteArrayToHex(registerCostRaw))
+    const registerCost = BigInt(registerCostRaw.toString())
 
     this.registerCost = registerCost
   }
