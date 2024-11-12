@@ -10,6 +10,7 @@ type DetectionResult = {
 
 const IdParamName = 'xwarp'
 const IdParamSeparator = ':'
+const DefaultIdType = 'alias'
 
 // Example Link (Transaction Hash as ID): https://xwarp.me/to?xwarp=hash%3A<MYHASH>
 // Example Link (Alias as ID): https://xwarp.me/to?xwarp=alias%3A<MYALIAS>
@@ -32,9 +33,9 @@ export class WarpLink {
       return { match: false, warp: null }
     }
 
-    const [idType, id] = param.includes(IdParamSeparator)
-      ? param.split(IdParamSeparator)
-      : param.split(encodeURIComponent(IdParamSeparator))
+    const decodedParam = decodeURIComponent(param)
+    const normalizedParam = decodedParam.includes(IdParamSeparator) ? decodedParam : `${DefaultIdType}${IdParamSeparator}${decodedParam}`
+    const [idType, id] = normalizedParam.split(IdParamSeparator)
 
     const builder = new WarpBuilder(this.config)
     const registry = new WarpRegistry(this.config)
