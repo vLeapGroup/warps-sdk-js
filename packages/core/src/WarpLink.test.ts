@@ -6,15 +6,15 @@ const Config: WarpConfig = {
 }
 
 describe('WarpLink', () => {
-  it('build - creates a link', () => {
+  it('build - creates a link with hash', () => {
     const link = new WarpLink(Config).build('hash', '123')
 
     expect(link).toBe('https://devnet.xwarp.me/to?xwarp=hash%3A123')
   })
 
   it('build - creates a link with alias', () => {
-    const link = new WarpLink(Config).build('alias', '123')
+    const link = new WarpLink(Config).build('alias', 'mywarp')
 
-    expect(link).toBe('https://devnet.xwarp.me/to?xwarp=alias%3A123')
+    expect(link).toBe('https://devnet.xwarp.me/to?xwarp=Amywarp')
   })
 })

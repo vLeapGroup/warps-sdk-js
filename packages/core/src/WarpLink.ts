@@ -21,6 +21,11 @@ export class WarpLink {
 
   build(type: WarpIdType, id: string): string {
     const clientUrl = this.config.clientUrl || Config.DefaultClientUrl(this.config.env)
+
+    if (type === DefaultIdType) {
+      return `${clientUrl}?${IdParamName}=${encodeURIComponent(id)}`
+    }
+
     return `${clientUrl}?${IdParamName}=${encodeURIComponent(type + IdParamSeparator + id)}`
   }
 
