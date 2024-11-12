@@ -7,7 +7,7 @@
   "module": "./dist/index.js",
   "scripts": {
     "build": "tsup src/index.ts --dts --format cjs,esm --minify --clean",
-    "test": "jest",
+    "test": "jest --config jest.config.js",
     "lint": "tsc --noEmit",
     "preversion": "npm run lint && npm run build"
   },
@@ -29,13 +29,6 @@
     "ts-jest": "^29.2.5",
     "tsup": "^8.3.5",
     "typescript": "^5.6.3"
-  },
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "jsdom",
-    "setupFiles": [
-      "./jest.setup.ts"
-    ]
   },
   "publishConfig": {
     "access": "public"
