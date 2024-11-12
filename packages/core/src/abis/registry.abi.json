@@ -51,6 +51,17 @@
             "outputs": []
         },
         {
+            "name": "publish",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "hash",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": []
+        },
+        {
             "name": "assignAlias",
             "mutability": "mutable",
             "inputs": [
