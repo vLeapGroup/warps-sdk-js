@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.36
+
+### Patch Changes
+
+- a3211c2: fix registry config loading
+
 ## 0.0.35
 
 ### Patch Changes
