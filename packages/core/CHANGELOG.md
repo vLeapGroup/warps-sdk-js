@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.34
+
+### Patch Changes
+
+- 80c69d2: fix registry type casting
+
 ## 0.0.33
 
 ### Patch Changes
