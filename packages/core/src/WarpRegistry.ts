@@ -73,7 +73,6 @@ export class WarpRegistry {
     const query = controller.createQuery({ contract, function: 'getInfoByAlias', arguments: [BytesValue.fromUTF8(alias)] })
     const res = await controller.runQuery(query)
     const [warpInfoRaw] = controller.parseQueryResponse(res)
-    console.log('getInfoByAlias parsed', warpInfoRaw)
     return warpInfoRaw ? toTypedWarpInfo(warpInfoRaw) : null
   }
 
