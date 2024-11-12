@@ -20,7 +20,7 @@ export class WarpLink {
 
   build(type: WarpIdType, id: string): string {
     const clientUrl = this.config.clientUrl || Config.DefaultClientUrl(this.config.env)
-    return `${clientUrl}?${IdParamName}=${encodeURIComponent(type)}${IdParamSeparator}${encodeURIComponent(id)}`
+    return `${clientUrl}?${IdParamName}=${encodeURIComponent(type + IdParamSeparator + id)}`
   }
 
   async detect(url: string): Promise<DetectionResult> {
