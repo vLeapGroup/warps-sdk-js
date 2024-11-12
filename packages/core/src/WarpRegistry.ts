@@ -55,6 +55,18 @@ export class WarpRegistry {
     })
   }
 
+  createPublishTransaction(txHash: string): Transaction {
+    if (!this.config.userAddress) throw new Error('registry config user address not set')
+
+    return this.getFactory().createTransactionForExecute({
+      sender: Address.newFromBech32(this.config.userAddress),
+      contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
+      function: 'publish',
+      gasLimit: BigInt(10_000_000),
+      arguments: [BytesValue.fromUTF8(txHash)],
+    })
+  }
+
   async getInfoByAlias(alias: string): Promise<WarpInfo | null> {
     const contract = Config.Registry.Contract(this.config.env)
     const controller = this.getController()
