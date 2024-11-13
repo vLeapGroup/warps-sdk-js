@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.39
+
+### Patch Changes
+
+- 3fa3a40: add registry user warp infos func
+
 ## 0.0.38
 
 ### Patch Changes
