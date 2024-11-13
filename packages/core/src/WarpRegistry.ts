@@ -1,6 +1,7 @@
 import {
   AbiRegistry,
   Address,
+  AddressValue,
   ApiNetworkProvider,
   BytesValue,
   QueryRunnerAdapter,
@@ -73,6 +74,15 @@ export class WarpRegistry {
     const res = await controller.runQuery(query)
     const [warpInfoRaw] = controller.parseQueryResponse(res)
     return warpInfoRaw ? toTypedWarpInfo(warpInfoRaw) : null
+  }
+
+  async getUserWarpInfos(user: string): Promise<WarpInfo[]> {
+    const contract = Config.Registry.Contract(this.config.env)
+    const controller = this.getController()
+    const query = controller.createQuery({ contract, function: 'getUserWarps', arguments: [new AddressValue(new Address(user))] })
+    const res = await controller.runQuery(query)
+    const warpInfosRaw = controller.parseQueryResponse(res)
+    return warpInfosRaw.map(toTypedWarpInfo)
   }
 
   private async loadRegistryConfigs(): Promise<void> {
