@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.44
+
+### Patch Changes
+
+- 1bb9f59: rename action input string type
+
 ## 0.0.43
 
 ### Patch Changes
