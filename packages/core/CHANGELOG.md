@@ -1,8 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 0.0.43
+
+### Patch Changes
+
+- add config types
+
 ## 0.0.42
 
 ### Patch Changes
+
 - fix build
 
 ## 0.0.41
