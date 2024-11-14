@@ -31,5 +31,17 @@ export const Config = {
 
   AvailableActionInputTypes: ['text', 'uint8', 'uint16', 'uint32', 'uint64', 'biguint', 'boolean', 'address'] as WarpActionInputType[],
 
-  AvailableActionInputPositions: ['value'] as string[],
+  AvailableActionInputPositions: [
+    'value',
+    'arg:1',
+    'arg:2',
+    'arg:3',
+    'arg:4',
+    'arg:5',
+    'arg:6',
+    'arg:7',
+    'arg:8',
+    'arg:9',
+    'arg:10',
+  ] as string[],
 }
