@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.40
+
+### Patch Changes
+
+- update available action input types
+
 ## 0.0.39
 
 ### Patch Changes
