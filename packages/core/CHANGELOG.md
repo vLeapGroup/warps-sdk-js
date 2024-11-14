@@ -1,5 +1,18 @@
 # @vleap/warp-sdk-core
 
+## 0.0.42
+
+### Patch Changes
+- fix build
+
+## 0.0.41
+
+### Patch Changes
+
+- implement action executor
+- update types
+- df63cf3: update config available action input positions
+
 ## 0.0.40
 
 ### Patch Changes
