@@ -29,7 +29,7 @@ export const Config = {
 
   AvailableActionInputSources: ['field', 'query'] as WarpActionInputSource[],
 
-  AvailableActionInputTypes: ['text', 'number', 'bigint', 'boolean', 'address'] as WarpActionInputType[],
+  AvailableActionInputTypes: ['text', 'uint8', 'uint16', 'uint32', 'uint64', 'biguint', 'boolean', 'address'] as WarpActionInputType[],
 
   AvailableActionInputPositions: ['value'] as string[],
 }
