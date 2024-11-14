@@ -1,4 +1,4 @@
-import { ChainEnv, WarpActionInputSource, WarpActionInputType } from './types'
+import { ChainEnv, WarpActionInputPosition, WarpActionInputSource, WarpActionInputType } from './types'
 
 export const Config = {
   ProtocolName: 'warp',
@@ -43,5 +43,5 @@ export const Config = {
     'arg:8',
     'arg:9',
     'arg:10',
-  ] as string[],
+  ] as WarpActionInputPosition[],
 }
