@@ -59,7 +59,7 @@ export class WarpActionExecutor {
   }
 
   private toTypedArg(arg: string, type: WarpActionInputType): TypedValue {
-    if (type === 'text') return BytesValue.fromUTF8(arg)
+    if (type === 'string') return BytesValue.fromUTF8(arg)
     if (type === 'uint8') return new U8Value(Number(arg))
     if (type === 'uint16') return new U16Value(Number(arg))
     if (type === 'uint32') return new U32Value(Number(arg))

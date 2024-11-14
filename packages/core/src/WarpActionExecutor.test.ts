@@ -58,7 +58,7 @@ describe('WarpActionExecutor', () => {
 
     const actual = subject.getTypedArgsWithInputs({
       args: [
-        'text:hello',
+        'string:hello',
         'uint8:1',
         'uint16:2',
         'uint32:3',
