@@ -42,12 +42,18 @@ export class WarpBuilder {
     })
   }
 
-  createFromRaw(encoded: string): Warp {
-    return JSON.parse(encoded) as Warp
+  async createFromRaw(encoded: string, validateSchema = true): Promise<Warp> {
+    const warp = JSON.parse(encoded) as Warp
+
+    if (validateSchema) {
+      await this.ensureValidSchema(warp)
+    }
+
+    return warp
   }
 
-  createFromTransaction(tx: TransactionOnNetwork): Warp {
-    return this.createFromRaw(tx.data.toString())
+  async createFromTransaction(tx: TransactionOnNetwork, validateSchema = false): Promise<Warp> {
+    return this.createFromRaw(tx.data.toString(), validateSchema)
   }
 
   async createFromTransactionHash(hash: string): Promise<Warp | null> {
@@ -98,7 +104,7 @@ export class WarpBuilder {
     this.ensure(this.pendingWarp.title, 'title is required')
     this.ensure(this.pendingWarp.actions.length > 0, 'actions are required')
 
-    await this.ensureValidSchema()
+    await this.ensureValidSchema(this.pendingWarp)
 
     return this.pendingWarp
   }
@@ -109,14 +115,14 @@ export class WarpBuilder {
     }
   }
 
-  private async ensureValidSchema(): Promise<void> {
+  private async ensureValidSchema(warp: Warp): Promise<void> {
     const schemaUrl = this.config.schemaUrl || Config.LatestSchemaUrl
     const schemaResponse = await fetch(schemaUrl)
     const schema = await schemaResponse.json()
     const ajv = new Ajv()
     const validate = ajv.compile(schema)
 
-    if (!validate(this.pendingWarp)) {
+    if (!validate(warp)) {
       throw new Error(`Warp schema validation failed: ${ajv.errorsText(validate.errors)}`)
     }
   }
