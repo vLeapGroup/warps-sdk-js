@@ -15,6 +15,6 @@ describe('WarpLink', () => {
   it('build - creates a link with alias', () => {
     const link = new WarpLink(Config).build('alias', 'mywarp')
 
-    expect(link).toBe('https://devnet.xwarp.me/to?xwarp=Amywarp')
+    expect(link).toBe('https://devnet.xwarp.me/to?xwarp=mywarp')
   })
 })
