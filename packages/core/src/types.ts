@@ -40,8 +40,8 @@ export type WarpContractAction = {
   address: string
   func: string | null
   args: any[]
-  gasLimit: number
   value?: string
+  gasLimit: number
   inputs?: WarpActionInput[]
 }
 
