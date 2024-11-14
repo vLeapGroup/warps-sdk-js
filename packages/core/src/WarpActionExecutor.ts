@@ -68,6 +68,6 @@ export class WarpActionExecutor {
     if (type === 'boolean') return new BooleanValue(arg === 'true')
     if (type === 'address') return new AddressValue(Address.newFromBech32(arg))
     if (type === 'hex') return BytesValue.fromHex(arg)
-    return BytesValue.fromUTF8(arg)
+    throw new Error(`WarpActionExecutor: Unsupported input type: ${type}`)
   }
 }
