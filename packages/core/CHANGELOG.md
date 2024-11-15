@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.47
+
+### Patch Changes
+
+- 77ddfad: add registry info by hash view func
+
 ## 0.0.46
 
 ### Patch Changes
