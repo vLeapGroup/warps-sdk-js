@@ -51,7 +51,7 @@ export class WarpRegistry {
       contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
       function: 'assignAlias',
       gasLimit: BigInt(10_000_000),
-      arguments: [BytesValue.fromUTF8(txHash), BytesValue.fromUTF8(alias)],
+      arguments: [BytesValue.fromHex(txHash), BytesValue.fromUTF8(alias)],
     })
   }
 
@@ -63,7 +63,7 @@ export class WarpRegistry {
       contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
       function: 'publishRegistry',
       gasLimit: BigInt(10_000_000),
-      arguments: [BytesValue.fromUTF8(txHash)],
+      arguments: [BytesValue.fromHex(txHash)],
     })
   }
 
