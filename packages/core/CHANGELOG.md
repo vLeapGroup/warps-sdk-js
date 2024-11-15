@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.48
+
+### Patch Changes
+
+- ec4414f: fix registry tx arg encoding
+
 ## 0.0.47
 
 ### Patch Changes
