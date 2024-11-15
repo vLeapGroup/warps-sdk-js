@@ -32,7 +32,7 @@
     },
     "endpoints": [
         {
-            "name": "register",
+            "name": "registerWarp",
             "mutability": "mutable",
             "payableInTokens": [
                 "EGLD"
@@ -51,7 +51,7 @@
             "outputs": []
         },
         {
-            "name": "publish",
+            "name": "publishWarp",
             "mutability": "mutable",
             "inputs": [
                 {
@@ -137,6 +137,23 @@
             "outputs": [
                 {
                     "type": "BigUint"
+                }
+            ]
+        }
+    ],
+    "events": [
+        {
+            "identifier": "warpRegistered",
+            "inputs": [
+                {
+                    "name": "hash",
+                    "type": "bytes",
+                    "indexed": true
+                },
+                {
+                    "name": "alias",
+                    "type": "bytes",
+                    "indexed": true
                 }
             ]
         }
