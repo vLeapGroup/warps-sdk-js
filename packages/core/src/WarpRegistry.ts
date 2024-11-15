@@ -36,7 +36,7 @@ export class WarpRegistry {
     return this.getFactory().createTransactionForExecute({
       sender: Address.newFromBech32(this.config.userAddress),
       contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
-      function: 'register',
+      function: 'registerWarp',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: costAmount,
       arguments: alias ? [BytesValue.fromHex(txHash), BytesValue.fromUTF8(alias)] : [BytesValue.fromHex(txHash)],
@@ -61,7 +61,7 @@ export class WarpRegistry {
     return this.getFactory().createTransactionForExecute({
       sender: Address.newFromBech32(this.config.userAddress),
       contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
-      function: 'publish',
+      function: 'publishRegistry',
       gasLimit: BigInt(10_000_000),
       arguments: [BytesValue.fromUTF8(txHash)],
     })
