@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 0.0.46
+
+### Patch Changes
+
+- add qr codes
+- 40a7c3e: update registry endpoint names
+
 ## 0.0.45
 
 ### Patch Changes
