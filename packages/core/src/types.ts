@@ -5,7 +5,8 @@ export type WarpConfig = {
   clientUrl?: string
   userAddress?: string
   chainApiUrl?: string
-  schemaUrl?: string
+  warpSchemaUrl?: string
+  brandSchemaUrl?: string
   cacheTtl?: number
 }
 
@@ -92,6 +93,7 @@ export type WarpActionExecutionResult = {
 }
 
 export type Brand = {
+  protocol: string
   name: string
   description: string
   logo: string

@@ -7,7 +7,7 @@ export const getChainId = (env: ChainEnv): string => {
   return '1'
 }
 
-export const getLatestProtocolIdentifier = (): string => `${Config.ProtocolName}:${Config.LatestVersion}`
+export const getLatestProtocolIdentifier = (name: string): string => `${name}:${Config.LatestProtocolVersion}`
 
 export const toTypedWarpInfo = (warpInfo: any): WarpInfo => ({
   hash: warpInfo.hash.toString('hex'),
@@ -15,4 +15,5 @@ export const toTypedWarpInfo = (warpInfo: any): WarpInfo => ({
   trust: warpInfo.trust.toString(),
   creator: warpInfo.creator.toString(),
   createdAt: warpInfo.created_at.toNumber(),
+  brand: warpInfo.brand?.toString() || null,
 })

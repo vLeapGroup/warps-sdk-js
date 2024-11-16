@@ -15,7 +15,7 @@ export class WarpBuilder {
   private config: WarpConfig
 
   private pendingWarp: Warp = {
-    protocol: getLatestProtocolIdentifier(),
+    protocol: getLatestProtocolIdentifier(Config.ProtocolNameWarp),
     name: '',
     title: '',
     description: null,
@@ -124,7 +124,7 @@ export class WarpBuilder {
   }
 
   private async ensureValidSchema(warp: Warp): Promise<void> {
-    const schemaUrl = this.config.schemaUrl || Config.LatestSchemaUrl
+    const schemaUrl = this.config.warpSchemaUrl || Config.LatestWarpSchemaUrl
     const schemaResponse = await fetch(schemaUrl)
     const schema = await schemaResponse.json()
     const ajv = new Ajv()
