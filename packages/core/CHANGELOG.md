@@ -1,5 +1,17 @@
 # @vleap/warp-sdk-core
 
+## 0.0.49
+
+### Patch Changes
+
+- b97a126: update config registry devnet address
+- 1de701c: update registry user warp info func
+- 60f2403: add next field to warp type
+- f07f27b: add registry brands
+- 5ab8737: add caching
+- f23f004: add brand field to warp info type
+- 8c8bcf6: add warp meta data
+
 ## 0.0.48
 
 ### Patch Changes
