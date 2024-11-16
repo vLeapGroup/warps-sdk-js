@@ -6,6 +6,11 @@ export type WarpConfig = {
   userAddress?: string
   chainApiUrl?: string
   schemaUrl?: string
+  cacheTtl?: number
+}
+
+export type WarpCacheConfig = {
+  ttl?: number
 }
 
 export type TrustStatus = 'unverified' | 'verified' | 'blacklisted'

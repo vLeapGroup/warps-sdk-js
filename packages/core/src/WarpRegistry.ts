@@ -13,11 +13,13 @@ import {
 import RegistryAbi from './abis/registry.abi.json'
 import { Config } from './config'
 import { getChainId, toTypedWarpInfo } from './helpers'
-import { Brand, WarpConfig, WarpInfo } from './types'
+import { Brand, WarpCacheConfig, WarpConfig, WarpInfo } from './types'
+import { CacheKey, WarpCache } from './WarpCache'
 
 export class WarpRegistry {
   private config: WarpConfig
   private registerCost: bigint
+  private cache: WarpCache = new WarpCache()
 
   constructor(config: WarpConfig) {
     this.config = config
@@ -67,7 +69,14 @@ export class WarpRegistry {
     })
   }
 
-  async getInfoByAlias(alias: string): Promise<{ warp: WarpInfo | null; brand: Brand | null }> {
+  async getInfoByAlias(alias: string, cache?: WarpCacheConfig): Promise<{ warp: WarpInfo | null; brand: Brand | null }> {
+    const cacheKey = CacheKey.WarpInfo(alias)
+
+    if (cache) {
+      const cached = this.cache.get<{ warp: WarpInfo | null; brand: Brand | null }>(cacheKey)
+      if (cached) return cached
+    }
+
     const contract = Config.Registry.Contract(this.config.env)
     const controller = this.getController()
     const query = controller.createQuery({ contract, function: 'getInfoByAlias', arguments: [BytesValue.fromUTF8(alias)] })
@@ -75,10 +84,21 @@ export class WarpRegistry {
     const [warpInfoRaw] = controller.parseQueryResponse(res)
     const warp = warpInfoRaw ? toTypedWarpInfo(warpInfoRaw) : null
     const brand = warp?.brand ? await this.fetchBrand(warp.brand) : null
+
+    if (cache && cache.ttl) {
+      this.cache.set(cacheKey, { warp, brand }, cache.ttl)
+    }
     return { warp, brand }
   }
 
-  async getInfoByHash(hash: string): Promise<{ warp: WarpInfo | null; brand: Brand | null }> {
+  async getInfoByHash(hash: string, cache?: WarpCacheConfig): Promise<{ warp: WarpInfo | null; brand: Brand | null }> {
+    const cacheKey = CacheKey.WarpInfo(hash)
+
+    if (cache) {
+      const cached = this.cache.get<{ warp: WarpInfo | null; brand: Brand | null }>(cacheKey)
+      if (cached) return cached
+    }
+
     const contract = Config.Registry.Contract(this.config.env)
     const controller = this.getController()
     const query = controller.createQuery({ contract, function: 'getInfoByHash', arguments: [BytesValue.fromUTF8(hash)] })
@@ -86,6 +106,11 @@ export class WarpRegistry {
     const [warpInfoRaw] = controller.parseQueryResponse(res)
     const warp = warpInfoRaw ? toTypedWarpInfo(warpInfoRaw) : null
     const brand = warp?.brand ? await this.fetchBrand(warp.brand) : null
+
+    if (cache && cache.ttl) {
+      this.cache.set(cacheKey, { warp, brand }, cache.ttl)
+    }
+
     return { warp, brand }
   }
 
@@ -100,12 +125,24 @@ export class WarpRegistry {
     return warpInfosRaw.map(toTypedWarpInfo)
   }
 
-  async fetchBrand(hash: string): Promise<Brand | null> {
+  async fetchBrand(hash: string, cache?: WarpCacheConfig): Promise<Brand | null> {
+    const cacheKey = CacheKey.Brand(hash)
+
+    if (cache) {
+      const cached = this.cache.get<Brand>(cacheKey)
+      if (cached) return cached
+    }
+
     const networkProvider = new ApiNetworkProvider(this.config.chainApiUrl || Config.Chain.ApiUrl(this.config.env))
 
     try {
       const tx = await networkProvider.getTransaction(hash)
       const brand = JSON.parse(tx.data.toString()) as Brand
+
+      if (cache && cache.ttl) {
+        this.cache.set(cacheKey, brand, cache.ttl)
+      }
+
       return brand
     } catch (error) {
       console.error('Error fetching brand from transaction hash', error)
