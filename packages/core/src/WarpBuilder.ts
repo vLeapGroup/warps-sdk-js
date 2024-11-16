@@ -28,7 +28,7 @@ export class WarpBuilder {
   }
 
   createInscriptionTransaction(warp: Warp): Transaction {
-    if (!this.config.userAddress) throw new Error('warp builder user address not set')
+    if (!this.config.userAddress) throw new Error('WarpBuilder: user address not set')
     const factoryConfig = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
     const factory = new TransferTransactionsFactory({ config: factoryConfig })
 
@@ -71,7 +71,7 @@ export class WarpBuilder {
       const tx = await networkProvider.getTransaction(hash)
       return this.createFromTransaction(tx)
     } catch (error) {
-      console.error('Error creating warp from transaction hash', error)
+      console.error('WarpBuilder: Error creating from transaction hash', error)
       return null
     }
   }
@@ -119,7 +119,7 @@ export class WarpBuilder {
 
   private ensure(value: string | null | boolean, errorMessage: string): void {
     if (!value) {
-      throw new Error(`Warp: ${errorMessage}`)
+      throw new Error(`WarpBuilder: ${errorMessage}`)
     }
   }
 
@@ -131,7 +131,7 @@ export class WarpBuilder {
     const validate = ajv.compile(schema)
 
     if (!validate(warp)) {
-      throw new Error(`Warp schema validation failed: ${ajv.errorsText(validate.errors)}`)
+      throw new Error(`WarpBuilder: schema validation failed: ${ajv.errorsText(validate.errors)}`)
     }
   }
 }
