@@ -57,6 +57,7 @@ export type WarpContractAction = {
   value?: string
   gasLimit: number
   inputs?: WarpActionInput[]
+  next?: string
 }
 
 export type WarpLinkAction = {
