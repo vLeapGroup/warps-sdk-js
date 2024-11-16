@@ -85,10 +85,12 @@ export class WarpRegistry {
     return warpInfoRaw ? toTypedWarpInfo(warpInfoRaw) : null
   }
 
-  async getUserWarpInfos(user: string): Promise<WarpInfo[]> {
+  async getUserWarpInfos(user?: string): Promise<WarpInfo[]> {
+    const userAddress = user || this.config.userAddress
+    if (!userAddress) throw new Error('WarpRegistry: user address not set')
     const contract = Config.Registry.Contract(this.config.env)
     const controller = this.getController()
-    const query = controller.createQuery({ contract, function: 'getUserWarps', arguments: [new AddressValue(new Address(user))] })
+    const query = controller.createQuery({ contract, function: 'getUserWarps', arguments: [new AddressValue(new Address(userAddress))] })
     const res = await controller.runQuery(query)
     const warpInfosRaw = controller.parseQueryResponse(res)
     return warpInfosRaw.map(toTypedWarpInfo)
