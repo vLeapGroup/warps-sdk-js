@@ -27,6 +27,7 @@ export type Warp = {
   description: string | null
   preview: string
   actions: WarpAction[]
+  next?: string
   meta?: WarpMeta
 }
 
