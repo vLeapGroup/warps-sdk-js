@@ -25,7 +25,7 @@ export const Config = {
 
   Registry: {
     Contract: (env: ChainEnv) => {
-      if (env === 'devnet') return 'erd1qqqqqqqqqqqqqpgq8h85eq9l3cp40h5s3ujqshj2x775m2wyl3tsl20ltn'
+      if (env === 'devnet') return 'erd1qqqqqqqqqqqqqpgqje2f99vr6r7sk54thg03c9suzcvwr4nfl3tsfkdl36'
       if (env === 'testnet') return '####'
       return 'erd1qqqqqqqqqqqqqpgq3mrpj3u6q7tejv6d7eqhnyd27n9v5c5tl3ts08mffe'
     },
