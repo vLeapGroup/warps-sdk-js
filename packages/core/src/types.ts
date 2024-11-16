@@ -27,6 +27,13 @@ export type Warp = {
   description: string | null
   preview: string
   actions: WarpAction[]
+  meta?: WarpMeta
+}
+
+export type WarpMeta = {
+  hash: string
+  creator: string
+  createdAt: string
 }
 
 export type WarpAction = WarpContractAction | WarpLinkAction

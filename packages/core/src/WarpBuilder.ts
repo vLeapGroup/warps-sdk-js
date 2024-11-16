@@ -53,7 +53,15 @@ export class WarpBuilder {
   }
 
   async createFromTransaction(tx: TransactionOnNetwork, validateSchema = false): Promise<Warp> {
-    return this.createFromRaw(tx.data.toString(), validateSchema)
+    const warp = await this.createFromRaw(tx.data.toString(), validateSchema)
+
+    warp.meta = {
+      hash: tx.hash,
+      creator: tx.sender.bech32(),
+      createdAt: new Date(tx.timestamp).toISOString(),
+    }
+
+    return warp
   }
 
   async createFromTransactionHash(hash: string): Promise<Warp | null> {
