@@ -84,3 +84,20 @@ export type WarpActionExecutionResult = {
   }
   tx?: string
 }
+
+export type Brand = {
+  name: string
+  description: string
+  logo: string
+  website?: string
+  colors?: {
+    primary?: string
+    secondary?: string
+  }
+  cta?: {
+    title: string
+    description: string
+    label: string
+    url: string
+  }
+}

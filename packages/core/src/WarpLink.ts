@@ -40,7 +40,7 @@ export class WarpLink {
     if (idType === 'hash') {
       warp = await builder.createFromTransactionHash(id)
     } else if (idType === 'alias') {
-      const warpInfo = await registry.getInfoByAlias(id)
+      const { warp: warpInfo } = await registry.getInfoByAlias(id)
       if (warpInfo) {
         warp = await builder.createFromTransactionHash(warpInfo.hash)
       }

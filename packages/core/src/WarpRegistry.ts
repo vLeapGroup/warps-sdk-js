@@ -13,7 +13,7 @@ import {
 import RegistryAbi from './abis/registry.abi.json'
 import { Config } from './config'
 import { getChainId, toTypedWarpInfo } from './helpers'
-import { WarpConfig, WarpInfo } from './types'
+import { Brand, WarpConfig, WarpInfo } from './types'
 
 export class WarpRegistry {
   private config: WarpConfig
@@ -67,22 +67,26 @@ export class WarpRegistry {
     })
   }
 
-  async getInfoByAlias(alias: string): Promise<WarpInfo | null> {
+  async getInfoByAlias(alias: string): Promise<{ warp: WarpInfo | null; brand: Brand | null }> {
     const contract = Config.Registry.Contract(this.config.env)
     const controller = this.getController()
     const query = controller.createQuery({ contract, function: 'getInfoByAlias', arguments: [BytesValue.fromUTF8(alias)] })
     const res = await controller.runQuery(query)
     const [warpInfoRaw] = controller.parseQueryResponse(res)
-    return warpInfoRaw ? toTypedWarpInfo(warpInfoRaw) : null
+    const warp = warpInfoRaw ? toTypedWarpInfo(warpInfoRaw) : null
+    const brand = warp?.brand ? await this.fetchBrand(warp.brand) : null
+    return { warp, brand }
   }
 
-  async getInfoByHash(hash: string): Promise<WarpInfo | null> {
+  async getInfoByHash(hash: string): Promise<{ warp: WarpInfo | null; brand: Brand | null }> {
     const contract = Config.Registry.Contract(this.config.env)
     const controller = this.getController()
     const query = controller.createQuery({ contract, function: 'getInfoByHash', arguments: [BytesValue.fromUTF8(hash)] })
     const res = await controller.runQuery(query)
     const [warpInfoRaw] = controller.parseQueryResponse(res)
-    return warpInfoRaw ? toTypedWarpInfo(warpInfoRaw) : null
+    const warp = warpInfoRaw ? toTypedWarpInfo(warpInfoRaw) : null
+    const brand = warp?.brand ? await this.fetchBrand(warp.brand) : null
+    return { warp, brand }
   }
 
   async getUserWarpInfos(user?: string): Promise<WarpInfo[]> {
@@ -94,6 +98,19 @@ export class WarpRegistry {
     const res = await controller.runQuery(query)
     const warpInfosRaw = controller.parseQueryResponse(res)
     return warpInfosRaw.map(toTypedWarpInfo)
+  }
+
+  async fetchBrand(hash: string): Promise<Brand | null> {
+    const networkProvider = new ApiNetworkProvider(this.config.chainApiUrl || Config.Chain.ApiUrl(this.config.env))
+
+    try {
+      const tx = await networkProvider.getTransaction(hash)
+      const brand = JSON.parse(tx.data.toString()) as Brand
+      return brand
+    } catch (error) {
+      console.error('Error fetching brand from transaction hash', error)
+      return null
+    }
   }
 
   private async loadRegistryConfigs(): Promise<void> {
