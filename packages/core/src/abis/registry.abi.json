@@ -46,9 +46,15 @@
                     "name": "alias_opt",
                     "type": "optional<bytes>",
                     "multi_arg": true
+                },
+                {
+                    "name": "brand_opt",
+                    "type": "optional<bytes>",
+                    "multi_arg": true
                 }
             ],
-            "outputs": []
+            "outputs": [],
+            "allow_multiple_var_args": true
         },
         {
             "name": "publishWarp",
