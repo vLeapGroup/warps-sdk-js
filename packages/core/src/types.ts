@@ -16,6 +16,7 @@ export type WarpInfo = {
   trust: TrustStatus
   creator: string
   createdAt: number
+  brand: string | null
 }
 
 export type WarpIdType = 'hash' | 'alias'
