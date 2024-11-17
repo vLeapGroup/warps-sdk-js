@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 0.0.50
+
+### Patch Changes
+
+- 0256016: add missing brand builder export
+- e4fdb30: add brand registration to registry
+
 ## 0.0.49
 
 ### Patch Changes
