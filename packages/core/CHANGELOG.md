@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.64
+
+### Patch Changes
+
+- 0acfe01: add contract action transfers
+
 ## 0.0.63
 
 ### Patch Changes
