@@ -30,7 +30,7 @@ export class WarpRegistry {
     await this.loadRegistryConfigs()
   }
 
-  createRegisterWarpTransaction(txHash: string, alias?: string | null): Transaction {
+  createWarpRegisterTransaction(txHash: string, alias?: string | null): Transaction {
     if (this.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
     if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
     const costAmount = alias ? this.unitPrice * BigInt(2) : this.unitPrice
@@ -45,7 +45,7 @@ export class WarpRegistry {
     })
   }
 
-  createRegisterBrandTransaction(txHash: string): Transaction {
+  createBrandRegisterTransaction(txHash: string): Transaction {
     if (this.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
     if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
 
@@ -59,19 +59,7 @@ export class WarpRegistry {
     })
   }
 
-  createAliasAssignTransaction(txHash: string, alias: string): Transaction {
-    if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
-
-    return this.getFactory().createTransactionForExecute({
-      sender: Address.newFromBech32(this.config.userAddress),
-      contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
-      function: 'assignAlias',
-      gasLimit: BigInt(10_000_000),
-      arguments: [BytesValue.fromHex(txHash), BytesValue.fromUTF8(alias)],
-    })
-  }
-
-  createPublishWarpTransaction(txHash: string): Transaction {
+  createWarpPublishTransaction(txHash: string): Transaction {
     if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
 
     return this.getFactory().createTransactionForExecute({
@@ -83,7 +71,7 @@ export class WarpRegistry {
     })
   }
 
-  createBrandWarpTransaction(warpHash: string, brandHash: string): Transaction {
+  createWarpBrandingTransaction(warpHash: string, brandHash: string): Transaction {
     if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
 
     return this.getFactory().createTransactionForExecute({
