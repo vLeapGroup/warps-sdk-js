@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.61
+
+### Patch Changes
+
+- bb402a7: fix warp info brand encoding
+
 ## 0.0.60
 
 ### Patch Changes
