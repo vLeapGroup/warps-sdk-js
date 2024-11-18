@@ -145,6 +145,20 @@ export class WarpRegistry {
     return warpInfosRaw.map(toTypedWarpInfo)
   }
 
+  async getUserBrands(user?: string): Promise<Brand[]> {
+    const userAddress = user || this.config.userAddress
+    if (!userAddress) throw new Error('WarpRegistry: user address not set')
+    const contract = Config.Registry.Contract(this.config.env)
+    const controller = this.getController()
+    const query = controller.createQuery({ contract, function: 'getUserBrands', arguments: [new AddressValue(new Address(userAddress))] })
+    const res = await controller.runQuery(query)
+    const [brandsRaw] = controller.parseQueryResponse(res)
+    const brandHashes: string[] = brandsRaw.map((b: any) => b.toString('hex'))
+    const brandCacheConfig: WarpCacheConfig = { ttl: 365 * 24 * 60 * 60 } // 1 year
+    const brands = await Promise.all(brandHashes.map((hash) => this.fetchBrand(hash, brandCacheConfig)))
+    return brands.filter((b) => b !== null) as Brand[]
+  }
+
   async fetchBrand(hash: string, cache?: WarpCacheConfig): Promise<Brand | null> {
     const cacheKey = CacheKey.Brand(hash)
 
