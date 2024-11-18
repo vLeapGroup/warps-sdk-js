@@ -9,7 +9,7 @@ import {
 import Ajv from 'ajv'
 import { Config } from './config'
 import { getChainId, getLatestProtocolIdentifier } from './helpers'
-import { Brand, WarpConfig } from './types'
+import { Brand, BrandColors, BrandCta, BrandUrls, WarpConfig } from './types'
 
 export class BrandBuilder {
   private config: WarpConfig
@@ -19,7 +19,6 @@ export class BrandBuilder {
     name: '',
     description: '',
     logo: '',
-    website: '',
   }
 
   constructor(config: WarpConfig) {
@@ -82,17 +81,17 @@ export class BrandBuilder {
     return this
   }
 
-  setWebsite(website: string): BrandBuilder {
-    this.pendingBrand.website = website
+  setUrls(urls: BrandUrls): BrandBuilder {
+    this.pendingBrand.urls = urls
     return this
   }
 
-  setColors(colors: { primary?: string; secondary?: string }): BrandBuilder {
+  setColors(colors: BrandColors): BrandBuilder {
     this.pendingBrand.colors = colors
     return this
   }
 
-  setCta(cta: { title: string; description: string; label: string; url: string }): BrandBuilder {
+  setCta(cta: BrandCta): BrandBuilder {
     this.pendingBrand.cta = cta
     return this
   }

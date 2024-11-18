@@ -97,18 +97,26 @@ export type Brand = {
   name: string
   description: string
   logo: string
-  website?: string
-  colors?: {
-    primary?: string
-    secondary?: string
-  }
-  cta?: {
-    title: string
-    description: string
-    label: string
-    url: string
-  }
+  urls?: BrandUrls
+  colors?: BrandColors
+  cta?: BrandCta
   meta?: BrandMeta
+}
+
+export type BrandUrls = {
+  web?: string
+}
+
+export type BrandColors = {
+  primary?: string
+  secondary?: string
+}
+
+export type BrandCta = {
+  title: string
+  description: string
+  label: string
+  url: string
 }
 
 export type BrandMeta = {
