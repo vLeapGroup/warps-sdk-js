@@ -15,5 +15,5 @@ export const toTypedWarpInfo = (warpInfo: any): WarpInfo => ({
   trust: warpInfo.trust.toString(),
   creator: warpInfo.creator.toString(),
   createdAt: warpInfo.created_at.toNumber(),
-  brand: warpInfo.brand?.toString() || null,
+  brand: warpInfo.brand?.toString('hex') || null,
 })
