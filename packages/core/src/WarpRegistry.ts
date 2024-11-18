@@ -141,7 +141,7 @@ export class WarpRegistry {
     const controller = this.getController()
     const query = controller.createQuery({ contract, function: 'getUserWarps', arguments: [new AddressValue(new Address(userAddress))] })
     const res = await controller.runQuery(query)
-    const warpInfosRaw = controller.parseQueryResponse(res)
+    const [warpInfosRaw] = controller.parseQueryResponse(res)
     return warpInfosRaw.map(toTypedWarpInfo)
   }
 
