@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.55
+
+### Patch Changes
+
+- f113a2c: fix registry warp branding tx
+
 ## 0.0.54
 
 ### Patch Changes
