@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.62
+
+### Patch Changes
+
+- 0a3cc54: update brand types
+
 ## 0.0.61
 
 ### Patch Changes
