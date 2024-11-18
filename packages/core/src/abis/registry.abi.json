@@ -161,6 +161,24 @@
             "outputs": []
         },
         {
+            "name": "brandWarp",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "EGLD"
+            ],
+            "inputs": [
+                {
+                    "name": "warp",
+                    "type": "bytes"
+                },
+                {
+                    "name": "brand",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": []
+        },
+        {
             "name": "getUserBrands",
             "mutability": "readonly",
             "inputs": [
