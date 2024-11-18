@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.57
+
+### Patch Changes
+
+- d713bb9: fix link detection brand loading
+
 ## 0.0.56
 
 ### Patch Changes
