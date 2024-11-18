@@ -88,7 +88,10 @@ export class WarpRegistry {
 
     if (cache) {
       const cached = this.cache.get<{ warp: WarpInfo | null; brand: Brand | null }>(cacheKey)
-      if (cached) return cached
+      if (cached) {
+        console.log(`WarpRegistry (getInfoByAlias): WarpInfo found in cache: ${alias}`)
+        return cached
+      }
     }
 
     const contract = Config.Registry.Contract(this.config.env)
@@ -110,7 +113,10 @@ export class WarpRegistry {
 
     if (cache) {
       const cached = this.cache.get<{ warp: WarpInfo | null; brand: Brand | null }>(cacheKey)
-      if (cached) return cached
+      if (cached) {
+        console.log(`WarpRegistry (getInfoByHash): WarpInfo found in cache: ${hash}`)
+        return cached
+      }
     }
 
     const contract = Config.Registry.Contract(this.config.env)
@@ -144,7 +150,10 @@ export class WarpRegistry {
 
     if (cache) {
       const cached = this.cache.get<Brand>(cacheKey)
-      if (cached) return cached
+      if (cached) {
+        console.log(`WarpRegistry (fetchBrand): Brand found in cache: ${hash}`)
+        return cached
+      }
     }
 
     const networkProvider = new ApiNetworkProvider(this.config.chainApiUrl || Config.Chain.ApiUrl(this.config.env))
