@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.52
+
+### Patch Changes
+
+- fe7076e: add registry user brands function
+
 ## 0.0.51
 
 ### Patch Changes
