@@ -4,6 +4,7 @@ type CacheEntry<T> = {
 }
 
 export const CacheKey = {
+  Warp: (id: string) => `warp:${id}`,
   WarpInfo: (id: string) => `warp-info:${id}`,
   Brand: (hash: string) => `brand:${hash}`,
 }
