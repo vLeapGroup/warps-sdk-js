@@ -188,6 +188,12 @@ export class WarpRegistry {
       const tx = await networkProvider.getTransaction(hash)
       const brand = JSON.parse(tx.data.toString()) as Brand
 
+      brand.meta = {
+        hash: tx.hash,
+        creator: tx.sender.bech32(),
+        createdAt: new Date(tx.timestamp).toISOString(),
+      }
+
       if (cache && cache.ttl) {
         this.cache.set(cacheKey, brand, cache.ttl)
       }

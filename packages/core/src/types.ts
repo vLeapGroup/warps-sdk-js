@@ -108,4 +108,11 @@ export type Brand = {
     label: string
     url: string
   }
+  meta?: BrandMeta
+}
+
+export type BrandMeta = {
+  hash: string
+  creator: string
+  createdAt: string
 }
