@@ -70,8 +70,21 @@ export type WarpLinkAction = {
 }
 
 export type WarpActionInputSource = 'field' | 'query'
-export type WarpActionInputType = 'string' | 'uint8' | 'uint16' | 'uint32' | 'uint64' | 'biguint' | 'boolean' | 'address' | 'hex'
-export type WarpActionInputPosition = 'value' | `arg:${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}`
+
+export type WarpActionInputType =
+  | 'string'
+  | 'uint8'
+  | 'uint16'
+  | 'uint32'
+  | 'uint64'
+  | 'biguint'
+  | 'boolean'
+  | 'address'
+  | 'hex'
+  | 'esdt'
+  | 'nft'
+
+export type WarpActionInputPosition = 'value' | 'transfer' | `arg:${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}`
 
 export type WarpActionInput = {
   name: string
@@ -82,6 +95,7 @@ export type WarpActionInput = {
   required?: boolean
   min?: number
   max?: number
+  options?: string[]
 }
 
 export type WarpActionExecutionResult = {
