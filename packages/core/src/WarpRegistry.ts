@@ -134,7 +134,7 @@ export class WarpRegistry {
 
     const contract = Config.Registry.Contract(this.config.env)
     const controller = this.getController()
-    const query = controller.createQuery({ contract, function: 'getInfoByHash', arguments: [BytesValue.fromUTF8(hash)] })
+    const query = controller.createQuery({ contract, function: 'getInfoByHash', arguments: [BytesValue.fromHex(hash)] })
     const res = await controller.runQuery(query)
     const [warpInfoRaw] = controller.parseQueryResponse(res)
     const warp = warpInfoRaw ? toTypedWarpInfo(warpInfoRaw) : null
