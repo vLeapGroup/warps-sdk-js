@@ -53,6 +53,7 @@ export class WarpRegistry {
       contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
       function: 'setWarpAlias',
       gasLimit: BigInt(10_000_000),
+      nativeTransferAmount: this.unitPrice,
       arguments: [BytesValue.fromHex(txHash), BytesValue.fromUTF8(alias)],
     })
   }

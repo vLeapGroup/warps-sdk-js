@@ -59,6 +59,9 @@
         {
             "name": "setWarpAlias",
             "mutability": "mutable",
+            "payableInTokens": [
+                "EGLD"
+            ],
             "inputs": [
                 {
                     "name": "warp",
