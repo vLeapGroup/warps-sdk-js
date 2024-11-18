@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 0.0.63
+
+### Patch Changes
+
+- 4a566db: add registry warp set alias function
+- f4e1f5b: add further action input types
+
 ## 0.0.62
 
 ### Patch Changes
