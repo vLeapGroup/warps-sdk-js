@@ -5,6 +5,7 @@ import {
   BooleanValue,
   BytesValue,
   SmartContractTransactionsFactory,
+  Token,
   TokenTransfer,
   Transaction,
   TransactionsFactoryConfig,
@@ -15,7 +16,14 @@ import {
   U8Value,
 } from '@multiversx/sdk-core/out'
 import { getChainId } from './helpers'
-import { WarpAction, WarpActionInputPosition, WarpActionInputType, WarpConfig, WarpContractAction } from './types'
+import {
+  WarpAction,
+  WarpActionInputPosition,
+  WarpActionInputType,
+  WarpConfig,
+  WarpContractAction,
+  WarpContractActionTransfer,
+} from './types'
 
 export class WarpActionExecutor {
   private config: WarpConfig
@@ -26,7 +34,7 @@ export class WarpActionExecutor {
     this.url = new URL(url)
   }
 
-  createTransactionForExecute(action: WarpContractAction, inputArgs: string[], inputTransfers?: TokenTransfer[]): Transaction {
+  createTransactionForExecute(action: WarpContractAction, inputArgs: string[], inputTransfers: TokenTransfer[]): Transaction {
     if (!this.config.userAddress) throw new Error('WarpActionExecutor: user address not set')
     const config = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
     const factory = new SmartContractTransactionsFactory({ config })
@@ -34,6 +42,7 @@ export class WarpActionExecutor {
     const args = this.getTypedArgsFromInput(inputArgs)
     const nativeValueFromUrl = this.getPositionValueFromUrl(action, 'value')
     const nativeTransferAmount = BigInt(nativeValueFromUrl || action.value || 0)
+    const combinedTransfers = this.getCombinedTokenTransfers(action, inputTransfers)
 
     return factory.createTransactionForExecute({
       sender: Address.newFromBech32(this.config.userAddress),
@@ -41,7 +50,7 @@ export class WarpActionExecutor {
       function: action.func || '',
       gasLimit: BigInt(action.gasLimit),
       arguments: args,
-      tokenTransfers: inputTransfers,
+      tokenTransfers: combinedTransfers,
       nativeTransferAmount,
     })
   }
@@ -53,10 +62,23 @@ export class WarpActionExecutor {
     return valuePositionQueryName ? searchParams.get(valuePositionQueryName) : null
   }
 
+  getCombinedTokenTransfers(action: WarpContractAction, inputTransfers: TokenTransfer[]): TokenTransfer[] {
+    const actionTransfers = action.transfers?.map(this.toTypedTransfer) || []
+
+    return [...actionTransfers, ...inputTransfers]
+  }
+
   getTypedArgsFromInput(inputArgs: string[]): TypedValue[] {
     return inputArgs.map((arg) => {
       const [type, value] = arg.split(':')
       return this.toTypedArg(value, type as WarpActionInputType)
+    })
+  }
+
+  private toTypedTransfer(transfer: WarpContractActionTransfer): TokenTransfer {
+    return new TokenTransfer({
+      token: new Token({ identifier: transfer.token, nonce: BigInt(transfer.nonce || 0) }),
+      amount: BigInt(transfer.amount || 0),
     })
   }
 
