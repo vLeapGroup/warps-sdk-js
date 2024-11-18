@@ -57,7 +57,7 @@ export type WarpContractAction = {
   args: string[]
   value?: string
   gasLimit: number
-  transfer?: WarpContractActionTransfer[]
+  transfers?: WarpContractActionTransfer[]
   inputs?: WarpActionInput[]
   next?: string
 }
