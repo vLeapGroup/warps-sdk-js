@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.54
+
+### Patch Changes
+
+- 299fb71: add brand meta
+
 ## 0.0.53
 
 ### Patch Changes
