@@ -91,6 +91,7 @@ export class WarpRegistry {
       contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
       function: 'brandWarp',
       gasLimit: BigInt(10_000_000),
+      nativeTransferAmount: this.unitPrice,
       arguments: [BytesValue.fromHex(warpHash), BytesValue.fromHex(brandHash)],
     })
   }
