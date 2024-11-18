@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.56
+
+### Patch Changes
+
+- b1c3c97: add brand to link detection
+
 ## 0.0.55
 
 ### Patch Changes
