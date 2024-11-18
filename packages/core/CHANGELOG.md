@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.53
+
+### Patch Changes
+
+- ed3e0ce: add registry brand warp tx func
+
 ## 0.0.52
 
 ### Patch Changes
