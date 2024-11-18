@@ -83,6 +83,18 @@ export class WarpRegistry {
     })
   }
 
+  createBrandWarpTransaction(warpHash: string, brandHash: string): Transaction {
+    if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
+
+    return this.getFactory().createTransactionForExecute({
+      sender: Address.newFromBech32(this.config.userAddress),
+      contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
+      function: 'brandWarp',
+      gasLimit: BigInt(10_000_000),
+      arguments: [BytesValue.fromHex(warpHash), BytesValue.fromHex(brandHash)],
+    })
+  }
+
   async getInfoByAlias(alias: string, cache?: WarpCacheConfig): Promise<{ warp: WarpInfo | null; brand: Brand | null }> {
     const cacheKey = CacheKey.WarpInfo(alias)
 
