@@ -57,22 +57,26 @@
             "allow_multiple_var_args": true
         },
         {
-            "name": "publishWarp",
+            "name": "setWarpAlias",
             "mutability": "mutable",
             "inputs": [
                 {
-                    "name": "hash",
+                    "name": "warp",
+                    "type": "bytes"
+                },
+                {
+                    "name": "alias",
                     "type": "bytes"
                 }
             ],
             "outputs": []
         },
         {
-            "name": "assignAlias",
+            "name": "publishWarp",
             "mutability": "mutable",
             "inputs": [
                 {
-                    "name": "alias",
+                    "name": "hash",
                     "type": "bytes"
                 }
             ],
