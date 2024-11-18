@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.58
+
+### Patch Changes
+
+- 0601428: fix registry query
+
 ## 0.0.57
 
 ### Patch Changes
