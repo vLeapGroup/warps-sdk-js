@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 0.0.51
+
+### Patch Changes
+
+- f628c80: fix registry user warps func
+- b48baaa: add further warp caching
+
 ## 0.0.50
 
 ### Patch Changes
