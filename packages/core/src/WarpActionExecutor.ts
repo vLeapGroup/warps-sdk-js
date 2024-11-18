@@ -5,6 +5,7 @@ import {
   BooleanValue,
   BytesValue,
   SmartContractTransactionsFactory,
+  TokenTransfer,
   Transaction,
   TransactionsFactoryConfig,
   TypedValue,
@@ -25,12 +26,12 @@ export class WarpActionExecutor {
     this.url = new URL(url)
   }
 
-  createTransactionForExecute(action: WarpContractAction): Transaction {
+  createTransactionForExecute(action: WarpContractAction, inputArgs: string[], inputTransfers?: TokenTransfer[]): Transaction {
     if (!this.config.userAddress) throw new Error('WarpActionExecutor: user address not set')
     const config = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
     const factory = new SmartContractTransactionsFactory({ config })
 
-    const args = this.getTypedArgsWithInputs(action)
+    const args = this.getTypedArgsFromInput(inputArgs)
     const nativeValueFromUrl = this.getPositionValueFromUrl(action, 'value')
     const nativeTransferAmount = BigInt(nativeValueFromUrl || action.value || 0)
 
@@ -40,6 +41,7 @@ export class WarpActionExecutor {
       function: action.func || '',
       gasLimit: BigInt(action.gasLimit),
       arguments: args,
+      tokenTransfers: inputTransfers,
       nativeTransferAmount,
     })
   }
@@ -51,8 +53,8 @@ export class WarpActionExecutor {
     return valuePositionQueryName ? searchParams.get(valuePositionQueryName) : null
   }
 
-  getTypedArgsWithInputs(action: WarpContractAction): TypedValue[] {
-    return action.args.map((arg) => {
+  getTypedArgsFromInput(inputArgs: string[]): TypedValue[] {
+    return inputArgs.map((arg) => {
       const [type, value] = arg.split(':')
       return this.toTypedArg(value, type as WarpActionInputType)
     })

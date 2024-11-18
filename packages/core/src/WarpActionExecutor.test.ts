@@ -56,7 +56,7 @@ describe('WarpActionExecutor', () => {
   it('getTypedArgsWithInputs - returns the typed args', async () => {
     const subject = new WarpActionExecutor(Config, 'https://example.com')
 
-    const actual = subject.getTypedArgsWithInputs({
+    const actual = subject.getTypedArgsFromInput({
       args: [
         'string:hello',
         'uint8:1',
