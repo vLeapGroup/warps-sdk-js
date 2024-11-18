@@ -1,12 +1,13 @@
 import QRCodeStyling from 'qr-code-styling'
 import { Config } from './config'
-import { Warp, WarpConfig, WarpIdType } from './types'
+import { Brand, Warp, WarpConfig, WarpIdType } from './types'
 import { WarpBuilder } from './WarpBuilder'
 import { WarpRegistry } from './WarpRegistry'
 
 type DetectionResult = {
   match: boolean
   warp: Warp | null
+  brand: Brand | null
 }
 
 const IdParamName = 'xwarp'
@@ -26,7 +27,7 @@ export class WarpLink {
     const param = searchParams.get(IdParamName)
 
     if (!param) {
-      return { match: false, warp: null }
+      return { match: false, warp: null, brand: null }
     }
 
     const decodedParam = decodeURIComponent(param)
@@ -36,17 +37,21 @@ export class WarpLink {
     const builder = new WarpBuilder(this.config)
     const registry = new WarpRegistry(this.config)
     let warp: Warp | null = null
+    let brand: Brand | null = null
 
     if (idType === 'hash') {
-      warp = await builder.createFromTransactionHash(id)
+      const [warpInfo, brandInfo] = await Promise.all([builder.createFromTransactionHash(id), registry.fetchBrand(id)])
+      warp = warpInfo
+      brand = brandInfo
     } else if (idType === 'alias') {
-      const { warp: warpInfo } = await registry.getInfoByAlias(id)
+      const { warp: warpInfo, brand: brandInfo } = await registry.getInfoByAlias(id)
       if (warpInfo) {
         warp = await builder.createFromTransactionHash(warpInfo.hash)
+        brand = brandInfo
       }
     }
 
-    return warp ? { match: true, warp } : { match: false, warp: null }
+    return warp ? { match: true, warp, brand } : { match: false, warp: null, brand: null }
   }
 
   build(type: WarpIdType, id: string): string {
