@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.67
+
+### Patch Changes
+
+- 409cae6: add optional pattern validation to action input
+
 ## 0.0.66
 
 ### Patch Changes
