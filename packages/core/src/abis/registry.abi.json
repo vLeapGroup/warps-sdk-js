@@ -103,7 +103,7 @@
             ],
             "outputs": [
                 {
-                    "type": "variadic<WarpInfoView>",
+                    "type": "variadic<InfoView>",
                     "multi_result": true
                 }
             ]
@@ -119,7 +119,7 @@
             ],
             "outputs": [
                 {
-                    "type": "WarpInfoView"
+                    "type": "InfoView"
                 }
             ]
         },
@@ -134,7 +134,7 @@
             ],
             "outputs": [
                 {
-                    "type": "WarpInfoView"
+                    "type": "InfoView"
                 }
             ]
         },
@@ -234,7 +234,7 @@
     "esdtAttributes": [],
     "hasCallback": false,
     "types": {
-        "WarpInfoView": {
+        "InfoView": {
             "type": "struct",
             "fields": [
                 {

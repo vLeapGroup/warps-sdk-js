@@ -1,5 +1,5 @@
 import { Config } from './config'
-import { ChainEnv, WarpInfo } from './types'
+import { ChainEnv, RegistryInfo } from './types'
 
 export const getChainId = (env: ChainEnv): string => {
   if (env === 'devnet') return 'D'
@@ -9,12 +9,12 @@ export const getChainId = (env: ChainEnv): string => {
 
 export const getLatestProtocolIdentifier = (name: string): string => `${name}:${Config.LatestProtocolVersion}`
 
-export const toTypedWarpInfo = (warpInfo: any): WarpInfo => ({
-  hash: warpInfo.hash.toString('hex'),
-  alias: warpInfo.alias?.toString() || null,
-  trust: warpInfo.trust.toString(),
-  creator: warpInfo.creator.toString(),
-  createdAt: warpInfo.created_at.toNumber(),
-  brand: warpInfo.brand?.toString('hex') || null,
-  upgrade: warpInfo.upgrade?.toString('hex') || null,
+export const toTypedRegistryInfo = (registryInfo: any): RegistryInfo => ({
+  hash: registryInfo.hash.toString('hex'),
+  alias: registryInfo.alias?.toString() || null,
+  trust: registryInfo.trust.toString(),
+  creator: registryInfo.creator.toString(),
+  createdAt: registryInfo.created_at.toNumber(),
+  brand: registryInfo.brand?.toString('hex') || null,
+  upgrade: registryInfo.upgrade?.toString('hex') || null,
 })

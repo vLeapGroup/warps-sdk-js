@@ -1,12 +1,13 @@
 import QRCodeStyling from 'qr-code-styling'
 import { Config } from './config'
-import { Brand, Warp, WarpConfig, WarpIdType } from './types'
+import { Brand, RegistryInfo, Warp, WarpConfig, WarpIdType } from './types'
 import { WarpBuilder } from './WarpBuilder'
 import { WarpRegistry } from './WarpRegistry'
 
 type DetectionResult = {
   match: boolean
   warp: Warp | null
+  registryInfo: RegistryInfo | null
   brand: Brand | null
 }
 
@@ -27,7 +28,7 @@ export class WarpLink {
     const param = searchParams.get(IdParamName)
 
     if (!param) {
-      return { match: false, warp: null, brand: null }
+      return { match: false, warp: null, registryInfo: null, brand: null }
     }
 
     const decodedParam = decodeURIComponent(param)
@@ -37,24 +38,26 @@ export class WarpLink {
     const builder = new WarpBuilder(this.config)
     const registry = new WarpRegistry(this.config)
     let warp: Warp | null = null
+    let registryInfo: RegistryInfo | null = null
     let brand: Brand | null = null
 
     if (idType === 'hash') {
-      const warpInfo = await builder.createFromTransactionHash(id)
-      warp = warpInfo
+      warp = await builder.createFromTransactionHash(id)
       try {
-        const { brand: brandInfo } = await registry.getInfoByHash(id)
-        brand = brandInfo
+        const { registryInfo: ri, brand: bi } = await registry.getInfoByHash(id)
+        registryInfo = ri
+        brand = bi
       } catch (e) {}
     } else if (idType === 'alias') {
-      const { warp: warpInfo, brand: brandInfo } = await registry.getInfoByAlias(id)
-      if (warpInfo) {
-        warp = await builder.createFromTransactionHash(warpInfo.hash)
-        brand = brandInfo
+      const { registryInfo: ri, brand: bi } = await registry.getInfoByAlias(id)
+      if (ri) {
+        warp = await builder.createFromTransactionHash(ri.hash)
+        registryInfo = ri
+        brand = bi
       }
     }
 
-    return warp ? { match: true, warp, brand } : { match: false, warp: null, brand: null }
+    return warp ? { match: true, warp, registryInfo, brand } : { match: false, warp: null, registryInfo: null, brand: null }
   }
 
   build(type: WarpIdType, id: string): string {

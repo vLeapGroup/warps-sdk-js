@@ -12,8 +12,8 @@ import {
 } from '@multiversx/sdk-core/out'
 import RegistryAbi from './abis/registry.abi.json'
 import { Config } from './config'
-import { getChainId, toTypedWarpInfo } from './helpers'
-import { Brand, WarpCacheConfig, WarpConfig, WarpInfo } from './types'
+import { getChainId, toTypedRegistryInfo } from './helpers'
+import { Brand, RegistryInfo, WarpCacheConfig, WarpConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
 
 export class WarpRegistry {
@@ -97,13 +97,13 @@ export class WarpRegistry {
     })
   }
 
-  async getInfoByAlias(alias: string, cache?: WarpCacheConfig): Promise<{ warp: WarpInfo | null; brand: Brand | null }> {
-    const cacheKey = CacheKey.WarpInfo(alias)
+  async getInfoByAlias(alias: string, cache?: WarpCacheConfig): Promise<{ registryInfo: RegistryInfo | null; brand: Brand | null }> {
+    const cacheKey = CacheKey.RegistryInfo(alias)
 
     if (cache) {
-      const cached = this.cache.get<{ warp: WarpInfo | null; brand: Brand | null }>(cacheKey)
+      const cached = this.cache.get<{ registryInfo: RegistryInfo | null; brand: Brand | null }>(cacheKey)
       if (cached) {
-        console.log(`WarpRegistry (getInfoByAlias): WarpInfo found in cache: ${alias}`)
+        console.log(`WarpRegistry (getInfoByAlias): RegistryInfo found in cache: ${alias}`)
         return cached
       }
     }
@@ -112,23 +112,23 @@ export class WarpRegistry {
     const controller = this.getController()
     const query = controller.createQuery({ contract, function: 'getInfoByAlias', arguments: [BytesValue.fromUTF8(alias)] })
     const res = await controller.runQuery(query)
-    const [warpInfoRaw] = controller.parseQueryResponse(res)
-    const warp = warpInfoRaw ? toTypedWarpInfo(warpInfoRaw) : null
-    const brand = warp?.brand ? await this.fetchBrand(warp.brand) : null
+    const [registryInfoRaw] = controller.parseQueryResponse(res)
+    const registryInfo = registryInfoRaw ? toTypedRegistryInfo(registryInfoRaw) : null
+    const brand = registryInfo?.brand ? await this.fetchBrand(registryInfo.brand) : null
 
     if (cache && cache.ttl) {
-      this.cache.set(cacheKey, { warp, brand }, cache.ttl)
+      this.cache.set(cacheKey, { registryInfo, brand }, cache.ttl)
     }
-    return { warp, brand }
+    return { registryInfo, brand }
   }
 
-  async getInfoByHash(hash: string, cache?: WarpCacheConfig): Promise<{ warp: WarpInfo | null; brand: Brand | null }> {
-    const cacheKey = CacheKey.WarpInfo(hash)
+  async getInfoByHash(hash: string, cache?: WarpCacheConfig): Promise<{ registryInfo: RegistryInfo | null; brand: Brand | null }> {
+    const cacheKey = CacheKey.RegistryInfo(hash)
 
     if (cache) {
-      const cached = this.cache.get<{ warp: WarpInfo | null; brand: Brand | null }>(cacheKey)
+      const cached = this.cache.get<{ registryInfo: RegistryInfo | null; brand: Brand | null }>(cacheKey)
       if (cached) {
-        console.log(`WarpRegistry (getInfoByHash): WarpInfo found in cache: ${hash}`)
+        console.log(`WarpRegistry (getInfoByHash): RegistryInfo found in cache: ${hash}`)
         return cached
       }
     }
@@ -137,26 +137,26 @@ export class WarpRegistry {
     const controller = this.getController()
     const query = controller.createQuery({ contract, function: 'getInfoByHash', arguments: [BytesValue.fromHex(hash)] })
     const res = await controller.runQuery(query)
-    const [warpInfoRaw] = controller.parseQueryResponse(res)
-    const warp = warpInfoRaw ? toTypedWarpInfo(warpInfoRaw) : null
-    const brand = warp?.brand ? await this.fetchBrand(warp.brand) : null
+    const [registryInfoRaw] = controller.parseQueryResponse(res)
+    const registryInfo = registryInfoRaw ? toTypedRegistryInfo(registryInfoRaw) : null
+    const brand = registryInfo?.brand ? await this.fetchBrand(registryInfo.brand) : null
 
     if (cache && cache.ttl) {
-      this.cache.set(cacheKey, { warp, brand }, cache.ttl)
+      this.cache.set(cacheKey, { registryInfo, brand }, cache.ttl)
     }
 
-    return { warp, brand }
+    return { registryInfo, brand }
   }
 
-  async getUserWarpInfos(user?: string): Promise<WarpInfo[]> {
+  async getUserWarpRegistryInfos(user?: string): Promise<RegistryInfo[]> {
     const userAddress = user || this.config.userAddress
     if (!userAddress) throw new Error('WarpRegistry: user address not set')
     const contract = Config.Registry.Contract(this.config.env)
     const controller = this.getController()
     const query = controller.createQuery({ contract, function: 'getUserWarps', arguments: [new AddressValue(new Address(userAddress))] })
     const res = await controller.runQuery(query)
-    const [warpInfosRaw] = controller.parseQueryResponse(res)
-    return warpInfosRaw.map(toTypedWarpInfo)
+    const [registryInfosRaw] = controller.parseQueryResponse(res)
+    return registryInfosRaw.map(toTypedRegistryInfo)
   }
 
   async getUserBrands(user?: string): Promise<Brand[]> {

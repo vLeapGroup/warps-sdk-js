@@ -16,7 +16,7 @@ export type WarpCacheConfig = {
 
 export type TrustStatus = 'unverified' | 'verified' | 'blacklisted'
 
-export type WarpInfo = {
+export type RegistryInfo = {
   hash: string
   alias: string | null
   trust: TrustStatus
