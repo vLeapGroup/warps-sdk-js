@@ -23,6 +23,7 @@ export type WarpInfo = {
   creator: string
   createdAt: number
   brand: string | null
+  prev: string | null
 }
 
 export type WarpIdType = 'hash' | 'alias'

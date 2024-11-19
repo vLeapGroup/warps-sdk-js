@@ -51,6 +51,11 @@
                     "name": "brand_opt",
                     "type": "optional<bytes>",
                     "multi_arg": true
+                },
+                {
+                    "name": "prev_opt",
+                    "type": "optional<bytes>",
+                    "multi_arg": true
                 }
             ],
             "outputs": [],
@@ -215,6 +220,11 @@
                     "name": "alias",
                     "type": "bytes",
                     "indexed": true
+                },
+                {
+                    "name": "prev",
+                    "type": "bytes",
+                    "indexed": true
                 }
             ]
         }
@@ -247,6 +257,10 @@
                 },
                 {
                     "name": "brand",
+                    "type": "Option<bytes>"
+                },
+                {
+                    "name": "prev",
                     "type": "Option<bytes>"
                 }
             ]
