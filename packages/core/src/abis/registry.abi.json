@@ -62,6 +62,13 @@
             "allow_multiple_var_args": true
         },
         {
+            "name": "claimBalance",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
             "name": "setWarpAlias",
             "mutability": "mutable",
             "payableInTokens": [
