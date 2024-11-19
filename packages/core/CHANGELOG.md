@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.68
+
+### Patch Changes
+
+- b8c1771: add prev warp tracking
+
 ## 0.0.67
 
 ### Patch Changes
