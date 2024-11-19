@@ -224,7 +224,7 @@
                     "indexed": true
                 },
                 {
-                    "name": "prev",
+                    "name": "upgrade",
                     "type": "bytes",
                     "indexed": true
                 }
@@ -262,7 +262,7 @@
                     "type": "Option<bytes>"
                 },
                 {
-                    "name": "prev",
+                    "name": "upgrade",
                     "type": "Option<bytes>"
                 }
             ]
