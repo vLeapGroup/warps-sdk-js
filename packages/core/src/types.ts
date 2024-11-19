@@ -102,6 +102,8 @@ export type WarpActionInput = {
   required?: boolean
   min?: number
   max?: number
+  pattern?: string
+  patternDescription?: string
   options?: string[]
 }
 
