@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.69
+
+### Patch Changes
+
+- 39b2df7: rename warp prev to upgrade
+
 ## 0.0.68
 
 ### Patch Changes
