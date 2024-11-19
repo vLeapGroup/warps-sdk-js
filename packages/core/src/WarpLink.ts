@@ -40,9 +40,12 @@ export class WarpLink {
     let brand: Brand | null = null
 
     if (idType === 'hash') {
-      const [warpInfo, { brand: brandInfo }] = await Promise.all([builder.createFromTransactionHash(id), registry.getInfoByHash(id)])
+      const warpInfo = await builder.createFromTransactionHash(id)
       warp = warpInfo
-      brand = brandInfo
+      try {
+        const { brand: brandInfo } = await registry.getInfoByHash(id)
+        brand = brandInfo
+      } catch (e) {}
     } else if (idType === 'alias') {
       const { warp: warpInfo, brand: brandInfo } = await registry.getInfoByAlias(id)
       if (warpInfo) {
