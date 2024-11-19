@@ -51,11 +51,6 @@
                     "name": "brand_opt",
                     "type": "optional<bytes>",
                     "multi_arg": true
-                },
-                {
-                    "name": "prev_opt",
-                    "type": "optional<bytes>",
-                    "multi_arg": true
                 }
             ],
             "outputs": [],
