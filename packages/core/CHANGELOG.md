@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.66
+
+### Patch Changes
+
+- 66b044d: fix link detection of unregistred
+
 ## 0.0.65
 
 ### Patch Changes
