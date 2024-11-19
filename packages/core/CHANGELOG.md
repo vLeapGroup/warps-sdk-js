@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.70
+
+### Patch Changes
+
+- 899dcfc: refactorings + renamings
+
 ## 0.0.69
 
 ### Patch Changes
