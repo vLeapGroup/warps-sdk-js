@@ -56,18 +56,16 @@ describe('WarpActionExecutor', () => {
   it('getTypedArgsWithInputs - returns the typed args', async () => {
     const subject = new WarpActionExecutor(Config, 'https://example.com')
 
-    const actual = subject.getTypedArgsFromInput({
-      args: [
-        'string:hello',
-        'uint8:1',
-        'uint16:2',
-        'uint32:3',
-        'uint64:4',
-        'biguint:5',
-        'boolean:true',
-        'address:erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
-      ],
-    } as WarpContractAction)
+    const actual = subject.getTypedArgsFromInput([
+      'string:hello',
+      'uint8:1',
+      'uint16:2',
+      'uint32:3',
+      'uint64:4',
+      'biguint:5',
+      'boolean:true',
+      'address:erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+    ])
 
     expect(actual).toEqual([
       BytesValue.fromUTF8('hello'),
