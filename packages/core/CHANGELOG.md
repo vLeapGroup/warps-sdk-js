@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.71
+
+### Patch Changes
+
+- eb045f1: add action input modifiers"
+
 ## 0.0.70
 
 ### Patch Changes
