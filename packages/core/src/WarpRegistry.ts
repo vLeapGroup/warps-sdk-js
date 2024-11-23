@@ -119,6 +119,7 @@ export class WarpRegistry {
     if (cache && cache.ttl) {
       this.cache.set(cacheKey, { registryInfo, brand }, cache.ttl)
     }
+
     return { registryInfo, brand }
   }
 

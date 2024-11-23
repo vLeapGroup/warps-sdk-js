@@ -50,10 +50,10 @@ export class WarpLink {
       } catch (e) {}
     } else if (idType === 'alias') {
       const { registryInfo: ri, brand: bi } = await registry.getInfoByAlias(id)
+      registryInfo = ri
+      brand = bi
       if (ri) {
         warp = await builder.createFromTransactionHash(ri.hash)
-        registryInfo = ri
-        brand = bi
       }
     }
 
