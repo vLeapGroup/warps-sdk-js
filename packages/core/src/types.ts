@@ -94,6 +94,8 @@ export type WarpActionInputType =
 
 export type WarpActionInputPosition = 'value' | 'transfer' | `arg:${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}`
 
+export type WarpActionInputModifier = 'scale'
+
 export type WarpActionInput = {
   name: string
   description?: string | null
@@ -106,6 +108,7 @@ export type WarpActionInput = {
   pattern?: string
   patternDescription?: string
   options?: string[]
+  modifier?: string
 }
 
 export type WarpActionExecutionResult = {

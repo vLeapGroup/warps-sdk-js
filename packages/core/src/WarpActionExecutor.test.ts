@@ -78,4 +78,69 @@ describe('WarpActionExecutor', () => {
       new AddressValue(Address.fromBech32('erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8')),
     ])
   })
+
+  it('getModifiedInputArgs - scales a value', async () => {
+    const subject = new WarpActionExecutor(Config, 'https://example.com')
+
+    const action: WarpContractAction = {
+      type: 'contract',
+      label: 'test',
+      description: 'test',
+      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      func: null,
+      args: [],
+      value: '0',
+      gasLimit: 1000000,
+      inputs: [
+        {
+          name: 'myvalue',
+          type: 'biguint',
+          position: 'arg:2',
+          source: 'field',
+          modifier: 'scale:18',
+        },
+      ],
+    }
+
+    const actual = subject.getModifiedInputArgs(action, ['string:hello', 'biguint:1'])
+
+    expect(actual[0].toString()).toBe('string:hello')
+    expect(actual[1].toString()).toBe('biguint:1000000000000000000')
+  })
+
+  it('getModifiedInputArgs - scales a value by another input field', async () => {
+    const subject = new WarpActionExecutor(Config, 'https://example.com')
+
+    const action: WarpContractAction = {
+      type: 'contract',
+      label: 'test',
+      description: 'test',
+      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      func: null,
+      args: [],
+      value: '0',
+      gasLimit: 1000000,
+      inputs: [
+        {
+          name: 'supply',
+          type: 'biguint',
+          position: 'arg:2',
+          source: 'field',
+          modifier: 'scale:decimals',
+        },
+        {
+          name: 'decimals',
+          type: 'uint8',
+          position: 'arg:3',
+          source: 'field',
+        },
+      ],
+    }
+
+    const actual = subject.getModifiedInputArgs(action, ['string:hello', 'biguint:1', 'uint8:18'])
+
+    expect(actual[0].toString()).toBe('string:hello')
+    expect(actual[1].toString()).toBe('biguint:1000000000000000000')
+    expect(actual[2].toString()).toBe('uint8:18')
+  })
 })

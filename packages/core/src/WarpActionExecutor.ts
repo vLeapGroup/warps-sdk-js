@@ -39,7 +39,8 @@ export class WarpActionExecutor {
     const config = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
     const factory = new SmartContractTransactionsFactory({ config })
 
-    const args = this.getTypedArgsFromInput(inputArgs)
+    const modifiedInputArgs = this.getModifiedInputArgs(action, inputArgs)
+    const args = this.getTypedArgsFromInput(modifiedInputArgs)
     const nativeValueFromUrl = this.getPositionValueFromUrl(action, 'value')
     const nativeTransferAmount = BigInt(nativeValueFromUrl || action.value || 0)
     const combinedTransfers = this.getCombinedTokenTransfers(action, inputTransfers)
@@ -66,6 +67,41 @@ export class WarpActionExecutor {
     const actionTransfers = action.transfers?.map(this.toTypedTransfer) || []
 
     return [...actionTransfers, ...inputTransfers]
+  }
+
+  getModifiedInputArgs(action: WarpContractAction, inputArgs: string[]): string[] {
+    const inputsWithModifiers = action.inputs?.filter((input) => !!input.modifier && input.position.startsWith('arg:')) || []
+
+    // Note: 'scale' modifier means that the value is multiplied by 10^modifier; the modifier can also be the name of another input field
+    // Example: 'scale:10' means that the value is multiplied by 10^10
+    // Example 2: 'scale:{amount}' means that the value is multiplied by the value of the 'amount' input field
+
+    // TODO: refactor once more modifiers are added
+
+    for (const input of inputsWithModifiers) {
+      if (input.modifier?.startsWith('scale:')) {
+        const [, exponent] = input.modifier.split(':')
+        if (isNaN(Number(exponent))) {
+          // Scale by another input field
+          const inputArgsIndex = Number(input.position.split(':')[1]) - 1
+          const scalableInput = action.inputs?.find((i) => i.name === exponent)
+          if (!scalableInput) throw new Error(`WarpActionExecutor: Scalable input ${exponent} not found`)
+          const scalableInputArgsIndex = Number(scalableInput.position.split(':')[1]) - 1
+          const exponentVal = BigInt(inputArgs[scalableInputArgsIndex].split(':')[1])
+          const scalableVal = BigInt(inputArgs[inputArgsIndex].split(':')[1])
+          const scaledVal = scalableVal * BigInt(10) ** exponentVal
+          inputArgs[inputArgsIndex] = `${input.type}:${scaledVal}`
+        } else {
+          // Scale by fixed amount
+          const inputArgsIndex = Number(input.position.split(':')[1]) - 1
+          const scalableVal = BigInt(inputArgs[inputArgsIndex].split(':')[1])
+          const scaledVal = scalableVal * BigInt(10) ** BigInt(exponent)
+          inputArgs[inputArgsIndex] = `${input.type}:${scaledVal}`
+        }
+      }
+    }
+
+    return inputArgs
   }
 
   getTypedArgsFromInput(inputArgs: string[]): TypedValue[] {
