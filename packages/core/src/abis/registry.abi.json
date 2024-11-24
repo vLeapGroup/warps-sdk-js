@@ -57,6 +57,17 @@
             "allow_multiple_var_args": true
         },
         {
+            "name": "unregisterWarp",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "warp",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": []
+        },
+        {
             "name": "claimBalance",
             "onlyOwner": true,
             "mutability": "mutable",
@@ -225,6 +236,16 @@
                 },
                 {
                     "name": "upgrade",
+                    "type": "bytes",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "warpUnregistered",
+            "inputs": [
+                {
+                    "name": "hash",
                     "type": "bytes",
                     "indexed": true
                 }
