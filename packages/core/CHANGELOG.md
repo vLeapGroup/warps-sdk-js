@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.72
+
+### Patch Changes
+
+- 120e91f: add registry unregister tx creation
+
 ## 0.0.71
 
 ### Patch Changes
