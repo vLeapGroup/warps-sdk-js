@@ -11,12 +11,12 @@ type DetectionResult = {
   brand: Brand | null
 }
 
-const IdParamName = 'xwarp'
+const IdParamName = 'warp'
 const IdParamSeparator = ':'
 const DefaultIdType = 'alias'
 
-// Example Link (Transaction Hash as ID): https://xwarp.me/to?xwarp=hash%3A<MYHASH>
-// Example Link (Alias as ID): https://xwarp.me/to?xwarp=alias%3A<MYALIAS>
+// Example Link (Transaction Hash as ID): https://xwarp.me/to?warp=hash%3A<MYHASH>
+// Example Link (Alias as ID): https://xwarp.me/to?warp=alias%3A<MYALIAS>
 export class WarpLink {
   constructor(private config: WarpConfig) {
     this.config = config
