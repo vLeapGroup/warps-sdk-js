@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.76
+
+### Patch Changes
+
+- 743b67e: update super client link detection
+
 ## 0.0.75
 
 ### Patch Changes
