@@ -87,7 +87,8 @@ export class WarpLink {
   private extractIdFromUrl(url: string): { type: WarpIdType; id: string } | null {
     const urlObj = new URL(url)
     const isSuperClient = Config.SuperClientUrls.includes(urlObj.origin)
-    const value = isSuperClient ? urlObj.pathname.split('/')[1] : urlObj.searchParams.get(IdParamName)
+    const searchParamValue = urlObj.searchParams.get(IdParamName)
+    const value = isSuperClient && !searchParamValue ? urlObj.pathname.split('/')[1] : searchParamValue
 
     if (!value) {
       return null
