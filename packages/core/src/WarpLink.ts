@@ -94,12 +94,8 @@ export class WarpLink {
     }
 
     const decodedParam = decodeURIComponent(value)
-    console.log('decodedParam', decodedParam)
     const normalizedParam = decodedParam.includes(IdParamSeparator) ? decodedParam : `${DefaultIdType}${IdParamSeparator}${decodedParam}`
-    console.log('normalizedParam', normalizedParam)
     const [idType, id] = normalizedParam.split(IdParamSeparator)
-    console.log('idType', idType)
-    console.log('id', id)
 
     return { type: idType as WarpIdType, id }
   }
