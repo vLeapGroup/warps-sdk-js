@@ -9,6 +9,7 @@ jest.mock('./WarpRegistry')
 
 const Config: WarpConfig = {
   env: 'devnet',
+  clientUrl: 'https://anyclient.com',
 }
 
 const mockWarp: Warp = {
@@ -62,12 +63,18 @@ const mockBrand: Brand = {
 describe('build', () => {
   it('builds a link with hash', () => {
     const link = new WarpLink(Config).build('hash', '123')
-    expect(link).toBe('https://devnet.usewarp.to?warp=hash%3A123')
+    expect(link).toBe('https://anyclient.com?warp=hash%3A123')
   })
 
   it('builds a link with alias', () => {
     const link = new WarpLink(Config).build('alias', 'mywarp')
-    expect(link).toBe('https://devnet.usewarp.to?warp=mywarp')
+    expect(link).toBe('https://anyclient.com?warp=mywarp')
+  })
+
+  it('builds a link with alias for super client', () => {
+    Config.clientUrl = 'https://devnet.usewarp.to'
+    const link = new WarpLink(Config).build('alias', 'mywarp')
+    expect(link).toBe('https://devnet.usewarp.to/mywarp')
   })
 })
 
@@ -85,7 +92,7 @@ describe('detect', () => {
 
   it('detects a hash-based warp link', async () => {
     const link = new WarpLink(Config)
-    const result = await link.detect('https://devnet.usewarp.to?warp=hash:123')
+    const result = await link.detect('https://anyclient.com?warp=hash:123')
 
     expect(result).toEqual({
       match: true,
@@ -97,7 +104,7 @@ describe('detect', () => {
 
   it('detects an alias-based warp link', async () => {
     const link = new WarpLink(Config)
-    const result = await link.detect('https://devnet.usewarp.to?warp=mywarp')
+    const result = await link.detect('https://anyclient.com?warp=mywarp')
 
     expect(result).toEqual({
       match: true,
@@ -108,8 +115,9 @@ describe('detect', () => {
   })
 
   it('detects a super client warp link with alias', async () => {
+    Config.clientUrl = 'https://devnet.usewarp.to'
     const link = new WarpLink(Config)
-    const result = await link.detect('https://usewarp.to/mywarp')
+    const result = await link.detect('https://devnet.usewarp.to/mywarp')
 
     expect(result).toEqual({
       match: true,
@@ -120,8 +128,9 @@ describe('detect', () => {
   })
 
   it('detects a super client warp link with hash', async () => {
+    Config.clientUrl = 'https://devnet.usewarp.to'
     const link = new WarpLink(Config)
-    const result = await link.detect('https://usewarp.to/' + encodeURIComponent('hash:123'))
+    const result = await link.detect('https://devnet.usewarp.to/' + encodeURIComponent('hash:123'))
 
     expect(result).toEqual({
       match: true,
@@ -132,8 +141,9 @@ describe('detect', () => {
   })
 
   it('detects a super client warp link with hash when search param is given', async () => {
+    Config.clientUrl = 'https://devnet.usewarp.to'
     const link = new WarpLink(Config)
-    const result = await link.detect('https://usewarp.to/details?warp=' + encodeURIComponent('hash:123'))
+    const result = await link.detect('https://devnet.usewarp.to/details?warp=' + encodeURIComponent('hash:123'))
 
     expect(result).toEqual({
       match: true,
