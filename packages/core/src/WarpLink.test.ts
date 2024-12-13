@@ -106,9 +106,21 @@ describe('WarpLink', () => {
       })
     })
 
-    it('detects a super client warp link', async () => {
+    it('detects a super client warp link with alias', async () => {
       const link = new WarpLink(Config)
       const result = await link.detect('https://usewarp.to/mywarp')
+
+      expect(result).toEqual({
+        match: true,
+        warp: mockWarp,
+        registryInfo: mockRegistryInfo,
+        brand: mockBrand,
+      })
+    })
+
+    it('detects a super client warp link with hash', async () => {
+      const link = new WarpLink(Config)
+      const result = await link.detect('https://usewarp.to/' + encodeURIComponent('hash:123'))
 
       expect(result).toEqual({
         match: true,
