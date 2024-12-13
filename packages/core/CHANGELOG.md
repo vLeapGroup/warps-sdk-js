@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 0.0.73
+
+### Patch Changes
+
+- d55640c: add super client url parsing
+- b832cfb: update query param name
+
 ## 0.0.72
 
 ### Patch Changes
