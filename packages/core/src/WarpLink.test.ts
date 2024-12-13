@@ -59,7 +59,19 @@ const mockBrand: Brand = {
   },
 }
 
-describe('WarpLink', () => {
+describe('build', () => {
+  it('builds a link with hash', () => {
+    const link = new WarpLink(Config).build('hash', '123')
+    expect(link).toBe('https://devnet.usewarp.to?warp=hash%3A123')
+  })
+
+  it('builds a link with alias', () => {
+    const link = new WarpLink(Config).build('alias', 'mywarp')
+    expect(link).toBe('https://devnet.usewarp.to?warp=mywarp')
+  })
+})
+
+describe('detect', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(WarpBuilder as jest.Mock).mockImplementation(() => ({
@@ -71,87 +83,75 @@ describe('WarpLink', () => {
     }))
   })
 
-  it('build - creates a link with hash', () => {
-    const link = new WarpLink(Config).build('hash', '123')
-    expect(link).toBe('https://devnet.usewarp.to?warp=hash%3A123')
+  it('detects a hash-based warp link', async () => {
+    const link = new WarpLink(Config)
+    const result = await link.detect('https://devnet.usewarp.to?warp=hash:123')
+
+    expect(result).toEqual({
+      match: true,
+      warp: mockWarp,
+      registryInfo: mockRegistryInfo,
+      brand: mockBrand,
+    })
   })
 
-  it('build - creates a link with alias', () => {
-    const link = new WarpLink(Config).build('alias', 'mywarp')
-    expect(link).toBe('https://devnet.usewarp.to?warp=mywarp')
+  it('detects an alias-based warp link', async () => {
+    const link = new WarpLink(Config)
+    const result = await link.detect('https://devnet.usewarp.to?warp=mywarp')
+
+    expect(result).toEqual({
+      match: true,
+      warp: mockWarp,
+      registryInfo: mockRegistryInfo,
+      brand: mockBrand,
+    })
   })
 
-  describe('detect', () => {
-    it('detects a hash-based warp link', async () => {
-      const link = new WarpLink(Config)
-      const result = await link.detect('https://devnet.usewarp.to?warp=hash:123')
+  it('detects a super client warp link with alias', async () => {
+    const link = new WarpLink(Config)
+    const result = await link.detect('https://usewarp.to/mywarp')
 
-      expect(result).toEqual({
-        match: true,
-        warp: mockWarp,
-        registryInfo: mockRegistryInfo,
-        brand: mockBrand,
-      })
+    expect(result).toEqual({
+      match: true,
+      warp: mockWarp,
+      registryInfo: mockRegistryInfo,
+      brand: mockBrand,
     })
+  })
 
-    it('detects an alias-based warp link', async () => {
-      const link = new WarpLink(Config)
-      const result = await link.detect('https://devnet.usewarp.to?warp=mywarp')
+  it('detects a super client warp link with hash', async () => {
+    const link = new WarpLink(Config)
+    const result = await link.detect('https://usewarp.to/' + encodeURIComponent('hash:123'))
 
-      expect(result).toEqual({
-        match: true,
-        warp: mockWarp,
-        registryInfo: mockRegistryInfo,
-        brand: mockBrand,
-      })
+    expect(result).toEqual({
+      match: true,
+      warp: mockWarp,
+      registryInfo: mockRegistryInfo,
+      brand: mockBrand,
     })
+  })
 
-    it('detects a super client warp link with alias', async () => {
-      const link = new WarpLink(Config)
-      const result = await link.detect('https://usewarp.to/mywarp')
+  it('detects a super client warp link with hash when search param is given', async () => {
+    const link = new WarpLink(Config)
+    const result = await link.detect('https://usewarp.to/details?warp=' + encodeURIComponent('hash:123'))
 
-      expect(result).toEqual({
-        match: true,
-        warp: mockWarp,
-        registryInfo: mockRegistryInfo,
-        brand: mockBrand,
-      })
+    expect(result).toEqual({
+      match: true,
+      warp: mockWarp,
+      registryInfo: mockRegistryInfo,
+      brand: mockBrand,
     })
+  })
 
-    it('detects a super client warp link with hash', async () => {
-      const link = new WarpLink(Config)
-      const result = await link.detect('https://usewarp.to/' + encodeURIComponent('hash:123'))
+  it('returns no match for invalid URLs', async () => {
+    const link = new WarpLink(Config)
+    const result = await link.detect('https://example.com')
 
-      expect(result).toEqual({
-        match: true,
-        warp: mockWarp,
-        registryInfo: mockRegistryInfo,
-        brand: mockBrand,
-      })
-    })
-
-    it('detects a super client warp link with hash when search param is given', async () => {
-      const link = new WarpLink(Config)
-      const result = await link.detect('https://usewarp.to/details?warp=' + encodeURIComponent('hash:123'))
-
-      expect(result).toEqual({
-        match: true,
-        warp: mockWarp,
-        registryInfo: mockRegistryInfo,
-        brand: mockBrand,
-      })
-    })
-
-    it('returns no match for invalid URLs', async () => {
-      const link = new WarpLink(Config)
-      const result = await link.detect('https://example.com')
-
-      expect(result).toEqual({
-        match: false,
-        warp: null,
-        registryInfo: null,
-        brand: null,
-      })
+    expect(result).toEqual({
+      match: false,
+      warp: null,
+      registryInfo: null,
+      brand: null,
     })
   })
 })
