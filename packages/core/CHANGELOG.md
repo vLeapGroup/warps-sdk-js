@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.74
+
+### Patch Changes
+
+- add warp publish unit payment
+
 ## 0.0.73
 
 ### Patch Changes
