@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.77
+
+### Patch Changes
+
+- a3ca64f: add super client link building
+
 ## 0.0.76
 
 ### Patch Changes
