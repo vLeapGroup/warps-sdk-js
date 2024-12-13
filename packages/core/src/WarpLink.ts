@@ -15,40 +15,35 @@ const IdParamName = 'warp'
 const IdParamSeparator = ':'
 const DefaultIdType = 'alias'
 
-// Example Link (Transaction Hash as ID): https://xwarp.me/to?warp=hash%3A<MYHASH>
-// Example Link (Alias as ID): https://xwarp.me/to?warp=alias%3A<MYALIAS>
+// Example Link (Transaction Hash as ID): https://usewarp.to/to?warp=hash%3A<MYHASH>
+// Example Link (Alias as ID): https://usewarp.to/to?warp=alias%3A<MYALIAS>
 export class WarpLink {
   constructor(private config: WarpConfig) {
     this.config = config
   }
 
   async detect(url: string): Promise<DetectionResult> {
-    const urlObj = new URL(url)
-    const searchParams = urlObj.searchParams
-    const param = searchParams.get(IdParamName)
+    const idResult = this.extractIdFromUrl(url)
 
-    if (!param) {
+    if (!idResult) {
       return { match: false, warp: null, registryInfo: null, brand: null }
     }
 
-    const decodedParam = decodeURIComponent(param)
-    const normalizedParam = decodedParam.includes(IdParamSeparator) ? decodedParam : `${DefaultIdType}${IdParamSeparator}${decodedParam}`
-    const [idType, id] = normalizedParam.split(IdParamSeparator)
-
+    const { type, id } = idResult
     const builder = new WarpBuilder(this.config)
     const registry = new WarpRegistry(this.config)
     let warp: Warp | null = null
     let registryInfo: RegistryInfo | null = null
     let brand: Brand | null = null
 
-    if (idType === 'hash') {
+    if (type === 'hash') {
       warp = await builder.createFromTransactionHash(id)
       try {
         const { registryInfo: ri, brand: bi } = await registry.getInfoByHash(id)
         registryInfo = ri
         brand = bi
       } catch (e) {}
-    } else if (idType === 'alias') {
+    } else if (type === 'alias') {
       const { registryInfo: ri, brand: bi } = await registry.getInfoByAlias(id)
       registryInfo = ri
       brand = bi
@@ -87,5 +82,21 @@ export class WarpLink {
       imageOptions: { hideBackgroundDots: true, imageSize: 0.4, margin: 8 },
       image: `data:image/svg+xml;utf8,<svg width="16" height="16" viewBox="0 0 100 100" fill="${encodeURIComponent(logoColor)}" xmlns="http://www.w3.org/2000/svg"><path d="M54.8383 50.0242L95 28.8232L88.2456 16L51.4717 30.6974C50.5241 31.0764 49.4759 31.0764 48.5283 30.6974L11.7544 16L5 28.8232L45.1616 50.0242L5 71.2255L11.7544 84.0488L48.5283 69.351C49.4759 68.9724 50.5241 68.9724 51.4717 69.351L88.2456 84.0488L95 71.2255L54.8383 50.0242Z"/></svg>`,
     })
+  }
+
+  private extractIdFromUrl(url: string): { type: WarpIdType; id: string } | null {
+    const urlObj = new URL(url)
+    const isSuperClient = Config.SuperClientUrls.includes(urlObj.origin)
+    const value = isSuperClient ? urlObj.pathname.split('/')[1] : urlObj.searchParams.get(IdParamName)
+
+    if (!value) {
+      return null
+    }
+
+    const decodedParam = decodeURIComponent(value)
+    const normalizedParam = decodedParam.includes(IdParamSeparator) ? decodedParam : `${DefaultIdType}${IdParamSeparator}${decodedParam}`
+    const [idType, id] = normalizedParam.split(IdParamSeparator)
+
+    return { type: idType as WarpIdType, id }
   }
 }

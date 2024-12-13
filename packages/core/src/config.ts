@@ -10,10 +10,12 @@ export const Config = {
   LatestBrandSchemaUrl: 'https://raw.githubusercontent.com/vLeapGroup/warps-specs/refs/heads/main/schemas/brand/v0.1.0.schema.json',
 
   DefaultClientUrl: (env: ChainEnv) => {
-    if (env === 'devnet') return 'https://devnet.xwarp.me/to'
-    if (env === 'testnet') return '###Not implemented###'
-    return 'https://xwarp.me/to'
+    if (env === 'devnet') return 'https://devnet.usewarp.to'
+    if (env === 'testnet') return 'https://testnet.usewarp.to'
+    return 'https://usewarp.to'
   },
+
+  SuperClientUrls: ['https://usewarp.to'],
 
   Chain: {
     ApiUrl: (env: ChainEnv) => {
