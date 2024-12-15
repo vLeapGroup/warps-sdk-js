@@ -233,6 +233,11 @@ export class WarpRegistry {
     this.unitPrice = unitPrice
   }
 
+  getUnitPrice(): bigint {
+    if (this.unitPrice === 0n) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
+    return this.unitPrice
+  }
+
   private getFactory(): SmartContractTransactionsFactory {
     const config = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
     const abi = AbiRegistry.create(RegistryAbi)
