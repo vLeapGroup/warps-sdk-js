@@ -23,7 +23,7 @@ export class WarpLink {
   }
 
   async detect(url: string): Promise<DetectionResult> {
-    const idResult = this.extractIdFromUrl(url)
+    const idResult = this.extractIdentifierInfoFromUrl(url)
 
     if (!idResult) {
       return { match: false, warp: null, registryInfo: null, brand: null }
@@ -82,7 +82,17 @@ export class WarpLink {
     })
   }
 
-  private extractIdFromUrl(url: string): { type: WarpIdType; id: string } | null {
+  getIdentifierInfo(prefixedIdentifier: string): { type: WarpIdType; id: string } | null {
+    const normalizedParam = prefixedIdentifier.includes(IdParamSeparator)
+      ? prefixedIdentifier
+      : `${DefaultIdType}${IdParamSeparator}${prefixedIdentifier}`
+
+    const [idType, id] = normalizedParam.split(IdParamSeparator)
+
+    return { type: idType as WarpIdType, id }
+  }
+
+  private extractIdentifierInfoFromUrl(url: string): { type: WarpIdType; id: string } | null {
     const urlObj = new URL(url)
     const superClientUrls = Config.SuperClientUrls(this.config.env)
     const isSuperClient = superClientUrls.includes(urlObj.origin)
@@ -94,9 +104,7 @@ export class WarpLink {
     }
 
     const decodedParam = decodeURIComponent(value)
-    const normalizedParam = decodedParam.includes(IdParamSeparator) ? decodedParam : `${DefaultIdType}${IdParamSeparator}${decodedParam}`
-    const [idType, id] = normalizedParam.split(IdParamSeparator)
 
-    return { type: idType as WarpIdType, id }
+    return this.getIdentifierInfo(decodedParam)
   }
 }
