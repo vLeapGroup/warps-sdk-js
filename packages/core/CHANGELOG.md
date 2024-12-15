@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.79
+
+### Patch Changes
+
+- dd5ce1e: add registry unit price getter
+
 ## 0.0.78
 
 ### Patch Changes
