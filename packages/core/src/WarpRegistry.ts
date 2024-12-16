@@ -18,8 +18,9 @@ import { CacheKey, WarpCache } from './WarpCache'
 
 export class WarpRegistry {
   private config: WarpConfig
-  private unitPrice: bigint
   private cache: WarpCache = new WarpCache()
+
+  public unitPrice: bigint
 
   constructor(config: WarpConfig) {
     this.config = config
@@ -231,11 +232,6 @@ export class WarpRegistry {
     const unitPrice = BigInt(unitPriceRaw.toString())
 
     this.unitPrice = unitPrice
-  }
-
-  getUnitPrice(): bigint {
-    if (this.unitPrice === 0n) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
-    return this.unitPrice
   }
 
   private getFactory(): SmartContractTransactionsFactory {
