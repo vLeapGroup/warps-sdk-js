@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.81
+
+### Patch Changes
+
+- a249176: update registry unit price to public
+
 ## 0.0.80
 
 ### Patch Changes
