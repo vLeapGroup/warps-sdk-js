@@ -3,7 +3,28 @@ import { WarpLink } from './WarpLink'
 
 const UrlPrefixDeterminer = 'https://'
 
+const VarSourceQuery = 'query'
+
 export class WarpUtils {
+  static prepareVars(warp: Warp, config: WarpConfig): Warp {
+    if (!warp?.vars) return warp
+    let modifiable = JSON.stringify(warp)
+    const modify = (placeholder: string, value: string) => (modifiable = modifiable.replace(`{{${placeholder.toUpperCase()}}}`, value))
+
+    Object.entries(warp.vars).forEach(([placeholder, value]) => {
+      if (typeof value === 'string' && value.startsWith(`${VarSourceQuery}:`)) {
+        if (!config.currentUrl) throw new Error('WarpUtils: currentUrl config is required to prepare vars')
+        const queryParamName = value.split(`${VarSourceQuery}:`)[1]
+        const queryParamValue = new URL(config.currentUrl).searchParams.get(queryParamName)
+        if (queryParamValue) modify(placeholder, queryParamValue)
+      } else {
+        modify(placeholder, value)
+      }
+    })
+
+    return JSON.parse(modifiable)
+  }
+
   static getNextStepUrl(warp: Warp, config: WarpConfig): string | null {
     if (!warp?.next) return null
     if (warp.next.startsWith(UrlPrefixDeterminer)) {

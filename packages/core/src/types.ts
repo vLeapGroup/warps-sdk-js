@@ -3,6 +3,7 @@ export type ChainEnv = 'mainnet' | 'testnet' | 'devnet'
 export type WarpConfig = {
   env: ChainEnv
   clientUrl?: string
+  currentUrl?: string
   userAddress?: string
   chainApiUrl?: string
   warpSchemaUrl?: string
@@ -28,12 +29,15 @@ export type RegistryInfo = {
 
 export type WarpIdType = 'hash' | 'alias'
 
+export type WarpVarPlaceholder = string
+
 export type Warp = {
   protocol: string
   name: string
   title: string
   description: string | null
   preview: string
+  vars?: Record<WarpVarPlaceholder, string>
   actions: WarpAction[]
   next?: string
   meta?: WarpMeta
@@ -103,8 +107,8 @@ export type WarpActionInput = {
   position: WarpActionInputPosition
   source: WarpActionInputSource
   required?: boolean
-  min?: number
-  max?: number
+  min?: number | WarpVarPlaceholder
+  max?: number | WarpVarPlaceholder
   pattern?: string
   patternDescription?: string
   options?: string[]

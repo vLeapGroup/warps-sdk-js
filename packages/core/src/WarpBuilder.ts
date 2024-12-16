@@ -11,6 +11,7 @@ import { Config } from './config'
 import { getChainId, getLatestProtocolIdentifier } from './helpers'
 import { Warp, WarpAction, WarpCacheConfig, WarpConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
+import { WarpUtils } from './WarpUtils'
 
 export class WarpBuilder {
   private config: WarpConfig
@@ -51,7 +52,7 @@ export class WarpBuilder {
       await this.ensureValidSchema(warp)
     }
 
-    return warp
+    return WarpUtils.prepareVars(warp, this.config)
   }
 
   async createFromTransaction(tx: TransactionOnNetwork, validateSchema = false): Promise<Warp> {

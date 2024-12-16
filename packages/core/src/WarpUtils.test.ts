@@ -6,6 +6,35 @@ const Config: WarpConfig = {
   clientUrl: 'https://anyclient.com',
 }
 
+describe('prepareVars', () => {
+  it('replaces placeholders with values', () => {
+    const warp: Warp = {
+      description: 'You are {{AGE}} years old',
+      vars: {
+        AGE: 10,
+      },
+    } as any
+
+    const actual = WarpUtils.prepareVars(warp, Config)
+
+    expect(actual.description).toBe('You are 10 years old')
+  })
+
+  it('replaces vars with query params', () => {
+    Config.currentUrl = 'https://anyclient.com?age=10'
+    const warp: Warp = {
+      description: 'You are {{AGE}} years old',
+      vars: {
+        AGE: 'query:age',
+      },
+    } as any
+
+    const actual = WarpUtils.prepareVars(warp, Config)
+
+    expect(actual.description).toBe('You are 10 years old')
+  })
+})
+
 describe('getNextStepUrl', () => {
   it('returns an url for an alias', () => {
     const warp: Warp = {
