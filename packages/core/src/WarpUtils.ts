@@ -9,7 +9,10 @@ export class WarpUtils {
   static prepareVars(warp: Warp, config: WarpConfig): Warp {
     if (!warp?.vars) return warp
     let modifiable = JSON.stringify(warp)
-    const modify = (placeholder: string, value: string) => (modifiable = modifiable.replace(`{{${placeholder.toUpperCase()}}}`, value))
+
+    const modify = (placeholder: string, value: string) => {
+      modifiable = modifiable.replace(new RegExp(`{{${placeholder.toUpperCase()}}}`, 'g'), value)
+    }
 
     Object.entries(warp.vars).forEach(([placeholder, value]) => {
       if (typeof value === 'string' && value.startsWith(`${VarSourceQuery}:`)) {
