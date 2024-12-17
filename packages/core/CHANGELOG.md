@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.82
+
+### Patch Changes
+
+- 72862f1: fix warp vars multiple occurrences
+
 ## 0.0.81
 
 ### Patch Changes
