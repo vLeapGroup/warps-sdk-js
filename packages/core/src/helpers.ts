@@ -18,3 +18,22 @@ export const toTypedRegistryInfo = (registryInfo: any): RegistryInfo => ({
   brand: registryInfo.brand?.toString('hex') || null,
   upgrade: registryInfo.upgrade?.toString('hex') || null,
 })
+
+export const shiftBigintBy = (value: bigint | string, decimals: number): bigint => {
+  const valueStr = value.toString()
+  const [integerPart, fractionalPart = ''] = valueStr.split('.')
+  const shiftPlaces = Math.abs(decimals)
+
+  if (decimals > 0) {
+    return BigInt(integerPart + fractionalPart.padEnd(shiftPlaces, '0'))
+  } else if (decimals < 0) {
+    const combined = integerPart + fractionalPart
+    if (shiftPlaces >= combined.length) {
+      return 0n
+    }
+    const newIntegerPart = combined.slice(0, -shiftPlaces) || '0'
+    return BigInt(newIntegerPart)
+  } else {
+    return BigInt(value)
+  }
+}

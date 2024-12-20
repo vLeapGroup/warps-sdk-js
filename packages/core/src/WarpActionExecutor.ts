@@ -15,7 +15,7 @@ import {
   U64Value,
   U8Value,
 } from '@multiversx/sdk-core/out'
-import { getChainId } from './helpers'
+import { getChainId, shiftBigintBy } from './helpers'
 import { WarpAction, WarpActionInput, WarpActionInputType, WarpConfig, WarpContractAction, WarpContractActionTransfer } from './types'
 
 export class WarpActionExecutor {
@@ -90,15 +90,15 @@ export class WarpActionExecutor {
           const scalableInput = action.inputs?.find((i) => i.name === exponent)
           if (!scalableInput) throw new Error(`WarpActionExecutor: Scalable input ${exponent} not found`)
           const scalableInputIndex = Number(scalableInput.position.split(':')[1]) - 1
-          const exponentVal = BigInt(inputs[scalableInputIndex].split(':')[1])
-          const scalableVal = BigInt(inputs[inputIndex].split(':')[1])
-          const scaledVal = scalableVal * BigInt(10) ** exponentVal
+          const exponentVal = inputs[scalableInputIndex].split(':')[1]
+          const scalableVal = inputs[inputIndex].split(':')[1]
+          const scaledVal = shiftBigintBy(scalableVal, +exponentVal)
           inputs[inputIndex] = `${input.type}:${scaledVal}`
         } else {
           // Scale by fixed amount
           const inputIndex = input.position.startsWith('arg:') ? Number(input.position.split(':')[1]) - 1 : index
-          const scalableVal = BigInt(inputs[inputIndex].split(':')[1])
-          const scaledVal = scalableVal * BigInt(10) ** BigInt(exponent)
+          const scalableVal = inputs[inputIndex].split(':')[1]
+          const scaledVal = shiftBigintBy(scalableVal, +exponent)
           inputs[inputIndex] = `${input.type}:${scaledVal}`
         }
       }
