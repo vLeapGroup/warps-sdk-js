@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.83
+
+### Patch Changes
+
+- 7748c8d: fix tx timestamp date conversion
+
 ## 0.0.82
 
 ### Patch Changes
