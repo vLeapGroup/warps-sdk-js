@@ -35,11 +35,14 @@ describe('WarpActionExecutor', () => {
           type: 'biguint',
           position: 'value',
           source: 'field',
+          modifier: 'scale:18',
         },
       ],
     }
 
-    const actual = subject.getNativeValueFromField(action, ['biguint:2000000000000000000'])
+    const modified = subject.getModifiedInputs(action, ['biguint:2'])
+
+    const actual = subject.getNativeValueFromField(action, modified)
 
     expect(actual).toBe('2000000000000000000')
   })
@@ -119,7 +122,13 @@ describe('WarpActionExecutor', () => {
       gasLimit: 1000000,
       inputs: [
         {
-          name: 'myvalue',
+          name: 'first',
+          type: 'string',
+          position: 'arg:1',
+          source: 'field',
+        },
+        {
+          name: 'second',
           type: 'biguint',
           position: 'arg:2',
           source: 'field',
@@ -128,7 +137,7 @@ describe('WarpActionExecutor', () => {
       ],
     }
 
-    const actual = subject.getModifiedInputArgs(action, ['string:hello', 'biguint:1'])
+    const actual = subject.getModifiedInputs(action, ['string:hello', 'biguint:1'])
 
     expect(actual[0].toString()).toBe('string:hello')
     expect(actual[1].toString()).toBe('biguint:1000000000000000000')
@@ -143,7 +152,7 @@ describe('WarpActionExecutor', () => {
       description: 'test',
       address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
       func: null,
-      args: [],
+      args: ['string:hello'],
       value: '0',
       gasLimit: 1000000,
       inputs: [
@@ -163,7 +172,8 @@ describe('WarpActionExecutor', () => {
       ],
     }
 
-    const actual = subject.getModifiedInputArgs(action, ['string:hello', 'biguint:1', 'uint8:18'])
+    const combined = subject.getCombinedInputs(action, ['biguint:1', 'uint8:18'])
+    const actual = subject.getModifiedInputs(action, combined)
 
     expect(actual[0].toString()).toBe('string:hello')
     expect(actual[1].toString()).toBe('biguint:1000000000000000000')
@@ -191,7 +201,7 @@ describe('WarpActionExecutor', () => {
       ],
     }
 
-    const actual = subject.getPreparedTxArgs(action, ['string:three', 'string:four', 'string:one'])
+    const actual = subject.getCombinedInputs(action, ['string:three', 'string:four', 'string:one'])
 
     expect(actual).toEqual(['string:one', 'string:two', 'string:three', 'string:four'])
   })

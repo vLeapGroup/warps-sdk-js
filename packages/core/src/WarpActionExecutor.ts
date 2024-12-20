@@ -27,13 +27,13 @@ export class WarpActionExecutor {
     this.url = new URL(url)
   }
 
-  createTransactionForExecute(action: WarpContractAction, inputArgs: string[], inputTransfers: TokenTransfer[]): Transaction {
+  createTransactionForExecute(action: WarpContractAction, inputs: string[], inputTransfers: TokenTransfer[]): Transaction {
     if (!this.config.userAddress) throw new Error('WarpActionExecutor: user address not set')
     const config = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
     const factory = new SmartContractTransactionsFactory({ config })
 
-    const modifiedInputArgs = this.getModifiedInputArgs(action, inputArgs)
-    const txArgs = this.getPreparedTxArgs(action, modifiedInputArgs)
+    const modifiedInputArgs = this.getModifiedInputs(action, inputs)
+    const txArgs = this.getCombinedInputs(action, modifiedInputArgs)
     const typedTxArgs = this.getTypedArgsFromInput(txArgs)
     const nativeValueFromField = this.getNativeValueFromField(action, modifiedInputArgs)
     const nativeValueFromUrl = this.getNativeValueFromUrl(action)
@@ -51,9 +51,9 @@ export class WarpActionExecutor {
     })
   }
 
-  getNativeValueFromField(action: WarpAction, inputArgs: string[]): string | null {
+  getNativeValueFromField(action: WarpAction, inputs: string[]): string | null {
     const valueFieldIndex = (action.inputs || []).findIndex((input) => input.source === 'field' && input.position === 'value')
-    const valueFieldValue = valueFieldIndex !== -1 ? inputArgs[valueFieldIndex] : null
+    const valueFieldValue = valueFieldIndex !== -1 ? inputs[valueFieldIndex] : null
     return valueFieldValue ? valueFieldValue.split(':')[1] : null
   }
 
@@ -72,8 +72,8 @@ export class WarpActionExecutor {
   }
 
   // Applies modifiers to the input args
-  getModifiedInputArgs(action: WarpContractAction, inputArgs: string[]): string[] {
-    const inputsWithModifiers = action.inputs?.filter((input) => !!input.modifier && input.position.startsWith('arg:')) || []
+  getModifiedInputs(action: WarpContractAction, inputs: string[]): string[] {
+    const inputsWithModifiers = action.inputs?.filter((input) => !!input.modifier) || []
 
     // Note: 'scale' modifier means that the value is multiplied by 10^modifier; the modifier can also be the name of another input field
     // Example: 'scale:10' means that the value is multiplied by 10^10
@@ -81,34 +81,34 @@ export class WarpActionExecutor {
 
     // TODO: refactor once more modifiers are added
 
-    for (const input of inputsWithModifiers) {
+    inputsWithModifiers.forEach((input, index) => {
       if (input.modifier?.startsWith('scale:')) {
         const [, exponent] = input.modifier.split(':')
         if (isNaN(Number(exponent))) {
           // Scale by another input field
-          const inputArgsIndex = Number(input.position.split(':')[1]) - 1
+          const inputIndex = input.position.startsWith('arg:') ? Number(input.position.split(':')[1]) - 1 : index
           const scalableInput = action.inputs?.find((i) => i.name === exponent)
           if (!scalableInput) throw new Error(`WarpActionExecutor: Scalable input ${exponent} not found`)
-          const scalableInputArgsIndex = Number(scalableInput.position.split(':')[1]) - 1
-          const exponentVal = BigInt(inputArgs[scalableInputArgsIndex].split(':')[1])
-          const scalableVal = BigInt(inputArgs[inputArgsIndex].split(':')[1])
+          const scalableInputIndex = Number(scalableInput.position.split(':')[1]) - 1
+          const exponentVal = BigInt(inputs[scalableInputIndex].split(':')[1])
+          const scalableVal = BigInt(inputs[inputIndex].split(':')[1])
           const scaledVal = scalableVal * BigInt(10) ** exponentVal
-          inputArgs[inputArgsIndex] = `${input.type}:${scaledVal}`
+          inputs[inputIndex] = `${input.type}:${scaledVal}`
         } else {
           // Scale by fixed amount
-          const inputArgsIndex = Number(input.position.split(':')[1]) - 1
-          const scalableVal = BigInt(inputArgs[inputArgsIndex].split(':')[1])
+          const inputIndex = input.position.startsWith('arg:') ? Number(input.position.split(':')[1]) - 1 : index
+          const scalableVal = BigInt(inputs[inputIndex].split(':')[1])
           const scaledVal = scalableVal * BigInt(10) ** BigInt(exponent)
-          inputArgs[inputArgsIndex] = `${input.type}:${scaledVal}`
+          inputs[inputIndex] = `${input.type}:${scaledVal}`
         }
       }
-    }
+    })
 
-    return inputArgs
+    return inputs
   }
 
   // Combines the provided args with filtered input args and sorts them by position index
-  getPreparedTxArgs(action: WarpContractAction, inputArgs: string[]): string[] {
+  getCombinedInputs(action: WarpContractAction, inputArgs: string[]): string[] {
     const fieldInputs = action.inputs?.filter((input) => input.source === 'field' && input.position.startsWith('arg:')) || []
     const inputsWithValues: { input: WarpActionInput; value: string }[] = fieldInputs.map((input, index) => ({
       input,
