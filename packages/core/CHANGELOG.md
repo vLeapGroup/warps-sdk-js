@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.84
+
+### Patch Changes
+
+- a57f527: add action exection args filtering + sorting
+
 ## 0.0.83
 
 ### Patch Changes
