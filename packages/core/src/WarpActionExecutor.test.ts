@@ -53,7 +53,7 @@ describe('WarpActionExecutor', () => {
     expect(actual).toBeNull()
   })
 
-  it('getTypedArgsWithInputs - returns the typed args', async () => {
+  it('getTypedArgsFromInput - returns the typed args', async () => {
     const subject = new WarpActionExecutor(Config, 'https://example.com')
 
     const actual = subject.getTypedArgsFromInput([
@@ -142,5 +142,31 @@ describe('WarpActionExecutor', () => {
     expect(actual[0].toString()).toBe('string:hello')
     expect(actual[1].toString()).toBe('biguint:1000000000000000000')
     expect(actual[2].toString()).toBe('uint8:18')
+  })
+
+  it.only('getPreparedTxArgs - sorts the args by position index', async () => {
+    const subject = new WarpActionExecutor(Config, 'https://example.com')
+
+    const action: WarpContractAction = {
+      type: 'contract',
+      label: 'test',
+      description: 'test',
+      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      func: null,
+      args: ['string:two'],
+      value: '0',
+      gasLimit: 1000000,
+      inputs: [
+        { name: 'myvalue', type: 'string', position: 'value', source: 'field' },
+        { name: 'three', type: 'string', position: 'arg:3', source: 'field' },
+        { name: 'four', type: 'string', position: 'arg:4', source: 'field' },
+        { name: 'mytransfer', type: 'string', position: 'transfer', source: 'field' },
+        { name: 'one', type: 'string', position: 'arg:1', source: 'field' },
+      ],
+    }
+
+    const actual = subject.getPreparedTxArgs(action, ['string:three', 'string:four', 'string:one'])
+
+    expect(actual).toEqual(['string:one', 'string:two', 'string:three', 'string:four'])
   })
 })

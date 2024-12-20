@@ -18,6 +18,7 @@ import {
 import { getChainId } from './helpers'
 import {
   WarpAction,
+  WarpActionInput,
   WarpActionInputPosition,
   WarpActionInputType,
   WarpConfig,
@@ -40,7 +41,8 @@ export class WarpActionExecutor {
     const factory = new SmartContractTransactionsFactory({ config })
 
     const modifiedInputArgs = this.getModifiedInputArgs(action, inputArgs)
-    const args = this.getTypedArgsFromInput(modifiedInputArgs)
+    const txArgs = this.getPreparedTxArgs(action, modifiedInputArgs)
+    const typedTxArgs = this.getTypedArgsFromInput(txArgs)
     const nativeValueFromUrl = this.getPositionValueFromUrl(action, 'value')
     const nativeTransferAmount = BigInt(nativeValueFromUrl || action.value || 0)
     const combinedTransfers = this.getCombinedTokenTransfers(action, inputTransfers)
@@ -50,7 +52,7 @@ export class WarpActionExecutor {
       contract: Address.newFromBech32(action.address),
       function: action.func || '',
       gasLimit: BigInt(action.gasLimit),
-      arguments: args,
+      arguments: typedTxArgs,
       tokenTransfers: combinedTransfers,
       nativeTransferAmount,
     })
@@ -63,12 +65,14 @@ export class WarpActionExecutor {
     return valuePositionQueryName ? searchParams.get(valuePositionQueryName) : null
   }
 
+  // Combines the provided transfers from input with the action transfers
   getCombinedTokenTransfers(action: WarpContractAction, inputTransfers: TokenTransfer[]): TokenTransfer[] {
     const actionTransfers = action.transfers?.map(this.toTypedTransfer) || []
 
     return [...actionTransfers, ...inputTransfers]
   }
 
+  // Applies modifiers to the input args
   getModifiedInputArgs(action: WarpContractAction, inputArgs: string[]): string[] {
     const inputsWithModifiers = action.inputs?.filter((input) => !!input.modifier && input.position.startsWith('arg:')) || []
 
@@ -104,6 +108,22 @@ export class WarpActionExecutor {
     return inputArgs
   }
 
+  // Combines the provided args with filtered input args and sorts them by position index
+  getPreparedTxArgs(action: WarpContractAction, inputArgs: string[]): string[] {
+    const fieldInputs = action.inputs?.filter((input) => input.source === 'field' && input.position.startsWith('arg:')) || []
+    const inputsWithValues: { input: WarpActionInput; value: string }[] = fieldInputs.map((input, index) => ({
+      input,
+      value: inputArgs[index],
+    }))
+    let args = action.args || []
+    inputsWithValues.forEach(({ input, value }) => {
+      const argIndex = Number(input.position.split(':')[1]) - 1
+      args.splice(argIndex, 0, value)
+    })
+    return args
+  }
+
+  // Converts the input args to typed values
   getTypedArgsFromInput(inputArgs: string[]): TypedValue[] {
     return inputArgs.map((arg) => {
       const [type, value] = arg.split(':')
