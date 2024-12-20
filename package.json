@@ -6,7 +6,8 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "packages:publish": "turbo run build lint test && changeset publish"
+    "packages:publish": "turbo run build lint test && changeset publish",
+    "typegen": "ts-json-schema-generator --path 'packages/core/src/types.ts' --type 'Warp'"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.9",
