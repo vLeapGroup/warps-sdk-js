@@ -18,7 +18,33 @@ const Config: WarpConfig = {
 }
 
 describe('WarpActionExecutor', () => {
-  it('getPositionValueFromUrl - gets the value from the url', async () => {
+  it('getNativeValueFromField - gets the value from the field', async () => {
+    const subject = new WarpActionExecutor(Config, 'https://example.com')
+
+    const action: WarpContractAction = {
+      type: 'contract',
+      label: 'test',
+      description: 'test',
+      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      func: null,
+      args: [],
+      gasLimit: 1000000,
+      inputs: [
+        {
+          name: 'myvalue',
+          type: 'biguint',
+          position: 'value',
+          source: 'field',
+        },
+      ],
+    }
+
+    const actual = subject.getNativeValueFromField(action, ['biguint:2000000000000000000'])
+
+    expect(actual).toBe('2000000000000000000')
+  })
+
+  it('getNativeValueFromUrl - gets the value from the url', async () => {
     const subject = new WarpActionExecutor(Config, 'https://example.com?myvalue=2000000000000000000')
 
     const action: WarpContractAction = {
@@ -40,15 +66,15 @@ describe('WarpActionExecutor', () => {
       ],
     }
 
-    const actual = subject.getPositionValueFromUrl(action, 'value')
+    const actual = subject.getNativeValueFromUrl(action)
 
     expect(actual).toBe('2000000000000000000')
   })
 
-  it('getPositionValueFromUrl - returns null if the value is not found', async () => {
+  it('getNativeValueFromUrl - returns null if the value is not found', async () => {
     const subject = new WarpActionExecutor(Config, 'https://example.com')
 
-    const actual = subject.getPositionValueFromUrl({} as WarpContractAction, 'value')
+    const actual = subject.getNativeValueFromUrl({} as WarpContractAction)
 
     expect(actual).toBeNull()
   })
@@ -144,7 +170,7 @@ describe('WarpActionExecutor', () => {
     expect(actual[2].toString()).toBe('uint8:18')
   })
 
-  it.only('getPreparedTxArgs - sorts the args by position index', async () => {
+  it('getPreparedTxArgs - sorts the args by position index', async () => {
     const subject = new WarpActionExecutor(Config, 'https://example.com')
 
     const action: WarpContractAction = {

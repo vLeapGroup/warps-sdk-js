@@ -16,15 +16,7 @@ import {
   U8Value,
 } from '@multiversx/sdk-core/out'
 import { getChainId } from './helpers'
-import {
-  WarpAction,
-  WarpActionInput,
-  WarpActionInputPosition,
-  WarpActionInputType,
-  WarpConfig,
-  WarpContractAction,
-  WarpContractActionTransfer,
-} from './types'
+import { WarpAction, WarpActionInput, WarpActionInputType, WarpConfig, WarpContractAction, WarpContractActionTransfer } from './types'
 
 export class WarpActionExecutor {
   private config: WarpConfig
@@ -43,8 +35,9 @@ export class WarpActionExecutor {
     const modifiedInputArgs = this.getModifiedInputArgs(action, inputArgs)
     const txArgs = this.getPreparedTxArgs(action, modifiedInputArgs)
     const typedTxArgs = this.getTypedArgsFromInput(txArgs)
-    const nativeValueFromUrl = this.getPositionValueFromUrl(action, 'value')
-    const nativeTransferAmount = BigInt(nativeValueFromUrl || action.value || 0)
+    const nativeValueFromField = this.getNativeValueFromField(action, modifiedInputArgs)
+    const nativeValueFromUrl = this.getNativeValueFromUrl(action)
+    const nativeTransferAmount = BigInt(nativeValueFromField || nativeValueFromUrl || action.value || 0)
     const combinedTransfers = this.getCombinedTokenTransfers(action, inputTransfers)
 
     return factory.createTransactionForExecute({
@@ -58,10 +51,16 @@ export class WarpActionExecutor {
     })
   }
 
-  getPositionValueFromUrl(action: WarpAction, position: WarpActionInputPosition): string | null {
+  getNativeValueFromField(action: WarpAction, inputArgs: string[]): string | null {
+    const valueFieldIndex = (action.inputs || []).findIndex((input) => input.source === 'field' && input.position === 'value')
+    const valueFieldValue = valueFieldIndex !== -1 ? inputArgs[valueFieldIndex] : null
+    return valueFieldValue ? valueFieldValue.split(':')[1] : null
+  }
+
+  getNativeValueFromUrl(action: WarpAction): string | null {
     const searchParams = new URLSearchParams(this.url.search)
     const inputsFromQuery = action.inputs?.filter((input) => input.source === 'query')
-    const valuePositionQueryName = inputsFromQuery?.find((i) => i.position === position)?.name
+    const valuePositionQueryName = inputsFromQuery?.find((i) => i.position === 'value')?.name
     return valuePositionQueryName ? searchParams.get(valuePositionQueryName) : null
   }
 
