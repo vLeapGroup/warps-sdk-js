@@ -29,15 +29,7 @@ describe('WarpActionExecutor', () => {
       func: null,
       args: [],
       gasLimit: 1000000,
-      inputs: [
-        {
-          name: 'myvalue',
-          type: 'biguint',
-          position: 'value',
-          source: 'field',
-          modifier: 'scale:18',
-        },
-      ],
+      inputs: [{ name: 'myvalue', type: 'biguint', position: 'value', source: 'field', modifier: 'scale:18' }],
     }
 
     const modified = subject.getModifiedInputs(action, ['biguint:2'])
@@ -59,14 +51,7 @@ describe('WarpActionExecutor', () => {
       args: [],
       value: '0',
       gasLimit: 1000000,
-      inputs: [
-        {
-          name: 'myvalue',
-          type: 'biguint',
-          position: 'value',
-          source: 'query',
-        },
-      ],
+      inputs: [{ name: 'myvalue', type: 'biguint', position: 'value', source: 'query' }],
     }
 
     const actual = subject.getNativeValueFromUrl(action)
@@ -121,19 +106,8 @@ describe('WarpActionExecutor', () => {
       value: '0',
       gasLimit: 1000000,
       inputs: [
-        {
-          name: 'first',
-          type: 'string',
-          position: 'arg:1',
-          source: 'field',
-        },
-        {
-          name: 'second',
-          type: 'biguint',
-          position: 'arg:2',
-          source: 'field',
-          modifier: 'scale:18',
-        },
+        { name: 'first', type: 'string', position: 'arg:1', source: 'field' },
+        { name: 'second', type: 'biguint', position: 'arg:2', source: 'field', modifier: 'scale:18' },
       ],
     }
 
@@ -156,19 +130,8 @@ describe('WarpActionExecutor', () => {
       value: '0',
       gasLimit: 1000000,
       inputs: [
-        {
-          name: 'supply',
-          type: 'biguint',
-          position: 'arg:2',
-          source: 'field',
-          modifier: 'scale:decimals',
-        },
-        {
-          name: 'decimals',
-          type: 'uint8',
-          position: 'arg:3',
-          source: 'field',
-        },
+        { name: 'supply', type: 'biguint', position: 'arg:2', source: 'field', modifier: 'scale:decimals' },
+        { name: 'decimals', type: 'uint8', position: 'arg:3', source: 'field' },
       ],
     }
 
@@ -180,7 +143,7 @@ describe('WarpActionExecutor', () => {
     expect(actual[2].toString()).toBe('uint8:18')
   })
 
-  it('getPreparedTxArgs - sorts the args by position index', async () => {
+  it('getCombinedInputs - sorts the args by position index', async () => {
     const subject = new WarpActionExecutor(Config, 'https://example.com')
 
     const action: WarpContractAction = {
