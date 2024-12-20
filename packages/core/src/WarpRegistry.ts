@@ -208,7 +208,7 @@ export class WarpRegistry {
       brand.meta = {
         hash: tx.hash,
         creator: tx.sender.bech32(),
-        createdAt: new Date(tx.timestamp).toISOString(),
+        createdAt: new Date(tx.timestamp * 1000).toISOString(),
       }
 
       if (cache && cache.ttl) {

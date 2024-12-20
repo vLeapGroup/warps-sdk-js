@@ -61,7 +61,7 @@ export class WarpBuilder {
     warp.meta = {
       hash: tx.hash,
       creator: tx.sender.bech32(),
-      createdAt: new Date(tx.timestamp).toISOString(),
+      createdAt: new Date(tx.timestamp * 1000).toISOString(),
     }
 
     return warp
