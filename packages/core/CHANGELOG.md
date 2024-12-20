@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.85
+
+### Patch Changes
+
+- 85354e8: add action exec native value from field
+
 ## 0.0.84
 
 ### Patch Changes
