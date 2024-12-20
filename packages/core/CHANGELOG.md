@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.87
+
+### Patch Changes
+
+- 3c6057a: add action exec bigint decimals support
+
 ## 0.0.86
 
 ### Patch Changes
