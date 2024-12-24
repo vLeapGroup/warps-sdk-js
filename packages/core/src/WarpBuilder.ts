@@ -8,7 +8,7 @@ import {
 } from '@multiversx/sdk-core'
 import Ajv from 'ajv'
 import { Config } from './config'
-import { getChainId, getLatestProtocolIdentifier } from './helpers'
+import { getChainId, getLatestProtocolIdentifier, toPreviewText } from './helpers'
 import { Warp, WarpAction, WarpCacheConfig, WarpConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
 import { WarpUtils } from './WarpUtils'
@@ -134,6 +134,10 @@ export class WarpBuilder {
     await this.ensureValidSchema(this.pendingWarp)
 
     return this.pendingWarp
+  }
+
+  getDescriptionPreview(description: string, maxChars = 100): string {
+    return toPreviewText(description, maxChars)
   }
 
   private ensure(value: string | null | boolean, errorMessage: string): void {

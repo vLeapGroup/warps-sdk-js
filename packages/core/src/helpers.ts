@@ -37,3 +37,18 @@ export const shiftBigintBy = (value: bigint | string, decimals: number): bigint 
     return BigInt(value)
   }
 }
+
+export const toPreviewText = (text: string, maxChars = 100) => {
+  if (!text) return ''
+  let sanitized = text
+    .replace(/<\/?(h[1-6])[^>]*>/gi, ' - ') // replace heading tags with space and colon
+    .replace(/<\/?(p|div|ul|ol|li|br|hr)[^>]*>/gi, ' ') // replace other block-level HTML tags with spaces
+    .replace(/<[^>]+>/g, '') // remove all other HTML tags
+    .replace(/\s+/g, ' ') // collapse multiple spaces into a single space
+    .trim()
+
+  sanitized = sanitized.startsWith('- ') ? sanitized.slice(2) : sanitized
+  sanitized = sanitized.length > maxChars ? sanitized.substring(0, sanitized.lastIndexOf(' ', maxChars)) + '...' : sanitized
+
+  return sanitized
+}
