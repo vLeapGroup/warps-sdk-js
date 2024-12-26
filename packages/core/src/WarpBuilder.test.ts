@@ -26,4 +26,9 @@ describe('WarpBuilder', () => {
     expect(warp.preview).toBe('test preview')
     expect(warp.actions).toEqual([{ type: 'link', label: 'test link', url: 'https://test.com' }])
   })
+
+  it('getDescriptionPreview - strips all html', () => {
+    const preview = new WarpBuilder(Config).getDescriptionPreview('<p>test<br />preview description</p>')
+    expect(preview).toBe('test preview description')
+  })
 })
