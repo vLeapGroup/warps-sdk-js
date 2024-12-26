@@ -58,6 +58,20 @@ export class WarpRegistry {
     })
   }
 
+  createWarpUpgradeTransaction(alias: string, txHash: string): Transaction {
+    if (this.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
+    if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
+
+    return this.getFactory().createTransactionForExecute({
+      sender: Address.newFromBech32(this.config.userAddress),
+      contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
+      function: 'upgradeWarp',
+      gasLimit: BigInt(10_000_000),
+      nativeTransferAmount: this.unitPrice,
+      arguments: [BytesValue.fromUTF8(alias), BytesValue.fromHex(txHash)],
+    })
+  }
+
   createWarpAliasSetTransaction(txHash: string, alias: string): Transaction {
     if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
 
