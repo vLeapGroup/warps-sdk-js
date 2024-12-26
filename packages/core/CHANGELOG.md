@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.89
+
+### Patch Changes
+
+- update registry abi
+
 ## 0.0.88
 
 ### Patch Changes
