@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 0.0.88
+
+### Patch Changes
+
+- 5fd7ed2: add registry warp upgrade
+- 28585a0: add warp builder description preview utility
+
 ## 0.0.87
 
 ### Patch Changes
