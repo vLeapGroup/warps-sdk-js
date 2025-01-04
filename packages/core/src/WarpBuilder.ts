@@ -37,12 +37,16 @@ export class WarpBuilder {
 
     const serialized = JSON.stringify(warp)
 
-    return factory.createTransactionForNativeTokenTransfer({
+    const tx = factory.createTransactionForTransfer({
       sender: Address.newFromBech32(this.config.userAddress),
       receiver: Address.newFromBech32(this.config.userAddress),
       nativeAmount: BigInt(0),
       data: Buffer.from(serialized).valueOf(),
     })
+
+    tx.gasLimit = tx.gasLimit + BigInt(2_000_000) // overestimate to avoid gas limit errors for slight inaccuracies
+
+    return tx
   }
 
   async createFromRaw(encoded: string, validateSchema = true): Promise<Warp> {
