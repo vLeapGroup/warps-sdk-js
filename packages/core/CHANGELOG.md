@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.90
+
+### Patch Changes
+
+- 731095b: add inscription gas limit overestimation
+
 ## 0.0.89
 
 ### Patch Changes
