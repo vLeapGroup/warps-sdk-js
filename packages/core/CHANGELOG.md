@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.0.91
+
+### Patch Changes
+
+- d06839c: add non-sc tx support
+
 ## 0.0.90
 
 ### Patch Changes
