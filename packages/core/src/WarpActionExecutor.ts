@@ -9,6 +9,7 @@ import {
   TokenTransfer,
   Transaction,
   TransactionsFactoryConfig,
+  TransferTransactionsFactory,
   TypedValue,
   U16Value,
   U32Value,
@@ -29,8 +30,9 @@ export class WarpActionExecutor {
 
   createTransactionForExecute(action: WarpContractAction, inputs: string[], inputTransfers: TokenTransfer[]): Transaction {
     if (!this.config.userAddress) throw new Error('WarpActionExecutor: user address not set')
+    const sender = Address.newFromBech32(this.config.userAddress)
+    const destination = Address.newFromBech32(action.address)
     const config = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
-    const factory = new SmartContractTransactionsFactory({ config })
 
     const modifiedInputArgs = this.getModifiedInputs(action, inputs)
     const txArgs = this.getCombinedInputs(action, modifiedInputArgs)
@@ -40,14 +42,24 @@ export class WarpActionExecutor {
     const nativeTransferAmount = BigInt(nativeValueFromField || nativeValueFromUrl || action.value || 0)
     const combinedTransfers = this.getCombinedTokenTransfers(action, inputTransfers)
 
-    return factory.createTransactionForExecute({
-      sender: Address.newFromBech32(this.config.userAddress),
-      contract: Address.newFromBech32(action.address),
-      function: action.func || '',
-      gasLimit: BigInt(action.gasLimit),
-      arguments: typedTxArgs,
+    if (destination.isContractAddress()) {
+      return new SmartContractTransactionsFactory({ config }).createTransactionForExecute({
+        sender,
+        contract: destination,
+        function: action.func || '',
+        gasLimit: BigInt(action.gasLimit),
+        arguments: typedTxArgs,
+        tokenTransfers: combinedTransfers,
+        nativeTransferAmount,
+      })
+    }
+
+    return new TransferTransactionsFactory({ config }).createTransactionForTransfer({
+      sender,
+      receiver: destination,
+      nativeAmount: nativeTransferAmount,
       tokenTransfers: combinedTransfers,
-      nativeTransferAmount,
+      data: typedTxArgs[0]?.hasExactClass(BytesValue.ClassName) ? typedTxArgs[0].valueOf() : undefined,
     })
   }
 

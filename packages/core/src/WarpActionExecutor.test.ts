@@ -18,6 +18,25 @@ const Config: WarpConfig = {
 }
 
 describe('WarpActionExecutor', () => {
+  it('createTransactionForExecute - creates a native transfer with message', async () => {
+    const subject = new WarpActionExecutor(Config, 'https://example.com')
+
+    const action: WarpContractAction = {
+      type: 'contract',
+      label: 'test',
+      description: 'test',
+      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      func: null,
+      args: [],
+      gasLimit: 1000000,
+      inputs: [{ name: 'message', type: 'string', position: 'arg:1', source: 'field' }],
+    }
+
+    const actual = subject.createTransactionForExecute(action, ['string:hello'], [])
+
+    expect(actual.data?.toString()).toBe('hello')
+  })
+
   it('getNativeValueFromField - gets the value from the field', async () => {
     const subject = new WarpActionExecutor(Config, 'https://example.com')
 
