@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 0.1.0
+
+### Minor Changes
+
+- e2cafa2: add warp link detection from html
+
+### Patch Changes
+
+- 951ca2a: add warp link detection from prefixed identifier
+
 ## 0.0.91
 
 ### Patch Changes
