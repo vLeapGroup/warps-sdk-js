@@ -30,9 +30,10 @@ export class WarpUtils {
   }
 
   static getInfoFromPrefixedIdentifier(prefixedIdentifier: string): { type: WarpIdType; id: string } | null {
-    const normalizedParam = prefixedIdentifier.includes(IdentifierParamSeparator)
-      ? prefixedIdentifier
-      : `${DefaultIdentifierType}${IdentifierParamSeparator}${prefixedIdentifier}`
+    const decodedIdentifier = decodeURIComponent(prefixedIdentifier)
+    const normalizedParam = decodedIdentifier.includes(IdentifierParamSeparator)
+      ? decodedIdentifier
+      : `${DefaultIdentifierType}${IdentifierParamSeparator}${decodedIdentifier}`
 
     const [idType, id] = normalizedParam.split(IdentifierParamSeparator)
 
