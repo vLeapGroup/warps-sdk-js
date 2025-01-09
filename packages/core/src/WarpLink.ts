@@ -11,6 +11,7 @@ type DetectionResult = {
   brand: Brand | null
 }
 
+const HttpsProtocolPrefix = 'https://'
 const IdParamName = 'warp'
 const IdParamSeparator = ':'
 const DefaultIdType = 'alias'
@@ -23,7 +24,7 @@ export class WarpLink {
   }
 
   async detect(url: string): Promise<DetectionResult> {
-    const idResult = this.extractIdentifierInfoFromUrl(url)
+    const idResult = url.startsWith(HttpsProtocolPrefix) ? this.extractIdentifierInfoFromUrl(url) : this.getInfoFromPrefixedIdentifier(url)
 
     if (!idResult) {
       return { match: false, warp: null, registryInfo: null, brand: null }
@@ -82,7 +83,7 @@ export class WarpLink {
     })
   }
 
-  getIdentifierInfo(prefixedIdentifier: string): { type: WarpIdType; id: string } | null {
+  getInfoFromPrefixedIdentifier(prefixedIdentifier: string): { type: WarpIdType; id: string } | null {
     const normalizedParam = prefixedIdentifier.includes(IdParamSeparator)
       ? prefixedIdentifier
       : `${DefaultIdType}${IdParamSeparator}${prefixedIdentifier}`
@@ -105,6 +106,6 @@ export class WarpLink {
 
     const decodedParam = decodeURIComponent(value)
 
-    return this.getIdentifierInfo(decodedParam)
+    return this.getInfoFromPrefixedIdentifier(decodedParam)
   }
 }
