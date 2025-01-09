@@ -96,6 +96,7 @@ describe('detect', () => {
 
     expect(result).toEqual({
       match: true,
+      url: 'https://anyclient.com?warp=hash:123',
       warp: mockWarp,
       registryInfo: mockRegistryInfo,
       brand: mockBrand,
@@ -108,6 +109,7 @@ describe('detect', () => {
 
     expect(result).toEqual({
       match: true,
+      url: 'https://anyclient.com?warp=mywarp',
       warp: mockWarp,
       registryInfo: mockRegistryInfo,
       brand: mockBrand,
@@ -121,6 +123,7 @@ describe('detect', () => {
 
     expect(result).toEqual({
       match: true,
+      url: 'https://devnet.usewarp.to/mywarp',
       warp: mockWarp,
       registryInfo: mockRegistryInfo,
       brand: mockBrand,
@@ -134,6 +137,7 @@ describe('detect', () => {
 
     expect(result).toEqual({
       match: true,
+      url: 'https://devnet.usewarp.to/' + encodeURIComponent('hash:123'),
       warp: mockWarp,
       registryInfo: mockRegistryInfo,
       brand: mockBrand,
@@ -147,6 +151,7 @@ describe('detect', () => {
 
     expect(result).toEqual({
       match: true,
+      url: 'https://devnet.usewarp.to/details?warp=' + encodeURIComponent('hash:123'),
       warp: mockWarp,
       registryInfo: mockRegistryInfo,
       brand: mockBrand,
@@ -159,6 +164,7 @@ describe('detect', () => {
 
     expect(result).toEqual({
       match: false,
+      url: 'https://example.com',
       warp: null,
       registryInfo: null,
       brand: null,
