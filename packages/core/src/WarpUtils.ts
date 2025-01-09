@@ -1,4 +1,5 @@
-import { Warp, WarpConfig } from './types'
+import { DefaultIdentifierType, IdentifierParamSeparator } from './constants'
+import { Warp, WarpConfig, WarpIdType } from './types'
 import { WarpLink } from './WarpLink'
 
 const UrlPrefixDeterminer = 'https://'
@@ -28,13 +29,23 @@ export class WarpUtils {
     return JSON.parse(modifiable)
   }
 
+  static getInfoFromPrefixedIdentifier(prefixedIdentifier: string): { type: WarpIdType; id: string } | null {
+    const normalizedParam = prefixedIdentifier.includes(IdentifierParamSeparator)
+      ? prefixedIdentifier
+      : `${DefaultIdentifierType}${IdentifierParamSeparator}${prefixedIdentifier}`
+
+    const [idType, id] = normalizedParam.split(IdentifierParamSeparator)
+
+    return { type: idType as WarpIdType, id }
+  }
+
   static getNextStepUrl(warp: Warp, config: WarpConfig): string | null {
     if (!warp?.next) return null
     if (warp.next.startsWith(UrlPrefixDeterminer)) {
       return warp.next
     } else {
       const warpLink = new WarpLink(config)
-      const identifierInfo = warpLink.getIdentifierInfo(warp.next)
+      const identifierInfo = WarpUtils.getInfoFromPrefixedIdentifier(warp.next)
       if (!identifierInfo) return null
       return warpLink.build(identifierInfo.type, identifierInfo.id)
     }
