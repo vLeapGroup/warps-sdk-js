@@ -6,9 +6,18 @@ import { WarpRegistry } from './WarpRegistry'
 
 type DetectionResult = {
   match: boolean
+  url: string
   warp: Warp | null
   registryInfo: RegistryInfo | null
   brand: Brand | null
+}
+
+type DetectionResultFromHtml = {
+  match: boolean
+  results: {
+    url: string
+    warp: Warp
+  }[]
 }
 
 const HttpsProtocolPrefix = 'https://'
@@ -23,11 +32,30 @@ export class WarpLink {
     this.config = config
   }
 
+  isValid(url: string): boolean {
+    if (!url.startsWith(HttpsProtocolPrefix)) return false
+    const idResult = this.extractIdentifierInfoFromUrl(url)
+    return !!idResult
+  }
+
+  async detectFromHtml(content: string): Promise<DetectionResultFromHtml> {
+    if (!content.length) return { match: false, results: [] }
+    const links = [...content.matchAll(/https?:\/\/[^\s"'<>]+/gi)].map((link) => link[0])
+    const warpLinks = links.filter((link) => this.isValid(link))
+    const detectionReqs = warpLinks.map((link) => this.detect(link))
+    const detectionResults = await Promise.all(detectionReqs)
+    const validDetections = detectionResults.filter((result) => result.match)
+    const hasMatch = validDetections.length > 0
+    const results = validDetections.map((result) => ({ url: result.url, warp: result.warp! }))
+
+    return { match: hasMatch, results }
+  }
+
   async detect(url: string): Promise<DetectionResult> {
     const idResult = url.startsWith(HttpsProtocolPrefix) ? this.extractIdentifierInfoFromUrl(url) : this.getInfoFromPrefixedIdentifier(url)
 
     if (!idResult) {
-      return { match: false, warp: null, registryInfo: null, brand: null }
+      return { match: false, url, warp: null, registryInfo: null, brand: null }
     }
 
     const { type, id } = idResult
@@ -53,7 +81,7 @@ export class WarpLink {
       }
     }
 
-    return warp ? { match: true, warp, registryInfo, brand } : { match: false, warp: null, registryInfo: null, brand: null }
+    return warp ? { match: true, url, warp, registryInfo, brand } : { match: false, url, warp: null, registryInfo: null, brand: null }
   }
 
   build(type: WarpIdType, id: string): string {
