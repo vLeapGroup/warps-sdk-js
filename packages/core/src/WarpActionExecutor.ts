@@ -1,8 +1,5 @@
 import {
   Address,
-  AddressValue,
-  BigUIntValue,
-  BooleanValue,
   BytesValue,
   SmartContractTransactionsFactory,
   Token,
@@ -10,22 +7,20 @@ import {
   Transaction,
   TransactionsFactoryConfig,
   TransferTransactionsFactory,
-  TypedValue,
-  U16Value,
-  U32Value,
-  U64Value,
-  U8Value,
 } from '@multiversx/sdk-core/out'
 import { getChainId, shiftBigintBy } from './helpers'
-import { WarpAction, WarpActionInput, WarpActionInputType, WarpConfig, WarpContractAction, WarpContractActionTransfer } from './types'
+import { WarpAction, WarpActionInput, WarpConfig, WarpContractAction, WarpContractActionTransfer } from './types'
+import { WarpArgSerializer } from './WarpArgSerializer'
 
 export class WarpActionExecutor {
   private config: WarpConfig
   private url: URL
+  private serializer: WarpArgSerializer
 
   constructor(config: WarpConfig, url: string) {
     this.config = config
     this.url = new URL(url)
+    this.serializer = new WarpArgSerializer()
   }
 
   createTransactionForExecute(action: WarpContractAction, inputs: string[], inputTransfers: TokenTransfer[]): Transaction {
@@ -36,7 +31,7 @@ export class WarpActionExecutor {
 
     const modifiedInputArgs = this.getModifiedInputs(action, inputs)
     const txArgs = this.getCombinedInputs(action, modifiedInputArgs)
-    const typedTxArgs = this.getTypedArgsFromInput(txArgs)
+    const typedTxArgs = txArgs.map((arg) => this.serializer.stringToTyped(arg))
     const nativeValueFromField = this.getNativeValueFromField(action, modifiedInputArgs)
     const nativeValueFromUrl = this.getNativeValueFromUrl(action)
     const nativeTransferAmount = BigInt(nativeValueFromField || nativeValueFromUrl || action.value || 0)
@@ -134,31 +129,10 @@ export class WarpActionExecutor {
     return args
   }
 
-  // Converts the input args to typed values
-  getTypedArgsFromInput(inputArgs: string[]): TypedValue[] {
-    return inputArgs.map((arg) => {
-      const [type, value] = arg.split(':')
-      return this.toTypedArg(value, type as WarpActionInputType)
-    })
-  }
-
   private toTypedTransfer(transfer: WarpContractActionTransfer): TokenTransfer {
     return new TokenTransfer({
       token: new Token({ identifier: transfer.token, nonce: BigInt(transfer.nonce || 0) }),
       amount: BigInt(transfer.amount || 0),
     })
-  }
-
-  private toTypedArg(arg: string, type: WarpActionInputType): TypedValue {
-    if (type === 'string') return BytesValue.fromUTF8(arg)
-    if (type === 'uint8') return new U8Value(Number(arg))
-    if (type === 'uint16') return new U16Value(Number(arg))
-    if (type === 'uint32') return new U32Value(Number(arg))
-    if (type === 'uint64') return new U64Value(BigInt(arg))
-    if (type === 'biguint') return new BigUIntValue(BigInt(arg))
-    if (type === 'boolean') return new BooleanValue(arg === 'true')
-    if (type === 'address') return new AddressValue(Address.newFromBech32(arg))
-    if (type === 'hex') return BytesValue.fromHex(arg)
-    throw new Error(`WarpActionExecutor: Unsupported input type: ${type}`)
   }
 }
