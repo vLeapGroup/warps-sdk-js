@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.1.1
+
+### Patch Changes
+
+- ff2d0e8: add warp arg serializer
+
 ## 0.1.0
 
 ### Minor Changes
