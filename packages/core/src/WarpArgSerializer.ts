@@ -19,15 +19,6 @@ export class WarpArgSerializer {
     return `${type}:${value.toString()}`
   }
 
-  stringToNative(value: string): NativeValue {
-    const [type, val] = value.split(':') as [WarpActionInputType, NativeValue]
-    if (type === 'address') return val
-    if (type === 'boolean') return val === 'true'
-    if (type === 'biguint') return BigInt(val)
-    if (type === 'uint8' || type === 'uint16' || type === 'uint32' || type === 'uint64') return Number(val)
-    return val
-  }
-
   nativeToTyped(type: WarpActionInputType, value: NativeValue): TypedValue {
     if (type === 'string') return BytesValue.fromUTF8(value as string)
     if (type === 'uint8') return new U8Value(Number(value))
@@ -39,6 +30,15 @@ export class WarpArgSerializer {
     if (type === 'address') return new AddressValue(Address.newFromBech32(value as string))
     if (type === 'hex') return BytesValue.fromHex(value as string)
     throw new Error(`WarpArgSerializer: Unsupported input type: ${type}`)
+  }
+
+  stringToNative(value: string): NativeValue {
+    const [type, val] = value.split(':') as [WarpActionInputType, NativeValue]
+    if (type === 'address') return val
+    if (type === 'boolean') return val === 'true'
+    if (type === 'biguint') return BigInt(val)
+    if (type === 'uint8' || type === 'uint16' || type === 'uint32' || type === 'uint64') return Number(val)
+    return val
   }
 
   stringToTyped(value: string): TypedValue {
