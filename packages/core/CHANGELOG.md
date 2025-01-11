@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.2.3
+
+### Patch Changes
+
+- dbe8631: add arg serializer code metadata support
+
 ## 0.2.2
 
 ### Patch Changes
