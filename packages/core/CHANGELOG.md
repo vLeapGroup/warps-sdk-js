@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.2.1
+
+### Patch Changes
+
+- 9d9944d: improve arg serializer
+
 ## 0.2.0
 
 ### Minor Changes
