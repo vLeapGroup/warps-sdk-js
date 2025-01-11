@@ -107,8 +107,14 @@ export type BaseWarpActionInputType =
   | 'esdt'
   | 'nft'
   | 'opt'
+  | 'list'
 
-export type WarpActionInputType = BaseWarpActionInputType | `opt:${BaseWarpActionInputType}`
+export type WarpActionInputType =
+  | BaseWarpActionInputType
+  | `opt:${BaseWarpActionInputType}`
+  | `list:${BaseWarpActionInputType}`
+  | `list:opt:${BaseWarpActionInputType}`
+  | `opt:list:${BaseWarpActionInputType}`
 
 export type WarpActionInputPosition = 'value' | 'transfer' | `arg:${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}`
 

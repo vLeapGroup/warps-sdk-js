@@ -4,9 +4,11 @@ import {
   BigUIntValue,
   BooleanValue,
   BytesValue,
+  List,
   NothingValue,
   NumericalValue,
   OptionValue,
+  PrimitiveType,
   StringValue,
   TypedValue,
   U16Value,
@@ -29,6 +31,12 @@ export class WarpArgSerializer {
       const baseValue = this.nativeToTyped(baseType, value)
       return value ? OptionValue.newProvided(baseValue) : OptionValue.newMissingTyped(baseValue.getType())
     }
+    if (type.startsWith('list:')) {
+      const [_, baseType] = type.split(':') as ['list', WarpActionInputType]
+      const values = (value as string).split(',')
+      const typedValues = values.map((val) => this.nativeToTyped(baseType, val))
+      return new List(new PrimitiveType('Custom'), typedValues)
+    }
     if (type === 'string') return value ? StringValue.fromUTF8(value as string) : new NothingValue()
     if (type === 'uint8') return value ? new U8Value(Number(value)) : new NothingValue()
     if (type === 'uint16') return value ? new U16Value(Number(value)) : new NothingValue()
@@ -46,6 +54,13 @@ export class WarpArgSerializer {
       if (!(value as OptionValue).isSet()) return ['opt', null]
       const [type, val] = this.typedToNative((value as OptionValue).getTypedValue()) as [BaseWarpActionInputType, NativeValue]
       return [`opt:${type}`, val]
+    }
+    if (value.hasClassOrSuperclass(List.ClassName)) {
+      const items = (value as List).getItems()
+      const types = items.map((item) => this.typedToNative(item))
+      const type = types[0][0] as BaseWarpActionInputType
+      const values = items.map((item) => item.valueOf()) as NativeValue[]
+      return [`list:${type}`, values.join(',')]
     }
     if (value.hasClassOrSuperclass(BigUIntValue.ClassName)) return ['biguint', BigInt((value as BigUIntValue).valueOf().toFixed())]
     if (value.hasClassOrSuperclass(NumericalValue.ClassName)) return ['uint64', (value as NumericalValue).valueOf().toNumber()]

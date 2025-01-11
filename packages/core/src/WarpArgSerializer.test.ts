@@ -4,6 +4,7 @@ import {
   BigUIntValue,
   BooleanValue,
   BytesValue,
+  List,
   OptionValue,
   StringType,
   StringValue,
@@ -64,6 +65,16 @@ describe('WarpArgSerializer', () => {
       const result = serializer.nativeToTyped('opt:string', null)
       expect(result).toBeInstanceOf(OptionValue)
       expect(result.valueOf()).toBe(null)
+    })
+
+    it('converts list to ListValue', () => {
+      const result = serializer.nativeToTyped('list:string', 'hello,world')
+      const actual = result as List
+      expect(actual).toBeInstanceOf(List)
+      expect(actual.getItems()[0]).toBeInstanceOf(StringValue)
+      expect(actual.getItems()[0].valueOf()).toBe('hello')
+      expect(actual.getItems()[1]).toBeInstanceOf(StringValue)
+      expect(actual.getItems()[1].valueOf()).toBe('world')
     })
 
     it('converts string to StringValue', () => {
@@ -134,6 +145,11 @@ describe('WarpArgSerializer', () => {
     it('converts OptionValue to native value', () => {
       const result = serializer.typedToNative(new OptionValue(new StringType(), StringValue.fromUTF8('abc')))
       expect(result).toEqual(['opt:string', 'abc'])
+    })
+
+    it('converts ListValue to native value', () => {
+      const result = serializer.typedToNative(new List(new StringType(), [StringValue.fromUTF8('abc'), StringValue.fromUTF8('def')]))
+      expect(result).toEqual(['list:string', 'abc,def'])
     })
 
     it('converts BigUIntValue to biguint', () => {
