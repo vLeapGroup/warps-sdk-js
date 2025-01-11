@@ -1,6 +1,10 @@
 import {
+  AbiRegistry,
   Address,
+  ApiNetworkProvider,
   BytesValue,
+  QueryRunnerAdapter,
+  SmartContractQueriesController,
   SmartContractTransactionsFactory,
   Token,
   TokenTransfer,
@@ -9,7 +13,7 @@ import {
   TransferTransactionsFactory,
 } from '@multiversx/sdk-core/out'
 import { getChainId, shiftBigintBy } from './helpers'
-import { WarpAction, WarpActionInput, WarpConfig, WarpContractAction, WarpContractActionTransfer } from './types'
+import { WarpAction, WarpActionInput, WarpConfig, WarpContractAction, WarpContractActionTransfer, WarpQueryAction } from './types'
 import { WarpArgSerializer } from './WarpArgSerializer'
 
 export class WarpActionExecutor {
@@ -31,7 +35,7 @@ export class WarpActionExecutor {
 
     const modifiedInputArgs = this.getModifiedInputs(action, inputs)
     const txArgs = this.getCombinedInputs(action, modifiedInputArgs)
-    const typedTxArgs = txArgs.map((arg) => this.serializer.stringToTyped(arg))
+    const typedArgs = txArgs.map((arg) => this.serializer.stringToTyped(arg))
     const nativeValueFromField = this.getNativeValueFromField(action, modifiedInputArgs)
     const nativeValueFromUrl = this.getNativeValueFromUrl(action)
     const nativeTransferAmount = BigInt(nativeValueFromField || nativeValueFromUrl || action.value || 0)
@@ -43,7 +47,7 @@ export class WarpActionExecutor {
         contract: destination,
         function: action.func || '',
         gasLimit: BigInt(action.gasLimit),
-        arguments: typedTxArgs,
+        arguments: typedArgs,
         tokenTransfers: combinedTransfers,
         nativeTransferAmount,
       })
@@ -54,8 +58,30 @@ export class WarpActionExecutor {
       receiver: destination,
       nativeAmount: nativeTransferAmount,
       tokenTransfers: combinedTransfers,
-      data: typedTxArgs[0]?.hasExactClass(BytesValue.ClassName) ? typedTxArgs[0].valueOf() : undefined,
+      data: typedArgs[0]?.hasExactClass(BytesValue.ClassName) ? typedArgs[0].valueOf() : undefined,
     })
+  }
+
+  async executeQuery(action: WarpQueryAction, inputs: string[]) {
+    if (!action.func) throw new Error('WarpActionExecutor: Function not found')
+    const chainApi = new ApiNetworkProvider(this.config.env)
+    const queryRunner = new QueryRunnerAdapter({ networkProvider: chainApi })
+    const abi = await this.fetchAbi(action)
+    const controller = new SmartContractQueriesController({ queryRunner, abi })
+    const modifiedInputArgs = this.getModifiedInputs(action, inputs)
+    const txArgs = this.getCombinedInputs(action, modifiedInputArgs)
+    const typedArgs = txArgs.map((arg) => this.serializer.stringToTyped(arg))
+    const query = controller.createQuery({ contract: action.address, function: action.func, arguments: typedArgs })
+    const res = await controller.runQuery(query)
+    const [result] = controller.parseQueryResponse(res)
+    return result
+  }
+
+  private async fetchAbi(action: WarpQueryAction): Promise<AbiRegistry> {
+    if (!action.abi) throw new Error('WarpActionExecutor: ABI not found')
+    const abiRes = await fetch(action.abi)
+    const abiContents = await abiRes.json()
+    return AbiRegistry.create(abiContents)
   }
 
   getNativeValueFromField(action: WarpAction, inputs: string[]): string | null {
@@ -79,7 +105,7 @@ export class WarpActionExecutor {
   }
 
   // Applies modifiers to the input args
-  getModifiedInputs(action: WarpContractAction, inputs: string[]): string[] {
+  getModifiedInputs(action: WarpAction, inputs: string[]): string[] {
     const inputsWithModifiers = action.inputs?.filter((input) => !!input.modifier) || []
 
     // Note: 'scale' modifier means that the value is multiplied by 10^modifier; the modifier can also be the name of another input field
@@ -115,13 +141,13 @@ export class WarpActionExecutor {
   }
 
   // Combines the provided args with filtered input args and sorts them by position index
-  getCombinedInputs(action: WarpContractAction, inputArgs: string[]): string[] {
+  getCombinedInputs(action: WarpAction, inputArgs: string[]): string[] {
     const fieldInputs = action.inputs?.filter((input) => input.source === 'field' && input.position.startsWith('arg:')) || []
     const inputsWithValues: { input: WarpActionInput; value: string }[] = fieldInputs.map((input, index) => ({
       input,
       value: inputArgs[index],
     }))
-    let args = action.args || []
+    let args = 'args' in action ? action.args : []
     inputsWithValues.forEach(({ input, value }) => {
       const argIndex = Number(input.position.split(':')[1]) - 1
       args.splice(argIndex, 0, value)

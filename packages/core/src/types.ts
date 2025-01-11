@@ -49,9 +49,9 @@ export type WarpMeta = {
   createdAt: string
 }
 
-export type WarpAction = WarpContractAction | WarpLinkAction
+export type WarpAction = WarpContractAction | WarpQueryAction | WarpLinkAction
 
-export type WarpActionType = 'contract' | 'link'
+export type WarpActionType = 'contract' | 'query' | 'link'
 
 export type WarpContractAction = {
   type: WarpActionType
@@ -78,6 +78,17 @@ export type WarpLinkAction = {
   label: string
   description?: string | null
   url: string
+  inputs?: WarpActionInput[]
+}
+
+export type WarpQueryAction = {
+  type: WarpActionType
+  label: string
+  description?: string | null
+  address: string
+  func: string | null
+  args: string[]
+  abi?: string
   inputs?: WarpActionInput[]
 }
 
