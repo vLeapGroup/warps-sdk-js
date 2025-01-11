@@ -94,7 +94,7 @@ export type WarpQueryAction = {
 
 export type WarpActionInputSource = 'field' | 'query'
 
-export type WarpActionInputType =
+export type BaseWarpActionInputType =
   | 'string'
   | 'uint8'
   | 'uint16'
@@ -106,6 +106,9 @@ export type WarpActionInputType =
   | 'hex'
   | 'esdt'
   | 'nft'
+  | 'opt'
+
+export type WarpActionInputType = BaseWarpActionInputType | `opt:${BaseWarpActionInputType}`
 
 export type WarpActionInputPosition = 'value' | 'transfer' | `arg:${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}`
 

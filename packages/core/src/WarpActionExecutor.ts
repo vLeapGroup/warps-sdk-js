@@ -2,10 +2,10 @@ import {
   AbiRegistry,
   Address,
   ApiNetworkProvider,
-  BytesValue,
   QueryRunnerAdapter,
   SmartContractQueriesController,
   SmartContractTransactionsFactory,
+  StringValue,
   Token,
   TokenTransfer,
   Transaction,
@@ -58,7 +58,7 @@ export class WarpActionExecutor {
       receiver: destination,
       nativeAmount: nativeTransferAmount,
       tokenTransfers: combinedTransfers,
-      data: typedArgs[0]?.hasExactClass(BytesValue.ClassName) ? typedArgs[0].valueOf() : undefined,
+      data: typedArgs[0]?.hasExactClass(StringValue.ClassName) ? typedArgs[0].valueOf() : undefined,
     })
   }
 

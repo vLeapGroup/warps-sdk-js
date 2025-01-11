@@ -4,38 +4,52 @@ import {
   BigUIntValue,
   BooleanValue,
   BytesValue,
+  NothingValue,
   NumericalValue,
+  OptionValue,
+  StringValue,
   TypedValue,
   U16Value,
   U32Value,
   U64Value,
   U8Value,
 } from '@multiversx/sdk-core/out'
-import { WarpActionInputType } from './types'
+import { BaseWarpActionInputType, WarpActionInputType } from './types'
 
-type NativeValue = string | number | bigint | boolean
+type NativeValue = string | number | bigint | boolean | null
 
 export class WarpArgSerializer {
   nativeToStrings(type: WarpActionInputType, value: NativeValue): string {
-    return `${type}:${value.toString()}`
+    return `${type}:${value?.toString() ?? ''}`
   }
 
   nativeToTyped(type: WarpActionInputType, value: NativeValue): TypedValue {
-    if (type === 'string') return BytesValue.fromUTF8(value as string)
-    if (type === 'uint8') return new U8Value(Number(value))
-    if (type === 'uint16') return new U16Value(Number(value))
-    if (type === 'uint32') return new U32Value(Number(value))
-    if (type === 'uint64') return new U64Value(BigInt(value))
-    if (type === 'biguint') return new BigUIntValue(BigInt(value))
-    if (type === 'boolean') return new BooleanValue(typeof value === 'boolean' ? value : value === 'true')
-    if (type === 'address') return new AddressValue(Address.newFromBech32(value as string))
-    if (type === 'hex') return BytesValue.fromHex(value as string)
+    if (type.startsWith('opt:')) {
+      const [_, baseType] = type.split(':') as ['opt', WarpActionInputType]
+      const baseValue = this.nativeToTyped(baseType, value)
+      return value ? OptionValue.newProvided(baseValue) : OptionValue.newMissingTyped(baseValue.getType())
+    }
+    if (type === 'string') return value ? StringValue.fromUTF8(value as string) : new NothingValue()
+    if (type === 'uint8') return value ? new U8Value(Number(value)) : new NothingValue()
+    if (type === 'uint16') return value ? new U16Value(Number(value)) : new NothingValue()
+    if (type === 'uint32') return value ? new U32Value(Number(value)) : new NothingValue()
+    if (type === 'uint64') return value ? new U64Value(BigInt(value)) : new NothingValue()
+    if (type === 'biguint') return value ? new BigUIntValue(BigInt(value)) : new NothingValue()
+    if (type === 'boolean') return value ? new BooleanValue(typeof value === 'boolean' ? value : value === 'true') : new NothingValue()
+    if (type === 'address') return value ? new AddressValue(Address.newFromBech32(value as string)) : new NothingValue()
+    if (type === 'hex') return value ? BytesValue.fromHex(value as string) : new NothingValue()
     throw new Error(`WarpArgSerializer (nativeToTyped): Unsupported input type: ${type}`)
   }
 
   typedToNative(value: TypedValue): [WarpActionInputType, NativeValue] {
+    if (value.hasClassOrSuperclass(OptionValue.ClassName)) {
+      if (!(value as OptionValue).isSet()) return ['opt', null]
+      const [type, val] = this.typedToNative((value as OptionValue).getTypedValue()) as [BaseWarpActionInputType, NativeValue]
+      return [`opt:${type}`, val]
+    }
     if (value.hasClassOrSuperclass(BigUIntValue.ClassName)) return ['biguint', BigInt((value as BigUIntValue).valueOf().toFixed())]
     if (value.hasClassOrSuperclass(NumericalValue.ClassName)) return ['uint64', (value as NumericalValue).valueOf().toNumber()]
+    if (value.hasClassOrSuperclass(StringValue.ClassName)) return ['string', (value as StringValue).valueOf()]
     if (value.hasClassOrSuperclass(BytesValue.ClassName)) return ['hex', (value as BytesValue).valueOf().toString('hex')]
     if (value.hasClassOrSuperclass(AddressValue.ClassName)) return ['address', (value as AddressValue).valueOf().bech32()]
     if (value.hasClassOrSuperclass(BooleanValue.ClassName)) return ['boolean', (value as BooleanValue).valueOf()]
@@ -46,7 +60,7 @@ export class WarpArgSerializer {
     const [type, val] = value.split(':') as [WarpActionInputType, NativeValue]
     if (type === 'address') return [type, val]
     if (type === 'boolean') return [type, val === 'true']
-    if (type === 'biguint') return [type, BigInt(val)]
+    if (type === 'biguint') return [type, BigInt(val || 0)]
     if (type === 'uint8' || type === 'uint16' || type === 'uint32' || type === 'uint64') return [type, Number(val)]
     return [type, val]
   }

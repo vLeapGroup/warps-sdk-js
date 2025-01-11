@@ -4,6 +4,9 @@ import {
   BigUIntValue,
   BooleanValue,
   BytesValue,
+  OptionValue,
+  StringType,
+  StringValue,
   U16Value,
   U32Value,
   U64Value,
@@ -51,10 +54,22 @@ describe('WarpArgSerializer', () => {
   })
 
   describe('nativeToTyped', () => {
-    it('converts string to BytesValue', () => {
+    it('converts opt to OptionValue', () => {
+      const result = serializer.nativeToTyped('opt:string', 'hello')
+      expect(result).toBeInstanceOf(OptionValue)
+      expect(result.valueOf()).toBe('hello')
+    })
+
+    it('converts opt to OptionValue with missing value', () => {
+      const result = serializer.nativeToTyped('opt:string', null)
+      expect(result).toBeInstanceOf(OptionValue)
+      expect(result.valueOf()).toBe(null)
+    })
+
+    it('converts string to StringValue', () => {
       const result = serializer.nativeToTyped('string', 'hello')
-      expect(result).toBeInstanceOf(BytesValue)
-      expect(result.toString()).toBe('hello')
+      expect(result).toBeInstanceOf(StringValue)
+      expect(result.valueOf()).toBe('hello')
     })
 
     it('converts uint8 to U8Value', () => {
@@ -116,6 +131,11 @@ describe('WarpArgSerializer', () => {
   })
 
   describe('typedToNative', () => {
+    it('converts OptionValue to native value', () => {
+      const result = serializer.typedToNative(new OptionValue(new StringType(), StringValue.fromUTF8('abc')))
+      expect(result).toEqual(['opt:string', 'abc'])
+    })
+
     it('converts BigUIntValue to biguint', () => {
       const result = serializer.typedToNative(new BigUIntValue(BigInt('123456789012345678901234567890')))
       expect(result).toEqual(['biguint', BigInt('123456789012345678901234567890')])
@@ -177,10 +197,10 @@ describe('WarpArgSerializer', () => {
   })
 
   describe('stringToTyped', () => {
-    it('converts string encoded value to BytesValue', () => {
+    it('converts string encoded value to StringValue', () => {
       const result = serializer.stringToTyped('string:hello')
-      expect(result).toBeInstanceOf(BytesValue)
-      expect(result.toString()).toBe('hello')
+      expect(result).toBeInstanceOf(StringValue)
+      expect(result.valueOf()).toBe('hello')
     })
 
     it('converts uint encoded values to respective UValue types', () => {
