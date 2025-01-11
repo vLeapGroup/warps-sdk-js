@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.2.0
+
+### Minor Changes
+
+- 50bb0ac: add action type query
+
 ## 0.1.1
 
 ### Patch Changes
