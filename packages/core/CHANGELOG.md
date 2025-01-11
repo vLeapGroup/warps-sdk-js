@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.2.2
+
+### Patch Changes
+
+- e83938b: add arg serializer list support
+
 ## 0.2.1
 
 ### Patch Changes
