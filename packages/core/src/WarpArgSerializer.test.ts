@@ -50,39 +50,6 @@ describe('WarpArgSerializer', () => {
     })
   })
 
-  describe('stringToNative', () => {
-    it('deserializes address values', () => {
-      const address = 'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqplllst77y4l'
-      const result = serializer.stringToNative(`address:${address}`)
-      expect(result).toBe(address)
-    })
-
-    it('deserializes boolean values', () => {
-      expect(serializer.stringToNative('boolean:true')).toBe(true)
-      expect(serializer.stringToNative('boolean:false')).toBe(false)
-    })
-
-    it('deserializes biguint values', () => {
-      const result = serializer.stringToNative('biguint:1234567890')
-      expect(result).toBe(BigInt('1234567890'))
-    })
-
-    it('deserializes uint values', () => {
-      expect(serializer.stringToNative('uint64:123')).toBe(123)
-      expect(serializer.stringToNative('uint32:456')).toBe(456)
-      expect(serializer.stringToNative('uint16:789')).toBe(789)
-      expect(serializer.stringToNative('uint8:255')).toBe(255)
-    })
-
-    it('deserializes string values', () => {
-      expect(serializer.stringToNative('string:hello')).toBe('hello')
-    })
-
-    it('deserializes hex values', () => {
-      expect(serializer.stringToNative('hex:0x1234')).toBe('0x1234')
-    })
-  })
-
   describe('nativeToTyped', () => {
     it('converts string to BytesValue', () => {
       const result = serializer.nativeToTyped('string', 'hello')
@@ -114,10 +81,10 @@ describe('WarpArgSerializer', () => {
       expect(result.valueOf().toString()).toBe('18446744073709551615')
     })
 
-    it.skip('converts biguint to BigUIntValue', () => {
+    it('converts biguint to BigUIntValue', () => {
       const result = serializer.nativeToTyped('biguint', '123456789012345678901234567890')
       expect(result).toBeInstanceOf(BigUIntValue)
-      expect(result).toBe('123456789012345678901234567890')
+      expect(result.valueOf().toFixed()).toBe('123456789012345678901234567890')
     })
 
     it('converts boolean to BooleanValue', () => {
@@ -143,8 +110,69 @@ describe('WarpArgSerializer', () => {
 
     it('throws error for unsupported type', () => {
       expect(() => serializer.nativeToTyped('unsupported' as any, 'value')).toThrow(
-        'WarpArgSerializer: Unsupported input type: unsupported'
+        'WarpArgSerializer (nativeToTyped): Unsupported input type: unsupported'
       )
+    })
+  })
+
+  describe('typedToNative', () => {
+    it('converts BigUIntValue to biguint', () => {
+      const result = serializer.typedToNative(new BigUIntValue(BigInt('123456789012345678901234567890')))
+      expect(result).toEqual(['biguint', BigInt('123456789012345678901234567890')])
+    })
+
+    it('converts NumericalValue to number', () => {
+      const result = serializer.typedToNative(new U64Value(123))
+      expect(result).toEqual(['uint64', 123])
+    })
+
+    it('converts BytesValue to hex', () => {
+      const result = serializer.typedToNative(BytesValue.fromHex('1234'))
+      expect(result).toEqual(['hex', '1234'])
+    })
+
+    it('converts AddressValue to address', () => {
+      const address = 'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqplllst77y4l'
+      const result = serializer.typedToNative(new AddressValue(Address.newFromBech32(address)))
+      expect(result).toEqual(['address', address])
+    })
+
+    it('converts BooleanValue to boolean', () => {
+      const result = serializer.typedToNative(new BooleanValue(true))
+      expect(result).toEqual(['boolean', true])
+    })
+  })
+
+  describe('stringToNative', () => {
+    it('deserializes address values', () => {
+      const address = 'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqplllst77y4l'
+      const result = serializer.stringToNative(`address:${address}`)
+      expect(result).toEqual(['address', address])
+    })
+
+    it('deserializes boolean values', () => {
+      expect(serializer.stringToNative('boolean:true')).toEqual(['boolean', true])
+      expect(serializer.stringToNative('boolean:false')).toEqual(['boolean', false])
+    })
+
+    it('deserializes biguint values', () => {
+      const result = serializer.stringToNative('biguint:1234567890')
+      expect(result).toEqual(['biguint', BigInt('1234567890')])
+    })
+
+    it('deserializes uint values', () => {
+      expect(serializer.stringToNative('uint64:123')).toEqual(['uint64', 123])
+      expect(serializer.stringToNative('uint32:456')).toEqual(['uint32', 456])
+      expect(serializer.stringToNative('uint16:789')).toEqual(['uint16', 789])
+      expect(serializer.stringToNative('uint8:255')).toEqual(['uint8', 255])
+    })
+
+    it('deserializes string values', () => {
+      expect(serializer.stringToNative('string:hello')).toEqual(['string', 'hello'])
+    })
+
+    it('deserializes hex values', () => {
+      expect(serializer.stringToNative('hex:0x1234')).toEqual(['hex', '0x1234'])
     })
   })
 
@@ -173,10 +201,10 @@ describe('WarpArgSerializer', () => {
       expect(uint64Result.toString()).toBe('18446744073709551615')
     })
 
-    it.skip('converts biguint encoded value to BigUIntValue', () => {
+    it('converts biguint encoded value to BigUIntValue', () => {
       const result = serializer.stringToTyped('biguint:123456789012345678901234567890')
       expect(result).toBeInstanceOf(BigUIntValue)
-      expect(result.toString()).toBe('123456789012345678901234567890')
+      expect(result.valueOf().toFixed()).toBe('123456789012345678901234567890')
     })
 
     it('converts boolean encoded value to BooleanValue', () => {
@@ -205,7 +233,9 @@ describe('WarpArgSerializer', () => {
     })
 
     it('throws error for unsupported type', () => {
-      expect(() => serializer.stringToTyped('unsupported:value')).toThrow('WarpArgSerializer: Unsupported input type: unsupported')
+      expect(() => serializer.stringToTyped('unsupported:value')).toThrow(
+        'WarpArgSerializer (nativeToTyped): Unsupported input type: unsupported'
+      )
     })
   })
 })

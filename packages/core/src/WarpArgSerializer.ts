@@ -4,6 +4,7 @@ import {
   BigUIntValue,
   BooleanValue,
   BytesValue,
+  NumericalValue,
   TypedValue,
   U16Value,
   U32Value,
@@ -29,16 +30,25 @@ export class WarpArgSerializer {
     if (type === 'boolean') return new BooleanValue(typeof value === 'boolean' ? value : value === 'true')
     if (type === 'address') return new AddressValue(Address.newFromBech32(value as string))
     if (type === 'hex') return BytesValue.fromHex(value as string)
-    throw new Error(`WarpArgSerializer: Unsupported input type: ${type}`)
+    throw new Error(`WarpArgSerializer (nativeToTyped): Unsupported input type: ${type}`)
   }
 
-  stringToNative(value: string): NativeValue {
+  typedToNative(value: TypedValue): [WarpActionInputType, NativeValue] {
+    if (value.hasClassOrSuperclass(BigUIntValue.ClassName)) return ['biguint', BigInt((value as BigUIntValue).valueOf().toFixed())]
+    if (value.hasClassOrSuperclass(NumericalValue.ClassName)) return ['uint64', (value as NumericalValue).valueOf().toNumber()]
+    if (value.hasClassOrSuperclass(BytesValue.ClassName)) return ['hex', (value as BytesValue).valueOf().toString('hex')]
+    if (value.hasClassOrSuperclass(AddressValue.ClassName)) return ['address', (value as AddressValue).valueOf().bech32()]
+    if (value.hasClassOrSuperclass(BooleanValue.ClassName)) return ['boolean', (value as BooleanValue).valueOf()]
+    throw new Error(`WarpArgSerializer (typedToNative): Unsupported input type: ${value.getClassName()}`)
+  }
+
+  stringToNative(value: string): [WarpActionInputType, NativeValue] {
     const [type, val] = value.split(':') as [WarpActionInputType, NativeValue]
-    if (type === 'address') return val
-    if (type === 'boolean') return val === 'true'
-    if (type === 'biguint') return BigInt(val)
-    if (type === 'uint8' || type === 'uint16' || type === 'uint32' || type === 'uint64') return Number(val)
-    return val
+    if (type === 'address') return [type, val]
+    if (type === 'boolean') return [type, val === 'true']
+    if (type === 'biguint') return [type, BigInt(val)]
+    if (type === 'uint8' || type === 'uint16' || type === 'uint32' || type === 'uint64') return [type, Number(val)]
+    return [type, val]
   }
 
   stringToTyped(value: string): TypedValue {
