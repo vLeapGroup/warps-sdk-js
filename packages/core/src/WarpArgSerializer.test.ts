@@ -4,6 +4,8 @@ import {
   BigUIntValue,
   BooleanValue,
   BytesValue,
+  CodeMetadata,
+  CodeMetadataValue,
   List,
   OptionValue,
   StringType,
@@ -127,6 +129,13 @@ describe('WarpArgSerializer', () => {
       expect(result.valueOf().bech32()).toBe(address)
     })
 
+    it('converts codemeta to CodeMetadataValue', () => {
+      const result = serializer.nativeToTyped('codemeta', '0106')
+      expect(result).toBeInstanceOf(CodeMetadataValue)
+      expect(result.valueOf()).toBeInstanceOf(CodeMetadata)
+      expect(result.valueOf().toBuffer().toString('hex')).toBe('0106')
+    })
+
     it('converts hex to BytesValue', () => {
       const result = serializer.nativeToTyped('hex', '1234')
       expect(result).toBeInstanceOf(BytesValue)
@@ -171,6 +180,11 @@ describe('WarpArgSerializer', () => {
       const address = 'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqplllst77y4l'
       const result = serializer.typedToNative(new AddressValue(Address.newFromBech32(address)))
       expect(result).toEqual(['address', address])
+    })
+
+    it('converts CodeMetadataValue to codemeta', () => {
+      const result = serializer.typedToNative(new CodeMetadataValue(new CodeMetadata(true, false, true, true)))
+      expect(result).toEqual(['codemeta', '0106'])
     })
 
     it('converts BooleanValue to boolean', () => {

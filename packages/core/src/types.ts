@@ -103,6 +103,7 @@ export type BaseWarpActionInputType =
   | 'biguint'
   | 'boolean'
   | 'address'
+  | 'codemeta'
   | 'hex'
   | 'esdt'
   | 'nft'

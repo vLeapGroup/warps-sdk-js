@@ -4,6 +4,8 @@ import {
   BigUIntValue,
   BooleanValue,
   BytesValue,
+  CodeMetadata,
+  CodeMetadataValue,
   List,
   NothingValue,
   NumericalValue,
@@ -46,6 +48,7 @@ export class WarpArgSerializer {
     if (type === 'boolean') return value ? new BooleanValue(typeof value === 'boolean' ? value : value === 'true') : new NothingValue()
     if (type === 'address') return value ? new AddressValue(Address.newFromBech32(value as string)) : new NothingValue()
     if (type === 'hex') return value ? BytesValue.fromHex(value as string) : new NothingValue()
+    if (type === 'codemeta') return new CodeMetadataValue(CodeMetadata.fromBuffer(Buffer.from(value as string, 'hex')))
     throw new Error(`WarpArgSerializer (nativeToTyped): Unsupported input type: ${type}`)
   }
 
@@ -65,9 +68,12 @@ export class WarpArgSerializer {
     if (value.hasClassOrSuperclass(BigUIntValue.ClassName)) return ['biguint', BigInt((value as BigUIntValue).valueOf().toFixed())]
     if (value.hasClassOrSuperclass(NumericalValue.ClassName)) return ['uint64', (value as NumericalValue).valueOf().toNumber()]
     if (value.hasClassOrSuperclass(StringValue.ClassName)) return ['string', (value as StringValue).valueOf()]
-    if (value.hasClassOrSuperclass(BytesValue.ClassName)) return ['hex', (value as BytesValue).valueOf().toString('hex')]
-    if (value.hasClassOrSuperclass(AddressValue.ClassName)) return ['address', (value as AddressValue).valueOf().bech32()]
     if (value.hasClassOrSuperclass(BooleanValue.ClassName)) return ['boolean', (value as BooleanValue).valueOf()]
+    if (value.hasClassOrSuperclass(AddressValue.ClassName)) return ['address', (value as AddressValue).valueOf().bech32()]
+    if (value.hasClassOrSuperclass(BytesValue.ClassName)) return ['hex', (value as BytesValue).valueOf().toString('hex')]
+    if (value.hasClassOrSuperclass(CodeMetadataValue.ClassName)) {
+      return ['codemeta', (value as CodeMetadataValue).valueOf().toBuffer().toString('hex')]
+    }
     throw new Error(`WarpArgSerializer (typedToNative): Unsupported input type: ${value.getClassName()}`)
   }
 
