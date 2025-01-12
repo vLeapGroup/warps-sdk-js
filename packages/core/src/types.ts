@@ -86,7 +86,7 @@ export type WarpQueryAction = {
   label: string
   description?: string | null
   address: string
-  func: string | null
+  func: string
   args: string[]
   abi?: string
   inputs?: WarpActionInput[]
