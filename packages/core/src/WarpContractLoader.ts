@@ -15,6 +15,7 @@ export class WarpContractLoader {
         verified: res.isVerified,
       }
     } catch (error) {
+      console.error('WarpContractLoader: getContract error', error)
       return null
     }
   }
@@ -29,6 +30,7 @@ export class WarpContractLoader {
         abi: JSON.parse(res.source.abi),
       }
     } catch (error) {
+      console.error('WarpContractLoader: getVerificationInfo error', error)
       return null
     }
   }
