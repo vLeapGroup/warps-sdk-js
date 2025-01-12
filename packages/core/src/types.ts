@@ -144,6 +144,17 @@ export type WarpActionExecutionResult = {
   tx?: string
 }
 
+export type WarpContract = {
+  address: string
+  owner: string
+  verified: boolean
+}
+
+export type WarpContractVerification = {
+  codeHash: string
+  abi: object
+}
+
 export type Brand = {
   protocol: string
   name: string
