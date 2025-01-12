@@ -2,7 +2,9 @@ import {
   AbiRegistry,
   Address,
   ApiNetworkProvider,
+  IContractQueryResponse,
   QueryRunnerAdapter,
+  ResultsParser,
   SmartContractQueriesController,
   SmartContractTransactionsFactory,
   StringValue,
@@ -11,6 +13,7 @@ import {
   Transaction,
   TransactionsFactoryConfig,
   TransferTransactionsFactory,
+  TypedValue,
 } from '@multiversx/sdk-core/out'
 import { getChainId, shiftBigintBy } from './helpers'
 import { WarpAction, WarpActionInput, WarpConfig, WarpContractAction, WarpContractActionTransfer, WarpQueryAction } from './types'
@@ -65,19 +68,32 @@ export class WarpActionExecutor {
     })
   }
 
-  async executeQuery(action: WarpQueryAction, inputs: string[]) {
+  async executeQuery(action: WarpQueryAction, inputs: string[]): Promise<TypedValue> {
     if (!this.config.chainApiUrl) throw new Error('WarpActionExecutor: Chain API URL not set')
     if (!action.func) throw new Error('WarpActionExecutor: Function not found')
     const chainApi = new ApiNetworkProvider(this.config.chainApiUrl, { timeout: 30_000 })
     const queryRunner = new QueryRunnerAdapter({ networkProvider: chainApi })
     const abi = await this.getAbiForAction(action)
-    const controller = new SmartContractQueriesController({ queryRunner, abi })
     const modifiedInputArgs = this.getModifiedInputs(action, inputs)
     const txArgs = this.getCombinedInputs(action, modifiedInputArgs)
     const typedArgs = txArgs.map((arg) => this.serializer.stringToTyped(arg))
+    const controller = new SmartContractQueriesController({ queryRunner, abi })
     const query = controller.createQuery({ contract: action.address, function: action.func, arguments: typedArgs })
-    const res = await controller.runQuery(query)
-    const [result] = controller.parseQueryResponse(res)
+    const response = await controller.runQuery(query)
+
+    const legacyResultsParser = new ResultsParser()
+    const legacyQueryResponse: IContractQueryResponse = {
+      returnCode: response.returnCode,
+      returnMessage: response.returnMessage,
+      getReturnDataParts: () => response.returnDataParts.map((part) => Buffer.from(part)),
+    }
+
+    const functionName = response.function
+    const endpoint = abi.getEndpoint(functionName)
+    const legacyBundle = legacyResultsParser.parseQueryResponse(legacyQueryResponse, endpoint)
+    const result = legacyBundle.firstValue
+    if (!result) throw new Error('WarpActionExecutor: Query result not found')
+
     return result
   }
 
