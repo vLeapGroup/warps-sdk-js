@@ -1,4 +1,4 @@
-export const HttpsProtocolPrefix = 'https://'
+export const HttpProtocolPrefix = 'http'
 
 export const IdentifierParamName = 'warp'
 

@@ -1,6 +1,6 @@
 import QRCodeStyling from 'qr-code-styling'
 import { Config } from './config'
-import { DefaultIdentifierType, HttpsProtocolPrefix, IdentifierParamName, IdentifierParamSeparator } from './constants'
+import { DefaultIdentifierType, HttpProtocolPrefix, IdentifierParamName, IdentifierParamSeparator } from './constants'
 import { Brand, RegistryInfo, Warp, WarpConfig, WarpIdType } from './types'
 import { WarpBuilder } from './WarpBuilder'
 import { WarpRegistry } from './WarpRegistry'
@@ -30,7 +30,7 @@ export class WarpLink {
   }
 
   isValid(url: string): boolean {
-    if (!url.startsWith(HttpsProtocolPrefix)) return false
+    if (!url.startsWith(HttpProtocolPrefix)) return false
     const idResult = this.extractIdentifierInfoFromUrl(url)
     return !!idResult
   }
@@ -49,7 +49,7 @@ export class WarpLink {
   }
 
   async detect(url: string): Promise<DetectionResult> {
-    const idResult = url.startsWith(HttpsProtocolPrefix)
+    const idResult = url.startsWith(HttpProtocolPrefix)
       ? this.extractIdentifierInfoFromUrl(url)
       : WarpUtils.getInfoFromPrefixedIdentifier(url)
 
