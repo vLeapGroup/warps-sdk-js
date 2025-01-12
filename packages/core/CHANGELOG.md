@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.2.5
+
+### Patch Changes
+
+- 7a5fff6: update protocol version
+
 ## 0.2.4
 
 ### Patch Changes
