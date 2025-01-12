@@ -27,7 +27,7 @@ export class WarpContractLoader {
 
       return {
         codeHash: res.codeHash,
-        abi: JSON.parse(res.source.abi),
+        abi: res.source.abi,
       }
     } catch (error) {
       console.error('WarpContractLoader: getVerificationInfo error', error)
