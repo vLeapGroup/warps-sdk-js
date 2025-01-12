@@ -15,16 +15,19 @@ import {
 import { getChainId, shiftBigintBy } from './helpers'
 import { WarpAction, WarpActionInput, WarpConfig, WarpContractAction, WarpContractActionTransfer, WarpQueryAction } from './types'
 import { WarpArgSerializer } from './WarpArgSerializer'
+import { WarpContractLoader } from './WarpContractLoader'
 
 export class WarpActionExecutor {
   private config: WarpConfig
   private url: URL
   private serializer: WarpArgSerializer
+  private contractLoader: WarpContractLoader
 
   constructor(config: WarpConfig, url: string) {
     this.config = config
     this.url = new URL(url)
     this.serializer = new WarpArgSerializer()
+    this.contractLoader = new WarpContractLoader(config)
   }
 
   createTransactionForExecute(action: WarpContractAction, inputs: string[], inputTransfers: TokenTransfer[]): Transaction {
@@ -67,7 +70,7 @@ export class WarpActionExecutor {
     if (!action.func) throw new Error('WarpActionExecutor: Function not found')
     const chainApi = new ApiNetworkProvider(this.config.chainApiUrl, { timeout: 30_000 })
     const queryRunner = new QueryRunnerAdapter({ networkProvider: chainApi })
-    const abi = await this.fetchAbi(action)
+    const abi = await this.getAbiForAction(action)
     const controller = new SmartContractQueriesController({ queryRunner, abi })
     const modifiedInputArgs = this.getModifiedInputs(action, inputs)
     const txArgs = this.getCombinedInputs(action, modifiedInputArgs)
@@ -76,6 +79,17 @@ export class WarpActionExecutor {
     const res = await controller.runQuery(query)
     const [result] = controller.parseQueryResponse(res)
     return result
+  }
+
+  private async getAbiForAction(action: WarpQueryAction): Promise<AbiRegistry> {
+    if (action.abi) {
+      return await this.fetchAbi(action)
+    }
+
+    const verification = await this.contractLoader.getVerificationInfo(action.address)
+    if (!verification) throw new Error('WarpActionExecutor: Verification info not found')
+
+    return AbiRegistry.create(verification.abi)
   }
 
   private async fetchAbi(action: WarpQueryAction): Promise<AbiRegistry> {
