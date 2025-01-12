@@ -6,14 +6,20 @@ import {
   BytesValue,
   CodeMetadata,
   CodeMetadataValue,
+  CompositeType,
+  CompositeValue,
   List,
+  ListType,
   OptionValue,
   StringType,
   StringValue,
   U16Value,
   U32Value,
+  U64Type,
   U64Value,
   U8Value,
+  VariadicType,
+  VariadicValue,
 } from '@multiversx/sdk-core/out'
 import { WarpArgSerializer } from './WarpArgSerializer'
 
@@ -77,6 +83,28 @@ describe('WarpArgSerializer', () => {
       expect(actual.getItems()[0].valueOf()).toBe('hello')
       expect(actual.getItems()[1]).toBeInstanceOf(StringValue)
       expect(actual.getItems()[1].valueOf()).toBe('world')
+    })
+
+    it('converts variadic to VariadicValue', () => {
+      const result = serializer.nativeToTyped('variadic:string', 'hello,world')
+      const actual = result as VariadicValue
+      expect(actual).toBeInstanceOf(VariadicValue)
+      expect(actual.getItems()[0]).toBeInstanceOf(StringValue)
+      expect(actual.getItems()[0].valueOf()).toBe('hello')
+      expect(actual.getItems()[1]).toBeInstanceOf(StringValue)
+      expect(actual.getItems()[1].valueOf()).toBe('world')
+    })
+
+    it('converts composite to CompositeValue', () => {
+      const result = serializer.nativeToTyped('composite:string|uint64|uint8', 'hello|12345678901234567890|255')
+      const actual = result as CompositeValue
+      expect(actual).toBeInstanceOf(CompositeValue)
+      expect(actual.getItems()[0]).toBeInstanceOf(StringValue)
+      expect(actual.getItems()[0].valueOf()).toBe('hello')
+      expect(actual.getItems()[1]).toBeInstanceOf(U64Value)
+      expect(actual.getItems()[1].valueOf().toString()).toBe('12345678901234567890')
+      expect(actual.getItems()[2]).toBeInstanceOf(U8Value)
+      expect(actual.getItems()[2].valueOf().toFixed()).toBe('255')
     })
 
     it('converts string to StringValue', () => {
@@ -161,6 +189,23 @@ describe('WarpArgSerializer', () => {
       expect(result).toEqual(['list:string', 'abc,def'])
     })
 
+    it('converts VariadicValue to native value', () => {
+      const result = serializer.typedToNative(
+        new VariadicValue(new VariadicType(new StringType()), [StringValue.fromUTF8('abc'), StringValue.fromUTF8('def')])
+      )
+      expect(result).toEqual(['variadic:string', 'abc,def'])
+    })
+
+    it('converts CompositeValue to native value', () => {
+      const result = serializer.typedToNative(
+        new CompositeValue(new CompositeType(new StringType(), new U64Type()), [
+          StringValue.fromUTF8('abc'),
+          new U64Value('12345678901234567890'),
+        ])
+      )
+      expect(result).toEqual(['composite:string|uint64', 'abc|12345678901234567890'])
+    })
+
     it('converts BigUIntValue to biguint', () => {
       const result = serializer.typedToNative(new BigUIntValue(BigInt('123456789012345678901234567890')))
       expect(result).toEqual(['biguint', BigInt('123456789012345678901234567890')])
@@ -190,6 +235,28 @@ describe('WarpArgSerializer', () => {
     it('converts BooleanValue to boolean', () => {
       const result = serializer.typedToNative(new BooleanValue(true))
       expect(result).toEqual(['boolean', true])
+    })
+
+    it('converts nested VariadicValue of CompositeValue to native value', () => {
+      const result = serializer.typedToNative(
+        new VariadicValue(new VariadicType(new CompositeType(new StringType(), new U64Type())), [
+          new CompositeValue(new CompositeType(new StringType(), new U64Type()), [StringValue.fromUTF8('abc'), new U64Value(123)]),
+          new CompositeValue(new CompositeType(new StringType(), new U64Type()), [StringValue.fromUTF8('def'), new U64Value(456)]),
+          new CompositeValue(new CompositeType(new StringType(), new U64Type()), [StringValue.fromUTF8('ghi'), new U64Value(789)]),
+        ])
+      )
+      expect(result).toEqual(['variadic:composite:string|uint64', 'abc|123,def|456,ghi|789'])
+    })
+
+    it('converts nested List of CompositeValue to native value', () => {
+      const result = serializer.typedToNative(
+        new List(new ListType(new CompositeType(new StringType(), new U64Type())), [
+          new CompositeValue(new CompositeType(new StringType(), new U64Type()), [StringValue.fromUTF8('abc'), new U64Value(123)]),
+          new CompositeValue(new CompositeType(new StringType(), new U64Type()), [StringValue.fromUTF8('def'), new U64Value(456)]),
+          new CompositeValue(new CompositeType(new StringType(), new U64Type()), [StringValue.fromUTF8('ghi'), new U64Value(789)]),
+        ])
+      )
+      expect(result).toEqual(['list:composite:string|uint64', 'abc|123,def|456,ghi|789'])
     })
   })
 
