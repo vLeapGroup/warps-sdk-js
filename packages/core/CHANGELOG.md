@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.2.4
+
+### Patch Changes
+
+- 6764504: fix warp query execution api config
+
 ## 0.2.3
 
 ### Patch Changes
