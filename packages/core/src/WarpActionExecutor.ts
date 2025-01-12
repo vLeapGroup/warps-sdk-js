@@ -63,8 +63,9 @@ export class WarpActionExecutor {
   }
 
   async executeQuery(action: WarpQueryAction, inputs: string[]) {
+    if (!this.config.chainApiUrl) throw new Error('WarpActionExecutor: Chain API URL not set')
     if (!action.func) throw new Error('WarpActionExecutor: Function not found')
-    const chainApi = new ApiNetworkProvider(this.config.env)
+    const chainApi = new ApiNetworkProvider(this.config.chainApiUrl, { timeout: 30_000 })
     const queryRunner = new QueryRunnerAdapter({ networkProvider: chainApi })
     const abi = await this.fetchAbi(action)
     const controller = new SmartContractQueriesController({ queryRunner, abi })
