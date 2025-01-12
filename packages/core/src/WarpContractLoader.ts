@@ -26,7 +26,7 @@ export class WarpContractLoader {
 
       return {
         codeHash: res.codeHash,
-        abi: JSON.parse(res.abi),
+        abi: JSON.parse(res.source.abi),
       }
     } catch (error) {
       return null
