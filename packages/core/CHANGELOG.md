@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 0.3.1
+
+### Patch Changes
+
+- f16c8dc: fix warp link detection on http
+- 86439ad: fix contract loader abi
+
 ## 0.3.0
 
 ### Minor Changes
