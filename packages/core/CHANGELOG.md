@@ -1,5 +1,13 @@
 # @vleap/warp-sdk-core
 
+## 0.3.2
+
+### Patch Changes
+
+- 356be58: fix contract loader verification parsing
+- 0e7d4a6: add further arg serializer type support
+- 77fdf2e: improve query action execution
+
 ## 0.3.1
 
 ### Patch Changes
