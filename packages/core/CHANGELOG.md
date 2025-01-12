@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 0.3.0
+
+### Minor Changes
+
+- 8a3484c: add contract loader
+
+### Patch Changes
+
+- e0a2682: add query action executor abi fallback
+
 ## 0.2.5
 
 ### Patch Changes
