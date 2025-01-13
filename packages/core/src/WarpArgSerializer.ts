@@ -41,7 +41,7 @@ import { BaseWarpActionInputType, WarpActionInputType } from './types'
 export type WarpNativeValue = string | number | bigint | boolean | null
 
 export class WarpArgSerializer {
-  nativeToStrings(type: WarpActionInputType, value: WarpNativeValue): string {
+  nativeToString(type: WarpActionInputType, value: WarpNativeValue): string {
     return `${type}:${value?.toString() ?? ''}`
   }
 
@@ -134,6 +134,11 @@ export class WarpArgSerializer {
       return ['codemeta', (value as CodeMetadataValue).valueOf().toBuffer().toString('hex')]
     }
     throw new Error(`WarpArgSerializer (typedToNative): Unsupported input type: ${value.getClassName()}`)
+  }
+
+  typedToString(value: TypedValue): string {
+    const [type, val] = this.typedToNative(value)
+    return this.nativeToString(type, val)
   }
 
   stringToNative(value: string): [WarpActionInputType, WarpNativeValue] {

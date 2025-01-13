@@ -34,33 +34,33 @@ describe('WarpArgSerializer', () => {
 
   describe('nativeToStrings', () => {
     it('serializes address values', () => {
-      const result = serializer.nativeToStrings('address', 'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqplllst77y4l')
+      const result = serializer.nativeToString('address', 'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqplllst77y4l')
       expect(result).toBe('address:erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqplllst77y4l')
     })
 
     it('serializes boolean values', () => {
-      expect(serializer.nativeToStrings('boolean', true)).toBe('boolean:true')
-      expect(serializer.nativeToStrings('boolean', false)).toBe('boolean:false')
+      expect(serializer.nativeToString('boolean', true)).toBe('boolean:true')
+      expect(serializer.nativeToString('boolean', false)).toBe('boolean:false')
     })
 
     it('serializes biguint values', () => {
       const bigValue = BigInt('1234567890')
-      expect(serializer.nativeToStrings('biguint', bigValue)).toBe('biguint:1234567890')
+      expect(serializer.nativeToString('biguint', bigValue)).toBe('biguint:1234567890')
     })
 
     it('serializes uint values', () => {
-      expect(serializer.nativeToStrings('uint64', 123)).toBe('uint64:123')
-      expect(serializer.nativeToStrings('uint32', 456)).toBe('uint32:456')
-      expect(serializer.nativeToStrings('uint16', 789)).toBe('uint16:789')
-      expect(serializer.nativeToStrings('uint8', 255)).toBe('uint8:255')
+      expect(serializer.nativeToString('uint64', 123)).toBe('uint64:123')
+      expect(serializer.nativeToString('uint32', 456)).toBe('uint32:456')
+      expect(serializer.nativeToString('uint16', 789)).toBe('uint16:789')
+      expect(serializer.nativeToString('uint8', 255)).toBe('uint8:255')
     })
 
     it('serializes string values', () => {
-      expect(serializer.nativeToStrings('string', 'hello')).toBe('string:hello')
+      expect(serializer.nativeToString('string', 'hello')).toBe('string:hello')
     })
 
     it('serializes hex values', () => {
-      expect(serializer.nativeToStrings('hex', '0x1234')).toBe('hex:0x1234')
+      expect(serializer.nativeToString('hex', '0x1234')).toBe('hex:0x1234')
     })
   })
 
