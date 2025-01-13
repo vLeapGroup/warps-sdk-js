@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.4.3
+
+### Patch Changes
+
+- 96adf32: add serializer esdt support
+
 ## 0.4.2
 
 ### Patch Changes
