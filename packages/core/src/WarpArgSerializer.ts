@@ -16,6 +16,7 @@ import {
   List,
   NothingValue,
   NumericalValue,
+  OptionalValue,
   OptionValue,
   PrimitiveType,
   StringType,
@@ -35,18 +36,23 @@ import {
 } from '@multiversx/sdk-core/out'
 import { BaseWarpActionInputType, WarpActionInputType } from './types'
 
-type NativeValue = string | number | bigint | boolean | null
+export type WarpNativeValue = string | number | bigint | boolean | null
 
 export class WarpArgSerializer {
-  nativeToStrings(type: WarpActionInputType, value: NativeValue): string {
+  nativeToStrings(type: WarpActionInputType, value: WarpNativeValue): string {
     return `${type}:${value?.toString() ?? ''}`
   }
 
-  nativeToTyped(type: WarpActionInputType, value: NativeValue): TypedValue {
-    if (type.startsWith('opt:')) {
-      const [_, baseType] = type.split(':') as ['opt', WarpActionInputType]
-      const baseValue = this.nativeToTyped(baseType, value)
+  nativeToTyped(type: WarpActionInputType, value: WarpNativeValue): TypedValue {
+    if (type.startsWith('option:')) {
+      const [_, baseTypeRaw] = type.split(':') as ['option', WarpActionInputType]
+      const baseValue = this.nativeToTyped(baseTypeRaw, value)
       return value ? OptionValue.newProvided(baseValue) : OptionValue.newMissingTyped(baseValue.getType())
+    }
+    if (type.startsWith('optional:')) {
+      const [_, baseTypeNative] = type.split(':') as ['optional', BaseWarpActionInputType]
+      const baseValue = this.nativeToTyped(baseTypeNative, value)
+      return value ? new OptionalValue(baseValue.getType(), baseValue) : OptionalValue.newMissing()
     }
     if (type.startsWith('list:')) {
       const [_, baseType] = type.split(':') as ['list', BaseWarpActionInputType]
@@ -81,30 +87,35 @@ export class WarpArgSerializer {
     throw new Error(`WarpArgSerializer (nativeToTyped): Unsupported input type: ${type}`)
   }
 
-  typedToNative(value: TypedValue): [WarpActionInputType, NativeValue] {
+  typedToNative(value: TypedValue): [WarpActionInputType, WarpNativeValue] {
     if (value.hasClassOrSuperclass(OptionValue.ClassName)) {
-      if (!(value as OptionValue).isSet()) return ['opt', null]
-      const [type, val] = this.typedToNative((value as OptionValue).getTypedValue()) as [BaseWarpActionInputType, NativeValue]
-      return [`opt:${type}`, val]
+      if (!(value as OptionValue).isSet()) return ['option', null]
+      const [type, val] = this.typedToNative((value as OptionValue).getTypedValue()) as [BaseWarpActionInputType, WarpNativeValue]
+      return [`option:${type}`, val]
+    }
+    if (value.hasClassOrSuperclass(OptionalValue.ClassName)) {
+      if (!(value as OptionalValue).isSet()) return ['optional', null]
+      const [type, val] = this.typedToNative((value as OptionalValue).getTypedValue()) as [BaseWarpActionInputType, WarpNativeValue]
+      return [`optional:${type}`, val]
     }
     if (value.hasClassOrSuperclass(List.ClassName)) {
       const items = (value as List).getItems()
       const types = items.map((item) => this.typedToNative(item)[0]) as BaseWarpActionInputType[]
       const type = types[0] as BaseWarpActionInputType
-      const values = items.map((item) => this.typedToNative(item)[1]) as NativeValue[]
+      const values = items.map((item) => this.typedToNative(item)[1]) as WarpNativeValue[]
       return [`list:${type}`, values.join(',')]
     }
     if (value.hasClassOrSuperclass(VariadicValue.ClassName)) {
       const items = (value as VariadicValue).getItems()
       const types = items.map((item) => this.typedToNative(item)[0]) as BaseWarpActionInputType[]
       const type = types[0] as BaseWarpActionInputType
-      const values = items.map((item) => this.typedToNative(item)[1]) as NativeValue[]
+      const values = items.map((item) => this.typedToNative(item)[1]) as WarpNativeValue[]
       return [`variadic:${type}`, values.join(',')]
     }
     if (value.hasClassOrSuperclass(CompositeValue.ClassName)) {
       const items = (value as CompositeValue).getItems()
       const types = items.map((item) => this.typeToNative(item.getType()))
-      const values = items.map((item) => item.valueOf()) as NativeValue[]
+      const values = items.map((item) => item.valueOf()) as WarpNativeValue[]
       const rawTypes = types.join('|')
       const rawValues = values.join('|')
       return [`composite:${rawTypes}`, rawValues]
@@ -121,8 +132,8 @@ export class WarpArgSerializer {
     throw new Error(`WarpArgSerializer (typedToNative): Unsupported input type: ${value.getClassName()}`)
   }
 
-  stringToNative(value: string): [WarpActionInputType, NativeValue] {
-    const [type, val] = value.split(':') as [WarpActionInputType, NativeValue]
+  stringToNative(value: string): [WarpActionInputType, WarpNativeValue] {
+    const [type, val] = value.split(':') as [WarpActionInputType, WarpNativeValue]
     if (type === 'address') return [type, val]
     if (type === 'boolean') return [type, val === 'true']
     if (type === 'biguint') return [type, BigInt(val || 0)]

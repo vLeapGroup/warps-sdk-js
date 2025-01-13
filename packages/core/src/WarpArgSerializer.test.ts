@@ -10,6 +10,7 @@ import {
   CompositeValue,
   List,
   ListType,
+  OptionalValue,
   OptionValue,
   StringType,
   StringValue,
@@ -63,15 +64,27 @@ describe('WarpArgSerializer', () => {
   })
 
   describe('nativeToTyped', () => {
-    it('converts opt to OptionValue', () => {
-      const result = serializer.nativeToTyped('opt:string', 'hello')
+    it('converts option to OptionValue', () => {
+      const result = serializer.nativeToTyped('option:string', 'hello')
       expect(result).toBeInstanceOf(OptionValue)
       expect(result.valueOf()).toBe('hello')
     })
 
-    it('converts opt to OptionValue with missing value', () => {
-      const result = serializer.nativeToTyped('opt:string', null)
+    it('converts option to OptionValue with missing value', () => {
+      const result = serializer.nativeToTyped('option:string', null)
       expect(result).toBeInstanceOf(OptionValue)
+      expect(result.valueOf()).toBe(null)
+    })
+
+    it('converts optional to OptionalValue', () => {
+      const result = serializer.nativeToTyped('optional:string', 'hello')
+      expect(result).toBeInstanceOf(OptionalValue)
+      expect(result.valueOf()).toBe('hello')
+    })
+
+    it('converts optional to OptionalValue with missing value', () => {
+      const result = serializer.nativeToTyped('optional:string', null)
+      expect(result).toBeInstanceOf(OptionalValue)
       expect(result.valueOf()).toBe(null)
     })
 
@@ -181,7 +194,12 @@ describe('WarpArgSerializer', () => {
   describe('typedToNative', () => {
     it('converts OptionValue to native value', () => {
       const result = serializer.typedToNative(new OptionValue(new StringType(), StringValue.fromUTF8('abc')))
-      expect(result).toEqual(['opt:string', 'abc'])
+      expect(result).toEqual(['option:string', 'abc'])
+    })
+
+    it('converts OptionalValue to native value', () => {
+      const result = serializer.typedToNative(new OptionalValue(new StringType(), StringValue.fromUTF8('abc')))
+      expect(result).toEqual(['optional:string', 'abc'])
     })
 
     it('converts ListValue to native value', () => {
