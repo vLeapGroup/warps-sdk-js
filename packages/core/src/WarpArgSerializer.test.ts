@@ -177,6 +177,13 @@ describe('WarpArgSerializer', () => {
       expect(result.valueOf()).toBe('1234')
     })
 
+    it('converts hex to BytesValue', () => {
+      const result = serializer.nativeToTyped('hex', '1234')
+      expect(result).toBeInstanceOf(BytesValue)
+      const hexValue = Buffer.from(result.valueOf()).toString('hex')
+      expect(hexValue).toBe('1234')
+    })
+
     it('converts codemeta to CodeMetadataValue', () => {
       const result = serializer.nativeToTyped('codemeta', '0106')
       expect(result).toBeInstanceOf(CodeMetadataValue)
@@ -184,11 +191,6 @@ describe('WarpArgSerializer', () => {
       expect(result.valueOf().toBuffer().toString('hex')).toBe('0106')
     })
 
-    it('converts hex to BytesValue', () => {
-      const result = serializer.nativeToTyped('hex', '1234')
-      expect(result).toBeInstanceOf(BytesValue)
-      const hexValue = Buffer.from(result.valueOf()).toString('hex')
-      expect(hexValue).toBe('1234')
     })
 
     it('throws error for unsupported type', () => {
@@ -241,9 +243,14 @@ describe('WarpArgSerializer', () => {
       expect(result).toEqual(['uint64', 123])
     })
 
-    it('converts BytesValue to hex', () => {
-      const result = serializer.typedToNative(BytesValue.fromHex('1234'))
-      expect(result).toEqual(['hex', '1234'])
+    it('converts StringValue to string', () => {
+      const result = serializer.typedToNative(StringValue.fromUTF8('hello'))
+      expect(result).toEqual(['string', 'hello'])
+    })
+
+    it('converts BooleanValue to boolean', () => {
+      const result = serializer.typedToNative(new BooleanValue(true))
+      expect(result).toEqual(['boolean', true])
     })
 
     it('converts AddressValue to address', () => {
@@ -257,14 +264,16 @@ describe('WarpArgSerializer', () => {
       expect(result).toEqual(['token', '1234'])
     })
 
+    it('converts BytesValue to hex', () => {
+      const result = serializer.typedToNative(BytesValue.fromHex('1234'))
+      expect(result).toEqual(['hex', '1234'])
+    })
+
     it('converts CodeMetadataValue to codemeta', () => {
       const result = serializer.typedToNative(new CodeMetadataValue(new CodeMetadata(true, false, true, true)))
       expect(result).toEqual(['codemeta', '0106'])
     })
 
-    it('converts BooleanValue to boolean', () => {
-      const result = serializer.typedToNative(new BooleanValue(true))
-      expect(result).toEqual(['boolean', true])
     })
 
     it('converts nested VariadicValue of CompositeValue to native value', () => {
