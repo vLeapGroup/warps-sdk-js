@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.3.4
+
+### Patch Changes
+
+- f6b9135: add arg type token support
+
 ## 0.3.3
 
 ### Patch Changes
