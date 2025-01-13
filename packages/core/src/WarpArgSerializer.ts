@@ -13,6 +13,8 @@ import {
   CodeMetadataValue,
   CompositeType,
   CompositeValue,
+  Field,
+  FieldDefinition,
   List,
   NothingValue,
   NumericalValue,
@@ -21,8 +23,12 @@ import {
   PrimitiveType,
   StringType,
   StringValue,
+  Struct,
+  StructType,
+  Token,
   TokenIdentifierType,
   TokenIdentifierValue,
+  TokenTransfer,
   Type,
   TypedValue,
   U16Type,
@@ -38,10 +44,13 @@ import {
 } from '@multiversx/sdk-core/out'
 import { BaseWarpActionInputType, WarpActionInputType } from './types'
 
-export type WarpNativeValue = string | number | bigint | boolean | null
+export type WarpNativeValue = string | number | bigint | boolean | null | TokenTransfer
 
 export class WarpArgSerializer {
   nativeToString(type: WarpActionInputType, value: WarpNativeValue): string {
+    if (type === 'esdt' && value instanceof TokenTransfer) {
+      return `esdt:${value.token.identifier}|${value.token.nonce.toString()}|${value.amount.toString()}`
+    }
     return `${type}:${value?.toString() ?? ''}`
   }
 
@@ -80,13 +89,20 @@ export class WarpArgSerializer {
     if (type === 'uint8') return value ? new U8Value(Number(value)) : new NothingValue()
     if (type === 'uint16') return value ? new U16Value(Number(value)) : new NothingValue()
     if (type === 'uint32') return value ? new U32Value(Number(value)) : new NothingValue()
-    if (type === 'uint64') return value ? new U64Value(BigInt(value)) : new NothingValue()
-    if (type === 'biguint') return value ? new BigUIntValue(BigInt(value)) : new NothingValue()
+    if (type === 'uint64') return value ? new U64Value(BigInt(value as string)) : new NothingValue()
+    if (type === 'biguint') return value ? new BigUIntValue(BigInt(value as string)) : new NothingValue()
     if (type === 'boolean') return value ? new BooleanValue(typeof value === 'boolean' ? value : value === 'true') : new NothingValue()
     if (type === 'address') return value ? new AddressValue(Address.newFromBech32(value as string)) : new NothingValue()
     if (type === 'token') return value ? new TokenIdentifierValue(value as string) : new NothingValue()
     if (type === 'hex') return value ? BytesValue.fromHex(value as string) : new NothingValue()
     if (type === 'codemeta') return new CodeMetadataValue(CodeMetadata.fromBuffer(Buffer.from(value as string, 'hex')))
+    if (type === 'esdt' && value instanceof TokenTransfer)
+      return new Struct(this.nativeToType('esdt') as StructType, [
+        new Field(new TokenIdentifierValue(value.token.identifier), 'token_identifier'),
+        new Field(new U64Value(BigInt(value.token.nonce)), 'token_nonce'),
+        new Field(new BigUIntValue(BigInt(value.amount)), 'amount'),
+      ])
+
     throw new Error(`WarpArgSerializer (nativeToTyped): Unsupported input type: ${type}`)
   }
 
@@ -133,6 +149,13 @@ export class WarpArgSerializer {
     if (value.hasClassOrSuperclass(CodeMetadataValue.ClassName)) {
       return ['codemeta', (value as CodeMetadataValue).valueOf().toBuffer().toString('hex')]
     }
+    if (value.getType().getName() === 'EsdtTokenPayment') {
+      const identifier = (value as Struct).getFieldValue('token_identifier').valueOf()
+      const nonce = (value as Struct).getFieldValue('token_nonce').valueOf()
+      const amount = (value as Struct).getFieldValue('amount').valueOf()
+      const token = new Token({ identifier, nonce })
+      return ['esdt', new TokenTransfer({ token, amount })]
+    }
     throw new Error(`WarpArgSerializer (typedToNative): Unsupported input type: ${value.getClassName()}`)
   }
 
@@ -145,8 +168,12 @@ export class WarpArgSerializer {
     const [type, val] = value.split(':') as [WarpActionInputType, WarpNativeValue]
     if (type === 'address') return [type, val]
     if (type === 'boolean') return [type, val === 'true']
-    if (type === 'biguint') return [type, BigInt(val || 0)]
+    if (type === 'biguint') return [type, BigInt((val as string) || 0)]
     if (type === 'uint8' || type === 'uint16' || type === 'uint32' || type === 'uint64') return [type, Number(val)]
+    if (type === 'esdt') {
+      const [identifier, nonce, amount] = (val as string).split('|')
+      return [type, new TokenTransfer({ token: new Token({ identifier, nonce: BigInt(nonce) }), amount: BigInt(amount) })]
+    }
     return [type, val]
   }
 
@@ -167,6 +194,12 @@ export class WarpArgSerializer {
     if (type === 'token') return new TokenIdentifierType()
     if (type === 'hex') return new BytesType()
     if (type === 'codemeta') return new CodeMetadataType()
+    if (type === 'esdt' || type === 'nft')
+      return new StructType('EsdtTokenPayment', [
+        new FieldDefinition('token_identifier', '', new TokenIdentifierType()),
+        new FieldDefinition('token_nonce', '', new U64Type()),
+        new FieldDefinition('amount', '', new BigUIntType()),
+      ])
     throw new Error(`WarpArgSerializer (nativeToType): Unsupported input type: ${type}`)
   }
 
@@ -182,6 +215,7 @@ export class WarpArgSerializer {
     if (type instanceof TokenIdentifierType) return 'token'
     if (type instanceof BytesType) return 'hex'
     if (type instanceof CodeMetadataType) return 'codemeta'
+    if (type instanceof StructType && type.getClassName() === 'EsdtTokenPayment') return 'esdt'
     throw new Error(`WarpArgSerializer (typeToNative): Unsupported input type: ${type.getClassName()}`)
   }
 }

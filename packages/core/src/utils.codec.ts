@@ -1,6 +1,7 @@
 import {
   Address,
   AddressValue,
+  BigUIntType,
   BigUIntValue,
   BooleanValue,
   BytesValue,
@@ -8,15 +9,22 @@ import {
   CodeMetadataValue,
   CompositeType,
   CompositeValue,
+  Field,
+  FieldDefinition,
   List,
   NothingValue,
   OptionalValue,
   OptionValue,
   StringValue,
+  Struct,
+  StructType,
+  TokenIdentifierType,
   TokenIdentifierValue,
+  TokenTransfer,
   TypedValue,
   U16Value,
   U32Value,
+  U64Type,
   U64Value,
   U8Value,
   VariadicValue,
@@ -61,6 +69,20 @@ export const address = (value: string): AddressValue => new AddressValue(Address
 export const token = (value: string): TokenIdentifierValue => new TokenIdentifierValue(value)
 
 export const hex = (value: string): BytesValue => BytesValue.fromHex(value)
+
+export const esdt = (value: TokenTransfer): Struct =>
+  new Struct(
+    new StructType('EsdtTokenPayment', [
+      new FieldDefinition('token_identifier', '', new TokenIdentifierType()),
+      new FieldDefinition('token_nonce', '', new U64Type()),
+      new FieldDefinition('amount', '', new BigUIntType()),
+    ]),
+    [
+      new Field(new TokenIdentifierValue(value.token.identifier), 'token_identifier'),
+      new Field(new U64Value(BigInt(value.token.nonce)), 'token_nonce'),
+      new Field(new BigUIntValue(BigInt(value.amount)), 'amount'),
+    ]
+  )
 
 export const codemeta = (hexString: string): CodeMetadataValue =>
   new CodeMetadataValue(CodeMetadata.fromBuffer(Buffer.from(hexString, 'hex')))

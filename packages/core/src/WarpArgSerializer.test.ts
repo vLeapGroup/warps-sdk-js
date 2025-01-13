@@ -14,7 +14,10 @@ import {
   OptionValue,
   StringType,
   StringValue,
+  Struct,
+  Token,
   TokenIdentifierValue,
+  TokenTransfer,
   U16Value,
   U32Value,
   U64Type,
@@ -24,6 +27,7 @@ import {
   VariadicValue,
 } from '@multiversx/sdk-core/out'
 import { WarpArgSerializer } from './WarpArgSerializer'
+import { esdt } from './utils.codec'
 
 describe('WarpArgSerializer', () => {
   let serializer: WarpArgSerializer
@@ -61,6 +65,12 @@ describe('WarpArgSerializer', () => {
 
     it('serializes hex values', () => {
       expect(serializer.nativeToString('hex', '0x1234')).toBe('hex:0x1234')
+    })
+
+    it('serializes esdt values', () => {
+      const token = new Token({ identifier: 'AAA-123456', nonce: BigInt(5) })
+      const transfer = new TokenTransfer({ token, amount: BigInt(100) })
+      expect(serializer.nativeToString('esdt', transfer)).toBe('esdt:AAA-123456|5|100')
     })
   })
 
@@ -191,6 +201,13 @@ describe('WarpArgSerializer', () => {
       expect(result.valueOf().toBuffer().toString('hex')).toBe('0106')
     })
 
+    it('converts esdt to EsdtTokenPayment Struct', () => {
+      const token = new Token({ identifier: 'AAA-123456', nonce: BigInt(5) })
+      const result = serializer.nativeToTyped('esdt', new TokenTransfer({ token, amount: BigInt(100) })) as Struct
+      expect(result).toBeInstanceOf(Struct)
+      expect(result.getFieldValue('token_identifier').valueOf()).toBe('AAA-123456')
+      expect(result.getFieldValue('token_nonce').toString()).toBe('5')
+      expect(result.getFieldValue('amount').toString()).toBe('100')
     })
 
     it('throws error for unsupported type', () => {
@@ -274,6 +291,14 @@ describe('WarpArgSerializer', () => {
       expect(result).toEqual(['codemeta', '0106'])
     })
 
+    it('converts EsdtTokenPayment Struct to esdt', () => {
+      const token = new Token({ identifier: 'AAA-123456', nonce: BigInt(5) })
+      const transfer = new TokenTransfer({ token, amount: BigInt(100) })
+      const [type, value] = serializer.typedToNative(esdt(transfer)) as [string, TokenTransfer]
+      expect(type).toBe('esdt')
+      expect(value.token.identifier).toBe(token.identifier)
+      expect(value.token.nonce.toString()).toBe('5')
+      expect(value.amount.toString()).toBe('100')
     })
 
     it('converts nested VariadicValue of CompositeValue to native value', () => {
@@ -329,6 +354,14 @@ describe('WarpArgSerializer', () => {
 
     it('deserializes hex values', () => {
       expect(serializer.stringToNative('hex:0x1234')).toEqual(['hex', '0x1234'])
+    })
+
+    it('deserializes esdt values', () => {
+      const result = serializer.stringToNative('esdt:AAA-123456|5|100')
+      expect(result).toEqual([
+        'esdt',
+        new TokenTransfer({ token: new Token({ identifier: 'AAA-123456', nonce: BigInt(5) }), amount: BigInt(100) }),
+      ])
     })
   })
 
