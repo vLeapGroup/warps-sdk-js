@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 0.4.2
+
+### Patch Changes
+
+- 7b53e62: improve codec util biguint
+- 7e7a0a9: add arg serializer typed-to-string
+
 ## 0.4.1
 
 ### Patch Changes
