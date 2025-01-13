@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.3.3
+
+### Patch Changes
+
+- 2cabb11: improve arg serializer
+
 ## 0.3.2
 
 ### Patch Changes
