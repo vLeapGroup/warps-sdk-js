@@ -52,7 +52,7 @@ export const u32 = (value: number): U32Value => new U32Value(value)
 
 export const u64 = (value: bigint): U64Value => new U64Value(value)
 
-export const biguint = (value: bigint): BigUIntValue => new BigUIntValue(value)
+export const biguint = (value: bigint | string | number): BigUIntValue => new BigUIntValue(BigInt(value))
 
 export const boolean = (value: boolean): BooleanValue => new BooleanValue(value)
 
