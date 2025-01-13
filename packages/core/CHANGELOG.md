@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.4.0
+
+### Minor Changes
+
+- 86562d6: add codec utils
+
 ## 0.3.4
 
 ### Patch Changes
