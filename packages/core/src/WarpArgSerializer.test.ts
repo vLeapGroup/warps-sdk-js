@@ -14,6 +14,7 @@ import {
   OptionValue,
   StringType,
   StringValue,
+  TokenIdentifierValue,
   U16Value,
   U32Value,
   U64Type,
@@ -170,6 +171,12 @@ describe('WarpArgSerializer', () => {
       expect(result.valueOf().bech32()).toBe(address)
     })
 
+    it('converts token to TokenIdentifierValue', () => {
+      const result = serializer.nativeToTyped('token', '1234')
+      expect(result).toBeInstanceOf(TokenIdentifierValue)
+      expect(result.valueOf()).toBe('1234')
+    })
+
     it('converts codemeta to CodeMetadataValue', () => {
       const result = serializer.nativeToTyped('codemeta', '0106')
       expect(result).toBeInstanceOf(CodeMetadataValue)
@@ -243,6 +250,11 @@ describe('WarpArgSerializer', () => {
       const address = 'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqplllst77y4l'
       const result = serializer.typedToNative(new AddressValue(Address.newFromBech32(address)))
       expect(result).toEqual(['address', address])
+    })
+
+    it('converts TokenIdentifierValue to token', () => {
+      const result = serializer.typedToNative(new TokenIdentifierValue('1234'))
+      expect(result).toEqual(['token', '1234'])
     })
 
     it('converts CodeMetadataValue to codemeta', () => {

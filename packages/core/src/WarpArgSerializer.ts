@@ -21,6 +21,8 @@ import {
   PrimitiveType,
   StringType,
   StringValue,
+  TokenIdentifierType,
+  TokenIdentifierValue,
   Type,
   TypedValue,
   U16Type,
@@ -82,6 +84,7 @@ export class WarpArgSerializer {
     if (type === 'biguint') return value ? new BigUIntValue(BigInt(value)) : new NothingValue()
     if (type === 'boolean') return value ? new BooleanValue(typeof value === 'boolean' ? value : value === 'true') : new NothingValue()
     if (type === 'address') return value ? new AddressValue(Address.newFromBech32(value as string)) : new NothingValue()
+    if (type === 'token') return value ? new TokenIdentifierValue(value as string) : new NothingValue()
     if (type === 'hex') return value ? BytesValue.fromHex(value as string) : new NothingValue()
     if (type === 'codemeta') return new CodeMetadataValue(CodeMetadata.fromBuffer(Buffer.from(value as string, 'hex')))
     throw new Error(`WarpArgSerializer (nativeToTyped): Unsupported input type: ${type}`)
@@ -125,6 +128,7 @@ export class WarpArgSerializer {
     if (value.hasClassOrSuperclass(StringValue.ClassName)) return ['string', (value as StringValue).valueOf()]
     if (value.hasClassOrSuperclass(BooleanValue.ClassName)) return ['boolean', (value as BooleanValue).valueOf()]
     if (value.hasClassOrSuperclass(AddressValue.ClassName)) return ['address', (value as AddressValue).valueOf().bech32()]
+    if (value.hasClassOrSuperclass(TokenIdentifierValue.ClassName)) return ['token', (value as TokenIdentifierValue).valueOf()]
     if (value.hasClassOrSuperclass(BytesValue.ClassName)) return ['hex', (value as BytesValue).valueOf().toString('hex')]
     if (value.hasClassOrSuperclass(CodeMetadataValue.ClassName)) {
       return ['codemeta', (value as CodeMetadataValue).valueOf().toBuffer().toString('hex')]
@@ -155,6 +159,7 @@ export class WarpArgSerializer {
     if (type === 'biguint') return new BigUIntType()
     if (type === 'boolean') return new BooleanType()
     if (type === 'address') return new AddressType()
+    if (type === 'token') return new TokenIdentifierType()
     if (type === 'hex') return new BytesType()
     if (type === 'codemeta') return new CodeMetadataType()
     throw new Error(`WarpArgSerializer (nativeToType): Unsupported input type: ${type}`)
@@ -169,6 +174,7 @@ export class WarpArgSerializer {
     if (type instanceof BigUIntType) return 'biguint'
     if (type instanceof BooleanType) return 'boolean'
     if (type instanceof AddressType) return 'address'
+    if (type instanceof TokenIdentifierType) return 'token'
     if (type instanceof BytesType) return 'hex'
     if (type instanceof CodeMetadataType) return 'codemeta'
     throw new Error(`WarpArgSerializer (typeToNative): Unsupported input type: ${type.getClassName()}`)
