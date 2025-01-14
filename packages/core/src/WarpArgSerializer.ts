@@ -17,7 +17,6 @@ import {
   FieldDefinition,
   List,
   NothingValue,
-  NumericalValue,
   OptionalValue,
   OptionValue,
   PrimitiveType,
@@ -140,7 +139,10 @@ export class WarpArgSerializer {
       return [`composite:${rawTypes}`, rawValues]
     }
     if (value.hasClassOrSuperclass(BigUIntValue.ClassName)) return ['biguint', BigInt((value as BigUIntValue).valueOf().toFixed())]
-    if (value.hasClassOrSuperclass(NumericalValue.ClassName)) return ['uint64', (value as NumericalValue).valueOf().toNumber()]
+    if (value.hasClassOrSuperclass(U8Value.ClassName)) return ['uint8', (value as U8Value).valueOf().toNumber()]
+    if (value.hasClassOrSuperclass(U16Value.ClassName)) return ['uint16', (value as U16Value).valueOf().toNumber()]
+    if (value.hasClassOrSuperclass(U32Value.ClassName)) return ['uint32', (value as U32Value).valueOf().toNumber()]
+    if (value.hasClassOrSuperclass(U64Value.ClassName)) return ['uint64', BigInt((value as U64Value).valueOf().toFixed())]
     if (value.hasClassOrSuperclass(StringValue.ClassName)) return ['string', (value as StringValue).valueOf()]
     if (value.hasClassOrSuperclass(BooleanValue.ClassName)) return ['boolean', (value as BooleanValue).valueOf()]
     if (value.hasClassOrSuperclass(AddressValue.ClassName)) return ['address', (value as AddressValue).valueOf().bech32()]

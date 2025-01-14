@@ -255,9 +255,24 @@ describe('WarpArgSerializer', () => {
       expect(result).toEqual(['biguint', BigInt('123456789012345678901234567890')])
     })
 
-    it('converts NumericalValue to number', () => {
-      const result = serializer.typedToNative(new U64Value(123))
-      expect(result).toEqual(['uint64', 123])
+    it('converts U8Value to uint8', () => {
+      const result = serializer.typedToNative(new U8Value(255))
+      expect(result).toEqual(['uint8', 255])
+    })
+
+    it('converts U16Value to uint16', () => {
+      const result = serializer.typedToNative(new U16Value(65535))
+      expect(result).toEqual(['uint16', 65535])
+    })
+
+    it('converts U32Value to uint32', () => {
+      const result = serializer.typedToNative(new U32Value(4294967295))
+      expect(result).toEqual(['uint32', 4294967295])
+    })
+
+    it('converts U64Value to uint64', () => {
+      const result = serializer.typedToNative(new U64Value(BigInt('18446744073709551615')))
+      expect(result).toEqual(['uint64', BigInt('18446744073709551615')])
     })
 
     it('converts StringValue to string', () => {
