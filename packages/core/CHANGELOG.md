@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.5.0
+
+### Minor Changes
+
+- f153527: shorten bool type name
+
 ## 0.4.4
 
 ### Patch Changes
