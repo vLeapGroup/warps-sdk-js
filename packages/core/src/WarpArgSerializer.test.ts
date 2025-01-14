@@ -42,9 +42,9 @@ describe('WarpArgSerializer', () => {
       expect(result).toBe('address:erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqplllst77y4l')
     })
 
-    it('serializes boolean values', () => {
-      expect(serializer.nativeToString('boolean', true)).toBe('boolean:true')
-      expect(serializer.nativeToString('boolean', false)).toBe('boolean:false')
+    it('serializes bool values', () => {
+      expect(serializer.nativeToString('bool', true)).toBe('bool:true')
+      expect(serializer.nativeToString('bool', false)).toBe('bool:false')
     })
 
     it('serializes biguint values', () => {
@@ -167,8 +167,8 @@ describe('WarpArgSerializer', () => {
       expect(result.valueOf().toFixed()).toBe('123456789012345678901234567890')
     })
 
-    it('converts boolean to BooleanValue', () => {
-      const result = serializer.nativeToTyped('boolean', true)
+    it('converts bool to BooleanValue', () => {
+      const result = serializer.nativeToTyped('bool', true)
       expect(result).toBeInstanceOf(BooleanValue)
       expect(result.valueOf()).toBe(true)
     })
@@ -280,9 +280,9 @@ describe('WarpArgSerializer', () => {
       expect(result).toEqual(['string', 'hello'])
     })
 
-    it('converts BooleanValue to boolean', () => {
+    it('converts BooleanValue to bool', () => {
       const result = serializer.typedToNative(new BooleanValue(true))
-      expect(result).toEqual(['boolean', true])
+      expect(result).toEqual(['bool', true])
     })
 
     it('converts AddressValue to address', () => {
@@ -346,9 +346,9 @@ describe('WarpArgSerializer', () => {
       expect(result).toEqual(['address', address])
     })
 
-    it('deserializes boolean values', () => {
-      expect(serializer.stringToNative('boolean:true')).toEqual(['boolean', true])
-      expect(serializer.stringToNative('boolean:false')).toEqual(['boolean', false])
+    it('deserializes bool values', () => {
+      expect(serializer.stringToNative('bool:true')).toEqual(['bool', true])
+      expect(serializer.stringToNative('bool:false')).toEqual(['bool', false])
     })
 
     it('deserializes biguint values', () => {
@@ -411,12 +411,12 @@ describe('WarpArgSerializer', () => {
       expect(result.valueOf().toFixed()).toBe('123456789012345678901234567890')
     })
 
-    it('converts boolean encoded value to BooleanValue', () => {
-      const trueResult = serializer.stringToTyped('boolean:true')
+    it('converts bool encoded value to BooleanValue', () => {
+      const trueResult = serializer.stringToTyped('bool:true')
       expect(trueResult).toBeInstanceOf(BooleanValue)
       expect(trueResult.valueOf()).toBe(true)
 
-      const falseResult = serializer.stringToTyped('boolean:false')
+      const falseResult = serializer.stringToTyped('bool:false')
       expect(falseResult).toBeInstanceOf(BooleanValue)
       expect(falseResult.valueOf()).toBe(false)
     })

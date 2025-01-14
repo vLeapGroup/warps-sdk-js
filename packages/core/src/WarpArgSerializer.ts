@@ -191,7 +191,7 @@ export class WarpArgSerializer {
     if (type === 'uint32') return new U32Type()
     if (type === 'uint64') return new U64Type()
     if (type === 'biguint') return new BigUIntType()
-    if (type === 'boolean') return new BooleanType()
+    if (type === 'bool') return new BooleanType()
     if (type === 'address') return new AddressType()
     if (type === 'token') return new TokenIdentifierType()
     if (type === 'hex') return new BytesType()
@@ -212,7 +212,7 @@ export class WarpArgSerializer {
     if (type instanceof U32Type) return 'uint32'
     if (type instanceof U64Type) return 'uint64'
     if (type instanceof BigUIntType) return 'biguint'
-    if (type instanceof BooleanType) return 'boolean'
+    if (type instanceof BooleanType) return 'bool'
     if (type instanceof AddressType) return 'address'
     if (type instanceof TokenIdentifierType) return 'token'
     if (type instanceof BytesType) return 'hex'

@@ -101,7 +101,7 @@ export type BaseWarpActionInputType =
   | 'uint32'
   | 'uint64'
   | 'biguint'
-  | 'boolean'
+  | 'bool'
   | 'address'
   | 'token'
   | 'codemeta'
