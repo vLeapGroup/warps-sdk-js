@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.4.4
+
+### Patch Changes
+
+- d6a7af9: update int arg serialization
+
 ## 0.4.3
 
 ### Patch Changes
