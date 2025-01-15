@@ -1,6 +1,6 @@
 import QRCodeStyling from 'qr-code-styling'
 import { Config } from './config'
-import { DefaultIdentifierType, HttpProtocolPrefix, IdentifierParamName, IdentifierParamSeparator } from './constants'
+import { WarpDefaultIdentifierType, WarpHttpProtocolPrefix, WarpIdentifierParamName, WarpIdentifierParamSeparator } from './constants'
 import { Brand, RegistryInfo, Warp, WarpConfig, WarpIdType } from './types'
 import { WarpBuilder } from './WarpBuilder'
 import { WarpRegistry } from './WarpRegistry'
@@ -30,7 +30,7 @@ export class WarpLink {
   }
 
   isValid(url: string): boolean {
-    if (!url.startsWith(HttpProtocolPrefix)) return false
+    if (!url.startsWith(WarpHttpProtocolPrefix)) return false
     const idResult = this.extractIdentifierInfoFromUrl(url)
     return !!idResult
   }
@@ -49,7 +49,7 @@ export class WarpLink {
   }
 
   async detect(url: string): Promise<DetectionResult> {
-    const idResult = url.startsWith(HttpProtocolPrefix)
+    const idResult = url.startsWith(WarpHttpProtocolPrefix)
       ? this.extractIdentifierInfoFromUrl(url)
       : WarpUtils.getInfoFromPrefixedIdentifier(url)
 
@@ -85,10 +85,11 @@ export class WarpLink {
 
   build(type: WarpIdType, id: string): string {
     const clientUrl = this.config.clientUrl || Config.DefaultClientUrl(this.config.env)
-    const encodedValue = type === DefaultIdentifierType ? encodeURIComponent(id) : encodeURIComponent(type + IdentifierParamSeparator + id)
+    const encodedValue =
+      type === WarpDefaultIdentifierType ? encodeURIComponent(id) : encodeURIComponent(type + WarpIdentifierParamSeparator + id)
     const superClientUrls = Config.SuperClientUrls(this.config.env)
 
-    return superClientUrls.includes(clientUrl) ? `${clientUrl}/${encodedValue}` : `${clientUrl}?${IdentifierParamName}=${encodedValue}`
+    return superClientUrls.includes(clientUrl) ? `${clientUrl}/${encodedValue}` : `${clientUrl}?${WarpIdentifierParamName}=${encodedValue}`
   }
 
   generateQrCode(type: WarpIdType, id: string, size = 512, background = 'white', color = 'black', logoColor = '#23F7DD'): QRCodeStyling {
@@ -114,7 +115,7 @@ export class WarpLink {
     const urlObj = new URL(url)
     const superClientUrls = Config.SuperClientUrls(this.config.env)
     const isSuperClient = superClientUrls.includes(urlObj.origin)
-    const searchParamValue = urlObj.searchParams.get(IdentifierParamName)
+    const searchParamValue = urlObj.searchParams.get(WarpIdentifierParamName)
     const value = isSuperClient && !searchParamValue ? urlObj.pathname.split('/')[1] : searchParamValue
 
     if (!value) {

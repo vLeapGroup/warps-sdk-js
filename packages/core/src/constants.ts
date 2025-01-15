@@ -1,7 +1,7 @@
-export const HttpProtocolPrefix = 'http'
+export const WarpHttpProtocolPrefix = 'http'
 
-export const IdentifierParamName = 'warp'
+export const WarpIdentifierParamName = 'warp'
 
-export const IdentifierParamSeparator = ':'
+export const WarpIdentifierParamSeparator = ':'
 
-export const DefaultIdentifierType = 'alias'
+export const WarpDefaultIdentifierType = 'alias'
