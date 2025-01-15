@@ -39,10 +39,9 @@ export class WarpActionExecutor {
     const destination = Address.newFromBech32(action.address)
     const config = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
 
-    const modifiedInputArgs = this.getModifiedInputs(action, inputs)
-    const txArgs = this.getCombinedInputs(action, modifiedInputArgs)
-    const typedArgs = txArgs.map((arg) => this.serializer.stringToTyped(arg))
-    const nativeValueFromField = this.getNativeValueFromField(action, modifiedInputArgs)
+    const args = this.getArgumentsForInputs(action, inputs)
+    const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
+    const nativeValueFromField = this.getNativeValueFromField(action, args)
     const nativeValueFromUrl = this.getNativeValueFromUrl(action)
     const nativeTransferAmount = BigInt(nativeValueFromField || nativeValueFromUrl || action.value || 0)
     const combinedTransfers = this.getCombinedTokenTransfers(action, inputTransfers)
@@ -97,22 +96,10 @@ export class WarpActionExecutor {
     return result
   }
 
-  private async getAbiForAction(action: WarpQueryAction): Promise<AbiRegistry> {
-    if (action.abi) {
-      return await this.fetchAbi(action)
-    }
-
-    const verification = await this.contractLoader.getVerificationInfo(action.address)
-    if (!verification) throw new Error('WarpActionExecutor: Verification info not found')
-
-    return AbiRegistry.create(verification.abi)
-  }
-
-  private async fetchAbi(action: WarpQueryAction): Promise<AbiRegistry> {
-    if (!action.abi) throw new Error('WarpActionExecutor: ABI not found')
-    const abiRes = await fetch(action.abi)
-    const abiContents = await abiRes.json()
-    return AbiRegistry.create(abiContents)
+  getArgumentsForInputs(action: WarpAction, inputs: string[]): string[] {
+    const modifiedInputArgs = this.getModifiedInputs(action, inputs)
+    const txArgs = this.getCombinedInputs(action, modifiedInputArgs)
+    return txArgs
   }
 
   getNativeValueFromField(action: WarpAction, inputs: string[]): string | null {
@@ -184,6 +171,24 @@ export class WarpActionExecutor {
       args.splice(argIndex, 0, value)
     })
     return args
+  }
+
+  private async getAbiForAction(action: WarpQueryAction): Promise<AbiRegistry> {
+    if (action.abi) {
+      return await this.fetchAbi(action)
+    }
+
+    const verification = await this.contractLoader.getVerificationInfo(action.address)
+    if (!verification) throw new Error('WarpActionExecutor: Verification info not found')
+
+    return AbiRegistry.create(verification.abi)
+  }
+
+  private async fetchAbi(action: WarpQueryAction): Promise<AbiRegistry> {
+    if (!action.abi) throw new Error('WarpActionExecutor: ABI not found')
+    const abiRes = await fetch(action.abi)
+    const abiContents = await abiRes.json()
+    return AbiRegistry.create(abiContents)
   }
 
   private toTypedTransfer(transfer: WarpContractActionTransfer): TokenTransfer {
