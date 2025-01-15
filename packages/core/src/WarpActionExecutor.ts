@@ -39,9 +39,10 @@ export class WarpActionExecutor {
     const destination = Address.newFromBech32(action.address)
     const config = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
 
-    const args = this.getArgumentsForInputs(action, inputs)
+    const modifiedInputArgs = this.getModifiedInputs(action, inputs)
+    const args = this.getCombinedInputs(action, modifiedInputArgs)
     const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
-    const nativeValueFromField = this.getNativeValueFromField(action, inputs)
+    const nativeValueFromField = this.getNativeValueFromField(action, modifiedInputArgs)
     const nativeValueFromUrl = this.getNativeValueFromUrl(action)
     const nativeTransferAmount = BigInt(nativeValueFromField || nativeValueFromUrl || action.value || 0)
     const combinedTransfers = this.getCombinedTokenTransfers(action, inputTransfers)
@@ -103,9 +104,8 @@ export class WarpActionExecutor {
   }
 
   getNativeValueFromField(action: WarpAction, inputs: string[]): string | null {
-    const modifiedInputs = this.getModifiedInputs(action, inputs)
     const valueFieldIndex = (action.inputs || []).findIndex((input) => input.source === 'field' && input.position === 'value')
-    const valueFieldValue = valueFieldIndex !== -1 ? modifiedInputs[valueFieldIndex] : null
+    const valueFieldValue = valueFieldIndex !== -1 ? inputs[valueFieldIndex] : null
     return valueFieldValue ? valueFieldValue.split(':')[1] : null
   }
 
@@ -125,6 +125,7 @@ export class WarpActionExecutor {
 
   // Applies modifiers to the input args
   getModifiedInputs(action: WarpAction, inputs: string[]): string[] {
+    const modifiableInputs = { ...inputs }
     const inputsWithModifiers = action.inputs?.filter((input) => !!input.modifier) || []
 
     // Note: 'scale' modifier means that the value is multiplied by 10^modifier; the modifier can also be the name of another input field
@@ -142,21 +143,21 @@ export class WarpActionExecutor {
           const scalableInput = action.inputs?.find((i) => i.name === exponent)
           if (!scalableInput) throw new Error(`WarpActionExecutor: Scalable input ${exponent} not found`)
           const scalableInputIndex = Number(scalableInput.position.split(':')[1]) - 1
-          const exponentVal = inputs[scalableInputIndex].split(':')[1]
-          const scalableVal = inputs[inputIndex].split(':')[1]
+          const exponentVal = modifiableInputs[scalableInputIndex].split(':')[1]
+          const scalableVal = modifiableInputs[inputIndex].split(':')[1]
           const scaledVal = shiftBigintBy(scalableVal, +exponentVal)
-          inputs[inputIndex] = `${input.type}:${scaledVal}`
+          modifiableInputs[inputIndex] = `${input.type}:${scaledVal}`
         } else {
           // Scale by fixed amount
           const inputIndex = input.position.startsWith('arg:') ? Number(input.position.split(':')[1]) - 1 : index
-          const scalableVal = inputs[inputIndex].split(':')[1]
+          const scalableVal = modifiableInputs[inputIndex].split(':')[1]
           const scaledVal = shiftBigintBy(scalableVal, +exponent)
-          inputs[inputIndex] = `${input.type}:${scaledVal}`
+          modifiableInputs[inputIndex] = `${input.type}:${scaledVal}`
         }
       }
     })
 
-    return inputs
+    return modifiableInputs
   }
 
   // Combines the provided args with filtered input args and sorts them by position index

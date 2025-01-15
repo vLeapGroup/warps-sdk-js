@@ -26,7 +26,7 @@ describe('WarpActionExecutor', () => {
     expect(actual.data?.toString()).toBe('hello')
   })
 
-  it.only('createTransactionForExecute - creates a contract call with value from field', async () => {
+  it('createTransactionForExecute - creates a contract call with value from field', async () => {
     const subject = new WarpActionExecutor(Config, 'https://example.com')
 
     const action: WarpContractAction = {
