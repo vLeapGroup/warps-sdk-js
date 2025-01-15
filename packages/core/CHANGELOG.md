@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.5.3
+
+### Patch Changes
+
+- 91905f3: further action execution fixes
+
 ## 0.5.2
 
 ### Patch Changes
