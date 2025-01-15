@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.5.2
+
+### Patch Changes
+
+- f142602: fix action execution value from field
+
 ## 0.5.1
 
 ### Patch Changes
