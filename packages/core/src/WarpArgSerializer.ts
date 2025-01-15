@@ -90,7 +90,7 @@ export class WarpArgSerializer {
     if (type === 'uint32') return value ? new U32Value(Number(value)) : new NothingValue()
     if (type === 'uint64') return value ? new U64Value(BigInt(value as string)) : new NothingValue()
     if (type === 'biguint') return value ? new BigUIntValue(BigInt(value as string)) : new NothingValue()
-    if (type === 'boolean') return value ? new BooleanValue(typeof value === 'boolean' ? value : value === 'true') : new NothingValue()
+    if (type === 'bool') return value ? new BooleanValue(typeof value === 'boolean' ? value : value === 'true') : new NothingValue()
     if (type === 'address') return value ? new AddressValue(Address.newFromBech32(value as string)) : new NothingValue()
     if (type === 'token') return value ? new TokenIdentifierValue(value as string) : new NothingValue()
     if (type === 'hex') return value ? BytesValue.fromHex(value as string) : new NothingValue()
@@ -144,7 +144,7 @@ export class WarpArgSerializer {
     if (value.hasClassOrSuperclass(U32Value.ClassName)) return ['uint32', (value as U32Value).valueOf().toNumber()]
     if (value.hasClassOrSuperclass(U64Value.ClassName)) return ['uint64', BigInt((value as U64Value).valueOf().toFixed())]
     if (value.hasClassOrSuperclass(StringValue.ClassName)) return ['string', (value as StringValue).valueOf()]
-    if (value.hasClassOrSuperclass(BooleanValue.ClassName)) return ['boolean', (value as BooleanValue).valueOf()]
+    if (value.hasClassOrSuperclass(BooleanValue.ClassName)) return ['bool', (value as BooleanValue).valueOf()]
     if (value.hasClassOrSuperclass(AddressValue.ClassName)) return ['address', (value as AddressValue).valueOf().bech32()]
     if (value.hasClassOrSuperclass(TokenIdentifierValue.ClassName)) return ['token', (value as TokenIdentifierValue).valueOf()]
     if (value.hasClassOrSuperclass(BytesValue.ClassName)) return ['hex', (value as BytesValue).valueOf().toString('hex')]
@@ -169,7 +169,7 @@ export class WarpArgSerializer {
   stringToNative(value: string): [WarpActionInputType, WarpNativeValue] {
     const [type, val] = value.split(':') as [WarpActionInputType, WarpNativeValue]
     if (type === 'address') return [type, val]
-    if (type === 'boolean') return [type, val === 'true']
+    if (type === 'bool') return [type, val === 'true']
     if (type === 'biguint') return [type, BigInt((val as string) || 0)]
     if (type === 'uint8' || type === 'uint16' || type === 'uint32' || type === 'uint64') return [type, Number(val)]
     if (type === 'esdt') {
