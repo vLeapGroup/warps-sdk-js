@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 0.5.1
+
+### Patch Changes
+
+- 066713e: fix bool arg serialization
+- 61c75ef: prefix exported constants
+
 ## 0.5.0
 
 ### Minor Changes
