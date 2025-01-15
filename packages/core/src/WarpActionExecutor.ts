@@ -41,7 +41,7 @@ export class WarpActionExecutor {
 
     const args = this.getArgumentsForInputs(action, inputs)
     const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
-    const nativeValueFromField = this.getNativeValueFromField(action, args)
+    const nativeValueFromField = this.getNativeValueFromField(action, inputs)
     const nativeValueFromUrl = this.getNativeValueFromUrl(action)
     const nativeTransferAmount = BigInt(nativeValueFromField || nativeValueFromUrl || action.value || 0)
     const combinedTransfers = this.getCombinedTokenTransfers(action, inputTransfers)
@@ -103,8 +103,9 @@ export class WarpActionExecutor {
   }
 
   getNativeValueFromField(action: WarpAction, inputs: string[]): string | null {
+    const modifiedInputs = this.getModifiedInputs(action, inputs)
     const valueFieldIndex = (action.inputs || []).findIndex((input) => input.source === 'field' && input.position === 'value')
-    const valueFieldValue = valueFieldIndex !== -1 ? inputs[valueFieldIndex] : null
+    const valueFieldValue = valueFieldIndex !== -1 ? modifiedInputs[valueFieldIndex] : null
     return valueFieldValue ? valueFieldValue.split(':')[1] : null
   }
 

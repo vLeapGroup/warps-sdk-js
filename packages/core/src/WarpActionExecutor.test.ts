@@ -26,6 +26,24 @@ describe('WarpActionExecutor', () => {
     expect(actual.data?.toString()).toBe('hello')
   })
 
+  it.only('createTransactionForExecute - creates a contract call with value from field', async () => {
+    const subject = new WarpActionExecutor(Config, 'https://example.com')
+
+    const action: WarpContractAction = {
+      type: 'contract',
+      label: 'stake',
+      address: 'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqplllst77y4l',
+      func: 'delegate',
+      args: [],
+      gasLimit: 1000000,
+      inputs: [{ name: 'value', type: 'biguint', position: 'value', source: 'field' }],
+    }
+
+    const actual = subject.createTransactionForExecute(action, ['biguint:1000000000000000000'], [])
+
+    expect(actual.value.toString()).toBe('1000000000000000000')
+  })
+
   it('getNativeValueFromField - gets the value from the field', async () => {
     const subject = new WarpActionExecutor(Config, 'https://example.com')
 
