@@ -43,7 +43,7 @@ import {
 } from '@multiversx/sdk-core/out'
 import { BaseWarpActionInputType, WarpActionInputType } from './types'
 
-export type WarpNativeValue = string | number | bigint | boolean | null | TokenTransfer
+export type WarpNativeValue = string | number | bigint | boolean | null | TokenTransfer | WarpNativeValue[]
 
 export class WarpArgSerializer {
   nativeToString(type: WarpActionInputType, value: WarpNativeValue): string {
@@ -54,29 +54,32 @@ export class WarpArgSerializer {
   }
 
   nativeToTyped(type: WarpActionInputType, value: WarpNativeValue): TypedValue {
-    if (type.startsWith('option:')) {
-      const [_, baseTypeRaw] = type.split(':') as ['option', WarpActionInputType]
-      const baseValue = this.nativeToTyped(baseTypeRaw, value)
+    const typeParts = type.split(':')
+    const baseType = typeParts[0]
+
+    if (baseType === 'option') {
+      const baseType = typeParts[1] as BaseWarpActionInputType
+      const baseValue = this.nativeToTyped(baseType, value)
       return value ? OptionValue.newProvided(baseValue) : OptionValue.newMissingTyped(baseValue.getType())
     }
-    if (type.startsWith('optional:')) {
-      const [_, baseTypeNative] = type.split(':') as ['optional', BaseWarpActionInputType]
-      const baseValue = this.nativeToTyped(baseTypeNative, value)
+    if (baseType === 'optional') {
+      const baseType = typeParts[1] as BaseWarpActionInputType
+      const baseValue = this.nativeToTyped(baseType, value)
       return value ? new OptionalValue(baseValue.getType(), baseValue) : OptionalValue.newMissing()
     }
-    if (type.startsWith('list:')) {
-      const [_, baseType] = type.split(':') as ['list', BaseWarpActionInputType]
+    if (baseType === 'list') {
+      const baseType = typeParts[1] as BaseWarpActionInputType
       const values = (value as string).split(',')
       const typedValues = values.map((val) => this.nativeToTyped(baseType, val))
       return new List(this.nativeToType(baseType), typedValues)
     }
-    if (type.startsWith('variadic:')) {
-      const [_, baseType] = type.split(':') as ['variadic', WarpActionInputType]
+    if (baseType === 'variadic') {
+      const baseTypeNative = typeParts[1]
       const values = (value as string).split(',')
-      const typedValues = values.map((val) => this.nativeToTyped(baseType, val))
+      const typedValues = values.map((val) => this.nativeToTyped(baseTypeNative, val))
       return new VariadicValue(new VariadicType(new PrimitiveType('Custom')), typedValues)
     }
-    if (type.startsWith('composite:')) {
+    if (baseType === 'composite') {
       const [_, baseType] = type.split(':') as ['composite', BaseWarpActionInputType]
       const rawValues = (value as string).split('|')
       const rawTypes = baseType.split('|') as BaseWarpActionInputType[]
@@ -167,16 +170,49 @@ export class WarpArgSerializer {
   }
 
   stringToNative(value: string): [WarpActionInputType, WarpNativeValue] {
-    const [type, val] = value.split(':') as [WarpActionInputType, WarpNativeValue]
-    if (type === 'address') return [type, val]
-    if (type === 'bool') return [type, val === 'true']
-    if (type === 'biguint') return [type, BigInt((val as string) || 0)]
-    if (type === 'uint8' || type === 'uint16' || type === 'uint32' || type === 'uint64') return [type, Number(val)]
-    if (type === 'esdt') {
+    const parts = value.split(':')
+    const baseType = parts[0]
+    const val = parts.slice(1).join(':')
+
+    if (baseType === 'option') {
+      const [baseType, baseValue] = val.split(':') as [WarpActionInputType, WarpNativeValue]
+      return [`option:${baseType}`, baseValue || null]
+    } else if (baseType === 'optional') {
+      const [baseType, baseValue] = val.split(':') as [WarpActionInputType, WarpNativeValue]
+      return [`optional:${baseType}`, baseValue || null]
+    } else if (baseType === 'list') {
+      const listParts = val.split(':') as [WarpActionInputType, WarpNativeValue]
+      const baseType = listParts.slice(0, -1).join(':')
+      const valuesRaw = listParts[listParts.length - 1]
+      const valuesStrings = valuesRaw ? (valuesRaw as string).split(',') : []
+      const values = valuesStrings.map((v) => this.stringToNative(`${baseType}:${v}`)[1])
+      return [`list:${baseType}`, values]
+    } else if (baseType === 'variadic') {
+      const variadicParts = (val as string).split(':') as [WarpActionInputType, WarpNativeValue]
+      const baseType = variadicParts.slice(0, -1).join(':')
+      const valuesRaw = variadicParts[variadicParts.length - 1]
+      const valuesStrings = valuesRaw ? (valuesRaw as string).split(',') : []
+      const values = valuesStrings.map((v) => this.stringToNative(`${baseType}:${v}`)[1])
+      return [`variadic:${baseType}`, values]
+    } else if (baseType === 'composite') {
+      const [baseType, valuesRaw] = (val as string).split(':') as ['composite', BaseWarpActionInputType]
+      const rawTypes = baseType.split('|') as BaseWarpActionInputType[]
+      const valuesStrings = valuesRaw.split('|')
+      const values = valuesStrings.map((val, index) => this.stringToNative(`${rawTypes[index]}:${val}`)[1])
+      return [`composite:${baseType}`, values]
+    } else if (baseType === 'string') return [baseType, val]
+    else if (baseType === 'uint8' || baseType === 'uint16' || baseType === 'uint32' || baseType === 'uint64') return [baseType, Number(val)]
+    else if (baseType === 'biguint') return [baseType, BigInt((val as string) || 0)]
+    else if (baseType === 'bool') return [baseType, val === 'true']
+    else if (baseType === 'address') return [baseType, val]
+    else if (baseType === 'token') return [baseType, val]
+    else if (baseType === 'hex') return [baseType, val]
+    else if (baseType === 'codemeta') return [baseType, val]
+    else if (baseType === 'esdt') {
       const [identifier, nonce, amount] = (val as string).split('|')
-      return [type, new TokenTransfer({ token: new Token({ identifier, nonce: BigInt(nonce) }), amount: BigInt(amount) })]
+      return [baseType, new TokenTransfer({ token: new Token({ identifier, nonce: BigInt(nonce) }), amount: BigInt(amount) })]
     }
-    return [type, val]
+    throw new Error(`WarpArgSerializer (stringToNative): Unsupported input type: ${baseType}`)
   }
 
   stringToTyped(value: string): TypedValue {
