@@ -19,7 +19,6 @@ import {
   NothingValue,
   OptionalValue,
   OptionValue,
-  PrimitiveType,
   StringType,
   StringValue,
   Struct,
@@ -74,10 +73,11 @@ export class WarpArgSerializer {
       return new List(this.nativeToType(baseType), typedValues)
     }
     if (baseType === 'variadic') {
-      const baseTypeNative = typeParts[1]
+      const baseTypeNative = typeParts[1] as BaseWarpActionInputType
+      const baseType = this.nativeToType(baseTypeNative)
       const values = (value as string).split(',')
       const typedValues = values.map((val) => this.nativeToTyped(baseTypeNative, val))
-      return new VariadicValue(new VariadicType(new PrimitiveType('Custom')), typedValues)
+      return new VariadicValue(new VariadicType(baseType), typedValues)
     }
     if (baseType === 'composite') {
       const [_, baseType] = type.split(':') as ['composite', BaseWarpActionInputType]
