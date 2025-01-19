@@ -446,12 +446,18 @@ describe('WarpArgSerializer', () => {
       expect(serializer.stringToNative('uint8:255')).toEqual(['uint8', 255])
       expect(serializer.stringToNative('uint16:789')).toEqual(['uint16', 789])
       expect(serializer.stringToNative('uint32:456')).toEqual(['uint32', 456])
-      expect(serializer.stringToNative('uint64:123')).toEqual(['uint64', 123])
+    })
+
+    it('deserializes uint64 values', () => {
+      const result = serializer.stringToNative('uint64:1234567890')
+      expect(result[0]).toBe('uint64')
+      expect(result[1]?.toString()).toBe('1234567890')
     })
 
     it('deserializes biguint values', () => {
       const result = serializer.stringToNative('biguint:1234567890')
-      expect(result).toEqual(['biguint', BigInt('1234567890')])
+      expect(result[0]).toBe('biguint')
+      expect(result[1]?.toString()).toBe('1234567890')
     })
 
     it('deserializes bool values', () => {

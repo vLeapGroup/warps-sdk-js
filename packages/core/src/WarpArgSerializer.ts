@@ -201,8 +201,8 @@ export class WarpArgSerializer {
       const values = valuesStrings.map((val, index) => this.stringToNative(`${rawTypes[index]}:${val}`)[1])
       return [`composite:${baseType}`, values]
     } else if (baseType === 'string') return [baseType, val]
-    else if (baseType === 'uint8' || baseType === 'uint16' || baseType === 'uint32' || baseType === 'uint64') return [baseType, Number(val)]
-    else if (baseType === 'biguint') return [baseType, BigInt((val as string) || 0)]
+    else if (baseType === 'uint8' || baseType === 'uint16' || baseType === 'uint32') return [baseType, Number(val)]
+    else if (baseType === 'uint64' || baseType === 'biguint') return [baseType, BigInt((val as string) || 0)]
     else if (baseType === 'bool') return [baseType, val === 'true']
     else if (baseType === 'address') return [baseType, val]
     else if (baseType === 'token') return [baseType, val]
