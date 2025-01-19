@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.5.5
+
+### Patch Changes
+
+- 302d564: fix arg serializer uint64 deserialization
+
 ## 0.5.4
 
 ### Patch Changes
