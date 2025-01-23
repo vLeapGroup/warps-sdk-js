@@ -70,24 +70,24 @@ export class WarpArgSerializer {
     }
     if (value.hasClassOrSuperclass(List.ClassName)) {
       const items = (value as List).getItems()
-      const types = items.map((item) => this.typedToString(item).split(':')[0]) as BaseWarpActionInputType[]
+      const types = items.map((item) => this.typedToString(item).split(ParamsSeparator)[0]) as BaseWarpActionInputType[]
       const type = types[0] as BaseWarpActionInputType
-      const values = items.map((item) => this.typedToString(item).split(':')[1]) as WarpNativeValue[]
+      const values = items.map((item) => this.typedToString(item).split(ParamsSeparator)[1]) as WarpNativeValue[]
       return `list:${type}:${values.join(',')}`
     }
     if (value.hasClassOrSuperclass(VariadicValue.ClassName)) {
       const items = (value as VariadicValue).getItems()
-      const types = items.map((item) => this.typedToString(item).split(':')[0]) as BaseWarpActionInputType[]
+      const types = items.map((item) => this.typedToString(item).split(ParamsSeparator)[0]) as BaseWarpActionInputType[]
       const type = types[0] as BaseWarpActionInputType
-      const values = items.map((item) => this.typedToString(item).split(':')[1]) as WarpNativeValue[]
+      const values = items.map((item) => this.typedToString(item).split(ParamsSeparator)[1]) as WarpNativeValue[]
       return `variadic:${type}:${values.join(',')}`
     }
     if (value.hasClassOrSuperclass(CompositeValue.ClassName)) {
       const items = (value as CompositeValue).getItems()
-      const types = items.map((item) => this.typedToString(item).split(':')[0]) as BaseWarpActionInputType[]
-      const values = items.map((item) => this.typedToString(item).split(':')[1]) as WarpNativeValue[]
-      const rawTypes = types.join('|')
-      const rawValues = values.join('|')
+      const types = items.map((item) => this.typedToString(item).split(ParamsSeparator)[0]) as BaseWarpActionInputType[]
+      const values = items.map((item) => this.typedToString(item).split(ParamsSeparator)[1]) as WarpNativeValue[]
+      const rawTypes = types.join(CompositeSeparator)
+      const rawValues = values.join(CompositeSeparator)
       return `composite(${rawTypes}):${rawValues}`
     }
     if (value.hasClassOrSuperclass(BigUIntValue.ClassName)) return `biguint:${BigInt((value as BigUIntValue).valueOf().toFixed())}`
@@ -107,7 +107,6 @@ export class WarpArgSerializer {
       const identifier = (value as Struct).getFieldValue('token_identifier').valueOf()
       const nonce = (value as Struct).getFieldValue('token_nonce').valueOf()
       const amount = (value as Struct).getFieldValue('amount').valueOf()
-      const token = new Token({ identifier, nonce })
       return `esdt:${identifier}|${nonce}|${amount}`
     }
     throw new Error(`WarpArgSerializer (typedToString): Unsupported input type: ${value.getClassName()}`)
@@ -126,7 +125,7 @@ export class WarpArgSerializer {
   nativeToType(type: BaseWarpActionInputType): Type {
     if (type.startsWith('composite')) {
       const rawTypes = type.match(/\(([^)]+)\)/)?.[1] as BaseWarpActionInputType
-      return new CompositeType(...rawTypes.split('|').map((t) => this.nativeToType(t as BaseWarpActionInputType)))
+      return new CompositeType(...rawTypes.split(CompositeSeparator).map((t) => this.nativeToType(t as BaseWarpActionInputType)))
     }
     if (type === 'string') return new StringType()
     if (type === 'uint8') return new U8Type()
@@ -149,36 +148,35 @@ export class WarpArgSerializer {
   }
 
   stringToNative(value: string): [WarpActionInputType, WarpNativeValue] {
-    const parts = value.split(':')
+    const parts = value.split(ParamsSeparator)
     const baseType = parts[0]
-    const val = parts.slice(1).join(':')
+    const val = parts.slice(1).join(ParamsSeparator)
 
     if (baseType === 'option') {
-      const [baseType, baseValue] = val.split(':') as [WarpActionInputType, WarpNativeValue]
+      const [baseType, baseValue] = val.split(ParamsSeparator) as [WarpActionInputType, WarpNativeValue]
       return [`option:${baseType}`, baseValue || null]
     } else if (baseType === 'optional') {
-      const [baseType, baseValue] = val.split(':') as [WarpActionInputType, WarpNativeValue]
+      const [baseType, baseValue] = val.split(ParamsSeparator) as [WarpActionInputType, WarpNativeValue]
       return [`optional:${baseType}`, baseValue || null]
     } else if (baseType === 'list') {
-      const listParts = val.split(':') as [WarpActionInputType, WarpNativeValue]
-      const baseType = listParts.slice(0, -1).join(':')
+      const listParts = val.split(ParamsSeparator) as [WarpActionInputType, WarpNativeValue]
+      const baseType = listParts.slice(0, -1).join(ParamsSeparator)
       const valuesRaw = listParts[listParts.length - 1]
       const valuesStrings = valuesRaw ? (valuesRaw as string).split(',') : []
       const values = valuesStrings.map((v) => this.stringToNative(`${baseType}:${v}`)[1])
       return [`list:${baseType}`, values]
     } else if (baseType === 'variadic') {
-      const variadicParts = (val as string).split(':') as [WarpActionInputType, WarpNativeValue]
-      const baseType = variadicParts.slice(0, -1).join(':')
+      const variadicParts = (val as string).split(ParamsSeparator) as [WarpActionInputType, WarpNativeValue]
+      const baseType = variadicParts.slice(0, -1).join(ParamsSeparator)
       const valuesRaw = variadicParts[variadicParts.length - 1]
       const valuesStrings = valuesRaw ? (valuesRaw as string).split(',') : []
       const values = valuesStrings.map((v) => this.stringToNative(`${baseType}:${v}`)[1])
       return [`variadic:${baseType}`, values]
-    } else if (baseType === 'composite') {
-      const [baseType, valuesRaw] = (val as string).split(':') as ['composite', BaseWarpActionInputType]
-      const rawTypes = baseType.split('|') as BaseWarpActionInputType[]
-      const valuesStrings = valuesRaw.split('|')
+    } else if (baseType.startsWith('composite')) {
+      const rawTypes = baseType.match(/\(([^)]+)\)/)?.[1]?.split(CompositeSeparator) as BaseWarpActionInputType[]
+      const valuesStrings = val.split(CompositeSeparator)
       const values = valuesStrings.map((val, index) => this.stringToNative(`${rawTypes[index]}:${val}`)[1])
-      return [`composite:${baseType}`, values]
+      return [baseType, values]
     } else if (baseType === 'string') return [baseType, val]
     else if (baseType === 'uint8' || baseType === 'uint16' || baseType === 'uint32') return [baseType, Number(val)]
     else if (baseType === 'uint64' || baseType === 'biguint') return [baseType, BigInt((val as string) || 0)]
@@ -188,7 +186,7 @@ export class WarpArgSerializer {
     else if (baseType === 'hex') return [baseType, val]
     else if (baseType === 'codemeta') return [baseType, val]
     else if (baseType === 'esdt') {
-      const [identifier, nonce, amount] = (val as string).split('|')
+      const [identifier, nonce, amount] = (val as string).split(CompositeSeparator)
       return [baseType, new TokenTransfer({ token: new Token({ identifier, nonce: BigInt(nonce) }), amount: BigInt(amount) })]
     }
     throw new Error(`WarpArgSerializer (stringToNative): Unsupported input type: ${baseType}`)
@@ -219,8 +217,8 @@ export class WarpArgSerializer {
     }
     if (type.startsWith('composite')) {
       const baseType = type.match(/\(([^)]+)\)/)?.[1] as BaseWarpActionInputType
-      const rawValues = (val as string).split('|')
-      const rawTypes = baseType.split('|') as BaseWarpActionInputType[]
+      const rawValues = (val as string).split(CompositeSeparator)
+      const rawTypes = baseType.split(CompositeSeparator) as BaseWarpActionInputType[]
       const values = rawValues.map((val, i) => this.stringToTyped(`${rawTypes[i]}:${val}`))
       const types = values.map((v) => v.getType())
       return new CompositeValue(new CompositeType(...types), values)

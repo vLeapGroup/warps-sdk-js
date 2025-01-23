@@ -379,8 +379,8 @@ describe('WarpArgSerializer', () => {
     })
 
     it('deserializes a list of composite values', () => {
-      const result = serializer.stringToNative('list:composite:string|uint64:hello|123,world|456')
-      expect(result[0]).toBe('list:composite:string|uint64')
+      const result = serializer.stringToNative('list:composite(string|uint64):hello|123,world|456')
+      expect(result[0]).toBe('list:composite(string|uint64)')
       const values = result[1] as [string, BigInt][]
       expect(values[0][0].toString()).toBe('hello')
       expect(values[0][1].toString()).toBe('123')
@@ -389,8 +389,8 @@ describe('WarpArgSerializer', () => {
     })
 
     it('deserializes a list of composite values', () => {
-      const result = serializer.stringToNative('list:composite:string|uint64:hello|123,world|456')
-      expect(result[0]).toBe('list:composite:string|uint64')
+      const result = serializer.stringToNative('list:composite(string|uint64):hello|123,world|456')
+      expect(result[0]).toBe('list:composite(string|uint64)')
       const values = result[1] as [string, BigInt][]
       expect(values[0][0].toString()).toBe('hello')
       expect(values[0][1].toString()).toBe('123')
@@ -399,8 +399,8 @@ describe('WarpArgSerializer', () => {
     })
 
     it('deserializes a list of empty values', () => {
-      const result = serializer.stringToNative('list:composite:string|uint64:')
-      expect(result[0]).toBe('list:composite:string|uint64')
+      const result = serializer.stringToNative('list:composite(string|uint64):')
+      expect(result[0]).toBe('list:composite(string|uint64)')
       expect(result[1]).toEqual([])
     })
 
@@ -414,9 +414,9 @@ describe('WarpArgSerializer', () => {
     })
 
     it('deserializes variadic of composite', function () {
-      const result = serializer.stringToNative('variadic:composite:string|uint64:abc|123,def|456,ghi|789')
+      const result = serializer.stringToNative('variadic:composite(string|uint64):abc|123,def|456,ghi|789')
 
-      expect(result[0]).toBe('variadic:composite:string|uint64')
+      expect(result[0]).toBe('variadic:composite(string|uint64)')
       const values = result[1] as [string, BigInt][]
       expect(values[0][0].toString()).toBe('abc')
       expect(values[0][1].toString()).toBe('123')
@@ -433,8 +433,8 @@ describe('WarpArgSerializer', () => {
     })
 
     it('deserializes composite values', () => {
-      const result = serializer.stringToNative('composite:string|uint64:hello|123')
-      expect(result[0]).toBe('composite:string|uint64')
+      const result = serializer.stringToNative('composite(string|uint64):hello|123')
+      expect(result[0]).toBe('composite(string|uint64)')
       const values = result[1] as [string, BigInt][]
       expect(values[0].toString()).toBe('hello')
       expect(values[1].toString()).toBe('123')
