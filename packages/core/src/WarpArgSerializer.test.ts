@@ -75,29 +75,29 @@ describe('WarpArgSerializer', () => {
   })
 
   describe('typedToString', () => {
-    it('converts OptionValue to native value', () => {
+    it('converts OptionValue', () => {
       const result = serializer.typedToString(new OptionValue(new StringType(), StringValue.fromUTF8('abc')))
       expect(result).toBe('option:string:abc')
     })
 
-    it('converts OptionalValue to native value', () => {
+    it('converts OptionalValue', () => {
       const result = serializer.typedToString(new OptionalValue(new StringType(), StringValue.fromUTF8('abc')))
       expect(result).toBe('optional:string:abc')
     })
 
-    it('converts ListValue to native value', () => {
+    it('converts ListValue', () => {
       const result = serializer.typedToString(new List(new StringType(), [StringValue.fromUTF8('abc'), StringValue.fromUTF8('def')]))
       expect(result).toBe('list:string:abc,def')
     })
 
-    it('converts VariadicValue to native value', () => {
+    it('converts VariadicValue', () => {
       const result = serializer.typedToString(
         new VariadicValue(new VariadicType(new StringType()), [StringValue.fromUTF8('abc'), StringValue.fromUTF8('def')])
       )
       expect(result).toBe('variadic:string:abc,def')
     })
 
-    it('converts CompositeValue to native value', () => {
+    it('converts CompositeValue', () => {
       const result = serializer.typedToString(
         new CompositeValue(new CompositeType(new StringType(), new U64Type()), [
           StringValue.fromUTF8('abc'),
@@ -354,7 +354,7 @@ describe('WarpArgSerializer', () => {
       expect(result[1]).toBe(null)
     })
 
-    it('deserializes optional ', () => {
+    it('deserializes optional', () => {
       const result = serializer.stringToNative('optional:string:hello')
       expect(result[0]).toBe('optional:string')
       expect(result[1]).toBe('hello')
