@@ -113,6 +113,11 @@ export class WarpArgSerializer {
     throw new Error(`WarpArgSerializer (typedToString): Unsupported input type: ${value.getClassName()}`)
   }
 
+  typedToNative(value: TypedValue): [WarpActionInputType, WarpNativeValue] {
+    const stringValue = this.typedToString(value)
+    return this.stringToNative(stringValue)
+  }
+
   nativeToTyped(type: WarpActionInputType, value: WarpNativeValue): TypedValue {
     const stringValue = this.nativeToString(type, value)
     return this.stringToTyped(stringValue)
