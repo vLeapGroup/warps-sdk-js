@@ -44,6 +44,11 @@ import { BaseWarpActionInputType, WarpActionInputType } from './types'
 
 export type WarpNativeValue = string | number | bigint | boolean | null | TokenTransfer | WarpNativeValue[]
 
+const ParamsSeparator = ':'
+const CompositeSeparator = '|'
+
+const SplitParamsRegex = new RegExp(`${ParamsSeparator}(.*)`)
+
 export class WarpArgSerializer {
   nativeToString(type: WarpActionInputType, value: WarpNativeValue): string {
     if (type === 'esdt' && value instanceof TokenTransfer) {
@@ -52,121 +57,90 @@ export class WarpArgSerializer {
     return `${type}:${value?.toString() ?? ''}`
   }
 
-  nativeToTyped(type: WarpActionInputType, value: WarpNativeValue): TypedValue {
-    const typeParts = type.split(':')
-    const baseType = typeParts[0]
-
-    if (baseType === 'option') {
-      const baseType = typeParts[1] as BaseWarpActionInputType
-      const baseValue = this.nativeToTyped(baseType, value)
-      return value ? OptionValue.newProvided(baseValue) : OptionValue.newMissingTyped(baseValue.getType())
-    }
-    if (baseType === 'optional') {
-      const baseType = typeParts[1] as BaseWarpActionInputType
-      const baseValue = this.nativeToTyped(baseType, value)
-      return value ? new OptionalValue(baseValue.getType(), baseValue) : OptionalValue.newMissing()
-    }
-    if (baseType === 'list') {
-      const baseType = typeParts[1] as BaseWarpActionInputType
-      const values = (value as string).split(',')
-      const typedValues = values.map((val) => this.nativeToTyped(baseType, val))
-      return new List(this.nativeToType(baseType), typedValues)
-    }
-    if (baseType === 'variadic') {
-      const baseTypeNative = typeParts[1] as BaseWarpActionInputType
-      const baseType = this.nativeToType(baseTypeNative)
-      const values = (value as string).split(',')
-      const typedValues = values.map((val) => this.nativeToTyped(baseTypeNative, val))
-      return new VariadicValue(new VariadicType(baseType), typedValues)
-    }
-    if (baseType === 'composite') {
-      const [_, baseType] = type.split(':') as ['composite', BaseWarpActionInputType]
-      const rawValues = (value as string).split('|')
-      const rawTypes = baseType.split('|') as BaseWarpActionInputType[]
-      const values = rawValues.map((val, index) => this.nativeToTyped(rawTypes[index], val))
-      const types = rawTypes.map((type) => this.nativeToType(type))
-      return new CompositeValue(new CompositeType(...types), values)
-    }
-    if (type === 'string') return value ? StringValue.fromUTF8(value as string) : new NothingValue()
-    if (type === 'uint8') return value ? new U8Value(Number(value)) : new NothingValue()
-    if (type === 'uint16') return value ? new U16Value(Number(value)) : new NothingValue()
-    if (type === 'uint32') return value ? new U32Value(Number(value)) : new NothingValue()
-    if (type === 'uint64') return value ? new U64Value(BigInt(value as string)) : new NothingValue()
-    if (type === 'biguint') return value ? new BigUIntValue(BigInt(value as string)) : new NothingValue()
-    if (type === 'bool') return value ? new BooleanValue(typeof value === 'boolean' ? value : value === 'true') : new NothingValue()
-    if (type === 'address') return value ? new AddressValue(Address.newFromBech32(value as string)) : new NothingValue()
-    if (type === 'token') return value ? new TokenIdentifierValue(value as string) : new NothingValue()
-    if (type === 'hex') return value ? BytesValue.fromHex(value as string) : new NothingValue()
-    if (type === 'codemeta') return new CodeMetadataValue(CodeMetadata.fromBuffer(Buffer.from(value as string, 'hex')))
-    if (type === 'esdt' && value instanceof TokenTransfer)
-      return new Struct(this.nativeToType('esdt') as StructType, [
-        new Field(new TokenIdentifierValue(value.token.identifier), 'token_identifier'),
-        new Field(new U64Value(BigInt(value.token.nonce)), 'token_nonce'),
-        new Field(new BigUIntValue(BigInt(value.amount)), 'amount'),
-      ])
-
-    throw new Error(`WarpArgSerializer (nativeToTyped): Unsupported input type: ${type}`)
-  }
-
-  typedToNative(value: TypedValue): [WarpActionInputType, WarpNativeValue] {
+  typedToString(value: TypedValue): string {
     if (value.hasClassOrSuperclass(OptionValue.ClassName)) {
-      if (!(value as OptionValue).isSet()) return ['option', null]
-      const [type, val] = this.typedToNative((value as OptionValue).getTypedValue()) as [BaseWarpActionInputType, WarpNativeValue]
-      return [`option:${type}`, val]
+      if (!(value as OptionValue).isSet()) return 'option:null'
+      const result = this.typedToString((value as OptionValue).getTypedValue())
+      return `option:${result}`
     }
     if (value.hasClassOrSuperclass(OptionalValue.ClassName)) {
-      if (!(value as OptionalValue).isSet()) return ['optional', null]
-      const [type, val] = this.typedToNative((value as OptionalValue).getTypedValue()) as [BaseWarpActionInputType, WarpNativeValue]
-      return [`optional:${type}`, val]
+      if (!(value as OptionalValue).isSet()) return 'optional:null'
+      const result = this.typedToString((value as OptionalValue).getTypedValue())
+      return `optional:${result}`
     }
     if (value.hasClassOrSuperclass(List.ClassName)) {
       const items = (value as List).getItems()
-      const types = items.map((item) => this.typedToNative(item)[0]) as BaseWarpActionInputType[]
+      const types = items.map((item) => this.typedToString(item).split(':')[0]) as BaseWarpActionInputType[]
       const type = types[0] as BaseWarpActionInputType
-      const values = items.map((item) => this.typedToNative(item)[1]) as WarpNativeValue[]
-      return [`list:${type}`, values.join(',')]
+      const values = items.map((item) => this.typedToString(item).split(':')[1]) as WarpNativeValue[]
+      return `list:${type}:${values.join(',')}`
     }
     if (value.hasClassOrSuperclass(VariadicValue.ClassName)) {
       const items = (value as VariadicValue).getItems()
-      const types = items.map((item) => this.typedToNative(item)[0]) as BaseWarpActionInputType[]
+      const types = items.map((item) => this.typedToString(item).split(':')[0]) as BaseWarpActionInputType[]
       const type = types[0] as BaseWarpActionInputType
-      const values = items.map((item) => this.typedToNative(item)[1]) as WarpNativeValue[]
-      return [`variadic:${type}`, values.join(',')]
+      const values = items.map((item) => this.typedToString(item).split(':')[1]) as WarpNativeValue[]
+      return `variadic:${type}:${values.join(',')}`
     }
     if (value.hasClassOrSuperclass(CompositeValue.ClassName)) {
       const items = (value as CompositeValue).getItems()
-      const types = items.map((item) => this.typeToNative(item.getType()))
-      const values = items.map((item) => item.valueOf()) as WarpNativeValue[]
+      const types = items.map((item) => this.typedToString(item).split(':')[0]) as BaseWarpActionInputType[]
+      const values = items.map((item) => this.typedToString(item).split(':')[1]) as WarpNativeValue[]
       const rawTypes = types.join('|')
       const rawValues = values.join('|')
-      return [`composite:${rawTypes}`, rawValues]
+      return `composite(${rawTypes}):${rawValues}`
     }
-    if (value.hasClassOrSuperclass(BigUIntValue.ClassName)) return ['biguint', BigInt((value as BigUIntValue).valueOf().toFixed())]
-    if (value.hasClassOrSuperclass(U8Value.ClassName)) return ['uint8', (value as U8Value).valueOf().toNumber()]
-    if (value.hasClassOrSuperclass(U16Value.ClassName)) return ['uint16', (value as U16Value).valueOf().toNumber()]
-    if (value.hasClassOrSuperclass(U32Value.ClassName)) return ['uint32', (value as U32Value).valueOf().toNumber()]
-    if (value.hasClassOrSuperclass(U64Value.ClassName)) return ['uint64', BigInt((value as U64Value).valueOf().toFixed())]
-    if (value.hasClassOrSuperclass(StringValue.ClassName)) return ['string', (value as StringValue).valueOf()]
-    if (value.hasClassOrSuperclass(BooleanValue.ClassName)) return ['bool', (value as BooleanValue).valueOf()]
-    if (value.hasClassOrSuperclass(AddressValue.ClassName)) return ['address', (value as AddressValue).valueOf().bech32()]
-    if (value.hasClassOrSuperclass(TokenIdentifierValue.ClassName)) return ['token', (value as TokenIdentifierValue).valueOf()]
-    if (value.hasClassOrSuperclass(BytesValue.ClassName)) return ['hex', (value as BytesValue).valueOf().toString('hex')]
+    if (value.hasClassOrSuperclass(BigUIntValue.ClassName)) return `biguint:${BigInt((value as BigUIntValue).valueOf().toFixed())}`
+    if (value.hasClassOrSuperclass(U8Value.ClassName)) return `uint8:${(value as U8Value).valueOf().toNumber()}`
+    if (value.hasClassOrSuperclass(U16Value.ClassName)) return `uint16:${(value as U16Value).valueOf().toNumber()}`
+    if (value.hasClassOrSuperclass(U32Value.ClassName)) return `uint32:${(value as U32Value).valueOf().toNumber()}`
+    if (value.hasClassOrSuperclass(U64Value.ClassName)) return `uint64:${BigInt((value as U64Value).valueOf().toFixed())}`
+    if (value.hasClassOrSuperclass(StringValue.ClassName)) return `string:${(value as StringValue).valueOf()}`
+    if (value.hasClassOrSuperclass(BooleanValue.ClassName)) return `bool:${(value as BooleanValue).valueOf()}`
+    if (value.hasClassOrSuperclass(AddressValue.ClassName)) return `address:${(value as AddressValue).valueOf().bech32()}`
+    if (value.hasClassOrSuperclass(TokenIdentifierValue.ClassName)) return `token:${(value as TokenIdentifierValue).valueOf()}`
+    if (value.hasClassOrSuperclass(BytesValue.ClassName)) return `hex:${(value as BytesValue).valueOf().toString('hex')}`
     if (value.hasClassOrSuperclass(CodeMetadataValue.ClassName)) {
-      return ['codemeta', (value as CodeMetadataValue).valueOf().toBuffer().toString('hex')]
+      return `codemeta:${(value as CodeMetadataValue).valueOf().toBuffer().toString('hex')}`
     }
     if (value.getType().getName() === 'EsdtTokenPayment') {
       const identifier = (value as Struct).getFieldValue('token_identifier').valueOf()
       const nonce = (value as Struct).getFieldValue('token_nonce').valueOf()
       const amount = (value as Struct).getFieldValue('amount').valueOf()
       const token = new Token({ identifier, nonce })
-      return ['esdt', new TokenTransfer({ token, amount })]
+      return `esdt:${identifier}|${nonce}|${amount}`
     }
-    throw new Error(`WarpArgSerializer (typedToNative): Unsupported input type: ${value.getClassName()}`)
+    throw new Error(`WarpArgSerializer (typedToString): Unsupported input type: ${value.getClassName()}`)
   }
 
-  typedToString(value: TypedValue): string {
-    const [type, val] = this.typedToNative(value)
-    return this.nativeToString(type, val)
+  nativeToTyped(type: WarpActionInputType, value: WarpNativeValue): TypedValue {
+    const stringValue = this.nativeToString(type, value)
+    return this.stringToTyped(stringValue)
+  }
+
+  nativeToType(type: BaseWarpActionInputType): Type {
+    if (type.startsWith('composite')) {
+      const rawTypes = type.match(/\(([^)]+)\)/)?.[1] as BaseWarpActionInputType
+      return new CompositeType(...rawTypes.split('|').map((t) => this.nativeToType(t as BaseWarpActionInputType)))
+    }
+    if (type === 'string') return new StringType()
+    if (type === 'uint8') return new U8Type()
+    if (type === 'uint16') return new U16Type()
+    if (type === 'uint32') return new U32Type()
+    if (type === 'uint64') return new U64Type()
+    if (type === 'biguint') return new BigUIntType()
+    if (type === 'bool') return new BooleanType()
+    if (type === 'address') return new AddressType()
+    if (type === 'token') return new TokenIdentifierType()
+    if (type === 'hex') return new BytesType()
+    if (type === 'codemeta') return new CodeMetadataType()
+    if (type === 'esdt' || type === 'nft')
+      return new StructType('EsdtTokenPayment', [
+        new FieldDefinition('token_identifier', '', new TokenIdentifierType()),
+        new FieldDefinition('token_nonce', '', new U64Type()),
+        new FieldDefinition('amount', '', new BigUIntType()),
+      ])
+    throw new Error(`WarpArgSerializer (nativeToType): Unsupported input type: ${type}`)
   }
 
   stringToNative(value: string): [WarpActionInputType, WarpNativeValue] {
@@ -216,30 +190,62 @@ export class WarpArgSerializer {
   }
 
   stringToTyped(value: string): TypedValue {
-    const [type, val] = value.split(':') as [WarpActionInputType, string]
-    return this.nativeToTyped(type, val)
+    const [type, val] = value.split(/:(.*)/, 2) as [WarpActionInputType, string]
+
+    if (type === 'option') {
+      const baseValue = this.stringToTyped(val)
+      return baseValue instanceof NothingValue ? OptionValue.newMissingTyped(baseValue.getType()) : OptionValue.newProvided(baseValue)
+    }
+    if (type === 'optional') {
+      const baseValue = this.stringToTyped(val)
+      return baseValue instanceof NothingValue ? OptionalValue.newMissing() : new OptionalValue(baseValue.getType(), baseValue)
+    }
+    if (type === 'list') {
+      const [baseType, listValues] = val.split(SplitParamsRegex, 2) as [BaseWarpActionInputType, string]
+      const values = listValues.split(',')
+      const typedValues = values.map((v) => this.stringToTyped(`${baseType}:${v}`))
+      return new List(this.nativeToType(baseType), typedValues)
+    }
+    if (type === 'variadic') {
+      const [baseType, listValues] = val.split(SplitParamsRegex, 2) as [BaseWarpActionInputType, string]
+      const values = listValues.split(',')
+      const typedValues = values.map((v) => this.stringToTyped(`${baseType}:${v}`))
+      return new VariadicValue(new VariadicType(this.nativeToType(baseType)), typedValues)
+    }
+    if (type.startsWith('composite')) {
+      const baseType = type.match(/\(([^)]+)\)/)?.[1] as BaseWarpActionInputType
+      const rawValues = (val as string).split('|')
+      const rawTypes = baseType.split('|') as BaseWarpActionInputType[]
+      const values = rawValues.map((val, i) => this.stringToTyped(`${rawTypes[i]}:${val}`))
+      const types = values.map((v) => v.getType())
+      return new CompositeValue(new CompositeType(...types), values)
+    }
+    if (type === 'string') return val ? StringValue.fromUTF8(val as string) : new NothingValue()
+    if (type === 'uint8') return val ? new U8Value(Number(val)) : new NothingValue()
+    if (type === 'uint16') return val ? new U16Value(Number(val)) : new NothingValue()
+    if (type === 'uint32') return val ? new U32Value(Number(val)) : new NothingValue()
+    if (type === 'uint64') return val ? new U64Value(BigInt(val as string)) : new NothingValue()
+    if (type === 'biguint') return val ? new BigUIntValue(BigInt(val as string)) : new NothingValue()
+    if (type === 'bool') return val ? new BooleanValue(typeof val === 'boolean' ? val : val === 'true') : new NothingValue()
+    if (type === 'address') return val ? new AddressValue(Address.newFromBech32(val as string)) : new NothingValue()
+    if (type === 'token') return val ? new TokenIdentifierValue(val as string) : new NothingValue()
+    if (type === 'hex') return val ? BytesValue.fromHex(val as string) : new NothingValue()
+    if (type === 'codemeta') return new CodeMetadataValue(CodeMetadata.fromBuffer(Buffer.from(val as string, 'hex')))
+    if (type === 'esdt') {
+      const parts = val.split(CompositeSeparator)
+      return new Struct(this.nativeToType('esdt') as StructType, [
+        new Field(new TokenIdentifierValue(parts[0]), 'token_identifier'),
+        new Field(new U64Value(BigInt(parts[1])), 'token_nonce'),
+        new Field(new BigUIntValue(BigInt(parts[2])), 'amount'),
+      ])
+    }
+
+    throw new Error(`WarpArgSerializer (stringToTyped): Unsupported input type: ${type}`)
   }
 
-  nativeToType(type: BaseWarpActionInputType): Type {
-    if (type === 'string') return new StringType()
-    if (type === 'uint8') return new U8Type()
-    if (type === 'uint16') return new U16Type()
-    if (type === 'uint32') return new U32Type()
-    if (type === 'uint64') return new U64Type()
-    if (type === 'biguint') return new BigUIntType()
-    if (type === 'bool') return new BooleanType()
-    if (type === 'address') return new AddressType()
-    if (type === 'token') return new TokenIdentifierType()
-    if (type === 'hex') return new BytesType()
-    if (type === 'codemeta') return new CodeMetadataType()
-    if (type === 'esdt' || type === 'nft')
-      return new StructType('EsdtTokenPayment', [
-        new FieldDefinition('token_identifier', '', new TokenIdentifierType()),
-        new FieldDefinition('token_nonce', '', new U64Type()),
-        new FieldDefinition('amount', '', new BigUIntType()),
-      ])
-    throw new Error(`WarpArgSerializer (nativeToType): Unsupported input type: ${type}`)
-  }
+  //   typedToNative(value: TypedValue): [WarpActionInputType, WarpNativeValue] {
+  //     //
+  //   }
 
   typeToNative(type: Type): BaseWarpActionInputType {
     if (type instanceof StringType) return 'string'
