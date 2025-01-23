@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 0.6.0
+
+### Minor Changes
+
+- ff9937b: increase protocol version
+
+### Patch Changes
+
+- 2a0c660: update arg serializer
+
 ## 0.5.5
 
 ### Patch Changes
