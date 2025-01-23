@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.6.1
+
+### Patch Changes
+
+- c935030: re-add arg serializer typed-to-native
+
 ## 0.6.0
 
 ### Minor Changes
