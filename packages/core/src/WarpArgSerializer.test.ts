@@ -496,6 +496,30 @@ describe('WarpArgSerializer', () => {
   })
 
   describe('stringToTyped', () => {
+    it('converts option encoded value to OptionValue', () => {
+      const result = serializer.stringToTyped('option:string:hello')
+      expect(result).toBeInstanceOf(OptionValue)
+      expect(result.valueOf()).toBe('hello')
+    })
+
+    it('converts option encoded value to OptionValue with missing value', () => {
+      const result = serializer.stringToTyped('option:string')
+      expect(result).toBeInstanceOf(OptionValue)
+      expect(result.valueOf()).toBe(null)
+    })
+
+    it('converts optional encoded value to OptionalValue', () => {
+      const result = serializer.stringToTyped('optional:string:hello')
+      expect(result).toBeInstanceOf(OptionalValue)
+      expect(result.valueOf()).toBe('hello')
+    })
+
+    it('converts optional encoded value to OptionalValue with missing value', () => {
+      const result = serializer.stringToTyped('optional:string')
+      expect(result).toBeInstanceOf(OptionalValue)
+      expect(result.valueOf()).toBe(null)
+    })
+
     it('converts string encoded value to StringValue', () => {
       const result = serializer.stringToTyped('string:hello')
       expect(result).toBeInstanceOf(StringValue)
