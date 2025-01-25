@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.6.4
+
+### Patch Changes
+
+- 939afb0: update option utils
+
 ## 0.6.3
 
 ### Patch Changes
