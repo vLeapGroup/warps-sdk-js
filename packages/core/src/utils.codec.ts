@@ -21,6 +21,7 @@ import {
   TokenIdentifierType,
   TokenIdentifierValue,
   TokenTransfer,
+  Type,
   TypedValue,
   U16Value,
   U32Value,
@@ -30,10 +31,17 @@ import {
   VariadicValue,
 } from '@multiversx/sdk-core/out'
 
-export const option = (value: TypedValue | null): OptionValue => (value ? OptionValue.newProvided(value) : OptionValue.newMissing())
+export const option = (value: TypedValue | null, type?: Type): OptionValue => {
+  if (value) return OptionValue.newProvided(value)
+  if (type) return OptionValue.newMissingTyped(type)
+  return OptionValue.newMissing()
+}
 
-export const optional = (value: TypedValue | null): OptionalValue =>
-  value ? new OptionalValue(value.getType(), value) : OptionalValue.newMissing()
+export const optional = (value: TypedValue | null, type?: Type): OptionalValue => {
+  if (value) return new OptionalValue(value.getType(), value)
+  if (type) return new OptionalValue(type)
+  return OptionalValue.newMissing()
+}
 
 export const list = (values: TypedValue[]): List => {
   if (values.length === 0) {
