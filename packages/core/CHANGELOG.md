@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.6.3
+
+### Patch Changes
+
+- 71d06fb: add arg serializer null value support
+
 ## 0.6.2
 
 ### Patch Changes
