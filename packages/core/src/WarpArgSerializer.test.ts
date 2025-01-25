@@ -10,6 +10,7 @@ import {
   CompositeValue,
   List,
   ListType,
+  NothingValue,
   OptionalValue,
   OptionValue,
   StringType,
@@ -342,6 +343,12 @@ describe('WarpArgSerializer', () => {
   })
 
   describe('stringToNative', () => {
+    it('deserializes null', () => {
+      const result = serializer.stringToNative('null')
+      expect(result[0]).toBe('null')
+      expect(result[1]).toBe(null)
+    })
+
     it('deserializes option', () => {
       const result = serializer.stringToNative('option:string:hello')
       expect(result[0]).toBe('option:string')
@@ -496,6 +503,11 @@ describe('WarpArgSerializer', () => {
   })
 
   describe('stringToTyped', () => {
+    it('converts null to NothingValue', () => {
+      const result = serializer.stringToTyped('null')
+      expect(result).toBeInstanceOf(NothingValue)
+    })
+
     it('converts option encoded value to OptionValue', () => {
       const result = serializer.stringToTyped('option:string:hello')
       expect(result).toBeInstanceOf(OptionValue)

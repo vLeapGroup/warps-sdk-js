@@ -152,6 +152,9 @@ export class WarpArgSerializer {
     const baseType = parts[0]
     const val = parts.slice(1).join(ParamsSeparator)
 
+    if (baseType === 'null') {
+      return [baseType, null]
+    }
     if (baseType === 'option') {
       const [baseType, baseValue] = val.split(ParamsSeparator) as [WarpActionInputType, WarpNativeValue]
       return [`option:${baseType}`, baseValue || null]
@@ -195,6 +198,9 @@ export class WarpArgSerializer {
   stringToTyped(value: string): TypedValue {
     const [type, val] = value.split(/:(.*)/, 2) as [WarpActionInputType, string]
 
+    if (type === 'null' || type === null) {
+      return new NothingValue()
+    }
     if (type === 'option') {
       const baseValue = this.stringToTyped(val)
       return baseValue instanceof NothingValue ? OptionValue.newMissingTyped(baseValue.getType()) : OptionValue.newProvided(baseValue)
