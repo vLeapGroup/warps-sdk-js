@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.6.6
+
+### Patch Changes
+
+- 498ac41: add input query arg scaling
+
 ## 0.6.5
 
 ### Patch Changes
