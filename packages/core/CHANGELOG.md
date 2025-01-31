@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.6.5
+
+### Patch Changes
+
+- f766215: add missing args from query source support
+
 ## 0.6.4
 
 ### Patch Changes
