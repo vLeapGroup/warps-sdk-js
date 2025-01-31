@@ -162,16 +162,24 @@ export class WarpActionExecutor {
 
   // Combines the provided args with filtered input args and sorts them by position index
   getCombinedInputs(action: WarpAction, inputArgs: string[]): string[] {
-    const fieldInputs = action.inputs?.filter((input) => input.source === 'field' && input.position.startsWith('arg:')) || []
-    const inputsWithValues: { input: WarpActionInput; value: string }[] = fieldInputs.map((input, index) => ({
+    const argInputs = action.inputs?.filter((input) => input.position.startsWith('arg:')) || []
+
+    const toValueByType = (input: WarpActionInput, index: number) => {
+      if (input.source === 'query') return this.serializer.nativeToString(input.type, this.url.searchParams.get(input.name) || '')
+      return inputArgs[index]
+    }
+
+    const argInputsWithValues: { input: WarpActionInput; value: string }[] = argInputs.map((input, index) => ({
       input,
-      value: inputArgs[index],
+      value: toValueByType(input, index),
     }))
+
     let args = 'args' in action ? action.args : []
-    inputsWithValues.forEach(({ input, value }) => {
+    argInputsWithValues.forEach(({ input, value }) => {
       const argIndex = Number(input.position.split(':')[1]) - 1
       args.splice(argIndex, 0, value)
     })
+
     return args
   }
 
