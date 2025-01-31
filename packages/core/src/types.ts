@@ -9,6 +9,7 @@ export type WarpConfig = {
   warpSchemaUrl?: string
   brandSchemaUrl?: string
   cacheTtl?: number
+  registryContract?: string
 }
 
 export type WarpCacheConfig = {

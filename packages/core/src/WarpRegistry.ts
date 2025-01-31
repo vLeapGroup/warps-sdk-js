@@ -38,7 +38,7 @@ export class WarpRegistry {
 
     return this.getFactory().createTransactionForExecute({
       sender: Address.newFromBech32(this.config.userAddress),
-      contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
+      contract: Address.newFromBech32(this.getRegistryContractAddress()),
       function: 'registerWarp',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: costAmount,
@@ -51,7 +51,7 @@ export class WarpRegistry {
 
     return this.getFactory().createTransactionForExecute({
       sender: Address.newFromBech32(this.config.userAddress),
-      contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
+      contract: Address.newFromBech32(this.getRegistryContractAddress()),
       function: 'unregisterWarp',
       gasLimit: BigInt(10_000_000),
       arguments: [BytesValue.fromHex(txHash)],
@@ -64,7 +64,7 @@ export class WarpRegistry {
 
     return this.getFactory().createTransactionForExecute({
       sender: Address.newFromBech32(this.config.userAddress),
-      contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
+      contract: Address.newFromBech32(this.getRegistryContractAddress()),
       function: 'upgradeWarp',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: this.unitPrice,
@@ -77,7 +77,7 @@ export class WarpRegistry {
 
     return this.getFactory().createTransactionForExecute({
       sender: Address.newFromBech32(this.config.userAddress),
-      contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
+      contract: Address.newFromBech32(this.getRegistryContractAddress()),
       function: 'setWarpAlias',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: this.unitPrice,
@@ -91,7 +91,7 @@ export class WarpRegistry {
 
     return this.getFactory().createTransactionForExecute({
       sender: Address.newFromBech32(this.config.userAddress),
-      contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
+      contract: Address.newFromBech32(this.getRegistryContractAddress()),
       function: 'registerBrand',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: this.unitPrice,
@@ -104,7 +104,7 @@ export class WarpRegistry {
 
     return this.getFactory().createTransactionForExecute({
       sender: Address.newFromBech32(this.config.userAddress),
-      contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
+      contract: Address.newFromBech32(this.getRegistryContractAddress()),
       function: 'publishWarp',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: this.unitPrice,
@@ -117,7 +117,7 @@ export class WarpRegistry {
 
     return this.getFactory().createTransactionForExecute({
       sender: Address.newFromBech32(this.config.userAddress),
-      contract: Address.newFromBech32(Config.Registry.Contract(this.config.env)),
+      contract: Address.newFromBech32(this.getRegistryContractAddress()),
       function: 'brandWarp',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: this.unitPrice,
@@ -136,7 +136,7 @@ export class WarpRegistry {
       }
     }
 
-    const contract = Config.Registry.Contract(this.config.env)
+    const contract = this.getRegistryContractAddress()
     const controller = this.getController()
     const query = controller.createQuery({ contract, function: 'getInfoByAlias', arguments: [BytesValue.fromUTF8(alias)] })
     const res = await controller.runQuery(query)
@@ -162,7 +162,7 @@ export class WarpRegistry {
       }
     }
 
-    const contract = Config.Registry.Contract(this.config.env)
+    const contract = this.getRegistryContractAddress()
     const controller = this.getController()
     const query = controller.createQuery({ contract, function: 'getInfoByHash', arguments: [BytesValue.fromHex(hash)] })
     const res = await controller.runQuery(query)
@@ -180,7 +180,7 @@ export class WarpRegistry {
   async getUserWarpRegistryInfos(user?: string): Promise<RegistryInfo[]> {
     const userAddress = user || this.config.userAddress
     if (!userAddress) throw new Error('WarpRegistry: user address not set')
-    const contract = Config.Registry.Contract(this.config.env)
+    const contract = this.getRegistryContractAddress()
     const controller = this.getController()
     const query = controller.createQuery({ contract, function: 'getUserWarps', arguments: [new AddressValue(new Address(userAddress))] })
     const res = await controller.runQuery(query)
@@ -191,7 +191,7 @@ export class WarpRegistry {
   async getUserBrands(user?: string): Promise<Brand[]> {
     const userAddress = user || this.config.userAddress
     if (!userAddress) throw new Error('WarpRegistry: user address not set')
-    const contract = Config.Registry.Contract(this.config.env)
+    const contract = this.getRegistryContractAddress()
     const controller = this.getController()
     const query = controller.createQuery({ contract, function: 'getUserBrands', arguments: [new AddressValue(new Address(userAddress))] })
     const res = await controller.runQuery(query)
@@ -236,8 +236,12 @@ export class WarpRegistry {
     }
   }
 
+  getRegistryContractAddress(): string {
+    return this.config.registryContract || Config.Registry.Contract(this.config.env)
+  }
+
   private async loadRegistryConfigs(): Promise<void> {
-    const contract = Config.Registry.Contract(this.config.env)
+    const contract = this.getRegistryContractAddress()
     const controller = this.getController()
     const query = controller.createQuery({ contract, function: 'getConfig', arguments: [] })
     const res = await controller.runQuery(query)
