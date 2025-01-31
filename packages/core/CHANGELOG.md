@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.6.8
+
+### Patch Changes
+
+- e809df3: update super client config
+
 ## 0.6.7
 
 ### Patch Changes
