@@ -46,7 +46,7 @@ describe('WarpActionExecutor', () => {
   })
 
   it('createTransactionForExecute - creates a contract call with modified values from url', async () => {
-    const subject = new WarpActionExecutor(Config, 'https://example.com/issue?name=WarpToken&ticker=WAPT&supply=1000&decimals=2')
+    const subject = new WarpActionExecutor(Config, 'https://example.com/issue?name=WarpToken&ticker=WAPT&supply=1000&decimals=18')
 
     const action: WarpContractAction = {
       type: 'contract',
@@ -58,14 +58,14 @@ describe('WarpActionExecutor', () => {
       inputs: [
         { name: 'name', type: 'string', position: 'arg:1', source: 'query' },
         { name: 'ticker', type: 'string', position: 'arg:2', source: 'query' },
-        { name: 'supply', type: 'biguint', position: 'arg:3', source: 'query' },
+        { name: 'supply', type: 'biguint', position: 'arg:3', source: 'query', modifier: 'scale:decimals' },
         { name: 'decimals', type: 'uint8', position: 'arg:4', source: 'query' },
       ],
     }
 
     const actual = subject.createTransactionForExecute(action, [], [])
 
-    expect(actual.data?.toString()).toBe(`issue@${utf8ToHex('WarpToken')}@${utf8ToHex('WAPT')}@${bigIntToHex('1000')}@02`)
+    expect(actual.data?.toString()).toBe(`issue@${utf8ToHex('WarpToken')}@${utf8ToHex('WAPT')}@${bigIntToHex('1000000000000000000000')}@12`)
   })
 
   it('getNativeValueFromField - gets the value from the field', async () => {

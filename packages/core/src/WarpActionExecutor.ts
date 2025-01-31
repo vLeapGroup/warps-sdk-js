@@ -39,10 +39,10 @@ export class WarpActionExecutor {
     const destination = Address.newFromBech32(action.address)
     const config = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
 
-    const modifiedInputArgs = this.getModifiedInputs(action, inputs)
-    const args = this.getCombinedInputs(action, modifiedInputArgs)
-    const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
-    const nativeValueFromField = this.getNativeValueFromField(action, modifiedInputArgs)
+    const args = this.getCombinedInputs(action, inputs)
+    const modifiedCombinedArgs = this.getModifiedInputs(action, args)
+    const typedArgs = modifiedCombinedArgs.map((arg) => this.serializer.stringToTyped(arg))
+    const nativeValueFromField = this.getNativeValueFromField(action, inputs)
     const nativeValueFromUrl = this.getNativeValueFromUrl(action)
     const nativeTransferAmount = BigInt(nativeValueFromField || nativeValueFromUrl || action.value || 0)
     const combinedTransfers = this.getCombinedTokenTransfers(action, inputTransfers)
@@ -125,7 +125,7 @@ export class WarpActionExecutor {
 
   // Applies modifiers to the input args
   getModifiedInputs(action: WarpAction, inputs: string[]): string[] {
-    const modifiableInputs = { ...inputs }
+    const modifiableInputs = Object.fromEntries(inputs.entries())
     const inputsWithModifiers = action.inputs?.filter((input) => !!input.modifier) || []
 
     // Note: 'scale' modifier means that the value is multiplied by 10^modifier; the modifier can also be the name of another input field
@@ -157,7 +157,7 @@ export class WarpActionExecutor {
       }
     })
 
-    return modifiableInputs
+    return Object.values(modifiableInputs)
   }
 
   // Combines the provided args with filtered input args and sorts them by position index
