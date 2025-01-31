@@ -10,6 +10,8 @@ export type WarpConfig = {
   brandSchemaUrl?: string
   cacheTtl?: number
   registryContract?: string
+  indexUrl?: string
+  indexApiKey?: string
 }
 
 export type WarpCacheConfig = {
@@ -181,4 +183,20 @@ export type BrandMeta = {
   hash: string
   creator: string
   createdAt: string
+}
+
+export type WarpSearchResult = {
+  hits: WarpSearchHit[]
+}
+
+export type WarpSearchHit = {
+  hash: string
+  alias: string
+  name: string
+  title: string
+  description: string
+  preview: string
+  status: string
+  category: string
+  featured: boolean
 }
