@@ -87,9 +87,10 @@ export class WarpLink {
     const clientUrl = this.config.clientUrl || Config.DefaultClientUrl(this.config.env)
     const encodedValue =
       type === WarpDefaultIdentifierType ? encodeURIComponent(id) : encodeURIComponent(type + WarpIdentifierParamSeparator + id)
-    const superClientUrls = Config.SuperClientUrls(this.config.env)
 
-    return superClientUrls.includes(clientUrl) ? `${clientUrl}/${encodedValue}` : `${clientUrl}?${WarpIdentifierParamName}=${encodedValue}`
+    return Config.SuperClientUrls.includes(clientUrl)
+      ? `${clientUrl}/${encodedValue}`
+      : `${clientUrl}?${WarpIdentifierParamName}=${encodedValue}`
   }
 
   generateQrCode(type: WarpIdType, id: string, size = 512, background = 'white', color = 'black', logoColor = '#23F7DD'): QRCodeStyling {
@@ -113,8 +114,7 @@ export class WarpLink {
 
   private extractIdentifierInfoFromUrl(url: string): { type: WarpIdType; id: string } | null {
     const urlObj = new URL(url)
-    const superClientUrls = Config.SuperClientUrls(this.config.env)
-    const isSuperClient = superClientUrls.includes(urlObj.origin)
+    const isSuperClient = Config.SuperClientUrls.includes(urlObj.origin)
     const searchParamValue = urlObj.searchParams.get(WarpIdentifierParamName)
     const value = isSuperClient && !searchParamValue ? urlObj.pathname.split('/')[1] : searchParamValue
 
