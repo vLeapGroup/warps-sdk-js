@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.7.0
+
+### Minor Changes
+
+- bfc90f8: add warp index
+
 ## 0.6.8
 
 ### Patch Changes
