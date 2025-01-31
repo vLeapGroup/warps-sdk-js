@@ -15,11 +15,7 @@ export const Config = {
     return 'https://usewarp.to'
   },
 
-  SuperClientUrls: (env: ChainEnv) => {
-    if (env === 'devnet') return ['https://devnet.usewarp.to']
-    if (env === 'testnet') return ['https://testnet.usewarp.to']
-    return ['https://usewarp.to']
-  },
+  SuperClientUrls: ['https://usewarp.to', 'https://testnet.usewarp.to', 'https://devnet.usewarp.to'],
 
   Chain: {
     ApiUrl: (env: ChainEnv) => {
