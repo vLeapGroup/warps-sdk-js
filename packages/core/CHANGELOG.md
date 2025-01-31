@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.6.7
+
+### Patch Changes
+
+- a386cd6: add opt registry contract config
+
 ## 0.6.6
 
 ### Patch Changes
