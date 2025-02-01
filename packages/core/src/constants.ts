@@ -6,4 +6,10 @@ export const WarpConstants = {
   IdentifierParamSeparator: ':',
 
   DefaultIdentifierType: 'alias',
+
+  Egld: {
+    Identifier: 'EGLD',
+    DisplayName: 'eGold',
+    Decimals: 18,
+  },
 }
