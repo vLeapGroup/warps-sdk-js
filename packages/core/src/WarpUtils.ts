@@ -1,4 +1,4 @@
-import { WarpDefaultIdentifierType, WarpIdentifierParamSeparator } from './constants'
+import { WarpConstants } from './constants'
 import { Warp, WarpConfig, WarpIdType } from './types'
 import { WarpLink } from './WarpLink'
 
@@ -31,11 +31,11 @@ export class WarpUtils {
 
   static getInfoFromPrefixedIdentifier(prefixedIdentifier: string): { type: WarpIdType; id: string } | null {
     const decodedIdentifier = decodeURIComponent(prefixedIdentifier)
-    const normalizedParam = decodedIdentifier.includes(WarpIdentifierParamSeparator)
+    const normalizedParam = decodedIdentifier.includes(WarpConstants.IdentifierParamSeparator)
       ? decodedIdentifier
-      : `${WarpDefaultIdentifierType}${WarpIdentifierParamSeparator}${decodedIdentifier}`
+      : `${WarpConstants.DefaultIdentifierType}${WarpConstants.IdentifierParamSeparator}${decodedIdentifier}`
 
-    const [idType, id] = normalizedParam.split(WarpIdentifierParamSeparator)
+    const [idType, id] = normalizedParam.split(WarpConstants.IdentifierParamSeparator)
 
     return { type: idType as WarpIdType, id }
   }

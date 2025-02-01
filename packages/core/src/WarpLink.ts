@@ -1,6 +1,6 @@
 import QRCodeStyling from 'qr-code-styling'
 import { Config } from './config'
-import { WarpDefaultIdentifierType, WarpHttpProtocolPrefix, WarpIdentifierParamName, WarpIdentifierParamSeparator } from './constants'
+import { WarpConstants } from './constants'
 import { Brand, RegistryInfo, Warp, WarpConfig, WarpIdType } from './types'
 import { WarpBuilder } from './WarpBuilder'
 import { WarpRegistry } from './WarpRegistry'
@@ -30,7 +30,7 @@ export class WarpLink {
   }
 
   isValid(url: string): boolean {
-    if (!url.startsWith(WarpHttpProtocolPrefix)) return false
+    if (!url.startsWith(WarpConstants.HttpProtocolPrefix)) return false
     const idResult = this.extractIdentifierInfoFromUrl(url)
     return !!idResult
   }
@@ -49,7 +49,7 @@ export class WarpLink {
   }
 
   async detect(url: string): Promise<DetectionResult> {
-    const idResult = url.startsWith(WarpHttpProtocolPrefix)
+    const idResult = url.startsWith(WarpConstants.HttpProtocolPrefix)
       ? this.extractIdentifierInfoFromUrl(url)
       : WarpUtils.getInfoFromPrefixedIdentifier(url)
 
@@ -86,11 +86,13 @@ export class WarpLink {
   build(type: WarpIdType, id: string): string {
     const clientUrl = this.config.clientUrl || Config.DefaultClientUrl(this.config.env)
     const encodedValue =
-      type === WarpDefaultIdentifierType ? encodeURIComponent(id) : encodeURIComponent(type + WarpIdentifierParamSeparator + id)
+      type === WarpConstants.DefaultIdentifierType
+        ? encodeURIComponent(id)
+        : encodeURIComponent(type + WarpConstants.IdentifierParamSeparator + id)
 
     return Config.SuperClientUrls.includes(clientUrl)
       ? `${clientUrl}/${encodedValue}`
-      : `${clientUrl}?${WarpIdentifierParamName}=${encodedValue}`
+      : `${clientUrl}?${WarpConstants.IdentifierParamName}=${encodedValue}`
   }
 
   generateQrCode(type: WarpIdType, id: string, size = 512, background = 'white', color = 'black', logoColor = '#23F7DD'): QRCodeStyling {
@@ -115,7 +117,7 @@ export class WarpLink {
   private extractIdentifierInfoFromUrl(url: string): { type: WarpIdType; id: string } | null {
     const urlObj = new URL(url)
     const isSuperClient = Config.SuperClientUrls.includes(urlObj.origin)
-    const searchParamValue = urlObj.searchParams.get(WarpIdentifierParamName)
+    const searchParamValue = urlObj.searchParams.get(WarpConstants.IdentifierParamName)
     const value = isSuperClient && !searchParamValue ? urlObj.pathname.split('/')[1] : searchParamValue
 
     if (!value) {
