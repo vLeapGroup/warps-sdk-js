@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.7.1
+
+### Patch Changes
+
+- 876a7fa: make index search param name configurable
+
 ## 0.7.0
 
 ### Minor Changes
