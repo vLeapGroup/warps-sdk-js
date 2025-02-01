@@ -12,6 +12,7 @@ export type WarpConfig = {
   registryContract?: string
   indexUrl?: string
   indexApiKey?: string
+  indexSearchParamName?: string
 }
 
 export type WarpCacheConfig = {

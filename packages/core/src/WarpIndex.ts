@@ -12,7 +12,7 @@ export class WarpIndex {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${this.config.indexApiKey}`,
         },
-        body: JSON.stringify({ q: query, search: query }),
+        body: JSON.stringify({ [this.config.indexSearchParamName || 'search']: query }),
       })
 
       if (!res.ok) {
