@@ -40,6 +40,7 @@ export type Warp = {
   name: string
   title: string
   description: string | null
+  bot?: string
   preview: string
   vars?: Record<WarpVarPlaceholder, string>
   actions: WarpAction[]
@@ -132,7 +133,9 @@ export type WarpActionInputModifier = 'scale'
 
 export type WarpActionInput = {
   name: string
+  as?: string
   description?: string | null
+  bot?: string
   type: WarpActionInputType
   position: WarpActionInputPosition
   source: WarpActionInputSource
