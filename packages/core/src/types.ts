@@ -55,7 +55,7 @@ export type WarpMeta = {
   createdAt: string
 }
 
-export type WarpAction = WarpContractAction | WarpQueryAction | WarpLinkAction
+export type WarpAction = WarpContractAction | WarpQueryAction | WarpCollectAction | WarpLinkAction
 
 export type WarpActionType = 'contract' | 'query' | 'collect' | 'link'
 
@@ -107,6 +107,8 @@ export type WarpCollectAction = {
     method: 'GET' | 'POST'
     headers: Record<string, string>
   }
+  inputs?: WarpActionInput[]
+  next?: string
 }
 
 export type WarpActionInputSource = 'field' | 'query'
