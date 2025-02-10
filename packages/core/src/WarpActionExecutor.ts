@@ -16,7 +16,15 @@ import {
   TypedValue,
 } from '@multiversx/sdk-core/out'
 import { getChainId, shiftBigintBy } from './helpers'
-import { WarpAction, WarpActionInput, WarpConfig, WarpContractAction, WarpContractActionTransfer, WarpQueryAction } from './types'
+import {
+  WarpAction,
+  WarpActionInput,
+  WarpCollectAction,
+  WarpConfig,
+  WarpContractAction,
+  WarpContractActionTransfer,
+  WarpQueryAction,
+} from './types'
 import { WarpArgSerializer } from './WarpArgSerializer'
 import { WarpContractLoader } from './WarpContractLoader'
 
@@ -95,6 +103,24 @@ export class WarpActionExecutor {
     if (!result) throw new Error('WarpActionExecutor: Query result not found')
 
     return result
+  }
+
+  async executeCollect(action: WarpCollectAction, inputs: string[]): Promise<void> {
+    const destination = new URL(action.destination.url)
+    const headers = new Headers()
+    Object.entries(action.destination.headers).forEach(([key, value]) => {
+      headers.set(key, value as string)
+    })
+
+    const response = await fetch(destination, {
+      method: action.destination.method,
+      headers,
+      body: JSON.stringify({ inputs }),
+    })
+
+    const body = await response.json()
+
+    return body
   }
 
   getArgumentsForInputs(action: WarpAction, inputs: string[]): string[] {
