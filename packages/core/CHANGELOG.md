@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 0.8.1
+
+### Patch Changes
+
+- 97ef011: add bot info to types
+- d4fc51e: add action collect types
+
 ## 0.8.0
 
 ### Minor Changes
