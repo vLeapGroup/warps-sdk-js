@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.9.1
+
+### Patch Changes
+
+- fbdf306: update collection action types
+
 ## 0.9.0
 
 ### Minor Changes
