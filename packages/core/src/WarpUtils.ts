@@ -5,14 +5,15 @@ import { WarpLink } from './WarpLink'
 const UrlPrefixDeterminer = 'https://'
 
 const VarSourceQuery = 'query'
+const VarSourceEnv = 'env'
 
 export class WarpUtils {
   static prepareVars(warp: Warp, config: WarpConfig): Warp {
     if (!warp?.vars) return warp
     let modifiable = JSON.stringify(warp)
 
-    const modify = (placeholder: string, value: string) => {
-      modifiable = modifiable.replace(new RegExp(`{{${placeholder.toUpperCase()}}}`, 'g'), value)
+    const modify = (placeholder: string, value: string | number) => {
+      modifiable = modifiable.replace(new RegExp(`{{${placeholder.toUpperCase()}}}`, 'g'), value.toString())
     }
 
     Object.entries(warp.vars).forEach(([placeholder, value]) => {
@@ -21,6 +22,10 @@ export class WarpUtils {
         const queryParamName = value.split(`${VarSourceQuery}:`)[1]
         const queryParamValue = new URL(config.currentUrl).searchParams.get(queryParamName)
         if (queryParamValue) modify(placeholder, queryParamValue)
+      } else if (typeof value === 'string' && value.startsWith(`${VarSourceEnv}:`)) {
+        const envVarName = value.split(`${VarSourceEnv}:`)[1]
+        const envVarValue = config.vars?.[envVarName]
+        if (envVarValue) modify(placeholder, envVarValue)
       } else {
         modify(placeholder, value)
       }

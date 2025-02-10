@@ -13,6 +13,7 @@ export type WarpConfig = {
   indexUrl?: string
   indexApiKey?: string
   indexSearchParamName?: string
+  vars?: Record<string, string | number>
 }
 
 export type WarpCacheConfig = {

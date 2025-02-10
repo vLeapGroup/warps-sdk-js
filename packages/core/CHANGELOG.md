@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 0.9.0
+
+### Minor Changes
+
+- e63a4d8: add executor for collect action
+- add config vars
+
 ## 0.8.1
 
 ### Patch Changes
