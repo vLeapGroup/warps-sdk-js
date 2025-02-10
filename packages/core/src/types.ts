@@ -55,7 +55,7 @@ export type WarpMeta = {
 
 export type WarpAction = WarpContractAction | WarpQueryAction | WarpLinkAction
 
-export type WarpActionType = 'contract' | 'query' | 'link'
+export type WarpActionType = 'contract' | 'query' | 'collect' | 'link'
 
 export type WarpContractAction = {
   type: WarpActionType
@@ -94,6 +94,17 @@ export type WarpQueryAction = {
   args: string[]
   abi?: string
   inputs?: WarpActionInput[]
+}
+
+export type WarpCollectAction = {
+  type: WarpActionType
+  label: string
+  description?: string | null
+  destination: {
+    url: string
+    method: 'GET' | 'POST'
+    headers: Record<string, string>
+  }
 }
 
 export type WarpActionInputSource = 'field' | 'query'
