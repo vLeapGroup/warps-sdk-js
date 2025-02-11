@@ -105,7 +105,7 @@ export class WarpActionExecutor {
     return result
   }
 
-  async executeCollect(action: WarpCollectAction, inputs: string[]): Promise<void> {
+  async executeCollect(action: WarpCollectAction, inputs: Record<string, any>): Promise<void> {
     const headers = new Headers()
     headers.set('Content-Type', 'application/json')
     headers.set('Accept', 'application/json')
