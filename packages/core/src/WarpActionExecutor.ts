@@ -105,7 +105,7 @@ export class WarpActionExecutor {
     return result
   }
 
-  async executeCollect(action: WarpCollectAction, inputs: Record<string, any>): Promise<void> {
+  async executeCollect(action: WarpCollectAction, inputs: Record<string, any>, meta?: Record<string, any>): Promise<void> {
     const headers = new Headers()
     headers.set('Content-Type', 'application/json')
     headers.set('Accept', 'application/json')
@@ -116,7 +116,7 @@ export class WarpActionExecutor {
     await fetch(action.destination.url, {
       method: action.destination.method,
       headers,
-      body: JSON.stringify({ inputs }),
+      body: JSON.stringify({ inputs, meta }),
     })
   }
 
