@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.9.2
+
+### Patch Changes
+
+- d38c55f: update action collect execution
+
 ## 0.9.1
 
 ### Patch Changes
