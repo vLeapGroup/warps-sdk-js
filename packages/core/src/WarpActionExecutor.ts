@@ -106,21 +106,18 @@ export class WarpActionExecutor {
   }
 
   async executeCollect(action: WarpCollectAction, inputs: string[]): Promise<void> {
-    const destination = new URL(action.destination.url)
     const headers = new Headers()
+    headers.set('Content-Type', 'application/json')
+    headers.set('Accept', 'application/json')
     Object.entries(action.destination.headers).forEach(([key, value]) => {
       headers.set(key, value as string)
     })
 
-    const response = await fetch(destination, {
+    await fetch(action.destination.url, {
       method: action.destination.method,
       headers,
       body: JSON.stringify({ inputs }),
     })
-
-    const body = await response.json()
-
-    return body
   }
 
   getArgumentsForInputs(action: WarpAction, inputs: string[]): string[] {
