@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.9.4
+
+### Patch Changes
+
+- c7813e9: add action collect executor opt meta info
+
 ## 0.9.3
 
 ### Patch Changes
