@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.9.3
+
+### Patch Changes
+
+- 53a332d: add input keys to action collect request
+
 ## 0.9.2
 
 ### Patch Changes
