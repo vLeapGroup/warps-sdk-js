@@ -252,10 +252,6 @@ export class WarpArgSerializer {
     throw new Error(`WarpArgSerializer (stringToTyped): Unsupported input type: ${type}`)
   }
 
-  //   typedToNative(value: TypedValue): [WarpActionInputType, WarpNativeValue] {
-  //     //
-  //   }
-
   typeToNative(type: Type): BaseWarpActionInputType {
     if (type instanceof StringType) return 'string'
     if (type instanceof U8Type) return 'uint8'
