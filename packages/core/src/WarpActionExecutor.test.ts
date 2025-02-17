@@ -9,7 +9,8 @@ const Config: WarpConfig = {
 
 describe('WarpActionExecutor', () => {
   it('createTransactionForExecute - creates a native transfer with message', async () => {
-    const subject = new WarpActionExecutor(Config, 'https://example.com')
+    Config.currentUrl = 'https://example.com'
+    const subject = new WarpActionExecutor(Config)
 
     const action: WarpContractAction = {
       type: 'contract',
@@ -27,8 +28,9 @@ describe('WarpActionExecutor', () => {
     expect(actual.data?.toString()).toBe('hello')
   })
 
-  it('createTransactionForExecute - creates a contract call with value from field', async () => {
-    const subject = new WarpActionExecutor(Config, 'https://example.com')
+  it('createTransactionForExecute - creates a contract call with scaled value from field', async () => {
+    Config.currentUrl = 'https://example.com'
+    const subject = new WarpActionExecutor(Config)
 
     const action: WarpContractAction = {
       type: 'contract',
@@ -37,16 +39,17 @@ describe('WarpActionExecutor', () => {
       func: 'delegate',
       args: [],
       gasLimit: 1000000,
-      inputs: [{ name: 'value', type: 'biguint', position: 'value', source: 'field' }],
+      inputs: [{ name: 'value', type: 'biguint', position: 'value', source: 'field', modifier: 'scale:18' }],
     }
 
-    const actual = subject.createTransactionForExecute(action, ['biguint:1000000000000000000'], [])
+    const actual = subject.createTransactionForExecute(action, ['biguint:1'], [])
 
     expect(actual.value.toString()).toBe('1000000000000000000')
   })
 
   it('createTransactionForExecute - creates a contract call with modified values from url', async () => {
-    const subject = new WarpActionExecutor(Config, 'https://example.com/issue?name=WarpToken&ticker=WAPT&supply=1000&decimals=18')
+    Config.currentUrl = 'https://example.com/issue?name=WarpToken&ticker=WAPT&supply=1000&decimals=18'
+    const subject = new WarpActionExecutor(Config)
 
     const action: WarpContractAction = {
       type: 'contract',
@@ -68,8 +71,9 @@ describe('WarpActionExecutor', () => {
     expect(actual.data?.toString()).toBe(`issue@${utf8ToHex('WarpToken')}@${utf8ToHex('WAPT')}@${bigIntToHex('1000000000000000000000')}@12`)
   })
 
-  it('getNativeValueFromField - gets the value from the field', async () => {
-    const subject = new WarpActionExecutor(Config, 'https://example.com')
+  it('getTxComponentsFromInputs - gets the value from the field', async () => {
+    Config.currentUrl = 'https://example.com'
+    const subject = new WarpActionExecutor(Config)
 
     const action: WarpContractAction = {
       type: 'contract',
@@ -82,15 +86,16 @@ describe('WarpActionExecutor', () => {
       inputs: [{ name: 'myvalue', type: 'biguint', position: 'value', source: 'field', modifier: 'scale:18' }],
     }
 
-    const modified = subject.getModifiedInputs(action, ['biguint:2'])
+    const { args, value, transfers } = subject.getTxComponentsFromInputs(action, ['biguint:2'], [])
 
-    const actual = subject.getNativeValueFromField(action, modified)
-
-    expect(actual).toBe('2000000000000000000')
+    expect(value.toString()).toBe('2000000000000000000')
+    expect(args).toEqual([])
+    expect(transfers).toEqual([])
   })
 
-  it('getNativeValueFromUrl - gets the value from the url', async () => {
-    const subject = new WarpActionExecutor(Config, 'https://example.com?myvalue=2000000000000000000')
+  it('getTxComponentsFromInputs - gets the value from the url', async () => {
+    Config.currentUrl = 'https://example.com?myvalue=2000000000000000000'
+    const subject = new WarpActionExecutor(Config)
 
     const action: WarpContractAction = {
       type: 'contract',
@@ -104,21 +109,14 @@ describe('WarpActionExecutor', () => {
       inputs: [{ name: 'myvalue', type: 'biguint', position: 'value', source: 'query' }],
     }
 
-    const actual = subject.getNativeValueFromUrl(action)
+    const { value } = subject.getTxComponentsFromInputs(action, [], [])
 
-    expect(actual).toBe('2000000000000000000')
+    expect(value.toString()).toBe('2000000000000000000')
   })
 
-  it('getNativeValueFromUrl - returns null if the value is not found', async () => {
-    const subject = new WarpActionExecutor(Config, 'https://example.com')
-
-    const actual = subject.getNativeValueFromUrl({} as WarpContractAction)
-
-    expect(actual).toBeNull()
-  })
-
-  it('getModifiedInputArgs - scales a value', async () => {
-    const subject = new WarpActionExecutor(Config, 'https://example.com')
+  it('getTxComponentsFromInputs - scales an arg by fixed amount', async () => {
+    Config.currentUrl = 'https://example.com'
+    const subject = new WarpActionExecutor(Config)
 
     const action: WarpContractAction = {
       type: 'contract',
@@ -135,14 +133,15 @@ describe('WarpActionExecutor', () => {
       ],
     }
 
-    const actual = subject.getModifiedInputs(action, ['string:hello', 'biguint:1'])
+    const { args } = subject.getTxComponentsFromInputs(action, ['string:hello', 'biguint:1'], [])
 
-    expect(actual[0].toString()).toBe('string:hello')
-    expect(actual[1].toString()).toBe('biguint:1000000000000000000')
+    expect(args[0].toString()).toBe('string:hello')
+    expect(args[1].toString()).toBe('biguint:1000000000000000000')
   })
 
-  it('getModifiedInputArgs - scales a value with decimals', async () => {
-    const subject = new WarpActionExecutor(Config, 'https://example.com')
+  it('getTxComponentsFromInputs - scales a value with decimals', async () => {
+    Config.currentUrl = 'https://example.com'
+    const subject = new WarpActionExecutor(Config)
 
     const action: WarpContractAction = {
       type: 'contract',
@@ -156,13 +155,14 @@ describe('WarpActionExecutor', () => {
       inputs: [{ name: 'one', type: 'biguint', position: 'arg:1', source: 'field', modifier: 'scale:18' }],
     }
 
-    const actual = subject.getModifiedInputs(action, ['biguint:2.2'])
+    const { args } = subject.getTxComponentsFromInputs(action, ['biguint:2.2'], [])
 
-    expect(actual[0].toString()).toBe('biguint:2200000000000000000')
+    expect(args[0].toString()).toBe('biguint:2200000000000000000')
   })
 
-  it('getModifiedInputArgs - scales a value by another input field', async () => {
-    const subject = new WarpActionExecutor(Config, 'https://example.com')
+  it('getTxComponentsFromInputs - scales a value by another input field', async () => {
+    Config.currentUrl = 'https://example.com'
+    const subject = new WarpActionExecutor(Config)
 
     const action: WarpContractAction = {
       type: 'contract',
@@ -179,16 +179,16 @@ describe('WarpActionExecutor', () => {
       ],
     }
 
-    const combined = subject.getCombinedInputs(action, ['biguint:1', 'uint8:18'])
-    const actual = subject.getModifiedInputs(action, combined)
+    const { args } = subject.getTxComponentsFromInputs(action, ['biguint:1', 'uint8:18'], [])
 
-    expect(actual[0].toString()).toBe('string:hello')
-    expect(actual[1].toString()).toBe('biguint:1000000000000000000')
-    expect(actual[2].toString()).toBe('uint8:18')
+    expect(args[0].toString()).toBe('string:hello')
+    expect(args[1].toString()).toBe('biguint:1000000000000000000')
+    expect(args[2].toString()).toBe('uint8:18')
   })
 
-  it('getCombinedInputs - sorts the args by position index', async () => {
-    const subject = new WarpActionExecutor(Config, 'https://example.com')
+  it('getTxComponentsFromInputs - sorts the args by position index', async () => {
+    Config.currentUrl = 'https://example.com'
+    const subject = new WarpActionExecutor(Config)
 
     const action: WarpContractAction = {
       type: 'contract',
@@ -200,16 +200,16 @@ describe('WarpActionExecutor', () => {
       value: '0',
       gasLimit: 1000000,
       inputs: [
-        { name: 'myvalue', type: 'string', position: 'value', source: 'field' },
-        { name: 'three', type: 'string', position: 'arg:3', source: 'field' },
+        { name: 'myvalue', type: 'string', position: 'value', source: 'field', modifier: 'scale:18' },
+        { name: 'three', type: 'biguint', position: 'arg:3', source: 'field', modifier: 'scale:2' },
         { name: 'four', type: 'string', position: 'arg:4', source: 'field' },
-        { name: 'mytransfer', type: 'string', position: 'transfer', source: 'field' },
         { name: 'one', type: 'string', position: 'arg:1', source: 'field' },
       ],
     }
 
-    const actual = subject.getCombinedInputs(action, ['string:three', 'string:four', 'string:one'])
+    const { args, value } = subject.getTxComponentsFromInputs(action, ['biguint:1', 'biguint:5', 'string:four', 'string:one'], [])
 
-    expect(actual).toEqual(['string:one', 'string:two', 'string:three', 'string:four'])
+    expect(args).toEqual(['string:one', 'string:two', 'biguint:500', 'string:four'])
+    expect(value.toString()).toEqual('1000000000000000000')
   })
 })
