@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.9.7
+
+### Patch Changes
+
+- 10da864: add arg serializer big number handling
+
 ## 0.9.6
 
 ### Patch Changes
