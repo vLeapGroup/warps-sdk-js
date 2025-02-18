@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.9.6
+
+### Patch Changes
+
+- 08b10b4: add further action validation
+
 ## 0.9.5
 
 ### Patch Changes
