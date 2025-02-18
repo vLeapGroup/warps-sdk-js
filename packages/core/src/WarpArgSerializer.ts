@@ -40,6 +40,7 @@ import {
   VariadicType,
   VariadicValue,
 } from '@multiversx/sdk-core/out'
+import { BigNumber } from 'bignumber.js'
 import { BaseWarpActionInputType, WarpActionInputType } from './types'
 
 export type WarpNativeValue = string | number | bigint | boolean | null | TokenTransfer | WarpNativeValue[]
@@ -90,7 +91,8 @@ export class WarpArgSerializer {
       const rawValues = values.join(CompositeSeparator)
       return `composite(${rawTypes}):${rawValues}`
     }
-    if (value.hasClassOrSuperclass(BigUIntValue.ClassName)) return `biguint:${BigInt((value as BigUIntValue).valueOf().toFixed())}`
+    if (value.hasClassOrSuperclass(BigUIntValue.ClassName) || BigNumber.isBigNumber(value))
+      return `biguint:${BigInt((value as BigUIntValue).valueOf().toFixed())}`
     if (value.hasClassOrSuperclass(U8Value.ClassName)) return `uint8:${(value as U8Value).valueOf().toNumber()}`
     if (value.hasClassOrSuperclass(U16Value.ClassName)) return `uint16:${(value as U16Value).valueOf().toNumber()}`
     if (value.hasClassOrSuperclass(U32Value.ClassName)) return `uint32:${(value as U32Value).valueOf().toNumber()}`
