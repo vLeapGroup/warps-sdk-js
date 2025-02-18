@@ -139,7 +139,7 @@ describe('WarpActionExecutor', () => {
     expect(args[1].toString()).toBe('biguint:1000000000000000000')
   })
 
-  it('getTxComponentsFromInputs - scales a value with decimals', async () => {
+  it('getTxComponentsFromInputs - scales a inputs with decimals', async () => {
     Config.currentUrl = 'https://example.com'
     const subject = new WarpActionExecutor(Config)
 
@@ -152,11 +152,15 @@ describe('WarpActionExecutor', () => {
       args: [],
       value: '0',
       gasLimit: 1000000,
-      inputs: [{ name: 'one', type: 'biguint', position: 'arg:1', source: 'field', modifier: 'scale:18' }],
+      inputs: [
+        { name: 'one', type: 'biguint', position: 'arg:1', source: 'field', modifier: 'scale:18' },
+        { name: 'two', type: 'biguint', position: 'value', source: 'field', modifier: 'scale:18' },
+      ],
     }
 
-    const { args } = subject.getTxComponentsFromInputs(action, ['biguint:2.2'], [])
+    const { args, value } = subject.getTxComponentsFromInputs(action, ['biguint:2.2', 'biguint:0.1'], [])
 
+    expect(value.toString()).toBe('100000000000000000')
     expect(args[0].toString()).toBe('biguint:2200000000000000000')
   })
 
