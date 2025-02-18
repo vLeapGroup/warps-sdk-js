@@ -90,7 +90,7 @@ export class WarpArgSerializer {
       const rawValues = values.join(CompositeSeparator)
       return `composite(${rawTypes}):${rawValues}`
     }
-    if (value.hasClassOrSuperclass(BigUIntValue.ClassName) || value.hasClassOrSuperclass('BigUint'))
+    if (value.hasClassOrSuperclass(BigUIntValue.ClassName) || value.getType().getName() === 'BigUint' /* ABI handling */)
       return `biguint:${BigInt((value as BigUIntValue).valueOf().toFixed())}`
     if (value.hasClassOrSuperclass(U8Value.ClassName)) return `uint8:${(value as U8Value).valueOf().toNumber()}`
     if (value.hasClassOrSuperclass(U16Value.ClassName)) return `uint16:${(value as U16Value).valueOf().toNumber()}`
