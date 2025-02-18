@@ -6,12 +6,12 @@ import {
   TransactionsFactoryConfig,
   TransferTransactionsFactory,
 } from '@multiversx/sdk-core'
-import Ajv from 'ajv'
 import { Config } from './config'
 import { getChainId, getLatestProtocolIdentifier, toPreviewText } from './helpers'
 import { Warp, WarpAction, WarpCacheConfig, WarpConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
 import { WarpUtils } from './WarpUtils'
+import { WarpValidator } from './WarpValidator'
 
 export class WarpBuilder {
   private config: WarpConfig
@@ -49,18 +49,19 @@ export class WarpBuilder {
     return tx
   }
 
-  async createFromRaw(encoded: string, validateSchema = true): Promise<Warp> {
+  async createFromRaw(encoded: string, validate = true): Promise<Warp> {
     const warp = JSON.parse(encoded) as Warp
 
-    if (validateSchema) {
-      await this.ensureValidSchema(warp)
+    if (validate) {
+      const validator = new WarpValidator(this.config)
+      await validator.validate(warp)
     }
 
     return WarpUtils.prepareVars(warp, this.config)
   }
 
-  async createFromTransaction(tx: TransactionOnNetwork, validateSchema = false): Promise<Warp> {
-    const warp = await this.createFromRaw(tx.data.toString(), validateSchema)
+  async createFromTransaction(tx: TransactionOnNetwork, validate = false): Promise<Warp> {
+    const warp = await this.createFromRaw(tx.data.toString(), validate)
 
     warp.meta = {
       hash: tx.hash,
@@ -135,7 +136,8 @@ export class WarpBuilder {
     this.ensure(this.pendingWarp.title, 'title is required')
     this.ensure(this.pendingWarp.actions.length > 0, 'actions are required')
 
-    await this.ensureValidSchema(this.pendingWarp)
+    const validator = new WarpValidator(this.config)
+    await validator.validate(this.pendingWarp)
 
     return this.pendingWarp
   }
@@ -147,18 +149,6 @@ export class WarpBuilder {
   private ensure(value: string | null | boolean, errorMessage: string): void {
     if (!value) {
       throw new Error(`WarpBuilder: ${errorMessage}`)
-    }
-  }
-
-  private async ensureValidSchema(warp: Warp): Promise<void> {
-    const schemaUrl = this.config.warpSchemaUrl || Config.LatestWarpSchemaUrl
-    const schemaResponse = await fetch(schemaUrl)
-    const schema = await schemaResponse.json()
-    const ajv = new Ajv()
-    const validate = ajv.compile(schema)
-
-    if (!validate(warp)) {
-      throw new Error(`WarpBuilder: schema validation failed: ${ajv.errorsText(validate.errors)}`)
     }
   }
 }
