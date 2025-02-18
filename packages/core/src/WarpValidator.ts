@@ -8,7 +8,19 @@ export class WarpValidator {
   }
 
   async validate(warp: Warp): Promise<void> {
+    this.ensureMaxOneValuePosition(warp)
     await this.ensureValidSchema(warp)
+  }
+
+  private ensureMaxOneValuePosition(warp: Warp): void {
+    const position = warp.actions.filter((action) => {
+      if ('position' in action) return action.position === 'value'
+      return false
+    })
+
+    if (position.length > 1) {
+      throw new Error('WarpBuilder: only one value position action is allowed')
+    }
   }
 
   private async ensureValidSchema(warp: Warp): Promise<void> {
