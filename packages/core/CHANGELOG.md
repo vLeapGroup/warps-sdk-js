@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.9.5
+
+### Patch Changes
+
+- 884198d: update action execution
+
 ## 0.9.4
 
 ### Patch Changes
