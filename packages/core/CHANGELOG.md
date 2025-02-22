@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.9.10
+
+### Patch Changes
+
+- 900f20f: update warp preview to optional
+
 ## 0.9.9
 
 ### Patch Changes
