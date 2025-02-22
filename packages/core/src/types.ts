@@ -42,7 +42,7 @@ export type Warp = {
   title: string
   description: string | null
   bot?: string
-  preview: string
+  preview?: string
   vars?: Record<WarpVarPlaceholder, string>
   actions: WarpAction[]
   next?: string
