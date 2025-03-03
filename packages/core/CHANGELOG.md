@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 0.10.0
+
+### Minor Changes
+
+- a6e6b74: add transfer action
+
+### Patch Changes
+
+- a6e6b74: add action receiver position
+
 ## 0.9.10
 
 ### Patch Changes
