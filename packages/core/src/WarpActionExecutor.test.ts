@@ -46,6 +46,23 @@ describe('WarpActionExecutor', () => {
     expect(actual.value.toString()).toBe('1000000000000000000')
   })
 
+  it('createTransactionForExecute - creates a native transfer with esdt from field', async () => {
+    const subject = new WarpActionExecutor(Config)
+
+    const action: WarpTransferAction = {
+      type: 'contract',
+      label: 'test',
+      description: 'test',
+      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      args: [],
+      inputs: [{ name: 'token', type: 'esdt', position: 'transfer', source: 'field' }],
+    }
+
+    const actual = subject.createTransactionForExecute(action, ['esdt:WARP-123456|0|1000000000000000000'])
+
+    expect(actual.data?.toString()).toBe('ESDTTransfer@574152502d313233343536@0de0b6b3a7640000')
+  })
+
   it('createTransactionForExecute - creates a contract call with esdt transfer from field', async () => {
     const subject = new WarpActionExecutor(Config)
 
