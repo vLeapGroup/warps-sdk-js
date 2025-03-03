@@ -53,7 +53,7 @@ describe('WarpActionExecutor', () => {
       type: 'contract',
       label: 'test',
       description: 'test',
-      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      address: 'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqplllst77y4l',
       func: 'testFunc',
       args: [],
       gasLimit: 1000000,
@@ -62,7 +62,7 @@ describe('WarpActionExecutor', () => {
 
     const actual = subject.createTransactionForExecute(action, ['esdt:WARP-123456|0|1000000000000000000'])
 
-    expect(actual.data?.toString()).toBe('ESDTTransfer@574152502d313233343536@0de0b6b3a7640000')
+    expect(actual.data?.toString()).toBe('ESDTTransfer@574152502d313233343536@0de0b6b3a7640000@7465737446756e63')
   })
 
   it('createTransactionForExecute - creates a contract call with scaled value from field', async () => {
