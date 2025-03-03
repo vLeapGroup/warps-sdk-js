@@ -55,9 +55,21 @@ export type WarpMeta = {
   createdAt: string
 }
 
-export type WarpAction = WarpContractAction | WarpQueryAction | WarpCollectAction | WarpLinkAction
+export type WarpAction = WarpTransferAction | WarpContractAction | WarpQueryAction | WarpCollectAction | WarpLinkAction
 
-export type WarpActionType = 'contract' | 'query' | 'collect' | 'link'
+export type WarpActionType = 'transfer' | 'contract' | 'query' | 'collect' | 'link'
+
+export type WarpTransferAction = {
+  type: WarpActionType
+  label: string
+  description?: string | null
+  address?: string
+  args: string[]
+  value?: string
+  transfers?: WarpContractActionTransfer[]
+  inputs?: WarpActionInput[]
+  next?: string
+}
 
 export type WarpContractAction = {
   type: WarpActionType
@@ -130,7 +142,7 @@ export type BaseWarpActionInputType =
 
 export type WarpActionInputType = string
 
-export type WarpActionInputPosition = 'value' | 'transfer' | `arg:${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}`
+export type WarpActionInputPosition = 'receiver' | 'value' | 'transfer' | `arg:${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}`
 
 export type WarpActionInputModifier = 'scale'
 

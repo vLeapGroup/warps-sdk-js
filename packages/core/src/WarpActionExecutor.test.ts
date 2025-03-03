@@ -1,5 +1,6 @@
-import { bigIntToHex, utf8ToHex } from '@multiversx/sdk-core/out/utils.codec'
-import { WarpConfig, WarpContractAction } from './types'
+import { Address, Token, TokenTransfer } from '@multiversx/sdk-core/out'
+import { addressToHex, bigIntToHex, utf8ToHex } from '@multiversx/sdk-core/out/utils.codec'
+import { WarpConfig, WarpContractAction, WarpTransferAction } from './types'
 import { WarpActionExecutor } from './WarpActionExecutor'
 
 const Config: WarpConfig = {
@@ -26,6 +27,30 @@ describe('WarpActionExecutor', () => {
     const actual = subject.createTransactionForExecute(action, ['string:hello'], [])
 
     expect(actual.data?.toString()).toBe('hello')
+  })
+
+  it('createTransactionForExecute - creates a native transfer field-based receiver', async () => {
+    Config.currentUrl = 'https://example.com'
+    const subject = new WarpActionExecutor(Config)
+
+    const action: WarpTransferAction = {
+      type: 'transfer',
+      label: 'test',
+      description: 'test',
+      args: [],
+      value: '1000000000000000000',
+      inputs: [{ name: 'Receiver', type: 'address', position: 'receiver', source: 'field' }],
+    }
+
+    const actual = subject.createTransactionForExecute(
+      action,
+      ['address:erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8'],
+      []
+    )
+
+    expect(actual.receiver.toString()).toBe('erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8')
+    expect(actual.data?.toString()).toBe('')
+    expect(actual.value.toString()).toBe('1000000000000000000')
   })
 
   it('createTransactionForExecute - creates a contract call with scaled value from field', async () => {

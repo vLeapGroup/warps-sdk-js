@@ -24,6 +24,7 @@ import {
   WarpContractAction,
   WarpContractActionTransfer,
   WarpQueryAction,
+  WarpTransferAction,
 } from './types'
 import { WarpArgSerializer } from './WarpArgSerializer'
 import { WarpContractLoader } from './WarpContractLoader'
@@ -47,21 +48,24 @@ export class WarpActionExecutor {
     this.contractLoader = new WarpContractLoader(config)
   }
 
-  createTransactionForExecute(action: WarpContractAction, inputs: string[], inputTransfers: TokenTransfer[]): Transaction {
+  createTransactionForExecute(
+    action: WarpTransferAction | WarpContractAction,
+    inputs: string[],
+    inputTransfers: TokenTransfer[]
+  ): Transaction {
     if (!this.config.userAddress) throw new Error('WarpActionExecutor: user address not set')
     const sender = Address.newFromBech32(this.config.userAddress)
-    const destination = Address.newFromBech32(action.address)
     const config = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
 
-    const { args, value, transfers } = this.getTxComponentsFromInputs(action, inputs, inputTransfers)
+    const { destination, args, value, transfers } = this.getTxComponentsFromInputs(action, inputs, inputTransfers, sender)
     const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
 
     if (destination.isContractAddress()) {
       return new SmartContractTransactionsFactory({ config }).createTransactionForExecute({
         sender,
         contract: destination,
-        function: action.func || '',
-        gasLimit: BigInt(action.gasLimit),
+        function: 'func' in action ? action.func || '' : '',
+        gasLimit: 'gasLimit' in action ? BigInt(action.gasLimit || 0) : 0n,
         arguments: typedArgs,
         tokenTransfers: transfers,
         nativeTransferAmount: value,
@@ -121,12 +125,20 @@ export class WarpActionExecutor {
   }
 
   getTxComponentsFromInputs(
-    action: WarpContractAction | WarpQueryAction,
+    action: WarpTransferAction | WarpContractAction | WarpQueryAction,
     inputs: string[],
-    inputTransfers: TokenTransfer[]
-  ): { args: string[]; value: bigint; transfers: TokenTransfer[] } {
+    inputTransfers: TokenTransfer[],
+    sender?: Address
+  ): { destination: Address; args: string[]; value: bigint; transfers: TokenTransfer[] } {
     const resolvedInputs = this.getResolvedInputs(action, inputs)
     const modifiedInputs = this.getModifiedInputs(resolvedInputs)
+
+    const destinationInput = modifiedInputs.find((i) => i.input.position === 'receiver')?.value
+    const detinationInAction = 'address' in action ? action.address : null
+    const destinationRaw = destinationInput?.split(':')[1] || detinationInAction || sender?.toBech32()
+    if (!destinationRaw) throw new Error('WarpActionExecutor: Destination/Receiver not provided')
+    const destination = Address.newFromBech32(destinationRaw)
+
     const args = this.getPreparedArgs(action, modifiedInputs)
 
     const valueInput = modifiedInputs.find((i) => i.input.position === 'value')?.value || null
@@ -136,7 +148,7 @@ export class WarpActionExecutor {
     const transfersInAction = 'transfers' in action ? action.transfers : []
     const transfers = [...(transfersInAction?.map(this.toTypedTransfer) || []), ...inputTransfers]
 
-    return { args, value, transfers }
+    return { destination, args, value, transfers }
   }
 
   private getModifiedInputs(inputs: ResolvedInput[]): ResolvedInput[] {
