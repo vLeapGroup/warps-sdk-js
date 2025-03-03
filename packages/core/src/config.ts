@@ -4,9 +4,9 @@ export const Config = {
   ProtocolNameWarp: 'warp',
   ProtocolNameBrand: 'warp-brand',
 
-  LatestProtocolVersion: '0.4.0',
+  LatestProtocolVersion: '0.5.0',
 
-  LatestWarpSchemaUrl: 'https://raw.githubusercontent.com/vLeapGroup/warps-specs/refs/heads/main/schemas/v0.4.0.schema.json',
+  LatestWarpSchemaUrl: 'https://raw.githubusercontent.com/vLeapGroup/warps-specs/refs/heads/main/schemas/v0.5.0.schema.json',
   LatestBrandSchemaUrl: 'https://raw.githubusercontent.com/vLeapGroup/warps-specs/refs/heads/main/schemas/brand/v0.1.0.schema.json',
 
   DefaultClientUrl: (env: ChainEnv) => {
