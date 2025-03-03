@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 0.11.0
+
+### Minor Changes
+
+- 443388a: update protocol version
+
+### Patch Changes
+
+- 285d7d0: update action args to optional
+
 ## 0.10.0
 
 ### Minor Changes
