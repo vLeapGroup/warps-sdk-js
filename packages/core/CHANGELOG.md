@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.12.0
+
+### Minor Changes
+
+- a704143: unify action transfers with inputs
+
 ## 0.11.0
 
 ### Minor Changes
