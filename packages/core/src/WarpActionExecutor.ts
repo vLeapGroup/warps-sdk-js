@@ -197,7 +197,7 @@ export class WarpActionExecutor {
   }
 
   private getPreparedArgs(action: WarpAction, resolvedInputs: ResolvedInput[]): string[] {
-    let args = 'args' in action ? action.args : []
+    let args = 'args' in action ? action.args || [] : []
     resolvedInputs.forEach(({ input, value }) => {
       if (!value) return
       if (!input.position.startsWith('arg:')) return

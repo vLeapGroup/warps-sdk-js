@@ -1,5 +1,4 @@
-import { Address, Token, TokenTransfer } from '@multiversx/sdk-core/out'
-import { addressToHex, bigIntToHex, utf8ToHex } from '@multiversx/sdk-core/out/utils.codec'
+import { bigIntToHex, utf8ToHex } from '@multiversx/sdk-core/out/utils.codec'
 import { WarpConfig, WarpContractAction, WarpTransferAction } from './types'
 import { WarpActionExecutor } from './WarpActionExecutor'
 
@@ -37,7 +36,6 @@ describe('WarpActionExecutor', () => {
       type: 'transfer',
       label: 'test',
       description: 'test',
-      args: [],
       value: '1000000000000000000',
       inputs: [{ name: 'Receiver', type: 'address', position: 'receiver', source: 'field' }],
     }

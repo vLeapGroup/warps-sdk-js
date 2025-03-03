@@ -64,7 +64,7 @@ export type WarpTransferAction = {
   label: string
   description?: string | null
   address?: string
-  args: string[]
+  args?: string[]
   value?: string
   transfers?: WarpContractActionTransfer[]
   inputs?: WarpActionInput[]
