@@ -48,16 +48,12 @@ export class WarpActionExecutor {
     this.contractLoader = new WarpContractLoader(config)
   }
 
-  createTransactionForExecute(
-    action: WarpTransferAction | WarpContractAction,
-    inputs: string[],
-    inputTransfers: TokenTransfer[]
-  ): Transaction {
+  createTransactionForExecute(action: WarpTransferAction | WarpContractAction, inputs: string[]): Transaction {
     if (!this.config.userAddress) throw new Error('WarpActionExecutor: user address not set')
     const sender = Address.newFromBech32(this.config.userAddress)
     const config = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
 
-    const { destination, args, value, transfers } = this.getTxComponentsFromInputs(action, inputs, inputTransfers, sender)
+    const { destination, args, value, transfers } = this.getTxComponentsFromInputs(action, inputs, sender)
     const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
 
     if (destination.isContractAddress()) {
@@ -87,7 +83,7 @@ export class WarpActionExecutor {
     const chainApi = new ApiNetworkProvider(this.config.chainApiUrl, { timeout: 30_000 })
     const queryRunner = new QueryRunnerAdapter({ networkProvider: chainApi })
     const abi = await this.getAbiForAction(action)
-    const { args } = this.getTxComponentsFromInputs(action, inputs, [])
+    const { args } = this.getTxComponentsFromInputs(action, inputs)
     const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
     const controller = new SmartContractQueriesController({ queryRunner, abi })
     const query = controller.createQuery({ contract: action.address, function: action.func, arguments: typedArgs })
@@ -127,7 +123,6 @@ export class WarpActionExecutor {
   getTxComponentsFromInputs(
     action: WarpTransferAction | WarpContractAction | WarpQueryAction,
     inputs: string[],
-    inputTransfers: TokenTransfer[],
     sender?: Address
   ): { destination: Address; args: string[]; value: bigint; transfers: TokenTransfer[] } {
     const resolvedInputs = this.getResolvedInputs(action, inputs)
@@ -145,8 +140,12 @@ export class WarpActionExecutor {
     const valueInAction = 'value' in action ? action.value : null
     const value = BigInt(valueInput?.split(':')[1] || valueInAction || 0)
 
+    const transferInputs = modifiedInputs.filter((i) => i.input.position === 'transfer' && i.value).map((i) => i.value) as string[]
     const transfersInAction = 'transfers' in action ? action.transfers : []
-    const transfers = [...(transfersInAction?.map(this.toTypedTransfer) || []), ...inputTransfers]
+    const transfers = [
+      ...(transfersInAction?.map(this.toTypedTransfer) || []),
+      ...(transferInputs?.map((t) => this.serializer.stringToNative(t)[1] as TokenTransfer) || []),
+    ]
 
     return { destination, args, value, transfers }
   }
