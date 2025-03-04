@@ -6,7 +6,7 @@ export class WarpContractLoader {
 
   async getContract(address: string): Promise<WarpContract | null> {
     try {
-      const chainApi = this.getConfiguredChainApi()
+      const chainApi = WarpUtils.getConfiguredChainApi(this.config)
       const res = await chainApi.doGetGeneric(`accounts/${address}/verification`)
 
       return {
