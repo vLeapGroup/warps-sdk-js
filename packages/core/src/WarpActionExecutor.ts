@@ -203,7 +203,7 @@ export class WarpActionExecutor {
     try {
       const [type, value] = this.serializer.stringToNative(input)
       if (type === 'esdt') {
-        const [, , , decimals] = input.split('|')
+        const [, , , decimals] = input.split(WarpConstants.ArgCompositeSeparator)
         if (decimals) return input
         const original = value as TokenTransfer
         const isFungible = new TokenComputer().isFungible(original.token)
