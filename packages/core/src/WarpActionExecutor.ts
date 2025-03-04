@@ -1,7 +1,6 @@
 import {
   AbiRegistry,
   Address,
-  ApiNetworkProvider,
   IContractQueryResponse,
   QueryRunnerAdapter,
   ResultsParser,
@@ -80,7 +79,7 @@ export class WarpActionExecutor {
   async executeQuery(action: WarpQueryAction, inputs: string[]): Promise<TypedValue> {
     if (!this.config.chainApiUrl) throw new Error('WarpActionExecutor: Chain API URL not set')
     if (!action.func) throw new Error('WarpActionExecutor: Function not found')
-    const chainApi = new ApiNetworkProvider(this.config.chainApiUrl, { timeout: 30_000 })
+    const chainApi = WarpUtils.getConfiguredChainApi(this.config)
     const queryRunner = new QueryRunnerAdapter({ networkProvider: chainApi })
     const abi = await this.getAbiForAction(action)
     const { args } = this.getTxComponentsFromInputs(action, inputs)

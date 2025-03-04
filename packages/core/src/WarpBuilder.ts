@@ -1,11 +1,4 @@
-import {
-  Address,
-  ApiNetworkProvider,
-  Transaction,
-  TransactionOnNetwork,
-  TransactionsFactoryConfig,
-  TransferTransactionsFactory,
-} from '@multiversx/sdk-core'
+import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
 import { Config } from './config'
 import { getChainId, getLatestProtocolIdentifier, toPreviewText } from './helpers'
 import { Warp, WarpAction, WarpCacheConfig, WarpConfig } from './types'
@@ -83,10 +76,10 @@ export class WarpBuilder {
       }
     }
 
-    const networkProvider = new ApiNetworkProvider(this.config.chainApiUrl || Config.Chain.ApiUrl(this.config.env))
+    const chainApi = WarpUtils.getConfiguredChainApi(this.config)
 
     try {
-      const tx = await networkProvider.getTransaction(hash)
+      const tx = await chainApi.getTransaction(hash)
       const warp = await this.createFromTransaction(tx)
 
       if (cache && cache.ttl && warp) {

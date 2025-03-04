@@ -1,5 +1,5 @@
-import { ApiNetworkProvider } from '@multiversx/sdk-core/out'
 import { WarpConfig, WarpContract, WarpContractVerification } from './types'
+import { WarpUtils } from './WarpUtils'
 
 export class WarpContractLoader {
   constructor(private readonly config: WarpConfig) {}
@@ -22,7 +22,7 @@ export class WarpContractLoader {
 
   async getVerificationInfo(address: string): Promise<WarpContractVerification | null> {
     try {
-      const chainApi = this.getConfiguredChainApi()
+      const chainApi = WarpUtils.getConfiguredChainApi(this.config)
       const res = await chainApi.doGetGeneric(`accounts/${address}/verification`)
 
       return {
@@ -33,10 +33,5 @@ export class WarpContractLoader {
       console.error('WarpContractLoader: getVerificationInfo error', error)
       return null
     }
-  }
-
-  private getConfiguredChainApi(): ApiNetworkProvider {
-    if (!this.config.chainApiUrl) throw new Error('WarpContract: Chain API URL not set')
-    return new ApiNetworkProvider(this.config.chainApiUrl, { timeout: 30000 })
   }
 }

@@ -1,3 +1,5 @@
+import { ApiNetworkProvider } from '@multiversx/sdk-core/out'
+import { Config } from './config'
 import { WarpConstants } from './constants'
 import { Warp, WarpConfig, WarpIdType } from './types'
 import { WarpLink } from './WarpLink'
@@ -55,5 +57,11 @@ export class WarpUtils {
       if (!identifierInfo) return null
       return warpLink.build(identifierInfo.type, identifierInfo.id)
     }
+  }
+
+  static getConfiguredChainApi(config: WarpConfig): ApiNetworkProvider {
+    const apiUrl = config.chainApiUrl || Config.Chain.ApiUrl(config.env)
+    if (!apiUrl) throw new Error('WarpUtils: Chain API URL not configured')
+    return new ApiNetworkProvider(apiUrl, { timeout: 30_000 })
   }
 }

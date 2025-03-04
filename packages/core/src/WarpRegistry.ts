@@ -2,7 +2,6 @@ import {
   AbiRegistry,
   Address,
   AddressValue,
-  ApiNetworkProvider,
   BytesValue,
   QueryRunnerAdapter,
   SmartContractQueriesController,
@@ -15,6 +14,7 @@ import { Config } from './config'
 import { getChainId, toTypedRegistryInfo } from './helpers'
 import { Brand, RegistryInfo, WarpCacheConfig, WarpConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
+import { WarpUtils } from './WarpUtils'
 
 export class WarpRegistry {
   private config: WarpConfig
@@ -213,10 +213,10 @@ export class WarpRegistry {
       }
     }
 
-    const networkProvider = new ApiNetworkProvider(this.config.chainApiUrl || Config.Chain.ApiUrl(this.config.env))
+    const chainApi = WarpUtils.getConfiguredChainApi(this.config)
 
     try {
-      const tx = await networkProvider.getTransaction(hash)
+      const tx = await chainApi.getTransaction(hash)
       const brand = JSON.parse(tx.data.toString()) as Brand
 
       brand.meta = {
@@ -259,8 +259,7 @@ export class WarpRegistry {
   }
 
   private getController(): SmartContractQueriesController {
-    const apiUrl = this.config.chainApiUrl || Config.Chain.ApiUrl(this.config.env)
-    const networkProvider = new ApiNetworkProvider(apiUrl, { timeout: 30_000 })
+    const networkProvider = WarpUtils.getConfiguredChainApi(this.config)
     const queryRunner = new QueryRunnerAdapter({ networkProvider: networkProvider })
     const abi = AbiRegistry.create(RegistryAbi)
     return new SmartContractQueriesController({ queryRunner, abi })
