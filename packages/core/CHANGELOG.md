@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.13.0
+
+### Minor Changes
+
+- add input esdt decimal preprocessing
+
 ## 0.12.0
 
 ### Minor Changes
