@@ -40,14 +40,12 @@ import {
   VariadicType,
   VariadicValue,
 } from '@multiversx/sdk-core/out'
+import { WarpConstants } from './constants'
 import { BaseWarpActionInputType, WarpActionInputType } from './types'
 
 export type WarpNativeValue = string | number | bigint | boolean | null | TokenTransfer | WarpNativeValue[]
 
-const ParamsSeparator = ':'
-const CompositeSeparator = '|'
-
-const SplitParamsRegex = new RegExp(`${ParamsSeparator}(.*)`)
+const SplitParamsRegex = new RegExp(`${WarpConstants.ArgParamsSeparator}(.*)`)
 
 export class WarpArgSerializer {
   nativeToString(type: WarpActionInputType, value: WarpNativeValue): string {
@@ -70,24 +68,24 @@ export class WarpArgSerializer {
     }
     if (value.hasClassOrSuperclass(List.ClassName)) {
       const items = (value as List).getItems()
-      const types = items.map((item) => this.typedToString(item).split(ParamsSeparator)[0]) as BaseWarpActionInputType[]
+      const types = items.map((item) => this.typedToString(item).split(WarpConstants.ArgParamsSeparator)[0]) as BaseWarpActionInputType[]
       const type = types[0] as BaseWarpActionInputType
-      const values = items.map((item) => this.typedToString(item).split(ParamsSeparator)[1]) as WarpNativeValue[]
+      const values = items.map((item) => this.typedToString(item).split(WarpConstants.ArgParamsSeparator)[1]) as WarpNativeValue[]
       return `list:${type}:${values.join(',')}`
     }
     if (value.hasClassOrSuperclass(VariadicValue.ClassName)) {
       const items = (value as VariadicValue).getItems()
-      const types = items.map((item) => this.typedToString(item).split(ParamsSeparator)[0]) as BaseWarpActionInputType[]
+      const types = items.map((item) => this.typedToString(item).split(WarpConstants.ArgParamsSeparator)[0]) as BaseWarpActionInputType[]
       const type = types[0] as BaseWarpActionInputType
-      const values = items.map((item) => this.typedToString(item).split(ParamsSeparator)[1]) as WarpNativeValue[]
+      const values = items.map((item) => this.typedToString(item).split(WarpConstants.ArgParamsSeparator)[1]) as WarpNativeValue[]
       return `variadic:${type}:${values.join(',')}`
     }
     if (value.hasClassOrSuperclass(CompositeValue.ClassName)) {
       const items = (value as CompositeValue).getItems()
-      const types = items.map((item) => this.typedToString(item).split(ParamsSeparator)[0]) as BaseWarpActionInputType[]
-      const values = items.map((item) => this.typedToString(item).split(ParamsSeparator)[1]) as WarpNativeValue[]
-      const rawTypes = types.join(CompositeSeparator)
-      const rawValues = values.join(CompositeSeparator)
+      const types = items.map((item) => this.typedToString(item).split(WarpConstants.ArgParamsSeparator)[0]) as BaseWarpActionInputType[]
+      const values = items.map((item) => this.typedToString(item).split(WarpConstants.ArgParamsSeparator)[1]) as WarpNativeValue[]
+      const rawTypes = types.join(WarpConstants.ArgCompositeSeparator)
+      const rawValues = values.join(WarpConstants.ArgCompositeSeparator)
       return `composite(${rawTypes}):${rawValues}`
     }
     if (value.hasClassOrSuperclass(BigUIntValue.ClassName) || value.getType().getName() === 'BigUint' /* ABI handling */)
@@ -126,7 +124,9 @@ export class WarpArgSerializer {
   nativeToType(type: BaseWarpActionInputType): Type {
     if (type.startsWith('composite')) {
       const rawTypes = type.match(/\(([^)]+)\)/)?.[1] as BaseWarpActionInputType
-      return new CompositeType(...rawTypes.split(CompositeSeparator).map((t) => this.nativeToType(t as BaseWarpActionInputType)))
+      return new CompositeType(
+        ...rawTypes.split(WarpConstants.ArgCompositeSeparator).map((t) => this.nativeToType(t as BaseWarpActionInputType))
+      )
     }
     if (type === 'string') return new StringType()
     if (type === 'uint8') return new U8Type()
@@ -149,36 +149,36 @@ export class WarpArgSerializer {
   }
 
   stringToNative(value: string): [WarpActionInputType, WarpNativeValue] {
-    const parts = value.split(ParamsSeparator)
+    const parts = value.split(WarpConstants.ArgParamsSeparator)
     const baseType = parts[0]
-    const val = parts.slice(1).join(ParamsSeparator)
+    const val = parts.slice(1).join(WarpConstants.ArgParamsSeparator)
 
     if (baseType === 'null') {
       return [baseType, null]
     }
     if (baseType === 'option') {
-      const [baseType, baseValue] = val.split(ParamsSeparator) as [WarpActionInputType, WarpNativeValue]
+      const [baseType, baseValue] = val.split(WarpConstants.ArgParamsSeparator) as [WarpActionInputType, WarpNativeValue]
       return [`option:${baseType}`, baseValue || null]
     } else if (baseType === 'optional') {
-      const [baseType, baseValue] = val.split(ParamsSeparator) as [WarpActionInputType, WarpNativeValue]
+      const [baseType, baseValue] = val.split(WarpConstants.ArgParamsSeparator) as [WarpActionInputType, WarpNativeValue]
       return [`optional:${baseType}`, baseValue || null]
     } else if (baseType === 'list') {
-      const listParts = val.split(ParamsSeparator) as [WarpActionInputType, WarpNativeValue]
-      const baseType = listParts.slice(0, -1).join(ParamsSeparator)
+      const listParts = val.split(WarpConstants.ArgParamsSeparator) as [WarpActionInputType, WarpNativeValue]
+      const baseType = listParts.slice(0, -1).join(WarpConstants.ArgParamsSeparator)
       const valuesRaw = listParts[listParts.length - 1]
       const valuesStrings = valuesRaw ? (valuesRaw as string).split(',') : []
       const values = valuesStrings.map((v) => this.stringToNative(`${baseType}:${v}`)[1])
       return [`list:${baseType}`, values]
     } else if (baseType === 'variadic') {
-      const variadicParts = (val as string).split(ParamsSeparator) as [WarpActionInputType, WarpNativeValue]
-      const baseType = variadicParts.slice(0, -1).join(ParamsSeparator)
+      const variadicParts = (val as string).split(WarpConstants.ArgParamsSeparator) as [WarpActionInputType, WarpNativeValue]
+      const baseType = variadicParts.slice(0, -1).join(WarpConstants.ArgParamsSeparator)
       const valuesRaw = variadicParts[variadicParts.length - 1]
       const valuesStrings = valuesRaw ? (valuesRaw as string).split(',') : []
       const values = valuesStrings.map((v) => this.stringToNative(`${baseType}:${v}`)[1])
       return [`variadic:${baseType}`, values]
     } else if (baseType.startsWith('composite')) {
-      const rawTypes = baseType.match(/\(([^)]+)\)/)?.[1]?.split(CompositeSeparator) as BaseWarpActionInputType[]
-      const valuesStrings = val.split(CompositeSeparator)
+      const rawTypes = baseType.match(/\(([^)]+)\)/)?.[1]?.split(WarpConstants.ArgCompositeSeparator) as BaseWarpActionInputType[]
+      const valuesStrings = val.split(WarpConstants.ArgCompositeSeparator)
       const values = valuesStrings.map((val, index) => this.stringToNative(`${rawTypes[index]}:${val}`)[1])
       return [baseType, values]
     } else if (baseType === 'string') return [baseType, val]
@@ -190,7 +190,7 @@ export class WarpArgSerializer {
     else if (baseType === 'hex') return [baseType, val]
     else if (baseType === 'codemeta') return [baseType, val]
     else if (baseType === 'esdt') {
-      const [identifier, nonce, amount] = (val as string).split(CompositeSeparator)
+      const [identifier, nonce, amount] = (val as string).split(WarpConstants.ArgCompositeSeparator)
       return [baseType, new TokenTransfer({ token: new Token({ identifier, nonce: BigInt(nonce) }), amount: BigInt(amount) })]
     }
     throw new Error(`WarpArgSerializer (stringToNative): Unsupported input type: ${baseType}`)
@@ -224,8 +224,8 @@ export class WarpArgSerializer {
     }
     if (type.startsWith('composite')) {
       const baseType = type.match(/\(([^)]+)\)/)?.[1] as BaseWarpActionInputType
-      const rawValues = (val as string).split(CompositeSeparator)
-      const rawTypes = baseType.split(CompositeSeparator) as BaseWarpActionInputType[]
+      const rawValues = (val as string).split(WarpConstants.ArgCompositeSeparator)
+      const rawTypes = baseType.split(WarpConstants.ArgCompositeSeparator) as BaseWarpActionInputType[]
       const values = rawValues.map((val, i) => this.stringToTyped(`${rawTypes[i]}:${val}`))
       const types = values.map((v) => v.getType())
       return new CompositeValue(new CompositeType(...types), values)
@@ -242,7 +242,7 @@ export class WarpArgSerializer {
     if (type === 'hex') return val ? BytesValue.fromHex(val as string) : new NothingValue()
     if (type === 'codemeta') return new CodeMetadataValue(CodeMetadata.fromBuffer(Buffer.from(val as string, 'hex')))
     if (type === 'esdt') {
-      const parts = val.split(CompositeSeparator)
+      const parts = val.split(WarpConstants.ArgCompositeSeparator)
       return new Struct(this.nativeToType('esdt') as StructType, [
         new Field(new TokenIdentifierValue(parts[0]), 'token_identifier'),
         new Field(new U64Value(BigInt(parts[1])), 'token_nonce'),
