@@ -23,7 +23,7 @@ describe('WarpActionExecutor', () => {
       inputs: [{ name: 'message', type: 'string', position: 'arg:1', source: 'field' }],
     }
 
-    const actual = subject.createTransactionForExecute(action, ['string:hello'])
+    const actual = await subject.createTransactionForExecute(action, ['string:hello'])
 
     expect(actual.data?.toString()).toBe('hello')
   })
@@ -39,7 +39,9 @@ describe('WarpActionExecutor', () => {
       inputs: [{ name: 'Receiver', type: 'address', position: 'receiver', source: 'field' }],
     }
 
-    const actual = subject.createTransactionForExecute(action, ['address:erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8'])
+    const actual = await subject.createTransactionForExecute(action, [
+      'address:erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+    ])
 
     expect(actual.receiver.toString()).toBe('erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8')
     expect(actual.data?.toString()).toBe('')
@@ -58,7 +60,7 @@ describe('WarpActionExecutor', () => {
       inputs: [{ name: 'token', type: 'esdt', position: 'transfer', source: 'field' }],
     }
 
-    const actual = subject.createTransactionForExecute(action, ['esdt:WARP-123456|0|1000000000000000000'])
+    const actual = await subject.createTransactionForExecute(action, ['esdt:WARP-123456|0|1000000000000000000'])
 
     expect(actual.data?.toString()).toBe('ESDTTransfer@574152502d313233343536@0de0b6b3a7640000')
   })
@@ -77,7 +79,7 @@ describe('WarpActionExecutor', () => {
       inputs: [{ name: 'token', type: 'esdt', position: 'transfer', source: 'field' }],
     }
 
-    const actual = subject.createTransactionForExecute(action, ['esdt:WARP-123456|0|1000000000000000000'])
+    const actual = await subject.createTransactionForExecute(action, ['esdt:WARP-123456|0|1000000000000000000'])
 
     expect(actual.data?.toString()).toBe('ESDTTransfer@574152502d313233343536@0de0b6b3a7640000@7465737446756e63')
   })
@@ -95,7 +97,7 @@ describe('WarpActionExecutor', () => {
       inputs: [{ name: 'value', type: 'biguint', position: 'value', source: 'field', modifier: 'scale:18' }],
     }
 
-    const actual = subject.createTransactionForExecute(action, ['biguint:1'])
+    const actual = await subject.createTransactionForExecute(action, ['biguint:1'])
 
     expect(actual.value.toString()).toBe('1000000000000000000')
   })
@@ -119,7 +121,7 @@ describe('WarpActionExecutor', () => {
       ],
     }
 
-    const actual = subject.createTransactionForExecute(action, [])
+    const actual = await subject.createTransactionForExecute(action, [])
 
     expect(actual.data?.toString()).toBe(`issue@${utf8ToHex('WarpToken')}@${utf8ToHex('WAPT')}@${bigIntToHex('1000000000000000000000')}@12`)
   })
@@ -138,7 +140,7 @@ describe('WarpActionExecutor', () => {
       inputs: [{ name: 'myvalue', type: 'biguint', position: 'value', source: 'field', modifier: 'scale:18' }],
     }
 
-    const { args, value, transfers } = subject.getTxComponentsFromInputs(action, ['biguint:2'])
+    const { args, value, transfers } = await subject.getTxComponentsFromInputs(action, ['biguint:2'])
 
     expect(value.toString()).toBe('2000000000000000000')
     expect(args).toEqual([])
@@ -161,7 +163,7 @@ describe('WarpActionExecutor', () => {
       inputs: [{ name: 'myvalue', type: 'biguint', position: 'value', source: 'query' }],
     }
 
-    const { value } = subject.getTxComponentsFromInputs(action, [])
+    const { value } = await subject.getTxComponentsFromInputs(action, [])
 
     expect(value.toString()).toBe('2000000000000000000')
   })
@@ -184,7 +186,7 @@ describe('WarpActionExecutor', () => {
       ],
     }
 
-    const { args } = subject.getTxComponentsFromInputs(action, ['string:hello', 'biguint:1'])
+    const { args } = await subject.getTxComponentsFromInputs(action, ['string:hello', 'biguint:1'])
 
     expect(args[0].toString()).toBe('string:hello')
     expect(args[1].toString()).toBe('biguint:1000000000000000000')
@@ -208,7 +210,7 @@ describe('WarpActionExecutor', () => {
       ],
     }
 
-    const { args, value } = subject.getTxComponentsFromInputs(action, ['biguint:2.2', 'biguint:0.1'])
+    const { args, value } = await subject.getTxComponentsFromInputs(action, ['biguint:2.2', 'biguint:0.1'])
 
     expect(value.toString()).toBe('100000000000000000')
     expect(args[0].toString()).toBe('biguint:2200000000000000000')
@@ -232,7 +234,7 @@ describe('WarpActionExecutor', () => {
       ],
     }
 
-    const { args } = subject.getTxComponentsFromInputs(action, ['biguint:1', 'uint8:18'])
+    const { args } = await subject.getTxComponentsFromInputs(action, ['biguint:1', 'uint8:18'])
 
     expect(args[0].toString()).toBe('string:hello')
     expect(args[1].toString()).toBe('biguint:1000000000000000000')
@@ -259,9 +261,49 @@ describe('WarpActionExecutor', () => {
       ],
     }
 
-    const { args, value } = subject.getTxComponentsFromInputs(action, ['biguint:1', 'biguint:5', 'string:four', 'string:one'])
+    const { args, value } = await subject.getTxComponentsFromInputs(action, ['biguint:1', 'biguint:5', 'string:four', 'string:one'])
 
     expect(args).toEqual(['string:one', 'string:two', 'biguint:500', 'string:four'])
     expect(value.toString()).toEqual('1000000000000000000')
+  })
+
+  it('getTxComponentsFromInputs - resolves esdt decimal places when no provided', async () => {
+    Config.chainApiUrl = 'https://api.multiversx.com'
+    const subject = new WarpActionExecutor(Config)
+
+    const action: WarpContractAction = {
+      type: 'contract',
+      label: 'test',
+      description: 'test',
+      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      func: null,
+      args: [],
+      gasLimit: 1000000,
+      inputs: [{ name: 'token', type: 'esdt', position: 'arg:1', source: 'field' }],
+    }
+
+    const { args } = await subject.getTxComponentsFromInputs(action, ['esdt:USH-111e09|0|1000'])
+
+    expect(args).toEqual(['esdt:USH-111e09|0|1000000000000000000000|18'])
+  })
+
+  it('getTxComponentsFromInputs - does not resolve esdt decimal places when decimal is provided', async () => {
+    Config.chainApiUrl = 'https://api.multiversx.com'
+    const subject = new WarpActionExecutor(Config)
+
+    const action: WarpContractAction = {
+      type: 'contract',
+      label: 'test',
+      description: 'test',
+      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      func: null,
+      args: [],
+      gasLimit: 1000000,
+      inputs: [{ name: 'token', type: 'esdt', position: 'arg:1', source: 'field' }],
+    }
+
+    const { args } = await subject.getTxComponentsFromInputs(action, ['esdt:USH-111e09|0|1000|2'])
+
+    expect(args).toEqual(['esdt:USH-111e09|0|1000|2'])
   })
 })
