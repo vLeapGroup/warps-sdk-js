@@ -8,12 +8,15 @@ import {
   SmartContractTransactionsFactory,
   StringValue,
   Token,
+  TokenComputer,
   TokenTransfer,
   Transaction,
   TransactionsFactoryConfig,
   TransferTransactionsFactory,
   TypedValue,
 } from '@multiversx/sdk-core/out'
+import { Config } from './config'
+import { WarpConstants } from './constants'
 import { getChainId, shiftBigintBy } from './helpers'
 import {
   WarpAction,
@@ -27,6 +30,7 @@ import {
 } from './types'
 import { WarpArgSerializer } from './WarpArgSerializer'
 import { WarpContractLoader } from './WarpContractLoader'
+import { WarpUtils } from './WarpUtils'
 
 type ResolvedInput = {
   input: WarpActionInput
@@ -47,12 +51,12 @@ export class WarpActionExecutor {
     this.contractLoader = new WarpContractLoader(config)
   }
 
-  createTransactionForExecute(action: WarpTransferAction | WarpContractAction, inputs: string[]): Transaction {
+  async createTransactionForExecute(action: WarpTransferAction | WarpContractAction, inputs: string[]): Promise<Transaction> {
     if (!this.config.userAddress) throw new Error('WarpActionExecutor: user address not set')
     const sender = Address.newFromBech32(this.config.userAddress)
     const config = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
 
-    const { destination, args, value, transfers } = this.getTxComponentsFromInputs(action, inputs, sender)
+    const { destination, args, value, transfers } = await this.getTxComponentsFromInputs(action, inputs, sender)
     const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
 
     if (destination.isContractAddress()) {
@@ -82,7 +86,7 @@ export class WarpActionExecutor {
     const chainApi = WarpUtils.getConfiguredChainApi(this.config)
     const queryRunner = new QueryRunnerAdapter({ networkProvider: chainApi })
     const abi = await this.getAbiForAction(action)
-    const { args } = this.getTxComponentsFromInputs(action, inputs)
+    const { args } = await this.getTxComponentsFromInputs(action, inputs)
     const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
     const controller = new SmartContractQueriesController({ queryRunner, abi })
     const query = controller.createQuery({ contract: action.address, function: action.func, arguments: typedArgs })
@@ -119,12 +123,12 @@ export class WarpActionExecutor {
     })
   }
 
-  getTxComponentsFromInputs(
+  async getTxComponentsFromInputs(
     action: WarpTransferAction | WarpContractAction | WarpQueryAction,
     inputs: string[],
     sender?: Address
-  ): { destination: Address; args: string[]; value: bigint; transfers: TokenTransfer[] } {
-    const resolvedInputs = this.getResolvedInputs(action, inputs)
+  ): Promise<{ destination: Address; args: string[]; value: bigint; transfers: TokenTransfer[] }> {
+    const resolvedInputs = await this.getResolvedInputs(action, inputs)
     const modifiedInputs = this.getModifiedInputs(resolvedInputs)
 
     const destinationInput = modifiedInputs.find((i) => i.input.position === 'receiver')?.value
@@ -180,18 +184,40 @@ export class WarpActionExecutor {
     })
   }
 
-  private getResolvedInputs(action: WarpAction, inputArgs: string[]): ResolvedInput[] {
+  private async getResolvedInputs(action: WarpAction, inputArgs: string[]): Promise<ResolvedInput[]> {
     const argInputs = action.inputs || []
+    const preprocessed = await Promise.all(inputArgs.map((arg) => this.preprocessInput(arg)))
 
     const toValueByType = (input: WarpActionInput, index: number) => {
       if (input.source === 'query') return this.serializer.nativeToString(input.type, this.url.searchParams.get(input.name) || '')
-      return inputArgs[index] || null
+      return preprocessed[index] || null
     }
 
     return argInputs.map((input, index) => ({
       input,
       value: toValueByType(input, index),
     }))
+  }
+
+  private async preprocessInput(input: string): Promise<string> {
+    try {
+      const [type, value] = this.serializer.stringToNative(input)
+      if (type === 'esdt') {
+        const [, , , decimals] = input.split('|')
+        if (decimals) return input
+        const original = value as TokenTransfer
+        const isFungible = new TokenComputer().isFungible(original.token)
+        if (!isFungible) return input // TODO: handle non-fungible tokens like meta-esdts
+        const apiUrl = this.config.chainApiUrl || Config.Chain.ApiUrl(this.config.env)
+        const definitionRes = await fetch(`${apiUrl}/tokens/${original.token.identifier}`) // TODO: use chainApi directly; currently causes circular reference for whatever reason
+        const definition = await definitionRes.json()
+        const processed = new TokenTransfer({ token: original.token, amount: shiftBigintBy(original.amount, definition.decimals) })
+        return this.serializer.nativeToString(type, processed) + WarpConstants.ArgCompositeSeparator + definition.decimals
+      }
+      return input
+    } catch (e) {
+      return input
+    }
   }
 
   private getPreparedArgs(action: WarpAction, resolvedInputs: ResolvedInput[]): string[] {
