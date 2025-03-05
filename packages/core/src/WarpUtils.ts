@@ -62,6 +62,6 @@ export class WarpUtils {
   static getConfiguredChainApi(config: WarpConfig): ApiNetworkProvider {
     const apiUrl = config.chainApiUrl || Config.Chain.ApiUrl(config.env)
     if (!apiUrl) throw new Error('WarpUtils: Chain API URL not configured')
-    return new ApiNetworkProvider(apiUrl, { timeout: 30_000 })
+    return new ApiNetworkProvider(apiUrl, { timeout: 30_000, clientName: 'warp-sdk' })
   }
 }
