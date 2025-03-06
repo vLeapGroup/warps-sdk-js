@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.13.1
+
+### Patch Changes
+
+- b8c0957: add action by index helper
+
 ## 0.13.0
 
 ### Minor Changes
