@@ -1,13 +1,14 @@
 import { ChainEnv, WarpActionInputPosition, WarpActionInputSource, WarpActionInputType } from './types'
 
+export const WarpProtocolVersions = {
+  Warp: '0.5.0',
+  Brand: '0.1.0',
+  Abi: '0.1.0',
+}
+
 export const Config = {
-  ProtocolNameWarp: 'warp',
-  ProtocolNameBrand: 'warp-brand',
-
-  LatestProtocolVersion: '0.5.0',
-
-  LatestWarpSchemaUrl: 'https://raw.githubusercontent.com/vLeapGroup/warps-specs/refs/heads/main/schemas/v0.5.0.schema.json',
-  LatestBrandSchemaUrl: 'https://raw.githubusercontent.com/vLeapGroup/warps-specs/refs/heads/main/schemas/brand/v0.1.0.schema.json',
+  LatestWarpSchemaUrl: `https://raw.githubusercontent.com/vLeapGroup/warps-specs/refs/heads/main/schemas/v${WarpProtocolVersions.Warp}.schema.json`,
+  LatestBrandSchemaUrl: `https://raw.githubusercontent.com/vLeapGroup/warps-specs/refs/heads/main/schemas/brand/v${WarpProtocolVersions.Brand}.schema.json`,
 
   DefaultClientUrl: (env: ChainEnv) => {
     if (env === 'devnet') return 'https://devnet.usewarp.to'

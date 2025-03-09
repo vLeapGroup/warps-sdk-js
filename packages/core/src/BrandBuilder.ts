@@ -9,7 +9,7 @@ export class BrandBuilder {
   private config: WarpConfig
 
   private pendingBrand: Brand = {
-    protocol: getLatestProtocolIdentifier(Config.ProtocolNameBrand),
+    protocol: getLatestProtocolIdentifier('brand'),
     name: '',
     description: '',
     logo: '',

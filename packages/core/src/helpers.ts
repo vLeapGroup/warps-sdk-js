@@ -1,5 +1,5 @@
-import { Config } from './config'
-import { ChainEnv, RegistryInfo, Warp } from './types'
+import { WarpProtocolVersions } from './config'
+import { ChainEnv, ProtocolName, RegistryInfo, Warp } from './types'
 
 export const getChainId = (env: ChainEnv): string => {
   if (env === 'devnet') return 'D'
@@ -7,7 +7,12 @@ export const getChainId = (env: ChainEnv): string => {
   return '1'
 }
 
-export const getLatestProtocolIdentifier = (name: string): string => `${name}:${Config.LatestProtocolVersion}`
+export const getLatestProtocolIdentifier = (name: ProtocolName): string => {
+  if (name === 'warp') return `warp:${WarpProtocolVersions.Warp}`
+  if (name === 'brand') return `brand:${WarpProtocolVersions.Brand}`
+  if (name === 'abi') return `abi:${WarpProtocolVersions.Abi}`
+  throw new Error(`getLatestProtocolIdentifier: Invalid protocol name: ${name}`)
+}
 
 export const getWarpActionByIndex = (warp: Warp, index: number) => warp?.actions[index - 1]
 

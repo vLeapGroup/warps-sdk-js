@@ -1,5 +1,4 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
-import { Config } from './config'
 import { getChainId, getLatestProtocolIdentifier, toPreviewText } from './helpers'
 import { Warp, WarpAction, WarpCacheConfig, WarpConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
@@ -11,7 +10,7 @@ export class WarpBuilder {
   private cache: WarpCache = new WarpCache()
 
   private pendingWarp: Warp = {
-    protocol: getLatestProtocolIdentifier(Config.ProtocolNameWarp),
+    protocol: getLatestProtocolIdentifier('warp'),
     name: '',
     title: '',
     description: null,

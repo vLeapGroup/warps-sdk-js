@@ -1,5 +1,4 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
-import { Config } from './config'
 import { getChainId, getLatestProtocolIdentifier } from './helpers'
 import { AbiContents, WarpAbi, WarpCacheConfig, WarpConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
@@ -19,7 +18,7 @@ export class WarpAbiBuilder {
     const factory = new TransferTransactionsFactory({ config: factoryConfig })
 
     const warpAbi: WarpAbi = {
-      protocol: getLatestProtocolIdentifier(Config.ProtocolNameWarp),
+      protocol: getLatestProtocolIdentifier('abi'),
       content: abi,
     }
 
