@@ -86,7 +86,7 @@ export class WarpLink {
   build(type: WarpIdType, id: string): string {
     const clientUrl = this.config.clientUrl || Config.DefaultClientUrl(this.config.env)
     const encodedValue =
-      type === WarpConstants.DefaultIdentifierType
+      type === WarpConstants.IdentifierType.Alias
         ? encodeURIComponent(id)
         : encodeURIComponent(type + WarpConstants.IdentifierParamSeparator + id)
 

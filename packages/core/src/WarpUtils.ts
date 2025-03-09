@@ -40,7 +40,7 @@ export class WarpUtils {
     const decodedIdentifier = decodeURIComponent(prefixedIdentifier)
     const normalizedParam = decodedIdentifier.includes(WarpConstants.IdentifierParamSeparator)
       ? decodedIdentifier
-      : `${WarpConstants.DefaultIdentifierType}${WarpConstants.IdentifierParamSeparator}${decodedIdentifier}`
+      : `${WarpConstants.IdentifierType.Alias}${WarpConstants.IdentifierParamSeparator}${decodedIdentifier}`
 
     const [idType, id] = normalizedParam.split(WarpConstants.IdentifierParamSeparator)
 

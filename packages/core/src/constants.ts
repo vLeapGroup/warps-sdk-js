@@ -5,7 +5,10 @@ export const WarpConstants = {
 
   IdentifierParamSeparator: ':',
 
-  DefaultIdentifierType: 'alias',
+  IdentifierType: {
+    Alias: 'alias',
+    Hash: 'hash',
+  },
 
   ArgParamsSeparator: ':',
   ArgCompositeSeparator: '|',
