@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 0.14.0
+
+### Minor Changes
+
+- fbb831d: add warp abi
+
+### Patch Changes
+
+- 057c57c: add action query on-chain abi support
+
 ## 0.13.1
 
 ### Patch Changes
