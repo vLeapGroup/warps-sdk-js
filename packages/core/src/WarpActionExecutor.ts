@@ -29,6 +29,7 @@ import {
   WarpQueryAction,
   WarpTransferAction,
 } from './types'
+import { WarpAbiBuilder } from './WarpAbiBuilder'
 import { WarpArgSerializer } from './WarpArgSerializer'
 import { WarpContractLoader } from './WarpContractLoader'
 import { WarpUtils } from './WarpUtils'
@@ -252,9 +253,16 @@ export class WarpActionExecutor {
 
   private async fetchAbi(action: WarpQueryAction): Promise<AbiRegistry> {
     if (!action.abi) throw new Error('WarpActionExecutor: ABI not found')
-    const abiRes = await fetch(action.abi)
-    const abiContents = await abiRes.json()
-    return AbiRegistry.create(abiContents)
+    if (action.abi.startsWith(WarpConstants.IdentifierType.Hash)) {
+      const abiBuilder = new WarpAbiBuilder(this.config)
+      const abi = await abiBuilder.createFromTransactionHash(action.abi)
+      if (!abi) throw new Error(`WarpActionExecutor: ABI not found for hash: ${action.abi}`)
+      return AbiRegistry.create(abi.content)
+    } else {
+      const abiRes = await fetch(action.abi)
+      const abiContents = await abiRes.json()
+      return AbiRegistry.create(abiContents)
+    }
   }
 
   private toTypedTransfer(transfer: WarpContractActionTransfer): TokenTransfer {
