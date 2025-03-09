@@ -255,7 +255,8 @@ export class WarpActionExecutor {
     if (!action.abi) throw new Error('WarpActionExecutor: ABI not found')
     if (action.abi.startsWith(WarpConstants.IdentifierType.Hash)) {
       const abiBuilder = new WarpAbiBuilder(this.config)
-      const abi = await abiBuilder.createFromTransactionHash(action.abi)
+      const hashValue = action.abi.split(WarpConstants.IdentifierParamSeparator)[1]
+      const abi = await abiBuilder.createFromTransactionHash(hashValue)
       if (!abi) throw new Error(`WarpActionExecutor: ABI not found for hash: ${action.abi}`)
       return AbiRegistry.create(abi.content)
     } else {
