@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.14.1
+
+### Patch Changes
+
+- 1cf29fe: fix action queries using on-chain abi
+
 ## 0.14.0
 
 ### Minor Changes
