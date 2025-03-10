@@ -99,19 +99,6 @@ export class WarpRegistry {
     })
   }
 
-  createWarpPublishTransaction(txHash: string): Transaction {
-    if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
-
-    return this.getFactory().createTransactionForExecute({
-      sender: Address.newFromBech32(this.config.userAddress),
-      contract: Address.newFromBech32(this.getRegistryContractAddress()),
-      function: 'publishWarp',
-      gasLimit: BigInt(10_000_000),
-      nativeTransferAmount: this.unitPrice,
-      arguments: [BytesValue.fromHex(txHash)],
-    })
-  }
-
   createWarpBrandingTransaction(warpHash: string, brandHash: string): Transaction {
     if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
 
