@@ -3,7 +3,7 @@ import { WarpConfig, WarpSearchHit, WarpSearchResult } from './types'
 export class WarpIndex {
   constructor(private config: WarpConfig) {}
 
-  async search(query: string): Promise<WarpSearchHit[]> {
+  async search(query: string, params: Record<string, any> = {}): Promise<WarpSearchHit[]> {
     if (!this.config.indexUrl) throw new Error('WarpIndex: Index URL is not set')
     try {
       const res = await fetch(this.config.indexUrl, {
@@ -12,7 +12,7 @@ export class WarpIndex {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${this.config.indexApiKey}`,
         },
-        body: JSON.stringify({ [this.config.indexSearchParamName || 'search']: query }),
+        body: JSON.stringify({ [this.config.indexSearchParamName || 'search']: query, ...params }),
       })
 
       if (!res.ok) {
