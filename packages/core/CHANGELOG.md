@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.14.4
+
+### Patch Changes
+
+- 2568c5b: add registry warp verify
+
 ## 0.14.3
 
 ### Patch Changes
