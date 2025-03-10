@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 0.14.2
+
+### Patch Changes
+
+- 0bb7eb1: add warp index search optional params
+
 ## 0.14.1
 
 ### Patch Changes
