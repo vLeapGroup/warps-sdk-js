@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 1.0.1
+
+### Patch Changes
+
+- 6f24fb2: increase protocol version
+
 ## 1.0.0
 
 ### Major Changes
