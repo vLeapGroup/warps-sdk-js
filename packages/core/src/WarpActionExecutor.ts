@@ -2,7 +2,6 @@ import {
   AbiRegistry,
   Address,
   SmartContractTransactionsFactory,
-  StringValue,
   Token,
   TokenComputer,
   TokenTransfer,
@@ -54,10 +53,17 @@ export class WarpActionExecutor {
     const sender = Address.newFromBech32(this.config.userAddress)
     const config = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
 
-    const { destination, args, value, transfers } = await this.getTxComponentsFromInputs(action, inputs, sender)
+    const { destination, args, value, transfers, data } = await this.getTxComponentsFromInputs(action, inputs, sender)
     const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
 
-    if (destination.isContractAddress()) {
+    if (action.type === 'transfer') {
+      return new TransferTransactionsFactory({ config }).createTransactionForTransfer(sender, {
+        receiver: destination,
+        nativeAmount: value,
+        tokenTransfers: transfers,
+        data: data ? new Uint8Array(data) : undefined,
+      })
+    } else if (action.type === 'contract' && destination.isSmartContract()) {
       return new SmartContractTransactionsFactory({ config }).createTransactionForExecute(sender, {
         contract: destination,
         function: 'func' in action ? action.func || '' : '',
@@ -66,14 +72,13 @@ export class WarpActionExecutor {
         tokenTransfers: transfers,
         nativeTransferAmount: value,
       })
+    } else if (action.type === 'query') {
+      throw new Error('WarpActionExecutor: Invalid action type for createTransactionForExecute; Use executeQuery instead')
+    } else if (action.type === 'collect') {
+      throw new Error('WarpActionExecutor: Invalid action type for createTransactionForExecute; Use executeCollect instead')
     }
 
-    return new TransferTransactionsFactory({ config }).createTransactionForTransfer(sender, {
-      receiver: destination,
-      nativeAmount: value,
-      tokenTransfers: transfers,
-      data: typedArgs[0]?.hasExactClass(StringValue.ClassName) ? typedArgs[0].valueOf() : undefined,
-    })
+    throw new Error('WarpActionExecutor: Invalid action type')
   }
 
   async executeQuery(action: WarpQueryAction, inputs: string[]): Promise<TypedValue> {
@@ -113,7 +118,7 @@ export class WarpActionExecutor {
     action: WarpTransferAction | WarpContractAction | WarpQueryAction,
     inputs: string[],
     sender?: Address
-  ): Promise<{ destination: Address; args: string[]; value: bigint; transfers: TokenTransfer[] }> {
+  ): Promise<{ destination: Address; args: string[]; value: bigint; transfers: TokenTransfer[]; data: Buffer | null }> {
     const resolvedInputs = await this.getResolvedInputs(action, inputs)
     const modifiedInputs = this.getModifiedInputs(resolvedInputs)
 
@@ -136,7 +141,13 @@ export class WarpActionExecutor {
       ...(transferInputs?.map((t) => this.serializer.stringToNative(t)[1] as TokenTransfer) || []),
     ]
 
-    return { destination, args, value, transfers }
+    const dataInput = modifiedInputs.find((i) => i.input.position === 'data')?.value
+    const dataInAction = 'data' in action ? action.data || '' : null
+    const dataCombined = dataInput || dataInAction || null
+    const dataValue = dataCombined ? this.serializer.stringToTyped(dataCombined).valueOf() : null
+    const data = dataValue ? Buffer.from(dataValue) : null
+
+    return { destination, args, value, transfers, data }
   }
 
   private getModifiedInputs(inputs: ResolvedInput[]): ResolvedInput[] {

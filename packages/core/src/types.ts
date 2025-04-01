@@ -66,7 +66,7 @@ export type WarpTransferAction = {
   label: string
   description?: string | null
   address?: string
-  args?: string[]
+  data?: string
   value?: string
   transfers?: WarpContractActionTransfer[]
   inputs?: WarpActionInput[]
@@ -144,7 +144,7 @@ export type BaseWarpActionInputType =
 
 export type WarpActionInputType = string
 
-export type WarpActionInputPosition = 'receiver' | 'value' | 'transfer' | `arg:${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}`
+export type WarpActionInputPosition = 'receiver' | 'value' | 'transfer' | `arg:${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}` | 'data'
 
 export type WarpActionInputModifier = 'scale'
 

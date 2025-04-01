@@ -12,20 +12,33 @@ describe('WarpActionExecutor', () => {
   it('createTransactionForExecute - creates a native transfer with message', async () => {
     const subject = new WarpActionExecutor(Config)
 
-    const action: WarpContractAction = {
-      type: 'contract',
+    const action: WarpTransferAction = {
+      type: 'transfer',
       label: 'test',
       description: 'test',
       address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
-      func: null,
-      args: [],
-      gasLimit: 1000000,
-      inputs: [{ name: 'message', type: 'string', position: 'arg:1', source: 'field' }],
+      data: 'string:hello',
+    }
+
+    const actual = await subject.createTransactionForExecute(action, [])
+
+    expect(Buffer.from(actual.data).toString('utf-8')).toBe('hello')
+  })
+
+  it('createTransactionForExecute - creates a native transfer with message from input', async () => {
+    const subject = new WarpActionExecutor(Config)
+
+    const action: WarpTransferAction = {
+      type: 'transfer',
+      label: 'test',
+      description: 'test',
+      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      inputs: [{ name: 'message', type: 'string', position: 'data', source: 'field' }],
     }
 
     const actual = await subject.createTransactionForExecute(action, ['string:hello'])
 
-    expect(actual.data?.toString()).toBe('hello')
+    expect(Buffer.from(actual.data).toString('utf-8')).toBe('hello')
   })
 
   it('createTransactionForExecute - creates a native transfer field-based receiver', async () => {
@@ -52,11 +65,10 @@ describe('WarpActionExecutor', () => {
     const subject = new WarpActionExecutor(Config)
 
     const action: WarpTransferAction = {
-      type: 'contract',
+      type: 'transfer',
       label: 'test',
       description: 'test',
       address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
-      args: [],
       inputs: [{ name: 'token', type: 'esdt', position: 'transfer', source: 'field' }],
     }
 
