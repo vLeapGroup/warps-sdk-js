@@ -22,13 +22,13 @@ export class WarpAbiBuilder {
       content: abi,
     }
 
+    const sender = Address.newFromBech32(this.config.userAddress)
     const serialized = JSON.stringify(warpAbi)
 
-    const tx = factory.createTransactionForTransfer({
-      sender: Address.newFromBech32(this.config.userAddress),
-      receiver: Address.newFromBech32(this.config.userAddress),
+    const tx = factory.createTransactionForTransfer(sender, {
+      receiver: sender,
       nativeAmount: BigInt(0),
-      data: Buffer.from(serialized).valueOf(),
+      data: Uint8Array.from(Buffer.from(serialized)),
     })
 
     tx.gasLimit = tx.gasLimit + BigInt(2_000_000) // overestimate to avoid gas limit errors for slight inaccuracies

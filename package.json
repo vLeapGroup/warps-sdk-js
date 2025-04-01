@@ -8,19 +8,20 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "packages:publish": "turbo run build lint test && changeset publish",
     "typegen": "ts-json-schema-generator --path 'packages/core/src/types.ts' --type 'Warp'"
+
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.9",
-    "@typescript-eslint/eslint-plugin": "^8.13.0",
-    "@typescript-eslint/parser": "^8.13.0",
-    "eslint": "^9.14.0",
+    "@changesets/cli": "^2.28.1",
+    "@typescript-eslint/eslint-plugin": "^8.29.0",
+    "@typescript-eslint/parser": "^8.29.0",
+    "eslint": "^9.23.0",
     "eslint-config-custom": "*",
-    "prettier": "^3.3.3",
+    "prettier": "^3.5.3",
     "ts-json-schema-generator": "^2.3.0",
-    "turbo": "^2.3.3"
+    "turbo": "^2.4.4"
   },
   "name": "warp-sdk-js",
-  "packageManager": "npm@10.9.0",
+  "packageManager": "npm@11.2.0",
   "workspaces": [
     "packages/*"
   ]

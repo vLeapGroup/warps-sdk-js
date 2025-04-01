@@ -1,4 +1,4 @@
-import { bigIntToHex, utf8ToHex } from '@multiversx/sdk-core/out/utils.codec'
+import { bigIntToHex, utf8ToHex } from '@multiversx/sdk-core/out/core/utils.codec'
 import { WarpConfig, WarpContractAction, WarpTransferAction } from './types'
 import { WarpActionExecutor } from './WarpActionExecutor'
 

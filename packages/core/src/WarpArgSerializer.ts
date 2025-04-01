@@ -240,7 +240,7 @@ export class WarpArgSerializer {
     if (type === 'address') return val ? new AddressValue(Address.newFromBech32(val as string)) : new NothingValue()
     if (type === 'token') return val ? new TokenIdentifierValue(val as string) : new NothingValue()
     if (type === 'hex') return val ? BytesValue.fromHex(val as string) : new NothingValue()
-    if (type === 'codemeta') return new CodeMetadataValue(CodeMetadata.fromBuffer(Buffer.from(val as string, 'hex')))
+    if (type === 'codemeta') return new CodeMetadataValue(CodeMetadata.newFromBytes(Uint8Array.from(Buffer.from(val as string, 'hex'))))
     if (type === 'esdt') {
       const parts = val.split(WarpConstants.ArgCompositeSeparator)
       return new Struct(this.nativeToType('esdt') as StructType, [

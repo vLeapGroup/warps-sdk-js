@@ -26,14 +26,13 @@ export class WarpBuilder {
     if (!this.config.userAddress) throw new Error('WarpBuilder: user address not set')
     const factoryConfig = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
     const factory = new TransferTransactionsFactory({ config: factoryConfig })
-
+    const sender = Address.newFromBech32(this.config.userAddress)
     const serialized = JSON.stringify(warp)
 
-    const tx = factory.createTransactionForTransfer({
-      sender: Address.newFromBech32(this.config.userAddress),
+    const tx = factory.createTransactionForTransfer(sender, {
       receiver: Address.newFromBech32(this.config.userAddress),
       nativeAmount: BigInt(0),
-      data: Buffer.from(serialized).valueOf(),
+      data: Uint8Array.from(Buffer.from(serialized)),
     })
 
     tx.gasLimit = tx.gasLimit + BigInt(2_000_000) // overestimate to avoid gas limit errors for slight inaccuracies

@@ -3,8 +3,7 @@ import {
   Address,
   AddressValue,
   BytesValue,
-  QueryRunnerAdapter,
-  SmartContractQueriesController,
+  SmartContractController,
   SmartContractTransactionsFactory,
   Transaction,
   TransactionsFactoryConfig,
@@ -34,11 +33,11 @@ export class WarpRegistry {
   createWarpRegisterTransaction(txHash: string, alias?: string | null): Transaction {
     if (this.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
     if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.userAddress)
     const costAmount = alias ? this.unitPrice * BigInt(2) : this.unitPrice
 
-    return this.getFactory().createTransactionForExecute({
-      sender: Address.newFromBech32(this.config.userAddress),
-      contract: Address.newFromBech32(this.getRegistryContractAddress()),
+    return this.getFactory().createTransactionForExecute(sender, {
+      contract: this.getRegistryContractAddress(),
       function: 'registerWarp',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: costAmount,
@@ -48,10 +47,9 @@ export class WarpRegistry {
 
   createWarpUnregisterTransaction(txHash: string): Transaction {
     if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
-
-    return this.getFactory().createTransactionForExecute({
-      sender: Address.newFromBech32(this.config.userAddress),
-      contract: Address.newFromBech32(this.getRegistryContractAddress()),
+    const sender = Address.newFromBech32(this.config.userAddress)
+    return this.getFactory().createTransactionForExecute(sender, {
+      contract: this.getRegistryContractAddress(),
       function: 'unregisterWarp',
       gasLimit: BigInt(10_000_000),
       arguments: [BytesValue.fromHex(txHash)],
@@ -61,10 +59,10 @@ export class WarpRegistry {
   createWarpUpgradeTransaction(alias: string, txHash: string): Transaction {
     if (this.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
     if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.userAddress)
 
-    return this.getFactory().createTransactionForExecute({
-      sender: Address.newFromBech32(this.config.userAddress),
-      contract: Address.newFromBech32(this.getRegistryContractAddress()),
+    return this.getFactory().createTransactionForExecute(sender, {
+      contract: this.getRegistryContractAddress(),
       function: 'upgradeWarp',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: this.unitPrice,
@@ -74,10 +72,10 @@ export class WarpRegistry {
 
   createWarpAliasSetTransaction(txHash: string, alias: string): Transaction {
     if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.userAddress)
 
-    return this.getFactory().createTransactionForExecute({
-      sender: Address.newFromBech32(this.config.userAddress),
-      contract: Address.newFromBech32(this.getRegistryContractAddress()),
+    return this.getFactory().createTransactionForExecute(sender, {
+      contract: this.getRegistryContractAddress(),
       function: 'setWarpAlias',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: this.unitPrice,
@@ -87,10 +85,10 @@ export class WarpRegistry {
 
   createWarpVerifyTransaction(txHash: string): Transaction {
     if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.userAddress)
 
-    return this.getFactory().createTransactionForExecute({
-      sender: Address.newFromBech32(this.config.userAddress),
-      contract: Address.newFromBech32(this.getRegistryContractAddress()),
+    return this.getFactory().createTransactionForExecute(sender, {
+      contract: this.getRegistryContractAddress(),
       function: 'verifyWarp',
       gasLimit: BigInt(10_000_000),
       arguments: [BytesValue.fromHex(txHash)],
@@ -100,10 +98,10 @@ export class WarpRegistry {
   createBrandRegisterTransaction(txHash: string): Transaction {
     if (this.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
     if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.userAddress)
 
-    return this.getFactory().createTransactionForExecute({
-      sender: Address.newFromBech32(this.config.userAddress),
-      contract: Address.newFromBech32(this.getRegistryContractAddress()),
+    return this.getFactory().createTransactionForExecute(sender, {
+      contract: this.getRegistryContractAddress(),
       function: 'registerBrand',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: this.unitPrice,
@@ -113,10 +111,10 @@ export class WarpRegistry {
 
   createWarpBrandingTransaction(warpHash: string, brandHash: string): Transaction {
     if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.userAddress)
 
-    return this.getFactory().createTransactionForExecute({
-      sender: Address.newFromBech32(this.config.userAddress),
-      contract: Address.newFromBech32(this.getRegistryContractAddress()),
+    return this.getFactory().createTransactionForExecute(sender, {
+      contract: this.getRegistryContractAddress(),
       function: 'brandWarp',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: this.unitPrice,
@@ -235,17 +233,14 @@ export class WarpRegistry {
     }
   }
 
-  getRegistryContractAddress(): string {
-    return this.config.registryContract || Config.Registry.Contract(this.config.env)
+  getRegistryContractAddress(): Address {
+    return Address.newFromBech32(this.config.registryContract || Config.Registry.Contract(this.config.env))
   }
 
   private async loadRegistryConfigs(): Promise<void> {
     const contract = this.getRegistryContractAddress()
     const controller = this.getController()
-    const query = controller.createQuery({ contract, function: 'getConfig', arguments: [] })
-    const res = await controller.runQuery(query)
-    const [unitPriceRaw] = controller.parseQueryResponse(res)
-
+    const [unitPriceRaw] = await controller.query({ contract, function: 'getConfig', arguments: [] })
     const unitPrice = BigInt(unitPriceRaw.toString())
 
     this.unitPrice = unitPrice
@@ -257,10 +252,9 @@ export class WarpRegistry {
     return new SmartContractTransactionsFactory({ config, abi })
   }
 
-  private getController(): SmartContractQueriesController {
-    const networkProvider = WarpUtils.getConfiguredChainApi(this.config)
-    const queryRunner = new QueryRunnerAdapter({ networkProvider: networkProvider })
+  private getController(): SmartContractController {
+    const entrypoint = WarpUtils.getChainEntrypoint(this.config)
     const abi = AbiRegistry.create(RegistryAbi)
-    return new SmartContractQueriesController({ queryRunner, abi })
+    return entrypoint.createSmartContractController(abi)
   }
 }

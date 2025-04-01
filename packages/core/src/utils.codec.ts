@@ -93,6 +93,6 @@ export const esdt = (value: TokenTransfer): Struct =>
   )
 
 export const codemeta = (hexString: string): CodeMetadataValue =>
-  new CodeMetadataValue(CodeMetadata.fromBuffer(Buffer.from(hexString, 'hex')))
+  new CodeMetadataValue(CodeMetadata.newFromBytes(Uint8Array.from(Buffer.from(hexString, 'hex'))))
 
 export const nothing = (): NothingValue => new NothingValue()

@@ -1,10 +1,6 @@
 import {
   AbiRegistry,
   Address,
-  IContractQueryResponse,
-  QueryRunnerAdapter,
-  ResultsParser,
-  SmartContractQueriesController,
   SmartContractTransactionsFactory,
   StringValue,
   Token,
@@ -14,7 +10,7 @@ import {
   TransactionsFactoryConfig,
   TransferTransactionsFactory,
   TypedValue,
-} from '@multiversx/sdk-core/out'
+} from '@multiversx/sdk-core'
 import { Config } from './config'
 import { WarpConstants } from './constants'
 import { getChainId, shiftBigintBy } from './helpers'
@@ -62,8 +58,7 @@ export class WarpActionExecutor {
     const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
 
     if (destination.isContractAddress()) {
-      return new SmartContractTransactionsFactory({ config }).createTransactionForExecute({
-        sender,
+      return new SmartContractTransactionsFactory({ config }).createTransactionForExecute(sender, {
         contract: destination,
         function: 'func' in action ? action.func || '' : '',
         gasLimit: 'gasLimit' in action ? BigInt(action.gasLimit || 0) : 0n,
@@ -73,8 +68,7 @@ export class WarpActionExecutor {
       })
     }
 
-    return new TransferTransactionsFactory({ config }).createTransactionForTransfer({
-      sender,
+    return new TransferTransactionsFactory({ config }).createTransactionForTransfer(sender, {
       receiver: destination,
       nativeAmount: value,
       tokenTransfers: transfers,
@@ -85,26 +79,16 @@ export class WarpActionExecutor {
   async executeQuery(action: WarpQueryAction, inputs: string[]): Promise<TypedValue> {
     if (!this.config.chainApiUrl) throw new Error('WarpActionExecutor: Chain API URL not set')
     if (!action.func) throw new Error('WarpActionExecutor: Function not found')
-    const chainApi = WarpUtils.getConfiguredChainApi(this.config)
-    const queryRunner = new QueryRunnerAdapter({ networkProvider: chainApi })
     const abi = await this.getAbiForAction(action)
     const { args } = await this.getTxComponentsFromInputs(action, inputs)
     const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
-    const controller = new SmartContractQueriesController({ queryRunner, abi })
-    const query = controller.createQuery({ contract: action.address, function: action.func, arguments: typedArgs })
+    const entrypoint = WarpUtils.getChainEntrypoint(this.config)
+    const contractAddress = Address.newFromBech32(action.address)
+    const controller = entrypoint.createSmartContractController(abi)
+    const query = controller.createQuery({ contract: contractAddress, function: action.func, arguments: typedArgs })
     const response = await controller.runQuery(query)
-
-    const legacyResultsParser = new ResultsParser()
-    const legacyQueryResponse: IContractQueryResponse = {
-      returnCode: response.returnCode,
-      returnMessage: response.returnMessage,
-      getReturnDataParts: () => response.returnDataParts.map((part) => Buffer.from(part)),
-    }
-
-    const functionName = response.function
-    const endpoint = abi.getEndpoint(functionName)
-    const legacyBundle = legacyResultsParser.parseQueryResponse(legacyQueryResponse, endpoint)
-    const result = legacyBundle.firstValue
+    const parsedResponse = controller.parseQueryResponse(response)
+    const result = parsedResponse[0]
     if (!result) throw new Error('WarpActionExecutor: Query result not found')
 
     return result

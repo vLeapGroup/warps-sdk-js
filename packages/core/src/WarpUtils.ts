@@ -1,4 +1,4 @@
-import { ApiNetworkProvider } from '@multiversx/sdk-core/out'
+import { ApiNetworkProvider, DevnetEntrypoint, MainnetEntrypoint, NetworkEntrypoint, TestnetEntrypoint } from '@multiversx/sdk-core'
 import { Config } from './config'
 import { WarpConstants } from './constants'
 import { Warp, WarpConfig, WarpIdType } from './types'
@@ -57,6 +57,12 @@ export class WarpUtils {
       if (!identifierInfo) return null
       return warpLink.build(identifierInfo.type, identifierInfo.id)
     }
+  }
+
+  static getChainEntrypoint(config: WarpConfig): NetworkEntrypoint {
+    if (config.env === 'devnet') return new DevnetEntrypoint()
+    if (config.env === 'testnet') return new TestnetEntrypoint()
+    return new MainnetEntrypoint()
   }
 
   static getConfiguredChainApi(config: WarpConfig): ApiNetworkProvider {
