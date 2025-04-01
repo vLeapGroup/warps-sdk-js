@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 1.0.0
+
+### Major Changes
+
+- d39eec3: upgrade deps + mvx core migrations
+
+### Minor Changes
+
+- 88600b0: update transfer execs
+
 ## 0.14.5
 
 ### Patch Changes

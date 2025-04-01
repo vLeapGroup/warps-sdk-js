@@ -1,6 +1,6 @@
 {
   "name": "@vleap/warps",
-  "version": "0.14.5",
+  "version": "1.0.0",
   "description": "",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
