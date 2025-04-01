@@ -18,7 +18,7 @@
     "dist"
   ],
   "peerDependencies": {
-    "@multiversx/sdk-core": "^13.13.1"
+    "@multiversx/sdk-core": "^14.0.2"
   },
   "devDependencies": {
     "@multiversx/sdk-core": "^14.0.1",
