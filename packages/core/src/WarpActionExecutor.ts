@@ -1,6 +1,7 @@
 import {
   AbiRegistry,
   Address,
+  ArgSerializer,
   SmartContractTransactionsFactory,
   Token,
   TokenComputer,
@@ -92,11 +93,13 @@ export class WarpActionExecutor {
     const controller = entrypoint.createSmartContractController(abi)
     const query = controller.createQuery({ contract: contractAddress, function: action.func, arguments: typedArgs })
     const response = await controller.runQuery(query)
-    const parsedResponse = controller.parseQueryResponse(response)
-    const result = parsedResponse[0]
-    if (!result) throw new Error('WarpActionExecutor: Query result not found')
-
-    return result
+    const isOk = response.returnCode === 'ok'
+    if (!isOk) throw new Error(`WarpActionExecutor: Query failed with return code ${response.returnCode}`)
+    const argsSerializer = new ArgSerializer()
+    const endpoint = abi.getEndpoint(response.function)
+    const parts = response.returnDataParts.map((part) => Buffer.from(part))
+    const values = argsSerializer.buffersToValues(parts, endpoint.output)
+    return values[0]
   }
 
   async executeCollect(action: WarpCollectAction, inputs: Record<string, any>, meta?: Record<string, any>): Promise<void> {
