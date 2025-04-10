@@ -11,7 +11,9 @@ import {
   List,
   ListType,
   NothingValue,
+  OptionalType,
   OptionalValue,
+  OptionType,
   OptionValue,
   StringType,
   StringValue,
@@ -607,6 +609,18 @@ describe('WarpArgSerializer', () => {
 
     it('throws error for unsupported type', () => {
       expect(() => serializer.stringToTyped('unsupported:value')).toThrow('Unsupported input type')
+    })
+  })
+
+  describe('typeToString', () => {
+    it('converts OptionType to option', () => {
+      const result = serializer.typeToString(new OptionType(new StringType()))
+      expect(result).toBe('option:string')
+    })
+
+    it('converts OptionalType to optional', () => {
+      const result = serializer.typeToString(new OptionalType(new StringType()))
+      expect(result).toBe('optional:string')
     })
   })
 })

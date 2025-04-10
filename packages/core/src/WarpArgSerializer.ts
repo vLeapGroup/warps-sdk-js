@@ -16,8 +16,11 @@ import {
   Field,
   FieldDefinition,
   List,
+  ListType,
   NothingValue,
+  OptionalType,
   OptionalValue,
+  OptionType,
   OptionValue,
   StringType,
   StringValue,
@@ -253,7 +256,11 @@ export class WarpArgSerializer {
     throw new Error(`WarpArgSerializer (stringToTyped): Unsupported input type: ${type}`)
   }
 
-  typeToNative(type: Type): BaseWarpActionInputType {
+  typeToString(type: Type): WarpActionInputType {
+    if (type instanceof OptionType) return 'option:' + this.typeToString(type.getFirstTypeParameter())
+    if (type instanceof OptionalType) return 'optional:' + this.typeToString(type.getFirstTypeParameter())
+    if (type instanceof ListType) return 'list:' + this.typeToString(type.getFirstTypeParameter())
+    if (type instanceof VariadicType) return 'variadic:' + this.typeToString(type.getFirstTypeParameter())
     if (type instanceof StringType) return 'string'
     if (type instanceof U8Type) return 'uint8'
     if (type instanceof U16Type) return 'uint16'
@@ -266,6 +273,6 @@ export class WarpArgSerializer {
     if (type instanceof BytesType) return 'hex'
     if (type instanceof CodeMetadataType) return 'codemeta'
     if (type instanceof StructType && type.getClassName() === 'EsdtTokenPayment') return 'esdt'
-    throw new Error(`WarpArgSerializer (typeToNative): Unsupported input type: ${type.getClassName()}`)
+    throw new Error(`WarpArgSerializer (typeToString): Unsupported input type: ${type.getClassName()}`)
   }
 }
