@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 1.0.3
+
+### Patch Changes
+
+- e0a5284: add missing exports
+
 ## 1.0.2
 
 ### Patch Changes
