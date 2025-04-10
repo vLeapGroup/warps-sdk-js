@@ -79,7 +79,7 @@ export class WarpActionExecutor {
       throw new Error('WarpActionExecutor: Invalid action type for createTransactionForExecute; Use executeCollect instead')
     }
 
-    throw new Error('WarpActionExecutor: Invalid action type')
+    throw new Error(`WarpActionExecutor: Invalid action type (${action.type})`)
   }
 
   async executeQuery(action: WarpQueryAction, inputs: string[]): Promise<TypedValue> {
