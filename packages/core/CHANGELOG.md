@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 1.0.2
+
+### Patch Changes
+
+- 5328f9b: fix query result parsing
+
 ## 1.0.1
 
 ### Patch Changes
