@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 1.1.0
+
+### Minor Changes
+
+- c7cfc65: update arg serializer type conversion
+
 ## 1.0.3
 
 ### Patch Changes
