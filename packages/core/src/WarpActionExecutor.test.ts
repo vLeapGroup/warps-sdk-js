@@ -291,12 +291,25 @@ describe('WarpActionExecutor', () => {
       func: null,
       args: [],
       gasLimit: 1000000,
-      inputs: [{ name: 'token', type: 'esdt', position: 'arg:1', source: 'field' }],
+      inputs: [
+        { name: 'token', type: 'esdt', position: 'arg:1', source: 'field' }, // in arguments
+        { name: 'token', type: 'esdt', position: 'arg:2', source: 'field' }, // in arguments with decimal
+        { name: 'token', type: 'esdt', position: 'transfer', source: 'field' }, // in transfers
+      ],
     }
 
-    const { args } = await subject.getTxComponentsFromInputs(action, ['esdt:USH-111e09|0|1000'])
+    const { args, transfers } = await subject.getTxComponentsFromInputs(action, [
+      'esdt:USH-111e09|0|1000',
+      'esdt:USH-111e09|0|1.2',
+      'esdt:USH-111e09|0|1.5',
+    ])
 
-    expect(args).toEqual(['esdt:USH-111e09|0|1000000000000000000000|18'])
+    expect(args).toEqual(['esdt:USH-111e09|0|1000000000000000000000|18', 'esdt:USH-111e09|0|1200000000000000000|18'])
+
+    expect(transfers.length).toEqual(1)
+    expect(transfers[0].token.identifier).toEqual('USH-111e09')
+    expect(transfers[0].token.nonce.toString()).toEqual('0')
+    expect(transfers[0].amount.toString()).toEqual('1500000000000000000')
   })
 
   it('getTxComponentsFromInputs - does not resolve esdt decimal places when decimal is provided', async () => {

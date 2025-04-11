@@ -18,6 +18,7 @@ import { findKnownTokenById } from './tokens'
 import {
   WarpAction,
   WarpActionInput,
+  WarpActionInputType,
   WarpCollectAction,
   WarpConfig,
   WarpContractAction,
@@ -201,23 +202,23 @@ export class WarpActionExecutor {
 
   private async preprocessInput(input: string): Promise<string> {
     try {
-      const [type, value] = this.serializer.stringToNative(input)
+      const [type, value] = input.split(WarpConstants.ArgParamsSeparator, 2) as [WarpActionInputType, string]
       if (type === 'esdt') {
-        const [, , , existingDecimals] = input.split(WarpConstants.ArgCompositeSeparator)
+        const [tokenId, nonce, amount, existingDecimals] = value.split(WarpConstants.ArgCompositeSeparator)
         if (existingDecimals) return input
-        const original = value as TokenTransfer
-        const isFungible = new TokenComputer().isFungible(original.token)
+        const token = new Token({ identifier: tokenId, nonce: BigInt(nonce) })
+        const isFungible = new TokenComputer().isFungible(token)
         if (!isFungible) return input // TODO: handle non-fungible tokens like meta-esdts
-        const knownToken = findKnownTokenById(original.token.identifier)
+        const knownToken = findKnownTokenById(tokenId)
         let decimals = knownToken?.decimals
         if (!decimals) {
           const apiUrl = this.config.chainApiUrl || Config.Chain.ApiUrl(this.config.env)
-          const definitionRes = await fetch(`${apiUrl}/tokens/${original.token.identifier}`) // TODO: use chainApi directly; currently causes circular reference for whatever reason
+          const definitionRes = await fetch(`${apiUrl}/tokens/${tokenId}`) // TODO: use chainApi directly; currently causes circular reference for whatever reason
           const definition = await definitionRes.json()
           decimals = definition.decimals
         }
-        if (!decimals) throw new Error(`WarpActionExecutor: Decimals not found for token ${original.token.identifier}`)
-        const processed = new TokenTransfer({ token: original.token, amount: shiftBigintBy(original.amount, decimals) })
+        if (!decimals) throw new Error(`WarpActionExecutor: Decimals not found for token ${tokenId}`)
+        const processed = new TokenTransfer({ token, amount: shiftBigintBy(amount, decimals) })
         return this.serializer.nativeToString(type, processed) + WarpConstants.ArgCompositeSeparator + decimals
       }
       return input
