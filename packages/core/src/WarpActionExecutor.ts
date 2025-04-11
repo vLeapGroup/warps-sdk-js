@@ -154,7 +154,7 @@ export class WarpActionExecutor {
     return { destination, args, value, transfers, data }
   }
 
-  private async getResolvedInputs(action: WarpAction, inputArgs: string[]): Promise<ResolvedInput[]> {
+  public async getResolvedInputs(action: WarpAction, inputArgs: string[]): Promise<ResolvedInput[]> {
     const argInputs = action.inputs || []
     const preprocessed = await Promise.all(inputArgs.map((arg) => this.preprocessInput(arg)))
 
@@ -169,7 +169,7 @@ export class WarpActionExecutor {
     }))
   }
 
-  private getModifiedInputs(inputs: ResolvedInput[]): ResolvedInput[] {
+  public getModifiedInputs(inputs: ResolvedInput[]): ResolvedInput[] {
     // Note: 'scale' modifier means that the value is multiplied by 10^modifier; the modifier can also be the name of another input field
     // Example: 'scale:10' means that the value is multiplied by 10^10
     // Example 2: 'scale:{amount}' means that the value is multiplied by the value of the 'amount' input field
@@ -200,7 +200,7 @@ export class WarpActionExecutor {
     })
   }
 
-  private async preprocessInput(input: string): Promise<string> {
+  public async preprocessInput(input: string): Promise<string> {
     try {
       const [type, value] = input.split(WarpConstants.ArgParamsSeparator, 2) as [WarpActionInputType, string]
       if (type === 'esdt') {
