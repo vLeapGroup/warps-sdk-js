@@ -153,6 +153,21 @@ export class WarpActionExecutor {
     return { destination, args, value, transfers, data }
   }
 
+  private async getResolvedInputs(action: WarpAction, inputArgs: string[]): Promise<ResolvedInput[]> {
+    const argInputs = action.inputs || []
+    const preprocessed = await Promise.all(inputArgs.map((arg) => this.preprocessInput(arg)))
+
+    const toValueByType = (input: WarpActionInput, index: number) => {
+      if (input.source === 'query') return this.serializer.nativeToString(input.type, this.url.searchParams.get(input.name) || '')
+      return preprocessed[index] || null
+    }
+
+    return argInputs.map((input, index) => ({
+      input,
+      value: toValueByType(input, index),
+    }))
+  }
+
   private getModifiedInputs(inputs: ResolvedInput[]): ResolvedInput[] {
     // Note: 'scale' modifier means that the value is multiplied by 10^modifier; the modifier can also be the name of another input field
     // Example: 'scale:10' means that the value is multiplied by 10^10
@@ -182,21 +197,6 @@ export class WarpActionExecutor {
         return resolved
       }
     })
-  }
-
-  private async getResolvedInputs(action: WarpAction, inputArgs: string[]): Promise<ResolvedInput[]> {
-    const argInputs = action.inputs || []
-    const preprocessed = await Promise.all(inputArgs.map((arg) => this.preprocessInput(arg)))
-
-    const toValueByType = (input: WarpActionInput, index: number) => {
-      if (input.source === 'query') return this.serializer.nativeToString(input.type, this.url.searchParams.get(input.name) || '')
-      return preprocessed[index] || null
-    }
-
-    return argInputs.map((input, index) => ({
-      input,
-      value: toValueByType(input, index),
-    }))
   }
 
   private async preprocessInput(input: string): Promise<string> {
