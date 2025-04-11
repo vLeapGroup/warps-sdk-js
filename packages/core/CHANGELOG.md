@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 1.1.1
+
+### Patch Changes
+
+- action executor improvements
+
 ## 1.1.0
 
 ### Minor Changes
