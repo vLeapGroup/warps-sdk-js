@@ -124,13 +124,10 @@ export class WarpRegistry {
 
   async getInfoByAlias(alias: string, cache?: WarpCacheConfig): Promise<{ registryInfo: RegistryInfo | null; brand: Brand | null }> {
     const cacheKey = CacheKey.RegistryInfo(alias)
-
-    if (cache) {
-      const cached = this.cache.get<{ registryInfo: RegistryInfo | null; brand: Brand | null }>(cacheKey)
-      if (cached) {
-        console.log(`WarpRegistry (getInfoByAlias): RegistryInfo found in cache: ${alias}`)
-        return cached
-      }
+    const cached = cache ? this.cache.get<{ registryInfo: RegistryInfo | null; brand: Brand | null }>(cacheKey) : null
+    if (cached) {
+      console.log(`WarpRegistry (getInfoByAlias): RegistryInfo found in cache: ${alias}`)
+      return cached
     }
 
     const contract = this.getRegistryContractAddress()
@@ -201,13 +198,10 @@ export class WarpRegistry {
 
   async fetchBrand(hash: string, cache?: WarpCacheConfig): Promise<Brand | null> {
     const cacheKey = CacheKey.Brand(hash)
-
-    if (cache) {
-      const cached = this.cache.get<Brand>(cacheKey)
-      if (cached) {
-        console.log(`WarpRegistry (fetchBrand): Brand found in cache: ${hash}`)
-        return cached
-      }
+    const cached = cache ? this.cache.get<Brand>(cacheKey) : null
+    if (cached) {
+      console.log(`WarpRegistry (fetchBrand): Brand found in cache: ${hash}`)
+      return cached
     }
 
     const chainApi = WarpUtils.getConfiguredChainApi(this.config)
