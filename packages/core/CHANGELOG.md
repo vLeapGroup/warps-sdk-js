@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 1.2.0
+
+### Minor Changes
+
+- d08711e: add multi-chain support
+- 4051239: add cache strategies
+
 ## 1.1.1
 
 ### Patch Changes
