@@ -2,6 +2,8 @@ export type ChainEnv = 'mainnet' | 'testnet' | 'devnet'
 
 export type ProtocolName = 'warp' | 'brand' | 'abi'
 
+export type WarpChain = string
+
 export type WarpConfig = {
   env: ChainEnv
   clientUrl?: string
@@ -34,6 +36,11 @@ export type RegistryInfo = {
   upgrade: string | null
 }
 
+export type ChainInfo = {
+  chainId: string
+  apiUrl: string
+}
+
 export type WarpIdType = 'hash' | 'alias'
 
 export type WarpVarPlaceholder = string
@@ -63,6 +70,7 @@ export type WarpActionType = 'transfer' | 'contract' | 'query' | 'collect' | 'li
 
 export type WarpTransferAction = {
   type: WarpActionType
+  chain?: WarpChain
   label: string
   description?: string | null
   address?: string
@@ -75,6 +83,7 @@ export type WarpTransferAction = {
 
 export type WarpContractAction = {
   type: WarpActionType
+  chain?: WarpChain
   label: string
   description?: string | null
   address: string
@@ -103,6 +112,7 @@ export type WarpLinkAction = {
 
 export type WarpQueryAction = {
   type: WarpActionType
+  chain?: WarpChain
   label: string
   description?: string | null
   address: string

@@ -10,8 +10,8 @@ import {
 } from '@multiversx/sdk-core/out'
 import RegistryAbi from './abis/registry.abi.json'
 import { Config } from './config'
-import { getChainId, toTypedRegistryInfo } from './helpers'
-import { Brand, RegistryInfo, WarpCacheConfig, WarpConfig } from './types'
+import { getChainId, getDefaultChainInfo, toTypedChainInfo, toTypedRegistryInfo } from './helpers'
+import { Brand, ChainInfo, RegistryInfo, WarpCacheConfig, WarpChain, WarpConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
 import { WarpUtils } from './WarpUtils'
 
@@ -196,6 +196,28 @@ export class WarpRegistry {
     return brands.filter((b) => b !== null) as Brand[]
   }
 
+  async getChainInfo(chain: WarpChain, cache?: WarpCacheConfig): Promise<ChainInfo | null> {
+    const cacheKey = CacheKey.ChainInfo(chain)
+    const cached = cache ? this.cache.get<ChainInfo>(cacheKey) : null
+    if (cached) {
+      console.log(`WarpRegistry (getChainInfo): ChainInfo found in cache: ${chain}`)
+      return cached
+    }
+
+    const contract = this.getRegistryContractAddress()
+    const controller = this.getController()
+    const query = controller.createQuery({ contract, function: 'getChain', arguments: [BytesValue.fromUTF8(chain)] })
+    const res = await controller.runQuery(query)
+    const [chainInfoRaw] = controller.parseQueryResponse(res)
+    const chainInfo = chainInfoRaw ? toTypedChainInfo(chainInfoRaw) : null
+
+    if (chainInfo && cache?.ttl) {
+      this.cache.set(cacheKey, chainInfo, cache.ttl)
+    }
+
+    return chainInfo
+  }
+
   async fetchBrand(hash: string, cache?: WarpCacheConfig): Promise<Brand | null> {
     const cacheKey = CacheKey.Brand(hash)
     const cached = cache ? this.cache.get<Brand>(cacheKey) : null
@@ -247,7 +269,8 @@ export class WarpRegistry {
   }
 
   private getController(): SmartContractController {
-    const entrypoint = WarpUtils.getChainEntrypoint(this.config)
+    const chainInfo = getDefaultChainInfo(this.config)
+    const entrypoint = WarpUtils.getChainEntrypoint(chainInfo, this.config.env)
     const abi = AbiRegistry.create(RegistryAbi)
     return entrypoint.createSmartContractController(abi)
   }

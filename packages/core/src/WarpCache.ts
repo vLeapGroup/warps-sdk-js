@@ -1,3 +1,5 @@
+import { WarpChain } from './types'
+
 type CacheEntry<T> = {
   value: T
   expiresAt: number
@@ -8,6 +10,7 @@ export const CacheKey = {
   WarpAbi: (id: string) => `warp-abi:${id}`,
   RegistryInfo: (id: string) => `registry-info:${id}`,
   Brand: (hash: string) => `brand:${hash}`,
+  ChainInfo: (chain: WarpChain) => `chain:${chain}`,
 }
 
 export class WarpCache {
