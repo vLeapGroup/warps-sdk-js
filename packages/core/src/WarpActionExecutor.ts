@@ -248,7 +248,7 @@ export class WarpActionExecutor {
     if (!action.chain) return getDefaultChainInfo(this.config)
 
     const chainInfo = await this.registry.getChainInfo(action.chain)
-    if (!chainInfo) throw new Error('WarpActionExecutor: Chain info not found')
+    if (!chainInfo) throw new Error(`WarpActionExecutor: Chain info not found for ${action.chain}`)
 
     return chainInfo
   }
