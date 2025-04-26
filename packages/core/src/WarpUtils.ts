@@ -1,7 +1,7 @@
 import { ApiNetworkProvider, DevnetEntrypoint, MainnetEntrypoint, NetworkEntrypoint, TestnetEntrypoint } from '@multiversx/sdk-core'
 import { Config } from './config'
 import { WarpConstants } from './constants'
-import { Warp, WarpConfig, WarpIdType } from './types'
+import { ChainEnv, ChainInfo, Warp, WarpConfig, WarpIdType } from './types'
 import { WarpLink } from './WarpLink'
 
 const UrlPrefixDeterminer = 'https://'
@@ -59,10 +59,12 @@ export class WarpUtils {
     }
   }
 
-  static getChainEntrypoint(config: WarpConfig): NetworkEntrypoint {
-    if (config.env === 'devnet') return new DevnetEntrypoint()
-    if (config.env === 'testnet') return new TestnetEntrypoint()
-    return new MainnetEntrypoint()
+  static getChainEntrypoint(chainInfo: ChainInfo, env: ChainEnv): NetworkEntrypoint {
+    const clientName = 'warp-sdk'
+    const kind = 'api'
+    if (env === 'devnet') return new DevnetEntrypoint(chainInfo.apiUrl, kind, clientName)
+    if (env === 'testnet') return new TestnetEntrypoint(chainInfo.apiUrl, kind, clientName)
+    return new MainnetEntrypoint(chainInfo.apiUrl, kind, clientName)
   }
 
   static getConfiguredChainApi(config: WarpConfig): ApiNetworkProvider {

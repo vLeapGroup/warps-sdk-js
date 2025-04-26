@@ -1,11 +1,16 @@
-import { WarpProtocolVersions } from './config'
-import { ChainEnv, ProtocolName, RegistryInfo, Warp } from './types'
+import { Config, WarpProtocolVersions } from './config'
+import { ChainEnv, ChainInfo, ProtocolName, RegistryInfo, Warp, WarpConfig } from './types'
 
 export const getChainId = (env: ChainEnv): string => {
   if (env === 'devnet') return 'D'
   if (env === 'testnet') return 'T'
   return '1'
 }
+
+export const getDefaultChainInfo = (config: WarpConfig): ChainInfo => ({
+  chainId: getChainId(config.env),
+  apiUrl: config.chainApiUrl || Config.Chain.ApiUrl(config.env),
+})
 
 export const getLatestProtocolIdentifier = (name: ProtocolName): string => {
   if (name === 'warp') return `warp:${WarpProtocolVersions.Warp}`
@@ -24,6 +29,11 @@ export const toTypedRegistryInfo = (registryInfo: any): RegistryInfo => ({
   createdAt: registryInfo.created_at.toNumber(),
   brand: registryInfo.brand?.toString('hex') || null,
   upgrade: registryInfo.upgrade?.toString('hex') || null,
+})
+
+export const toTypedChainInfo = (chainInfo: any): ChainInfo => ({
+  chainId: chainInfo.chain_id.toString(),
+  apiUrl: chainInfo.api_url.toString(),
 })
 
 export const shiftBigintBy = (value: bigint | string, decimals: number): bigint => {

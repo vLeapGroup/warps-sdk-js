@@ -13,9 +13,10 @@ import {
 } from '@multiversx/sdk-core'
 import { Config } from './config'
 import { WarpConstants } from './constants'
-import { getChainId, shiftBigintBy } from './helpers'
+import { getDefaultChainInfo, shiftBigintBy } from './helpers'
 import { findKnownTokenById } from './tokens'
 import {
+  ChainInfo,
   WarpAction,
   WarpActionInput,
   WarpActionInputType,
@@ -29,6 +30,7 @@ import {
 import { WarpAbiBuilder } from './WarpAbiBuilder'
 import { WarpArgSerializer } from './WarpArgSerializer'
 import { WarpContractLoader } from './WarpContractLoader'
+import { WarpRegistry } from './WarpRegistry'
 import { WarpUtils } from './WarpUtils'
 
 type ResolvedInput = {
@@ -41,6 +43,7 @@ export class WarpActionExecutor {
   private url: URL
   private serializer: WarpArgSerializer
   private contractLoader: WarpContractLoader
+  private registry: WarpRegistry
 
   constructor(config: WarpConfig) {
     if (!config.currentUrl) throw new Error('WarpActionExecutor: currentUrl config not set')
@@ -48,12 +51,14 @@ export class WarpActionExecutor {
     this.url = new URL(config.currentUrl)
     this.serializer = new WarpArgSerializer()
     this.contractLoader = new WarpContractLoader(config)
+    this.registry = new WarpRegistry(config)
   }
 
   async createTransactionForExecute(action: WarpTransferAction | WarpContractAction, inputs: string[]): Promise<Transaction> {
     if (!this.config.userAddress) throw new Error('WarpActionExecutor: user address not set')
     const sender = Address.newFromBech32(this.config.userAddress)
-    const config = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
+    const chainInfo = await this.getChainInfoForAction(action)
+    const config = new TransactionsFactoryConfig({ chainID: chainInfo.chainId })
 
     const { destination, args, value, transfers, data } = await this.getTxComponentsFromInputs(action, inputs, sender)
     const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
@@ -84,12 +89,12 @@ export class WarpActionExecutor {
   }
 
   async executeQuery(action: WarpQueryAction, inputs: string[]): Promise<TypedValue> {
-    if (!this.config.chainApiUrl) throw new Error('WarpActionExecutor: Chain API URL not set')
     if (!action.func) throw new Error('WarpActionExecutor: Function not found')
+    const chainInfo = await this.getChainInfoForAction(action)
     const abi = await this.getAbiForAction(action)
     const { args } = await this.getTxComponentsFromInputs(action, inputs)
     const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
-    const entrypoint = WarpUtils.getChainEntrypoint(this.config)
+    const entrypoint = WarpUtils.getChainEntrypoint(chainInfo, this.config.env)
     const contractAddress = Address.newFromBech32(action.address)
     const controller = entrypoint.createSmartContractController(abi)
     const query = controller.createQuery({ contract: contractAddress, function: action.func, arguments: typedArgs })
@@ -237,6 +242,15 @@ export class WarpActionExecutor {
     })
 
     return args
+  }
+
+  private async getChainInfoForAction(action: WarpTransferAction | WarpContractAction | WarpQueryAction): Promise<ChainInfo> {
+    if (!action.chain) return getDefaultChainInfo(this.config)
+
+    const chainInfo = await this.registry.getChainInfo(action.chain)
+    if (!chainInfo) throw new Error(`WarpActionExecutor: Chain info not found for ${action.chain}`)
+
+    return chainInfo
   }
 
   private async getAbiForAction(action: WarpQueryAction): Promise<AbiRegistry> {

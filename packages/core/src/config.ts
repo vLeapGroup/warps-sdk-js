@@ -1,7 +1,7 @@
 import { ChainEnv, WarpActionInputPosition, WarpActionInputSource, WarpActionInputType } from './types'
 
 export const WarpProtocolVersions = {
-  Warp: '1.0.0',
+  Warp: '1.1.0',
   Brand: '0.1.0',
   Abi: '0.1.0',
 }
