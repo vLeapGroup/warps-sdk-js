@@ -7,7 +7,7 @@ import { WarpValidator } from './WarpValidator'
 
 export class WarpBuilder {
   private config: WarpConfig
-  private cache: WarpCache = new WarpCache()
+  private cache: WarpCache
 
   private pendingWarp: Warp = {
     protocol: getLatestProtocolIdentifier('warp'),
@@ -20,6 +20,7 @@ export class WarpBuilder {
 
   constructor(config: WarpConfig) {
     this.config = config
+    this.cache = new WarpCache(config.cacheType)
   }
 
   createInscriptionTransaction(warp: Warp): Transaction {

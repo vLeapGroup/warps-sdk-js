@@ -1,9 +1,7 @@
+import { CacheStrategy } from './cache/CacheStrategy'
+import { LocalStorageCacheStrategy } from './cache/LocalStorageCacheStrategy'
+import { MemoryCacheStrategy } from './cache/MemoryCacheStrategy'
 import { WarpChain } from './types'
-
-type CacheEntry<T> = {
-  value: T
-  expiresAt: number
-}
 
 export const CacheKey = {
   Warp: (id: string) => `warp:${id}`,
@@ -13,27 +11,34 @@ export const CacheKey = {
   ChainInfo: (chain: WarpChain) => `chain:${chain}`,
 }
 
+export type CacheType = 'memory' | 'localStorage'
+
 export class WarpCache {
-  private cache: Map<string, CacheEntry<any>> = new Map()
+  private strategy: CacheStrategy
+
+  constructor(type?: CacheType) {
+    this.strategy = this.selectStrategy(type)
+  }
+
+  private selectStrategy(type?: CacheType): CacheStrategy {
+    if (type === 'localStorage') return new LocalStorageCacheStrategy()
+    if (type === 'memory') return new MemoryCacheStrategy()
+
+    // Default to localStorage in browser environments
+    if (typeof window !== 'undefined' && window.localStorage) return new LocalStorageCacheStrategy()
+
+    return new MemoryCacheStrategy()
+  }
 
   set<T>(key: string, value: T, ttl: number): void {
-    const expiresAt = Date.now() + ttl * 1000
-    this.cache.set(key, { value, expiresAt })
+    this.strategy.set(key, value, ttl)
   }
 
   get<T>(key: string): T | null {
-    const entry = this.cache.get(key)
-    if (!entry) return null
-
-    if (Date.now() > entry.expiresAt) {
-      this.cache.delete(key)
-      return null
-    }
-
-    return entry.value as T
+    return this.strategy.get(key)
   }
 
   clear(): void {
-    this.cache.clear()
+    this.strategy.clear()
   }
 }

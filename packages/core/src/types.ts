@@ -1,3 +1,5 @@
+import { CacheType } from './WarpCache'
+
 export type ChainEnv = 'mainnet' | 'testnet' | 'devnet'
 
 export type ProtocolName = 'warp' | 'brand' | 'abi'
@@ -13,6 +15,7 @@ export type WarpConfig = {
   warpSchemaUrl?: string
   brandSchemaUrl?: string
   cacheTtl?: number
+  cacheType?: CacheType
   registryContract?: string
   indexUrl?: string
   indexApiKey?: string

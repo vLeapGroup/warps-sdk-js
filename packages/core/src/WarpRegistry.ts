@@ -17,12 +17,13 @@ import { WarpUtils } from './WarpUtils'
 
 export class WarpRegistry {
   private config: WarpConfig
-  private cache: WarpCache = new WarpCache()
+  private cache: WarpCache
 
   public unitPrice: bigint
 
   constructor(config: WarpConfig) {
     this.config = config
+    this.cache = new WarpCache(config.cacheType)
     this.unitPrice = BigInt(0)
   }
 
