@@ -34,27 +34,19 @@ export class LocalStorageCacheStrategy implements CacheStrategy {
   }
 
   set<T>(key: string, value: T, ttl: number): void {
-    try {
-      const entry: CacheEntry<T> = {
-        value,
-        expiresAt: Date.now() + ttl * 1000,
-      }
-      localStorage.setItem(this.getKey(key), JSON.stringify(entry))
-    } catch {
-      // Silently fail if localStorage is not available
+    const entry: CacheEntry<T> = {
+      value,
+      expiresAt: Date.now() + ttl * 1000,
     }
+    localStorage.setItem(this.getKey(key), JSON.stringify(entry))
   }
 
   clear(): void {
-    try {
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i)
-        if (key?.startsWith(this.prefix)) {
-          localStorage.removeItem(key)
-        }
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key?.startsWith(this.prefix)) {
+        localStorage.removeItem(key)
       }
-    } catch {
-      // Silently fail if localStorage is not available
     }
   }
 }
