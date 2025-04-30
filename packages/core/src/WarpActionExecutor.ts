@@ -108,7 +108,11 @@ export class WarpActionExecutor {
     return values[0]
   }
 
-  async executeCollect(action: WarpCollectAction, inputs: Record<string, any>, meta?: Record<string, any>): Promise<void> {
+  async executeCollect(action: WarpCollectAction, inputs: string[], meta?: Record<string, any>): Promise<void> {
+    const resolvedInputs = await this.getResolvedInputs(action, inputs)
+    const modifiedInputs = this.getModifiedInputs(resolvedInputs)
+    const requestInputs = modifiedInputs.map((i) => i.value)
+
     const headers = new Headers()
     headers.set('Content-Type', 'application/json')
     headers.set('Accept', 'application/json')
@@ -119,7 +123,7 @@ export class WarpActionExecutor {
     await fetch(action.destination.url, {
       method: action.destination.method,
       headers,
-      body: JSON.stringify({ inputs, meta }),
+      body: JSON.stringify({ inputs: requestInputs, meta }),
     })
   }
 
