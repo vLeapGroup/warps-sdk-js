@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 1.3.0
+
+### Minor Changes
+
+- 3eb51b4: update collect exec input handling
+
 ## 1.2.1
 
 ### Patch Changes
