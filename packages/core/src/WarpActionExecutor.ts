@@ -172,6 +172,7 @@ export class WarpActionExecutor {
 
     const toValueByType = (input: WarpActionInput, index: number) => {
       if (input.source === 'query') return this.serializer.nativeToString(input.type, this.url.searchParams.get(input.name) || '')
+      if (input.source === 'user_wallet') return this.config.userAddress || null
       return preprocessed[index] || null
     }
 

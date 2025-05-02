@@ -138,7 +138,7 @@ export type WarpCollectAction = {
   next?: string
 }
 
-export type WarpActionInputSource = 'field' | 'query'
+export type WarpActionInputSource = 'field' | 'query' | 'user_wallet'
 
 export type BaseWarpActionInputType =
   | 'string'
