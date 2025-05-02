@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 1.4.0
+
+### Minor Changes
+
+- e5bf3ea: update collect action payload structure
+- 8755b28: add action input source for user wallet
+
 ## 1.3.0
 
 ### Minor Changes
