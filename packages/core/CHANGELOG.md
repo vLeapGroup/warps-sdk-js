@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 1.4.1
+
+### Patch Changes
+
+- 3967021: update protocol version
+
 ## 1.4.0
 
 ### Minor Changes
