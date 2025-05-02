@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 1.4.2
+
+### Patch Changes
+
+- c6f809c: fix action input source resolvements
+
 ## 1.4.1
 
 ### Patch Changes
