@@ -171,9 +171,16 @@ export class WarpActionExecutor {
     const preprocessed = await Promise.all(inputArgs.map((arg) => this.preprocessInput(arg)))
 
     const toValueByType = (input: WarpActionInput, index: number) => {
-      if (input.source === 'query') return this.serializer.nativeToString(input.type, this.url.searchParams.get(input.name) || '')
-      if (input.source === 'user_wallet') return this.config.userAddress || null
-      return preprocessed[index] || null
+      if (input.source === 'query') {
+        const value = this.url.searchParams.get(input.name)
+        if (!value) return null
+        return this.serializer.nativeToString(input.type, value)
+      } else if (input.source === 'user_wallet') {
+        if (!this.config.userAddress) return null
+        return this.serializer.nativeToString('address', this.config.userAddress)
+      } else {
+        return preprocessed[index] || null
+      }
     }
 
     return argInputs.map((input, index) => ({
