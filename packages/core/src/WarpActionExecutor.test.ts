@@ -1,5 +1,5 @@
 import { bigIntToHex, utf8ToHex } from '@multiversx/sdk-core/out/core/utils.codec'
-import { WarpConfig, WarpContractAction, WarpTransferAction } from './types'
+import { WarpCollectAction, WarpConfig, WarpContractAction, WarpTransferAction } from './types'
 import { WarpActionExecutor } from './WarpActionExecutor'
 
 const Config: WarpConfig = {
@@ -136,6 +136,50 @@ describe('WarpActionExecutor', () => {
     const actual = await subject.createTransactionForExecute(action, [])
 
     expect(actual.data?.toString()).toBe(`issue@${utf8ToHex('WarpToken')}@${utf8ToHex('WAPT')}@${bigIntToHex('1000000000000000000000')}@12`)
+  })
+
+  it('executeCollect - creates correct input payload structure', async () => {
+    Config.currentUrl = 'https://example.com?queryParam=testValue'
+    const subject = new WarpActionExecutor(Config)
+    const mockFetch = jest.fn()
+    const originalFetch = global.fetch
+    global.fetch = mockFetch
+
+    const action: WarpCollectAction = {
+      type: 'collect',
+      label: 'test',
+      description: 'test',
+      destination: {
+        url: 'https://example.com/collect',
+        method: 'POST',
+        headers: {},
+      },
+      inputs: [
+        { name: 'amount', type: 'biguint', source: 'field', position: 'arg:1' },
+        { name: 'token', type: 'esdt', source: 'field', position: 'arg:2' },
+        { name: 'address', type: 'address', source: 'user_wallet', position: 'arg:3' },
+        { name: 'queryParam', type: 'string', source: 'query', position: 'arg:4' },
+      ],
+    }
+
+    await subject.executeCollect(action, ['biguint:1000', 'esdt:WARP-123456|0|1000000000000000000'])
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://example.com/collect',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({
+          inputs: {
+            amount: '1000',
+            token: { token: 'WARP-123456', nonce: '0', amount: '1000000000000000000' },
+            address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+            queryParam: 'testValue',
+          },
+        }),
+      })
+    )
+
+    global.fetch = originalFetch
   })
 
   it('getTxComponentsFromInputs - gets the value from the field', async () => {

@@ -112,9 +112,21 @@ export class WarpActionExecutor {
     const resolvedInputs = await this.getResolvedInputs(action, inputs)
     const modifiedInputs = this.getModifiedInputs(resolvedInputs)
 
-    const inputPayload = modifiedInputs.map((i) => ({
-      [i.input.as || i.input.name]: i.value ? this.serializer.stringToNative(i.value)[1] : null,
-    }))
+    const toInputPayloadValue = (resolvedInput: ResolvedInput) => {
+      if (!resolvedInput.value) return null
+      const value = this.serializer.stringToNative(resolvedInput.value)[1]
+      if (resolvedInput.input.type === 'biguint') {
+        const casted = value as bigint
+        return casted.toString() // json-stringify doesn't support bigint
+      } else if (resolvedInput.input.type === 'esdt') {
+        const casted = value as TokenTransfer
+        return { token: casted.token.identifier, nonce: casted.token.nonce.toString(), amount: casted.amount.toString() }
+      } else {
+        return value
+      }
+    }
+
+    const inputPayload = Object.fromEntries(modifiedInputs.map((i) => [i.input.as || i.input.name, toInputPayloadValue(i)]))
 
     const headers = new Headers()
     headers.set('Content-Type', 'application/json')
