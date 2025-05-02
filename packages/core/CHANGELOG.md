@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 1.4.3
+
+### Patch Changes
+
+- 8821c65: improve collect action payload construction
+
 ## 1.4.2
 
 ### Patch Changes
