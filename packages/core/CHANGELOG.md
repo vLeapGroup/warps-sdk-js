@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 1.4.4
+
+### Patch Changes
+
+- dc1cc27: update biguint helper
+
 ## 1.4.3
 
 ### Patch Changes
