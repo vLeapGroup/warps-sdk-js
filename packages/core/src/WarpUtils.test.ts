@@ -45,7 +45,7 @@ describe('getNextStepUrl', () => {
       next: 'alias:mywarp',
     } as any
 
-    const result = WarpUtils.getNextStepUrl(warp, Config)
+    const result = WarpUtils.getNextStepUrl(warp, 1, Config)
 
     expect(result).toBe('https://anyclient.com?warp=mywarp')
   })
@@ -55,7 +55,7 @@ describe('getNextStepUrl', () => {
       next: 'hash:123',
     } as any
 
-    const result = WarpUtils.getNextStepUrl(warp, Config)
+    const result = WarpUtils.getNextStepUrl(warp, 1, Config)
 
     expect(result).toBe('https://anyclient.com?warp=hash%3A123')
   })
@@ -65,7 +65,7 @@ describe('getNextStepUrl', () => {
       next: 'https://example.com',
     } as any
 
-    const result = WarpUtils.getNextStepUrl(warp, Config)
+    const result = WarpUtils.getNextStepUrl(warp, 1, Config)
 
     expect(result).toBe('https://example.com')
   })
@@ -75,7 +75,7 @@ describe('getNextStepUrl', () => {
       next: undefined,
     } as any
 
-    const result = WarpUtils.getNextStepUrl(warp, Config)
+    const result = WarpUtils.getNextStepUrl(warp, 1, Config)
 
     expect(result).toBeNull()
   })

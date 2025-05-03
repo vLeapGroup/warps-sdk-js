@@ -33,6 +33,12 @@ export type WarpIdType = 'hash' | 'alias'
 
 export type WarpVarPlaceholder = string
 
+export type WarpResultName = string
+
+export type WarpResulutionPath = string
+
+export type WarpMessageName = string
+
 export type Warp = {
   protocol: string
   name: string
@@ -43,6 +49,8 @@ export type Warp = {
   vars?: Record<WarpVarPlaceholder, string>
   actions: WarpAction[]
   next?: string
+  results?: Record<WarpResultName, WarpResulutionPath>
+  messages?: Record<WarpMessageName, string>
   meta?: WarpMeta
 }
 
@@ -80,6 +88,7 @@ export type WarpContractAction = {
   value?: string
   gasLimit: number
   transfers?: WarpContractActionTransfer[]
+  abi?: string
   inputs?: WarpActionInput[]
   next?: string
 }
@@ -88,14 +97,6 @@ export type WarpContractActionTransfer = {
   token: string
   nonce?: number
   amount?: string
-}
-
-export type WarpLinkAction = {
-  type: WarpActionType
-  label: string
-  description?: string | null
-  url: string
-  inputs?: WarpActionInput[]
 }
 
 export type WarpQueryAction = {
@@ -108,6 +109,7 @@ export type WarpQueryAction = {
   args: string[]
   abi?: string
   inputs?: WarpActionInput[]
+  next?: string
 }
 
 export type WarpCollectAction = {
@@ -121,6 +123,14 @@ export type WarpCollectAction = {
   }
   inputs?: WarpActionInput[]
   next?: string
+}
+
+export type WarpLinkAction = {
+  type: WarpActionType
+  label: string
+  description?: string | null
+  url: string
+  inputs?: WarpActionInput[]
 }
 
 export type WarpActionInputSource = 'field' | 'query' | 'user_wallet'
