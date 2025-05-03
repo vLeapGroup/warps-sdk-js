@@ -1,5 +1,7 @@
+import { SmartContractResult, TransactionEvent, TransactionLogs, TransactionOnNetwork } from '@multiversx/sdk-core/out'
 import { bigIntToHex, utf8ToHex } from '@multiversx/sdk-core/out/core/utils.codec'
-import { WarpCollectAction, WarpConfig, WarpContractAction, WarpTransferAction } from './types'
+import { promises as fs, PathLike } from 'fs'
+import { Warp, WarpCollectAction, WarpConfig, WarpContractAction, WarpTransferAction } from './types'
 import { WarpActionExecutor } from './WarpActionExecutor'
 
 const Config: WarpConfig = {
@@ -136,6 +138,87 @@ describe('WarpActionExecutor', () => {
     const actual = await subject.createTransactionForExecute(action, [])
 
     expect(actual.data?.toString()).toBe(`issue@${utf8ToHex('WarpToken')}@${utf8ToHex('WAPT')}@${bigIntToHex('1000000000000000000000')}@12`)
+  })
+
+  it('getExecutionResults - gets the results and messages from the transaction', async () => {
+    const subject = new WarpActionExecutor(Config)
+    const mockFetch = jest.fn()
+    const originalFetch = global.fetch
+    global.fetch = mockFetch
+
+    mockFetch.mockImplementation(async (url) => {
+      return Promise.resolve({
+        json: async () => await loadAbiContents('./src/testdata/test.abi.json'),
+      })
+    })
+
+    const action: WarpContractAction = {
+      type: 'contract',
+      label: 'test',
+      description: 'test',
+      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      func: 'register',
+      args: [],
+      abi: 'https://mock.com/esdt-safe.abi.json',
+      gasLimit: 1000000,
+    }
+
+    const warp = {
+      actions: [action],
+      results: {
+        firstEvent: 'event.registeredWithToken.1',
+        secondEvent: 'event.registeredWithToken.2',
+        thirdEvent: 'event.registeredWithToken.3',
+        fourthEvent: 'event.registeredWithToken.4',
+        firstOut: 'out.0',
+        secondOut: 'out.1',
+        thirdOut: 'out.2',
+      },
+      messages: {
+        success: 'You have successfully registered {{firstEvent}} with duration {{thirdEvent}}',
+        identifier: 'Your registration has the id: {{secondOut}}',
+      },
+      next: 'some-warp',
+    } as any as Warp
+
+    const transactionOnNetwork = new TransactionOnNetwork({
+      nonce: 7n,
+      smartContractResults: [
+        new SmartContractResult({
+          data: Buffer.from('@6f6b@10'),
+          logs: new TransactionLogs({
+            events: [
+              new TransactionEvent({
+                identifier: 'register',
+                topics: [
+                  Buffer.from('cmVnaXN0ZXJlZFdpdGhUb2tlbg==', 'base64'),
+                  Buffer.from('AAAAAAAAAAAFAPWuOkANricr0lRon9WkT4jj8pSeV4c=', 'base64'),
+                  Buffer.from('QUJDLTEyMzQ1Ng==', 'base64'),
+                  Buffer.from('REVGLTEyMzQ1Ng==', 'base64'),
+                  Buffer.from('EnUA', 'base64'),
+                ],
+                additionalData: [Buffer.from('AAAAAAAAA9sAAAA=', 'base64')],
+              }),
+            ],
+          }),
+        }),
+      ],
+    })
+
+    const actual = await subject.getExecutionResults(warp, 1, transactionOnNetwork)
+
+    expect(actual.results.firstEvent).toBe('ABC-123456')
+    expect(actual.results.secondEvent).toBe('DEF-123456')
+    expect(actual.results.thirdEvent).toBe('1209600')
+    expect(actual.results.fourthEvent).toBeNull()
+    expect(actual.results.firstOut).toBeNull()
+    expect(actual.results.secondOut).toBe('16')
+    expect(actual.results.thirdOut).toBeNull()
+
+    expect(actual.messages.success).toBe('You have successfully registered ABC-123456 with duration 1209600')
+    expect(actual.messages.identifier).toBe('Your registration has the id: 16')
+
+    global.fetch = originalFetch
   })
 
   it('executeCollect - creates correct input payload structure', async () => {
@@ -376,3 +459,8 @@ describe('WarpActionExecutor', () => {
     expect(args).toEqual(['esdt:USH-111e09|0|1000|2'])
   })
 })
+
+export const loadAbiContents = async (path: PathLike): Promise<any> => {
+  let jsonContent: string = await fs.readFile(path, { encoding: 'utf8' })
+  return JSON.parse(jsonContent)
+}

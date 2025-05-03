@@ -2,21 +2,26 @@ import {
   AbiRegistry,
   Address,
   ArgSerializer,
+  findEventsByFirstTopic,
   SmartContractTransactionsFactory,
+  SmartContractTransactionsOutcomeParser,
   Token,
   TokenComputer,
   TokenTransfer,
   Transaction,
+  TransactionEventsParser,
+  TransactionOnNetwork,
   TransactionsFactoryConfig,
   TransferTransactionsFactory,
   TypedValue,
 } from '@multiversx/sdk-core'
 import { Config } from './config'
 import { WarpConstants } from './constants'
-import { getDefaultChainInfo, shiftBigintBy } from './helpers'
+import { getDefaultChainInfo, getWarpActionByIndex, shiftBigintBy } from './helpers'
 import { findKnownTokenById } from './tokens'
 import {
   ChainInfo,
+  Warp,
   WarpAction,
   WarpActionInput,
   WarpActionInputType,
@@ -27,6 +32,7 @@ import {
   WarpQueryAction,
   WarpTransferAction,
 } from './types'
+import { WarpExecutionResult } from './types/results'
 import { WarpAbiBuilder } from './WarpAbiBuilder'
 import { WarpArgSerializer } from './WarpArgSerializer'
 import { WarpContractLoader } from './WarpContractLoader'
@@ -86,6 +92,49 @@ export class WarpActionExecutor {
     }
 
     throw new Error(`WarpActionExecutor: Invalid action type (${action.type})`)
+  }
+
+  async getExecutionResults(warp: Warp, actionIndex: number, tx: TransactionOnNetwork): Promise<WarpExecutionResult> {
+    const action = getWarpActionByIndex(warp, actionIndex) as WarpContractAction | WarpQueryAction
+    const redirectUrl = WarpUtils.getNextStepUrl(warp, actionIndex, this.config)
+    let results: Record<string, any> = {}
+
+    // Fetch results
+    if (!!warp.results && (action.type === 'contract' || action.type === 'query')) {
+      const abi = await this.getAbiForAction(action as WarpContractAction | WarpQueryAction)
+      const eventParser = new TransactionEventsParser({ abi })
+      const outcomeParser = new SmartContractTransactionsOutcomeParser({ abi })
+      const outcome = outcomeParser.parseExecute({ transactionOnNetwork: tx, function: action.func || undefined })
+
+      for (const [resultName, resultPath] of Object.entries(warp.results)) {
+        const [resultType, partOne, partTwo] = resultPath.split('.')
+        if (resultType === 'event') {
+          if (!partOne || isNaN(Number(partTwo))) continue
+          const topicPosition = Number(partTwo)
+          const events = findEventsByFirstTopic(tx, partOne)
+          const outcome = eventParser.parseEvents({ events })[0]
+          const outcomeAtPosition = (Object.values(outcome)[topicPosition] || null) as object | null
+          results[resultName] = outcomeAtPosition ? outcomeAtPosition.valueOf() : outcomeAtPosition
+        } else if (resultType === 'out') {
+          if (!partOne) continue
+          const outputIndex = Number(partOne)
+          const outputAtPosition = (outcome.values[outputIndex - 1] || null) as object | null // first is return message
+          results[resultName] = outputAtPosition ? outputAtPosition.valueOf() : outputAtPosition
+        }
+      }
+    }
+
+    // Replace placeholders in messages with results
+    const messages = Object.fromEntries(
+      Object.entries(warp.messages || {}).map(([key, value]) => [
+        key,
+        value.replace(/\{\{([^}]+)\}\}/g, (match, p1) => {
+          return results[p1] || ''
+        }),
+      ])
+    )
+
+    return { redirectUrl, results, messages }
   }
 
   async executeQuery(action: WarpQueryAction, inputs: string[]): Promise<TypedValue> {
@@ -280,7 +329,7 @@ export class WarpActionExecutor {
     return chainInfo
   }
 
-  private async getAbiForAction(action: WarpQueryAction): Promise<AbiRegistry> {
+  private async getAbiForAction(action: WarpContractAction | WarpQueryAction): Promise<AbiRegistry> {
     if (action.abi) {
       return await this.fetchAbi(action)
     }
@@ -291,7 +340,7 @@ export class WarpActionExecutor {
     return AbiRegistry.create(verification.abi)
   }
 
-  private async fetchAbi(action: WarpQueryAction): Promise<AbiRegistry> {
+  private async fetchAbi(action: WarpContractAction | WarpQueryAction): Promise<AbiRegistry> {
     if (!action.abi) throw new Error('WarpActionExecutor: ABI not found')
     if (action.abi.startsWith(WarpConstants.IdentifierType.Hash)) {
       const abiBuilder = new WarpAbiBuilder(this.config)

@@ -47,13 +47,14 @@ export class WarpUtils {
     return { type: idType as WarpIdType, id }
   }
 
-  static getNextStepUrl(warp: Warp, config: WarpConfig): string | null {
-    if (!warp?.next) return null
-    if (warp.next.startsWith(UrlPrefixDeterminer)) {
-      return warp.next
+  static getNextStepUrl(warp: Warp, actionIndex: number, config: WarpConfig): string | null {
+    const next = warp.next || (warp.actions?.[actionIndex] as any)?.next || null
+    if (!next) return null
+    if (next.startsWith(UrlPrefixDeterminer)) {
+      return next
     } else {
       const warpLink = new WarpLink(config)
-      const identifierInfo = WarpUtils.getInfoFromPrefixedIdentifier(warp.next)
+      const identifierInfo = WarpUtils.getInfoFromPrefixedIdentifier(next)
       if (!identifierInfo) return null
       return warpLink.build(identifierInfo.type, identifierInfo.id)
     }
