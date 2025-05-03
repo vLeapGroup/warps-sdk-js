@@ -51,7 +51,7 @@ export const shiftBigintBy = (value: bigint | string, decimals: number): bigint 
     const newIntegerPart = combined.slice(0, -shiftPlaces) || '0'
     return BigInt(newIntegerPart)
   } else {
-    return BigInt(value)
+    return valueStr.includes('.') ? BigInt(valueStr.split('.')[0]) : BigInt(valueStr)
   }
 }
 
