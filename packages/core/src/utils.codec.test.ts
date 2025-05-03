@@ -1,5 +1,3 @@
-// codec.test.ts
-
 import {
   Address,
   AddressValue,
