@@ -1,8 +1,5 @@
-import { CacheType } from './WarpCache'
-
-export type ChainEnv = 'mainnet' | 'testnet' | 'devnet'
-
-export type ProtocolName = 'warp' | 'brand' | 'abi'
+import { CacheType } from '../WarpCache'
+import { ChainEnv } from './general'
 
 export type WarpChain = string
 
@@ -25,18 +22,6 @@ export type WarpConfig = {
 
 export type WarpCacheConfig = {
   ttl?: number
-}
-
-export type TrustStatus = 'unverified' | 'verified' | 'blacklisted'
-
-export type RegistryInfo = {
-  hash: string
-  alias: string | null
-  trust: TrustStatus
-  creator: string
-  createdAt: number
-  brand: string | null
-  upgrade: string | null
 }
 
 export type ChainInfo = {
@@ -195,68 +180,4 @@ export type WarpContract = {
 export type WarpContractVerification = {
   codeHash: string
   abi: object
-}
-
-export type Brand = {
-  protocol: string
-  name: string
-  description: string
-  logo: string
-  urls?: BrandUrls
-  colors?: BrandColors
-  cta?: BrandCta
-  meta?: BrandMeta
-}
-
-export type BrandUrls = {
-  web?: string
-}
-
-export type BrandColors = {
-  primary?: string
-  secondary?: string
-}
-
-export type BrandCta = {
-  title: string
-  description: string
-  label: string
-  url: string
-}
-
-export type BrandMeta = {
-  hash: string
-  creator: string
-  createdAt: string
-}
-
-export type WarpSearchResult = {
-  hits: WarpSearchHit[]
-}
-
-export type WarpSearchHit = {
-  hash: string
-  alias: string
-  name: string
-  title: string
-  description: string
-  preview: string
-  status: string
-  category: string
-  featured: boolean
-}
-
-export type WarpAbi = {
-  protocol: string
-  content: AbiContents
-  meta?: WarpMeta
-}
-
-export type AbiContents = {
-  name?: string
-  constructor?: any
-  upgradeConstructor?: any
-  endpoints?: any[]
-  types?: Record<string, any>
-  events?: any[]
 }
