@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-alpha.1
+
+### Patch Changes
+
+- 7d50e91: add missing type export
+
 ## 2.0.0-alpha.0
 
 ### Major Changes
