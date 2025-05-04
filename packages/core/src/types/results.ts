@@ -2,6 +2,8 @@ import { WarpMessageName, WarpResultName } from './warp'
 
 export type WarpExecutionResult = {
   success: boolean
+  user: string | null
+  txHash: string | null
   redirectUrl: string | null
   values: any[]
   results: WarpExecutionResults

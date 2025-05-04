@@ -98,7 +98,15 @@ export class WarpActionExecutor {
     const { values, results } = await extractContractResults(this, warp, action, tx)
     const messages = this.getPreparedMessages(warp, results)
 
-    return { success: tx.status.isSuccessful(), redirectUrl, values, results, messages }
+    return {
+      success: tx.status.isSuccessful(),
+      user: this.config.userAddress || null,
+      txHash: tx.hash,
+      redirectUrl,
+      values,
+      results,
+      messages,
+    }
   }
 
   async executeQuery(warp: Warp, actionIndex: number, inputs: string[]): Promise<WarpExecutionResult> {
@@ -123,6 +131,8 @@ export class WarpActionExecutor {
 
     return {
       success: isSuccess,
+      user: this.config.userAddress || null,
+      txHash: null,
       redirectUrl: action.next || null,
       values,
       results,
@@ -170,6 +180,8 @@ export class WarpActionExecutor {
 
       return {
         success: response.ok,
+        user: this.config.userAddress || null,
+        txHash: null,
         redirectUrl: action.next || null,
         values,
         results,
@@ -177,7 +189,15 @@ export class WarpActionExecutor {
       }
     } catch (error) {
       console.error(error)
-      return { success: false, redirectUrl: null, values: [], results: {}, messages: {} }
+      return {
+        success: false,
+        user: this.config.userAddress || null,
+        txHash: null,
+        redirectUrl: null,
+        values: [],
+        results: {},
+        messages: {},
+      }
     }
   }
 
