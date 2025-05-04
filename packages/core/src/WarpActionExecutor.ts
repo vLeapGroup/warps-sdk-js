@@ -13,11 +13,10 @@ import {
 } from '@multiversx/sdk-core'
 import { Config } from './config'
 import { WarpConstants } from './constants'
-import { getDefaultChainInfo, getWarpActionByIndex, shiftBigintBy } from './helpers'
+import { getWarpActionByIndex, shiftBigintBy } from './helpers'
 import { extractCollectResults, extractContractResults, extractQueryResults } from './helpers/results'
 import { findKnownTokenById } from './tokens'
 import {
-  ChainInfo,
   Warp,
   WarpAction,
   WarpActionInput,
@@ -60,7 +59,7 @@ export class WarpActionExecutor {
   async createTransactionForExecute(action: WarpTransferAction | WarpContractAction, inputs: string[]): Promise<Transaction> {
     if (!this.config.userAddress) throw new Error('WarpActionExecutor: user address not set')
     const sender = Address.newFromBech32(this.config.userAddress)
-    const chainInfo = await this.getChainInfoForAction(action)
+    const chainInfo = await WarpUtils.getChainInfoForAction(action, this.config)
     const config = new TransactionsFactoryConfig({ chainID: chainInfo.chainId })
 
     const { destination, args, value, transfers, data } = await this.getTxComponentsFromInputs(action, inputs, sender)
@@ -115,7 +114,7 @@ export class WarpActionExecutor {
     const action = getWarpActionByIndex(warp, actionIndex) as WarpQueryAction | null
     if (!action) throw new Error('WarpActionExecutor: Action not found')
     if (!action.func) throw new Error('WarpActionExecutor: Function not found')
-    const chainInfo = await this.getChainInfoForAction(action)
+    const chainInfo = await WarpUtils.getChainInfoForAction(action, this.config)
     const abi = await this.getAbiForAction(action)
     const { args } = await this.getTxComponentsFromInputs(action, inputs)
     const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
@@ -356,15 +355,6 @@ export class WarpActionExecutor {
     ])
 
     return Object.fromEntries(parts)
-  }
-
-  private async getChainInfoForAction(action: WarpTransferAction | WarpContractAction | WarpQueryAction): Promise<ChainInfo> {
-    if (!action.chain) return getDefaultChainInfo(this.config)
-
-    const chainInfo = await this.registry.getChainInfo(action.chain)
-    if (!chainInfo) throw new Error(`WarpActionExecutor: Chain info not found for ${action.chain}`)
-
-    return chainInfo
   }
 
   private async fetchAbi(action: WarpContractAction | WarpQueryAction): Promise<AbiRegistry> {

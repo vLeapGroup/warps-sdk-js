@@ -1,8 +1,10 @@
 import { ApiNetworkProvider, DevnetEntrypoint, MainnetEntrypoint, NetworkEntrypoint, TestnetEntrypoint } from '@multiversx/sdk-core'
 import { Config } from './config'
 import { WarpConstants } from './constants'
-import { ChainEnv, ChainInfo, Warp, WarpConfig, WarpIdType } from './types'
+import { getDefaultChainInfo } from './helpers'
+import { ChainEnv, ChainInfo, Warp, WarpConfig, WarpContractAction, WarpIdType, WarpQueryAction, WarpTransferAction } from './types'
 import { WarpLink } from './WarpLink'
+import { WarpRegistry } from './WarpRegistry'
 
 const UrlPrefixDeterminer = 'https://'
 
@@ -58,6 +60,18 @@ export class WarpUtils {
       if (!identifierInfo) return null
       return warpLink.build(identifierInfo.type, identifierInfo.id)
     }
+  }
+
+  static async getChainInfoForAction(
+    action: WarpTransferAction | WarpContractAction | WarpQueryAction,
+    config: WarpConfig
+  ): Promise<ChainInfo> {
+    if (!action.chain) return getDefaultChainInfo(config)
+
+    const chainInfo = await new WarpRegistry(config).getChainInfo(action.chain)
+    if (!chainInfo) throw new Error(`WarpActionExecutor: Chain info not found for ${action.chain}`)
+
+    return chainInfo
   }
 
   static getChainEntrypoint(chainInfo: ChainInfo, env: ChainEnv): NetworkEntrypoint {
