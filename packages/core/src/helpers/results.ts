@@ -78,7 +78,7 @@ export const extractQueryResults = async (
       value = value[indices[i]]
     }
 
-    return value?.toString() // Convert to string since the test expects string values
+    return value
   }
 
   Object.entries(warp.results).forEach(([key, path]) => {
