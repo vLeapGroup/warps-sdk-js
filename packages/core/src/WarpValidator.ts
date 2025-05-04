@@ -9,6 +9,13 @@ export class WarpValidator {
 
   async validate(warp: Warp): Promise<void> {
     this.ensureMaxOneValuePosition(warp)
+
+    this.ensureVariableNamesAndResultNamesUppercase(warp)
+
+    this.ensureVariableNamesAndResultNamesUnique(warp)
+
+    this.ensureAbiIsSetIfApplicable(warp)
+
     await this.ensureValidSchema(warp)
   }
 
@@ -23,6 +30,25 @@ export class WarpValidator {
     }
   }
 
+  private ensureVariableNamesAndResultNamesUppercase(warp: Warp): void {
+    // TODO:
+  }
+
+  private ensureVariableNamesAndResultNamesUnique(warp: Warp): void {
+    // TODO:
+  }
+
+  private ensureAbiIsSetIfApplicable(warp: Warp): void {
+    const hasContractAction = warp.actions.some((action) => action.type === 'contract')
+    const hasQueryAction = warp.actions.some((action) => action.type === 'query')
+
+    if (!hasContractAction && !hasQueryAction) {
+      return
+    }
+
+    this.throwUnless(!!warp.results, 'results are required if there are contract or query actions')
+  }
+
   private async ensureValidSchema(warp: Warp): Promise<void> {
     const schemaUrl = this.config.warpSchemaUrl || Config.LatestWarpSchemaUrl
     const schemaResponse = await fetch(schemaUrl)
@@ -30,8 +56,12 @@ export class WarpValidator {
     const ajv = new Ajv()
     const validate = ajv.compile(schema)
 
-    if (!validate(warp)) {
-      throw new Error(`WarpBuilder: schema validation failed: ${ajv.errorsText(validate.errors)}`)
+    this.throwUnless(validate(warp), `WarpValidator: schema validation failed: ${ajv.errorsText(validate.errors)}`)
+  }
+
+  private throwUnless(condition: boolean, message: string): void {
+    if (!condition) {
+      throw new Error(`WarpValidator: ${message}`)
     }
   }
 }

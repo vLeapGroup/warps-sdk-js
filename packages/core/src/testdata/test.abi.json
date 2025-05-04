@@ -53,6 +53,22 @@
           "type": "u64"
         }
       ]
+    },
+    {
+      "name": "getParticipations",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "variadic<multi<Address,bytes>>",
+          "multi_result": true
+        }
+      ]
     }
   ],
   "events": [
