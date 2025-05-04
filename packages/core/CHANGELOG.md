@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-alpha.5
+
+### Minor Changes
+
+- update multi chain
+
 ## 2.0.0-alpha.4
 
 ### Patch Changes
