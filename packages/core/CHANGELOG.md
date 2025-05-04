@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-alpha.0
+
+### Major Changes
+
+- add results + messages v2
+
+### Patch Changes
+
+- extend validator
+
 ## 1.5.0
 
 ### Minor Changes
