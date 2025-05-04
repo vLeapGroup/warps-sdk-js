@@ -1,7 +1,6 @@
-import { ApiNetworkProvider, DevnetEntrypoint, MainnetEntrypoint, NetworkEntrypoint, TestnetEntrypoint } from '@multiversx/sdk-core'
-import { Config } from './config'
+import { DevnetEntrypoint, MainnetEntrypoint, NetworkEntrypoint, TestnetEntrypoint } from '@multiversx/sdk-core'
 import { WarpConstants } from './constants'
-import { getDefaultChainInfo } from './helpers'
+import { getMainChainInfo } from './helpers'
 import { ChainEnv, ChainInfo, Warp, WarpConfig, WarpContractAction, WarpIdType, WarpQueryAction, WarpTransferAction } from './types'
 import { WarpLink } from './WarpLink'
 import { WarpRegistry } from './WarpRegistry'
@@ -66,7 +65,7 @@ export class WarpUtils {
     action: WarpTransferAction | WarpContractAction | WarpQueryAction,
     config: WarpConfig
   ): Promise<ChainInfo> {
-    if (!action.chain) return getDefaultChainInfo(config)
+    if (!action.chain) return getMainChainInfo(config)
 
     const chainInfo = await new WarpRegistry(config).getChainInfo(action.chain)
     if (!chainInfo) throw new Error(`WarpActionExecutor: Chain info not found for ${action.chain}`)
@@ -80,11 +79,5 @@ export class WarpUtils {
     if (env === 'devnet') return new DevnetEntrypoint(chainInfo.apiUrl, kind, clientName)
     if (env === 'testnet') return new TestnetEntrypoint(chainInfo.apiUrl, kind, clientName)
     return new MainnetEntrypoint(chainInfo.apiUrl, kind, clientName)
-  }
-
-  static getConfiguredChainApi(config: WarpConfig): ApiNetworkProvider {
-    const apiUrl = config.chainApiUrl || Config.Chain.ApiUrl(config.env)
-    if (!apiUrl) throw new Error('WarpUtils: Chain API URL not configured')
-    return new ApiNetworkProvider(apiUrl, { timeout: 30_000, clientName: 'warp-sdk' })
   }
 }

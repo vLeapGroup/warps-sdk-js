@@ -7,9 +7,11 @@ export const getChainId = (env: ChainEnv): string => {
   return '1'
 }
 
-export const getDefaultChainInfo = (config: WarpConfig): ChainInfo => ({
+export const getMainChainInfo = (config: WarpConfig): ChainInfo => ({
   chainId: getChainId(config.env),
-  apiUrl: config.chainApiUrl || Config.Chain.ApiUrl(config.env),
+  apiUrl: config.chainApiUrl || Config.MainChain.ApiUrl(config.env),
+  blockTime: 6000,
+  explorerUrl: config.chainExplorerUrl || Config.MainChain.ExplorerUrl(config.env),
 })
 
 export const getLatestProtocolIdentifier = (name: ProtocolName): string => {
@@ -34,6 +36,8 @@ export const toTypedRegistryInfo = (registryInfo: any): RegistryInfo => ({
 export const toTypedChainInfo = (chainInfo: any): ChainInfo => ({
   chainId: chainInfo.chain_id.toString(),
   apiUrl: chainInfo.api_url.toString(),
+  explorerUrl: chainInfo.explorer_url.toString(),
+  blockTime: chainInfo.block_time.toNumber(),
 })
 
 export const shiftBigintBy = (value: bigint | string, decimals: number): bigint => {

@@ -1,7 +1,7 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
 import Ajv from 'ajv'
 import { Config } from './config'
-import { getChainId, getLatestProtocolIdentifier } from './helpers'
+import { getChainId, getLatestProtocolIdentifier, getMainChainInfo } from './helpers'
 import { Brand, BrandColors, BrandCta, BrandUrls, WarpConfig } from './types'
 import { WarpUtils } from './WarpUtils'
 
@@ -48,10 +48,12 @@ export class BrandBuilder {
   }
 
   async createFromTransactionHash(hash: string): Promise<Brand | null> {
-    const chainApi = WarpUtils.getConfiguredChainApi(this.config)
+    const chainInfo = getMainChainInfo(this.config)
+    const chainEntry = WarpUtils.getChainEntrypoint(chainInfo, this.config.env)
+    const chainProvider = chainEntry.createNetworkProvider()
 
     try {
-      const tx = await chainApi.getTransaction(hash)
+      const tx = await chainProvider.getTransaction(hash)
       return this.createFromTransaction(tx)
     } catch (error) {
       console.error('BrandBuilder: Error creating from transaction hash', error)

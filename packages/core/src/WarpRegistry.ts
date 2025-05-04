@@ -10,7 +10,7 @@ import {
 } from '@multiversx/sdk-core/out'
 import RegistryAbi from './abis/registry.abi.json'
 import { Config } from './config'
-import { getChainId, getDefaultChainInfo, toTypedChainInfo, toTypedRegistryInfo } from './helpers'
+import { getChainId, getMainChainInfo, toTypedChainInfo, toTypedRegistryInfo } from './helpers'
 import { Brand, ChainInfo, RegistryInfo, WarpCacheConfig, WarpChain, WarpConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
 import { WarpUtils } from './WarpUtils'
@@ -227,10 +227,12 @@ export class WarpRegistry {
       return cached
     }
 
-    const chainApi = WarpUtils.getConfiguredChainApi(this.config)
+    const chainInfo = getMainChainInfo(this.config)
+    const chainEntry = WarpUtils.getChainEntrypoint(chainInfo, this.config.env)
+    const chainProvider = chainEntry.createNetworkProvider()
 
     try {
-      const tx = await chainApi.getTransaction(hash)
+      const tx = await chainProvider.getTransaction(hash)
       const brand = JSON.parse(tx.data.toString()) as Brand
 
       brand.meta = {
@@ -270,7 +272,7 @@ export class WarpRegistry {
   }
 
   private getController(): SmartContractController {
-    const chainInfo = getDefaultChainInfo(this.config)
+    const chainInfo = getMainChainInfo(this.config)
     const entrypoint = WarpUtils.getChainEntrypoint(chainInfo, this.config.env)
     const abi = AbiRegistry.create(RegistryAbi)
     return entrypoint.createSmartContractController(abi)

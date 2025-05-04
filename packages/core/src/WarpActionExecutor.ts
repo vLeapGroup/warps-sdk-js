@@ -13,7 +13,7 @@ import {
 } from '@multiversx/sdk-core'
 import { Config } from './config'
 import { WarpConstants } from './constants'
-import { getWarpActionByIndex, shiftBigintBy } from './helpers'
+import { getMainChainInfo, getWarpActionByIndex, shiftBigintBy } from './helpers'
 import { extractCollectResults, extractContractResults, extractQueryResults } from './helpers/results'
 import { findKnownTokenById } from './tokens'
 import {
@@ -310,7 +310,7 @@ export class WarpActionExecutor {
         const knownToken = findKnownTokenById(tokenId)
         let decimals = knownToken?.decimals
         if (!decimals) {
-          const apiUrl = this.config.chainApiUrl || Config.Chain.ApiUrl(this.config.env)
+          const apiUrl = this.config.chainApiUrl || Config.MainChain.ApiUrl(this.config.env)
           const definitionRes = await fetch(`${apiUrl}/tokens/${tokenId}`) // TODO: use chainApi directly; currently causes circular reference for whatever reason
           const definition = await definitionRes.json()
           decimals = definition.decimals
@@ -330,7 +330,8 @@ export class WarpActionExecutor {
       return await this.fetchAbi(action)
     }
 
-    const verification = await this.contractLoader.getVerificationInfo(action.address)
+    const chainInfo = getMainChainInfo(this.config)
+    const verification = await this.contractLoader.getVerificationInfo(action.address, chainInfo)
     if (!verification) throw new Error('WarpActionExecutor: Verification info not found')
 
     return AbiRegistry.create(verification.abi)
