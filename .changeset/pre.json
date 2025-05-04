@@ -8,6 +8,7 @@
     "tsconfig": "0.0.1"
   },
   "changesets": [
+    "blue-moments-wish",
     "calm-hats-rescue",
     "lazy-houses-dress",
     "loud-bears-take"

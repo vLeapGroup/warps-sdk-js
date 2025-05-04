@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-alpha.2
+
+### Patch Changes
+
+- f55412d: add further info to execution result
+
 ## 2.0.0-alpha.1
 
 ### Patch Changes
