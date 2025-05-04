@@ -12,8 +12,6 @@ export class WarpValidator {
 
     this.ensureVariableNamesAndResultNamesUppercase(warp)
 
-    this.ensureVariableNamesAndResultNamesUnique(warp)
-
     this.ensureAbiIsSetIfApplicable(warp)
 
     await this.ensureValidSchema(warp)
@@ -21,8 +19,8 @@ export class WarpValidator {
 
   private ensureMaxOneValuePosition(warp: Warp): void {
     const position = warp.actions.filter((action) => {
-      if ('position' in action) return action.position === 'value'
-      return false
+      if (!action.inputs) return false
+      return action.inputs.some((input) => input.position === 'value')
     })
 
     if (position.length > 1) {
@@ -31,11 +29,17 @@ export class WarpValidator {
   }
 
   private ensureVariableNamesAndResultNamesUppercase(warp: Warp): void {
-    // TODO:
-  }
+    const validateUppercase = (obj: Record<string, any> | undefined) => {
+      if (!obj) return
+      Object.keys(obj).forEach((key) => {
+        if (key !== key.toUpperCase()) {
+          throw new Error(`WarpValidator: variable/result name '${key}' must be uppercase`)
+        }
+      })
+    }
 
-  private ensureVariableNamesAndResultNamesUnique(warp: Warp): void {
-    // TODO:
+    validateUppercase(warp.vars)
+    validateUppercase(warp.results)
   }
 
   private ensureAbiIsSetIfApplicable(warp: Warp): void {
