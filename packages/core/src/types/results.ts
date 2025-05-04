@@ -1,7 +1,9 @@
-import { WarpMessageName, WarpResultName } from './warp'
+import { Warp, WarpMessageName, WarpResultName } from './warp'
 
 export type WarpExecutionResult = {
   success: boolean
+  warp: Warp
+  action: number
   user: string | null
   txHash: string | null
   redirectUrl: string | null

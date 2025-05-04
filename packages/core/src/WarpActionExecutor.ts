@@ -100,6 +100,8 @@ export class WarpActionExecutor {
 
     return {
       success: tx.status.isSuccessful(),
+      warp,
+      action: actionIndex,
       user: this.config.userAddress || null,
       txHash: tx.hash,
       redirectUrl,
@@ -131,6 +133,8 @@ export class WarpActionExecutor {
 
     return {
       success: isSuccess,
+      warp,
+      action: actionIndex,
       user: this.config.userAddress || null,
       txHash: null,
       redirectUrl: action.next || null,
@@ -180,6 +184,8 @@ export class WarpActionExecutor {
 
       return {
         success: response.ok,
+        warp,
+        action: actionIndex,
         user: this.config.userAddress || null,
         txHash: null,
         redirectUrl: action.next || null,
@@ -191,6 +197,8 @@ export class WarpActionExecutor {
       console.error(error)
       return {
         success: false,
+        warp,
+        action: actionIndex,
         user: this.config.userAddress || null,
         txHash: null,
         redirectUrl: null,
