@@ -173,14 +173,6 @@ export type WarpActionInput = {
   modifier?: string
 }
 
-export type WarpActionExecutionResult = {
-  action: WarpAction
-  user: {
-    address: string
-  }
-  tx?: string
-}
-
 export type WarpContract = {
   address: string
   owner: string
