@@ -28,7 +28,7 @@ import {
   WarpQueryAction,
   WarpTransferAction,
 } from './types'
-import { WarpExecutionResult } from './types/results'
+import { WarpExecution } from './types/results'
 import { WarpAbiBuilder } from './WarpAbiBuilder'
 import { WarpArgSerializer } from './WarpArgSerializer'
 import { WarpContractLoader } from './WarpContractLoader'
@@ -90,10 +90,10 @@ export class WarpActionExecutor {
     throw new Error(`WarpActionExecutor: Invalid action type (${action.type})`)
   }
 
-  async getTransactionExecutionResults(warp: Warp, actionIndex: number, tx: TransactionOnNetwork): Promise<WarpExecutionResult> {
+  async getTransactionExecutionResults(warp: Warp, actionIndex: number, tx: TransactionOnNetwork): Promise<WarpExecution> {
     const action = getWarpActionByIndex(warp, actionIndex) as WarpContractAction
-    const next = WarpUtils.getNextInfo(warp, actionIndex, this.config)
     const { values, results } = await extractContractResults(this, warp, action, tx)
+    const next = WarpUtils.getNextInfo(warp, actionIndex, results, this.config)
     const messages = this.getPreparedMessages(warp, results)
 
     return {
@@ -109,7 +109,7 @@ export class WarpActionExecutor {
     }
   }
 
-  async executeQuery(warp: Warp, actionIndex: number, inputs: string[]): Promise<WarpExecutionResult> {
+  async executeQuery(warp: Warp, actionIndex: number, inputs: string[]): Promise<WarpExecution> {
     const action = getWarpActionByIndex(warp, actionIndex) as WarpQueryAction | null
     if (!action) throw new Error('WarpActionExecutor: Action not found')
     if (!action.func) throw new Error('WarpActionExecutor: Function not found')
@@ -128,7 +128,7 @@ export class WarpActionExecutor {
     const parts = response.returnDataParts.map((part) => Buffer.from(part))
     const typedValues = argsSerializer.buffersToValues(parts, endpoint.output)
     const { values, results } = await extractQueryResults(warp, typedValues)
-    const next = WarpUtils.getNextInfo(warp, actionIndex, this.config)
+    const next = WarpUtils.getNextInfo(warp, actionIndex, results, this.config)
 
     return {
       success: isSuccess,
@@ -143,7 +143,7 @@ export class WarpActionExecutor {
     }
   }
 
-  async executeCollect(warp: Warp, actionIndex: number, inputs: string[], meta?: Record<string, any>): Promise<WarpExecutionResult> {
+  async executeCollect(warp: Warp, actionIndex: number, inputs: string[], meta?: Record<string, any>): Promise<WarpExecution> {
     const action = getWarpActionByIndex(warp, actionIndex) as WarpCollectAction | null
     if (!action) throw new Error('WarpActionExecutor: Action not found')
     const resolvedInputs = await this.getResolvedInputs(action, inputs)
@@ -180,7 +180,7 @@ export class WarpActionExecutor {
       })
       const content = await response.json()
       const { values, results } = await extractCollectResults(warp, content)
-      const next = WarpUtils.getNextInfo(warp, actionIndex, this.config)
+      const next = WarpUtils.getNextInfo(warp, actionIndex, results, this.config)
 
       return {
         success: response.ok,

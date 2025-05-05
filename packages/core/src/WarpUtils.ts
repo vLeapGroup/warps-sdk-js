@@ -1,7 +1,7 @@
 import { DevnetEntrypoint, MainnetEntrypoint, NetworkEntrypoint, TestnetEntrypoint } from '@multiversx/sdk-core'
 import { Config } from './config'
 import { WarpConstants } from './constants'
-import { getMainChainInfo } from './helpers/general'
+import { getMainChainInfo, replacePlaceholders } from './helpers/general'
 import {
   ChainEnv,
   ChainInfo,
@@ -9,6 +9,7 @@ import {
   WarpConfig,
   WarpContractAction,
   WarpExecutionNextInfo,
+  WarpExecutionResults,
   WarpIdType,
   WarpQueryAction,
   WarpTransferAction,
@@ -58,12 +59,13 @@ export class WarpUtils {
     return { type: idType as WarpIdType, id }
   }
 
-  static getNextInfo(warp: Warp, actionIndex: number, config: WarpConfig): WarpExecutionNextInfo | null {
+  static getNextInfo(warp: Warp, actionIndex: number, results: WarpExecutionResults, config: WarpConfig): WarpExecutionNextInfo | null {
     const next = (warp.actions?.[actionIndex] as { next?: string })?.next || warp.next || null
     if (!next) return null
     if (next.startsWith(UrlPrefixDeterminer)) return { identifier: null, url: next }
 
-    const [baseIdentifier, query] = next.split('?')
+    const [baseIdentifier, queryWithPlaceholders] = next.split('?')
+    const query = queryWithPlaceholders ? replacePlaceholders(queryWithPlaceholders, { ...warp.vars, ...results }) : null
     const params = new URLSearchParams(query || '')
     const currentUrl = new URL(config.currentUrl || Config.DefaultClientUrl(config.env))
     currentUrl.searchParams.forEach((value, key) => params.set(key, value))

@@ -1,6 +1,6 @@
 import { Warp, WarpMessageName, WarpResultName } from './warp'
 
-export type WarpExecutionResult = {
+export type WarpExecution = {
   success: boolean
   warp: Warp
   action: number
