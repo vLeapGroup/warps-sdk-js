@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-alpha.7
+
+### Minor Changes
+
+- b978b7a: add next var + result placeholder replacements
+
 ## 2.0.0-alpha.6
 
 ### Minor Changes
