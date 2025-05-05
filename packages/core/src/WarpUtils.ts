@@ -1,8 +1,18 @@
 import { DevnetEntrypoint, MainnetEntrypoint, NetworkEntrypoint, TestnetEntrypoint } from '@multiversx/sdk-core'
+import { Config } from './config'
 import { WarpConstants } from './constants'
 import { getMainChainInfo } from './helpers'
-import { ChainEnv, ChainInfo, Warp, WarpConfig, WarpContractAction, WarpIdType, WarpQueryAction, WarpTransferAction } from './types'
-import { WarpLink } from './WarpLink'
+import {
+  ChainEnv,
+  ChainInfo,
+  Warp,
+  WarpConfig,
+  WarpContractAction,
+  WarpExecutionNextInfo,
+  WarpIdType,
+  WarpQueryAction,
+  WarpTransferAction,
+} from './types'
 import { WarpRegistry } from './WarpRegistry'
 
 const UrlPrefixDeterminer = 'https://'
@@ -48,17 +58,21 @@ export class WarpUtils {
     return { type: idType as WarpIdType, id }
   }
 
-  static getNextStepUrl(warp: Warp, actionIndex: number, config: WarpConfig): string | null {
-    const next = warp.next || (warp.actions?.[actionIndex] as any)?.next || null
+  static getNextInfo(warp: Warp, actionIndex: number, config: WarpConfig): WarpExecutionNextInfo | null {
+    const next = (warp.actions?.[actionIndex] as { next?: string })?.next || warp.next || null
     if (!next) return null
-    if (next.startsWith(UrlPrefixDeterminer)) {
-      return next
-    } else {
-      const warpLink = new WarpLink(config)
-      const identifierInfo = WarpUtils.getInfoFromPrefixedIdentifier(next)
-      if (!identifierInfo) return null
-      return warpLink.build(identifierInfo.type, identifierInfo.id)
-    }
+    if (next.startsWith(UrlPrefixDeterminer)) return { identifier: null, url: next }
+
+    const [baseIdentifier, query] = next.split('?')
+    const params = new URLSearchParams(query || '')
+    const currentUrl = new URL(config.currentUrl || Config.DefaultClientUrl(config.env))
+    currentUrl.searchParams.forEach((value, key) => params.set(key, value))
+
+    const identifier = params.toString() ? `${baseIdentifier}?${params.toString()}` : baseIdentifier
+    const url = new URL(config.clientUrl || Config.DefaultClientUrl(config.env))
+    url.searchParams.set('warp', identifier)
+
+    return { identifier, url: url.toString().replace(/\/\?/, '?') }
   }
 
   static async getChainInfoForAction(

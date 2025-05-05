@@ -95,6 +95,12 @@ export class WarpLink {
       : `${clientUrl}?${WarpConstants.IdentifierParamName}=${encodedValue}`
   }
 
+  buildFromPrefixedIdentifier(prefixedIdentifier: string): string {
+    const idResult = WarpUtils.getInfoFromPrefixedIdentifier(prefixedIdentifier)
+    if (!idResult) return ''
+    return this.build(idResult.type, idResult.id)
+  }
+
   generateQrCode(type: WarpIdType, id: string, size = 512, background = 'white', color = 'black', logoColor = '#23F7DD'): QRCodeStyling {
     const url = this.build(type, id)
 

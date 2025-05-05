@@ -39,44 +39,61 @@ describe('prepareVars', () => {
   })
 })
 
-describe('getNextStepUrl', () => {
-  it('returns an url for an alias', () => {
-    const warp: Warp = {
-      next: 'alias:mywarp',
-    } as any
+describe('getNextInfo', () => {
+  it('returns info for an alias', () => {
+    const warp: Warp = { next: 'mywarp' } as any
+    const result = WarpUtils.getNextInfo(warp, 1, Config)
 
-    const result = WarpUtils.getNextStepUrl(warp, 1, Config)
-
-    expect(result).toBe('https://anyclient.com?warp=mywarp')
+    expect(result?.identifier).toBe('mywarp')
+    expect(result?.url).toBe('https://anyclient.com?warp=mywarp')
   })
 
-  it('returns an url for a hash', () => {
-    const warp: Warp = {
-      next: 'hash:123',
-    } as any
+  it('returns info for a prefixed alias', () => {
+    const warp: Warp = { next: 'alias:mywarp' } as any
+    const result = WarpUtils.getNextInfo(warp, 1, Config)
 
-    const result = WarpUtils.getNextStepUrl(warp, 1, Config)
+    expect(result?.identifier).toBe('alias:mywarp')
+    expect(result?.url).toBe('https://anyclient.com?warp=alias%3Amywarp')
+  })
 
-    expect(result).toBe('https://anyclient.com?warp=hash%3A123')
+  it('returns an url for a prefixed hash', () => {
+    const warp: Warp = { next: 'hash:123' } as any
+    const result = WarpUtils.getNextInfo(warp, 1, Config)
+
+    expect(result?.identifier).toBe('hash:123')
+    expect(result?.url).toBe('https://anyclient.com?warp=hash%3A123')
   })
 
   it('returns an external url as is', () => {
-    const warp: Warp = {
-      next: 'https://example.com',
-    } as any
+    const warp: Warp = { next: 'https://example.com' } as any
+    const result = WarpUtils.getNextInfo(warp, 1, Config)
 
-    const result = WarpUtils.getNextStepUrl(warp, 1, Config)
-
-    expect(result).toBe('https://example.com')
+    expect(result?.identifier).toBeNull()
+    expect(result?.url).toBe('https://example.com')
   })
 
   it('returns null when warp has no next step', () => {
-    const warp: Warp = {
-      next: undefined,
-    } as any
-
-    const result = WarpUtils.getNextStepUrl(warp, 1, Config)
+    const warp: Warp = { next: undefined } as any
+    const result = WarpUtils.getNextInfo(warp, 1, Config)
 
     expect(result).toBeNull()
+  })
+
+  it('keeps url params as part of the identifier', () => {
+    const warp: Warp = { next: 'mywarp?param1=value1&param2=value2' } as any
+    const result = WarpUtils.getNextInfo(warp, 1, Config)
+
+    expect(result?.identifier).toBe('mywarp?param1=value1&param2=value2')
+    expect(result?.url).toBe('https://anyclient.com?warp=mywarp%3Fparam1%3Dvalue1%26param2%3Dvalue2')
+  })
+
+  it('merges url params from the identifier with the url params from the config', () => {
+    Config.currentUrl = 'https://anyclient.com?param3=3&param4=4'
+
+    const warp: Warp = { next: 'mywarp?param1=1&param2=2' } as any
+    const result = WarpUtils.getNextInfo(warp, 1, Config)
+
+    expect(result?.identifier).toBe('mywarp?param1=1&param2=2&param3=3&param4=4')
+    expect(result?.url).toBe('https://anyclient.com?warp=mywarp%3Fparam1%3D1%26param2%3D2%26param3%3D3%26param4%3D4')
   })
 })

@@ -6,11 +6,13 @@ export type WarpExecutionResult = {
   action: number
   user: string | null
   txHash: string | null
-  redirectUrl: string | null
+  next: WarpExecutionNextInfo | null
   values: any[]
   results: WarpExecutionResults
   messages: WarpExecutionMessages
 }
+
+export type WarpExecutionNextInfo = { identifier: string | null; url: string }
 
 export type WarpExecutionResults = Record<WarpResultName, any | null>
 
