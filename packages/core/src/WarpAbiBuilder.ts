@@ -1,5 +1,5 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
-import { getChainId, getLatestProtocolIdentifier, getMainChainInfo } from './helpers'
+import { getChainId, getLatestProtocolIdentifier, getMainChainInfo } from './helpers/general'
 import { AbiContents, WarpAbi, WarpCacheConfig, WarpConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
 import { WarpUtils } from './WarpUtils'

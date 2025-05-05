@@ -1,5 +1,5 @@
-import { Config, WarpProtocolVersions } from './config'
-import { ChainEnv, ChainInfo, ProtocolName, RegistryInfo, Warp, WarpConfig } from './types'
+import { Config, WarpProtocolVersions } from '../config'
+import { ChainEnv, ChainInfo, ProtocolName, RegistryInfo, Warp, WarpConfig } from '../types'
 
 export const getChainId = (env: ChainEnv): string => {
   if (env === 'devnet') return 'D'
@@ -73,3 +73,6 @@ export const toPreviewText = (text: string, maxChars = 100) => {
 
   return sanitized
 }
+
+export const replacePlaceholders = (message: string, bag: Record<string, any>) =>
+  message.replace(/\{\{([^}]+)\}\}/g, (match, p1) => bag[p1] || '')

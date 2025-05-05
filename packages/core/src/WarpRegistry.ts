@@ -10,7 +10,7 @@ import {
 } from '@multiversx/sdk-core/out'
 import RegistryAbi from './abis/registry.abi.json'
 import { Config } from './config'
-import { getChainId, getMainChainInfo, toTypedChainInfo, toTypedRegistryInfo } from './helpers'
+import { getChainId, getMainChainInfo, toTypedChainInfo, toTypedRegistryInfo } from './helpers/general'
 import { Brand, ChainInfo, RegistryInfo, WarpCacheConfig, WarpChain, WarpConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
 import { WarpUtils } from './WarpUtils'

@@ -1,7 +1,7 @@
 import { DevnetEntrypoint, MainnetEntrypoint, NetworkEntrypoint, TestnetEntrypoint } from '@multiversx/sdk-core'
 import { Config } from './config'
 import { WarpConstants } from './constants'
-import { getMainChainInfo } from './helpers'
+import { getMainChainInfo } from './helpers/general'
 import {
   ChainEnv,
   ChainInfo,

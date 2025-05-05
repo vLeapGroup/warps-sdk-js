@@ -13,7 +13,7 @@ import {
 } from '@multiversx/sdk-core'
 import { Config } from './config'
 import { WarpConstants } from './constants'
-import { getMainChainInfo, getWarpActionByIndex, shiftBigintBy } from './helpers'
+import { getMainChainInfo, getWarpActionByIndex, replacePlaceholders, shiftBigintBy } from './helpers/general'
 import { extractCollectResults, extractContractResults, extractQueryResults } from './helpers/results'
 import { findKnownTokenById } from './tokens'
 import {
@@ -351,10 +351,7 @@ export class WarpActionExecutor {
   }
 
   private getPreparedMessages(warp: Warp, results: Record<string, any>): Record<string, string> {
-    const parts = Object.entries(warp.messages || {}).map(([key, value]) => [
-      key,
-      value.replace(/\{\{([^}]+)\}\}/g, (match, p1) => results[p1] || ''),
-    ])
+    const parts = Object.entries(warp.messages || {}).map(([key, value]) => [key, replacePlaceholders(value, results)])
 
     return Object.fromEntries(parts)
   }

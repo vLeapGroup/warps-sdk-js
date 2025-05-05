@@ -1,7 +1,7 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
 import Ajv from 'ajv'
 import { Config } from './config'
-import { getChainId, getLatestProtocolIdentifier, getMainChainInfo } from './helpers'
+import { getChainId, getLatestProtocolIdentifier, getMainChainInfo } from './helpers/general'
 import { Brand, BrandColors, BrandCta, BrandUrls, WarpConfig } from './types'
 import { WarpUtils } from './WarpUtils'
 
