@@ -2,25 +2,21 @@ import {
   AbiRegistry,
   Address,
   ArgSerializer,
-  findEventsByFirstTopic,
   SmartContractTransactionsFactory,
-  SmartContractTransactionsOutcomeParser,
   Token,
   TokenComputer,
   TokenTransfer,
   Transaction,
-  TransactionEventsParser,
   TransactionOnNetwork,
   TransactionsFactoryConfig,
   TransferTransactionsFactory,
-  TypedValue,
 } from '@multiversx/sdk-core'
 import { Config } from './config'
 import { WarpConstants } from './constants'
-import { getDefaultChainInfo, getWarpActionByIndex, shiftBigintBy } from './helpers'
+import { getMainChainInfo, getWarpActionByIndex, replacePlaceholders, shiftBigintBy } from './helpers/general'
+import { extractCollectResults, extractContractResults, extractQueryResults } from './helpers/results'
 import { findKnownTokenById } from './tokens'
 import {
-  ChainInfo,
   Warp,
   WarpAction,
   WarpActionInput,
@@ -32,7 +28,7 @@ import {
   WarpQueryAction,
   WarpTransferAction,
 } from './types'
-import { WarpExecutionResult } from './types/results'
+import { WarpExecution } from './types/results'
 import { WarpAbiBuilder } from './WarpAbiBuilder'
 import { WarpArgSerializer } from './WarpArgSerializer'
 import { WarpContractLoader } from './WarpContractLoader'
@@ -63,7 +59,7 @@ export class WarpActionExecutor {
   async createTransactionForExecute(action: WarpTransferAction | WarpContractAction, inputs: string[]): Promise<Transaction> {
     if (!this.config.userAddress) throw new Error('WarpActionExecutor: user address not set')
     const sender = Address.newFromBech32(this.config.userAddress)
-    const chainInfo = await this.getChainInfoForAction(action)
+    const chainInfo = await WarpUtils.getChainInfoForAction(action, this.config)
     const config = new TransactionsFactoryConfig({ chainID: chainInfo.chainId })
 
     const { destination, args, value, transfers, data } = await this.getTxComponentsFromInputs(action, inputs, sender)
@@ -94,52 +90,30 @@ export class WarpActionExecutor {
     throw new Error(`WarpActionExecutor: Invalid action type (${action.type})`)
   }
 
-  async getExecutionResults(warp: Warp, actionIndex: number, tx: TransactionOnNetwork): Promise<WarpExecutionResult> {
-    const action = getWarpActionByIndex(warp, actionIndex) as WarpContractAction | WarpQueryAction
-    const redirectUrl = WarpUtils.getNextStepUrl(warp, actionIndex, this.config)
-    let results: Record<string, any> = {}
+  async getTransactionExecutionResults(warp: Warp, actionIndex: number, tx: TransactionOnNetwork): Promise<WarpExecution> {
+    const action = getWarpActionByIndex(warp, actionIndex) as WarpContractAction
+    const { values, results } = await extractContractResults(this, warp, action, tx)
+    const next = WarpUtils.getNextInfo(warp, actionIndex, results, this.config)
+    const messages = this.getPreparedMessages(warp, results)
 
-    // Fetch results
-    if (!!warp.results && (action.type === 'contract' || action.type === 'query')) {
-      const abi = await this.getAbiForAction(action as WarpContractAction | WarpQueryAction)
-      const eventParser = new TransactionEventsParser({ abi })
-      const outcomeParser = new SmartContractTransactionsOutcomeParser({ abi })
-      const outcome = outcomeParser.parseExecute({ transactionOnNetwork: tx, function: action.func || undefined })
-
-      for (const [resultName, resultPath] of Object.entries(warp.results)) {
-        const [resultType, partOne, partTwo] = resultPath.split('.')
-        if (resultType === 'event') {
-          if (!partOne || isNaN(Number(partTwo))) continue
-          const topicPosition = Number(partTwo)
-          const events = findEventsByFirstTopic(tx, partOne)
-          const outcome = eventParser.parseEvents({ events })[0]
-          const outcomeAtPosition = (Object.values(outcome)[topicPosition] || null) as object | null
-          results[resultName] = outcomeAtPosition ? outcomeAtPosition.valueOf() : outcomeAtPosition
-        } else if (resultType === 'out') {
-          if (!partOne) continue
-          const outputIndex = Number(partOne)
-          const outputAtPosition = (outcome.values[outputIndex - 1] || null) as object | null // first is return message
-          results[resultName] = outputAtPosition ? outputAtPosition.valueOf() : outputAtPosition
-        }
-      }
+    return {
+      success: tx.status.isSuccessful(),
+      warp,
+      action: actionIndex,
+      user: this.config.userAddress || null,
+      txHash: tx.hash,
+      next,
+      values,
+      results,
+      messages,
     }
-
-    // Replace placeholders in messages with results
-    const messages = Object.fromEntries(
-      Object.entries(warp.messages || {}).map(([key, value]) => [
-        key,
-        value.replace(/\{\{([^}]+)\}\}/g, (match, p1) => {
-          return results[p1] || ''
-        }),
-      ])
-    )
-
-    return { redirectUrl, results, messages }
   }
 
-  async executeQuery(action: WarpQueryAction, inputs: string[]): Promise<TypedValue> {
+  async executeQuery(warp: Warp, actionIndex: number, inputs: string[]): Promise<WarpExecution> {
+    const action = getWarpActionByIndex(warp, actionIndex) as WarpQueryAction | null
+    if (!action) throw new Error('WarpActionExecutor: Action not found')
     if (!action.func) throw new Error('WarpActionExecutor: Function not found')
-    const chainInfo = await this.getChainInfoForAction(action)
+    const chainInfo = await WarpUtils.getChainInfoForAction(action, this.config)
     const abi = await this.getAbiForAction(action)
     const { args } = await this.getTxComponentsFromInputs(action, inputs)
     const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
@@ -148,16 +122,30 @@ export class WarpActionExecutor {
     const controller = entrypoint.createSmartContractController(abi)
     const query = controller.createQuery({ contract: contractAddress, function: action.func, arguments: typedArgs })
     const response = await controller.runQuery(query)
-    const isOk = response.returnCode === 'ok'
-    if (!isOk) throw new Error(`WarpActionExecutor: Query failed with return code ${response.returnCode}`)
+    const isSuccess = response.returnCode === 'ok'
     const argsSerializer = new ArgSerializer()
     const endpoint = abi.getEndpoint(response.function)
     const parts = response.returnDataParts.map((part) => Buffer.from(part))
-    const values = argsSerializer.buffersToValues(parts, endpoint.output)
-    return values[0]
+    const typedValues = argsSerializer.buffersToValues(parts, endpoint.output)
+    const { values, results } = await extractQueryResults(warp, typedValues)
+    const next = WarpUtils.getNextInfo(warp, actionIndex, results, this.config)
+
+    return {
+      success: isSuccess,
+      warp,
+      action: actionIndex,
+      user: this.config.userAddress || null,
+      txHash: null,
+      next,
+      values,
+      results,
+      messages: this.getPreparedMessages(warp, results),
+    }
   }
 
-  async executeCollect(action: WarpCollectAction, inputs: string[], meta?: Record<string, any>): Promise<void> {
+  async executeCollect(warp: Warp, actionIndex: number, inputs: string[], meta?: Record<string, any>): Promise<WarpExecution> {
+    const action = getWarpActionByIndex(warp, actionIndex) as WarpCollectAction | null
+    if (!action) throw new Error('WarpActionExecutor: Action not found')
     const resolvedInputs = await this.getResolvedInputs(action, inputs)
     const modifiedInputs = this.getModifiedInputs(resolvedInputs)
 
@@ -184,11 +172,41 @@ export class WarpActionExecutor {
       headers.set(key, value as string)
     })
 
-    await fetch(action.destination.url, {
-      method: action.destination.method,
-      headers,
-      body: JSON.stringify({ inputs: inputPayload, meta }),
-    })
+    try {
+      const response = await fetch(action.destination.url, {
+        method: action.destination.method,
+        headers,
+        body: JSON.stringify({ inputs: inputPayload, meta }),
+      })
+      const content = await response.json()
+      const { values, results } = await extractCollectResults(warp, content)
+      const next = WarpUtils.getNextInfo(warp, actionIndex, results, this.config)
+
+      return {
+        success: response.ok,
+        warp,
+        action: actionIndex,
+        user: this.config.userAddress || null,
+        txHash: null,
+        next,
+        values,
+        results,
+        messages: this.getPreparedMessages(warp, results),
+      }
+    } catch (error) {
+      console.error(error)
+      return {
+        success: false,
+        warp,
+        action: actionIndex,
+        user: this.config.userAddress || null,
+        txHash: null,
+        next: null,
+        values: [],
+        results: {},
+        messages: {},
+      }
+    }
   }
 
   async getTxComponentsFromInputs(
@@ -293,7 +311,7 @@ export class WarpActionExecutor {
         const knownToken = findKnownTokenById(tokenId)
         let decimals = knownToken?.decimals
         if (!decimals) {
-          const apiUrl = this.config.chainApiUrl || Config.Chain.ApiUrl(this.config.env)
+          const apiUrl = this.config.chainApiUrl || Config.MainChain.ApiUrl(this.config.env)
           const definitionRes = await fetch(`${apiUrl}/tokens/${tokenId}`) // TODO: use chainApi directly; currently causes circular reference for whatever reason
           const definition = await definitionRes.json()
           decimals = definition.decimals
@@ -308,6 +326,18 @@ export class WarpActionExecutor {
     }
   }
 
+  public async getAbiForAction(action: WarpContractAction | WarpQueryAction): Promise<AbiRegistry> {
+    if (action.abi) {
+      return await this.fetchAbi(action)
+    }
+
+    const chainInfo = getMainChainInfo(this.config)
+    const verification = await this.contractLoader.getVerificationInfo(action.address, chainInfo)
+    if (!verification) throw new Error('WarpActionExecutor: Verification info not found')
+
+    return AbiRegistry.create(verification.abi)
+  }
+
   private getPreparedArgs(action: WarpAction, resolvedInputs: ResolvedInput[]): string[] {
     let args = 'args' in action ? action.args || [] : []
     resolvedInputs.forEach(({ input, value }) => {
@@ -320,24 +350,10 @@ export class WarpActionExecutor {
     return args
   }
 
-  private async getChainInfoForAction(action: WarpTransferAction | WarpContractAction | WarpQueryAction): Promise<ChainInfo> {
-    if (!action.chain) return getDefaultChainInfo(this.config)
+  private getPreparedMessages(warp: Warp, results: Record<string, any>): Record<string, string> {
+    const parts = Object.entries(warp.messages || {}).map(([key, value]) => [key, replacePlaceholders(value, results)])
 
-    const chainInfo = await this.registry.getChainInfo(action.chain)
-    if (!chainInfo) throw new Error(`WarpActionExecutor: Chain info not found for ${action.chain}`)
-
-    return chainInfo
-  }
-
-  private async getAbiForAction(action: WarpContractAction | WarpQueryAction): Promise<AbiRegistry> {
-    if (action.abi) {
-      return await this.fetchAbi(action)
-    }
-
-    const verification = await this.contractLoader.getVerificationInfo(action.address)
-    if (!verification) throw new Error('WarpActionExecutor: Verification info not found')
-
-    return AbiRegistry.create(verification.abi)
+    return Object.fromEntries(parts)
   }
 
   private async fetchAbi(action: WarpContractAction | WarpQueryAction): Promise<AbiRegistry> {

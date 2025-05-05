@@ -1,18 +1,19 @@
-import { WarpConfig, WarpContract, WarpContractVerification } from './types'
+import { ChainInfo, WarpConfig, WarpContract, WarpContractVerification } from './types'
 import { WarpUtils } from './WarpUtils'
 
 export class WarpContractLoader {
   constructor(private readonly config: WarpConfig) {}
 
-  async getContract(address: string): Promise<WarpContract | null> {
+  async getContract(address: string, chain: ChainInfo): Promise<WarpContract | null> {
     try {
-      const chainApi = WarpUtils.getConfiguredChainApi(this.config)
-      const res = await chainApi.doGetGeneric(`accounts/${address}/verification`)
+      const chainEntry = WarpUtils.getChainEntrypoint(chain, this.config.env)
+      const chainProvider = chainEntry.createNetworkProvider()
+      const res = await chainProvider.doGetGeneric(`accounts/${address}`)
 
       return {
         address,
         owner: res.ownerAddress,
-        verified: res.isVerified,
+        verified: res.isVerified || false,
       }
     } catch (error) {
       console.error('WarpContractLoader: getContract error', error)
@@ -20,10 +21,11 @@ export class WarpContractLoader {
     }
   }
 
-  async getVerificationInfo(address: string): Promise<WarpContractVerification | null> {
+  async getVerificationInfo(address: string, chain: ChainInfo): Promise<WarpContractVerification | null> {
     try {
-      const chainApi = WarpUtils.getConfiguredChainApi(this.config)
-      const res = await chainApi.doGetGeneric(`accounts/${address}/verification`)
+      const chainEntry = WarpUtils.getChainEntrypoint(chain, this.config.env)
+      const chainProvider = chainEntry.createNetworkProvider()
+      const res = await chainProvider.doGetGeneric(`accounts/${address}/verification`)
 
       return {
         codeHash: res.codeHash,

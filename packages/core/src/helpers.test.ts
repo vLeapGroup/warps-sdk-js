@@ -1,4 +1,4 @@
-import { shiftBigintBy } from './helpers'
+import { shiftBigintBy } from './helpers/general'
 
 describe('Helpers', () => {
   describe('shiftBigintBy', () => {

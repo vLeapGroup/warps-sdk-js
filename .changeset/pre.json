@@ -1,0 +1,21 @@
+{
+  "mode": "pre",
+  "tag": "alpha",
+  "initialVersions": {
+    "@vleap/warps": "1.5.0",
+    "eslint-config-custom": "0.0.0",
+    "@vleap/warps-react": "0.0.4",
+    "tsconfig": "0.0.1"
+  },
+  "changesets": [
+    "blue-moments-wish",
+    "calm-hats-rescue",
+    "clean-trains-do",
+    "hot-coins-peel",
+    "lazy-houses-dress",
+    "loud-bears-take",
+    "soft-moons-make",
+    "some-boats-cover",
+    "stupid-ghosts-cry"
+  ]
+}

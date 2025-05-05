@@ -9,6 +9,7 @@ export type WarpConfig = {
   currentUrl?: string
   userAddress?: string
   chainApiUrl?: string
+  chainExplorerUrl?: string
   warpSchemaUrl?: string
   brandSchemaUrl?: string
   cacheTtl?: number
@@ -26,7 +27,9 @@ export type WarpCacheConfig = {
 
 export type ChainInfo = {
   chainId: string
+  blockTime: number
   apiUrl: string
+  explorerUrl: string
 }
 
 export type WarpIdType = 'hash' | 'alias'
@@ -171,14 +174,6 @@ export type WarpActionInput = {
   patternDescription?: string
   options?: string[]
   modifier?: string
-}
-
-export type WarpActionExecutionResult = {
-  action: WarpAction
-  user: {
-    address: string
-  }
-  tx?: string
 }
 
 export type WarpContract = {
