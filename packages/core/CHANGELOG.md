@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-alpha.6
+
+### Minor Changes
+
+- update next results + url query support for ids
+
 ## 2.0.0-alpha.5
 
 ### Minor Changes
