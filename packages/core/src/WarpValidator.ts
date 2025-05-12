@@ -1,6 +1,6 @@
 import Ajv from 'ajv'
 import { Config } from './config'
-import { Warp, WarpConfig } from './types'
+import { Warp, WarpConfig, WarpContractAction, WarpQueryAction } from './types'
 
 export class WarpValidator {
   constructor(private config: WarpConfig) {
@@ -50,7 +50,11 @@ export class WarpValidator {
       return
     }
 
-    this.throwUnless(!!warp.results, 'results are required if there are contract or query actions')
+    const hasAnyAbi = warp.actions.some((action) => (action as WarpContractAction | WarpQueryAction).abi)
+
+    if (warp.results) {
+      this.throwUnless(hasAnyAbi, 'ABI is required when results are present for contract or query actions')
+    }
   }
 
   private async ensureValidSchema(warp: Warp): Promise<void> {

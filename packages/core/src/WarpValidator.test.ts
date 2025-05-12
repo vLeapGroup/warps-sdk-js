@@ -121,7 +121,85 @@ describe('WarpValidator', () => {
   })
 
   describe('ensureAbiIsSetIfApplicable', () => {
-    it('allows contract action with results', async () => {
+    it('allows contract action with results and ABI', async () => {
+      const validator = new WarpValidator(defaultConfig)
+      const warp = createWarp({
+        actions: [
+          {
+            type: 'contract',
+            label: 'test',
+            description: 'test',
+            address: 'erd1...',
+            func: 'test',
+            args: [],
+            gasLimit: 1000000,
+            abi: 'hashOfAbi',
+          },
+        ],
+        results: {
+          TEST: 'value',
+        },
+      })
+      await expect(validator.validate(warp)).resolves.not.toThrow()
+    })
+
+    it('allows query action with results and ABI', async () => {
+      const validator = new WarpValidator(defaultConfig)
+      const warp = createWarp({
+        actions: [
+          {
+            type: 'query',
+            label: 'test',
+            description: 'test',
+            address: 'erd1...',
+            func: 'test',
+            args: [],
+            abi: 'hashOfAbi',
+          },
+        ],
+        results: {
+          TEST: 'value',
+        },
+      })
+      await expect(validator.validate(warp)).resolves.not.toThrow()
+    })
+
+    it('allows contract action without results and without ABI', async () => {
+      const validator = new WarpValidator(defaultConfig)
+      const warp = createWarp({
+        actions: [
+          {
+            type: 'contract',
+            label: 'test',
+            description: 'test',
+            address: 'erd1...',
+            func: 'test',
+            args: [],
+            gasLimit: 1000000,
+          },
+        ],
+      })
+      await expect(validator.validate(warp)).resolves.not.toThrow()
+    })
+
+    it('allows query action without results and without ABI', async () => {
+      const validator = new WarpValidator(defaultConfig)
+      const warp = createWarp({
+        actions: [
+          {
+            type: 'query',
+            label: 'test',
+            description: 'test',
+            address: 'erd1...',
+            func: 'test',
+            args: [],
+          },
+        ],
+      })
+      await expect(validator.validate(warp)).resolves.not.toThrow()
+    })
+
+    it('throws when contract action has results but no ABI', async () => {
       const validator = new WarpValidator(defaultConfig)
       const warp = createWarp({
         actions: [
@@ -139,10 +217,12 @@ describe('WarpValidator', () => {
           TEST: 'value',
         },
       })
-      await expect(validator.validate(warp)).resolves.not.toThrow()
+      await expect(validator.validate(warp)).rejects.toThrow(
+        'WarpValidator: ABI is required when results are present for contract or query actions'
+      )
     })
 
-    it('allows query action with results', async () => {
+    it('throws when query action has results but no ABI', async () => {
       const validator = new WarpValidator(defaultConfig)
       const warp = createWarp({
         actions: [
@@ -159,42 +239,9 @@ describe('WarpValidator', () => {
           TEST: 'value',
         },
       })
-      await expect(validator.validate(warp)).resolves.not.toThrow()
-    })
-
-    it('throws when contract action has no results', async () => {
-      const validator = new WarpValidator(defaultConfig)
-      const warp = createWarp({
-        actions: [
-          {
-            type: 'contract',
-            label: 'test',
-            description: 'test',
-            address: 'erd1...',
-            func: 'test',
-            args: [],
-            gasLimit: 1000000,
-          },
-        ],
-      })
-      await expect(validator.validate(warp)).rejects.toThrow('WarpValidator: results are required if there are contract or query actions')
-    })
-
-    it('throws when query action has no results', async () => {
-      const validator = new WarpValidator(defaultConfig)
-      const warp = createWarp({
-        actions: [
-          {
-            type: 'query',
-            label: 'test',
-            description: 'test',
-            address: 'erd1...',
-            func: 'test',
-            args: [],
-          },
-        ],
-      })
-      await expect(validator.validate(warp)).rejects.toThrow('WarpValidator: results are required if there are contract or query actions')
+      await expect(validator.validate(warp)).rejects.toThrow(
+        'WarpValidator: ABI is required when results are present for contract or query actions'
+      )
     })
   })
 
