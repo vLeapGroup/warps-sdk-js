@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-alpha.10
+
+### Patch Changes
+
+- 34cf858: fix builder validation handling
+
 ## 2.0.0-alpha.9
 
 ### Patch Changes

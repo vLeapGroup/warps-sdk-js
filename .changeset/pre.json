@@ -8,6 +8,7 @@
     "tsconfig": "0.0.1"
   },
   "changesets": [
+    "angry-bananas-obey",
     "blue-moments-wish",
     "calm-hats-rescue",
     "clean-trains-do",
