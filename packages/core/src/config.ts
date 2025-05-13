@@ -39,7 +39,7 @@ export const Config = {
     },
   },
 
-  AvailableActionInputSources: ['field', 'query'] as WarpActionInputSource[],
+  AvailableActionInputSources: ['field', 'query', 'user_wallet'] as WarpActionInputSource[],
 
   AvailableActionInputTypes: ['string', 'uint8', 'uint16', 'uint32', 'uint64', 'biguint', 'boolean', 'address'] as WarpActionInputType[],
 
