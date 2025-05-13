@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-alpha.12
+
+### Patch Changes
+
+- 7eb23d2: update position field to be optional
+
 ## 2.0.0-alpha.11
 
 ### Patch Changes
