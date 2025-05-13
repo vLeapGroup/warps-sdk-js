@@ -20,10 +20,12 @@ describe('WarpValidator', () => {
   it('validates a valid warp', async () => {
     const validator = new WarpValidator(defaultConfig)
     const warp = createWarp()
-    await expect(validator.validate(warp)).resolves.not.toThrow()
+    const result = await validator.validate(warp)
+    expect(result.valid).toBe(true)
+    expect(result.errors).toHaveLength(0)
   })
 
-  describe('ensureMaxOneValuePosition', () => {
+  describe('validateMaxOneValuePosition', () => {
     it('allows zero value position actions', async () => {
       const validator = new WarpValidator(defaultConfig)
       const warp = createWarp({
@@ -32,7 +34,9 @@ describe('WarpValidator', () => {
           { type: 'transfer', label: 'test', description: 'test', address: 'erd1...' },
         ],
       })
-      await expect(validator.validate(warp)).resolves.not.toThrow()
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(true)
+      expect(result.errors).toHaveLength(0)
     })
 
     it('allows one value position action', async () => {
@@ -49,10 +53,12 @@ describe('WarpValidator', () => {
           { type: 'transfer', label: 'test', description: 'test', address: 'erd1...' },
         ],
       })
-      await expect(validator.validate(warp)).resolves.not.toThrow()
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(true)
+      expect(result.errors).toHaveLength(0)
     })
 
-    it('throws when multiple value position actions exist', async () => {
+    it('returns error when multiple value position actions exist', async () => {
       const validator = new WarpValidator(defaultConfig)
       const warp = createWarp({
         actions: [
@@ -72,11 +78,13 @@ describe('WarpValidator', () => {
           },
         ],
       })
-      await expect(validator.validate(warp)).rejects.toThrow('WarpBuilder: only one value position action is allowed')
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(false)
+      expect(result.errors).toContain('Only one value position action is allowed')
     })
   })
 
-  describe('ensureVariableNamesAndResultNamesUppercase', () => {
+  describe('validateVariableNamesAndResultNamesUppercase', () => {
     it('allows uppercase variable names', async () => {
       const validator = new WarpValidator(defaultConfig)
       const warp = createWarp({
@@ -85,7 +93,9 @@ describe('WarpValidator', () => {
           ANOTHER_TEST: 'value',
         },
       })
-      await expect(validator.validate(warp)).resolves.not.toThrow()
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(true)
+      expect(result.errors).toHaveLength(0)
     })
 
     it('allows uppercase result names', async () => {
@@ -96,31 +106,29 @@ describe('WarpValidator', () => {
           ANOTHER_TEST: 'value',
         },
       })
-      await expect(validator.validate(warp)).resolves.not.toThrow()
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(true)
+      expect(result.errors).toHaveLength(0)
     })
 
-    it('throws when variable name is not uppercase', async () => {
+    it('returns error when variable name is not uppercase', async () => {
       const validator = new WarpValidator(defaultConfig)
-      const warp = createWarp({
-        vars: {
-          test: 'value',
-        },
-      })
-      await expect(validator.validate(warp)).rejects.toThrow("WarpValidator: variable/result name 'test' must be uppercase")
+      const warp = createWarp({ vars: { test: 'value' } })
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(false)
+      expect(result.errors).toContain("Variable name 'test' must be uppercase")
     })
 
-    it('throws when result name is not uppercase', async () => {
+    it('returns error when result name is not uppercase', async () => {
       const validator = new WarpValidator(defaultConfig)
-      const warp = createWarp({
-        results: {
-          test: 'value',
-        },
-      })
-      await expect(validator.validate(warp)).rejects.toThrow("WarpValidator: variable/result name 'test' must be uppercase")
+      const warp = createWarp({ results: { test: 'value' } })
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(false)
+      expect(result.errors).toContain("Result name 'test' must be uppercase")
     })
   })
 
-  describe('ensureAbiIsSetIfApplicable', () => {
+  describe('validateAbiIsSetIfApplicable', () => {
     it('allows contract action with results and ABI', async () => {
       const validator = new WarpValidator(defaultConfig)
       const warp = createWarp({
@@ -140,7 +148,9 @@ describe('WarpValidator', () => {
           TEST: 'value',
         },
       })
-      await expect(validator.validate(warp)).resolves.not.toThrow()
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(true)
+      expect(result.errors).toHaveLength(0)
     })
 
     it('allows query action with results and ABI', async () => {
@@ -161,7 +171,9 @@ describe('WarpValidator', () => {
           TEST: 'value',
         },
       })
-      await expect(validator.validate(warp)).resolves.not.toThrow()
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(true)
+      expect(result.errors).toHaveLength(0)
     })
 
     it('allows contract action without results and without ABI', async () => {
@@ -179,7 +191,9 @@ describe('WarpValidator', () => {
           },
         ],
       })
-      await expect(validator.validate(warp)).resolves.not.toThrow()
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(true)
+      expect(result.errors).toHaveLength(0)
     })
 
     it('allows query action without results and without ABI', async () => {
@@ -196,10 +210,12 @@ describe('WarpValidator', () => {
           },
         ],
       })
-      await expect(validator.validate(warp)).resolves.not.toThrow()
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(true)
+      expect(result.errors).toHaveLength(0)
     })
 
-    it('throws when contract action has results but no ABI', async () => {
+    it('returns error when contract action has results but no ABI', async () => {
       const validator = new WarpValidator(defaultConfig)
       const warp = createWarp({
         actions: [
@@ -217,12 +233,12 @@ describe('WarpValidator', () => {
           TEST: 'value',
         },
       })
-      await expect(validator.validate(warp)).rejects.toThrow(
-        'WarpValidator: ABI is required when results are present for contract or query actions'
-      )
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(false)
+      expect(result.errors).toContain('ABI is required when results are present for contract or query actions')
     })
 
-    it('throws when query action has results but no ABI', async () => {
+    it('returns error when query action has results but no ABI', async () => {
       const validator = new WarpValidator(defaultConfig)
       const warp = createWarp({
         actions: [
@@ -239,20 +255,22 @@ describe('WarpValidator', () => {
           TEST: 'value',
         },
       })
-      await expect(validator.validate(warp)).rejects.toThrow(
-        'WarpValidator: ABI is required when results are present for contract or query actions'
-      )
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(false)
+      expect(result.errors).toContain('ABI is required when results are present for contract or query actions')
     })
   })
 
-  describe('ensureValidSchema', () => {
+  describe('validateSchema', () => {
     it('validates against schema', async () => {
       const validator = new WarpValidator(defaultConfig)
       const warp = createWarp()
-      await expect(validator.validate(warp)).resolves.not.toThrow()
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(true)
+      expect(result.errors).toHaveLength(0)
     })
 
-    it('throws when schema validation fails', async () => {
+    it('returns error when schema validation fails', async () => {
       const validator = new WarpValidator(defaultConfig)
       const warp = createWarp({
         actions: [
@@ -260,7 +278,9 @@ describe('WarpValidator', () => {
           { type: 'invalid', label: 'test', description: 'test' },
         ],
       })
-      await expect(validator.validate(warp)).rejects.toThrow('WarpValidator: schema validation failed')
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(false)
+      expect(result.errors[0]).toContain('Schema validation failed')
     })
   })
 })

@@ -2,74 +2,84 @@ import Ajv from 'ajv'
 import { Config } from './config'
 import { Warp, WarpConfig, WarpContractAction, WarpQueryAction } from './types'
 
+type ValidationResult = {
+  valid: boolean
+  errors: ValidationError[]
+}
+
+type ValidationError = string
+
 export class WarpValidator {
   constructor(private config: WarpConfig) {
     this.config = config
   }
 
-  async validate(warp: Warp): Promise<void> {
-    this.ensureMaxOneValuePosition(warp)
+  async validate(warp: Warp): Promise<ValidationResult> {
+    const errors: ValidationError[] = []
 
-    this.ensureVariableNamesAndResultNamesUppercase(warp)
+    errors.push(...this.validateMaxOneValuePosition(warp))
+    errors.push(...this.validateVariableNamesAndResultNamesUppercase(warp))
+    errors.push(...this.validateAbiIsSetIfApplicable(warp))
+    errors.push(...(await this.validateSchema(warp)))
 
-    this.ensureAbiIsSetIfApplicable(warp)
-
-    await this.ensureValidSchema(warp)
+    return {
+      valid: errors.length === 0,
+      errors,
+    }
   }
 
-  private ensureMaxOneValuePosition(warp: Warp): void {
+  private validateMaxOneValuePosition(warp: Warp): ValidationError[] {
     const position = warp.actions.filter((action) => {
       if (!action.inputs) return false
       return action.inputs.some((input) => input.position === 'value')
     })
 
-    if (position.length > 1) {
-      throw new Error('WarpBuilder: only one value position action is allowed')
-    }
+    return position.length > 1 ? ['Only one value position action is allowed'] : []
   }
 
-  private ensureVariableNamesAndResultNamesUppercase(warp: Warp): void {
-    const validateUppercase = (obj: Record<string, any> | undefined) => {
+  private validateVariableNamesAndResultNamesUppercase(warp: Warp): ValidationError[] {
+    const errors: ValidationError[] = []
+    const validateUppercase = (obj: Record<string, any> | undefined, type: string) => {
       if (!obj) return
       Object.keys(obj).forEach((key) => {
         if (key !== key.toUpperCase()) {
-          throw new Error(`WarpValidator: variable/result name '${key}' must be uppercase`)
+          errors.push(`${type} name '${key}' must be uppercase`)
         }
       })
     }
 
-    validateUppercase(warp.vars)
-    validateUppercase(warp.results)
+    validateUppercase(warp.vars, 'Variable')
+    validateUppercase(warp.results, 'Result')
+    return errors
   }
 
-  private ensureAbiIsSetIfApplicable(warp: Warp): void {
+  private validateAbiIsSetIfApplicable(warp: Warp): ValidationError[] {
     const hasContractAction = warp.actions.some((action) => action.type === 'contract')
     const hasQueryAction = warp.actions.some((action) => action.type === 'query')
 
     if (!hasContractAction && !hasQueryAction) {
-      return
+      return []
     }
 
     const hasAnyAbi = warp.actions.some((action) => (action as WarpContractAction | WarpQueryAction).abi)
 
-    if (warp.results) {
-      this.throwUnless(hasAnyAbi, 'ABI is required when results are present for contract or query actions')
+    if (warp.results && !hasAnyAbi) {
+      return ['ABI is required when results are present for contract or query actions']
     }
+    return []
   }
 
-  private async ensureValidSchema(warp: Warp): Promise<void> {
-    const schemaUrl = this.config.warpSchemaUrl || Config.LatestWarpSchemaUrl
-    const schemaResponse = await fetch(schemaUrl)
-    const schema = await schemaResponse.json()
-    const ajv = new Ajv()
-    const validate = ajv.compile(schema)
+  private async validateSchema(warp: Warp): Promise<ValidationError[]> {
+    try {
+      const schemaUrl = this.config.warpSchemaUrl || Config.LatestWarpSchemaUrl
+      const schemaResponse = await fetch(schemaUrl)
+      const schema = await schemaResponse.json()
+      const ajv = new Ajv()
+      const validate = ajv.compile(schema)
 
-    this.throwUnless(validate(warp), `WarpValidator: schema validation failed: ${ajv.errorsText(validate.errors)}`)
-  }
-
-  private throwUnless(condition: boolean, message: string): void {
-    if (!condition) {
-      throw new Error(`WarpValidator: ${message}`)
+      return validate(warp) ? [] : [`Schema validation failed: ${ajv.errorsText(validate.errors)}`]
+    } catch (error) {
+      return [`Schema validation failed: ${error instanceof Error ? error.message : String(error)}`]
     }
   }
 }
