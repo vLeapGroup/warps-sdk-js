@@ -146,7 +146,7 @@ export class WarpBuilder {
 
   private ensure(value: string | null | boolean, errorMessage: string): void {
     if (!value) {
-      throw new Error(`WarpBuilder: ${errorMessage}`)
+      throw new Error(errorMessage)
     }
   }
 }
