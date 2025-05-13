@@ -131,7 +131,11 @@ export class WarpBuilder {
     this.ensure(this.pendingWarp.actions.length > 0, 'actions are required')
 
     const validator = new WarpValidator(this.config)
-    await validator.validate(this.pendingWarp)
+    const validationResult = await validator.validate(this.pendingWarp)
+
+    if (!validationResult.valid) {
+      throw new Error(validationResult.errors.join('\n'))
+    }
 
     return this.pendingWarp
   }
