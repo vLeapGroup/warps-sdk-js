@@ -165,7 +165,7 @@ export type WarpActionInput = {
   description?: string | null
   bot?: string
   type: WarpActionInputType
-  position: WarpActionInputPosition
+  position?: WarpActionInputPosition
   source: WarpActionInputSource
   required?: boolean
   min?: number | WarpVarPlaceholder

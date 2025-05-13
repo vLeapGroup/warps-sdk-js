@@ -342,7 +342,7 @@ export class WarpActionExecutor {
     let args = 'args' in action ? action.args || [] : []
     resolvedInputs.forEach(({ input, value }) => {
       if (!value) return
-      if (!input.position.startsWith('arg:')) return
+      if (!input.position?.startsWith('arg:')) return
       const argIndex = Number(input.position.split(':')[1]) - 1
       args.splice(argIndex, 0, value)
     })
