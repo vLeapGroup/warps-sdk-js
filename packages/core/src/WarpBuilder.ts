@@ -45,8 +45,7 @@ export class WarpBuilder {
     const warp = JSON.parse(encoded) as Warp
 
     if (validate) {
-      const validator = new WarpValidator(this.config)
-      await validator.validate(warp)
+      await this.validate(warp)
     }
 
     return WarpUtils.prepareVars(warp, this.config)
@@ -130,12 +129,7 @@ export class WarpBuilder {
     this.ensure(this.pendingWarp.title, 'title is required')
     this.ensure(this.pendingWarp.actions.length > 0, 'actions are required')
 
-    const validator = new WarpValidator(this.config)
-    const validationResult = await validator.validate(this.pendingWarp)
-
-    if (!validationResult.valid) {
-      throw new Error(validationResult.errors.join('\n'))
-    }
+    await this.validate(this.pendingWarp)
 
     return this.pendingWarp
   }
@@ -147,6 +141,15 @@ export class WarpBuilder {
   private ensure(value: string | null | boolean, errorMessage: string): void {
     if (!value) {
       throw new Error(errorMessage)
+    }
+  }
+
+  private async validate(warp: Warp): Promise<void> {
+    const validator = new WarpValidator(this.config)
+    const validationResult = await validator.validate(warp)
+
+    if (!validationResult.valid) {
+      throw new Error(validationResult.errors.join('\n'))
     }
   }
 }
