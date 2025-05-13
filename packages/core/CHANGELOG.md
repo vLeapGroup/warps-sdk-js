@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-alpha.9
+
+### Patch Changes
+
+- aecfa73: update validator
+
 ## 2.0.0-alpha.8
 
 ### Patch Changes
