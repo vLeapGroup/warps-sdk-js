@@ -32,7 +32,6 @@ import { WarpExecution } from './types/results'
 import { WarpAbiBuilder } from './WarpAbiBuilder'
 import { WarpArgSerializer } from './WarpArgSerializer'
 import { WarpContractLoader } from './WarpContractLoader'
-import { WarpRegistry } from './WarpRegistry'
 import { WarpUtils } from './WarpUtils'
 
 type ResolvedInput = {
@@ -45,7 +44,6 @@ export class WarpActionExecutor {
   private url: URL
   private serializer: WarpArgSerializer
   private contractLoader: WarpContractLoader
-  private registry: WarpRegistry
 
   constructor(config: WarpConfig) {
     if (!config.currentUrl) throw new Error('WarpActionExecutor: currentUrl config not set')
@@ -53,7 +51,6 @@ export class WarpActionExecutor {
     this.url = new URL(config.currentUrl)
     this.serializer = new WarpArgSerializer()
     this.contractLoader = new WarpContractLoader(config)
-    this.registry = new WarpRegistry(config)
   }
 
   async createTransactionForExecute(action: WarpTransferAction | WarpContractAction, inputs: string[]): Promise<Transaction> {
