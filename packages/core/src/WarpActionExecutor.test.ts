@@ -1,7 +1,8 @@
 import { SmartContractResult, TransactionEvent, TransactionLogs, TransactionOnNetwork } from '@multiversx/sdk-core/out'
 import { bigIntToHex, utf8ToHex } from '@multiversx/sdk-core/out/core/utils.codec'
 import { promises as fs, PathLike } from 'fs'
-import { Warp, WarpCollectAction, WarpConfig, WarpContractAction, WarpTransferAction } from './types'
+import { setupHttpMock } from './test-utils/mockHttp'
+import { Warp, WarpCollectAction, WarpConfig, WarpContractAction, WarpQueryAction, WarpTransferAction } from './types'
 import { WarpActionExecutor } from './WarpActionExecutor'
 
 const Config: WarpConfig = {
@@ -140,17 +141,11 @@ describe('WarpActionExecutor', () => {
     expect(actual.data?.toString()).toBe(`issue@${utf8ToHex('WarpToken')}@${utf8ToHex('WAPT')}@${bigIntToHex('1000000000000000000000')}@12`)
   })
 
-  it('getExecutionResults - gets the results and messages from the transaction', async () => {
+  it('getTransactionExecutionResults - gets the results and messages from the transaction', async () => {
     const subject = new WarpActionExecutor(Config)
-    const mockFetch = jest.fn()
-    const originalFetch = global.fetch
-    global.fetch = mockFetch
+    const httpMock = setupHttpMock()
 
-    mockFetch.mockImplementation(async (url) => {
-      return Promise.resolve({
-        json: async () => await loadAbiContents('./src/testdata/test.abi.json'),
-      })
-    })
+    httpMock.registerResponse('https://mock.com/test.abi.json', await loadAbiContents('./src/testdata/test.abi.json'))
 
     const action: WarpContractAction = {
       type: 'contract',
@@ -159,24 +154,24 @@ describe('WarpActionExecutor', () => {
       address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
       func: 'register',
       args: [],
-      abi: 'https://mock.com/esdt-safe.abi.json',
+      abi: 'https://mock.com/test.abi.json',
       gasLimit: 1000000,
     }
 
     const warp = {
       actions: [action],
       results: {
-        firstEvent: 'event.registeredWithToken.1',
-        secondEvent: 'event.registeredWithToken.2',
-        thirdEvent: 'event.registeredWithToken.3',
-        fourthEvent: 'event.registeredWithToken.4',
-        firstOut: 'out.0',
-        secondOut: 'out.1',
-        thirdOut: 'out.2',
+        FIRST_EVENT: 'event.registeredWithToken.1',
+        SECOND_EVENT: 'event.registeredWithToken.2',
+        THIRD_EVENT: 'event.registeredWithToken.3',
+        FOURTH_EVENT: 'event.registeredWithToken.4',
+        FIRST_OUT: 'out.0',
+        SECOND_OUT: 'out.1',
+        THIRD_OUT: 'out.2',
       },
       messages: {
-        success: 'You have successfully registered {{firstEvent}} with duration {{thirdEvent}}',
-        identifier: 'Your registration has the id: {{secondOut}}',
+        success: 'You have successfully registered {{FIRST_EVENT}} with duration {{THIRD_EVENT}}',
+        identifier: 'Your registration has the id: {{SECOND_OUT}}',
       },
       next: 'some-warp',
     } as any as Warp
@@ -205,28 +200,107 @@ describe('WarpActionExecutor', () => {
       ],
     })
 
-    const actual = await subject.getExecutionResults(warp, 1, transactionOnNetwork)
+    const actual = await subject.getTransactionExecutionResults(warp, 1, transactionOnNetwork)
 
-    expect(actual.results.firstEvent).toBe('ABC-123456')
-    expect(actual.results.secondEvent).toBe('DEF-123456')
-    expect(actual.results.thirdEvent).toBe('1209600')
-    expect(actual.results.fourthEvent).toBeNull()
-    expect(actual.results.firstOut).toBeNull()
-    expect(actual.results.secondOut).toBe('16')
-    expect(actual.results.thirdOut).toBeNull()
+    expect(actual.results.FIRST_EVENT).toBe('ABC-123456')
+    expect(actual.results.SECOND_EVENT).toBe('DEF-123456')
+    expect(actual.results.THIRD_EVENT).toBe('1209600')
+    expect(actual.results.FOURTH_EVENT).toBeNull()
+    expect(actual.results.FIRST_OUT).toBeNull()
+    expect(actual.results.SECOND_OUT).toBe('16')
+    expect(actual.results.THIRD_OUT).toBeNull()
 
     expect(actual.messages.success).toBe('You have successfully registered ABC-123456 with duration 1209600')
     expect(actual.messages.identifier).toBe('Your registration has the id: 16')
 
-    global.fetch = originalFetch
+    httpMock.cleanup()
+  })
+
+  it('executeQuery - gets the results and messages from the query', async () => {
+    const subject = new WarpActionExecutor(Config)
+    const httpMock = setupHttpMock()
+
+    httpMock.registerResponse('https://mock.com/test.abi.json', await loadAbiContents('./src/testdata/test.abi.json'))
+
+    httpMock.registerResponse('https://devnet-api.multiversx.com/query', {
+      returnData: [
+        'Ws6WB9vXH5fBJp/xjWSWUfa+go9DW+GQDTDNStbt/Fc=',
+        'cGVlcm1laHEsNi42LA==',
+        '958gsNBuF5QBNaIFhb2fl82RcrLbYSGVSupM21xiVRA=',
+        'Y2hlc3N1Y2F0aW9uLDYuNiUs',
+        '+ypwllq05g8Zsgoeib5g8iq9DSTD0EiU481+Y0cXQEc=',
+        'bWljaGF2aWVfLDYuNiUs',
+        'X/+USeMmAVTAiBjLU9K17JkjQ6PBCqkwMx79ObB2mD4=',
+        'dGhlZXdlYjNnZWVrICxDLA==',
+        'YQyiqQwRK+AlBa64eUiYgfUWbG29grdGiwH3Hwpquhw=',
+        'QHhzeWxsYV8sNi42JSw=',
+        'EkcdYkCE6/s0qapeAJE1OEzs0lBwEy4NXdQZeGYxcjs=',
+        'ZHZ6X0FJLEMpIDYuNiUsZHZ6X0FJLEMpIDYuNiUs',
+      ],
+      returnCode: 'ok',
+      gasRemaining: 299996465215,
+      gasRefund: 0,
+      outputAccounts: {
+        '00000000000000000500badf3bafd1cb915d98679b4e565027c246494be9fc57': {
+          address: 'erd1qqqqqqqqqqqqqpgqht0nht73ewg4mxr8nd89v5p8cfryjjlfl3tskqtqpw',
+          nonce: 0,
+          balanceDelta: 0,
+          storageUpdates: {},
+          callType: 0,
+        },
+      },
+    })
+
+    const action: WarpQueryAction = {
+      type: 'query',
+      label: 'test',
+      description: 'test',
+      address: 'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqplllst77y4l',
+      func: 'getParticipations',
+      args: ['uint64:1'],
+      abi: 'https://mock.com/test.abi.json',
+    }
+
+    const warp = {
+      actions: [action],
+      results: {
+        FIRST_ADDRESS: 'out.1.1.1',
+        FIRST_VALUE: 'out.1.1.2',
+        SECOND_ADDRESS: 'out.1.2.1',
+        SECOND_VALUE: 'out.1.2.2',
+        THIRD_ADDRESS: 'out.1.3.1',
+        THIRD_VALUE: 'out.1.3.2',
+        NULL_VALUE: 'out.2.1.1',
+      },
+      messages: {
+        first: '{{FIRST_ADDRESS}} has {{FIRST_VALUE}}',
+        second: '{{SECOND_ADDRESS}} has {{SECOND_VALUE}}',
+        third: '{{THIRD_ADDRESS}} has {{THIRD_VALUE}}',
+      },
+    } as any as Warp
+
+    const actual = await subject.executeQuery(warp, 1, ['address:erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8'])
+
+    expect(actual.results.FIRST_ADDRESS).toEqual('erd1tt8fvp7m6u0e0sfxnlcc6eyk28mtaq50gdd7ryqdxrx544hdl3tsqqk9uw')
+    expect(actual.results.FIRST_VALUE).toEqual('706565726d6568712c362e362c')
+    expect(actual.results.SECOND_ADDRESS).toEqual('erd1770jpvxsdctegqf45gzct0vljlxezu4jmdsjr922afxdkhrz25gqv9qcsw')
+    expect(actual.results.SECOND_VALUE).toEqual('636865737375636174696f6e2c362e36252c')
+    expect(actual.results.THIRD_ADDRESS).toEqual('erd1lv48p9j6knnq7xdjpg0gn0nq7g4t6rfyc0gy398re4lxx3chgprsx5hmfu')
+    expect(actual.results.THIRD_VALUE).toEqual('6d696368617669655f2c362e36252c')
+    expect(actual.results.NULL_VALUE).toBeNull()
+
+    expect(actual.messages.first).toEqual('erd1tt8fvp7m6u0e0sfxnlcc6eyk28mtaq50gdd7ryqdxrx544hdl3tsqqk9uw has 706565726d6568712c362e362c')
+    expect(actual.messages.second).toEqual(
+      'erd1770jpvxsdctegqf45gzct0vljlxezu4jmdsjr922afxdkhrz25gqv9qcsw has 636865737375636174696f6e2c362e36252c'
+    )
+
+    httpMock.cleanup()
   })
 
   it('executeCollect - creates correct input payload structure', async () => {
     Config.currentUrl = 'https://example.com?queryParam=testValue'
     const subject = new WarpActionExecutor(Config)
-    const mockFetch = jest.fn()
-    const originalFetch = global.fetch
-    global.fetch = mockFetch
+    const httpMock = setupHttpMock()
 
     const action: WarpCollectAction = {
       type: 'collect',
@@ -245,24 +319,50 @@ describe('WarpActionExecutor', () => {
       ],
     }
 
-    await subject.executeCollect(action, ['biguint:1000', 'esdt:WARP-123456|0|1000000000000000000'])
+    const warp = {
+      actions: [action],
+      results: {
+        USERNAME: 'out.data.username',
+        ID: 'out.data.id',
+      },
+      messages: {
+        successRegistration: 'Your registration has the username: {{USERNAME}}',
+        successIdentifier: 'Your registration has the id: {{ID}}',
+      },
+    } as any as Warp
 
-    expect(mockFetch).toHaveBeenCalledWith(
-      'https://example.com/collect',
-      expect.objectContaining({
-        method: 'POST',
-        body: JSON.stringify({
-          inputs: {
-            amount: '1000',
-            token: { token: 'WARP-123456', nonce: '0', amount: '1000000000000000000' },
-            address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
-            queryParam: 'testValue',
-          },
-        }),
-      })
-    )
+    httpMock.registerResponse('https://example.com/collect', {
+      data: {
+        username: 'abcdef',
+        id: '12',
+      },
+    })
 
-    global.fetch = originalFetch
+    const actual = await subject.executeCollect(warp, 1, ['biguint:1000', 'esdt:WARP-123456|0|1000000000000000000|18'])
+
+    httpMock.assertCall('https://example.com/collect', {
+      method: 'POST',
+      body: {
+        inputs: {
+          amount: '1000',
+          token: { token: 'WARP-123456', nonce: '0', amount: '1000000000000000000' },
+          address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+          queryParam: 'testValue',
+        },
+      },
+    })
+
+    expect(actual.success).toBe(true)
+    expect(actual.results).toEqual({
+      USERNAME: 'abcdef',
+      ID: '12',
+    })
+    expect(actual.messages).toEqual({
+      successRegistration: 'Your registration has the username: abcdef',
+      successIdentifier: 'Your registration has the id: 12',
+    })
+
+    httpMock.cleanup()
   })
 
   it('getTxComponentsFromInputs - gets the value from the field', async () => {

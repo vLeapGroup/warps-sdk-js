@@ -1,8 +1,20 @@
-import { ApiNetworkProvider, DevnetEntrypoint, MainnetEntrypoint, NetworkEntrypoint, TestnetEntrypoint } from '@multiversx/sdk-core'
+import { DevnetEntrypoint, MainnetEntrypoint, NetworkEntrypoint, TestnetEntrypoint } from '@multiversx/sdk-core'
 import { Config } from './config'
 import { WarpConstants } from './constants'
-import { ChainEnv, ChainInfo, Warp, WarpConfig, WarpIdType } from './types'
-import { WarpLink } from './WarpLink'
+import { getMainChainInfo, replacePlaceholders } from './helpers/general'
+import {
+  ChainEnv,
+  ChainInfo,
+  Warp,
+  WarpConfig,
+  WarpContractAction,
+  WarpExecutionNextInfo,
+  WarpExecutionResults,
+  WarpIdType,
+  WarpQueryAction,
+  WarpTransferAction,
+} from './types'
+import { WarpRegistry } from './WarpRegistry'
 
 const UrlPrefixDeterminer = 'https://'
 
@@ -47,17 +59,34 @@ export class WarpUtils {
     return { type: idType as WarpIdType, id }
   }
 
-  static getNextStepUrl(warp: Warp, actionIndex: number, config: WarpConfig): string | null {
-    const next = warp.next || (warp.actions?.[actionIndex] as any)?.next || null
+  static getNextInfo(warp: Warp, actionIndex: number, results: WarpExecutionResults, config: WarpConfig): WarpExecutionNextInfo | null {
+    const next = (warp.actions?.[actionIndex] as { next?: string })?.next || warp.next || null
     if (!next) return null
-    if (next.startsWith(UrlPrefixDeterminer)) {
-      return next
-    } else {
-      const warpLink = new WarpLink(config)
-      const identifierInfo = WarpUtils.getInfoFromPrefixedIdentifier(next)
-      if (!identifierInfo) return null
-      return warpLink.build(identifierInfo.type, identifierInfo.id)
-    }
+    if (next.startsWith(UrlPrefixDeterminer)) return { identifier: null, url: next }
+
+    const [baseIdentifier, queryWithPlaceholders] = next.split('?')
+    const query = queryWithPlaceholders ? replacePlaceholders(queryWithPlaceholders, { ...warp.vars, ...results }) : null
+    const params = new URLSearchParams(query || '')
+    const currentUrl = new URL(config.currentUrl || Config.DefaultClientUrl(config.env))
+    currentUrl.searchParams.forEach((value, key) => params.set(key, value))
+
+    const identifier = params.toString() ? `${baseIdentifier}?${params.toString()}` : baseIdentifier
+    const url = new URL(config.clientUrl || Config.DefaultClientUrl(config.env))
+    url.searchParams.set('warp', identifier)
+
+    return { identifier, url: url.toString().replace(/\/\?/, '?') }
+  }
+
+  static async getChainInfoForAction(
+    action: WarpTransferAction | WarpContractAction | WarpQueryAction,
+    config: WarpConfig
+  ): Promise<ChainInfo> {
+    if (!action.chain) return getMainChainInfo(config)
+
+    const chainInfo = await new WarpRegistry(config).getChainInfo(action.chain)
+    if (!chainInfo) throw new Error(`WarpActionExecutor: Chain info not found for ${action.chain}`)
+
+    return chainInfo
   }
 
   static getChainEntrypoint(chainInfo: ChainInfo, env: ChainEnv): NetworkEntrypoint {
@@ -66,11 +95,5 @@ export class WarpUtils {
     if (env === 'devnet') return new DevnetEntrypoint(chainInfo.apiUrl, kind, clientName)
     if (env === 'testnet') return new TestnetEntrypoint(chainInfo.apiUrl, kind, clientName)
     return new MainnetEntrypoint(chainInfo.apiUrl, kind, clientName)
-  }
-
-  static getConfiguredChainApi(config: WarpConfig): ApiNetworkProvider {
-    const apiUrl = config.chainApiUrl || Config.Chain.ApiUrl(config.env)
-    if (!apiUrl) throw new Error('WarpUtils: Chain API URL not configured')
-    return new ApiNetworkProvider(apiUrl, { timeout: 30_000, clientName: 'warp-sdk' })
   }
 }

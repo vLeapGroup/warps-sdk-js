@@ -1,5 +1,87 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-alpha.12
+
+### Patch Changes
+
+- 7eb23d2: update position field to be optional
+
+## 2.0.0-alpha.11
+
+### Patch Changes
+
+- baf7e4b: update builder validation
+
+## 2.0.0-alpha.10
+
+### Patch Changes
+
+- 34cf858: fix builder validation handling
+
+## 2.0.0-alpha.9
+
+### Patch Changes
+
+- aecfa73: update validator
+
+## 2.0.0-alpha.8
+
+### Patch Changes
+
+- 942ddd8: fix validator
+
+## 2.0.0-alpha.7
+
+### Minor Changes
+
+- b978b7a: add next var + result placeholder replacements
+
+## 2.0.0-alpha.6
+
+### Minor Changes
+
+- update next results + url query support for ids
+
+## 2.0.0-alpha.5
+
+### Minor Changes
+
+- update multi chain
+
+## 2.0.0-alpha.4
+
+### Patch Changes
+
+- f806686: move chain info for action to utils
+
+## 2.0.0-alpha.3
+
+### Patch Changes
+
+- 60cd189: add further info to exec result
+
+## 2.0.0-alpha.2
+
+### Patch Changes
+
+- f55412d: add further info to execution result
+
+## 2.0.0-alpha.1
+
+### Patch Changes
+
+- 7d50e91: add missing type export
+
+## 2.0.0-alpha.0
+
+### Major Changes
+
+- add results + messages v2
+
+### Patch Changes
+
+- extend validator
+
 ## 1.5.0
 
 ### Minor Changes
