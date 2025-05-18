@@ -21,9 +21,7 @@ describe('prepareVars', () => {
   })
 
   it('replaces vars with env vars from config', () => {
-    Config.vars = {
-      AGE: 10,
-    }
+    const config = { ...Config, vars: { AGE: 10 } }
     const warp: Warp = {
       title: 'Age: {{AGE}}',
       description: 'You are {{AGE}} years old',
@@ -32,14 +30,14 @@ describe('prepareVars', () => {
       },
     } as any
 
-    const actual = WarpUtils.prepareVars(warp, Config)
+    const actual = WarpUtils.prepareVars(warp, config)
 
     expect(actual.title).toBe('Age: 10')
     expect(actual.description).toBe('You are 10 years old')
   })
 
   it('replaces vars with query params from the current url', () => {
-    Config.currentUrl = 'https://anyclient.com?age=10'
+    const config = { ...Config, currentUrl: 'https://anyclient.com?age=10' }
     const warp: Warp = {
       title: 'Age: {{AGE}}',
       description: 'You are {{AGE}} years old',
@@ -48,10 +46,26 @@ describe('prepareVars', () => {
       },
     } as any
 
-    const actual = WarpUtils.prepareVars(warp, Config)
+    const actual = WarpUtils.prepareVars(warp, config)
 
     expect(actual.title).toBe('Age: 10')
     expect(actual.description).toBe('You are 10 years old')
+  })
+
+  it('replaces var with user wallet', () => {
+    const config = { ...Config, userAddress: 'erd123456789' }
+    const warp: Warp = {
+      title: 'Age: {{AGE}}',
+      description: 'You are {{AGE}} years old',
+      vars: {
+        AGE: 'user:wallet',
+      },
+    } as any
+
+    const actual = WarpUtils.prepareVars(warp, config)
+
+    expect(actual.title).toBe('Age: erd123456789')
+    expect(actual.description).toBe('You are erd123456789 years old')
   })
 })
 

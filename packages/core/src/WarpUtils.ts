@@ -40,6 +40,9 @@ export class WarpUtils {
         const envVarName = value.split(`${VarSourceEnv}:`)[1]
         const envVarValue = config.vars?.[envVarName]
         if (envVarValue) modify(placeholder, envVarValue)
+      } else if (typeof value === 'string' && value === 'user:wallet') {
+        if (!config.userAddress) throw new Error('WarpUtils: userAddress config is required to prepare vars')
+        modify(placeholder, config.userAddress)
       } else {
         modify(placeholder, value)
       }

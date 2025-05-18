@@ -10,6 +10,10 @@ export const WarpConstants = {
     Hash: 'hash',
   },
 
+  Source: {
+    UserWallet: 'user:wallet',
+  },
+
   ArgParamsSeparator: ':',
   ArgCompositeSeparator: '|',
 

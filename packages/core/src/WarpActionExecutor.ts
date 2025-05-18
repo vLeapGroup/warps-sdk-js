@@ -251,7 +251,7 @@ export class WarpActionExecutor {
         const value = this.url.searchParams.get(input.name)
         if (!value) return null
         return this.serializer.nativeToString(input.type, value)
-      } else if (input.source === 'user_wallet') {
+      } else if (input.source === WarpConstants.Source.UserWallet) {
         if (!this.config.userAddress) return null
         return this.serializer.nativeToString('address', this.config.userAddress)
       } else {
