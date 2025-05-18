@@ -37,6 +37,22 @@ describe('prepareVars', () => {
     expect(actual.title).toBe('Age: 10')
     expect(actual.description).toBe('You are 10 years old')
   })
+
+  it('replaces vars with query params from the current url', () => {
+    Config.currentUrl = 'https://anyclient.com?age=10'
+    const warp: Warp = {
+      title: 'Age: {{AGE}}',
+      description: 'You are {{AGE}} years old',
+      vars: {
+        AGE: 'query:age',
+      },
+    } as any
+
+    const actual = WarpUtils.prepareVars(warp, Config)
+
+    expect(actual.title).toBe('Age: 10')
+    expect(actual.description).toBe('You are 10 years old')
+  })
 })
 
 describe('getNextInfo', () => {
