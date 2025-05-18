@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-alpha.13
+
+### Minor Changes
+
+- 48432d7: update user source + config
+- 0228460: add vars user wallet source
+
 ## 2.0.0-alpha.12
 
 ### Patch Changes
