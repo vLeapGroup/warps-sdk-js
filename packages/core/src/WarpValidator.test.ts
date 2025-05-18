@@ -4,7 +4,9 @@ import { WarpValidator } from './WarpValidator'
 describe('WarpValidator', () => {
   const defaultConfig: WarpConfig = {
     env: 'devnet',
-    userAddress: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+    user: {
+      wallet: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+    },
     currentUrl: 'https://example.com',
   }
 

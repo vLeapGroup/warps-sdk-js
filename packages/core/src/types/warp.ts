@@ -7,7 +7,9 @@ export type WarpConfig = {
   env: ChainEnv
   clientUrl?: string
   currentUrl?: string
-  userAddress?: string
+  user?: {
+    wallet?: string
+  }
   chainApiUrl?: string
   chainExplorerUrl?: string
   warpSchemaUrl?: string
@@ -136,7 +138,7 @@ export type WarpLinkAction = {
   inputs?: WarpActionInput[]
 }
 
-export type WarpActionInputSource = 'field' | 'query' | 'user_wallet'
+export type WarpActionInputSource = 'field' | 'query' | 'user:wallet'
 
 export type BaseWarpActionInputType =
   | 'string'

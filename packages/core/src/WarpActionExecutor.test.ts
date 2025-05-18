@@ -7,7 +7,9 @@ import { WarpActionExecutor } from './WarpActionExecutor'
 
 const Config: WarpConfig = {
   env: 'devnet',
-  userAddress: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+  user: {
+    wallet: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+  },
   currentUrl: 'https://example.com',
 }
 
@@ -314,7 +316,7 @@ describe('WarpActionExecutor', () => {
       inputs: [
         { name: 'amount', type: 'biguint', source: 'field', position: 'arg:1' },
         { name: 'token', type: 'esdt', source: 'field', position: 'arg:2' },
-        { name: 'address', type: 'address', source: 'user_wallet', position: 'arg:3' },
+        { name: 'address', type: 'address', source: 'user:wallet', position: 'arg:3' },
         { name: 'queryParam', type: 'string', source: 'query', position: 'arg:4' },
       ],
     }

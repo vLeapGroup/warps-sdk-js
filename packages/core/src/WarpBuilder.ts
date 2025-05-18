@@ -24,14 +24,14 @@ export class WarpBuilder {
   }
 
   createInscriptionTransaction(warp: Warp): Transaction {
-    if (!this.config.userAddress) throw new Error('WarpBuilder: user address not set')
+    if (!this.config.user?.wallet) throw new Error('WarpBuilder: user address not set')
     const factoryConfig = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
     const factory = new TransferTransactionsFactory({ config: factoryConfig })
-    const sender = Address.newFromBech32(this.config.userAddress)
+    const sender = Address.newFromBech32(this.config.user.wallet)
     const serialized = JSON.stringify(warp)
 
     const tx = factory.createTransactionForTransfer(sender, {
-      receiver: Address.newFromBech32(this.config.userAddress),
+      receiver: Address.newFromBech32(this.config.user.wallet),
       nativeAmount: BigInt(0),
       data: Uint8Array.from(Buffer.from(serialized)),
     })

@@ -1,3 +1,4 @@
+import { WarpConstants } from './constants'
 import { ChainEnv, WarpActionInputPosition, WarpActionInputSource, WarpActionInputType } from './types'
 
 export const WarpProtocolVersions = {
@@ -39,7 +40,7 @@ export const Config = {
     },
   },
 
-  AvailableActionInputSources: ['field', 'query', 'user_wallet'] as WarpActionInputSource[],
+  AvailableActionInputSources: ['field', 'query', WarpConstants.Source.UserWallet] as WarpActionInputSource[],
 
   AvailableActionInputTypes: ['string', 'uint8', 'uint16', 'uint32', 'uint64', 'biguint', 'boolean', 'address'] as WarpActionInputType[],
 

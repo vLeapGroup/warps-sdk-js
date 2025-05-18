@@ -54,8 +54,8 @@ export class WarpActionExecutor {
   }
 
   async createTransactionForExecute(action: WarpTransferAction | WarpContractAction, inputs: string[]): Promise<Transaction> {
-    if (!this.config.userAddress) throw new Error('WarpActionExecutor: user address not set')
-    const sender = Address.newFromBech32(this.config.userAddress)
+    if (!this.config.user?.wallet) throw new Error('WarpActionExecutor: user address not set')
+    const sender = Address.newFromBech32(this.config.user.wallet)
     const chainInfo = await WarpUtils.getChainInfoForAction(action, this.config)
     const config = new TransactionsFactoryConfig({ chainID: chainInfo.chainId })
 
@@ -97,7 +97,7 @@ export class WarpActionExecutor {
       success: tx.status.isSuccessful(),
       warp,
       action: actionIndex,
-      user: this.config.userAddress || null,
+      user: this.config.user?.wallet || null,
       txHash: tx.hash,
       next,
       values,
@@ -131,7 +131,7 @@ export class WarpActionExecutor {
       success: isSuccess,
       warp,
       action: actionIndex,
-      user: this.config.userAddress || null,
+      user: this.config.user?.wallet || null,
       txHash: null,
       next,
       values,
@@ -183,7 +183,7 @@ export class WarpActionExecutor {
         success: response.ok,
         warp,
         action: actionIndex,
-        user: this.config.userAddress || null,
+        user: this.config.user?.wallet || null,
         txHash: null,
         next,
         values,
@@ -196,7 +196,7 @@ export class WarpActionExecutor {
         success: false,
         warp,
         action: actionIndex,
-        user: this.config.userAddress || null,
+        user: this.config.user?.wallet || null,
         txHash: null,
         next: null,
         values: [],
@@ -252,8 +252,8 @@ export class WarpActionExecutor {
         if (!value) return null
         return this.serializer.nativeToString(input.type, value)
       } else if (input.source === WarpConstants.Source.UserWallet) {
-        if (!this.config.userAddress) return null
-        return this.serializer.nativeToString('address', this.config.userAddress)
+        if (!this.config.user?.wallet) return null
+        return this.serializer.nativeToString('address', this.config.user.wallet)
       } else {
         return preprocessed[index] || null
       }

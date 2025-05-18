@@ -53,7 +53,7 @@ describe('prepareVars', () => {
   })
 
   it('replaces var with user wallet', () => {
-    const config = { ...Config, userAddress: 'erd123456789' }
+    const config = { ...Config, user: { wallet: 'erd123456789' } }
     const warp: Warp = {
       title: 'Age: {{AGE}}',
       description: 'You are {{AGE}} years old',

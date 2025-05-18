@@ -20,14 +20,14 @@ export class BrandBuilder {
   }
 
   createInscriptionTransaction(brand: Brand): Transaction {
-    if (!this.config.userAddress) throw new Error('BrandBuilder: user address not set')
+    if (!this.config.user?.wallet) throw new Error('BrandBuilder: user address not set')
     const factoryConfig = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
     const factory = new TransferTransactionsFactory({ config: factoryConfig })
-    const sender = Address.newFromBech32(this.config.userAddress)
+    const sender = Address.newFromBech32(this.config.user.wallet)
     const serialized = JSON.stringify(brand)
 
     return factory.createTransactionForNativeTokenTransfer(sender, {
-      receiver: Address.newFromBech32(this.config.userAddress),
+      receiver: Address.newFromBech32(this.config.user.wallet),
       nativeAmount: BigInt(0),
       data: Uint8Array.from(Buffer.from(serialized)),
     })

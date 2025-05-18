@@ -33,8 +33,8 @@ export class WarpRegistry {
 
   createWarpRegisterTransaction(txHash: string, alias?: string | null): Transaction {
     if (this.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
-    if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.userAddress)
+    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.user.wallet)
     const costAmount = alias ? this.unitPrice * BigInt(2) : this.unitPrice
 
     return this.getFactory().createTransactionForExecute(sender, {
@@ -47,8 +47,8 @@ export class WarpRegistry {
   }
 
   createWarpUnregisterTransaction(txHash: string): Transaction {
-    if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.userAddress)
+    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.user.wallet)
     return this.getFactory().createTransactionForExecute(sender, {
       contract: this.getRegistryContractAddress(),
       function: 'unregisterWarp',
@@ -59,8 +59,8 @@ export class WarpRegistry {
 
   createWarpUpgradeTransaction(alias: string, txHash: string): Transaction {
     if (this.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
-    if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.userAddress)
+    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.user.wallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
       contract: this.getRegistryContractAddress(),
@@ -72,8 +72,8 @@ export class WarpRegistry {
   }
 
   createWarpAliasSetTransaction(txHash: string, alias: string): Transaction {
-    if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.userAddress)
+    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.user.wallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
       contract: this.getRegistryContractAddress(),
@@ -85,8 +85,8 @@ export class WarpRegistry {
   }
 
   createWarpVerifyTransaction(txHash: string): Transaction {
-    if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.userAddress)
+    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.user.wallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
       contract: this.getRegistryContractAddress(),
@@ -98,8 +98,8 @@ export class WarpRegistry {
 
   createBrandRegisterTransaction(txHash: string): Transaction {
     if (this.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
-    if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.userAddress)
+    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.user.wallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
       contract: this.getRegistryContractAddress(),
@@ -111,8 +111,8 @@ export class WarpRegistry {
   }
 
   createWarpBrandingTransaction(warpHash: string, brandHash: string): Transaction {
-    if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.userAddress)
+    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.user.wallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
       contract: this.getRegistryContractAddress(),
@@ -173,22 +173,22 @@ export class WarpRegistry {
   }
 
   async getUserWarpRegistryInfos(user?: string): Promise<RegistryInfo[]> {
-    const userAddress = user || this.config.userAddress
-    if (!userAddress) throw new Error('WarpRegistry: user address not set')
+    const userWallet = user || this.config.user?.wallet
+    if (!userWallet) throw new Error('WarpRegistry: user address not set')
     const contract = this.getRegistryContractAddress()
     const controller = this.getController()
-    const query = controller.createQuery({ contract, function: 'getUserWarps', arguments: [new AddressValue(new Address(userAddress))] })
+    const query = controller.createQuery({ contract, function: 'getUserWarps', arguments: [new AddressValue(new Address(userWallet))] })
     const res = await controller.runQuery(query)
     const [registryInfosRaw] = controller.parseQueryResponse(res)
     return registryInfosRaw.map(toTypedRegistryInfo)
   }
 
   async getUserBrands(user?: string): Promise<Brand[]> {
-    const userAddress = user || this.config.userAddress
-    if (!userAddress) throw new Error('WarpRegistry: user address not set')
+    const userWallet = user || this.config.user?.wallet
+    if (!userWallet) throw new Error('WarpRegistry: user address not set')
     const contract = this.getRegistryContractAddress()
     const controller = this.getController()
-    const query = controller.createQuery({ contract, function: 'getUserBrands', arguments: [new AddressValue(new Address(userAddress))] })
+    const query = controller.createQuery({ contract, function: 'getUserBrands', arguments: [new AddressValue(new Address(userWallet))] })
     const res = await controller.runQuery(query)
     const [brandsRaw] = controller.parseQueryResponse(res)
     const brandHashes: string[] = brandsRaw.map((b: any) => b.toString('hex'))
