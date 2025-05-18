@@ -20,7 +20,7 @@ describe('prepareVars', () => {
     expect(actual.description).toBe('You are 10 years old')
   })
 
-  it('replaces vars with vars from config', () => {
+  it('replaces vars with env vars from config', () => {
     Config.vars = {
       AGE: 10,
     }
