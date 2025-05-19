@@ -165,13 +165,13 @@ export class WarpActionExecutor {
     const headers = new Headers()
     headers.set('Content-Type', 'application/json')
     headers.set('Accept', 'application/json')
-    Object.entries(action.destination.headers).forEach(([key, value]) => {
+    Object.entries(action.destination.headers || {}).forEach(([key, value]) => {
       headers.set(key, value as string)
     })
 
     try {
       const response = await fetch(action.destination.url, {
-        method: action.destination.method,
+        method: action.destination.method || 'GET',
         headers,
         body: JSON.stringify({ inputs: inputPayload, meta }),
       })

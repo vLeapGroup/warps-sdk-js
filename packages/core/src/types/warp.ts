@@ -123,8 +123,8 @@ export type WarpCollectAction = {
   description?: string | null
   destination: {
     url: string
-    method: 'GET' | 'POST'
-    headers: Record<string, string>
+    method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+    headers?: Record<string, string>
   }
   inputs?: WarpActionInput[]
   next?: string
