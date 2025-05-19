@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-alpha.21
+
+### Patch Changes
+
+- 6fe2da5: fix warp link detection
+
 ## 2.0.0-alpha.20
 
 ### Patch Changes
