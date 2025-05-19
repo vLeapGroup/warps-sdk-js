@@ -95,7 +95,16 @@ describe('getNextInfo', () => {
     const result = WarpUtils.getNextInfo(warp, 1, {}, testConfig)
 
     expect(result?.[0].identifier).toBe('alias:mywarp')
-    expect(result?.[0].url).toBe('https://anyclient.com?warp=alias%3Amywarp')
+    expect(result?.[0].url).toBe('https://anyclient.com?warp=mywarp')
+  })
+
+  it('returns info for a super client', () => {
+    const config = { ...testConfig, clientUrl: 'https://usewarp.to', currentUrl: 'https://usewarp.to' }
+    const warp: Warp = { next: 'mywarp?param1=value1&param2=value2' } as any
+    const result = WarpUtils.getNextInfo(warp, 1, {}, config)
+
+    expect(result?.[0].identifier).toBe('mywarp?param1=value1&param2=value2')
+    expect(result?.[0].url).toBe('https://usewarp.to/mywarp?param1=value1&param2=value2')
   })
 
   it('returns an url for a prefixed hash', () => {

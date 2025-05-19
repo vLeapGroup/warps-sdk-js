@@ -1,5 +1,4 @@
 import { DevnetEntrypoint, MainnetEntrypoint, NetworkEntrypoint, TestnetEntrypoint } from '@multiversx/sdk-core'
-import { Config } from './config'
 import { WarpConstants } from './constants'
 import { getMainChainInfo, replacePlaceholders } from './helpers/general'
 import {
@@ -14,6 +13,7 @@ import {
   WarpQueryAction,
   WarpTransferAction,
 } from './types'
+import { WarpLink } from './WarpLink'
 import { WarpRegistry } from './WarpRegistry'
 
 const URL_PREFIX = 'https://'
@@ -116,14 +116,14 @@ export class WarpUtils {
   }
 
   private static buildNextUrl(identifier: string, config: WarpConfig, splitParams = false): string {
-    const url = new URL(config.clientUrl || Config.DefaultClientUrl(config.env))
-    const [warpId, queryString] = identifier.split('?')
+    const [rawId, queryString] = identifier.split('?')
+    const info = this.getInfoFromPrefixedIdentifier(rawId) || { type: 'alias', id: rawId }
+    const warpLink = new WarpLink(config)
+    const baseUrl = warpLink.build(info.type, info.id)
+    if (!queryString) return baseUrl
 
-    url.searchParams.set('warp', warpId)
-    if (queryString) {
-      new URLSearchParams(queryString).forEach((value, key) => url.searchParams.set(key, value))
-    }
-
+    const url = new URL(baseUrl)
+    new URLSearchParams(queryString).forEach((value, key) => url.searchParams.set(key, value))
     return url.toString().replace(/\/\?/, '?')
   }
 
