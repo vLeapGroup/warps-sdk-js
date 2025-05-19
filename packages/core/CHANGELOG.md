@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-alpha.16
+
+### Patch Changes
+
+- 5ca0cbe: fix action collect get requests
+
 ## 2.0.0-alpha.15
 
 ### Patch Changes
