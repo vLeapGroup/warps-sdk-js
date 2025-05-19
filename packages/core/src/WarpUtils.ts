@@ -16,10 +16,9 @@ import {
 } from './types'
 import { WarpRegistry } from './WarpRegistry'
 
-const UrlPrefixDeterminer = 'https://'
-
-const VarSourceQuery = 'query'
-const VarSourceEnv = 'env'
+const URL_PREFIX = 'https://'
+const VAR_SOURCE_QUERY = 'query'
+const VAR_SOURCE_ENV = 'env'
 
 export class WarpUtils {
   static prepareVars(warp: Warp, config: WarpConfig): Warp {
@@ -31,16 +30,21 @@ export class WarpUtils {
     }
 
     Object.entries(warp.vars).forEach(([placeholder, value]) => {
-      if (typeof value === 'string' && value.startsWith(`${VarSourceQuery}:`)) {
+      if (typeof value !== 'string') {
+        modify(placeholder, value)
+        return
+      }
+
+      if (value.startsWith(`${VAR_SOURCE_QUERY}:`)) {
         if (!config.currentUrl) throw new Error('WarpUtils: currentUrl config is required to prepare vars')
-        const queryParamName = value.split(`${VarSourceQuery}:`)[1]
+        const queryParamName = value.split(`${VAR_SOURCE_QUERY}:`)[1]
         const queryParamValue = new URL(config.currentUrl).searchParams.get(queryParamName)
         if (queryParamValue) modify(placeholder, queryParamValue)
-      } else if (typeof value === 'string' && value.startsWith(`${VarSourceEnv}:`)) {
-        const envVarName = value.split(`${VarSourceEnv}:`)[1]
+      } else if (value.startsWith(`${VAR_SOURCE_ENV}:`)) {
+        const envVarName = value.split(`${VAR_SOURCE_ENV}:`)[1]
         const envVarValue = config.vars?.[envVarName]
         if (envVarValue) modify(placeholder, envVarValue)
-      } else if (typeof value === 'string' && value === WarpConstants.Source.UserWallet && config.user?.wallet) {
+      } else if (value === WarpConstants.Source.UserWallet && config.user?.wallet) {
         modify(placeholder, config.user.wallet)
       } else {
         modify(placeholder, value)
@@ -57,7 +61,6 @@ export class WarpUtils {
       : `${WarpConstants.IdentifierType.Alias}${WarpConstants.IdentifierParamSeparator}${decodedIdentifier}`
 
     const [idType, id] = normalizedParam.split(WarpConstants.IdentifierParamSeparator)
-
     return { type: idType as WarpIdType, id }
   }
 
@@ -84,10 +87,8 @@ export class WarpUtils {
     config: WarpConfig
   ): Promise<ChainInfo> {
     if (!action.chain) return getMainChainInfo(config)
-
     const chainInfo = await new WarpRegistry(config).getChainInfo(action.chain)
     if (!chainInfo) throw new Error(`WarpActionExecutor: Chain info not found for ${action.chain}`)
-
     return chainInfo
   }
 
