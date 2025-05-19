@@ -158,6 +158,32 @@ describe('detect', () => {
     })
   })
 
+  it('detects a warp by alias', async () => {
+    const link = new WarpLink(Config)
+    const result = await link.detect('mywarp')
+
+    expect(result).toEqual({
+      match: true,
+      url: 'mywarp',
+      warp: mockWarp,
+      registryInfo: mockRegistryInfo,
+      brand: mockBrand,
+    })
+  })
+
+  it('detects a warp by alias with query params', async () => {
+    const link = new WarpLink(Config)
+    const result = await link.detect('mywarp?param1=value1&param2=value2')
+
+    expect(result).toEqual({
+      match: true,
+      url: 'mywarp?param1=value1&param2=value2',
+      warp: mockWarp,
+      registryInfo: mockRegistryInfo,
+      brand: mockBrand,
+    })
+  })
+
   it('returns no match for invalid URLs', async () => {
     const link = new WarpLink(Config)
     const result = await link.detect('https://example.com')
