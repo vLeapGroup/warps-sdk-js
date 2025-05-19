@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-alpha.20
+
+### Patch Changes
+
+- 198fd65: add warp link detect caching
+- a1e04a4: add warp link detect error catching
+
 ## 2.0.0-alpha.19
 
 ### Patch Changes
