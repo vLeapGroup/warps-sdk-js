@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-alpha.23
+
+### Major Changes
+
+- edd1760: update version to v2
+
+### Patch Changes
+
+- dc6842d: add registry soft err handling
+
 ## 2.0.0-alpha.22
 
 ### Patch Changes
