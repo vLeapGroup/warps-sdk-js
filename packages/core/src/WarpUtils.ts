@@ -32,13 +32,10 @@ export class WarpUtils {
     Object.entries(warp.vars).forEach(([placeholder, value]) => {
       if (typeof value !== 'string') {
         modify(placeholder, value)
-        return
-      }
-
-      if (value.startsWith(`${VAR_SOURCE_QUERY}:`)) {
+      } else if (value.startsWith(`${VAR_SOURCE_QUERY}:`)) {
         if (!config.currentUrl) throw new Error('WarpUtils: currentUrl config is required to prepare vars')
         const queryParamName = value.split(`${VAR_SOURCE_QUERY}:`)[1]
-        const queryParamValue = new URL(config.currentUrl).searchParams.get(queryParamName)
+        const queryParamValue = new URLSearchParams(config.currentUrl.split('?')[1]).get(queryParamName)
         if (queryParamValue) modify(placeholder, queryParamValue)
       } else if (value.startsWith(`${VAR_SOURCE_ENV}:`)) {
         const envVarName = value.split(`${VAR_SOURCE_ENV}:`)[1]
