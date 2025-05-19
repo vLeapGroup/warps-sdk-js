@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-alpha.19
+
+### Patch Changes
+
+- 3cc2a32: fix link building
+
 ## 2.0.0-alpha.18
 
 ### Minor Changes
