@@ -49,38 +49,44 @@ export class WarpLink {
   }
 
   async detect(url: string, cache?: WarpCacheConfig): Promise<DetectionResult> {
-    const idResult = url.startsWith(WarpConstants.HttpProtocolPrefix)
-      ? this.extractIdentifierInfoFromUrl(url)
-      : WarpUtils.getInfoFromPrefixedIdentifier(url)
+    const emptyResult: DetectionResult = { match: false, url, warp: null, registryInfo: null, brand: null }
+    try {
+      const idResult = url.startsWith(WarpConstants.HttpProtocolPrefix)
+        ? this.extractIdentifierInfoFromUrl(url)
+        : WarpUtils.getInfoFromPrefixedIdentifier(url)
 
-    if (!idResult) {
-      return { match: false, url, warp: null, registryInfo: null, brand: null }
-    }
+      if (!idResult) {
+        return emptyResult
+      }
 
-    const { type, id } = idResult
-    const builder = new WarpBuilder(this.config)
-    const registry = new WarpRegistry(this.config)
-    let warp: Warp | null = null
-    let registryInfo: RegistryInfo | null = null
-    let brand: Brand | null = null
+      const { type, id } = idResult
+      const builder = new WarpBuilder(this.config)
+      const registry = new WarpRegistry(this.config)
+      let warp: Warp | null = null
+      let registryInfo: RegistryInfo | null = null
+      let brand: Brand | null = null
 
-    if (type === 'hash') {
-      warp = await builder.createFromTransactionHash(id, cache)
-      try {
-        const { registryInfo: ri, brand: bi } = await registry.getInfoByHash(id, cache)
+      if (type === 'hash') {
+        warp = await builder.createFromTransactionHash(id, cache)
+        try {
+          const { registryInfo: ri, brand: bi } = await registry.getInfoByHash(id, cache)
+          registryInfo = ri
+          brand = bi
+        } catch (e) {}
+      } else if (type === 'alias') {
+        const { registryInfo: ri, brand: bi } = await registry.getInfoByAlias(id, cache)
         registryInfo = ri
         brand = bi
-      } catch (e) {}
-    } else if (type === 'alias') {
-      const { registryInfo: ri, brand: bi } = await registry.getInfoByAlias(id, cache)
-      registryInfo = ri
-      brand = bi
-      if (ri) {
-        warp = await builder.createFromTransactionHash(ri.hash, cache)
+        if (ri) {
+          warp = await builder.createFromTransactionHash(ri.hash, cache)
+        }
       }
-    }
 
-    return warp ? { match: true, url, warp, registryInfo, brand } : { match: false, url, warp: null, registryInfo: null, brand: null }
+      return warp ? { match: true, url, warp, registryInfo, brand } : emptyResult
+    } catch (e) {
+      console.error(e)
+      return emptyResult
+    }
   }
 
   build(type: WarpIdType, id: string): string {
