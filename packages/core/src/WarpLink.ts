@@ -59,7 +59,7 @@ export class WarpLink {
         return emptyResult
       }
 
-      const { type, id } = idResult
+      const { type, identifier, identifierBase } = idResult
       const builder = new WarpBuilder(this.config)
       const registry = new WarpRegistry(this.config)
       let warp: Warp | null = null
@@ -67,14 +67,14 @@ export class WarpLink {
       let brand: Brand | null = null
 
       if (type === 'hash') {
-        warp = await builder.createFromTransactionHash(id, cache)
+        warp = await builder.createFromTransactionHash(identifierBase, cache)
         try {
-          const { registryInfo: ri, brand: bi } = await registry.getInfoByHash(id, cache)
+          const { registryInfo: ri, brand: bi } = await registry.getInfoByHash(identifierBase, cache)
           registryInfo = ri
           brand = bi
         } catch (e) {}
       } else if (type === 'alias') {
-        const { registryInfo: ri, brand: bi } = await registry.getInfoByAlias(id, cache)
+        const { registryInfo: ri, brand: bi } = await registry.getInfoByAlias(identifierBase, cache)
         registryInfo = ri
         brand = bi
         if (ri) {
@@ -104,7 +104,7 @@ export class WarpLink {
   buildFromPrefixedIdentifier(prefixedIdentifier: string): string {
     const idResult = WarpUtils.getInfoFromPrefixedIdentifier(prefixedIdentifier)
     if (!idResult) return ''
-    return this.build(idResult.type, idResult.id)
+    return this.build(idResult.type, idResult.identifierBase)
   }
 
   generateQrCode(type: WarpIdType, id: string, size = 512, background = 'white', color = 'black', logoColor = '#23F7DD'): QRCodeStyling {
@@ -126,7 +126,7 @@ export class WarpLink {
     })
   }
 
-  private extractIdentifierInfoFromUrl(url: string): { type: WarpIdType; id: string } | null {
+  private extractIdentifierInfoFromUrl(url: string): { type: WarpIdType; identifier: string; identifierBase: string } | null {
     const urlObj = new URL(url)
     const isSuperClient = Config.SuperClientUrls.includes(urlObj.origin)
     const searchParamValue = urlObj.searchParams.get(WarpConstants.IdentifierParamName)

@@ -54,14 +54,18 @@ export class WarpUtils {
     return JSON.parse(modifiable)
   }
 
-  static getInfoFromPrefixedIdentifier(prefixedIdentifier: string): { type: WarpIdType; id: string } | null {
+  static getInfoFromPrefixedIdentifier(
+    prefixedIdentifier: string
+  ): { type: WarpIdType; identifier: string; identifierBase: string } | null {
     const decodedIdentifier = decodeURIComponent(prefixedIdentifier)
     const normalizedParam = decodedIdentifier.includes(WarpConstants.IdentifierParamSeparator)
       ? decodedIdentifier
       : `${WarpConstants.IdentifierType.Alias}${WarpConstants.IdentifierParamSeparator}${decodedIdentifier}`
 
-    const [idType, id] = normalizedParam.split(WarpConstants.IdentifierParamSeparator)
-    return { type: idType as WarpIdType, id }
+    const [idType, identifier] = normalizedParam.split(WarpConstants.IdentifierParamSeparator)
+    const identifierBase = identifier.split('?')[0]
+
+    return { type: idType as WarpIdType, identifier, identifierBase }
   }
 
   static getNextInfo(warp: Warp, actionIndex: number, results: WarpExecutionResults, config: WarpConfig): WarpExecutionNextInfo | null {
@@ -76,7 +80,7 @@ export class WarpUtils {
     if (arrayPlaceholders.length === 0) {
       const query = replacePlaceholders(queryWithPlaceholders, { ...warp.vars, ...results })
       const identifier = query ? `${baseIdentifier}?${query}` : baseIdentifier
-      return [{ identifier, url: this.buildNextUrl(identifier, config, false) }]
+      return [{ identifier, url: this.buildNextUrl(identifier, config) }]
     }
 
     return this.handleArrayNext(baseIdentifier, queryWithPlaceholders, arrayPlaceholders, results, config)
@@ -108,18 +112,18 @@ export class WarpUtils {
         if (replacedQuery.includes('{{') || replacedQuery.includes('}}')) return null
 
         const identifier = replacedQuery ? `${baseIdentifier}?${replacedQuery}` : baseIdentifier
-        return { identifier, url: this.buildNextUrl(identifier, config, true) }
+        return { identifier, url: this.buildNextUrl(identifier, config) }
       })
       .filter((link): link is NonNullable<typeof link> => link !== null)
 
     return nextLinks.length > 0 ? nextLinks : [{ identifier: baseIdentifier, url: this.buildNextUrl(baseIdentifier, config) }]
   }
 
-  private static buildNextUrl(identifier: string, config: WarpConfig, splitParams = false): string {
+  private static buildNextUrl(identifier: string, config: WarpConfig): string {
     const [rawId, queryString] = identifier.split('?')
-    const info = this.getInfoFromPrefixedIdentifier(rawId) || { type: 'alias', id: rawId }
+    const info = this.getInfoFromPrefixedIdentifier(rawId) || { type: 'alias', identifier: rawId, identifierBase: rawId }
     const warpLink = new WarpLink(config)
-    const baseUrl = warpLink.build(info.type, info.id)
+    const baseUrl = warpLink.build(info.type, info.identifierBase)
     if (!queryString) return baseUrl
 
     const url = new URL(baseUrl)
