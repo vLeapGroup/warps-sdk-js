@@ -67,19 +67,68 @@ export class WarpUtils {
   static getNextInfo(warp: Warp, actionIndex: number, results: WarpExecutionResults, config: WarpConfig): WarpExecutionNextInfo | null {
     const next = (warp.actions?.[actionIndex] as { next?: string })?.next || warp.next || null
     if (!next) return null
-    if (next.startsWith(UrlPrefixDeterminer)) return { identifier: null, url: next }
+    if (next.startsWith(URL_PREFIX)) return [{ identifier: null, url: next }]
 
     const [baseIdentifier, queryWithPlaceholders] = next.split('?')
-    const query = queryWithPlaceholders ? replacePlaceholders(queryWithPlaceholders, { ...warp.vars, ...results }) : null
-    const params = new URLSearchParams(query || '')
-    const currentUrl = new URL(config.currentUrl || Config.DefaultClientUrl(config.env))
-    currentUrl.searchParams.forEach((value, key) => params.set(key, value))
+    if (!queryWithPlaceholders) return [{ identifier: baseIdentifier, url: this.buildNextUrl(baseIdentifier, config) }]
 
-    const identifier = params.toString() ? `${baseIdentifier}?${params.toString()}` : baseIdentifier
+    const arrayPlaceholders = queryWithPlaceholders.match(/{{([^}]+)\[\](\.[^}]+)?}}/g) || []
+    if (arrayPlaceholders.length === 0) {
+      const query = replacePlaceholders(queryWithPlaceholders, { ...warp.vars, ...results })
+      const identifier = query ? `${baseIdentifier}?${query}` : baseIdentifier
+      return [{ identifier, url: this.buildNextUrl(identifier, config, false) }]
+    }
+
+    return this.handleArrayNext(baseIdentifier, queryWithPlaceholders, arrayPlaceholders, results, config)
+  }
+
+  private static handleArrayNext(
+    baseIdentifier: string,
+    queryWithPlaceholders: string,
+    arrayPlaceholders: string[],
+    results: WarpExecutionResults,
+    config: WarpConfig
+  ): WarpExecutionNextInfo {
+    const placeholder = arrayPlaceholders[0]
+    if (!placeholder) return [{ identifier: baseIdentifier, url: this.buildNextUrl(baseIdentifier, config) }]
+
+    const resultName = placeholder.match(/{{([^[]+)\[\]/)?.[1]
+    if (!resultName || !results[resultName]) return [{ identifier: baseIdentifier, url: this.buildNextUrl(baseIdentifier, config) }]
+
+    const resultArray = Array.isArray(results[resultName]) ? results[resultName] : [results[resultName]]
+    const fieldPath = placeholder.match(/\[\](\.[^}]+)?}}/)?.[1] || ''
+    const exactPlaceholderRegex = new RegExp(`{{${resultName}\\[\\]${fieldPath.replace('.', '\\.')}}}`, 'g')
+
+    const nextLinks = resultArray
+      .map((item) => {
+        const mainValue = fieldPath ? this.getNestedValue(item, fieldPath.slice(1)) : item
+        if (mainValue === undefined || mainValue === null) return null
+
+        const replacedQuery = queryWithPlaceholders.replace(exactPlaceholderRegex, mainValue)
+        if (replacedQuery.includes('{{') || replacedQuery.includes('}}')) return null
+
+        const identifier = replacedQuery ? `${baseIdentifier}?${replacedQuery}` : baseIdentifier
+        return { identifier, url: this.buildNextUrl(identifier, config, true) }
+      })
+      .filter((link): link is NonNullable<typeof link> => link !== null)
+
+    return nextLinks.length > 0 ? nextLinks : [{ identifier: baseIdentifier, url: this.buildNextUrl(baseIdentifier, config) }]
+  }
+
+  private static buildNextUrl(identifier: string, config: WarpConfig, splitParams = false): string {
     const url = new URL(config.clientUrl || Config.DefaultClientUrl(config.env))
-    url.searchParams.set('warp', identifier)
+    const [warpId, queryString] = identifier.split('?')
 
-    return { identifier, url: url.toString().replace(/\/\?/, '?') }
+    url.searchParams.set('warp', warpId)
+    if (queryString) {
+      new URLSearchParams(queryString).forEach((value, key) => url.searchParams.set(key, value))
+    }
+
+    return url.toString().replace(/\/\?/, '?')
+  }
+
+  private static getNestedValue(obj: any, path: string): any {
+    return path.split('.').reduce((current, key) => current?.[key], obj)
   }
 
   static async getChainInfoForAction(

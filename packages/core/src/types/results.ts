@@ -12,7 +12,7 @@ export type WarpExecution = {
   messages: WarpExecutionMessages
 }
 
-export type WarpExecutionNextInfo = { identifier: string | null; url: string }
+export type WarpExecutionNextInfo = { identifier: string | null; url: string }[]
 
 export type WarpExecutionResults = Record<WarpResultName, any | null>
 
