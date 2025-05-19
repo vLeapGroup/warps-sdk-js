@@ -162,8 +162,6 @@ export class WarpActionExecutor {
       }
     }
 
-    const inputPayload = Object.fromEntries(modifiedInputs.map((i) => [i.input.as || i.input.name, toInputPayloadValue(i)]))
-
     const headers = new Headers()
     headers.set('Content-Type', 'application/json')
     headers.set('Accept', 'application/json')
@@ -171,6 +169,7 @@ export class WarpActionExecutor {
       headers.set(key, value as string)
     })
 
+    const inputPayload = Object.fromEntries(modifiedInputs.map((i) => [i.input.as || i.input.name, toInputPayloadValue(i)]))
     const httpMethod = action.destination.method || 'GET'
     const body = httpMethod === 'GET' ? undefined : JSON.stringify({ inputs: inputPayload, meta })
 
