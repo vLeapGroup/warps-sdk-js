@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-alpha.17
+
+### Patch Changes
+
+- 13e7464: fix collect results
+
 ## 2.0.0-alpha.16
 
 ### Patch Changes
