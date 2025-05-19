@@ -171,12 +171,11 @@ export class WarpActionExecutor {
       headers.set(key, value as string)
     })
 
+    const httpMethod = action.destination.method || 'GET'
+    const body = httpMethod === 'GET' ? undefined : JSON.stringify({ inputs: inputPayload, meta })
+
     try {
-      const response = await fetch(action.destination.url, {
-        method: action.destination.method || 'GET',
-        headers,
-        body: JSON.stringify({ inputs: inputPayload, meta }),
-      })
+      const response = await fetch(action.destination.url, { method: httpMethod, headers, body })
       const content = await response.json()
       const { values, results } = await extractCollectResults(preparedWarp, content)
       const next = WarpUtils.getNextInfo(preparedWarp, actionIndex, results, this.config)
