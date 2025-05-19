@@ -1,7 +1,7 @@
 import QRCodeStyling from 'qr-code-styling'
 import { Config } from './config'
 import { WarpConstants } from './constants'
-import { Brand, RegistryInfo, Warp, WarpConfig, WarpIdType } from './types'
+import { Brand, RegistryInfo, Warp, WarpCacheConfig, WarpConfig, WarpIdType } from './types'
 import { WarpBuilder } from './WarpBuilder'
 import { WarpRegistry } from './WarpRegistry'
 import { WarpUtils } from './WarpUtils'
@@ -48,7 +48,7 @@ export class WarpLink {
     return { match: hasMatch, results }
   }
 
-  async detect(url: string): Promise<DetectionResult> {
+  async detect(url: string, cache?: WarpCacheConfig): Promise<DetectionResult> {
     const idResult = url.startsWith(WarpConstants.HttpProtocolPrefix)
       ? this.extractIdentifierInfoFromUrl(url)
       : WarpUtils.getInfoFromPrefixedIdentifier(url)
@@ -65,18 +65,18 @@ export class WarpLink {
     let brand: Brand | null = null
 
     if (type === 'hash') {
-      warp = await builder.createFromTransactionHash(id)
+      warp = await builder.createFromTransactionHash(id, cache)
       try {
-        const { registryInfo: ri, brand: bi } = await registry.getInfoByHash(id)
+        const { registryInfo: ri, brand: bi } = await registry.getInfoByHash(id, cache)
         registryInfo = ri
         brand = bi
       } catch (e) {}
     } else if (type === 'alias') {
-      const { registryInfo: ri, brand: bi } = await registry.getInfoByAlias(id)
+      const { registryInfo: ri, brand: bi } = await registry.getInfoByAlias(id, cache)
       registryInfo = ri
       brand = bi
       if (ri) {
-        warp = await builder.createFromTransactionHash(ri.hash)
+        warp = await builder.createFromTransactionHash(ri.hash, cache)
       }
     }
 
