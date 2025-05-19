@@ -107,7 +107,8 @@ export class WarpActionExecutor {
   }
 
   async executeQuery(warp: Warp, actionIndex: number, inputs: string[]): Promise<WarpExecution> {
-    const action = getWarpActionByIndex(warp, actionIndex) as WarpQueryAction | null
+    const preparedWarp = WarpUtils.prepareVars(warp, this.config)
+    const action = getWarpActionByIndex(preparedWarp, actionIndex) as WarpQueryAction | null
     if (!action) throw new Error('WarpActionExecutor: Action not found')
     if (!action.func) throw new Error('WarpActionExecutor: Function not found')
     const chainInfo = await WarpUtils.getChainInfoForAction(action, this.config)
@@ -124,24 +125,25 @@ export class WarpActionExecutor {
     const endpoint = abi.getEndpoint(response.function)
     const parts = response.returnDataParts.map((part) => Buffer.from(part))
     const typedValues = argsSerializer.buffersToValues(parts, endpoint.output)
-    const { values, results } = await extractQueryResults(warp, typedValues)
-    const next = WarpUtils.getNextInfo(warp, actionIndex, results, this.config)
+    const { values, results } = await extractQueryResults(preparedWarp, typedValues)
+    const next = WarpUtils.getNextInfo(preparedWarp, actionIndex, results, this.config)
 
     return {
       success: isSuccess,
-      warp,
+      warp: preparedWarp,
       action: actionIndex,
       user: this.config.user?.wallet || null,
       txHash: null,
       next,
       values,
       results,
-      messages: this.getPreparedMessages(warp, results),
+      messages: this.getPreparedMessages(preparedWarp, results),
     }
   }
 
   async executeCollect(warp: Warp, actionIndex: number, inputs: string[], meta?: Record<string, any>): Promise<WarpExecution> {
-    const action = getWarpActionByIndex(warp, actionIndex) as WarpCollectAction | null
+    const preparedWarp = WarpUtils.prepareVars(warp, this.config)
+    const action = getWarpActionByIndex(preparedWarp, actionIndex) as WarpCollectAction | null
     if (!action) throw new Error('WarpActionExecutor: Action not found')
     const resolvedInputs = await this.getResolvedInputs(action, inputs)
     const modifiedInputs = this.getModifiedInputs(resolvedInputs)
@@ -176,25 +178,25 @@ export class WarpActionExecutor {
         body: JSON.stringify({ inputs: inputPayload, meta }),
       })
       const content = await response.json()
-      const { values, results } = await extractCollectResults(warp, content)
-      const next = WarpUtils.getNextInfo(warp, actionIndex, results, this.config)
+      const { values, results } = await extractCollectResults(preparedWarp, content)
+      const next = WarpUtils.getNextInfo(preparedWarp, actionIndex, results, this.config)
 
       return {
         success: response.ok,
-        warp,
+        warp: preparedWarp,
         action: actionIndex,
         user: this.config.user?.wallet || null,
         txHash: null,
         next,
         values,
         results,
-        messages: this.getPreparedMessages(warp, results),
+        messages: this.getPreparedMessages(preparedWarp, results),
       }
     } catch (error) {
       console.error(error)
       return {
         success: false,
-        warp,
+        warp: preparedWarp,
         action: actionIndex,
         user: this.config.user?.wallet || null,
         txHash: null,
