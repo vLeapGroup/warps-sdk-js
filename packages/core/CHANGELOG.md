@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-alpha.15
+
+### Patch Changes
+
+- 82a45c1: update warp var handling
+
 ## 2.0.0-alpha.14
 
 ### Patch Changes
