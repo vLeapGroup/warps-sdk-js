@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-alpha.18
+
+### Minor Changes
+
+- dc17400: add multi-next warp support
+
 ## 2.0.0-alpha.17
 
 ### Patch Changes
