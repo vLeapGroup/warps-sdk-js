@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-alpha.14
+
+### Patch Changes
+
+- 578e1b3: update collect action params to be optional
+
 ## 2.0.0-alpha.13
 
 ### Minor Changes
