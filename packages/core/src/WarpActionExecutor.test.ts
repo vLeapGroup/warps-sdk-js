@@ -326,6 +326,7 @@ describe('WarpActionExecutor', () => {
       results: {
         USERNAME: 'out.data.username',
         ID: 'out.data.id',
+        ALL: 'out',
       },
       messages: {
         successRegistration: 'Your registration has the username: {{USERNAME}}',
@@ -358,6 +359,7 @@ describe('WarpActionExecutor', () => {
     expect(actual.results).toEqual({
       USERNAME: 'abcdef',
       ID: '12',
+      ALL: { username: 'abcdef', id: '12' },
     })
     expect(actual.messages).toEqual({
       successRegistration: 'Your registration has the username: abcdef',

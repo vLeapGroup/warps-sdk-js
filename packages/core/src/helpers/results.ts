@@ -97,7 +97,13 @@ export const extractCollectResults = async (warp: Warp, response: any): Promise<
 
   for (const [resultName, resultPath] of Object.entries(warp.results || {})) {
     const [resultType, ...pathPartsDotNotated] = resultPath.split('.')
-    if (resultType !== 'out' || !pathPartsDotNotated.length) continue
+    if (resultType !== 'out') continue
+    if (!pathPartsDotNotated.length) {
+      const value = response?.data || response
+      values.push(value)
+      results[resultName] = value
+      continue
+    }
     const value = pathPartsDotNotated.reduce((obj, key) => obj?.[key], response)
     values.push(value)
     results[resultName] = value
