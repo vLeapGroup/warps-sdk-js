@@ -1,7 +1,7 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
 import Ajv from 'ajv'
 import { Config } from './config'
-import { getChainId, getLatestProtocolIdentifier } from './helpers'
+import { getChainId, getLatestProtocolIdentifier, getMainChainInfo } from './helpers/general'
 import { Brand, BrandColors, BrandCta, BrandUrls, WarpConfig } from './types'
 import { WarpUtils } from './WarpUtils'
 
@@ -20,14 +20,14 @@ export class BrandBuilder {
   }
 
   createInscriptionTransaction(brand: Brand): Transaction {
-    if (!this.config.userAddress) throw new Error('BrandBuilder: user address not set')
+    if (!this.config.user?.wallet) throw new Error('BrandBuilder: user address not set')
     const factoryConfig = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
     const factory = new TransferTransactionsFactory({ config: factoryConfig })
-    const sender = Address.newFromBech32(this.config.userAddress)
+    const sender = Address.newFromBech32(this.config.user.wallet)
     const serialized = JSON.stringify(brand)
 
     return factory.createTransactionForNativeTokenTransfer(sender, {
-      receiver: Address.newFromBech32(this.config.userAddress),
+      receiver: Address.newFromBech32(this.config.user.wallet),
       nativeAmount: BigInt(0),
       data: Uint8Array.from(Buffer.from(serialized)),
     })
@@ -48,10 +48,12 @@ export class BrandBuilder {
   }
 
   async createFromTransactionHash(hash: string): Promise<Brand | null> {
-    const chainApi = WarpUtils.getConfiguredChainApi(this.config)
+    const chainInfo = getMainChainInfo(this.config)
+    const chainEntry = WarpUtils.getChainEntrypoint(chainInfo, this.config.env)
+    const chainProvider = chainEntry.createNetworkProvider()
 
     try {
-      const tx = await chainApi.getTransaction(hash)
+      const tx = await chainProvider.getTransaction(hash)
       return this.createFromTransaction(tx)
     } catch (error) {
       console.error('BrandBuilder: Error creating from transaction hash', error)

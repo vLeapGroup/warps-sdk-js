@@ -1,7 +1,8 @@
+import { WarpConstants } from './constants'
 import { ChainEnv, WarpActionInputPosition, WarpActionInputSource, WarpActionInputType } from './types'
 
 export const WarpProtocolVersions = {
-  Warp: '1.2.0',
+  Warp: '2.0.0',
   Brand: '0.1.0',
   Abi: '0.1.0',
 }
@@ -18,11 +19,16 @@ export const Config = {
 
   SuperClientUrls: ['https://usewarp.to', 'https://testnet.usewarp.to', 'https://devnet.usewarp.to'],
 
-  Chain: {
+  MainChain: {
     ApiUrl: (env: ChainEnv) => {
       if (env === 'devnet') return 'https://devnet-api.multiversx.com'
       if (env === 'testnet') return 'https://testnet-api.multiversx.com'
       return 'https://api.multiversx.com'
+    },
+    ExplorerUrl: (env: ChainEnv) => {
+      if (env === 'devnet') return 'https://devnet-explorer.multiversx.com'
+      if (env === 'testnet') return 'https://testnet-explorer.multiversx.com'
+      return 'https://explorer.multiversx.com'
     },
   },
 
@@ -34,12 +40,14 @@ export const Config = {
     },
   },
 
-  AvailableActionInputSources: ['field', 'query'] as WarpActionInputSource[],
+  AvailableActionInputSources: ['field', 'query', WarpConstants.Source.UserWallet] as WarpActionInputSource[],
 
   AvailableActionInputTypes: ['string', 'uint8', 'uint16', 'uint32', 'uint64', 'biguint', 'boolean', 'address'] as WarpActionInputType[],
 
   AvailableActionInputPositions: [
+    'receiver',
     'value',
+    'transfer',
     'arg:1',
     'arg:2',
     'arg:3',
@@ -50,5 +58,7 @@ export const Config = {
     'arg:8',
     'arg:9',
     'arg:10',
+    'data',
+    'ignore',
   ] as WarpActionInputPosition[],
 }

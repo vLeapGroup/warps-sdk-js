@@ -10,7 +10,7 @@ import {
 } from '@multiversx/sdk-core/out'
 import RegistryAbi from './abis/registry.abi.json'
 import { Config } from './config'
-import { getChainId, getDefaultChainInfo, toTypedChainInfo, toTypedRegistryInfo } from './helpers'
+import { getChainId, getMainChainInfo, toTypedChainInfo, toTypedRegistryInfo } from './helpers/general'
 import { Brand, ChainInfo, RegistryInfo, WarpCacheConfig, WarpChain, WarpConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
 import { WarpUtils } from './WarpUtils'
@@ -33,8 +33,8 @@ export class WarpRegistry {
 
   createWarpRegisterTransaction(txHash: string, alias?: string | null): Transaction {
     if (this.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
-    if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.userAddress)
+    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.user.wallet)
     const costAmount = alias ? this.unitPrice * BigInt(2) : this.unitPrice
 
     return this.getFactory().createTransactionForExecute(sender, {
@@ -47,8 +47,8 @@ export class WarpRegistry {
   }
 
   createWarpUnregisterTransaction(txHash: string): Transaction {
-    if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.userAddress)
+    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.user.wallet)
     return this.getFactory().createTransactionForExecute(sender, {
       contract: this.getRegistryContractAddress(),
       function: 'unregisterWarp',
@@ -59,8 +59,8 @@ export class WarpRegistry {
 
   createWarpUpgradeTransaction(alias: string, txHash: string): Transaction {
     if (this.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
-    if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.userAddress)
+    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.user.wallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
       contract: this.getRegistryContractAddress(),
@@ -72,8 +72,8 @@ export class WarpRegistry {
   }
 
   createWarpAliasSetTransaction(txHash: string, alias: string): Transaction {
-    if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.userAddress)
+    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.user.wallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
       contract: this.getRegistryContractAddress(),
@@ -85,8 +85,8 @@ export class WarpRegistry {
   }
 
   createWarpVerifyTransaction(txHash: string): Transaction {
-    if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.userAddress)
+    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.user.wallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
       contract: this.getRegistryContractAddress(),
@@ -98,8 +98,8 @@ export class WarpRegistry {
 
   createBrandRegisterTransaction(txHash: string): Transaction {
     if (this.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
-    if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.userAddress)
+    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.user.wallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
       contract: this.getRegistryContractAddress(),
@@ -111,8 +111,8 @@ export class WarpRegistry {
   }
 
   createWarpBrandingTransaction(warpHash: string, brandHash: string): Transaction {
-    if (!this.config.userAddress) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.userAddress)
+    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.user.wallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
       contract: this.getRegistryContractAddress(),
@@ -124,99 +124,124 @@ export class WarpRegistry {
   }
 
   async getInfoByAlias(alias: string, cache?: WarpCacheConfig): Promise<{ registryInfo: RegistryInfo | null; brand: Brand | null }> {
-    const cacheKey = CacheKey.RegistryInfo(alias)
-    const cached = cache ? this.cache.get<{ registryInfo: RegistryInfo | null; brand: Brand | null }>(cacheKey) : null
-    if (cached) {
-      console.log(`WarpRegistry (getInfoByAlias): RegistryInfo found in cache: ${alias}`)
-      return cached
+    try {
+      const cacheKey = CacheKey.RegistryInfo(alias)
+      const cached = cache ? this.cache.get<{ registryInfo: RegistryInfo | null; brand: Brand | null }>(cacheKey) : null
+      if (cached) {
+        console.log(`WarpRegistry (getInfoByAlias): RegistryInfo found in cache: ${alias}`)
+        return cached
+      }
+
+      const contract = this.getRegistryContractAddress()
+      const controller = this.getController()
+      const query = controller.createQuery({ contract, function: 'getInfoByAlias', arguments: [BytesValue.fromUTF8(alias)] })
+      const res = await controller.runQuery(query)
+      const [registryInfoRaw] = controller.parseQueryResponse(res)
+      const registryInfo = registryInfoRaw ? toTypedRegistryInfo(registryInfoRaw) : null
+      const brand = registryInfo?.brand ? await this.fetchBrand(registryInfo.brand) : null
+
+      if (cache && cache.ttl) {
+        this.cache.set(cacheKey, { registryInfo, brand }, cache.ttl)
+      }
+
+      return { registryInfo, brand }
+    } catch (error) {
+      console.error('WarpRegistry: Error getting info by alias', error)
+      return { registryInfo: null, brand: null }
     }
-
-    const contract = this.getRegistryContractAddress()
-    const controller = this.getController()
-    const query = controller.createQuery({ contract, function: 'getInfoByAlias', arguments: [BytesValue.fromUTF8(alias)] })
-    const res = await controller.runQuery(query)
-    const [registryInfoRaw] = controller.parseQueryResponse(res)
-    const registryInfo = registryInfoRaw ? toTypedRegistryInfo(registryInfoRaw) : null
-    const brand = registryInfo?.brand ? await this.fetchBrand(registryInfo.brand) : null
-
-    if (cache && cache.ttl) {
-      this.cache.set(cacheKey, { registryInfo, brand }, cache.ttl)
-    }
-
-    return { registryInfo, brand }
   }
 
   async getInfoByHash(hash: string, cache?: WarpCacheConfig): Promise<{ registryInfo: RegistryInfo | null; brand: Brand | null }> {
-    const cacheKey = CacheKey.RegistryInfo(hash)
+    try {
+      const cacheKey = CacheKey.RegistryInfo(hash)
 
-    if (cache) {
-      const cached = this.cache.get<{ registryInfo: RegistryInfo | null; brand: Brand | null }>(cacheKey)
-      if (cached) {
-        console.log(`WarpRegistry (getInfoByHash): RegistryInfo found in cache: ${hash}`)
-        return cached
+      if (cache) {
+        const cached = this.cache.get<{ registryInfo: RegistryInfo | null; brand: Brand | null }>(cacheKey)
+        if (cached) {
+          console.log(`WarpRegistry (getInfoByHash): RegistryInfo found in cache: ${hash}`)
+          return cached
+        }
       }
+
+      const contract = this.getRegistryContractAddress()
+      const controller = this.getController()
+      const query = controller.createQuery({ contract, function: 'getInfoByHash', arguments: [BytesValue.fromHex(hash)] })
+      const res = await controller.runQuery(query)
+      const [registryInfoRaw] = controller.parseQueryResponse(res)
+      const registryInfo = registryInfoRaw ? toTypedRegistryInfo(registryInfoRaw) : null
+      const brand = registryInfo?.brand ? await this.fetchBrand(registryInfo.brand) : null
+
+      if (cache && cache.ttl) {
+        this.cache.set(cacheKey, { registryInfo, brand }, cache.ttl)
+      }
+
+      return { registryInfo, brand }
+    } catch (error) {
+      console.error('WarpRegistry: Error getting info by hash', error)
+      return { registryInfo: null, brand: null }
     }
-
-    const contract = this.getRegistryContractAddress()
-    const controller = this.getController()
-    const query = controller.createQuery({ contract, function: 'getInfoByHash', arguments: [BytesValue.fromHex(hash)] })
-    const res = await controller.runQuery(query)
-    const [registryInfoRaw] = controller.parseQueryResponse(res)
-    const registryInfo = registryInfoRaw ? toTypedRegistryInfo(registryInfoRaw) : null
-    const brand = registryInfo?.brand ? await this.fetchBrand(registryInfo.brand) : null
-
-    if (cache && cache.ttl) {
-      this.cache.set(cacheKey, { registryInfo, brand }, cache.ttl)
-    }
-
-    return { registryInfo, brand }
   }
 
   async getUserWarpRegistryInfos(user?: string): Promise<RegistryInfo[]> {
-    const userAddress = user || this.config.userAddress
-    if (!userAddress) throw new Error('WarpRegistry: user address not set')
-    const contract = this.getRegistryContractAddress()
-    const controller = this.getController()
-    const query = controller.createQuery({ contract, function: 'getUserWarps', arguments: [new AddressValue(new Address(userAddress))] })
-    const res = await controller.runQuery(query)
-    const [registryInfosRaw] = controller.parseQueryResponse(res)
-    return registryInfosRaw.map(toTypedRegistryInfo)
+    try {
+      const userWallet = user || this.config.user?.wallet
+      if (!userWallet) throw new Error('WarpRegistry: user address not set')
+      const contract = this.getRegistryContractAddress()
+      const controller = this.getController()
+      const query = controller.createQuery({ contract, function: 'getUserWarps', arguments: [new AddressValue(new Address(userWallet))] })
+      const res = await controller.runQuery(query)
+      const [registryInfosRaw] = controller.parseQueryResponse(res)
+      return registryInfosRaw.map(toTypedRegistryInfo)
+    } catch (error) {
+      console.error('WarpRegistry: Error getting user warp registry infos', error)
+      return []
+    }
   }
 
   async getUserBrands(user?: string): Promise<Brand[]> {
-    const userAddress = user || this.config.userAddress
-    if (!userAddress) throw new Error('WarpRegistry: user address not set')
-    const contract = this.getRegistryContractAddress()
-    const controller = this.getController()
-    const query = controller.createQuery({ contract, function: 'getUserBrands', arguments: [new AddressValue(new Address(userAddress))] })
-    const res = await controller.runQuery(query)
-    const [brandsRaw] = controller.parseQueryResponse(res)
-    const brandHashes: string[] = brandsRaw.map((b: any) => b.toString('hex'))
-    const brandCacheConfig: WarpCacheConfig = { ttl: 365 * 24 * 60 * 60 } // 1 year
-    const brands = await Promise.all(brandHashes.map((hash) => this.fetchBrand(hash, brandCacheConfig)))
-    return brands.filter((b) => b !== null) as Brand[]
+    try {
+      const userWallet = user || this.config.user?.wallet
+      if (!userWallet) throw new Error('WarpRegistry: user address not set')
+      const contract = this.getRegistryContractAddress()
+      const controller = this.getController()
+      const query = controller.createQuery({ contract, function: 'getUserBrands', arguments: [new AddressValue(new Address(userWallet))] })
+      const res = await controller.runQuery(query)
+      const [brandsRaw] = controller.parseQueryResponse(res)
+      const brandHashes: string[] = brandsRaw.map((b: any) => b.toString('hex'))
+      const brandCacheConfig: WarpCacheConfig = { ttl: 365 * 24 * 60 * 60 } // 1 year
+      const brands = await Promise.all(brandHashes.map((hash) => this.fetchBrand(hash, brandCacheConfig)))
+      return brands.filter((b) => b !== null) as Brand[]
+    } catch (error) {
+      console.error('WarpRegistry: Error getting user brands', error)
+      return []
+    }
   }
 
   async getChainInfo(chain: WarpChain, cache?: WarpCacheConfig): Promise<ChainInfo | null> {
-    const cacheKey = CacheKey.ChainInfo(chain)
-    const cached = cache ? this.cache.get<ChainInfo>(cacheKey) : null
-    if (cached) {
-      console.log(`WarpRegistry (getChainInfo): ChainInfo found in cache: ${chain}`)
-      return cached
+    try {
+      const cacheKey = CacheKey.ChainInfo(chain)
+      const cached = cache ? this.cache.get<ChainInfo>(cacheKey) : null
+      if (cached) {
+        console.log(`WarpRegistry (getChainInfo): ChainInfo found in cache: ${chain}`)
+        return cached
+      }
+
+      const contract = this.getRegistryContractAddress()
+      const controller = this.getController()
+      const query = controller.createQuery({ contract, function: 'getChain', arguments: [BytesValue.fromUTF8(chain)] })
+      const res = await controller.runQuery(query)
+      const [chainInfoRaw] = controller.parseQueryResponse(res)
+      const chainInfo = chainInfoRaw ? toTypedChainInfo(chainInfoRaw) : null
+
+      if (cache && cache.ttl && chainInfo) {
+        this.cache.set(cacheKey, chainInfo, cache.ttl)
+      }
+
+      return chainInfo
+    } catch (error) {
+      console.error('WarpRegistry: Error getting chain info', error)
+      return null
     }
-
-    const contract = this.getRegistryContractAddress()
-    const controller = this.getController()
-    const query = controller.createQuery({ contract, function: 'getChain', arguments: [BytesValue.fromUTF8(chain)] })
-    const res = await controller.runQuery(query)
-    const [chainInfoRaw] = controller.parseQueryResponse(res)
-    const chainInfo = chainInfoRaw ? toTypedChainInfo(chainInfoRaw) : null
-
-    if (chainInfo && cache?.ttl) {
-      this.cache.set(cacheKey, chainInfo, cache.ttl)
-    }
-
-    return chainInfo
   }
 
   async fetchBrand(hash: string, cache?: WarpCacheConfig): Promise<Brand | null> {
@@ -227,10 +252,12 @@ export class WarpRegistry {
       return cached
     }
 
-    const chainApi = WarpUtils.getConfiguredChainApi(this.config)
+    const chainInfo = getMainChainInfo(this.config)
+    const chainEntry = WarpUtils.getChainEntrypoint(chainInfo, this.config.env)
+    const chainProvider = chainEntry.createNetworkProvider()
 
     try {
-      const tx = await chainApi.getTransaction(hash)
+      const tx = await chainProvider.getTransaction(hash)
       const brand = JSON.parse(tx.data.toString()) as Brand
 
       brand.meta = {
@@ -270,7 +297,7 @@ export class WarpRegistry {
   }
 
   private getController(): SmartContractController {
-    const chainInfo = getDefaultChainInfo(this.config)
+    const chainInfo = getMainChainInfo(this.config)
     const entrypoint = WarpUtils.getChainEntrypoint(chainInfo, this.config.env)
     const abi = AbiRegistry.create(RegistryAbi)
     return entrypoint.createSmartContractController(abi)

@@ -10,11 +10,16 @@ export const WarpConstants = {
     Hash: 'hash',
   },
 
+  Source: {
+    UserWallet: 'user:wallet',
+  },
+
   ArgParamsSeparator: ':',
   ArgCompositeSeparator: '|',
 
   Egld: {
     Identifier: 'EGLD',
+    EsdtIdentifier: 'EGLD-000000',
     DisplayName: 'eGold',
     Decimals: 18,
   },

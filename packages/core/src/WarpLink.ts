@@ -1,7 +1,7 @@
 import QRCodeStyling from 'qr-code-styling'
 import { Config } from './config'
 import { WarpConstants } from './constants'
-import { Brand, RegistryInfo, Warp, WarpConfig, WarpIdType } from './types'
+import { Brand, RegistryInfo, Warp, WarpCacheConfig, WarpConfig, WarpIdType } from './types'
 import { WarpBuilder } from './WarpBuilder'
 import { WarpRegistry } from './WarpRegistry'
 import { WarpUtils } from './WarpUtils'
@@ -48,39 +48,48 @@ export class WarpLink {
     return { match: hasMatch, results }
   }
 
-  async detect(url: string): Promise<DetectionResult> {
-    const idResult = url.startsWith(WarpConstants.HttpProtocolPrefix)
-      ? this.extractIdentifierInfoFromUrl(url)
-      : WarpUtils.getInfoFromPrefixedIdentifier(url)
+  async detect(url: string, cache?: WarpCacheConfig): Promise<DetectionResult> {
+    const emptyResult: DetectionResult = { match: false, url, warp: null, registryInfo: null, brand: null }
+    try {
+      const idResult = url.startsWith(WarpConstants.HttpProtocolPrefix)
+        ? this.extractIdentifierInfoFromUrl(url)
+        : WarpUtils.getInfoFromPrefixedIdentifier(url)
 
-    if (!idResult) {
-      return { match: false, url, warp: null, registryInfo: null, brand: null }
-    }
+      if (!idResult) {
+        return emptyResult
+      }
 
-    const { type, id } = idResult
-    const builder = new WarpBuilder(this.config)
-    const registry = new WarpRegistry(this.config)
-    let warp: Warp | null = null
-    let registryInfo: RegistryInfo | null = null
-    let brand: Brand | null = null
+      const { type, identifier, identifierBase } = idResult
+      const builder = new WarpBuilder(this.config)
+      const registry = new WarpRegistry(this.config)
+      let warp: Warp | null = null
+      let registryInfo: RegistryInfo | null = null
+      let brand: Brand | null = null
 
-    if (type === 'hash') {
-      warp = await builder.createFromTransactionHash(id)
-      try {
-        const { registryInfo: ri, brand: bi } = await registry.getInfoByHash(id)
+      if (type === 'hash') {
+        warp = await builder.createFromTransactionHash(identifierBase, cache)
+        try {
+          const { registryInfo: ri, brand: bi } = await registry.getInfoByHash(identifierBase, cache)
+          registryInfo = ri
+          brand = bi
+        } catch (e) {}
+      } else if (type === 'alias') {
+        const { registryInfo: ri, brand: bi } = await registry.getInfoByAlias(identifierBase, cache)
         registryInfo = ri
         brand = bi
-      } catch (e) {}
-    } else if (type === 'alias') {
-      const { registryInfo: ri, brand: bi } = await registry.getInfoByAlias(id)
-      registryInfo = ri
-      brand = bi
-      if (ri) {
-        warp = await builder.createFromTransactionHash(ri.hash)
+        if (ri) {
+          warp = await builder.createFromTransactionHash(ri.hash, cache)
+        }
       }
-    }
 
-    return warp ? { match: true, url, warp, registryInfo, brand } : { match: false, url, warp: null, registryInfo: null, brand: null }
+      const configWithCurrentUrl = { ...this.config, currentUrl: url }
+      const preparedWarp = warp ? WarpUtils.prepareVars(warp, configWithCurrentUrl) : null
+
+      return warp ? { match: true, url, warp: preparedWarp, registryInfo, brand } : emptyResult
+    } catch (e) {
+      console.error(e)
+      return emptyResult
+    }
   }
 
   build(type: WarpIdType, id: string): string {
@@ -93,6 +102,12 @@ export class WarpLink {
     return Config.SuperClientUrls.includes(clientUrl)
       ? `${clientUrl}/${encodedValue}`
       : `${clientUrl}?${WarpConstants.IdentifierParamName}=${encodedValue}`
+  }
+
+  buildFromPrefixedIdentifier(prefixedIdentifier: string): string {
+    const idResult = WarpUtils.getInfoFromPrefixedIdentifier(prefixedIdentifier)
+    if (!idResult) return ''
+    return this.build(idResult.type, idResult.identifierBase)
   }
 
   generateQrCode(type: WarpIdType, id: string, size = 512, background = 'white', color = 'black', logoColor = '#23F7DD'): QRCodeStyling {
@@ -114,7 +129,7 @@ export class WarpLink {
     })
   }
 
-  private extractIdentifierInfoFromUrl(url: string): { type: WarpIdType; id: string } | null {
+  private extractIdentifierInfoFromUrl(url: string): { type: WarpIdType; identifier: string; identifierBase: string } | null {
     const urlObj = new URL(url)
     const isSuperClient = Config.SuperClientUrls.includes(urlObj.origin)
     const searchParamValue = urlObj.searchParams.get(WarpConstants.IdentifierParamName)

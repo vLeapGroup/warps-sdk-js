@@ -1,5 +1,5 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
-import { getChainId, getLatestProtocolIdentifier } from './helpers'
+import { getChainId, getLatestProtocolIdentifier, getMainChainInfo } from './helpers/general'
 import { AbiContents, WarpAbi, WarpCacheConfig, WarpConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
 import { WarpUtils } from './WarpUtils'
@@ -13,7 +13,7 @@ export class WarpAbiBuilder {
   }
 
   createInscriptionTransaction(abi: AbiContents): Transaction {
-    if (!this.config.userAddress) throw new Error('WarpBuilder: user address not set')
+    if (!this.config.user?.wallet) throw new Error('WarpBuilder: user address not set')
     const factoryConfig = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
     const factory = new TransferTransactionsFactory({ config: factoryConfig })
 
@@ -22,7 +22,7 @@ export class WarpAbiBuilder {
       content: abi,
     }
 
-    const sender = Address.newFromBech32(this.config.userAddress)
+    const sender = Address.newFromBech32(this.config.user.wallet)
     const serialized = JSON.stringify(warpAbi)
 
     const tx = factory.createTransactionForTransfer(sender, {
@@ -63,10 +63,12 @@ export class WarpAbiBuilder {
       }
     }
 
-    const chainApi = WarpUtils.getConfiguredChainApi(this.config)
+    const chainInfo = getMainChainInfo(this.config)
+    const chainEntry = WarpUtils.getChainEntrypoint(chainInfo, this.config.env)
+    const chainProvider = chainEntry.createNetworkProvider()
 
     try {
-      const tx = await chainApi.getTransaction(hash)
+      const tx = await chainProvider.getTransaction(hash)
       const abi = await this.createFromTransaction(tx)
 
       if (cache && cache.ttl && abi) {

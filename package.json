@@ -17,7 +17,7 @@
     "eslint-config-custom": "*",
     "prettier": "^3.5.3",
     "ts-json-schema-generator": "^2.4.0",
-    "turbo": "^2.5.0"
+    "turbo": "^2.5.2"
   },
   "name": "warp-sdk-js",
   "packageManager": "npm@11.3.0",

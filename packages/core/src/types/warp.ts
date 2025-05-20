@@ -7,8 +7,11 @@ export type WarpConfig = {
   env: ChainEnv
   clientUrl?: string
   currentUrl?: string
-  userAddress?: string
+  user?: {
+    wallet?: string
+  }
   chainApiUrl?: string
+  chainExplorerUrl?: string
   warpSchemaUrl?: string
   brandSchemaUrl?: string
   cacheTtl?: number
@@ -26,7 +29,9 @@ export type WarpCacheConfig = {
 
 export type ChainInfo = {
   chainId: string
+  blockTime: number
   apiUrl: string
+  explorerUrl: string
 }
 
 export type WarpIdType = 'hash' | 'alias'
@@ -118,8 +123,8 @@ export type WarpCollectAction = {
   description?: string | null
   destination: {
     url: string
-    method: 'GET' | 'POST'
-    headers: Record<string, string>
+    method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+    headers?: Record<string, string>
   }
   inputs?: WarpActionInput[]
   next?: string
@@ -133,7 +138,7 @@ export type WarpLinkAction = {
   inputs?: WarpActionInput[]
 }
 
-export type WarpActionInputSource = 'field' | 'query' | 'user_wallet'
+export type WarpActionInputSource = 'field' | 'query' | 'user:wallet'
 
 export type BaseWarpActionInputType =
   | 'string'
@@ -162,7 +167,7 @@ export type WarpActionInput = {
   description?: string | null
   bot?: string
   type: WarpActionInputType
-  position: WarpActionInputPosition
+  position?: WarpActionInputPosition
   source: WarpActionInputSource
   required?: boolean
   min?: number | WarpVarPlaceholder
@@ -171,14 +176,6 @@ export type WarpActionInput = {
   patternDescription?: string
   options?: string[]
   modifier?: string
-}
-
-export type WarpActionExecutionResult = {
-  action: WarpAction
-  user: {
-    address: string
-  }
-  tx?: string
 }
 
 export type WarpContract = {

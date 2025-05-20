@@ -1,5 +1,5 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
-import { getChainId, getLatestProtocolIdentifier, toPreviewText } from './helpers'
+import { getChainId, getLatestProtocolIdentifier, getMainChainInfo, toPreviewText } from './helpers/general'
 import { Warp, WarpAction, WarpCacheConfig, WarpConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
 import { WarpUtils } from './WarpUtils'
@@ -24,14 +24,14 @@ export class WarpBuilder {
   }
 
   createInscriptionTransaction(warp: Warp): Transaction {
-    if (!this.config.userAddress) throw new Error('WarpBuilder: user address not set')
+    if (!this.config.user?.wallet) throw new Error('WarpBuilder: user address not set')
     const factoryConfig = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
     const factory = new TransferTransactionsFactory({ config: factoryConfig })
-    const sender = Address.newFromBech32(this.config.userAddress)
+    const sender = Address.newFromBech32(this.config.user.wallet)
     const serialized = JSON.stringify(warp)
 
     const tx = factory.createTransactionForTransfer(sender, {
-      receiver: Address.newFromBech32(this.config.userAddress),
+      receiver: Address.newFromBech32(this.config.user.wallet),
       nativeAmount: BigInt(0),
       data: Uint8Array.from(Buffer.from(serialized)),
     })
@@ -45,8 +45,7 @@ export class WarpBuilder {
     const warp = JSON.parse(encoded) as Warp
 
     if (validate) {
-      const validator = new WarpValidator(this.config)
-      await validator.validate(warp)
+      await this.validate(warp)
     }
 
     return WarpUtils.prepareVars(warp, this.config)
@@ -57,7 +56,7 @@ export class WarpBuilder {
 
     warp.meta = {
       hash: tx.hash,
-      creator: tx.sender.bech32(),
+      creator: tx.sender.toBech32(),
       createdAt: new Date(tx.timestamp * 1000).toISOString(),
     }
 
@@ -75,10 +74,12 @@ export class WarpBuilder {
       }
     }
 
-    const chainApi = WarpUtils.getConfiguredChainApi(this.config)
+    const chainInfo = getMainChainInfo(this.config)
+    const chainEntry = WarpUtils.getChainEntrypoint(chainInfo, this.config.env)
+    const chainProvider = chainEntry.createNetworkProvider()
 
     try {
-      const tx = await chainApi.getTransaction(hash)
+      const tx = await chainProvider.getTransaction(hash)
       const warp = await this.createFromTransaction(tx)
 
       if (cache && cache.ttl && warp) {
@@ -128,8 +129,7 @@ export class WarpBuilder {
     this.ensure(this.pendingWarp.title, 'title is required')
     this.ensure(this.pendingWarp.actions.length > 0, 'actions are required')
 
-    const validator = new WarpValidator(this.config)
-    await validator.validate(this.pendingWarp)
+    await this.validate(this.pendingWarp)
 
     return this.pendingWarp
   }
@@ -140,7 +140,16 @@ export class WarpBuilder {
 
   private ensure(value: string | null | boolean, errorMessage: string): void {
     if (!value) {
-      throw new Error(`WarpBuilder: ${errorMessage}`)
+      throw new Error(errorMessage)
+    }
+  }
+
+  private async validate(warp: Warp): Promise<void> {
+    const validator = new WarpValidator(this.config)
+    const validationResult = await validator.validate(warp)
+
+    if (!validationResult.valid) {
+      throw new Error(validationResult.errors.join('\n'))
     }
   }
 }

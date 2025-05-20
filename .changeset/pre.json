@@ -1,0 +1,40 @@
+{
+  "mode": "pre",
+  "tag": "alpha",
+  "initialVersions": {
+    "@vleap/warps": "1.5.0",
+    "eslint-config-custom": "0.0.0",
+    "@vleap/warps-react": "0.0.4",
+    "tsconfig": "0.0.1"
+  },
+  "changesets": [
+    "angry-bananas-obey",
+    "better-towns-wait",
+    "blue-moments-wish",
+    "calm-hats-rescue",
+    "clean-trains-do",
+    "cool-bears-hammer",
+    "cool-kiwis-worry",
+    "dry-mice-count",
+    "early-lizards-send",
+    "every-women-press",
+    "fluffy-plums-beg",
+    "hip-keys-marry",
+    "hot-coins-peel",
+    "lazy-houses-dress",
+    "loud-bears-take",
+    "nice-heads-march",
+    "ninety-singers-move",
+    "proud-rooms-allow",
+    "rude-bikes-joke",
+    "smart-kings-itch",
+    "smooth-crabs-decide",
+    "soft-moons-make",
+    "some-boats-cover",
+    "stupid-ghosts-cry",
+    "thick-cars-return",
+    "thirty-horses-sin",
+    "upset-oranges-press",
+    "whole-colts-yawn"
+  ]
+}
