@@ -96,6 +96,18 @@ export class WarpRegistry {
     })
   }
 
+  createWarpTransferOwnershipTransaction(txHash: string, newOwner: string): Transaction {
+    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.user.wallet)
+
+    return this.getFactory().createTransactionForExecute(sender, {
+      contract: this.getRegistryContractAddress(),
+      function: 'transferOwnership',
+      gasLimit: BigInt(10_000_000),
+      arguments: [BytesValue.fromHex(txHash), new AddressValue(new Address(newOwner))],
+    })
+  }
+
   createBrandRegisterTransaction(txHash: string): Transaction {
     if (this.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
     if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
