@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-beta.25
+
+### Minor Changes
+
+- 73c0057: add registry transfer ownership
+
 ## 2.0.0-beta.24
 
 ### Patch Changes
