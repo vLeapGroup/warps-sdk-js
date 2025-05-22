@@ -50,16 +50,17 @@ export class WarpLink {
 
   async detect(url: string, cache?: WarpCacheConfig): Promise<DetectionResult> {
     const emptyResult: DetectionResult = { match: false, url, warp: null, registryInfo: null, brand: null }
+
+    const idResult = url.startsWith(WarpConstants.HttpProtocolPrefix)
+      ? this.extractIdentifierInfoFromUrl(url)
+      : WarpUtils.getInfoFromPrefixedIdentifier(url)
+
+    if (!idResult) {
+      return emptyResult
+    }
+
     try {
-      const idResult = url.startsWith(WarpConstants.HttpProtocolPrefix)
-        ? this.extractIdentifierInfoFromUrl(url)
-        : WarpUtils.getInfoFromPrefixedIdentifier(url)
-
-      if (!idResult) {
-        return emptyResult
-      }
-
-      const { type, identifier, identifierBase } = idResult
+      const { type, identifierBase } = idResult
       const builder = new WarpBuilder(this.config)
       const registry = new WarpRegistry(this.config)
       let warp: Warp | null = null
@@ -68,17 +69,15 @@ export class WarpLink {
 
       if (type === 'hash') {
         warp = await builder.createFromTransactionHash(identifierBase, cache)
-        try {
-          const { registryInfo: ri, brand: bi } = await registry.getInfoByHash(identifierBase, cache)
-          registryInfo = ri
-          brand = bi
-        } catch (e) {}
+        const result = await registry.getInfoByHash(identifierBase, cache)
+        registryInfo = result.registryInfo
+        brand = result.brand
       } else if (type === 'alias') {
-        const { registryInfo: ri, brand: bi } = await registry.getInfoByAlias(identifierBase, cache)
-        registryInfo = ri
-        brand = bi
-        if (ri) {
-          warp = await builder.createFromTransactionHash(ri.hash, cache)
+        const result = await registry.getInfoByAlias(identifierBase, cache)
+        registryInfo = result.registryInfo
+        brand = result.brand
+        if (result.registryInfo) {
+          warp = await builder.createFromTransactionHash(result.registryInfo.hash, cache)
         }
       }
 
@@ -87,7 +86,7 @@ export class WarpLink {
 
       return warp ? { match: true, url, warp: preparedWarp, registryInfo, brand } : emptyResult
     } catch (e) {
-      console.error(e)
+      console.error(`Error detecting warp from URL ${url}:`, e)
       return emptyResult
     }
   }

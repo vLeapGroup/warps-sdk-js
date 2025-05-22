@@ -196,4 +196,80 @@ describe('detect', () => {
       brand: null,
     })
   })
+
+  it('handles null registry info for hash', async () => {
+    ;(WarpRegistry as jest.Mock).mockImplementation(() => ({
+      getInfoByHash: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
+    }))
+
+    const link = new WarpLink(Config)
+    const result = await link.detect('https://anyclient.com?warp=hash:123')
+
+    expect(result).toEqual({
+      match: true,
+      url: 'https://anyclient.com?warp=hash:123',
+      warp: mockWarp,
+      registryInfo: null,
+      brand: null,
+    })
+  })
+
+  it('handles null registry info for alias', async () => {
+    ;(WarpRegistry as jest.Mock).mockImplementation(() => ({
+      getInfoByAlias: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
+    }))
+
+    const link = new WarpLink(Config)
+    const result = await link.detect('https://anyclient.com?warp=mywarp')
+
+    expect(result).toEqual({
+      match: false,
+      url: 'https://anyclient.com?warp=mywarp',
+      warp: null,
+      registryInfo: null,
+      brand: null,
+    })
+  })
+
+  it('returns empty result when warp creation fails', async () => {
+    const mockError = new Error('Failed to create warp')
+    ;(WarpBuilder as jest.Mock).mockImplementation(() => ({
+      createFromTransactionHash: jest.fn().mockRejectedValue(mockError),
+    }))
+
+    const link = new WarpLink(Config)
+    const result = await link.detect('https://anyclient.com?warp=hash:123')
+
+    expect(result).toEqual({
+      match: false,
+      url: 'https://anyclient.com?warp=hash:123',
+      warp: null,
+      registryInfo: null,
+      brand: null,
+    })
+  })
+
+  it('returns empty result when URL parsing fails', async () => {
+    ;(WarpBuilder as jest.Mock).mockImplementation(() => ({
+      createFromTransactionHash: jest.fn().mockImplementation((id) => {
+        if (id === 'invalid-url') return Promise.resolve(null)
+        return Promise.resolve(mockWarp)
+      }),
+    }))
+    ;(WarpRegistry as jest.Mock).mockImplementation(() => ({
+      getInfoByHash: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
+      getInfoByAlias: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
+    }))
+
+    const link = new WarpLink(Config)
+    const result = await link.detect('invalid-url')
+
+    expect(result).toEqual({
+      match: false,
+      url: 'invalid-url',
+      warp: null,
+      registryInfo: null,
+      brand: null,
+    })
+  })
 })
