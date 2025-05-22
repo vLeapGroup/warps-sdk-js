@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-beta.26
+
+### Patch Changes
+
+- 9fda71f: update registry abi
+
 ## 2.0.0-beta.25
 
 ### Minor Changes
