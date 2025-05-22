@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-beta.24
+
+### Patch Changes
+
+- 437731c: fix warp detection
+
 ## 2.0.0-alpha.23
 
 ### Major Changes

@@ -1,10 +1,10 @@
 {
-  "mode": "exit",
-  "tag": "alpha",
+  "mode": "pre",
+  "tag": "beta",
   "initialVersions": {
-    "@vleap/warps": "1.5.0",
+    "@vleap/warps": "2.0.0-alpha.23",
     "eslint-config-custom": "0.0.0",
-    "@vleap/warps-react": "0.0.4",
+    "@vleap/warps-react": "0.0.5-alpha.23",
     "tsconfig": "0.0.1"
   },
   "changesets": [
@@ -34,6 +34,7 @@
     "stupid-ghosts-cry",
     "thick-cars-return",
     "thirty-horses-sin",
+    "tidy-parrots-tan",
     "upset-oranges-press",
     "whole-colts-yawn"
   ]
