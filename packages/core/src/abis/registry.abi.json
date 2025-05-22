@@ -1,345 +1,501 @@
 {
-  "buildInfo": {
-    "rustc": {
-      "version": "1.80.0-nightly",
-      "commitHash": "791adf759cc065316f054961875052d5bc03e16c",
-      "commitDate": "2024-05-21",
-      "channel": "Nightly",
-      "short": "rustc 1.80.0-nightly (791adf759 2024-05-21)"
+    "buildInfo": {
+        "rustc": {
+            "version": "1.86.0",
+            "commitHash": "05f9846f893b09a1be1fc8560e33fc3c815cfecb",
+            "commitDate": "2025-03-31",
+            "channel": "Stable",
+            "short": "rustc 1.86.0 (05f9846f8 2025-03-31)"
+        },
+        "contractCrate": {
+            "name": "registry",
+            "version": "0.0.1"
+        },
+        "framework": {
+            "name": "multiversx-sc",
+            "version": "0.51.1"
+        }
     },
-    "contractCrate": {
-      "name": "registry",
-      "version": "0.0.1"
+    "name": "RegistryContract",
+    "constructor": {
+        "inputs": [
+            {
+                "name": "unit_price",
+                "type": "BigUint"
+            },
+            {
+                "name": "vault",
+                "type": "Address"
+            }
+        ],
+        "outputs": []
     },
-    "framework": {
-      "name": "multiversx-sc",
-      "version": "0.51.1"
-    }
-  },
-  "name": "RegistryContract",
-  "constructor": {
-    "inputs": [
-      {
-        "name": "unit_price",
-        "type": "BigUint"
-      },
-      {
-        "name": "vault",
-        "type": "Address"
-      }
+    "upgradeConstructor": {
+        "inputs": [],
+        "outputs": []
+    },
+    "endpoints": [
+        {
+            "name": "registerWarp",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "EGLD"
+            ],
+            "inputs": [
+                {
+                    "name": "hash",
+                    "type": "bytes"
+                },
+                {
+                    "name": "alias_opt",
+                    "type": "optional<bytes>",
+                    "multi_arg": true
+                },
+                {
+                    "name": "brand_opt",
+                    "type": "optional<bytes>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": [],
+            "allow_multiple_var_args": true
+        },
+        {
+            "name": "unregisterWarp",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "warp",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "upgradeWarp",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "EGLD"
+            ],
+            "inputs": [
+                {
+                    "name": "alias",
+                    "type": "bytes"
+                },
+                {
+                    "name": "new_warp",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setWarpAlias",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "EGLD"
+            ],
+            "inputs": [
+                {
+                    "name": "hash",
+                    "type": "bytes"
+                },
+                {
+                    "name": "alias",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "verifyWarp",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "warp",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "transferOwnership",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "warp",
+                    "type": "bytes"
+                },
+                {
+                    "name": "new_owner",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getUserWarps",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "variadic<InfoView>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getInfoByAlias",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "alias",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "InfoView"
+                }
+            ]
+        },
+        {
+            "name": "getInfoByHash",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "hash",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "InfoView"
+                }
+            ]
+        },
+        {
+            "name": "setVault",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "vault",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setUnitPrice",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "amount",
+                    "type": "BigUint"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "addAdmin",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "removeAdmin",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getConfig",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "registerBrand",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "EGLD"
+            ],
+            "inputs": [
+                {
+                    "name": "hash",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "brandWarp",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "EGLD"
+            ],
+            "inputs": [
+                {
+                    "name": "warp",
+                    "type": "bytes"
+                },
+                {
+                    "name": "brand",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getUserBrands",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "variadic<bytes>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "setChain",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "name",
+                    "type": "bytes"
+                },
+                {
+                    "name": "env",
+                    "type": "bytes"
+                },
+                {
+                    "name": "chain_id",
+                    "type": "bytes"
+                },
+                {
+                    "name": "block_time",
+                    "type": "u64"
+                },
+                {
+                    "name": "api_url",
+                    "type": "bytes"
+                },
+                {
+                    "name": "explorer_url",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "removeChain",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "name",
+                    "type": "bytes"
+                },
+                {
+                    "name": "env",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getChain",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "name",
+                    "type": "bytes"
+                },
+                {
+                    "name": "env",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "ChainInfo"
+                }
+            ]
+        }
     ],
-    "outputs": []
-  },
-  "upgradeConstructor": {
-    "inputs": [],
-    "outputs": []
-  },
-  "endpoints": [
-    {
-      "name": "registerWarp",
-      "mutability": "mutable",
-      "payableInTokens": ["EGLD"],
-      "inputs": [
+    "events": [
         {
-          "name": "hash",
-          "type": "bytes"
+            "identifier": "warpRegistered",
+            "inputs": [
+                {
+                    "name": "hash",
+                    "type": "bytes",
+                    "indexed": true
+                },
+                {
+                    "name": "alias",
+                    "type": "bytes",
+                    "indexed": true
+                }
+            ]
         },
         {
-          "name": "alias_opt",
-          "type": "optional<bytes>",
-          "multi_arg": true
+            "identifier": "warpUnregistered",
+            "inputs": [
+                {
+                    "name": "hash",
+                    "type": "bytes",
+                    "indexed": true
+                }
+            ]
         },
         {
-          "name": "brand_opt",
-          "type": "optional<bytes>",
-          "multi_arg": true
-        }
-      ],
-      "outputs": [],
-      "allow_multiple_var_args": true
-    },
-    {
-      "name": "unregisterWarp",
-      "mutability": "mutable",
-      "inputs": [
-        {
-          "name": "warp",
-          "type": "bytes"
-        }
-      ],
-      "outputs": []
-    },
-    {
-      "name": "upgradeWarp",
-      "mutability": "mutable",
-      "payableInTokens": ["EGLD"],
-      "inputs": [
-        {
-          "name": "alias",
-          "type": "bytes"
+            "identifier": "warpUpgraded",
+            "inputs": [
+                {
+                    "name": "alias",
+                    "type": "bytes",
+                    "indexed": true
+                },
+                {
+                    "name": "new_warp",
+                    "type": "bytes",
+                    "indexed": true
+                }
+            ]
         },
         {
-          "name": "new_warp",
-          "type": "bytes"
-        }
-      ],
-      "outputs": []
-    },
-    {
-      "name": "setWarpAlias",
-      "mutability": "mutable",
-      "payableInTokens": ["EGLD"],
-      "inputs": [
-        {
-          "name": "hash",
-          "type": "bytes"
+            "identifier": "warpVerified",
+            "inputs": [
+                {
+                    "name": "hash",
+                    "type": "bytes",
+                    "indexed": true
+                }
+            ]
         },
         {
-          "name": "alias",
-          "type": "bytes"
-        }
-      ],
-      "outputs": []
-    },
-    {
-      "name": "verifyWarp",
-      "onlyOwner": true,
-      "mutability": "mutable",
-      "inputs": [
-        {
-          "name": "warp",
-          "type": "bytes"
-        }
-      ],
-      "outputs": []
-    },
-    {
-      "name": "getUserWarps",
-      "mutability": "readonly",
-      "inputs": [
-        {
-          "name": "address",
-          "type": "Address"
-        }
-      ],
-      "outputs": [
-        {
-          "type": "variadic<InfoView>",
-          "multi_result": true
-        }
-      ]
-    },
-    {
-      "name": "getInfoByAlias",
-      "mutability": "readonly",
-      "inputs": [
-        {
-          "name": "alias",
-          "type": "bytes"
-        }
-      ],
-      "outputs": [
-        {
-          "type": "InfoView"
-        }
-      ]
-    },
-    {
-      "name": "getInfoByHash",
-      "mutability": "readonly",
-      "inputs": [
-        {
-          "name": "hash",
-          "type": "bytes"
-        }
-      ],
-      "outputs": [
-        {
-          "type": "InfoView"
-        }
-      ]
-    },
-    {
-      "name": "setVault",
-      "onlyOwner": true,
-      "mutability": "mutable",
-      "inputs": [
-        {
-          "name": "vault",
-          "type": "Address"
-        }
-      ],
-      "outputs": []
-    },
-    {
-      "name": "setUnitPrice",
-      "onlyOwner": true,
-      "mutability": "mutable",
-      "inputs": [
-        {
-          "name": "amount",
-          "type": "BigUint"
-        }
-      ],
-      "outputs": []
-    },
-    {
-      "name": "getConfig",
-      "mutability": "readonly",
-      "inputs": [],
-      "outputs": [
-        {
-          "type": "BigUint"
-        }
-      ]
-    },
-    {
-      "name": "registerBrand",
-      "mutability": "mutable",
-      "payableInTokens": ["EGLD"],
-      "inputs": [
-        {
-          "name": "hash",
-          "type": "bytes"
-        }
-      ],
-      "outputs": []
-    },
-    {
-      "name": "brandWarp",
-      "mutability": "mutable",
-      "payableInTokens": ["EGLD"],
-      "inputs": [
-        {
-          "name": "warp",
-          "type": "bytes"
+            "identifier": "aliasUpdated",
+            "inputs": [
+                {
+                    "name": "hash",
+                    "type": "bytes",
+                    "indexed": true
+                },
+                {
+                    "name": "alias",
+                    "type": "bytes",
+                    "indexed": true
+                }
+            ]
         },
         {
-          "name": "brand",
-          "type": "bytes"
+            "identifier": "ownershipTransferred",
+            "inputs": [
+                {
+                    "name": "warp",
+                    "type": "bytes",
+                    "indexed": true
+                },
+                {
+                    "name": "old_owner",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "new_owner",
+                    "type": "Address",
+                    "indexed": true
+                }
+            ]
         }
-      ],
-      "outputs": []
-    },
-    {
-      "name": "getUserBrands",
-      "mutability": "readonly",
-      "inputs": [
-        {
-          "name": "user",
-          "type": "Address"
+    ],
+    "esdtAttributes": [],
+    "hasCallback": false,
+    "types": {
+        "ChainInfo": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "chain_id",
+                    "type": "bytes"
+                },
+                {
+                    "name": "block_time",
+                    "type": "u64"
+                },
+                {
+                    "name": "api_url",
+                    "type": "bytes"
+                },
+                {
+                    "name": "explorer_url",
+                    "type": "bytes"
+                }
+            ]
+        },
+        "InfoView": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "hash",
+                    "type": "bytes"
+                },
+                {
+                    "name": "alias",
+                    "type": "Option<bytes>"
+                },
+                {
+                    "name": "trust",
+                    "type": "bytes"
+                },
+                {
+                    "name": "creator",
+                    "type": "Address"
+                },
+                {
+                    "name": "created_at",
+                    "type": "u64"
+                },
+                {
+                    "name": "brand",
+                    "type": "Option<bytes>"
+                },
+                {
+                    "name": "upgrade",
+                    "type": "Option<bytes>"
+                }
+            ]
         }
-      ],
-      "outputs": [
-        {
-          "type": "variadic<bytes>",
-          "multi_result": true
-        }
-      ]
     }
-  ],
-  "events": [
-    {
-      "identifier": "warpRegistered",
-      "inputs": [
-        {
-          "name": "hash",
-          "type": "bytes",
-          "indexed": true
-        },
-        {
-          "name": "alias",
-          "type": "bytes",
-          "indexed": true
-        }
-      ]
-    },
-    {
-      "identifier": "warpUnregistered",
-      "inputs": [
-        {
-          "name": "hash",
-          "type": "bytes",
-          "indexed": true
-        }
-      ]
-    },
-    {
-      "identifier": "warpUpgraded",
-      "inputs": [
-        {
-          "name": "alias",
-          "type": "bytes",
-          "indexed": true
-        },
-        {
-          "name": "new_warp",
-          "type": "bytes",
-          "indexed": true
-        }
-      ]
-    },
-    {
-      "identifier": "warpVerified",
-      "inputs": [
-        {
-          "name": "hash",
-          "type": "bytes",
-          "indexed": true
-        }
-      ]
-    },
-    {
-      "identifier": "aliasUpdated",
-      "inputs": [
-        {
-          "name": "hash",
-          "type": "bytes",
-          "indexed": true
-        },
-        {
-          "name": "alias",
-          "type": "bytes",
-          "indexed": true
-        }
-      ]
-    }
-  ],
-  "esdtAttributes": [],
-  "hasCallback": false,
-  "types": {
-    "InfoView": {
-      "type": "struct",
-      "fields": [
-        {
-          "name": "hash",
-          "type": "bytes"
-        },
-        {
-          "name": "alias",
-          "type": "Option<bytes>"
-        },
-        {
-          "name": "trust",
-          "type": "bytes"
-        },
-        {
-          "name": "creator",
-          "type": "Address"
-        },
-        {
-          "name": "created_at",
-          "type": "u64"
-        },
-        {
-          "name": "brand",
-          "type": "Option<bytes>"
-        },
-        {
-          "name": "upgrade",
-          "type": "Option<bytes>"
-        }
-      ]
-    }
-  }
 }
