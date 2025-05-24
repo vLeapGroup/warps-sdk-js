@@ -488,6 +488,10 @@
                     "type": "u64"
                 },
                 {
+                    "name": "upgraded_at",
+                    "type": "u64"
+                },
+                {
                     "name": "brand",
                     "type": "Option<bytes>"
                 },
