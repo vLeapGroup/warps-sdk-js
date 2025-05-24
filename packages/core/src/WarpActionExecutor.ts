@@ -53,9 +53,11 @@ export class WarpActionExecutor {
     this.contractLoader = new WarpContractLoader(config)
   }
 
-  async createTransactionForExecute(action: WarpTransferAction | WarpContractAction, inputs: string[]): Promise<Transaction> {
+  async createTransactionForExecute(warp: Warp, actionIndex: number, inputs: string[]): Promise<Transaction> {
     if (!this.config.user?.wallet) throw new Error('WarpActionExecutor: user address not set')
     const sender = Address.newFromBech32(this.config.user.wallet)
+    const preparedWarp = WarpUtils.prepareVars(warp, this.config)
+    const action = getWarpActionByIndex(preparedWarp, actionIndex) as WarpTransferAction | WarpContractAction
     const chainInfo = await WarpUtils.getChainInfoForAction(action, this.config)
     const config = new TransactionsFactoryConfig({ chainID: chainInfo.chainId })
 
@@ -88,14 +90,15 @@ export class WarpActionExecutor {
   }
 
   async getTransactionExecutionResults(warp: Warp, actionIndex: number, tx: TransactionOnNetwork): Promise<WarpExecution> {
-    const action = getWarpActionByIndex(warp, actionIndex) as WarpContractAction
-    const { values, results } = await extractContractResults(this, warp, action, tx)
-    const next = WarpUtils.getNextInfo(warp, actionIndex, results, this.config)
-    const messages = this.getPreparedMessages(warp, results)
+    const preparedWarp = WarpUtils.prepareVars(warp, this.config)
+    const action = getWarpActionByIndex(preparedWarp, actionIndex) as WarpContractAction
+    const { values, results } = await extractContractResults(this, preparedWarp, action, tx)
+    const next = WarpUtils.getNextInfo(preparedWarp, actionIndex, results, this.config)
+    const messages = this.getPreparedMessages(preparedWarp, results)
 
     return {
       success: tx.status.isSuccessful(),
-      warp,
+      warp: preparedWarp,
       action: actionIndex,
       user: this.config.user?.wallet || null,
       txHash: tx.hash,

@@ -81,12 +81,8 @@ export class WarpLink {
         }
       }
 
-      const configWithCurrentUrl = { ...this.config, currentUrl: url }
-      const preparedWarp = warp ? WarpUtils.prepareVars(warp, configWithCurrentUrl) : null
-
-      return warp ? { match: true, url, warp: preparedWarp, registryInfo, brand } : emptyResult
+      return warp ? { match: true, url, warp, registryInfo, brand } : emptyResult
     } catch (e) {
-      console.error(`Error detecting warp from URL ${url}:`, e)
       return emptyResult
     }
   }

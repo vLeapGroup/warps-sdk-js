@@ -25,7 +25,11 @@ describe('WarpActionExecutor', () => {
       data: 'string:hello',
     }
 
-    const actual = await subject.createTransactionForExecute(action, [])
+    const warp = {
+      actions: [action],
+    } as any as Warp
+
+    const actual = await subject.createTransactionForExecute(warp, 1, [])
 
     expect(Buffer.from(actual.data).toString('utf-8')).toBe('hello')
   })
@@ -41,7 +45,11 @@ describe('WarpActionExecutor', () => {
       inputs: [{ name: 'message', type: 'string', position: 'data', source: 'field' }],
     }
 
-    const actual = await subject.createTransactionForExecute(action, ['string:hello'])
+    const warp = {
+      actions: [action],
+    } as any as Warp
+
+    const actual = await subject.createTransactionForExecute(warp, 1, ['string:hello'])
 
     expect(Buffer.from(actual.data).toString('utf-8')).toBe('hello')
   })
@@ -57,7 +65,11 @@ describe('WarpActionExecutor', () => {
       inputs: [{ name: 'Receiver', type: 'address', position: 'receiver', source: 'field' }],
     }
 
-    const actual = await subject.createTransactionForExecute(action, [
+    const warp = {
+      actions: [action],
+    } as any as Warp
+
+    const actual = await subject.createTransactionForExecute(warp, 1, [
       'address:erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
     ])
 
@@ -77,7 +89,11 @@ describe('WarpActionExecutor', () => {
       inputs: [{ name: 'token', type: 'esdt', position: 'transfer', source: 'field' }],
     }
 
-    const actual = await subject.createTransactionForExecute(action, ['esdt:WARP-123456|0|1000000000000000000'])
+    const warp = {
+      actions: [action],
+    } as any as Warp
+
+    const actual = await subject.createTransactionForExecute(warp, 1, ['esdt:WARP-123456|0|1000000000000000000'])
 
     expect(actual.data?.toString()).toBe('ESDTTransfer@574152502d313233343536@0de0b6b3a7640000')
   })
@@ -96,7 +112,11 @@ describe('WarpActionExecutor', () => {
       inputs: [{ name: 'token', type: 'esdt', position: 'transfer', source: 'field' }],
     }
 
-    const actual = await subject.createTransactionForExecute(action, ['esdt:WARP-123456|0|1000000000000000000'])
+    const warp = {
+      actions: [action],
+    } as any as Warp
+
+    const actual = await subject.createTransactionForExecute(warp, 1, ['esdt:WARP-123456|0|1000000000000000000'])
 
     expect(actual.data?.toString()).toBe('ESDTTransfer@574152502d313233343536@0de0b6b3a7640000@7465737446756e63')
   })
@@ -114,7 +134,11 @@ describe('WarpActionExecutor', () => {
       inputs: [{ name: 'value', type: 'biguint', position: 'value', source: 'field', modifier: 'scale:18' }],
     }
 
-    const actual = await subject.createTransactionForExecute(action, ['biguint:1'])
+    const warp = {
+      actions: [action],
+    } as any as Warp
+
+    const actual = await subject.createTransactionForExecute(warp, 1, ['biguint:1'])
 
     expect(actual.value.toString()).toBe('1000000000000000000')
   })
@@ -138,7 +162,11 @@ describe('WarpActionExecutor', () => {
       ],
     }
 
-    const actual = await subject.createTransactionForExecute(action, [])
+    const warp = {
+      actions: [action],
+    } as any as Warp
+
+    const actual = await subject.createTransactionForExecute(warp, 1, [])
 
     expect(actual.data?.toString()).toBe(`issue@${utf8ToHex('WarpToken')}@${utf8ToHex('WAPT')}@${bigIntToHex('1000000000000000000000')}@12`)
   })
