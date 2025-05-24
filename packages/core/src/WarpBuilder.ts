@@ -48,7 +48,7 @@ export class WarpBuilder {
       await this.validate(warp)
     }
 
-    return WarpUtils.prepareVars(warp, this.config)
+    return warp
   }
 
   async createFromTransaction(tx: TransactionOnNetwork, validate = false): Promise<Warp> {
