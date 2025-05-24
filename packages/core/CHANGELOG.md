@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-beta.32
+
+### Patch Changes
+
+- c22e11a: remove logging
+
 ## 2.0.0-beta.31
 
 ### Patch Changes
