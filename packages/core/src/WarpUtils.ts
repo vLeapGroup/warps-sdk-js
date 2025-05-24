@@ -71,8 +71,11 @@ export class WarpUtils {
     if (next.startsWith(URL_PREFIX)) return [{ identifier: null, url: next }]
 
     const [baseIdentifier, queryWithPlaceholders] = next.split('?')
-    if (!queryWithPlaceholders) return [{ identifier: baseIdentifier, url: this.buildNextUrl(baseIdentifier, config) }]
+    if (!queryWithPlaceholders) {
+      return [{ identifier: baseIdentifier, url: this.buildNextUrl(baseIdentifier, config) }]
+    }
 
+    // Find all array placeholders like {{DELEGATIONS[].contract}}
     const arrayPlaceholders = queryWithPlaceholders.match(/{{([^}]+)\[\](\.[^}]+)?}}/g) || []
     if (arrayPlaceholders.length === 0) {
       const query = replacePlaceholders(queryWithPlaceholders, { ...warp.vars, ...results })
@@ -80,40 +83,33 @@ export class WarpUtils {
       return [{ identifier, url: this.buildNextUrl(identifier, config) }]
     }
 
-    return this.handleArrayNext(baseIdentifier, queryWithPlaceholders, arrayPlaceholders, results, config)
-  }
-
-  private static handleArrayNext(
-    baseIdentifier: string,
-    queryWithPlaceholders: string,
-    arrayPlaceholders: string[],
-    results: WarpExecutionResults,
-    config: WarpConfig
-  ): WarpExecutionNextInfo {
+    // Only support one array placeholder per next link
     const placeholder = arrayPlaceholders[0]
-    if (!placeholder) return [{ identifier: baseIdentifier, url: this.buildNextUrl(baseIdentifier, config) }]
-
-    const resultName = placeholder.match(/{{([^[]+)\[\]/)?.[1]
-    if (!resultName || !results[resultName]) return [{ identifier: baseIdentifier, url: this.buildNextUrl(baseIdentifier, config) }]
+    if (!placeholder) return []
+    const resultNameMatch = placeholder.match(/{{([^[]+)\[\]/)
+    const resultName = resultNameMatch ? resultNameMatch[1] : null
+    if (!resultName || results[resultName] === undefined) return []
 
     const resultArray = Array.isArray(results[resultName]) ? results[resultName] : [results[resultName]]
-    const fieldPath = placeholder.match(/\[\](\.[^}]+)?}}/)?.[1] || ''
-    const exactPlaceholderRegex = new RegExp(`{{${resultName}\\[\\]${fieldPath.replace('.', '\\.')}}}`, 'g')
+    if (resultArray.length === 0) return []
+
+    // Extract field path, e.g. .contract
+    const fieldPathMatch = placeholder.match(/\[\](\.[^}]+)?}}/)
+    const fieldPath = fieldPathMatch ? fieldPathMatch[1] || '' : ''
+    const exactPlaceholderRegex = new RegExp(`{{${resultName}\\[\\]${fieldPath.replace('.', '\.')}}}`, 'g')
 
     const nextLinks = resultArray
       .map((item) => {
         const mainValue = fieldPath ? this.getNestedValue(item, fieldPath.slice(1)) : item
         if (mainValue === undefined || mainValue === null) return null
-
         const replacedQuery = queryWithPlaceholders.replace(exactPlaceholderRegex, mainValue)
         if (replacedQuery.includes('{{') || replacedQuery.includes('}}')) return null
-
         const identifier = replacedQuery ? `${baseIdentifier}?${replacedQuery}` : baseIdentifier
         return { identifier, url: this.buildNextUrl(identifier, config) }
       })
       .filter((link): link is NonNullable<typeof link> => link !== null)
 
-    return nextLinks.length > 0 ? nextLinks : [{ identifier: baseIdentifier, url: this.buildNextUrl(baseIdentifier, config) }]
+    return nextLinks
   }
 
   private static buildNextUrl(identifier: string, config: WarpConfig): string {

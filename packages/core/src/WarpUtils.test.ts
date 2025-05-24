@@ -138,6 +138,19 @@ describe('getNextInfo', () => {
     expect(result?.[0].url).toBe('https://anyclient.com?warp=mywarp&param1=value1&param2=value2')
   })
 
+  it('returns empty array when array-based next link has empty results array', () => {
+    const warp: Warp = {
+      next: 'mywarp?address={{DELEGATIONS[].address}}',
+      results: {
+        DELEGATIONS: [],
+      },
+    } as any
+    const results = warp.results as WarpExecutionResults
+    const result = WarpUtils.getNextInfo(warp, 1, results, testConfig)
+
+    expect(result).toEqual([])
+  })
+
   it('handles array-based next links with object fields', () => {
     const warp: Warp = {
       next: 'mywarp?address={{DELEGATIONS[].address}}',
@@ -182,17 +195,6 @@ describe('getNextInfo', () => {
     const result = WarpUtils.getNextInfo(warp, 1, results, testConfig)
 
     expect(result).toEqual([{ identifier: 'mywarp?value=A', url: 'https://anyclient.com?warp=mywarp&value=A' }])
-  })
-
-  it('handles array-based next links with missing results', () => {
-    const warp: Warp = {
-      next: 'mywarp?value={{MISSING[]}}',
-      results: {},
-    } as any
-    const results = warp.results as WarpExecutionResults
-    const result = WarpUtils.getNextInfo(warp, 1, results, testConfig)
-
-    expect(result).toEqual([{ identifier: 'mywarp', url: 'https://anyclient.com?warp=mywarp' }])
   })
 
   it('handles array-based next links with null values', () => {
