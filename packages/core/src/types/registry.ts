@@ -4,7 +4,7 @@ export type RegistryInfo = {
   hash: string
   alias: string | null
   trust: TrustStatus
-  creator: string
+  owner: string
   createdAt: number
   upgradedAt: number
   brand: string | null

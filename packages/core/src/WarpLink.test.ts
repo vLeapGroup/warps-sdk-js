@@ -39,7 +39,7 @@ const mockRegistryInfo: RegistryInfo = {
   hash: '123',
   alias: 'mywarp',
   trust: 'unverified',
-  creator: 'test-creator',
+  owner: 'test-creator',
   createdAt: 1234567890,
   brand: null,
   upgrade: null,

@@ -27,7 +27,7 @@ export const toTypedRegistryInfo = (registryInfo: any): RegistryInfo => ({
   hash: registryInfo.hash.toString('hex'),
   alias: registryInfo.alias?.toString() || null,
   trust: registryInfo.trust.toString(),
-  creator: registryInfo.creator.toString(),
+  owner: registryInfo.owner.toString(),
   createdAt: registryInfo.created_at.toNumber(),
   upgradedAt: registryInfo.upgraded_at?.toNumber(),
   brand: registryInfo.brand?.toString('hex') || null,
