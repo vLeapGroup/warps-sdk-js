@@ -158,7 +158,6 @@ export class WarpRegistry {
 
       return { registryInfo, brand }
     } catch (error) {
-      console.error('WarpRegistry: Error getting info by alias', error)
       return { registryInfo: null, brand: null }
     }
   }
@@ -189,7 +188,6 @@ export class WarpRegistry {
 
       return { registryInfo, brand }
     } catch (error) {
-      console.error('WarpRegistry: Error getting info by hash', error)
       return { registryInfo: null, brand: null }
     }
   }
@@ -205,7 +203,6 @@ export class WarpRegistry {
       const [registryInfosRaw] = controller.parseQueryResponse(res)
       return registryInfosRaw.map(toTypedRegistryInfo)
     } catch (error) {
-      console.error('WarpRegistry: Error getting user warp registry infos', error)
       return []
     }
   }
@@ -224,7 +221,6 @@ export class WarpRegistry {
       const brands = await Promise.all(brandHashes.map((hash) => this.fetchBrand(hash, brandCacheConfig)))
       return brands.filter((b) => b !== null) as Brand[]
     } catch (error) {
-      console.error('WarpRegistry: Error getting user brands', error)
       return []
     }
   }
@@ -251,7 +247,6 @@ export class WarpRegistry {
 
       return chainInfo
     } catch (error) {
-      console.error('WarpRegistry: Error getting chain info', error)
       return null
     }
   }
@@ -284,7 +279,6 @@ export class WarpRegistry {
 
       return brand
     } catch (error) {
-      console.error('WarpRegistry: Error fetching brand from transaction hash', error)
       return null
     }
   }
