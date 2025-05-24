@@ -38,6 +38,10 @@ export class WarpCache {
     return this.strategy.get(key)
   }
 
+  forget(key: string): void {
+    this.strategy.forget(key)
+  }
+
   clear(): void {
     this.strategy.clear()
   }

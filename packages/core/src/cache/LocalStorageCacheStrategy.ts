@@ -41,6 +41,10 @@ export class LocalStorageCacheStrategy implements CacheStrategy {
     localStorage.setItem(this.getKey(key), JSON.stringify(entry))
   }
 
+  forget(key: string): void {
+    localStorage.removeItem(this.getKey(key))
+  }
+
   clear(): void {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i)

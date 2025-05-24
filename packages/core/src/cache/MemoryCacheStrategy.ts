@@ -25,6 +25,10 @@ export class MemoryCacheStrategy implements CacheStrategy {
     this.cache.set(key, { value, expiresAt })
   }
 
+  forget(key: string): void {
+    this.cache.delete(key)
+  }
+
   clear(): void {
     this.cache.clear()
   }
