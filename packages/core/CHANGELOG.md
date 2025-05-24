@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-beta.29
+
+### Patch Changes
+
+- 8a00d9e: remove builder from raw vars preperation
+
 ## 2.0.0-beta.28
 
 ### Minor Changes
