@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-beta.28
+
+### Minor Changes
+
+- 04c2d80: add cache forget
+
 ## 2.0.0-beta.27
 
 ### Patch Changes
