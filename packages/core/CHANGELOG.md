@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-beta.30
+
+### Minor Changes
+
+- 8677223: update vars preparations
+
 ## 2.0.0-beta.29
 
 ### Patch Changes
