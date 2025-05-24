@@ -1,5 +1,12 @@
 # @vleap/warps-react
 
+## 0.0.5-beta.31
+
+### Patch Changes
+
+- Updated dependencies [204ba91]
+  - @vleap/warps@2.0.0-beta.31
+
 ## 0.0.5-beta.30
 
 ### Patch Changes

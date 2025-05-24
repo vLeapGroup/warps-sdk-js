@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-beta.31
+
+### Patch Changes
+
+- 204ba91: fix next links
+
 ## 2.0.0-beta.30
 
 ### Minor Changes
