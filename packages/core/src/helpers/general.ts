@@ -29,6 +29,7 @@ export const toTypedRegistryInfo = (registryInfo: any): RegistryInfo => ({
   trust: registryInfo.trust.toString(),
   creator: registryInfo.creator.toString(),
   createdAt: registryInfo.created_at.toNumber(),
+  upgradedAt: registryInfo.upgraded_at?.toNumber(),
   brand: registryInfo.brand?.toString('hex') || null,
   upgrade: registryInfo.upgrade?.toString('hex') || null,
 })

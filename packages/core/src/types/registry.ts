@@ -6,6 +6,7 @@ export type RegistryInfo = {
   trust: TrustStatus
   creator: string
   createdAt: number
+  upgradedAt: number
   brand: string | null
   upgrade: string | null
 }
