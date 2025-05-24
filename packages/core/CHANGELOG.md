@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-beta.27
+
+### Patch Changes
+
+- a46773a: add upgrade timestamps
+
 ## 2.0.0-beta.26
 
 ### Patch Changes
