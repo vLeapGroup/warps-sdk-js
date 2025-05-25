@@ -108,6 +108,17 @@
             "outputs": []
         },
         {
+            "name": "forceRemoveAlias",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "hash",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": []
+        },
+        {
             "name": "verifyWarp",
             "mutability": "mutable",
             "inputs": [
@@ -233,7 +244,7 @@
             "inputs": [],
             "outputs": [
                 {
-                    "type": "BigUint"
+                    "type": "ConfigView"
                 }
             ]
         },
@@ -461,6 +472,19 @@
                 {
                     "name": "explorer_url",
                     "type": "bytes"
+                }
+            ]
+        },
+        "ConfigView": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "unit_price",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "admins",
+                    "type": "List<Address>"
                 }
             ]
         },
