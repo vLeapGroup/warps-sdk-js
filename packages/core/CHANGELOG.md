@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-beta.33
+
+### Minor Changes
+
+- 60a3fc6: add registry brand configuration on register
+
+### Patch Changes
+
+- f5c434b: update registry config
+
 ## 2.0.0-beta.32
 
 ### Patch Changes
