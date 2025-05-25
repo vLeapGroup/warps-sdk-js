@@ -35,18 +35,23 @@ export class WarpRegistry {
     await this.loadRegistryConfigs()
   }
 
-  createWarpRegisterTransaction(txHash: string, alias?: string | null): Transaction {
+  createWarpRegisterTransaction(txHash: string, alias?: string | null, brand?: string | null): Transaction {
     if (this.registryConfig.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
     if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
     const sender = Address.newFromBech32(this.config.user.wallet)
     const costAmount = alias ? this.registryConfig.unitPrice * BigInt(2) : this.registryConfig.unitPrice
+    const buildArgs = (): BytesValue[] => {
+      if (alias && brand) return [BytesValue.fromHex(txHash), BytesValue.fromUTF8(alias), BytesValue.fromHex(brand)]
+      if (alias) return [BytesValue.fromHex(txHash), BytesValue.fromUTF8(alias)]
+      return [BytesValue.fromHex(txHash)]
+    }
 
     return this.getFactory().createTransactionForExecute(sender, {
       contract: this.getRegistryContractAddress(),
       function: 'registerWarp',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: costAmount,
-      arguments: alias ? [BytesValue.fromHex(txHash), BytesValue.fromUTF8(alias)] : [BytesValue.fromHex(txHash)],
+      arguments: buildArgs(),
     })
   }
 
