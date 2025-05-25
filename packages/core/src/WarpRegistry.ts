@@ -307,9 +307,7 @@ export class WarpRegistry {
     const contract = this.getRegistryContractAddress()
     const controller = this.getController()
     const [configInfoRaw] = await controller.query({ contract, function: 'getConfig', arguments: [] })
-    console.log('configInfoRaw', configInfoRaw)
     const configInfo = configInfoRaw ? toTypedConfigInfo(configInfoRaw) : null
-    console.log('configInfo', configInfo)
 
     this.registryConfig = configInfo || { unitPrice: BigInt(0), admins: [] }
   }
