@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-beta.35
+
+### Minor Changes
+
+- 3a37f74: update config structure
+
 ## 2.0.0-beta.34
 
 ### Patch Changes
