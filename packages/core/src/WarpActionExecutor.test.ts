@@ -539,7 +539,7 @@ describe('WarpActionExecutor', () => {
   })
 
   it('getTxComponentsFromInputs - resolves esdt decimal places when no provided', async () => {
-    Config.chainApiUrl = 'https://api.multiversx.com'
+    Config.chain = { apiUrl: 'https://api.multiversx.com' }
     const subject = new WarpActionExecutor(Config)
 
     const action: WarpContractAction = {
@@ -572,7 +572,7 @@ describe('WarpActionExecutor', () => {
   })
 
   it('getTxComponentsFromInputs - does not resolve esdt decimal places when decimal is provided', async () => {
-    Config.chainApiUrl = 'https://api.multiversx.com'
+    Config.chain = { apiUrl: 'https://api.multiversx.com' }
     const subject = new WarpActionExecutor(Config)
 
     const action: WarpContractAction = {

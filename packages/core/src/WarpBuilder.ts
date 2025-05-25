@@ -20,7 +20,7 @@ export class WarpBuilder {
 
   constructor(config: WarpConfig) {
     this.config = config
-    this.cache = new WarpCache(config.cacheType)
+    this.cache = new WarpCache(config.cache?.type)
   }
 
   createInscriptionTransaction(warp: Warp): Transaction {

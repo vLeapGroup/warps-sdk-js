@@ -7,20 +7,30 @@ export type WarpConfig = {
   env: ChainEnv
   clientUrl?: string
   currentUrl?: string
+  vars?: Record<string, string | number>
   user?: {
     wallet?: string
   }
-  chainApiUrl?: string
-  chainExplorerUrl?: string
-  warpSchemaUrl?: string
-  brandSchemaUrl?: string
-  cacheTtl?: number
-  cacheType?: CacheType
-  registryContract?: string
-  indexUrl?: string
-  indexApiKey?: string
-  indexSearchParamName?: string
-  vars?: Record<string, string | number>
+  chain?: {
+    apiUrl?: string
+    explorerUrl?: string
+  }
+  schema?: {
+    warp?: string
+    brand?: string
+  }
+  cache?: {
+    ttl?: number
+    type?: CacheType
+  }
+  registry?: {
+    contract?: string
+  }
+  index?: {
+    url?: string
+    apiKey?: string
+    searchParamName?: string
+  }
 }
 
 export type WarpCacheConfig = {

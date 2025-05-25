@@ -71,7 +71,7 @@ export class WarpValidator {
 
   private async validateSchema(warp: Warp): Promise<ValidationError[]> {
     try {
-      const schemaUrl = this.config.warpSchemaUrl || Config.LatestWarpSchemaUrl
+      const schemaUrl = this.config.schema?.warp || Config.LatestWarpSchemaUrl
       const schemaResponse = await fetch(schemaUrl)
       const schema = await schemaResponse.json()
       const ajv = new Ajv()

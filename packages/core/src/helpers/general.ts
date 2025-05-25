@@ -9,9 +9,9 @@ export const getChainId = (env: ChainEnv): string => {
 
 export const getMainChainInfo = (config: WarpConfig): ChainInfo => ({
   chainId: getChainId(config.env),
-  apiUrl: config.chainApiUrl || Config.MainChain.ApiUrl(config.env),
+  apiUrl: config.chain?.apiUrl || Config.MainChain.ApiUrl(config.env),
   blockTime: 6000,
-  explorerUrl: config.chainExplorerUrl || Config.MainChain.ExplorerUrl(config.env),
+  explorerUrl: config.chain?.explorerUrl || Config.MainChain.ExplorerUrl(config.env),
 })
 
 export const getLatestProtocolIdentifier = (name: ProtocolName): string => {

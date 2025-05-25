@@ -311,7 +311,7 @@ export class WarpActionExecutor {
         const knownToken = findKnownTokenById(tokenId)
         let decimals = knownToken?.decimals
         if (!decimals) {
-          const apiUrl = this.config.chainApiUrl || Config.MainChain.ApiUrl(this.config.env)
+          const apiUrl = this.config.chain?.apiUrl || Config.MainChain.ApiUrl(this.config.env)
           const definitionRes = await fetch(`${apiUrl}/tokens/${tokenId}`) // TODO: use chainApi directly; currently causes circular reference for whatever reason
           const definition = await definitionRes.json()
           decimals = definition.decimals

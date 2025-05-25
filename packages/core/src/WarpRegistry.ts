@@ -24,7 +24,7 @@ export class WarpRegistry {
 
   constructor(config: WarpConfig) {
     this.config = config
-    this.cache = new WarpCache(config.cacheType)
+    this.cache = new WarpCache(config.cache?.type)
     this.registryConfig = {
       unitPrice: BigInt(0),
       admins: [],
@@ -300,7 +300,7 @@ export class WarpRegistry {
   }
 
   getRegistryContractAddress(): Address {
-    return Address.newFromBech32(this.config.registryContract || Config.Registry.Contract(this.config.env))
+    return Address.newFromBech32(this.config.registry?.contract || Config.Registry.Contract(this.config.env))
   }
 
   private async loadRegistryConfigs(): Promise<void> {

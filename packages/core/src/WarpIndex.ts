@@ -4,16 +4,16 @@ export class WarpIndex {
   constructor(private config: WarpConfig) {}
 
   async search(query: string, params?: Record<string, any>, headers?: Record<string, string>): Promise<WarpSearchHit[]> {
-    if (!this.config.indexUrl) throw new Error('WarpIndex: Index URL is not set')
+    if (!this.config.index?.url) throw new Error('WarpIndex: Index URL is not set')
     try {
-      const res = await fetch(this.config.indexUrl, {
+      const res = await fetch(this.config.index?.url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.config.indexApiKey}`,
+          Authorization: `Bearer ${this.config.index?.apiKey}`,
           ...headers,
         },
-        body: JSON.stringify({ [this.config.indexSearchParamName || 'search']: query, ...params }),
+        body: JSON.stringify({ [this.config.index?.searchParamName || 'search']: query, ...params }),
       })
 
       if (!res.ok) {

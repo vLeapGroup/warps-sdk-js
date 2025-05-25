@@ -108,7 +108,7 @@ export class BrandBuilder {
   }
 
   private async ensureValidSchema(brand: Brand): Promise<void> {
-    const schemaUrl = this.config.brandSchemaUrl || Config.LatestBrandSchemaUrl
+    const schemaUrl = this.config.schema?.brand || Config.LatestBrandSchemaUrl
     const schemaResponse = await fetch(schemaUrl)
     const schema = await schemaResponse.json()
     const ajv = new Ajv()
