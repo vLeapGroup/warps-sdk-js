@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-beta.34
+
+### Patch Changes
+
+- 7c605ee: fix registry config parsing
+
 ## 2.0.0-beta.33
 
 ### Minor Changes
