@@ -39,7 +39,14 @@ export class WarpRegistry {
     if (this.registryConfig.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
     if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
     const sender = Address.newFromBech32(this.config.user.wallet)
-    const costAmount = alias ? this.registryConfig.unitPrice * BigInt(2) : this.registryConfig.unitPrice
+
+    const calculateCostAmount = (): bigint => {
+      if (this.isCurrentUserAdmin()) return BigInt(0)
+      if (alias && brand) return this.registryConfig.unitPrice * BigInt(3)
+      if (alias) return this.registryConfig.unitPrice * BigInt(2)
+      return this.registryConfig.unitPrice
+    }
+
     const buildArgs = (): BytesValue[] => {
       if (alias && brand) return [BytesValue.fromHex(txHash), BytesValue.fromUTF8(alias), BytesValue.fromHex(brand)]
       if (alias) return [BytesValue.fromHex(txHash), BytesValue.fromUTF8(alias)]
@@ -50,7 +57,7 @@ export class WarpRegistry {
       contract: this.getRegistryContractAddress(),
       function: 'registerWarp',
       gasLimit: BigInt(10_000_000),
-      nativeTransferAmount: costAmount,
+      nativeTransferAmount: calculateCostAmount(),
       arguments: buildArgs(),
     })
   }
@@ -75,7 +82,7 @@ export class WarpRegistry {
       contract: this.getRegistryContractAddress(),
       function: 'upgradeWarp',
       gasLimit: BigInt(10_000_000),
-      nativeTransferAmount: this.registryConfig.unitPrice,
+      nativeTransferAmount: this.isCurrentUserAdmin() ? undefined : this.registryConfig.unitPrice,
       arguments: [BytesValue.fromUTF8(alias), BytesValue.fromHex(txHash)],
     })
   }
@@ -88,7 +95,7 @@ export class WarpRegistry {
       contract: this.getRegistryContractAddress(),
       function: 'setWarpAlias',
       gasLimit: BigInt(10_000_000),
-      nativeTransferAmount: this.registryConfig.unitPrice,
+      nativeTransferAmount: this.isCurrentUserAdmin() ? undefined : this.registryConfig.unitPrice,
       arguments: [BytesValue.fromHex(txHash), BytesValue.fromUTF8(alias)],
     })
   }
@@ -126,7 +133,7 @@ export class WarpRegistry {
       contract: this.getRegistryContractAddress(),
       function: 'registerBrand',
       gasLimit: BigInt(10_000_000),
-      nativeTransferAmount: this.registryConfig.unitPrice,
+      nativeTransferAmount: this.isCurrentUserAdmin() ? undefined : this.registryConfig.unitPrice,
       arguments: [BytesValue.fromHex(txHash)],
     })
   }
@@ -139,7 +146,7 @@ export class WarpRegistry {
       contract: this.getRegistryContractAddress(),
       function: 'brandWarp',
       gasLimit: BigInt(10_000_000),
-      nativeTransferAmount: this.registryConfig.unitPrice,
+      nativeTransferAmount: this.isCurrentUserAdmin() ? undefined : this.registryConfig.unitPrice,
       arguments: [BytesValue.fromHex(warpHash), BytesValue.fromHex(brandHash)],
     })
   }
@@ -318,5 +325,9 @@ export class WarpRegistry {
     const entrypoint = WarpUtils.getChainEntrypoint(chainInfo, this.config.env)
     const abi = AbiRegistry.create(RegistryAbi)
     return entrypoint.createSmartContractController(abi)
+  }
+
+  private isCurrentUserAdmin(): boolean {
+    return !!this.config.user?.wallet && this.registryConfig.admins.includes(this.config.user.wallet)
   }
 }
