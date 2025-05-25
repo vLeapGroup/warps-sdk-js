@@ -1,3 +1,4 @@
+import { Address } from '@multiversx/sdk-core/out'
 import { ConfigInfo, RegistryInfo } from '../types'
 
 export const toTypedRegistryInfo = (registryInfo: any): RegistryInfo => ({
@@ -12,6 +13,6 @@ export const toTypedRegistryInfo = (registryInfo: any): RegistryInfo => ({
 })
 
 export const toTypedConfigInfo = (configInfo: any): ConfigInfo => ({
-  unitPrice: configInfo.unit_price.toBigInt(),
-  admins: configInfo.admins.map((admin: any) => admin.toString()),
+  unitPrice: BigInt(configInfo.unit_price.toString()),
+  admins: configInfo.admins.map((admin: Address) => admin.toBech32()),
 })
