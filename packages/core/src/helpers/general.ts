@@ -1,5 +1,5 @@
 import { Config, WarpProtocolVersions } from '../config'
-import { ChainEnv, ChainInfo, ProtocolName, RegistryInfo, Warp, WarpConfig } from '../types'
+import { ChainEnv, ChainInfo, ProtocolName, Warp, WarpConfig } from '../types'
 
 export const getChainId = (env: ChainEnv): string => {
   if (env === 'devnet') return 'D'
@@ -22,17 +22,6 @@ export const getLatestProtocolIdentifier = (name: ProtocolName): string => {
 }
 
 export const getWarpActionByIndex = (warp: Warp, index: number) => warp?.actions[index - 1]
-
-export const toTypedRegistryInfo = (registryInfo: any): RegistryInfo => ({
-  hash: registryInfo.hash.toString('hex'),
-  alias: registryInfo.alias?.toString() || null,
-  trust: registryInfo.trust.toString(),
-  owner: registryInfo.owner.toString(),
-  createdAt: registryInfo.created_at.toNumber(),
-  upgradedAt: registryInfo.upgraded_at?.toNumber(),
-  brand: registryInfo.brand?.toString('hex') || null,
-  upgrade: registryInfo.upgrade?.toString('hex') || null,
-})
 
 export const toTypedChainInfo = (chainInfo: any): ChainInfo => ({
   chainId: chainInfo.chain_id.toString(),

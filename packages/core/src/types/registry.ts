@@ -10,3 +10,8 @@ export type RegistryInfo = {
   brand: string | null
   upgrade: string | null
 }
+
+export type ConfigInfo = {
+  unitPrice: bigint
+  admins: string[]
+}

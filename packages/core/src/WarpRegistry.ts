@@ -10,8 +10,9 @@ import {
 } from '@multiversx/sdk-core/out'
 import RegistryAbi from './abis/registry.abi.json'
 import { Config } from './config'
-import { getChainId, getMainChainInfo, toTypedChainInfo, toTypedRegistryInfo } from './helpers/general'
-import { Brand, ChainInfo, RegistryInfo, WarpCacheConfig, WarpChain, WarpConfig } from './types'
+import { getChainId, getMainChainInfo, toTypedChainInfo } from './helpers/general'
+import { toTypedConfigInfo, toTypedRegistryInfo } from './helpers/registry'
+import { Brand, ChainInfo, ConfigInfo, RegistryInfo, WarpCacheConfig, WarpChain, WarpConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
 import { WarpUtils } from './WarpUtils'
 
@@ -19,12 +20,15 @@ export class WarpRegistry {
   private config: WarpConfig
   private cache: WarpCache
 
-  public unitPrice: bigint
+  public registryConfig: ConfigInfo
 
   constructor(config: WarpConfig) {
     this.config = config
     this.cache = new WarpCache(config.cacheType)
-    this.unitPrice = BigInt(0)
+    this.registryConfig = {
+      unitPrice: BigInt(0),
+      admins: [],
+    }
   }
 
   async init(): Promise<void> {
@@ -32,10 +36,10 @@ export class WarpRegistry {
   }
 
   createWarpRegisterTransaction(txHash: string, alias?: string | null): Transaction {
-    if (this.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
+    if (this.registryConfig.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
     if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
     const sender = Address.newFromBech32(this.config.user.wallet)
-    const costAmount = alias ? this.unitPrice * BigInt(2) : this.unitPrice
+    const costAmount = alias ? this.registryConfig.unitPrice * BigInt(2) : this.registryConfig.unitPrice
 
     return this.getFactory().createTransactionForExecute(sender, {
       contract: this.getRegistryContractAddress(),
@@ -58,7 +62,7 @@ export class WarpRegistry {
   }
 
   createWarpUpgradeTransaction(alias: string, txHash: string): Transaction {
-    if (this.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
+    if (this.registryConfig.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
     if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
     const sender = Address.newFromBech32(this.config.user.wallet)
 
@@ -66,7 +70,7 @@ export class WarpRegistry {
       contract: this.getRegistryContractAddress(),
       function: 'upgradeWarp',
       gasLimit: BigInt(10_000_000),
-      nativeTransferAmount: this.unitPrice,
+      nativeTransferAmount: this.registryConfig.unitPrice,
       arguments: [BytesValue.fromUTF8(alias), BytesValue.fromHex(txHash)],
     })
   }
@@ -79,7 +83,7 @@ export class WarpRegistry {
       contract: this.getRegistryContractAddress(),
       function: 'setWarpAlias',
       gasLimit: BigInt(10_000_000),
-      nativeTransferAmount: this.unitPrice,
+      nativeTransferAmount: this.registryConfig.unitPrice,
       arguments: [BytesValue.fromHex(txHash), BytesValue.fromUTF8(alias)],
     })
   }
@@ -109,7 +113,7 @@ export class WarpRegistry {
   }
 
   createBrandRegisterTransaction(txHash: string): Transaction {
-    if (this.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
+    if (this.registryConfig.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
     if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
     const sender = Address.newFromBech32(this.config.user.wallet)
 
@@ -117,7 +121,7 @@ export class WarpRegistry {
       contract: this.getRegistryContractAddress(),
       function: 'registerBrand',
       gasLimit: BigInt(10_000_000),
-      nativeTransferAmount: this.unitPrice,
+      nativeTransferAmount: this.registryConfig.unitPrice,
       arguments: [BytesValue.fromHex(txHash)],
     })
   }
@@ -130,7 +134,7 @@ export class WarpRegistry {
       contract: this.getRegistryContractAddress(),
       function: 'brandWarp',
       gasLimit: BigInt(10_000_000),
-      nativeTransferAmount: this.unitPrice,
+      nativeTransferAmount: this.registryConfig.unitPrice,
       arguments: [BytesValue.fromHex(warpHash), BytesValue.fromHex(brandHash)],
     })
   }
@@ -290,10 +294,12 @@ export class WarpRegistry {
   private async loadRegistryConfigs(): Promise<void> {
     const contract = this.getRegistryContractAddress()
     const controller = this.getController()
-    const [unitPriceRaw] = await controller.query({ contract, function: 'getConfig', arguments: [] })
-    const unitPrice = BigInt(unitPriceRaw.toString())
+    const [configInfoRaw] = await controller.query({ contract, function: 'getConfig', arguments: [] })
+    console.log('configInfoRaw', configInfoRaw)
+    const configInfo = configInfoRaw ? toTypedConfigInfo(configInfoRaw) : null
+    console.log('configInfo', configInfo)
 
-    this.unitPrice = unitPrice
+    this.registryConfig = configInfo || { unitPrice: BigInt(0), admins: [] }
   }
 
   private getFactory(): SmartContractTransactionsFactory {
