@@ -19,9 +19,9 @@ export const getWarpActionByIndex = (warp: Warp, index: number) => warp?.actions
 
 export const toTypedChainInfo = (chainInfo: any): ChainInfo => ({
   chainId: chainInfo.chain_id.toString(),
+  blockTime: chainInfo.block_time.toNumber(),
   apiUrl: chainInfo.api_url.toString(),
   explorerUrl: chainInfo.explorer_url.toString(),
-  blockTime: chainInfo.block_time.toNumber(),
 })
 
 export const shiftBigintBy = (value: bigint | string, decimals: number): bigint => {
