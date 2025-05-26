@@ -1,7 +1,7 @@
-import { Config } from './config'
 import { ChainEnv } from './types/general'
 import { WarpExecutionResults } from './types/results'
 import { Warp, WarpConfig } from './types/warp'
+import { WarpInterpolator } from './WarpInterpolator'
 import { WarpUtils } from './WarpUtils'
 
 const testConfig: WarpConfig = {
@@ -10,14 +10,9 @@ const testConfig: WarpConfig = {
   currentUrl: 'https://anyclient.com',
   vars: {},
   user: undefined,
-  chainApiUrl: Config.MainChain.ApiUrl('devnet'),
-  chainExplorerUrl: Config.MainChain.ExplorerUrl('devnet'),
-  warpSchemaUrl: Config.LatestWarpSchemaUrl,
-  brandSchemaUrl: Config.LatestBrandSchemaUrl,
-  registryContract: Config.Registry.Contract('devnet'),
 }
 
-describe('prepareVars', () => {
+describe('applyVars', () => {
   it('replaces placeholders with values', () => {
     const config = { ...testConfig }
     const warp: Warp = {
@@ -27,7 +22,7 @@ describe('prepareVars', () => {
       },
     } as any
 
-    const actual = WarpUtils.prepareVars(warp, config)
+    const actual = WarpInterpolator.applyVars(warp, config)
 
     expect(actual.description).toBe('You are 10 years old')
   })
@@ -42,7 +37,7 @@ describe('prepareVars', () => {
       },
     } as any
 
-    const actual = WarpUtils.prepareVars(warp, config)
+    const actual = WarpInterpolator.applyVars(warp, config)
 
     expect(actual.title).toBe('Age: 10')
     expect(actual.description).toBe('You are 10 years old')
@@ -58,7 +53,7 @@ describe('prepareVars', () => {
       },
     } as any
 
-    const actual = WarpUtils.prepareVars(warp, config)
+    const actual = WarpInterpolator.applyVars(warp, config)
 
     expect(actual.title).toBe('Age: 10')
     expect(actual.description).toBe('You are 10 years old')
@@ -74,7 +69,7 @@ describe('prepareVars', () => {
       },
     } as any
 
-    const actual = WarpUtils.prepareVars(warp, config)
+    const actual = WarpInterpolator.applyVars(warp, config)
 
     expect(actual.title).toBe('Age: erd123456789')
     expect(actual.description).toBe('You are erd123456789 years old')

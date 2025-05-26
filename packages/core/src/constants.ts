@@ -1,3 +1,5 @@
+import { WarpConfig } from './types'
+
 export const WarpConstants = {
   HttpProtocolPrefix: 'http',
 
@@ -12,6 +14,26 @@ export const WarpConstants = {
 
   Source: {
     UserWallet: 'user:wallet',
+  },
+
+  Globals: {
+    UserWallet: {
+      Placeholder: 'USER_WALLET',
+      Accessor: (config: WarpConfig) => config.user?.wallet,
+    },
+    ChainApiUrl: {
+      Placeholder: 'CHAIN_API',
+      Accessor: (config: WarpConfig) => config.chain?.apiUrl,
+    },
+    ChainExplorerUrl: {
+      Placeholder: 'CHAIN_EXPLORER',
+      Accessor: (config: WarpConfig) => config.chain?.explorerUrl,
+    },
+  },
+
+  Vars: {
+    Query: 'query',
+    Env: 'env',
   },
 
   ArgParamsSeparator: ':',

@@ -1,18 +1,8 @@
 import { DevnetEntrypoint, MainnetEntrypoint, NetworkEntrypoint, TestnetEntrypoint } from '@multiversx/sdk-core'
 import { WarpConstants } from './constants'
 import { getMainChainInfo, replacePlaceholders } from './helpers/general'
-import {
-  ChainEnv,
-  ChainInfo,
-  Warp,
-  WarpConfig,
-  WarpContractAction,
-  WarpExecutionNextInfo,
-  WarpExecutionResults,
-  WarpIdType,
-  WarpQueryAction,
-  WarpTransferAction,
-} from './types'
+import { ChainEnv, ChainInfo, Warp, WarpAction, WarpConfig, WarpExecutionNextInfo, WarpExecutionResults, WarpIdType } from './types'
+import { CacheTtl } from './WarpCache'
 import { WarpLink } from './WarpLink'
 import { WarpRegistry } from './WarpRegistry'
 
@@ -21,36 +11,6 @@ const VAR_SOURCE_QUERY = 'query'
 const VAR_SOURCE_ENV = 'env'
 
 export class WarpUtils {
-  static prepareVars(warp: Warp, config: WarpConfig): Warp {
-    if (!warp?.vars) return warp
-    let modifiable = JSON.stringify(warp)
-
-    const modify = (placeholder: string, value: string | number) => {
-      modifiable = modifiable.replace(new RegExp(`{{${placeholder.toUpperCase()}}}`, 'g'), value.toString())
-    }
-
-    Object.entries(warp.vars).forEach(([placeholder, value]) => {
-      if (typeof value !== 'string') {
-        modify(placeholder, value)
-      } else if (value.startsWith(`${VAR_SOURCE_QUERY}:`)) {
-        if (!config.currentUrl) throw new Error('WarpUtils: currentUrl config is required to prepare vars')
-        const queryParamName = value.split(`${VAR_SOURCE_QUERY}:`)[1]
-        const queryParamValue = new URLSearchParams(config.currentUrl.split('?')[1]).get(queryParamName)
-        if (queryParamValue) modify(placeholder, queryParamValue)
-      } else if (value.startsWith(`${VAR_SOURCE_ENV}:`)) {
-        const envVarName = value.split(`${VAR_SOURCE_ENV}:`)[1]
-        const envVarValue = config.vars?.[envVarName]
-        if (envVarValue) modify(placeholder, envVarValue)
-      } else if (value === WarpConstants.Source.UserWallet && config.user?.wallet) {
-        modify(placeholder, config.user.wallet)
-      } else {
-        modify(placeholder, value)
-      }
-    })
-
-    return JSON.parse(modifiable)
-  }
-
   static getInfoFromPrefixedIdentifier(
     prefixedIdentifier: string
   ): { type: WarpIdType; identifier: string; identifierBase: string } | null {
@@ -128,12 +88,9 @@ export class WarpUtils {
     return path.split('.').reduce((current, key) => current?.[key], obj)
   }
 
-  static async getChainInfoForAction(
-    action: WarpTransferAction | WarpContractAction | WarpQueryAction,
-    config: WarpConfig
-  ): Promise<ChainInfo> {
+  static async getChainInfoForAction(action: WarpAction, config: WarpConfig): Promise<ChainInfo> {
     if (!action.chain) return getMainChainInfo(config)
-    const chainInfo = await new WarpRegistry(config).getChainInfo(action.chain)
+    const chainInfo = await new WarpRegistry(config).getChainInfo(action.chain, { ttl: CacheTtl.OneWeek })
     if (!chainInfo) throw new Error(`WarpActionExecutor: Chain info not found for ${action.chain}`)
     return chainInfo
   }

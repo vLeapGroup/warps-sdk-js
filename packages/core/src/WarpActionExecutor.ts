@@ -32,6 +32,7 @@ import { WarpExecution } from './types/results'
 import { WarpAbiBuilder } from './WarpAbiBuilder'
 import { WarpArgSerializer } from './WarpArgSerializer'
 import { WarpContractLoader } from './WarpContractLoader'
+import { WarpInterpolator } from './WarpInterpolator'
 import { WarpUtils } from './WarpUtils'
 
 type ResolvedInput = {
@@ -56,7 +57,7 @@ export class WarpActionExecutor {
   async createTransactionForExecute(warp: Warp, actionIndex: number, inputs: string[]): Promise<Transaction> {
     if (!this.config.user?.wallet) throw new Error('WarpActionExecutor: user address not set')
     const sender = Address.newFromBech32(this.config.user.wallet)
-    const preparedWarp = WarpUtils.prepareVars(warp, this.config)
+    const preparedWarp = WarpInterpolator.applyVars(warp, this.config)
     const action = getWarpActionByIndex(preparedWarp, actionIndex) as WarpTransferAction | WarpContractAction
     const chainInfo = await WarpUtils.getChainInfoForAction(action, this.config)
     const config = new TransactionsFactoryConfig({ chainID: chainInfo.chainId })
@@ -90,7 +91,7 @@ export class WarpActionExecutor {
   }
 
   async getTransactionExecutionResults(warp: Warp, actionIndex: number, tx: TransactionOnNetwork): Promise<WarpExecution> {
-    const preparedWarp = WarpUtils.prepareVars(warp, this.config)
+    const preparedWarp = WarpInterpolator.applyVars(warp, this.config)
     const action = getWarpActionByIndex(preparedWarp, actionIndex) as WarpContractAction
     const { values, results } = await extractContractResults(this, preparedWarp, action, tx)
     const next = WarpUtils.getNextInfo(preparedWarp, actionIndex, results, this.config)
@@ -110,7 +111,7 @@ export class WarpActionExecutor {
   }
 
   async executeQuery(warp: Warp, actionIndex: number, inputs: string[]): Promise<WarpExecution> {
-    const preparedWarp = WarpUtils.prepareVars(warp, this.config)
+    const preparedWarp = WarpInterpolator.applyVars(warp, this.config)
     const action = getWarpActionByIndex(preparedWarp, actionIndex) as WarpQueryAction | null
     if (!action) throw new Error('WarpActionExecutor: Action not found')
     if (!action.func) throw new Error('WarpActionExecutor: Function not found')
@@ -145,7 +146,7 @@ export class WarpActionExecutor {
   }
 
   async executeCollect(warp: Warp, actionIndex: number, inputs: string[], meta?: Record<string, any>): Promise<WarpExecution> {
-    const preparedWarp = WarpUtils.prepareVars(warp, this.config)
+    const preparedWarp = WarpInterpolator.applyVars(warp, this.config)
     const action = getWarpActionByIndex(preparedWarp, actionIndex) as WarpCollectAction | null
     if (!action) throw new Error('WarpActionExecutor: Action not found')
     const resolvedInputs = await this.getResolvedInputs(action, inputs)

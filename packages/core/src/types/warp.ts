@@ -129,6 +129,7 @@ export type WarpQueryAction = {
 
 export type WarpCollectAction = {
   type: WarpActionType
+  chain?: WarpChain
   label: string
   description?: string | null
   destination: {
@@ -142,6 +143,7 @@ export type WarpCollectAction = {
 
 export type WarpLinkAction = {
   type: WarpActionType
+  chain?: WarpChain
   label: string
   description?: string | null
   url: string
