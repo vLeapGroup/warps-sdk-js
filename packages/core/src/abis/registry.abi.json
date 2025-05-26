@@ -306,16 +306,12 @@
                     "type": "bytes"
                 },
                 {
-                    "name": "env",
-                    "type": "bytes"
-                },
-                {
                     "name": "chain_id",
                     "type": "bytes"
                 },
                 {
                     "name": "block_time",
-                    "type": "u64"
+                    "type": "u32"
                 },
                 {
                     "name": "api_url",
@@ -336,10 +332,6 @@
                 {
                     "name": "name",
                     "type": "bytes"
-                },
-                {
-                    "name": "env",
-                    "type": "bytes"
                 }
             ],
             "outputs": []
@@ -351,15 +343,22 @@
                 {
                     "name": "name",
                     "type": "bytes"
-                },
-                {
-                    "name": "env",
-                    "type": "bytes"
                 }
             ],
             "outputs": [
                 {
-                    "type": "ChainInfo"
+                    "type": "ChainView"
+                }
+            ]
+        },
+        {
+            "name": "getChains",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "variadic<ChainView>",
+                    "multi_result": true
                 }
             ]
         }
@@ -375,6 +374,11 @@
                 },
                 {
                     "name": "alias",
+                    "type": "bytes",
+                    "indexed": true
+                },
+                {
+                    "name": "trust",
                     "type": "bytes",
                     "indexed": true
                 }
@@ -400,6 +404,11 @@
                 },
                 {
                     "name": "new_warp",
+                    "type": "bytes",
+                    "indexed": true
+                },
+                {
+                    "name": "trust",
                     "type": "bytes",
                     "indexed": true
                 }
@@ -454,7 +463,7 @@
     "esdtAttributes": [],
     "hasCallback": false,
     "types": {
-        "ChainInfo": {
+        "ChainView": {
             "type": "struct",
             "fields": [
                 {
@@ -463,7 +472,7 @@
                 },
                 {
                     "name": "block_time",
-                    "type": "u64"
+                    "type": "u32"
                 },
                 {
                     "name": "api_url",
