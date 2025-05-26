@@ -6,14 +6,14 @@ type CacheEntry<T> = {
 }
 
 export class MemoryCacheStrategy implements CacheStrategy {
-  private cache: Map<string, CacheEntry<any>> = new Map()
+  private static cache: Map<string, CacheEntry<any>> = new Map()
 
   get<T>(key: string): T | null {
-    const entry = this.cache.get(key)
+    const entry = MemoryCacheStrategy.cache.get(key)
     if (!entry) return null
 
     if (Date.now() > entry.expiresAt) {
-      this.cache.delete(key)
+      MemoryCacheStrategy.cache.delete(key)
       return null
     }
 
@@ -22,14 +22,14 @@ export class MemoryCacheStrategy implements CacheStrategy {
 
   set<T>(key: string, value: T, ttl: number): void {
     const expiresAt = Date.now() + ttl * 1000
-    this.cache.set(key, { value, expiresAt })
+    MemoryCacheStrategy.cache.set(key, { value, expiresAt })
   }
 
   forget(key: string): void {
-    this.cache.delete(key)
+    MemoryCacheStrategy.cache.delete(key)
   }
 
   clear(): void {
-    this.cache.clear()
+    MemoryCacheStrategy.cache.clear()
   }
 }
