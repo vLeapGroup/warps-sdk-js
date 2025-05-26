@@ -3,6 +3,15 @@ import { LocalStorageCacheStrategy } from './cache/LocalStorageCacheStrategy'
 import { MemoryCacheStrategy } from './cache/MemoryCacheStrategy'
 import { WarpChain } from './types'
 
+export const CacheTtl = {
+  OneMinute: 60,
+  OneHour: 60 * 60,
+  OneDay: 60 * 60 * 24,
+  OneWeek: 60 * 60 * 24 * 7,
+  OneMonth: 60 * 60 * 24 * 30,
+  OneYear: 60 * 60 * 24 * 365,
+}
+
 export const CacheKey = {
   Warp: (id: string) => `warp:${id}`,
   WarpAbi: (id: string) => `warp-abi:${id}`,
