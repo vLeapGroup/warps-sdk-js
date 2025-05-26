@@ -1,5 +1,18 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0-beta.36
+
+### Minor Changes
+
+- 7458732: add warp logger
+- a3aa83d: add globals
+
+### Patch Changes
+
+- a43d025: update globals
+- fcddba6: optimize in-memory cache
+- 9bce92b: add cache ttl constants
+
 ## 2.0.0-beta.35
 
 ### Minor Changes
