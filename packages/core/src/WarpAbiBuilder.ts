@@ -2,6 +2,7 @@ import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, 
 import { getLatestProtocolIdentifier, getMainChainInfo } from './helpers/general'
 import { AbiContents, WarpAbi, WarpCacheConfig, WarpConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
+import { WarpLogger } from './WarpLogger'
 import { WarpUtils } from './WarpUtils'
 
 export class WarpAbiBuilder {
@@ -59,7 +60,7 @@ export class WarpAbiBuilder {
     if (cache) {
       const cached = this.cache.get<WarpAbi>(cacheKey)
       if (cached) {
-        console.log(`WarpAbiBuilder (createFromTransactionHash): Warp abi found in cache: ${hash}`)
+        WarpLogger.info(`WarpAbiBuilder (createFromTransactionHash): Warp abi found in cache: ${hash}`)
         return cached
       }
     }

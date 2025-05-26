@@ -2,6 +2,7 @@ import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, 
 import { getLatestProtocolIdentifier, getMainChainInfo, toPreviewText } from './helpers/general'
 import { Warp, WarpAction, WarpCacheConfig, WarpConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
+import { WarpLogger } from './WarpLogger'
 import { WarpUtils } from './WarpUtils'
 import { WarpValidator } from './WarpValidator'
 
@@ -70,7 +71,7 @@ export class WarpBuilder {
     if (cache) {
       const cached = this.cache.get<Warp>(cacheKey)
       if (cached) {
-        console.log(`WarpBuilder (createFromTransactionHash): Warp found in cache: ${hash}`)
+        WarpLogger.info(`WarpBuilder (createFromTransactionHash): Warp found in cache: ${hash}`)
         return cached
       }
     }

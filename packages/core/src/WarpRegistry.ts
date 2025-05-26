@@ -14,6 +14,7 @@ import { getMainChainInfo, toTypedChainInfo } from './helpers/general'
 import { toTypedConfigInfo, toTypedRegistryInfo } from './helpers/registry'
 import { Brand, ChainInfo, ConfigInfo, RegistryInfo, WarpCacheConfig, WarpChain, WarpConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
+import { WarpLogger } from './WarpLogger'
 import { WarpUtils } from './WarpUtils'
 
 export class WarpRegistry {
@@ -156,7 +157,7 @@ export class WarpRegistry {
       const cacheKey = CacheKey.RegistryInfo(alias)
       const cached = cache ? this.cache.get<{ registryInfo: RegistryInfo | null; brand: Brand | null }>(cacheKey) : null
       if (cached) {
-        console.log(`WarpRegistry (getInfoByAlias): RegistryInfo found in cache: ${alias}`)
+        WarpLogger.info(`WarpRegistry (getInfoByAlias): RegistryInfo found in cache: ${alias}`)
         return cached
       }
 
@@ -185,7 +186,7 @@ export class WarpRegistry {
       if (cache) {
         const cached = this.cache.get<{ registryInfo: RegistryInfo | null; brand: Brand | null }>(cacheKey)
         if (cached) {
-          console.log(`WarpRegistry (getInfoByHash): RegistryInfo found in cache: ${hash}`)
+          WarpLogger.info(`WarpRegistry (getInfoByHash): RegistryInfo found in cache: ${hash}`)
           return cached
         }
       }
@@ -246,7 +247,7 @@ export class WarpRegistry {
       const cacheKey = CacheKey.ChainInfo(chain)
       const cached = cache ? this.cache.get<ChainInfo>(cacheKey) : null
       if (cached) {
-        console.log(`WarpRegistry (getChainInfo): ChainInfo found in cache: ${chain}`)
+        WarpLogger.info(`WarpRegistry (getChainInfo): ChainInfo found in cache: ${chain}`)
         return cached
       }
 
@@ -271,7 +272,7 @@ export class WarpRegistry {
     const cacheKey = CacheKey.Brand(hash)
     const cached = cache ? this.cache.get<Brand>(cacheKey) : null
     if (cached) {
-      console.log(`WarpRegistry (fetchBrand): Brand found in cache: ${hash}`)
+      WarpLogger.info(`WarpRegistry (fetchBrand): Brand found in cache: ${hash}`)
       return cached
     }
 
