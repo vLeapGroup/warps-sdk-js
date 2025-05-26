@@ -55,11 +55,10 @@ export class WarpActionExecutor {
   }
 
   async createTransactionForExecute(warp: Warp, actionIndex: number, inputs: string[]): Promise<Transaction> {
+    const action = getWarpActionByIndex(warp, actionIndex) as WarpTransferAction | WarpContractAction
     if (!this.config.user?.wallet) throw new Error('WarpActionExecutor: user address not set')
     const sender = Address.newFromBech32(this.config.user.wallet)
-    const preparedWarp = WarpInterpolator.applyVars(warp, this.config)
-    const action = getWarpActionByIndex(preparedWarp, actionIndex) as WarpTransferAction | WarpContractAction
-    const chain = await WarpUtils.getChainInfoForAction(action, this.config)
+    const chain = await WarpUtils.getChainInfoForAction(this.config, action)
     const config = new TransactionsFactoryConfig({ chainID: chain.chainId })
 
     const { destination, args, value, transfers, data } = await this.getTxComponentsFromInputs(chain, action, inputs, sender)
@@ -91,10 +90,10 @@ export class WarpActionExecutor {
   }
 
   async getTransactionExecutionResults(warp: Warp, actionIndex: number, tx: TransactionOnNetwork): Promise<WarpExecution> {
-    const preparedWarp = WarpInterpolator.applyVars(warp, this.config)
-    const action = getWarpActionByIndex(preparedWarp, actionIndex) as WarpContractAction
+    const action = getWarpActionByIndex(warp, actionIndex) as WarpContractAction
+    const preparedWarp = await WarpInterpolator.apply(this.config, warp)
     const { values, results } = await extractContractResults(this, preparedWarp, action, tx)
-    const next = WarpUtils.getNextInfo(preparedWarp, actionIndex, results, this.config)
+    const next = WarpUtils.getNextInfo(this.config, preparedWarp, actionIndex, results)
     const messages = this.getPreparedMessages(preparedWarp, results)
 
     return {
@@ -111,12 +110,12 @@ export class WarpActionExecutor {
   }
 
   async executeQuery(warp: Warp, actionIndex: number, inputs: string[]): Promise<WarpExecution> {
-    const preparedWarp = WarpInterpolator.applyVars(warp, this.config)
-    const action = getWarpActionByIndex(preparedWarp, actionIndex) as WarpQueryAction | null
+    const action = getWarpActionByIndex(warp, actionIndex) as WarpQueryAction | null
     if (!action) throw new Error('WarpActionExecutor: Action not found')
     if (!action.func) throw new Error('WarpActionExecutor: Function not found')
 
-    const chain = await WarpUtils.getChainInfoForAction(action, this.config)
+    const chain = await WarpUtils.getChainInfoForAction(this.config, action)
+    const preparedWarp = await WarpInterpolator.apply(this.config, warp)
     const abi = await this.getAbiForAction(action)
     const { args } = await this.getTxComponentsFromInputs(chain, action, inputs)
     const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
@@ -131,7 +130,7 @@ export class WarpActionExecutor {
     const parts = response.returnDataParts.map((part) => Buffer.from(part))
     const typedValues = argsSerializer.buffersToValues(parts, endpoint.output)
     const { values, results } = await extractQueryResults(preparedWarp, typedValues)
-    const next = WarpUtils.getNextInfo(preparedWarp, actionIndex, results, this.config)
+    const next = WarpUtils.getNextInfo(this.config, preparedWarp, actionIndex, results)
 
     return {
       success: isSuccess,
@@ -150,8 +149,8 @@ export class WarpActionExecutor {
     const action = getWarpActionByIndex(warp, actionIndex) as WarpCollectAction | null
     if (!action) throw new Error('WarpActionExecutor: Action not found')
 
-    const chain = await WarpUtils.getChainInfoForAction(action, this.config)
-    const preparedWarp = WarpInterpolator.applyVars(warp, this.config)
+    const chain = await WarpUtils.getChainInfoForAction(this.config, action)
+    const preparedWarp = await WarpInterpolator.apply(this.config, warp)
     const resolvedInputs = await this.getResolvedInputs(chain, action, inputs)
     const modifiedInputs = this.getModifiedInputs(resolvedInputs)
 
@@ -184,7 +183,7 @@ export class WarpActionExecutor {
       const response = await fetch(action.destination.url, { method: httpMethod, headers, body })
       const content = await response.json()
       const { values, results } = await extractCollectResults(preparedWarp, content)
-      const next = WarpUtils.getNextInfo(preparedWarp, actionIndex, results, this.config)
+      const next = WarpUtils.getNextInfo(this.config, preparedWarp, actionIndex, results)
 
       return {
         success: response.ok,

@@ -1,22 +1,29 @@
 import { WarpConstants } from './constants'
-import { Warp, WarpConfig } from './types'
+import { getMainChainInfo } from './helpers/general'
+import { ChainInfo, Warp, WarpAction, WarpConfig } from './types'
+import { WarpUtils } from './WarpUtils'
+
+export type InterpolationBag = {
+  config: WarpConfig
+  chain: ChainInfo
+}
 
 export class WarpInterpolator {
-  static applyGlobals(warp: Warp, config: WarpConfig): Warp {
-    let modifiable = JSON.stringify(warp)
-
-    Object.values(WarpConstants.Globals).forEach((global) => {
-      if (!global?.Placeholder || typeof global.Accessor !== 'function') return
-      const value = global.Accessor(config)
-      if (value !== undefined && value !== null) {
-        modifiable = modifiable.replace(new RegExp(`{{${global.Placeholder}}}`, 'g'), value.toString())
-      }
-    })
-
-    return JSON.parse(modifiable)
+  static async apply(config: WarpConfig, warp: Warp): Promise<Warp> {
+    const modifiable = this.applyVars(config, warp)
+    return await this.applyGlobals(config, modifiable)
   }
 
-  static applyVars(warp: Warp, config: WarpConfig): Warp {
+  static async applyGlobals(config: WarpConfig, warp: Warp): Promise<Warp> {
+    let modifiable = { ...warp }
+    modifiable.actions = await Promise.all(modifiable.actions.map(async (action) => await this.applyActionGlobals(config, action)))
+
+    modifiable = await this.applyRootGlobals(modifiable, config)
+
+    return modifiable
+  }
+
+  static applyVars(config: WarpConfig, warp: Warp): Warp {
     if (!warp?.vars) return warp
     let modifiable = JSON.stringify(warp)
 
@@ -40,6 +47,35 @@ export class WarpInterpolator {
         modify(placeholder, config.user.wallet)
       } else {
         modify(placeholder, value)
+      }
+    })
+
+    return JSON.parse(modifiable)
+  }
+
+  private static async applyRootGlobals(warp: Warp, config: WarpConfig): Promise<Warp> {
+    let modifiable = JSON.stringify(warp)
+    const rootBag: InterpolationBag = { config, chain: getMainChainInfo(config) }
+
+    Object.values(WarpConstants.Globals).forEach((global) => {
+      const value = global.Accessor(rootBag)
+      if (value !== undefined && value !== null) {
+        modifiable = modifiable.replace(new RegExp(`{{${global.Placeholder}}}`, 'g'), value.toString())
+      }
+    })
+
+    return JSON.parse(modifiable)
+  }
+
+  private static async applyActionGlobals(config: WarpConfig, action: WarpAction): Promise<WarpAction> {
+    const chain = await WarpUtils.getChainInfoForAction(config, action)
+    let modifiable = JSON.stringify(action)
+    const bag: InterpolationBag = { config, chain }
+
+    Object.values(WarpConstants.Globals).forEach((global) => {
+      const value = global.Accessor(bag)
+      if (value !== undefined && value !== null) {
+        modifiable = modifiable.replace(new RegExp(`{{${global.Placeholder}}}`, 'g'), value.toString())
       }
     })
 

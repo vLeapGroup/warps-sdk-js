@@ -1,4 +1,4 @@
-import { WarpConfig } from './types'
+import { InterpolationBag } from './WarpInterpolator'
 
 export const WarpConstants = {
   HttpProtocolPrefix: 'http',
@@ -19,15 +19,15 @@ export const WarpConstants = {
   Globals: {
     UserWallet: {
       Placeholder: 'USER_WALLET',
-      Accessor: (config: WarpConfig) => config.user?.wallet,
+      Accessor: (bag: InterpolationBag) => bag.config.user?.wallet,
     },
     ChainApiUrl: {
       Placeholder: 'CHAIN_API',
-      Accessor: (config: WarpConfig) => config.chain?.apiUrl,
+      Accessor: (bag: InterpolationBag) => bag.chain.apiUrl,
     },
     ChainExplorerUrl: {
       Placeholder: 'CHAIN_EXPLORER',
-      Accessor: (config: WarpConfig) => config.chain?.explorerUrl,
+      Accessor: (bag: InterpolationBag) => bag.chain.explorerUrl,
     },
   },
 

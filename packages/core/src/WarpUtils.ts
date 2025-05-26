@@ -7,8 +7,6 @@ import { WarpLink } from './WarpLink'
 import { WarpRegistry } from './WarpRegistry'
 
 const URL_PREFIX = 'https://'
-const VAR_SOURCE_QUERY = 'query'
-const VAR_SOURCE_ENV = 'env'
 
 export class WarpUtils {
   static getInfoFromPrefixedIdentifier(
@@ -25,7 +23,7 @@ export class WarpUtils {
     return { type: idType as WarpIdType, identifier, identifierBase }
   }
 
-  static getNextInfo(warp: Warp, actionIndex: number, results: WarpExecutionResults, config: WarpConfig): WarpExecutionNextInfo | null {
+  static getNextInfo(config: WarpConfig, warp: Warp, actionIndex: number, results: WarpExecutionResults): WarpExecutionNextInfo | null {
     const next = (warp.actions?.[actionIndex] as { next?: string })?.next || warp.next || null
     if (!next) return null
     if (next.startsWith(URL_PREFIX)) return [{ identifier: null, url: next }]
@@ -88,7 +86,7 @@ export class WarpUtils {
     return path.split('.').reduce((current, key) => current?.[key], obj)
   }
 
-  static async getChainInfoForAction(action: WarpAction, config: WarpConfig): Promise<ChainInfo> {
+  static async getChainInfoForAction(config: WarpConfig, action: WarpAction): Promise<ChainInfo> {
     if (!action.chain) return getMainChainInfo(config)
     const chainInfo = await new WarpRegistry(config).getChainInfo(action.chain, { ttl: CacheTtl.OneWeek })
     if (!chainInfo) throw new Error(`WarpActionExecutor: Chain info not found for ${action.chain}`)
