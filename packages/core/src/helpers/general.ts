@@ -1,17 +1,11 @@
 import { Config, WarpProtocolVersions } from '../config'
-import { ChainEnv, ChainInfo, ProtocolName, Warp, WarpConfig } from '../types'
-
-export const getChainId = (env: ChainEnv): string => {
-  if (env === 'devnet') return 'D'
-  if (env === 'testnet') return 'T'
-  return '1'
-}
+import { ChainInfo, ProtocolName, Warp, WarpConfig } from '../types'
 
 export const getMainChainInfo = (config: WarpConfig): ChainInfo => ({
-  chainId: getChainId(config.env),
-  apiUrl: config.chain?.apiUrl || Config.MainChain.ApiUrl(config.env),
-  blockTime: 6000,
-  explorerUrl: config.chain?.explorerUrl || Config.MainChain.ExplorerUrl(config.env),
+  chainId: Config.MainChain.ChainId(config.env),
+  apiUrl: Config.MainChain.ApiUrl(config.env),
+  blockTime: Config.MainChain.BlockTime(config.env),
+  explorerUrl: Config.MainChain.ExplorerUrl(config.env),
 })
 
 export const getLatestProtocolIdentifier = (name: ProtocolName): string => {

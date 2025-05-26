@@ -1,5 +1,5 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
-import { getChainId, getLatestProtocolIdentifier, getMainChainInfo, toPreviewText } from './helpers/general'
+import { getLatestProtocolIdentifier, getMainChainInfo, toPreviewText } from './helpers/general'
 import { Warp, WarpAction, WarpCacheConfig, WarpConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
 import { WarpUtils } from './WarpUtils'
@@ -25,7 +25,8 @@ export class WarpBuilder {
 
   createInscriptionTransaction(warp: Warp): Transaction {
     if (!this.config.user?.wallet) throw new Error('WarpBuilder: user address not set')
-    const factoryConfig = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
+    const chain = getMainChainInfo(this.config)
+    const factoryConfig = new TransactionsFactoryConfig({ chainID: chain.chainId })
     const factory = new TransferTransactionsFactory({ config: factoryConfig })
     const sender = Address.newFromBech32(this.config.user.wallet)
     const serialized = JSON.stringify(warp)

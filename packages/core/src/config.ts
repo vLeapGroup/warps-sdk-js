@@ -30,6 +30,16 @@ export const Config = {
       if (env === 'testnet') return 'https://testnet-explorer.multiversx.com'
       return 'https://explorer.multiversx.com'
     },
+    BlockTime: (env: ChainEnv) => {
+      if (env === 'devnet') return 6000
+      if (env === 'testnet') return 6000
+      return 6000
+    },
+    ChainId: (env: ChainEnv) => {
+      if (env === 'devnet') return 'D'
+      if (env === 'testnet') return 'T'
+      return '1'
+    },
   },
 
   Registry: {

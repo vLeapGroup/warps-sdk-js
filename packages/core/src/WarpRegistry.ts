@@ -10,7 +10,7 @@ import {
 } from '@multiversx/sdk-core/out'
 import RegistryAbi from './abis/registry.abi.json'
 import { Config } from './config'
-import { getChainId, getMainChainInfo, toTypedChainInfo } from './helpers/general'
+import { getMainChainInfo, toTypedChainInfo } from './helpers/general'
 import { toTypedConfigInfo, toTypedRegistryInfo } from './helpers/registry'
 import { Brand, ChainInfo, ConfigInfo, RegistryInfo, WarpCacheConfig, WarpChain, WarpConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
@@ -313,7 +313,8 @@ export class WarpRegistry {
   }
 
   private getFactory(): SmartContractTransactionsFactory {
-    const config = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
+    const chain = getMainChainInfo(this.config)
+    const config = new TransactionsFactoryConfig({ chainID: chain.chainId })
     const abi = AbiRegistry.create(RegistryAbi)
     return new SmartContractTransactionsFactory({ config, abi })
   }

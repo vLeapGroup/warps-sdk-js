@@ -11,12 +11,12 @@ import {
   TransactionsFactoryConfig,
   TransferTransactionsFactory,
 } from '@multiversx/sdk-core'
-import { Config } from './config'
 import { WarpConstants } from './constants'
 import { getMainChainInfo, getWarpActionByIndex, replacePlaceholders, shiftBigintBy } from './helpers/general'
 import { extractCollectResults, extractContractResults, extractQueryResults } from './helpers/results'
 import { findKnownTokenById } from './tokens'
 import {
+  ChainInfo,
   Warp,
   WarpAction,
   WarpActionInput,
@@ -59,10 +59,10 @@ export class WarpActionExecutor {
     const sender = Address.newFromBech32(this.config.user.wallet)
     const preparedWarp = WarpInterpolator.applyVars(warp, this.config)
     const action = getWarpActionByIndex(preparedWarp, actionIndex) as WarpTransferAction | WarpContractAction
-    const chainInfo = await WarpUtils.getChainInfoForAction(action, this.config)
-    const config = new TransactionsFactoryConfig({ chainID: chainInfo.chainId })
+    const chain = await WarpUtils.getChainInfoForAction(action, this.config)
+    const config = new TransactionsFactoryConfig({ chainID: chain.chainId })
 
-    const { destination, args, value, transfers, data } = await this.getTxComponentsFromInputs(action, inputs, sender)
+    const { destination, args, value, transfers, data } = await this.getTxComponentsFromInputs(chain, action, inputs, sender)
     const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
 
     if (action.type === 'transfer') {
@@ -115,11 +115,12 @@ export class WarpActionExecutor {
     const action = getWarpActionByIndex(preparedWarp, actionIndex) as WarpQueryAction | null
     if (!action) throw new Error('WarpActionExecutor: Action not found')
     if (!action.func) throw new Error('WarpActionExecutor: Function not found')
-    const chainInfo = await WarpUtils.getChainInfoForAction(action, this.config)
+
+    const chain = await WarpUtils.getChainInfoForAction(action, this.config)
     const abi = await this.getAbiForAction(action)
-    const { args } = await this.getTxComponentsFromInputs(action, inputs)
+    const { args } = await this.getTxComponentsFromInputs(chain, action, inputs)
     const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
-    const entrypoint = WarpUtils.getChainEntrypoint(chainInfo, this.config.env)
+    const entrypoint = WarpUtils.getChainEntrypoint(chain, this.config.env)
     const contractAddress = Address.newFromBech32(action.address)
     const controller = entrypoint.createSmartContractController(abi)
     const query = controller.createQuery({ contract: contractAddress, function: action.func, arguments: typedArgs })
@@ -146,10 +147,12 @@ export class WarpActionExecutor {
   }
 
   async executeCollect(warp: Warp, actionIndex: number, inputs: string[], meta?: Record<string, any>): Promise<WarpExecution> {
-    const preparedWarp = WarpInterpolator.applyVars(warp, this.config)
-    const action = getWarpActionByIndex(preparedWarp, actionIndex) as WarpCollectAction | null
+    const action = getWarpActionByIndex(warp, actionIndex) as WarpCollectAction | null
     if (!action) throw new Error('WarpActionExecutor: Action not found')
-    const resolvedInputs = await this.getResolvedInputs(action, inputs)
+
+    const chain = await WarpUtils.getChainInfoForAction(action, this.config)
+    const preparedWarp = WarpInterpolator.applyVars(warp, this.config)
+    const resolvedInputs = await this.getResolvedInputs(chain, action, inputs)
     const modifiedInputs = this.getModifiedInputs(resolvedInputs)
 
     const toInputPayloadValue = (resolvedInput: ResolvedInput) => {
@@ -211,11 +214,12 @@ export class WarpActionExecutor {
   }
 
   async getTxComponentsFromInputs(
+    chain: ChainInfo,
     action: WarpTransferAction | WarpContractAction | WarpQueryAction,
     inputs: string[],
     sender?: Address
   ): Promise<{ destination: Address; args: string[]; value: bigint; transfers: TokenTransfer[]; data: Buffer | null }> {
-    const resolvedInputs = await this.getResolvedInputs(action, inputs)
+    const resolvedInputs = await this.getResolvedInputs(chain, action, inputs)
     const modifiedInputs = this.getModifiedInputs(resolvedInputs)
 
     const destinationInput = modifiedInputs.find((i) => i.input.position === 'receiver')?.value
@@ -246,9 +250,9 @@ export class WarpActionExecutor {
     return { destination, args, value, transfers, data }
   }
 
-  public async getResolvedInputs(action: WarpAction, inputArgs: string[]): Promise<ResolvedInput[]> {
+  public async getResolvedInputs(chain: ChainInfo, action: WarpAction, inputArgs: string[]): Promise<ResolvedInput[]> {
     const argInputs = action.inputs || []
-    const preprocessed = await Promise.all(inputArgs.map((arg) => this.preprocessInput(arg)))
+    const preprocessed = await Promise.all(inputArgs.map((arg) => this.preprocessInput(chain, arg)))
 
     const toValueByType = (input: WarpActionInput, index: number) => {
       if (input.source === 'query') {
@@ -300,7 +304,7 @@ export class WarpActionExecutor {
     })
   }
 
-  public async preprocessInput(input: string): Promise<string> {
+  public async preprocessInput(chain: ChainInfo, input: string): Promise<string> {
     try {
       const [type, value] = input.split(WarpConstants.ArgParamsSeparator, 2) as [WarpActionInputType, string]
       if (type === 'esdt') {
@@ -312,8 +316,7 @@ export class WarpActionExecutor {
         const knownToken = findKnownTokenById(tokenId)
         let decimals = knownToken?.decimals
         if (!decimals) {
-          const apiUrl = this.config.chain?.apiUrl || Config.MainChain.ApiUrl(this.config.env)
-          const definitionRes = await fetch(`${apiUrl}/tokens/${tokenId}`) // TODO: use chainApi directly; currently causes circular reference for whatever reason
+          const definitionRes = await fetch(`${chain.apiUrl}/tokens/${tokenId}`) // TODO: use chainApi directly; currently causes circular reference for whatever reason
           const definition = await definitionRes.json()
           decimals = definition.decimals
         }

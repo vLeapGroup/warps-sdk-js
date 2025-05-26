@@ -11,10 +11,6 @@ export type WarpConfig = {
   user?: {
     wallet?: string
   }
-  chain?: {
-    apiUrl?: string
-    explorerUrl?: string
-  }
   schema?: {
     warp?: string
     brand?: string

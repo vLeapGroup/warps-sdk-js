@@ -1,7 +1,7 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
 import Ajv from 'ajv'
 import { Config } from './config'
-import { getChainId, getLatestProtocolIdentifier, getMainChainInfo } from './helpers/general'
+import { getLatestProtocolIdentifier, getMainChainInfo } from './helpers/general'
 import { Brand, BrandColors, BrandCta, BrandUrls, WarpConfig } from './types'
 import { WarpUtils } from './WarpUtils'
 
@@ -21,7 +21,8 @@ export class BrandBuilder {
 
   createInscriptionTransaction(brand: Brand): Transaction {
     if (!this.config.user?.wallet) throw new Error('BrandBuilder: user address not set')
-    const factoryConfig = new TransactionsFactoryConfig({ chainID: getChainId(this.config.env) })
+    const chain = getMainChainInfo(this.config)
+    const factoryConfig = new TransactionsFactoryConfig({ chainID: chain.chainId })
     const factory = new TransferTransactionsFactory({ config: factoryConfig })
     const sender = Address.newFromBech32(this.config.user.wallet)
     const serialized = JSON.stringify(brand)
