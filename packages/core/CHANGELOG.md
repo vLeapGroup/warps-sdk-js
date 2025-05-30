@@ -1,5 +1,62 @@
 # @vleap/warp-sdk-core
 
+## 2.0.0
+
+### Major Changes
+
+- edd1760: update version to v2
+- 329a791: add results + messages v2
+
+### Minor Changes
+
+- 7458732: add warp logger
+- e1a5401: update multi chain
+- 60a3fc6: add registry brand configuration on register
+- 8677223: update vars preparations
+- a3aa83d: add globals
+- 48432d7: update user source + config
+- 3a37f74: update config structure
+- 0228460: add vars user wallet source
+- 17c2311: update next results + url query support for ids
+- b978b7a: add next var + result placeholder replacements
+- 04c2d80: add cache forget
+- dc17400: add multi-next warp support
+- 73c0057: add registry transfer ownership
+
+### Patch Changes
+
+- 34cf858: fix builder validation handling
+- 198fd65: add warp link detect caching
+- f55412d: add further info to execution result
+- 7d50e91: add missing type export
+- 3cc2a32: fix link building
+- 6fe2da5: fix warp link detection
+- aecfa73: update validator
+- 9fda71f: update registry abi
+- f5c434b: update registry config
+- a43d025: update globals
+- 942ddd8: fix validator
+- baf7e4b: update builder validation
+- dc6842d: add registry soft err handling
+- f806686: move chain info for action to utils
+- 329a791: extend validator
+- 204ba91: fix next links
+- fcddba6: optimize in-memory cache
+- a1e04a4: add warp link detect error catching
+- 13e7464: fix collect results
+- 7eb23d2: update position field to be optional
+- 9bce92b: add cache ttl constants
+- 578e1b3: update collect action params to be optional
+- 60cd189: add further info to exec result
+- a46773a: add upgrade timestamps
+- 8159b44: update warp var resolution
+- 82a45c1: update warp var handling
+- 437731c: fix warp detection
+- 7c605ee: fix registry config parsing
+- 8a00d9e: remove builder from raw vars preperation
+- 5ca0cbe: fix action collect get requests
+- c22e11a: remove logging
+
 ## 2.0.0-beta.36
 
 ### Minor Changes

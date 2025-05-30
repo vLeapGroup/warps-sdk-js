@@ -1,5 +1,57 @@
 # @vleap/warps-react
 
+## 0.0.5
+
+### Patch Changes
+
+- Updated dependencies [34cf858]
+- Updated dependencies [198fd65]
+- Updated dependencies [f55412d]
+- Updated dependencies [7458732]
+- Updated dependencies [7d50e91]
+- Updated dependencies [e1a5401]
+- Updated dependencies [3cc2a32]
+- Updated dependencies [edd1760]
+- Updated dependencies [6fe2da5]
+- Updated dependencies [60a3fc6]
+- Updated dependencies [aecfa73]
+- Updated dependencies [9fda71f]
+- Updated dependencies [f5c434b]
+- Updated dependencies [a43d025]
+- Updated dependencies [942ddd8]
+- Updated dependencies [baf7e4b]
+- Updated dependencies [8677223]
+- Updated dependencies [dc6842d]
+- Updated dependencies [f806686]
+- Updated dependencies [329a791]
+- Updated dependencies [329a791]
+- Updated dependencies [204ba91]
+- Updated dependencies [fcddba6]
+- Updated dependencies [a1e04a4]
+- Updated dependencies [13e7464]
+- Updated dependencies [a3aa83d]
+- Updated dependencies [7eb23d2]
+- Updated dependencies [9bce92b]
+- Updated dependencies [48432d7]
+- Updated dependencies [3a37f74]
+- Updated dependencies [578e1b3]
+- Updated dependencies [0228460]
+- Updated dependencies [17c2311]
+- Updated dependencies [60cd189]
+- Updated dependencies [b978b7a]
+- Updated dependencies [a46773a]
+- Updated dependencies [8159b44]
+- Updated dependencies [82a45c1]
+- Updated dependencies [437731c]
+- Updated dependencies [04c2d80]
+- Updated dependencies [7c605ee]
+- Updated dependencies [8a00d9e]
+- Updated dependencies [dc17400]
+- Updated dependencies [5ca0cbe]
+- Updated dependencies [73c0057]
+- Updated dependencies [c22e11a]
+  - @vleap/warps@2.0.0
+
 ## 0.0.5-beta.36
 
 ### Patch Changes
