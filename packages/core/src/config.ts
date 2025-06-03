@@ -2,7 +2,7 @@ import { WarpConstants } from './constants'
 import { ChainEnv, WarpActionInputPosition, WarpActionInputSource, WarpActionInputType } from './types'
 
 export const WarpProtocolVersions = {
-  Warp: '2.0.0',
+  Warp: '2.0.1',
   Brand: '0.1.0',
   Abi: '0.1.0',
 }
