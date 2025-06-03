@@ -182,7 +182,7 @@ export type WarpActionInput = {
   max?: number | WarpVarPlaceholder
   pattern?: string
   patternDescription?: string
-  options?: string[]
+  options?: string[] | { [key: string]: string }
   modifier?: string
 }
 
