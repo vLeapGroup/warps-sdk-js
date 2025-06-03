@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 2.0.1
+
+### Patch Changes
+
+- 5c99634: update input options type
+- 834ad73: update protocol version in config
+
 ## 2.0.0
 
 ### Major Changes
