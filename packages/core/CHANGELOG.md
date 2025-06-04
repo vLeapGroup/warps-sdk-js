@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.2
+
+### Patch Changes
+
+- 1a1e749: add interpolation to link detection
+
 ## 2.0.1
 
 ### Patch Changes
