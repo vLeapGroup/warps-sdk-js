@@ -5,7 +5,7 @@
 
 ## Documentation
 
-For detailed documentation, including setup guides, API descriptions, and usage examples, please visit the [docs](https://docs.vleap.io).
+For detailed documentation, including setup guides, API descriptions, and usage examples, please visit the [docs](https://docs.vleap.ai).
 
 ## Installation
 
