@@ -4,6 +4,7 @@ import { WarpConstants } from './constants'
 import { Brand, RegistryInfo, Warp, WarpCacheConfig, WarpConfig, WarpIdType } from './types'
 import { WarpBuilder } from './WarpBuilder'
 import { WarpInterpolator } from './WarpInterpolator'
+import { WarpLogger } from './WarpLogger'
 import { WarpRegistry } from './WarpRegistry'
 import { WarpUtils } from './WarpUtils'
 
@@ -86,6 +87,7 @@ export class WarpLink {
 
       return preparedWarp ? { match: true, url, warp: preparedWarp, registryInfo, brand } : emptyResult
     } catch (e) {
+      WarpLogger.error('Error detecting warp link', e)
       return emptyResult
     }
   }
