@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.0.3
+
+### Patch Changes
+
+- 9f68518: add logging
+
 ## 2.0.2
 
 ### Patch Changes
