@@ -3,6 +3,7 @@ import { Config } from './config'
 import { WarpConstants } from './constants'
 import { Brand, RegistryInfo, Warp, WarpCacheConfig, WarpConfig, WarpIdType } from './types'
 import { WarpBuilder } from './WarpBuilder'
+import { WarpInterpolator } from './WarpInterpolator'
 import { WarpRegistry } from './WarpRegistry'
 import { WarpUtils } from './WarpUtils'
 
@@ -81,7 +82,9 @@ export class WarpLink {
         }
       }
 
-      return warp ? { match: true, url, warp, registryInfo, brand } : emptyResult
+      const preparedWarp = warp ? await WarpInterpolator.apply(this.config, warp) : null
+
+      return preparedWarp ? { match: true, url, warp: preparedWarp, registryInfo, brand } : emptyResult
     } catch (e) {
       return emptyResult
     }
