@@ -475,6 +475,10 @@
             "type": "struct",
             "fields": [
                 {
+                    "name": "name",
+                    "type": "bytes"
+                },
+                {
                     "name": "display_name",
                     "type": "bytes"
                 },

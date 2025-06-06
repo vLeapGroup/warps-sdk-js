@@ -2,6 +2,7 @@ import { Config, WarpProtocolVersions } from '../config'
 import { ChainInfo, ProtocolName, Warp, WarpConfig } from '../types'
 
 export const getMainChainInfo = (config: WarpConfig): ChainInfo => ({
+  name: Config.MainChain.Name,
   displayName: Config.MainChain.DisplayName,
   chainId: Config.MainChain.ChainId(config.env),
   blockTime: Config.MainChain.BlockTime(config.env),
@@ -20,6 +21,7 @@ export const getLatestProtocolIdentifier = (name: ProtocolName): string => {
 export const getWarpActionByIndex = (warp: Warp, index: number) => warp?.actions[index - 1]
 
 export const toTypedChainInfo = (chainInfo: any): ChainInfo => ({
+  name: chainInfo.name.toString(),
   displayName: chainInfo.display_name.toString(),
   chainId: chainInfo.chain_id.toString(),
   blockTime: chainInfo.block_time.toNumber(),

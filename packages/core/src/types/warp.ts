@@ -34,6 +34,7 @@ export type WarpCacheConfig = {
 }
 
 export type ChainInfo = {
+  name: string
   displayName: string
   chainId: string
   blockTime: number
