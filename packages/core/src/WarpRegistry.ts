@@ -242,6 +242,35 @@ export class WarpRegistry {
     }
   }
 
+  async getChainInfos(cache?: WarpCacheConfig): Promise<ChainInfo[]> {
+    const cacheListKey = CacheKey.ChainInfos()
+    if (cache && cache.ttl) {
+      const cachedList = this.cache.get<ChainInfo[]>(cacheListKey)
+      if (cachedList) {
+        WarpLogger.info('WarpRegistry (getChainInfos): ChainInfos found in cache')
+        return cachedList
+      }
+    }
+
+    const contract = this.getRegistryContractAddress()
+    const controller = this.getController()
+    const query = controller.createQuery({ contract, function: 'getChains', arguments: [] })
+    const res = await controller.runQuery(query)
+    const [chainInfosRaw] = controller.parseQueryResponse(res)
+    const chainInfos = chainInfosRaw.map(toTypedChainInfo)
+
+    if (cache && cache.ttl) {
+      // Cache each individually for efficient reuse in getChainInfo
+      for (const chainInfo of chainInfos) {
+        this.cache.set(CacheKey.ChainInfo(chainInfo.chain), chainInfo, cache.ttl)
+      }
+      // Cache the full list
+      this.cache.set(cacheListKey, chainInfos, cache.ttl)
+    }
+
+    return chainInfos
+  }
+
   async getChainInfo(chain: WarpChain, cache?: WarpCacheConfig): Promise<ChainInfo | null> {
     try {
       const cacheKey = CacheKey.ChainInfo(chain)

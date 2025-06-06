@@ -18,6 +18,7 @@ export const CacheKey = {
   RegistryInfo: (id: string) => `registry-info:${id}`,
   Brand: (hash: string) => `brand:${hash}`,
   ChainInfo: (chain: WarpChain) => `chain:${chain}`,
+  ChainInfos: () => 'chains',
 }
 
 export type CacheType = 'memory' | 'localStorage'
