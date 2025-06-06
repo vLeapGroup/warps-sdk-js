@@ -2,9 +2,11 @@ import { Config, WarpProtocolVersions } from '../config'
 import { ChainInfo, ProtocolName, Warp, WarpConfig } from '../types'
 
 export const getMainChainInfo = (config: WarpConfig): ChainInfo => ({
+  displayName: Config.MainChain.DisplayName,
   chainId: Config.MainChain.ChainId(config.env),
-  apiUrl: Config.MainChain.ApiUrl(config.env),
   blockTime: Config.MainChain.BlockTime(config.env),
+  addressHrp: Config.MainChain.AddressHrp,
+  apiUrl: Config.MainChain.ApiUrl(config.env),
   explorerUrl: Config.MainChain.ExplorerUrl(config.env),
 })
 

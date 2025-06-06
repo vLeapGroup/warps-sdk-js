@@ -20,6 +20,7 @@ export const Config = {
   SuperClientUrls: ['https://usewarp.to', 'https://testnet.usewarp.to', 'https://devnet.usewarp.to'],
 
   MainChain: {
+    DisplayName: 'MultiversX',
     ApiUrl: (env: ChainEnv) => {
       if (env === 'devnet') return 'https://devnet-api.multiversx.com'
       if (env === 'testnet') return 'https://testnet-api.multiversx.com'
@@ -35,6 +36,7 @@ export const Config = {
       if (env === 'testnet') return 6000
       return 6000
     },
+    AddressHrp: 'erd',
     ChainId: (env: ChainEnv) => {
       if (env === 'devnet') return 'D'
       if (env === 'testnet') return 'T'
