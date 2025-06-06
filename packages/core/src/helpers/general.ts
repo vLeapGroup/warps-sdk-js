@@ -11,6 +11,8 @@ export const getMainChainInfo = (config: WarpConfig): ChainInfo => ({
   explorerUrl: Config.MainChain.ExplorerUrl(config.env),
 })
 
+export const getChainExplorerUrl = (chain: ChainInfo, path?: string) => chain.explorerUrl + (path ? '/' + path : '')
+
 export const getLatestProtocolIdentifier = (name: ProtocolName): string => {
   if (name === 'warp') return `warp:${WarpProtocolVersions.Warp}`
   if (name === 'brand') return `brand:${WarpProtocolVersions.Brand}`
