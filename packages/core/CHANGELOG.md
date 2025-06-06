@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.2.0
+
+### Minor Changes
+
+- 039965b: add chain explorer helper
+
 ## 2.1.1
 
 ### Patch Changes
