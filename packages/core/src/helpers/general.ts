@@ -18,8 +18,10 @@ export const getLatestProtocolIdentifier = (name: ProtocolName): string => {
 export const getWarpActionByIndex = (warp: Warp, index: number) => warp?.actions[index - 1]
 
 export const toTypedChainInfo = (chainInfo: any): ChainInfo => ({
+  displayName: chainInfo.display_name.toString(),
   chainId: chainInfo.chain_id.toString(),
   blockTime: chainInfo.block_time.toNumber(),
+  addressHrp: chainInfo.address_hrp.toString(),
   apiUrl: chainInfo.api_url.toString(),
   explorerUrl: chainInfo.explorer_url.toString(),
 })

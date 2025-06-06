@@ -306,12 +306,20 @@
                     "type": "bytes"
                 },
                 {
+                    "name": "display_name",
+                    "type": "bytes"
+                },
+                {
                     "name": "chain_id",
                     "type": "bytes"
                 },
                 {
                     "name": "block_time",
                     "type": "u32"
+                },
+                {
+                    "name": "address_hrp",
+                    "type": "bytes"
                 },
                 {
                     "name": "api_url",
@@ -467,12 +475,20 @@
             "type": "struct",
             "fields": [
                 {
+                    "name": "display_name",
+                    "type": "bytes"
+                },
+                {
                     "name": "chain_id",
                     "type": "bytes"
                 },
                 {
                     "name": "block_time",
                     "type": "u32"
+                },
+                {
+                    "name": "address_hrp",
+                    "type": "bytes"
                 },
                 {
                     "name": "api_url",
