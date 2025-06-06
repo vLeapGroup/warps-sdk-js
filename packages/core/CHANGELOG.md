@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 2.1.0
+
+### Minor Changes
+
+- 4ae0571: add further chain properties
+- c084637: add registry chain infos
+
 ## 2.0.3
 
 ### Patch Changes
