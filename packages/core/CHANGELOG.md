@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.1.1
+
+### Patch Changes
+
+- b67b76e: add chain name to info
+
 ## 2.1.0
 
 ### Minor Changes
