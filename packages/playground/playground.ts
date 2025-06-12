@@ -1,5 +1,5 @@
 // Playground for testing warps in isolation
-import { getWarpActionByIndex, WarpActionExecutor, WarpBuilder, WarpConfig, WarpExecution } from '@vleap/warps'
+import { getWarpActionByIndex, WarpActionExecutor, WarpBuilder, WarpConfig, WarpExecution, WarpInterpolator } from '@vleap/warps'
 import * as fs from 'fs'
 import * as path from 'path'
 
@@ -24,13 +24,14 @@ const runWarp = async (warpFile: string) => {
   const executor = new WarpActionExecutor(config)
 
   const warp = await builder.createFromRaw(warpRaw)
-  const action = getWarpActionByIndex(warp, actionIndex)
+  const preparedWarp = await WarpInterpolator.apply(config, warp)
+  const action = getWarpActionByIndex(preparedWarp, actionIndex)
   let execution: WarpExecution | null = null
 
   if (action.type === 'query') {
-    execution = await executor.executeQuery(warp, actionIndex, [])
+    execution = await executor.executeQuery(preparedWarp, actionIndex, [])
   } else if (action.type === 'collect') {
-    execution = await executor.executeCollect(warp, actionIndex, [])
+    execution = await executor.executeCollect(preparedWarp, actionIndex, [])
   }
 
   console.log('Execution:', execution)
