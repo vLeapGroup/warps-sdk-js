@@ -92,7 +92,7 @@ export class WarpActionExecutor {
   async getTransactionExecutionResults(warp: Warp, actionIndex: number, tx: TransactionOnNetwork): Promise<WarpExecution> {
     const action = getWarpActionByIndex(warp, actionIndex) as WarpContractAction
     const preparedWarp = await WarpInterpolator.apply(this.config, warp)
-    const { values, results } = await extractContractResults(this, preparedWarp, action, tx)
+    const { values, results } = await extractContractResults(this, preparedWarp, action, tx, actionIndex)
     const next = WarpUtils.getNextInfo(this.config, preparedWarp, actionIndex, results)
     const messages = this.getPreparedMessages(preparedWarp, results)
 
@@ -129,7 +129,7 @@ export class WarpActionExecutor {
     const endpoint = abi.getEndpoint(response.function)
     const parts = response.returnDataParts.map((part) => Buffer.from(part))
     const typedValues = argsSerializer.buffersToValues(parts, endpoint.output)
-    const { values, results } = await extractQueryResults(preparedWarp, typedValues)
+    const { values, results } = await extractQueryResults(preparedWarp, typedValues, actionIndex)
     const next = WarpUtils.getNextInfo(this.config, preparedWarp, actionIndex, results)
 
     return {
@@ -182,7 +182,7 @@ export class WarpActionExecutor {
     try {
       const response = await fetch(action.destination.url, { method: httpMethod, headers, body })
       const content = await response.json()
-      const { values, results } = await extractCollectResults(preparedWarp, content)
+      const { values, results } = await extractCollectResults(preparedWarp, content, actionIndex)
       const next = WarpUtils.getNextInfo(this.config, preparedWarp, actionIndex, results)
 
       return {
