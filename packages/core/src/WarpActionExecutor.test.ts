@@ -547,6 +547,13 @@ describe('WarpActionExecutor', () => {
   it('getTxComponentsFromInputs - resolves esdt decimal places from network when no provided', async () => {
     const config: WarpConfig = { ...testConfig, env: 'mainnet' }
     const subject = new WarpActionExecutor(config)
+    const httpMock = setupHttpMock()
+
+    httpMock.registerResponse('https://api.multiversx.com/tokens/USH-111e09', {
+      identifier: 'USH-111e09',
+      name: 'Test Token',
+      decimals: 18,
+    })
 
     const action: WarpContractAction = {
       type: 'contract',
@@ -575,6 +582,8 @@ describe('WarpActionExecutor', () => {
     expect(transfers[0].token.identifier).toEqual('USH-111e09')
     expect(transfers[0].token.nonce.toString()).toEqual('0')
     expect(transfers[0].amount.toString()).toEqual('1500000000000000000')
+
+    httpMock.cleanup()
   })
 
   it('getTxComponentsFromInputs - resolves esdt decimal places from known tokens when no provided', async () => {
