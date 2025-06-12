@@ -41,7 +41,7 @@ export class WarpUtils {
       return [{ identifier, url: this.buildNextUrl(identifier, config) }]
     }
 
-    // Only support one array placeholder per next link
+    // Support multiple array placeholders that reference the same array
     const placeholder = arrayPlaceholders[0]
     if (!placeholder) return []
     const resultNameMatch = placeholder.match(/{{([^[]+)\[\]/)
@@ -51,16 +51,30 @@ export class WarpUtils {
     const resultArray = Array.isArray(results[resultName]) ? results[resultName] : [results[resultName]]
     if (resultArray.length === 0) return []
 
-    // Extract field path, e.g. .contract
-    const fieldPathMatch = placeholder.match(/\[\](\.[^}]+)?}}/)
-    const fieldPath = fieldPathMatch ? fieldPathMatch[1] || '' : ''
-    const exactPlaceholderRegex = new RegExp(`{{${resultName}\\[\\]${fieldPath.replace('.', '\.')}}}`, 'g')
+    // Create regex patterns for all array placeholders with the same result name
+    const arrayRegexes = arrayPlaceholders
+      .filter((p) => p.includes(`{{${resultName}[]`))
+      .map((p) => {
+        const fieldMatch = p.match(/\[\](\.[^}]+)?}}/)
+        const field = fieldMatch ? fieldMatch[1] || '' : ''
+        return {
+          placeholder: p,
+          field: field ? field.slice(1) : '', // Remove leading dot if present
+          regex: new RegExp(p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
+        }
+      })
 
     const nextLinks = resultArray
       .map((item) => {
-        const mainValue = fieldPath ? this.getNestedValue(item, fieldPath.slice(1)) : item
-        if (mainValue === undefined || mainValue === null) return null
-        const replacedQuery = queryWithPlaceholders.replace(exactPlaceholderRegex, mainValue)
+        let replacedQuery = queryWithPlaceholders
+
+        // Replace all array placeholders for this item
+        for (const { regex, field } of arrayRegexes) {
+          const value = field ? this.getNestedValue(item, field) : item
+          if (value === undefined || value === null) return null
+          replacedQuery = replacedQuery.replace(regex, value)
+        }
+
         if (replacedQuery.includes('{{') || replacedQuery.includes('}}')) return null
         const identifier = replacedQuery ? `${baseIdentifier}?${replacedQuery}` : baseIdentifier
         return { identifier, url: this.buildNextUrl(identifier, config) }

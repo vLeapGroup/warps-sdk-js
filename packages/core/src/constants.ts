@@ -39,6 +39,10 @@ export const WarpConstants = {
   ArgParamsSeparator: ':',
   ArgCompositeSeparator: '|',
 
+  Transform: {
+    Prefix: 'transform:',
+  },
+
   Egld: {
     Identifier: 'EGLD',
     EsdtIdentifier: 'EGLD-000000',

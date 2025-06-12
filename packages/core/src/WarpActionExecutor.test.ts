@@ -628,9 +628,115 @@ describe('WarpActionExecutor', () => {
 
     expect(args).toEqual(['esdt:USH-111e09|0|1000|2'])
   })
+
+  describe('transform results', () => {
+    it('evaluates transform results from collect action', async () => {
+      const subject = new WarpActionExecutor(testConfig)
+      const httpMock = setupHttpMock()
+      httpMock.registerResponse('https://api.example.com/data', {
+        users: [
+          { name: 'Alice', amount: 100 },
+          { name: 'Bob', amount: 200 },
+        ],
+      })
+
+      const action: WarpCollectAction = {
+        type: 'collect',
+        label: 'Get Users',
+        destination: {
+          url: 'https://api.example.com/data',
+        },
+      }
+
+      const warp = {
+        actions: [action],
+        results: {
+          USERS: 'out.users',
+          TOTAL: 'transform:() => { return input.USERS.reduce((sum, user) => sum + user.amount, 0) }',
+          COUNT: 'transform:() => input.USERS.length',
+        },
+      } as any as Warp
+
+      const execution = await subject.executeCollect(warp, 1, [])
+
+      expect(execution.success).toBe(true)
+      expect(execution.results.USERS).toEqual([
+        { name: 'Alice', amount: 100 },
+        { name: 'Bob', amount: 200 },
+      ])
+      expect(execution.results.TOTAL).toBe(300)
+      expect(execution.results.COUNT).toBe(2)
+
+      httpMock.cleanup()
+    })
+
+    it('evaluates multiple transform results that depend on each other', async () => {
+      const subject = new WarpActionExecutor(testConfig)
+      const httpMock = setupHttpMock()
+      httpMock.registerResponse('https://api.example.com/data', { value: 10 })
+
+      const action: WarpCollectAction = {
+        type: 'collect',
+        label: 'Get Value',
+        destination: {
+          url: 'https://api.example.com/data',
+        },
+      }
+
+      const warp = {
+        actions: [action],
+        results: {
+          BASE_VALUE: 'out.value',
+          DOUBLED: 'transform:() => { return input.BASE_VALUE * 2 }',
+          FINAL: 'transform:() => { return input.DOUBLED + 5 }',
+        },
+      } as any as Warp
+
+      const execution = await subject.executeCollect(warp, 1, [])
+
+      expect(execution.success).toBe(true)
+      expect(execution.results.BASE_VALUE).toBe(10)
+      expect(execution.results.DOUBLED).toBe(20)
+      expect(execution.results.FINAL).toBe(25)
+
+      httpMock.cleanup()
+    })
+
+    it('handles transform errors gracefully', async () => {
+      const subject = new WarpActionExecutor(testConfig)
+      const httpMock = setupHttpMock()
+      httpMock.registerResponse('https://api.example.com/data', { value: 10 })
+
+      const action: WarpCollectAction = {
+        type: 'collect',
+        label: 'Get Value',
+        destination: {
+          url: 'https://api.example.com/data',
+        },
+      }
+
+      const warp = {
+        actions: [action],
+        results: {
+          BASE_VALUE: 'out.value',
+          ERROR_RESULT: 'transform:() => { throw new Error("Test error") }',
+          VALID_RESULT: 'transform:() => { return input.BASE_VALUE * 3 }',
+        },
+      } as any as Warp
+
+      const execution = await subject.executeCollect(warp, 1, [])
+
+      expect(execution.success).toBe(true)
+      expect(execution.results.BASE_VALUE).toBe(10)
+      expect(execution.results.ERROR_RESULT).toBeNull()
+      expect(execution.results.VALID_RESULT).toBe(30)
+
+      httpMock.cleanup()
+    })
+  })
 })
 
-export const loadAbiContents = async (path: PathLike): Promise<any> => {
+const loadAbiContents = async (path: PathLike): Promise<any> => {
   let jsonContent: string = await fs.readFile(path, { encoding: 'utf8' })
   return JSON.parse(jsonContent)
 }

@@ -194,4 +194,32 @@ describe('getNextInfo', () => {
       { identifier: 'mywarp?value=C', url: 'https://anyclient.com?warp=mywarp&value=C' },
     ])
   })
+
+  it('handles multiple array placeholders in same next link', () => {
+    const warp: Warp = {
+      next: 'stake-distribution?user={{STAKERS[].user}}&amount={{STAKERS[].amount}}',
+      results: {
+        BASE_DATA: [
+          { contract: 'A', value: 100 },
+          { contract: 'B', value: 200 },
+        ],
+        STAKERS: [
+          { user: 'alice', amount: 150 },
+          { user: 'bob', amount: 250 },
+        ],
+      },
+    } as any
+    const results = warp.results as WarpExecutionResults
+    const result = WarpUtils.getNextInfo(testConfig, warp, 1, results)
+    expect(result).toEqual([
+      {
+        identifier: 'stake-distribution?user=alice&amount=150',
+        url: 'https://anyclient.com?warp=stake-distribution&user=alice&amount=150',
+      },
+      {
+        identifier: 'stake-distribution?user=bob&amount=250',
+        url: 'https://anyclient.com?warp=stake-distribution&user=bob&amount=250',
+      },
+    ])
+  })
 })

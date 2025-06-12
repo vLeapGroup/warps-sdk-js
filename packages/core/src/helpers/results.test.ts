@@ -1,8 +1,8 @@
 import { SmartContractResult, TransactionEvent, TransactionLogs, TransactionOnNetwork, TypedValue } from '@multiversx/sdk-core/out'
+import { promises as fs, PathLike } from 'fs'
 import { setupHttpMock } from '../test-utils/mockHttp'
 import { Warp, WarpConfig, WarpContractAction } from '../types'
 import { WarpActionExecutor } from '../WarpActionExecutor'
-import { loadAbiContents } from '../WarpActionExecutor.test'
 import { extractCollectResults, extractContractResults, extractQueryResults } from './results'
 
 const Config: WarpConfig = {
@@ -229,5 +229,33 @@ describe('Result Helpers', () => {
       expect(results.MISSING).toBeUndefined()
       expect(values).toHaveLength(2)
     })
+
+    it('evaluates transform results in collect', async () => {
+      const warp = {
+        protocol: 'test',
+        name: 'test',
+        title: 'test',
+        description: 'test',
+        actions: [],
+        results: {
+          BASE: 'out.value',
+          DOUBLED: 'transform:() => { return input.BASE * 2 }',
+        },
+      } as Warp
+
+      const response = {
+        value: 10,
+      }
+
+      const { values, results } = await extractCollectResults(warp, response)
+
+      expect(results.BASE).toBe(10)
+      expect(results.DOUBLED).toBe(20)
+    })
   })
 })
+
+const loadAbiContents = async (path: PathLike): Promise<any> => {
+  let jsonContent: string = await fs.readFile(path, { encoding: 'utf8' })
+  return JSON.parse(jsonContent)
+}
