@@ -189,6 +189,11 @@ export type WarpActionInput = {
   modifier?: string
 }
 
+export type ResolvedInput = {
+  input: WarpActionInput
+  value: string | null
+}
+
 export type WarpContract = {
   address: string
   owner: string

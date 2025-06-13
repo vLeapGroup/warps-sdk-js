@@ -37,7 +37,7 @@ describe('Result Helpers', () => {
             args: [],
             inputs: [
               { name: 'foo', type: 'string', source: 'field' },
-              { name: 'bar', type: 'string', source: 'field' },
+              { name: 'bar', type: 'biguint', source: 'field' },
             ],
           },
         ],
@@ -47,10 +47,13 @@ describe('Result Helpers', () => {
         },
       } as any
       const typedValues: TypedValue[] = []
-      const inputs = ['string:abc', 'string:xyz']
+      const inputs = [
+        { input: warp.actions[0].inputs[0], value: 'string:abc' },
+        { input: warp.actions[0].inputs[1], value: 'biguint:1234567890' },
+      ]
       const { results } = await extractQueryResults(warp, typedValues, 1, inputs)
       expect(results.FOO).toBe('abc')
-      expect(results.BAR).toBe('xyz')
+      expect(results.BAR).toBe(1234567890n)
     })
 
     it('returns input-based result by input.as alias (query)', async () => {
@@ -74,7 +77,7 @@ describe('Result Helpers', () => {
         },
       } as any
       const typedValues: TypedValue[] = []
-      const inputs = ['string:aliased']
+      const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:aliased' }]
       const { results } = await extractQueryResults(warp, typedValues, 1, inputs)
       expect(results.FOO).toBe('aliased')
     })
@@ -100,7 +103,7 @@ describe('Result Helpers', () => {
         },
       } as any
       const typedValues: TypedValue[] = []
-      const inputs = ['string:abc']
+      const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:abc' }]
       const { results } = await extractQueryResults(warp, typedValues, 1, inputs)
       expect(results.BAR).toBeNull()
     })
@@ -128,7 +131,10 @@ describe('Result Helpers', () => {
         },
       } as any
       const response = { data: { some: 'value' } }
-      const inputs = ['string:abc', 'string:xyz']
+      const inputs = [
+        { input: warp.actions[0].inputs[0], value: 'string:abc' },
+        { input: warp.actions[0].inputs[1], value: 'string:xyz' },
+      ]
       const { results } = await extractCollectResults(warp, response, 1, inputs)
       expect(results.FOO).toBe('abc')
       expect(results.BAR).toBe('xyz')
@@ -153,7 +159,7 @@ describe('Result Helpers', () => {
         },
       } as any
       const response = { data: { some: 'value' } }
-      const inputs = ['string:aliased']
+      const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:aliased' }]
       const { results } = await extractCollectResults(warp, response, 1, inputs)
       expect(results.FOO).toBe('aliased')
     })
@@ -177,7 +183,7 @@ describe('Result Helpers', () => {
         },
       } as any
       const response = { data: { some: 'value' } }
-      const inputs = ['string:abc']
+      const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:abc' }]
       const { results } = await extractCollectResults(warp, response, 1, inputs)
       expect(results.BAR).toBeNull()
     })
@@ -213,7 +219,10 @@ describe('Result Helpers', () => {
       } as any
       const action = warp.actions[0]
       const tx = new TransactionOnNetwork()
-      const inputs = ['string:abc', 'string:xyz']
+      const inputs = [
+        { input: warp.actions[0].inputs[0], value: 'string:abc' },
+        { input: warp.actions[0].inputs[1], value: 'string:xyz' },
+      ]
       const { results } = await extractContractResults(executor, warp, action, tx, 1, inputs)
       expect(results.FOO).toBe('abc')
       expect(results.BAR).toBe('xyz')
@@ -244,7 +253,7 @@ describe('Result Helpers', () => {
       } as any
       const action = warp.actions[0]
       const tx = new TransactionOnNetwork()
-      const inputs = ['string:aliased']
+      const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:aliased' }]
       const { results } = await extractContractResults(executor, warp, action, tx, 1, inputs)
       expect(results.FOO).toBe('aliased')
     })
@@ -274,7 +283,7 @@ describe('Result Helpers', () => {
       } as any
       const action = warp.actions[0]
       const tx = new TransactionOnNetwork()
-      const inputs = ['string:abc']
+      const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:abc' }]
       const { results } = await extractContractResults(executor, warp, action, tx, 1, inputs)
       expect(results.BAR).toBeNull()
     })

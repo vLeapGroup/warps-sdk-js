@@ -6,7 +6,7 @@ import {
   findEventsByFirstTopic,
 } from '@multiversx/sdk-core/out'
 import { WarpConstants } from '../constants'
-import { Warp, WarpContractAction } from '../types'
+import { ResolvedInput, Warp, WarpContractAction } from '../types'
 import { WarpExecutionResults } from '../types/results'
 import { WarpActionExecutor } from '../WarpActionExecutor'
 import { WarpArgSerializer } from '../WarpArgSerializer'
@@ -35,7 +35,7 @@ export const extractContractResults = async (
   action: WarpContractAction,
   tx: TransactionOnNetwork,
   actionIndex: number,
-  inputs: string[]
+  inputs: ResolvedInput[]
 ): Promise<{ values: any[]; results: WarpExecutionResults }> => {
   let values: any[] = []
   let results: WarpExecutionResults = {}
@@ -96,7 +96,7 @@ export const extractQueryResults = async (
   warp: Warp,
   typedValues: TypedValue[],
   actionIndex: number,
-  inputs: string[]
+  inputs: ResolvedInput[]
 ): Promise<{ values: any[]; results: WarpExecutionResults }> => {
   const was = new WarpArgSerializer()
   const values = typedValues.map((t) => was.typedToString(t))
@@ -136,7 +136,7 @@ export const extractCollectResults = async (
   warp: Warp,
   response: any,
   actionIndex: number,
-  inputs: string[]
+  inputs: ResolvedInput[]
 ): Promise<{ values: any[]; results: WarpExecutionResults }> => {
   const values: any[] = []
   let results: WarpExecutionResults = {}
@@ -167,13 +167,13 @@ export async function resolveWarpResultsRecursively(
   warp: any,
   entryActionIndex: number,
   executor: { executeQuery: Function; executeCollect: Function },
-  inputs: string[] = [],
+  inputs: ResolvedInput[],
   meta?: Record<string, any>
 ): Promise<any> {
   const resultsCache = new Map<number, any>()
   const resolving = new Set<number>()
 
-  async function resolveAction(actionIndex: number, actionInputs: string[] = []): Promise<any> {
+  async function resolveAction(actionIndex: number, actionInputs: ResolvedInput[] = []): Promise<any> {
     if (resultsCache.has(actionIndex)) return resultsCache.get(actionIndex)
     if (resolving.has(actionIndex)) throw new Error(`Circular dependency detected at action ${actionIndex}`)
     resolving.add(actionIndex)
@@ -230,7 +230,7 @@ const evaluateResultsCommon = async (
   warp: Warp,
   baseResults: WarpExecutionResults,
   actionIndex: number,
-  inputs: string[]
+  inputs: ResolvedInput[]
 ): Promise<WarpExecutionResults> => {
   if (!warp.results) return baseResults
   let results = { ...baseResults }
@@ -239,7 +239,12 @@ const evaluateResultsCommon = async (
   return results
 }
 
-const evaluateInputResults = (results: WarpExecutionResults, warp: Warp, actionIndex: number, inputs: string[]): WarpExecutionResults => {
+const evaluateInputResults = (
+  results: WarpExecutionResults,
+  warp: Warp,
+  actionIndex: number,
+  inputs: ResolvedInput[]
+): WarpExecutionResults => {
   const modifiable = { ...results }
   const actionInputs = getWarpActionByIndex(warp, actionIndex)?.inputs || []
   const serializer = new WarpArgSerializer()
@@ -247,7 +252,8 @@ const evaluateInputResults = (results: WarpExecutionResults, warp: Warp, actionI
     if (typeof value === 'string' && value.startsWith('input.')) {
       const inputName = value.split('.')[1]
       const inputIndex = actionInputs.findIndex((i) => i.as === inputName || i.name === inputName)
-      modifiable[key] = inputIndex !== -1 ? serializer.stringToNative(inputs[inputIndex])[1] : null
+      const valueAtIndex = inputIndex !== -1 ? inputs[inputIndex]?.value : null
+      modifiable[key] = valueAtIndex ? serializer.stringToNative(valueAtIndex)[1] : null
     }
   }
   return modifiable
