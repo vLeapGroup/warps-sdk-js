@@ -3,8 +3,15 @@
  */
 export const runInVm = async (code: string, result: any): Promise<any> => {
   if (typeof window === 'undefined') {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { VM } = require('vm2')
+    let VM: any
+    try {
+      // Dynamically require vm2 only when needed
+      VM = require('vm2').VM
+    } catch (e) {
+      throw new Error(
+        'The optional dependency "vm2" is not installed. To use runInVm in Node.js, please install vm2: npm install vm2 --save. This is not required for browser usage.'
+      )
+    }
     const vm = new VM({ timeout: 1000, sandbox: { result }, eval: false, wasm: false })
 
     // Handle arrow function syntax: () => { return ... }

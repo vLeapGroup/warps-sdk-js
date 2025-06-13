@@ -12,7 +12,6 @@ import { WarpActionExecutor } from '../WarpActionExecutor'
 import { WarpArgSerializer } from '../WarpArgSerializer'
 import { WarpLogger } from '../WarpLogger'
 import { getWarpActionByIndex } from './general'
-import { runInVm } from './vm'
 
 /**
  * Parses out[N] notation and returns the action index (1-based) or null if invalid.
@@ -264,6 +263,8 @@ const evaluateTransformResults = async (warp: Warp, baseResults: WarpExecutionRe
 
   for (const { key, code } of transforms) {
     try {
+      // Dynamically import runInVm only when needed
+      const { runInVm } = await import('./vm')
       modifiable[key] = await runInVm(code, modifiable)
     } catch (err) {
       WarpLogger.error(`Transform error for result '${key}':`, err)
