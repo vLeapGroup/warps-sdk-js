@@ -33,6 +33,7 @@ import { WarpAbiBuilder } from './WarpAbiBuilder'
 import { WarpArgSerializer } from './WarpArgSerializer'
 import { WarpContractLoader } from './WarpContractLoader'
 import { WarpInterpolator } from './WarpInterpolator'
+import { WarpLogger } from './WarpLogger'
 import { WarpUtils } from './WarpUtils'
 
 type ResolvedInput = {
@@ -197,7 +198,7 @@ export class WarpActionExecutor {
         messages: this.getPreparedMessages(preparedWarp, results),
       }
     } catch (error) {
-      console.error(error)
+      WarpLogger.error('WarpActionExecutor: Error executing collect', error)
       return {
         success: false,
         warp: preparedWarp,

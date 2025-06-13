@@ -1,4 +1,5 @@
 import { ChainInfo, WarpConfig, WarpContract, WarpContractVerification } from './types'
+import { WarpLogger } from './WarpLogger'
 import { WarpUtils } from './WarpUtils'
 
 export class WarpContractLoader {
@@ -16,7 +17,7 @@ export class WarpContractLoader {
         verified: res.isVerified || false,
       }
     } catch (error) {
-      console.error('WarpContractLoader: getContract error', error)
+      WarpLogger.error('WarpContractLoader: getContract error', error)
       return null
     }
   }
@@ -32,7 +33,7 @@ export class WarpContractLoader {
         abi: res.source.abi,
       }
     } catch (error) {
-      console.error('WarpContractLoader: getVerificationInfo error', error)
+      WarpLogger.error('WarpContractLoader: getVerificationInfo error', error)
       return null
     }
   }

@@ -3,6 +3,7 @@ import Ajv from 'ajv'
 import { Config } from './config'
 import { getLatestProtocolIdentifier, getMainChainInfo } from './helpers/general'
 import { Brand, BrandColors, BrandCta, BrandUrls, WarpConfig } from './types'
+import { WarpLogger } from './WarpLogger'
 import { WarpUtils } from './WarpUtils'
 
 export class BrandBuilder {
@@ -57,7 +58,7 @@ export class BrandBuilder {
       const tx = await chainProvider.getTransaction(hash)
       return this.createFromTransaction(tx)
     } catch (error) {
-      console.error('BrandBuilder: Error creating from transaction hash', error)
+      WarpLogger.error('BrandBuilder: Error creating from transaction hash', error)
       return null
     }
   }

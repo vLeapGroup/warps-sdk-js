@@ -1,4 +1,5 @@
 import { WarpConfig, WarpSearchHit, WarpSearchResult } from './types'
+import { WarpLogger } from './WarpLogger'
 
 export class WarpIndex {
   constructor(private config: WarpConfig) {}
@@ -24,7 +25,7 @@ export class WarpIndex {
 
       return data.hits
     } catch (error) {
-      console.error('WarpIndex: Error searching for warps: ', error)
+      WarpLogger.error('WarpIndex: Error searching for warps: ', error)
       throw error
     }
   }

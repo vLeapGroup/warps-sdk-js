@@ -90,7 +90,7 @@ export class WarpBuilder {
 
       return warp
     } catch (error) {
-      console.error('WarpBuilder: Error creating from transaction hash', error)
+      WarpLogger.error('WarpBuilder: Error creating from transaction hash', error)
       return null
     }
   }

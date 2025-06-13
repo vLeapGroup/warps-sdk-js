@@ -79,7 +79,7 @@ export class WarpAbiBuilder {
 
       return abi
     } catch (error) {
-      console.error('WarpAbiBuilder: Error creating from transaction hash', error)
+      WarpLogger.error('WarpAbiBuilder: Error creating from transaction hash', error)
       return null
     }
   }
