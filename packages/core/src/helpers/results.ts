@@ -14,15 +14,15 @@ import { WarpArgSerializer } from '../WarpArgSerializer'
 /**
  * Executes transform code securely in Node.js (using vm2) or browser (using Web Worker).
  */
-const runTransform = async (code: string, input: any): Promise<any> => {
+const runTransform = async (code: string, result: any): Promise<any> => {
   if (typeof window === 'undefined') {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { VM } = require('vm2')
-    const vm = new VM({ timeout: 1000, sandbox: { input }, eval: false, wasm: false })
+    const vm = new VM({ timeout: 1000, sandbox: { result }, eval: false, wasm: false })
 
     // Handle arrow function syntax: () => { return ... }
     if (code.trim().startsWith('(') && code.includes('=>')) {
-      return vm.run(`(${code})(input)`)
+      return vm.run(`(${code})(result)`)
     }
 
     return null
@@ -35,9 +35,9 @@ const runTransform = async (code: string, input: any): Promise<any> => {
           `
           self.onmessage = function(e) {
             try {
-              const input = e.data;
-              const result = (${code})(input);
-              self.postMessage({ result });
+              const result = e.data;
+              const output = (${code})(result);
+              self.postMessage({ result: output });
             } catch (error) {
               self.postMessage({ error: error.toString() });
             }
@@ -62,7 +62,7 @@ const runTransform = async (code: string, input: any): Promise<any> => {
         worker.terminate()
         URL.revokeObjectURL(url)
       }
-      worker.postMessage(input)
+      worker.postMessage(result)
     } catch (err) {
       return reject(err)
     }
