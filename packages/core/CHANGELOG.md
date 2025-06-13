@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.3.0-alpha.1
+
+### Minor Changes
+
+- 12ea059: update result evaluations
+
 ## 2.3.0-alpha.0
 
 ### Minor Changes
