@@ -72,12 +72,6 @@ const runTransform = async (code: string, result: any): Promise<any> => {
 /**
  * Parses out[N] notation and returns the action index (1-based) or null if invalid.
  * Also handles plain "out" which defaults to action index 1.
- * Returns null for legacy paths like "out.1.2" to maintain backwards compatibility.
- *
- * Note: This implementation handles basic out[N] indexing but doesn't automatically execute
- * referenced actions. To access results from other actions, they must be executed explicitly
- * before being referenced. This design choice maintains API stability and avoids potential
- * circular dependencies or unexpected side effects.
  */
 const parseOutActionIndex = (resultPath: string): number | null => {
   if (resultPath === 'out') return 1
@@ -87,31 +81,8 @@ const parseOutActionIndex = (resultPath: string): number | null => {
   return null
 }
 
-/**
- * Utility to get a nested value from an object by path array.
- */
 const getNestedValueFromObject = (obj: any, path: string[]): any => {
   return path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : null), obj)
-}
-
-/**
- * Evaluates results with support for transform functions.
- */
-export const evaluateResults = async (warp: Warp, baseResults: WarpExecutionResults): Promise<WarpExecutionResults> => {
-  if (!warp.results) return baseResults
-  const results = { ...baseResults }
-  const transforms = Object.entries(warp.results)
-    .filter(([, path]) => path.startsWith(WarpConstants.Transform.Prefix))
-    .map(([key, path]) => ({ key, code: path.substring(WarpConstants.Transform.Prefix.length) }))
-  for (const { key, code } of transforms) {
-    try {
-      results[key] = await runTransform(code, results)
-    } catch (err) {
-      console.error(`Transform error for result '${key}':`, err)
-      results[key] = null
-    }
-  }
-  return results
 }
 
 export const extractContractResults = async (
@@ -160,7 +131,7 @@ export const extractContractResults = async (
       results[resultName] = outputAtPosition ? outputAtPosition.valueOf() : outputAtPosition
     }
   }
-  return { values, results: await evaluateResults(warp, results) }
+  return { values, results: await transformResults(warp, results) }
 }
 
 export const extractQueryResults = async (
@@ -197,7 +168,7 @@ export const extractQueryResults = async (
       results[key] = getNestedValue(path) || null
     }
   }
-  return { values, results: await evaluateResults(warp, results) }
+  return { values, results: await transformResults(warp, results) }
 }
 
 export const extractCollectResults = async (
@@ -220,19 +191,12 @@ export const extractCollectResults = async (
     values.push(value)
     results[resultName] = value
   }
-  return { values, results: await evaluateResults(warp, results) }
+  return { values, results: await transformResults(warp, results) }
 }
 
 /**
  * Resolves all results for a warp, including dependencies referenced via out[N], recursively.
  * Executes all required actions and applies transforms, returning the final results for the entry action.
- *
- * @param warp The warp definition
- * @param entryActionIndex The index of the entry action to start execution from (1-based)
- * @param executor An object with executeQuery and executeCollect methods (typically a WarpActionExecutor instance)
- * @param inputs Initial inputs for the entry action
- * @param meta Optional metadata for collect actions
- * @returns The execution result with all dependencies resolved and transforms applied
  */
 export async function resolveWarpResultsRecursively(
   warp: any,
@@ -289,10 +253,27 @@ export async function resolveWarpResultsRecursively(
       }
     }
   }
-  const finalResults = await evaluateResults(warp, combinedResults)
+  const finalResults = await transformResults(warp, combinedResults)
   const entryExecution = resultsCache.get(entryActionIndex)!
   return {
     ...entryExecution,
     results: finalResults,
   }
+}
+
+const transformResults = async (warp: Warp, baseResults: WarpExecutionResults): Promise<WarpExecutionResults> => {
+  if (!warp.results) return baseResults
+  const results = { ...baseResults }
+  const transforms = Object.entries(warp.results)
+    .filter(([, path]) => path.startsWith(WarpConstants.Transform.Prefix))
+    .map(([key, path]) => ({ key, code: path.substring(WarpConstants.Transform.Prefix.length) }))
+  for (const { key, code } of transforms) {
+    try {
+      results[key] = await runTransform(code, results)
+    } catch (err) {
+      console.error(`Transform error for result '${key}':`, err)
+      results[key] = null
+    }
+  }
+  return results
 }
