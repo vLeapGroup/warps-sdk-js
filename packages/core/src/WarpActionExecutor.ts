@@ -70,7 +70,12 @@ export class WarpActionExecutor {
     const chain = await WarpUtils.getChainInfoForAction(this.config, action)
     const config = new TransactionsFactoryConfig({ chainID: chain.chainId })
 
-    const { destination, args, value, transfers, data } = await this.getTxComponentsFromInputs(chain, action, inputs, sender)
+    const { destination, args, value, transfers, data, resolvedInputs } = await this.getTxComponentsFromInputs(
+      chain,
+      action,
+      inputs,
+      sender
+    )
     const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
 
     let tx: Transaction | null = null
@@ -97,7 +102,7 @@ export class WarpActionExecutor {
     }
 
     if (!tx) throw new Error(`WarpActionExecutor: Invalid action type (${action.type})`)
-    this.cache.set(CacheKey.LastWarpExecutionInputs(warp.meta?.hash || '', actionIndex), inputs, CacheTtl.OneWeek)
+    this.cache.set(CacheKey.LastWarpExecutionInputs(warp.meta?.hash || '', actionIndex), resolvedInputs, CacheTtl.OneWeek)
 
     return tx
   }
