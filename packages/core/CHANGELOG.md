@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.3.0-alpha.3
+
+### Patch Changes
+
+- 58bcb6e: update build config
+
 ## 2.3.0-alpha.2
 
 ### Patch Changes
