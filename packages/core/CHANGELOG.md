@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.3.0-alpha.7
+
+### Patch Changes
+
+- 51471f3: fix input result resolving for contract actions
+
 ## 2.3.0-alpha.6
 
 ### Patch Changes
