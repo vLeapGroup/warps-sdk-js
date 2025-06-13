@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.3.0-alpha.5
+
+### Patch Changes
+
+- 970fc74: update vm dependencies
+
 ## 2.3.0-alpha.4
 
 ### Minor Changes
