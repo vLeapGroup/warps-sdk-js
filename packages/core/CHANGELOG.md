@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 2.3.0-alpha.4
+
+### Minor Changes
+
+- 7062a92: add input-based results
+- 12ea059: update result evaluations
+
 ## 2.3.0-alpha.0
 
 ### Minor Changes
