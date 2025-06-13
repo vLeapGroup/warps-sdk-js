@@ -6,7 +6,7 @@
   "types": "./dist/index.d.ts",
   "module": "./dist/index.js",
   "scripts": {
-    "build": "tsup src/index.ts --dts --format cjs,esm --minify --clean",
+    "build": "tsup",
     "test": "jest --config jest.config.js",
     "lint": "tsc --noEmit",
     "prepare": "npm run build",
