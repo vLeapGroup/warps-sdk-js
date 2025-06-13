@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.3.0-alpha.2
+
+### Patch Changes
+
+- 2b6f808: fix vm dep for browser envs
+
 ## 2.3.0-alpha.1
 
 ### Minor Changes
