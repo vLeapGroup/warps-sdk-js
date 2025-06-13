@@ -18,8 +18,7 @@
     "dist"
   ],
   "peerDependencies": {
-    "@multiversx/sdk-core": "^14.0.2",
-    "vm2": "^3.9.17"
+    "@multiversx/sdk-core": "^14.0.2"
   },
   "devDependencies": {
     "@multiversx/sdk-core": "^14.2.1",
@@ -29,7 +28,9 @@
     "jest-fetch-mock": "^3.0.3",
     "ts-jest": "^29.4.0",
     "tsup": "^8.5.0",
-    "typescript": "^5.8.3",
+    "typescript": "^5.8.3"
+  },
+  "optionalDependencies": {
     "vm2": "^3.9.19"
   },
   "publishConfig": {

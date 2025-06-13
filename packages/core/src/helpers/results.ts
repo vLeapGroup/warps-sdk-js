@@ -16,8 +16,16 @@ import { WarpArgSerializer } from '../WarpArgSerializer'
  */
 const runTransform = async (code: string, input: any): Promise<any> => {
   if (typeof window === 'undefined') {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { VM } = require('vm2')
+    // Dynamically require vm2 only in Node.js, and handle missing module gracefully
+    let VM
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      VM = require('vm2').VM
+    } catch (err) {
+      throw new Error(
+        "The 'vm2' package is required for transform execution in Node.js environments. Please install it with 'npm install vm2', or use this library in a browser environment."
+      )
+    }
     const vm = new VM({ timeout: 1000, sandbox: { input }, eval: false, wasm: false })
 
     // Handle arrow function syntax: () => { return ... }
