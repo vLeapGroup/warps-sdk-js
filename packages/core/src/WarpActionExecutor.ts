@@ -7,6 +7,7 @@ import {
   TokenComputer,
   TokenTransfer,
   Transaction,
+  TransactionComputer,
   TransactionOnNetwork,
   TransactionsFactoryConfig,
   TransferTransactionsFactory,
@@ -31,6 +32,7 @@ import {
 import { WarpExecution } from './types/results'
 import { WarpAbiBuilder } from './WarpAbiBuilder'
 import { WarpArgSerializer } from './WarpArgSerializer'
+import { CacheKey, CacheTtl, WarpCache } from './WarpCache'
 import { WarpContractLoader } from './WarpContractLoader'
 import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
@@ -46,6 +48,7 @@ export class WarpActionExecutor {
   private url: URL
   private serializer: WarpArgSerializer
   private contractLoader: WarpContractLoader
+  private cache: WarpCache
 
   constructor(config: WarpConfig) {
     if (!config.currentUrl) throw new Error('WarpActionExecutor: currentUrl config not set')
@@ -53,6 +56,7 @@ export class WarpActionExecutor {
     this.url = new URL(config.currentUrl)
     this.serializer = new WarpArgSerializer()
     this.contractLoader = new WarpContractLoader(config)
+    this.cache = new WarpCache(config.cache?.type)
   }
 
   async createTransactionForExecute(warp: Warp, actionIndex: number, inputs: string[]): Promise<Transaction> {
@@ -65,15 +69,16 @@ export class WarpActionExecutor {
     const { destination, args, value, transfers, data } = await this.getTxComponentsFromInputs(chain, action, inputs, sender)
     const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
 
+    let tx: Transaction | null = null
     if (action.type === 'transfer') {
-      return new TransferTransactionsFactory({ config }).createTransactionForTransfer(sender, {
+      tx = new TransferTransactionsFactory({ config }).createTransactionForTransfer(sender, {
         receiver: destination,
         nativeAmount: value,
         tokenTransfers: transfers,
         data: data ? new Uint8Array(data) : undefined,
       })
     } else if (action.type === 'contract' && destination.isSmartContract()) {
-      return new SmartContractTransactionsFactory({ config }).createTransactionForExecute(sender, {
+      tx = new SmartContractTransactionsFactory({ config }).createTransactionForExecute(sender, {
         contract: destination,
         function: 'func' in action ? action.func || '' : '',
         gasLimit: 'gasLimit' in action ? BigInt(action.gasLimit || 0) : 0n,
@@ -87,13 +92,22 @@ export class WarpActionExecutor {
       throw new Error('WarpActionExecutor: Invalid action type for createTransactionForExecute; Use executeCollect instead')
     }
 
-    throw new Error(`WarpActionExecutor: Invalid action type (${action.type})`)
+    if (!tx) throw new Error(`WarpActionExecutor: Invalid action type (${action.type})`)
+
+    const txHash = new TransactionComputer().computeTransactionHash(tx)
+    this.cache.set(CacheKey.WarpExecutionInputs(txHash), inputs, CacheTtl.OneWeek)
+
+    return tx
   }
 
   async getTransactionExecutionResults(warp: Warp, actionIndex: number, tx: TransactionOnNetwork): Promise<WarpExecution> {
     const action = getWarpActionByIndex(warp, actionIndex) as WarpContractAction
     const preparedWarp = await WarpInterpolator.apply(this.config, warp)
-    const { values, results } = await extractContractResults(this, preparedWarp, action, tx, actionIndex)
+
+    // Restore inputs via cache as transactions are broadcasted and processed asynchronously
+    const inputs: string[] = this.cache.get(CacheKey.WarpExecutionInputs(tx.hash.toString())) ?? []
+
+    const { values, results } = await extractContractResults(this, preparedWarp, action, tx, actionIndex, inputs)
     const next = WarpUtils.getNextInfo(this.config, preparedWarp, actionIndex, results)
     const messages = this.getPreparedMessages(preparedWarp, results)
 
@@ -130,7 +144,7 @@ export class WarpActionExecutor {
     const endpoint = abi.getEndpoint(response.function)
     const parts = response.returnDataParts.map((part) => Buffer.from(part))
     const typedValues = argsSerializer.buffersToValues(parts, endpoint.output)
-    const { values, results } = await extractQueryResults(preparedWarp, typedValues, actionIndex)
+    const { values, results } = await extractQueryResults(preparedWarp, typedValues, actionIndex, inputs)
     const next = WarpUtils.getNextInfo(this.config, preparedWarp, actionIndex, results)
 
     return {
@@ -183,7 +197,7 @@ export class WarpActionExecutor {
     try {
       const response = await fetch(action.destination.url, { method: httpMethod, headers, body })
       const content = await response.json()
-      const { values, results } = await extractCollectResults(preparedWarp, content, actionIndex)
+      const { values, results } = await extractCollectResults(preparedWarp, content, actionIndex, inputs)
       const next = WarpUtils.getNextInfo(this.config, preparedWarp, actionIndex, results)
 
       return {

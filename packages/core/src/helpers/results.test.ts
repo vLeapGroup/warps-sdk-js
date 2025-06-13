@@ -14,6 +14,168 @@ const testConfig: WarpConfig = {
 }
 
 describe('Result Helpers', () => {
+  describe('input-based results', () => {
+    it('returns input-based result by input name (query)', async () => {
+      const warp = {
+        protocol: 'test',
+        name: 'test',
+        title: 'test',
+        description: 'test',
+        actions: [
+          {
+            type: 'query',
+            label: 'Test Query',
+            address: 'erd1...',
+            func: 'test',
+            args: [],
+            inputs: [
+              { name: 'foo', type: 'string', source: 'field' },
+              { name: 'bar', type: 'string', source: 'field' },
+            ],
+          },
+        ],
+        results: {
+          FOO: 'input.foo',
+          BAR: 'input.bar',
+        },
+      } as any
+      const typedValues: TypedValue[] = []
+      const inputs = ['abc', 'xyz']
+      const { results } = await extractQueryResults(warp, typedValues, 1, inputs)
+      expect(results.FOO).toBe('abc')
+      expect(results.BAR).toBe('xyz')
+    })
+
+    it('returns input-based result by input.as alias (query)', async () => {
+      const warp = {
+        protocol: 'test',
+        name: 'test',
+        title: 'test',
+        description: 'test',
+        actions: [
+          {
+            type: 'query',
+            label: 'Test Query',
+            address: 'erd1...',
+            func: 'test',
+            args: [],
+            inputs: [{ name: 'foo', as: 'FOO_ALIAS', type: 'string', source: 'field' }],
+          },
+        ],
+        results: {
+          FOO: 'input.FOO_ALIAS',
+        },
+      } as any
+      const typedValues: TypedValue[] = []
+      const inputs = ['aliased']
+      const { results } = await extractQueryResults(warp, typedValues, 1, inputs)
+      expect(results.FOO).toBe('aliased')
+    })
+
+    it('returns null for missing input (query)', async () => {
+      const warp = {
+        protocol: 'test',
+        name: 'test',
+        title: 'test',
+        description: 'test',
+        actions: [
+          {
+            type: 'query',
+            label: 'Test Query',
+            address: 'erd1...',
+            func: 'test',
+            args: [],
+            inputs: [{ name: 'foo', type: 'string', source: 'field' }],
+          },
+        ],
+        results: {
+          BAR: 'input.bar',
+        },
+      } as any
+      const typedValues: TypedValue[] = []
+      const inputs = ['abc']
+      const { results } = await extractQueryResults(warp, typedValues, 1, inputs)
+      expect(results.BAR).toBeUndefined()
+    })
+
+    it('returns input-based result by input name (collect)', async () => {
+      const warp = {
+        protocol: 'test',
+        name: 'test',
+        title: 'test',
+        description: 'test',
+        actions: [
+          {
+            type: 'collect',
+            label: 'Test Collect',
+            destination: { url: 'https://api.example.com' },
+            inputs: [
+              { name: 'foo', type: 'string', source: 'field' },
+              { name: 'bar', type: 'string', source: 'field' },
+            ],
+          },
+        ],
+        results: {
+          FOO: 'input.foo',
+          BAR: 'input.bar',
+        },
+      } as any
+      const response = { data: { some: 'value' } }
+      const inputs = ['abc', 'xyz']
+      const { results } = await extractCollectResults(warp, response, 1, inputs)
+      expect(results.FOO).toBe('abc')
+      expect(results.BAR).toBe('xyz')
+    })
+
+    it('returns input-based result by input.as alias (collect)', async () => {
+      const warp = {
+        protocol: 'test',
+        name: 'test',
+        title: 'test',
+        description: 'test',
+        actions: [
+          {
+            type: 'collect',
+            label: 'Test Collect',
+            destination: { url: 'https://api.example.com' },
+            inputs: [{ name: 'foo', as: 'FOO_ALIAS', type: 'string', source: 'field' }],
+          },
+        ],
+        results: {
+          FOO: 'input.FOO_ALIAS',
+        },
+      } as any
+      const response = { data: { some: 'value' } }
+      const inputs = ['aliased']
+      const { results } = await extractCollectResults(warp, response, 1, inputs)
+      expect(results.FOO).toBe('aliased')
+    })
+
+    it('returns null for missing input (collect)', async () => {
+      const warp = {
+        protocol: 'test',
+        name: 'test',
+        title: 'test',
+        description: 'test',
+        actions: [
+          {
+            type: 'collect',
+            label: 'Test Collect',
+            destination: { url: 'https://api.example.com' },
+            inputs: [{ name: 'foo', type: 'string', source: 'field' }],
+          },
+        ],
+        results: {
+          BAR: 'input.bar',
+        },
+      } as any
+      const response = { data: { some: 'value' } }
+      const inputs = ['abc']
+      const { results } = await extractCollectResults(warp, response, 1, inputs)
+      expect(results.BAR).toBeUndefined()
+    })
+  })
+
   describe('extractContractResults', () => {
     it('returns empty results when no results defined', async () => {
       const executor = new WarpActionExecutor(testConfig)
@@ -27,7 +189,7 @@ describe('Result Helpers', () => {
       const action = { type: 'contract' } as WarpContractAction
       const tx = new TransactionOnNetwork()
 
-      const { values, results } = await extractContractResults(executor, warp, action, tx)
+      const { values, results } = await extractContractResults(executor, warp, action, tx, 1, [])
 
       expect(values).toEqual([])
       expect(results).toEqual({})
@@ -84,7 +246,7 @@ describe('Result Helpers', () => {
         ],
       })
 
-      const { values, results } = await extractContractResults(executor, warp, action, tx)
+      const { values, results } = await extractContractResults(executor, warp, action, tx, 1, [])
 
       expect(results.TOKEN_ID).toBe('ABC-123456')
       expect(results.DURATION).toBe('1209600')
@@ -130,7 +292,7 @@ describe('Result Helpers', () => {
         ],
       })
 
-      const { values, results } = await extractContractResults(executor, warp, action, tx)
+      const { values, results } = await extractContractResults(executor, warp, action, tx, 1, [])
 
       expect(results.FIRST_OUT).toBe('22')
       expect(results.SECOND_OUT).toBeNull()
@@ -151,7 +313,7 @@ describe('Result Helpers', () => {
       } as Warp
       const typedValues: TypedValue[] = []
 
-      const { values, results } = await extractQueryResults(warp, typedValues)
+      const { values, results } = await extractQueryResults(warp, typedValues, 1, [])
 
       expect(values).toEqual([])
       expect(results).toEqual({})
@@ -169,7 +331,7 @@ describe('Result Helpers', () => {
       } as Warp
       const response = {}
 
-      const { values, results } = await extractCollectResults(warp, response)
+      const { values, results } = await extractCollectResults(warp, response, 1, [])
 
       expect(values).toEqual([])
       expect(results).toEqual({})
@@ -196,7 +358,7 @@ describe('Result Helpers', () => {
         },
       }
 
-      const { values, results } = await extractCollectResults(warp, response)
+      const { values, results } = await extractCollectResults(warp, response, 1, [])
 
       expect(results.USERNAME).toBe('testuser')
       expect(results.ID).toBe('123')
@@ -223,7 +385,7 @@ describe('Result Helpers', () => {
         },
       }
 
-      const { values, results } = await extractCollectResults(warp, response)
+      const { values, results } = await extractCollectResults(warp, response, 1, [])
 
       expect(results.USERNAME).toBeNull()
       expect(results.MISSING).toBeNull()
@@ -239,7 +401,7 @@ describe('Result Helpers', () => {
         actions: [],
         results: {
           BASE: 'out.value',
-          DOUBLED: 'transform:() => { return input.BASE * 2 }',
+          DOUBLED: 'transform:() => { return result.BASE * 2 }',
         },
       } as Warp
 
@@ -247,7 +409,7 @@ describe('Result Helpers', () => {
         value: 10,
       }
 
-      const { values, results } = await extractCollectResults(warp, response)
+      const { values, results } = await extractCollectResults(warp, response, 1, [])
 
       expect(results.BASE).toBe(10)
       expect(results.DOUBLED).toBe(20)
@@ -268,7 +430,7 @@ describe('Result Helpers', () => {
           },
         } as any
         const response = { data: 'current-action-data' }
-        const { results } = await extractCollectResults(warp, response, 1)
+        const { results } = await extractCollectResults(warp, response, 1, [])
         expect(results.USERS_FROM_ACTION1).toBeNull()
         expect(results.BALANCE_FROM_ACTION2).toBeNull()
         expect(results.CURRENT_ACTION_DATA).toBe('current-action-data')
@@ -387,8 +549,8 @@ describe('Result Helpers', () => {
           USER_ID: 'out[1].id',
           USERNAME: 'out[1].username',
           POSTS: 'out[2].posts',
-          POST_COUNT: 'transform:() => { return input.POSTS ? input.POSTS.length : 0 }',
-          USER_WITH_POSTS: 'transform:() => { return { user: input.USERNAME, posts: input.POSTS } }',
+          POST_COUNT: 'transform:() => { return result.POSTS ? result.POSTS.length : 0 }',
+          USER_WITH_POSTS: 'transform:() => { return { user: result.USERNAME, posts: result.POSTS } }',
         },
       }
 

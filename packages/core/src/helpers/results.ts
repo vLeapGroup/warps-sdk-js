@@ -10,64 +10,9 @@ import { Warp, WarpContractAction } from '../types'
 import { WarpExecutionResults } from '../types/results'
 import { WarpActionExecutor } from '../WarpActionExecutor'
 import { WarpArgSerializer } from '../WarpArgSerializer'
-
-/**
- * Executes transform code securely in Node.js (using vm2) or browser (using Web Worker).
- */
-const runTransform = async (code: string, result: any): Promise<any> => {
-  if (typeof window === 'undefined') {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { VM } = require('vm2')
-    const vm = new VM({ timeout: 1000, sandbox: { result }, eval: false, wasm: false })
-
-    // Handle arrow function syntax: () => { return ... }
-    if (code.trim().startsWith('(') && code.includes('=>')) {
-      return vm.run(`(${code})(result)`)
-    }
-
-    return null
-  }
-  // Handle browser environment by creating a Web Worker
-  return new Promise((resolve, reject) => {
-    try {
-      const blob = new Blob(
-        [
-          `
-          self.onmessage = function(e) {
-            try {
-              const result = e.data;
-              const output = (${code})(result);
-              self.postMessage({ result: output });
-            } catch (error) {
-              self.postMessage({ error: error.toString() });
-            }
-          };
-        `,
-        ],
-        { type: 'application/javascript' }
-      )
-      const url = URL.createObjectURL(blob)
-      const worker = new Worker(url)
-      worker.onmessage = function (e) {
-        if (e.data.error) {
-          reject(new Error(e.data.error))
-        } else {
-          resolve(e.data.result)
-        }
-        worker.terminate()
-        URL.revokeObjectURL(url)
-      }
-      worker.onerror = function (e) {
-        reject(new Error(`Error in transform: ${e.message}`))
-        worker.terminate()
-        URL.revokeObjectURL(url)
-      }
-      worker.postMessage(result)
-    } catch (err) {
-      return reject(err)
-    }
-  })
-}
+import { WarpLogger } from '../WarpLogger'
+import { getWarpActionByIndex } from './general'
+import { runInVm } from './vm'
 
 /**
  * Parses out[N] notation and returns the action index (1-based) or null if invalid.
@@ -90,7 +35,8 @@ export const extractContractResults = async (
   warp: Warp,
   action: WarpContractAction,
   tx: TransactionOnNetwork,
-  currentActionIndex: number = 1
+  actionIndex: number,
+  inputs: string[]
 ): Promise<{ values: any[]; results: WarpExecutionResults }> => {
   let values: any[] = []
   let results: WarpExecutionResults = {}
@@ -103,8 +49,8 @@ export const extractContractResults = async (
   const outcome = outcomeParser.parseExecute({ transactionOnNetwork: tx, function: action.func || undefined })
   for (const [resultName, resultPath] of Object.entries(warp.results)) {
     if (resultPath.startsWith(WarpConstants.Transform.Prefix)) continue
-    const actionIndex = parseOutActionIndex(resultPath)
-    if (actionIndex !== null && actionIndex !== currentActionIndex) {
+    const currentActionIndex = parseOutActionIndex(resultPath)
+    if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
       results[resultName] = null
       continue
     }
@@ -131,13 +77,14 @@ export const extractContractResults = async (
       results[resultName] = outputAtPosition ? outputAtPosition.valueOf() : outputAtPosition
     }
   }
-  return { values, results: await transformResults(warp, results) }
+  return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
 }
 
 export const extractQueryResults = async (
   warp: Warp,
   typedValues: TypedValue[],
-  currentActionIndex: number = 1
+  actionIndex: number,
+  inputs: string[]
 ): Promise<{ values: any[]; results: WarpExecutionResults }> => {
   const was = new WarpArgSerializer()
   const values = typedValues.map((t) => was.typedToString(t))
@@ -159,39 +106,45 @@ export const extractQueryResults = async (
   }
   for (const [key, path] of Object.entries(warp.results)) {
     if (path.startsWith(WarpConstants.Transform.Prefix)) continue
-    const actionIndex = parseOutActionIndex(path)
-    if (actionIndex !== null && actionIndex !== currentActionIndex) {
+    const currentActionIndex = parseOutActionIndex(path)
+    if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
       results[key] = null
       continue
     }
     if (path.startsWith('out.') || path === 'out' || path.startsWith('out[')) {
       results[key] = getNestedValue(path) || null
+    } else {
+      results[key] = path
     }
   }
-  return { values, results: await transformResults(warp, results) }
+  return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
 }
 
 export const extractCollectResults = async (
   warp: Warp,
   response: any,
-  currentActionIndex: number = 1
+  actionIndex: number,
+  inputs: string[]
 ): Promise<{ values: any[]; results: WarpExecutionResults }> => {
   const values: any[] = []
   let results: WarpExecutionResults = {}
   for (const [resultName, resultPath] of Object.entries(warp.results || {})) {
     if (resultPath.startsWith(WarpConstants.Transform.Prefix)) continue
-    const actionIndex = parseOutActionIndex(resultPath)
-    if (actionIndex !== null && actionIndex !== currentActionIndex) {
+    const currentActionIndex = parseOutActionIndex(resultPath)
+    if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
       results[resultName] = null
       continue
     }
     const [resultType, ...pathParts] = resultPath.split('.')
-    if (resultType !== 'out' && !resultType.startsWith('out[')) continue
-    const value = pathParts.length === 0 ? response?.data || response : getNestedValueFromObject(response, pathParts)
-    values.push(value)
-    results[resultName] = value
+    if (resultType === 'out' || resultType.startsWith('out[')) {
+      const value = pathParts.length === 0 ? response?.data || response : getNestedValueFromObject(response, pathParts)
+      values.push(value)
+      results[resultName] = value
+    } else {
+      results[resultName] = resultPath
+    }
   }
-  return { values, results: await transformResults(warp, results) }
+  return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
 }
 
 /**
@@ -253,7 +206,7 @@ export async function resolveWarpResultsRecursively(
       }
     }
   }
-  const finalResults = await transformResults(warp, combinedResults)
+  const finalResults = await evaluateResultsCommon(warp, combinedResults, entryActionIndex, inputs)
   const entryExecution = resultsCache.get(entryActionIndex)!
   return {
     ...entryExecution,
@@ -261,19 +214,48 @@ export async function resolveWarpResultsRecursively(
   }
 }
 
-const transformResults = async (warp: Warp, baseResults: WarpExecutionResults): Promise<WarpExecutionResults> => {
+const evaluateResultsCommon = async (
+  warp: Warp,
+  baseResults: WarpExecutionResults,
+  actionIndex: number,
+  inputs: string[]
+): Promise<WarpExecutionResults> => {
   if (!warp.results) return baseResults
-  const results = { ...baseResults }
+  let results = { ...baseResults }
+  results = evaluateInputResults(results, warp, actionIndex, inputs)
+  results = await evaluateTransformResults(warp, results)
+  return results
+}
+
+const evaluateInputResults = (results: WarpExecutionResults, warp: Warp, actionIndex: number, inputs: string[]): WarpExecutionResults => {
+  const modifiable = { ...results }
+  const actionInputs = getWarpActionByIndex(warp, actionIndex)?.inputs || []
+  for (const [key, value] of Object.entries(modifiable)) {
+    if (typeof value === 'string' && value.startsWith('input.')) {
+      const inputName = value.split('.')[1]
+      const inputIndex = actionInputs.findIndex((i) => i.as === inputName || i.name === inputName)
+      modifiable[key] = inputIndex !== -1 ? inputs[inputIndex] : undefined
+    }
+  }
+  return modifiable
+}
+
+const evaluateTransformResults = async (warp: Warp, baseResults: WarpExecutionResults): Promise<WarpExecutionResults> => {
+  if (!warp.results) return baseResults
+  const modifiable = { ...baseResults }
+
   const transforms = Object.entries(warp.results)
     .filter(([, path]) => path.startsWith(WarpConstants.Transform.Prefix))
     .map(([key, path]) => ({ key, code: path.substring(WarpConstants.Transform.Prefix.length) }))
+
   for (const { key, code } of transforms) {
     try {
-      results[key] = await runTransform(code, results)
+      modifiable[key] = await runInVm(code, modifiable)
     } catch (err) {
-      console.error(`Transform error for result '${key}':`, err)
-      results[key] = null
+      WarpLogger.error(`Transform error for result '${key}':`, err)
+      modifiable[key] = null
     }
   }
-  return results
+
+  return modifiable
 }

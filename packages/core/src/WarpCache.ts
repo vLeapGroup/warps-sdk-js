@@ -15,6 +15,7 @@ export const CacheTtl = {
 export const CacheKey = {
   Warp: (id: string) => `warp:${id}`,
   WarpAbi: (id: string) => `warp-abi:${id}`,
+  WarpExecutionInputs: (executionHash: string) => `warp-exec-inputs:${executionHash}`,
   RegistryInfo: (id: string) => `registry-info:${id}`,
   Brand: (hash: string) => `brand:${hash}`,
   ChainInfo: (chain: WarpChain) => `chain:${chain}`,

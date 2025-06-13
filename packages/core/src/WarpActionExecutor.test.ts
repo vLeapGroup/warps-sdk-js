@@ -661,8 +661,8 @@ describe('WarpActionExecutor', () => {
         actions: [action],
         results: {
           USERS: 'out.users',
-          TOTAL: 'transform:() => { return input.USERS.reduce((sum, user) => sum + user.amount, 0) }',
-          COUNT: 'transform:() => input.USERS.length',
+          TOTAL: 'transform:() => { return result.USERS.reduce((sum, user) => sum + user.amount, 0) }',
+          COUNT: 'transform:() => result.USERS.length',
         },
       } as any as Warp
 
@@ -696,8 +696,8 @@ describe('WarpActionExecutor', () => {
         actions: [action],
         results: {
           BASE_VALUE: 'out.value',
-          DOUBLED: 'transform:() => { return input.BASE_VALUE * 2 }',
-          FINAL: 'transform:() => { return input.DOUBLED + 5 }',
+          DOUBLED: 'transform:() => { return result.BASE_VALUE * 2 }',
+          FINAL: 'transform:() => { return result.DOUBLED + 5 }',
         },
       } as any as Warp
 
@@ -729,7 +729,7 @@ describe('WarpActionExecutor', () => {
         results: {
           BASE_VALUE: 'out.value',
           ERROR_RESULT: 'transform:() => { throw new Error("Test error") }',
-          VALID_RESULT: 'transform:() => { return input.BASE_VALUE * 3 }',
+          VALID_RESULT: 'transform:() => { return result.BASE_VALUE * 3 }',
         },
       } as any as Warp
 
