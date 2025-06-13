@@ -234,7 +234,7 @@ const evaluateInputResults = (results: WarpExecutionResults, warp: Warp, actionI
     if (typeof value === 'string' && value.startsWith('input.')) {
       const inputName = value.split('.')[1]
       const inputIndex = actionInputs.findIndex((i) => i.as === inputName || i.name === inputName)
-      modifiable[key] = inputIndex !== -1 ? inputs[inputIndex] : undefined
+      modifiable[key] = inputIndex !== -1 ? inputs[inputIndex] : null
     }
   }
   return modifiable

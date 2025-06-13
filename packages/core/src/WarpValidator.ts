@@ -63,7 +63,11 @@ export class WarpValidator {
 
     const hasAnyAbi = warp.actions.some((action) => (action as WarpContractAction | WarpQueryAction).abi)
 
-    if (warp.results && !hasAnyAbi) {
+    const hasAnyResultRequiringAbi = Object.values(warp.results || {}).some(
+      (result) => result.startsWith('out.') || result.startsWith('event.')
+    )
+
+    if (warp.results && !hasAnyAbi && hasAnyResultRequiringAbi) {
       return ['ABI is required when results are present for contract or query actions']
     }
     return []

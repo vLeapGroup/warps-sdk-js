@@ -232,7 +232,7 @@ describe('WarpValidator', () => {
           },
         ],
         results: {
-          TEST: 'value',
+          TEST: 'out.value',
         },
       })
       const result = await validator.validate(warp)
@@ -254,7 +254,7 @@ describe('WarpValidator', () => {
           },
         ],
         results: {
-          TEST: 'value',
+          TEST: 'out.value',
         },
       })
       const result = await validator.validate(warp)

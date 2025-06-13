@@ -95,7 +95,7 @@ describe('Result Helpers', () => {
       const typedValues: TypedValue[] = []
       const inputs = ['abc']
       const { results } = await extractQueryResults(warp, typedValues, 1, inputs)
-      expect(results.BAR).toBeUndefined()
+      expect(results.BAR).toBeNull()
     })
 
     it('returns input-based result by input name (collect)', async () => {
@@ -172,7 +172,7 @@ describe('Result Helpers', () => {
       const response = { data: { some: 'value' } }
       const inputs = ['abc']
       const { results } = await extractCollectResults(warp, response, 1, inputs)
-      expect(results.BAR).toBeUndefined()
+      expect(results.BAR).toBeNull()
     })
   })
 
