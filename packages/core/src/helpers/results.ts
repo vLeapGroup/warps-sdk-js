@@ -40,8 +40,15 @@ export const extractContractResults = async (
 ): Promise<{ values: any[]; results: WarpExecutionResults }> => {
   let values: any[] = []
   let results: WarpExecutionResults = {}
-  if (!warp.results || !action.abi || action.type !== 'contract') {
+  if (!warp.results || action.type !== 'contract') {
     return { values, results }
+  }
+  const needsAbi = Object.values(warp.results).some((resultPath) => resultPath.includes('out') || resultPath.includes('event'))
+  if (!needsAbi) {
+    for (const [resultName, resultPath] of Object.entries(warp.results)) {
+      results[resultName] = resultPath
+    }
+    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
   }
   const abi = await executor.getAbiForAction(action)
   const eventParser = new TransactionEventsParser({ abi })
@@ -49,6 +56,10 @@ export const extractContractResults = async (
   const outcome = outcomeParser.parseExecute({ transactionOnNetwork: tx, function: action.func || undefined })
   for (const [resultName, resultPath] of Object.entries(warp.results)) {
     if (resultPath.startsWith(WarpConstants.Transform.Prefix)) continue
+    if (resultPath.startsWith('input.')) {
+      results[resultName] = resultPath
+      continue
+    }
     const currentActionIndex = parseOutActionIndex(resultPath)
     if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
       results[resultName] = null
@@ -75,6 +86,8 @@ export const extractContractResults = async (
       }
       values.push(outputAtPosition)
       results[resultName] = outputAtPosition ? outputAtPosition.valueOf() : outputAtPosition
+    } else {
+      results[resultName] = resultPath
     }
   }
   return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
@@ -230,11 +243,12 @@ const evaluateResultsCommon = async (
 const evaluateInputResults = (results: WarpExecutionResults, warp: Warp, actionIndex: number, inputs: string[]): WarpExecutionResults => {
   const modifiable = { ...results }
   const actionInputs = getWarpActionByIndex(warp, actionIndex)?.inputs || []
+  const serializer = new WarpArgSerializer()
   for (const [key, value] of Object.entries(modifiable)) {
     if (typeof value === 'string' && value.startsWith('input.')) {
       const inputName = value.split('.')[1]
       const inputIndex = actionInputs.findIndex((i) => i.as === inputName || i.name === inputName)
-      modifiable[key] = inputIndex !== -1 ? inputs[inputIndex] : null
+      modifiable[key] = inputIndex !== -1 ? serializer.stringToNative(inputs[inputIndex])[1] : null
     }
   }
   return modifiable

@@ -1,4 +1,11 @@
-import { SmartContractResult, TransactionEvent, TransactionLogs, TransactionOnNetwork, TypedValue } from '@multiversx/sdk-core/out'
+import {
+  AbiRegistry,
+  SmartContractResult,
+  TransactionEvent,
+  TransactionLogs,
+  TransactionOnNetwork,
+  TypedValue,
+} from '@multiversx/sdk-core/out'
 import { promises as fs, PathLike } from 'fs'
 import { setupHttpMock } from '../test-utils/mockHttp'
 import { Warp, WarpConfig, WarpContractAction } from '../types'
@@ -40,7 +47,7 @@ describe('Result Helpers', () => {
         },
       } as any
       const typedValues: TypedValue[] = []
-      const inputs = ['abc', 'xyz']
+      const inputs = ['string:abc', 'string:xyz']
       const { results } = await extractQueryResults(warp, typedValues, 1, inputs)
       expect(results.FOO).toBe('abc')
       expect(results.BAR).toBe('xyz')
@@ -67,7 +74,7 @@ describe('Result Helpers', () => {
         },
       } as any
       const typedValues: TypedValue[] = []
-      const inputs = ['aliased']
+      const inputs = ['string:aliased']
       const { results } = await extractQueryResults(warp, typedValues, 1, inputs)
       expect(results.FOO).toBe('aliased')
     })
@@ -93,7 +100,7 @@ describe('Result Helpers', () => {
         },
       } as any
       const typedValues: TypedValue[] = []
-      const inputs = ['abc']
+      const inputs = ['string:abc']
       const { results } = await extractQueryResults(warp, typedValues, 1, inputs)
       expect(results.BAR).toBeNull()
     })
@@ -121,7 +128,7 @@ describe('Result Helpers', () => {
         },
       } as any
       const response = { data: { some: 'value' } }
-      const inputs = ['abc', 'xyz']
+      const inputs = ['string:abc', 'string:xyz']
       const { results } = await extractCollectResults(warp, response, 1, inputs)
       expect(results.FOO).toBe('abc')
       expect(results.BAR).toBe('xyz')
@@ -146,7 +153,7 @@ describe('Result Helpers', () => {
         },
       } as any
       const response = { data: { some: 'value' } }
-      const inputs = ['aliased']
+      const inputs = ['string:aliased']
       const { results } = await extractCollectResults(warp, response, 1, inputs)
       expect(results.FOO).toBe('aliased')
     })
@@ -170,8 +177,105 @@ describe('Result Helpers', () => {
         },
       } as any
       const response = { data: { some: 'value' } }
-      const inputs = ['abc']
+      const inputs = ['string:abc']
       const { results } = await extractCollectResults(warp, response, 1, inputs)
+      expect(results.BAR).toBeNull()
+    })
+  })
+
+  describe('input-based results (contract)', () => {
+    it('returns input-based result by input name (contract)', async () => {
+      const executor = new WarpActionExecutor(testConfig)
+      jest.spyOn(executor, 'getAbiForAction').mockResolvedValue(AbiRegistry.create({ name: 'Dummy', endpoints: [] }))
+      const warp = {
+        protocol: 'test',
+        name: 'test',
+        title: 'test',
+        description: 'test',
+        actions: [
+          {
+            type: 'contract',
+            label: 'Test Contract',
+            address: 'erd1...',
+            func: 'test',
+            abi: 'dummy',
+            gasLimit: 1000000,
+            inputs: [
+              { name: 'foo', type: 'string', source: 'field' },
+              { name: 'bar', type: 'string', source: 'field' },
+            ],
+          },
+        ],
+        results: {
+          FOO: 'input.foo',
+          BAR: 'input.bar',
+        },
+      } as any
+      const action = warp.actions[0]
+      const tx = new TransactionOnNetwork()
+      const inputs = ['string:abc', 'string:xyz']
+      const { results } = await extractContractResults(executor, warp, action, tx, 1, inputs)
+      expect(results.FOO).toBe('abc')
+      expect(results.BAR).toBe('xyz')
+    })
+
+    it('returns input-based result by input.as alias (contract)', async () => {
+      const executor = new WarpActionExecutor(testConfig)
+      jest.spyOn(executor, 'getAbiForAction').mockResolvedValue(AbiRegistry.create({ name: 'Dummy', endpoints: [] }))
+      const warp = {
+        protocol: 'test',
+        name: 'test',
+        title: 'test',
+        description: 'test',
+        actions: [
+          {
+            type: 'contract',
+            label: 'Test Contract',
+            address: 'erd1...',
+            func: 'test',
+            abi: 'dummy',
+            gasLimit: 1000000,
+            inputs: [{ name: 'foo', as: 'FOO_ALIAS', type: 'string', source: 'field' }],
+          },
+        ],
+        results: {
+          FOO: 'input.FOO_ALIAS',
+        },
+      } as any
+      const action = warp.actions[0]
+      const tx = new TransactionOnNetwork()
+      const inputs = ['string:aliased']
+      const { results } = await extractContractResults(executor, warp, action, tx, 1, inputs)
+      expect(results.FOO).toBe('aliased')
+    })
+
+    it('returns null for missing input (contract)', async () => {
+      const executor = new WarpActionExecutor(testConfig)
+      jest.spyOn(executor, 'getAbiForAction').mockResolvedValue(AbiRegistry.create({ name: 'Dummy', endpoints: [] }))
+      const warp = {
+        protocol: 'test',
+        name: 'test',
+        title: 'test',
+        description: 'test',
+        actions: [
+          {
+            type: 'contract',
+            label: 'Test Contract',
+            address: 'erd1...',
+            func: 'test',
+            abi: 'dummy',
+            gasLimit: 1000000,
+            inputs: [{ name: 'foo', type: 'string', source: 'field' }],
+          },
+        ],
+        results: {
+          BAR: 'input.bar',
+        },
+      } as any
+      const action = warp.actions[0]
+      const tx = new TransactionOnNetwork()
+      const inputs = ['string:abc']
+      const { results } = await extractContractResults(executor, warp, action, tx, 1, inputs)
       expect(results.BAR).toBeNull()
     })
   })

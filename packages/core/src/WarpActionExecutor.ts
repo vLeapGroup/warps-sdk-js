@@ -7,7 +7,6 @@ import {
   TokenComputer,
   TokenTransfer,
   Transaction,
-  TransactionComputer,
   TransactionOnNetwork,
   TransactionsFactoryConfig,
   TransferTransactionsFactory,
@@ -93,19 +92,17 @@ export class WarpActionExecutor {
     }
 
     if (!tx) throw new Error(`WarpActionExecutor: Invalid action type (${action.type})`)
-
-    const txHash = new TransactionComputer().computeTransactionHash(tx)
-    this.cache.set(CacheKey.WarpExecutionInputs(txHash), inputs, CacheTtl.OneWeek)
+    this.cache.set(CacheKey.LastWarpExecutionInputs(warp.meta?.hash || '', actionIndex), inputs, CacheTtl.OneWeek)
 
     return tx
   }
 
   async getTransactionExecutionResults(warp: Warp, actionIndex: number, tx: TransactionOnNetwork): Promise<WarpExecution> {
-    const action = getWarpActionByIndex(warp, actionIndex) as WarpContractAction
     const preparedWarp = await WarpInterpolator.apply(this.config, warp)
+    const action = getWarpActionByIndex(preparedWarp, actionIndex) as WarpContractAction
 
     // Restore inputs via cache as transactions are broadcasted and processed asynchronously
-    const inputs: string[] = this.cache.get(CacheKey.WarpExecutionInputs(tx.hash.toString())) ?? []
+    const inputs: string[] = this.cache.get(CacheKey.LastWarpExecutionInputs(warp.meta?.hash || '', actionIndex)) ?? []
 
     const { values, results } = await extractContractResults(this, preparedWarp, action, tx, actionIndex, inputs)
     const next = WarpUtils.getNextInfo(this.config, preparedWarp, actionIndex, results)
