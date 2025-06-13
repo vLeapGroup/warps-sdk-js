@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 2.3.0-alpha.6
+
+### Patch Changes
+
+- 92e516d: resolve inputs for results
+
 ## 2.3.0-alpha.5
 
 ### Patch Changes
