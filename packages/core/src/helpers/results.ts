@@ -149,7 +149,13 @@ export const extractContractResults = async (
     } else if (resultType === 'out' || resultType.startsWith('out[')) {
       if (!partOne) continue
       const outputIndex = Number(partOne)
-      const outputAtPosition = (outcome.values[outputIndex - 1] || null) as object | null
+      let outputAtPosition = outcome.values[outputIndex - 1] || null
+      if (partTwo) {
+        outputAtPosition = outputAtPosition[partTwo] || null
+      }
+      if (outputAtPosition && typeof outputAtPosition === 'object') {
+        outputAtPosition = 'toFixed' in outputAtPosition ? outputAtPosition.toFixed() : outputAtPosition.valueOf()
+      }
       values.push(outputAtPosition)
       results[resultName] = outputAtPosition ? outputAtPosition.valueOf() : outputAtPosition
     }
