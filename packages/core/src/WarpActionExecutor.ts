@@ -167,7 +167,7 @@ export class WarpActionExecutor {
     }
   }
 
-  async executeCollect(warp: Warp, actionIndex: number, inputs: string[], meta?: Record<string, any>): Promise<WarpExecution> {
+  async executeCollect(warp: Warp, actionIndex: number, inputs: string[], extra?: Record<string, any>): Promise<WarpExecution> {
     const action = getWarpActionByIndex(warp, actionIndex) as WarpCollectAction | null
     if (!action) throw new Error('WarpActionExecutor: Action not found')
 
@@ -197,9 +197,9 @@ export class WarpActionExecutor {
       headers.set(key, value as string)
     })
 
-    const inputPayload = Object.fromEntries(modifiedInputs.map((i) => [i.input.as || i.input.name, toInputPayloadValue(i)]))
+    const payload = Object.fromEntries(modifiedInputs.map((i) => [i.input.as || i.input.name, toInputPayloadValue(i)]))
     const httpMethod = action.destination.method || 'GET'
-    const body = httpMethod === 'GET' ? undefined : JSON.stringify({ inputs: inputPayload, meta })
+    const body = httpMethod === 'GET' ? undefined : JSON.stringify({ ...payload, ...extra })
 
     WarpLogger.info('Executing collect', {
       url: action.destination.url,

@@ -375,12 +375,10 @@ describe('WarpActionExecutor', () => {
     httpMock.assertCall('https://example.com/collect', {
       method: 'POST',
       body: {
-        inputs: {
-          amount: '1000',
-          token: { token: 'WARP-123456', nonce: '0', amount: '1000000000000000000' },
-          address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
-          queryParam: 'testValue',
-        },
+        amount: '1000',
+        token: { token: 'WARP-123456', nonce: '0', amount: '1000000000000000000' },
+        address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+        queryParam: 'testValue',
       },
     })
 
