@@ -3,7 +3,7 @@ import { bigIntToHex, utf8ToHex } from '@multiversx/sdk-core/out/core/utils.code
 import { promises as fs, PathLike } from 'fs'
 import { getMainChainInfo } from './helpers/general'
 import { setupHttpMock } from './test-utils/mockHttp'
-import { Warp, WarpCollectAction, WarpConfig, WarpContractAction, WarpQueryAction, WarpTransferAction } from './types'
+import { Warp, WarpCollectAction, WarpInitConfig as WarpConfig, WarpContractAction, WarpQueryAction, WarpTransferAction } from './types'
 import { WarpActionExecutor } from './WarpActionExecutor'
 
 const testConfig: WarpConfig = {
@@ -389,6 +389,12 @@ describe('WarpActionExecutor', () => {
       USERNAME: 'abcdef',
       ID: '12',
       ALL: { username: 'abcdef', id: '12' },
+      _DATA: {
+        data: {
+          username: 'abcdef',
+          id: '12',
+        },
+      },
     })
     expect(actual.messages).toEqual({
       successRegistration: 'Your registration has the username: abcdef',
