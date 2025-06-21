@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.9
+
+### Patch Changes
+
+- 1e09810: add collect response to results
+
 ## 3.0.0-alpha.8
 
 ### Major Changes
