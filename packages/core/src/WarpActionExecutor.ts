@@ -228,7 +228,9 @@ export class WarpActionExecutor {
         txHash: null,
         next: null,
         values: [],
-        results: {},
+        results: {
+          error: error instanceof Error ? error.message : 'Unknown error',
+        },
         messages: {},
       }
     }
