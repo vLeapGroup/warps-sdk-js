@@ -201,6 +201,13 @@ export class WarpActionExecutor {
     const httpMethod = action.destination.method || 'GET'
     const body = httpMethod === 'GET' ? undefined : JSON.stringify({ inputs: inputPayload, meta })
 
+    WarpLogger.info('Executing collect', {
+      url: action.destination.url,
+      method: httpMethod,
+      headers,
+      body,
+    })
+
     try {
       const response = await fetch(action.destination.url, { method: httpMethod, headers, body })
       const content = await response.json()
