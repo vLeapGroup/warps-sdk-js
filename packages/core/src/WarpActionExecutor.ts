@@ -215,7 +215,7 @@ export class WarpActionExecutor {
         txHash: null,
         next,
         values,
-        results,
+        results: { ...results, _DATA: content },
         messages: this.getPreparedMessages(preparedWarp, results),
       }
     } catch (error) {
@@ -228,9 +228,7 @@ export class WarpActionExecutor {
         txHash: null,
         next: null,
         values: [],
-        results: {
-          error: error instanceof Error ? error.message : 'Unknown error',
-        },
+        results: { _DATA: error },
         messages: {},
       }
     }
