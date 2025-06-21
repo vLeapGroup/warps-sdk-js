@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.11
+
+### Major Changes
+
+- a88cbbb: update collect exec body
+
 ## 3.0.0-alpha.10
 
 ### Patch Changes
