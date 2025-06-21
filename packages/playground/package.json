@@ -1,6 +1,6 @@
 {
   "name": "@warps/playground",
-  "version": "0.1.1-alpha.4",
+  "version": "0.1.1-alpha.5",
   "private": true,
   "main": "playground.ts",
   "devDependencies": {
@@ -8,6 +8,6 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "@vleap/warps": "2.3.0-alpha.7"
+    "@vleap/warps": "3.0.0-alpha.8"
   }
 }

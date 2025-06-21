@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.8
+
+### Major Changes
+
+- 694c989: prepend warp prefix to vars + types
+
+### Patch Changes
+
+- 8396ad3: add err msg to collect executor
+
 ## 2.3.0-alpha.7
 
 ### Patch Changes

@@ -9,8 +9,10 @@
     "@warps/playground": "0.1.0"
   },
   "changesets": [
+    "curly-clubs-take",
     "empty-friends-wonder",
     "evil-clouds-tap",
+    "puny-seals-rescue",
     "sad-paths-fold",
     "short-singers-relax",
     "slow-candies-notice",
