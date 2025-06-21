@@ -1,13 +1,13 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
 import { getLatestProtocolIdentifier, getMainChainInfo, toPreviewText } from './helpers/general'
-import { Warp, WarpAction, WarpCacheConfig, WarpConfig } from './types'
+import { Warp, WarpAction, WarpCacheConfig, WarpInitConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
 import { WarpLogger } from './WarpLogger'
 import { WarpUtils } from './WarpUtils'
 import { WarpValidator } from './WarpValidator'
 
 export class WarpBuilder {
-  private config: WarpConfig
+  private config: WarpInitConfig
   private cache: WarpCache
 
   private pendingWarp: Warp = {
@@ -19,7 +19,7 @@ export class WarpBuilder {
     actions: [],
   }
 
-  constructor(config: WarpConfig) {
+  constructor(config: WarpInitConfig) {
     this.config = config
     this.cache = new WarpCache(config.cache?.type)
   }

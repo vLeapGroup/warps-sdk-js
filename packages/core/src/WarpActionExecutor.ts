@@ -16,16 +16,16 @@ import { getMainChainInfo, getWarpActionByIndex, replacePlaceholders, shiftBigin
 import { extractCollectResults, extractContractResults, extractQueryResults } from './helpers/results'
 import { findKnownTokenById } from './tokens'
 import {
-  ChainInfo,
   ResolvedInput,
   Warp,
   WarpAction,
   WarpActionInput,
   WarpActionInputType,
+  WarpChainInfo,
   WarpCollectAction,
-  WarpConfig,
   WarpContractAction,
   WarpContractActionTransfer,
+  WarpInitConfig,
   WarpQueryAction,
   WarpTransferAction,
 } from './types'
@@ -48,13 +48,13 @@ type TxComponents = {
 }
 
 export class WarpActionExecutor {
-  private config: WarpConfig
+  private config: WarpInitConfig
   private url: URL
   private serializer: WarpArgSerializer
   private contractLoader: WarpContractLoader
   private cache: WarpCache
 
-  constructor(config: WarpConfig) {
+  constructor(config: WarpInitConfig) {
     if (!config.currentUrl) throw new Error('WarpActionExecutor: currentUrl config not set')
     this.config = config
     this.url = new URL(config.currentUrl)
@@ -235,7 +235,7 @@ export class WarpActionExecutor {
   }
 
   async getTxComponentsFromInputs(
-    chain: ChainInfo,
+    chain: WarpChainInfo,
     action: WarpTransferAction | WarpContractAction | WarpQueryAction,
     inputs: string[],
     sender?: Address
@@ -271,7 +271,7 @@ export class WarpActionExecutor {
     return { destination, args, value, transfers, data, resolvedInputs: modifiedInputs }
   }
 
-  public async getResolvedInputs(chain: ChainInfo, action: WarpAction, inputArgs: string[]): Promise<ResolvedInput[]> {
+  public async getResolvedInputs(chain: WarpChainInfo, action: WarpAction, inputArgs: string[]): Promise<ResolvedInput[]> {
     const argInputs = action.inputs || []
     const preprocessed = await Promise.all(inputArgs.map((arg) => this.preprocessInput(chain, arg)))
 
@@ -325,7 +325,7 @@ export class WarpActionExecutor {
     })
   }
 
-  public async preprocessInput(chain: ChainInfo, input: string): Promise<string> {
+  public async preprocessInput(chain: WarpChainInfo, input: string): Promise<string> {
     try {
       const [type, value] = input.split(WarpConstants.ArgParamsSeparator, 2) as [WarpActionInputType, string]
       if (type === 'esdt') {

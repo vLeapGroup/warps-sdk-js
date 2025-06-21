@@ -1,4 +1,4 @@
-import { Brand, RegistryInfo, Warp, WarpConfig } from './types'
+import { Brand, Warp, WarpConfig, WarpRegistryInfo } from './types'
 import { WarpBuilder } from './WarpBuilder'
 import { WarpLink } from './WarpLink'
 import { WarpRegistry } from './WarpRegistry'
@@ -35,7 +35,7 @@ const mockWarp: Warp = {
   },
 }
 
-const mockRegistryInfo: RegistryInfo = {
+const mockRegistryInfo: WarpRegistryInfo = {
   hash: '123',
   alias: 'mywarp',
   trust: 'unverified',

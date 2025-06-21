@@ -1,9 +1,9 @@
-export type TrustStatus = 'unverified' | 'verified' | 'blacklisted'
+export type WarpTrustStatus = 'unverified' | 'verified' | 'blacklisted'
 
-export type RegistryInfo = {
+export type WarpRegistryInfo = {
   hash: string
   alias: string | null
-  trust: TrustStatus
+  trust: WarpTrustStatus
   owner: string
   createdAt: number
   upgradedAt: number
@@ -11,7 +11,7 @@ export type RegistryInfo = {
   upgrade: string | null
 }
 
-export type ConfigInfo = {
+export type WarpRegistryConfigInfo = {
   unitPrice: bigint
   admins: string[]
 }

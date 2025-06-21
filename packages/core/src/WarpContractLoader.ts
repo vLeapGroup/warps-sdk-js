@@ -1,11 +1,11 @@
-import { ChainInfo, WarpConfig, WarpContract, WarpContractVerification } from './types'
+import { WarpChainInfo, WarpContract, WarpContractVerification, WarpInitConfig } from './types'
 import { WarpLogger } from './WarpLogger'
 import { WarpUtils } from './WarpUtils'
 
 export class WarpContractLoader {
-  constructor(private readonly config: WarpConfig) {}
+  constructor(private readonly config: WarpInitConfig) {}
 
-  async getContract(address: string, chain: ChainInfo): Promise<WarpContract | null> {
+  async getContract(address: string, chain: WarpChainInfo): Promise<WarpContract | null> {
     try {
       const chainEntry = WarpUtils.getChainEntrypoint(chain, this.config.env)
       const chainProvider = chainEntry.createNetworkProvider()
@@ -22,7 +22,7 @@ export class WarpContractLoader {
     }
   }
 
-  async getVerificationInfo(address: string, chain: ChainInfo): Promise<WarpContractVerification | null> {
+  async getVerificationInfo(address: string, chain: WarpChainInfo): Promise<WarpContractVerification | null> {
     try {
       const chainEntry = WarpUtils.getChainEntrypoint(chain, this.config.env)
       const chainProvider = chainEntry.createNetworkProvider()

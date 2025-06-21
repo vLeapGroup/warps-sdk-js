@@ -1,10 +1,10 @@
 import { CacheType } from '../WarpCache'
-import { ChainEnv } from './general'
+import { WarpChainEnv } from './general'
 
 export type WarpChain = string
 
-export type WarpConfig = {
-  env: ChainEnv
+export type WarpInitConfig = {
+  env: WarpChainEnv
   clientUrl?: string
   currentUrl?: string
   vars?: Record<string, string | number>
@@ -33,7 +33,7 @@ export type WarpCacheConfig = {
   ttl?: number
 }
 
-export type ChainInfo = {
+export type WarpChainInfo = {
   name: WarpChain
   displayName: string
   chainId: string

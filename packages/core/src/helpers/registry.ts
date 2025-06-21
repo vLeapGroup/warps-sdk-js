@@ -1,7 +1,7 @@
 import { Address } from '@multiversx/sdk-core/out'
-import { ConfigInfo, RegistryInfo } from '../types'
+import { WarpRegistryConfigInfo, WarpRegistryInfo } from '../types'
 
-export const toTypedRegistryInfo = (registryInfo: any): RegistryInfo => ({
+export const toTypedRegistryInfo = (registryInfo: any): WarpRegistryInfo => ({
   hash: registryInfo.hash.toString('hex'),
   alias: registryInfo.alias?.toString() || null,
   trust: registryInfo.trust.toString(),
@@ -12,7 +12,7 @@ export const toTypedRegistryInfo = (registryInfo: any): RegistryInfo => ({
   upgrade: registryInfo.upgrade?.toString('hex') || null,
 })
 
-export const toTypedConfigInfo = (configInfo: any): ConfigInfo => ({
+export const toTypedConfigInfo = (configInfo: any): WarpRegistryConfigInfo => ({
   unitPrice: BigInt(configInfo.unit_price.toString()),
   admins: configInfo.admins.map((admin: Address) => admin.toBech32()),
 })

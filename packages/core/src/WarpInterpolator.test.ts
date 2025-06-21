@@ -1,6 +1,6 @@
-import { Config } from './config'
+import { WarpConfig } from './config'
 import { getMainChainInfo } from './helpers/general'
-import { Warp, WarpConfig } from './types/warp'
+import { Warp } from './types/warp'
 import { CacheKey, CacheTtl, WarpCache } from './WarpCache'
 import { WarpInterpolator } from './WarpInterpolator'
 
@@ -11,11 +11,11 @@ const testConfig: WarpConfig = {
   vars: {},
   user: { wallet: 'erd1abc' },
   schema: {
-    warp: Config.LatestWarpSchemaUrl,
-    brand: Config.LatestBrandSchemaUrl,
+    warp: WarpConfig.LatestWarpSchemaUrl,
+    brand: WarpConfig.LatestBrandSchemaUrl,
   },
   registry: {
-    contract: Config.Registry.Contract('devnet'),
+    contract: WarpConfig.Registry.Contract('devnet'),
   },
 }
 

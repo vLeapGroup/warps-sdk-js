@@ -1,11 +1,11 @@
-import { ChainEnv } from './types/general'
+import { WarpChainEnv } from './types/general'
 import { WarpExecutionResults } from './types/results'
 import { Warp, WarpConfig } from './types/warp'
 import { WarpInterpolator } from './WarpInterpolator'
 import { WarpUtils } from './WarpUtils'
 
 const testConfig: WarpConfig = {
-  env: 'devnet' as ChainEnv,
+  env: 'devnet' as WarpChainEnv,
   clientUrl: 'https://anyclient.com',
   currentUrl: 'https://anyclient.com',
   vars: {},

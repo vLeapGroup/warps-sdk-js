@@ -1,20 +1,20 @@
 import { WarpConstants } from './constants'
 import { getMainChainInfo } from './helpers/general'
-import { ChainInfo, Warp, WarpAction, WarpConfig } from './types'
+import { Warp, WarpAction, WarpChainInfo, WarpInitConfig } from './types'
 import { WarpUtils } from './WarpUtils'
 
 export type InterpolationBag = {
-  config: WarpConfig
-  chain: ChainInfo
+  config: WarpInitConfig
+  chain: WarpChainInfo
 }
 
 export class WarpInterpolator {
-  static async apply(config: WarpConfig, warp: Warp): Promise<Warp> {
+  static async apply(config: WarpInitConfig, warp: Warp): Promise<Warp> {
     const modifiable = this.applyVars(config, warp)
     return await this.applyGlobals(config, modifiable)
   }
 
-  static async applyGlobals(config: WarpConfig, warp: Warp): Promise<Warp> {
+  static async applyGlobals(config: WarpInitConfig, warp: Warp): Promise<Warp> {
     let modifiable = { ...warp }
     modifiable.actions = await Promise.all(modifiable.actions.map(async (action) => await this.applyActionGlobals(config, action)))
 
@@ -23,7 +23,7 @@ export class WarpInterpolator {
     return modifiable
   }
 
-  static applyVars(config: WarpConfig, warp: Warp): Warp {
+  static applyVars(config: WarpInitConfig, warp: Warp): Warp {
     if (!warp?.vars) return warp
     let modifiable = JSON.stringify(warp)
 
@@ -53,7 +53,7 @@ export class WarpInterpolator {
     return JSON.parse(modifiable)
   }
 
-  private static async applyRootGlobals(warp: Warp, config: WarpConfig): Promise<Warp> {
+  private static async applyRootGlobals(warp: Warp, config: WarpInitConfig): Promise<Warp> {
     let modifiable = JSON.stringify(warp)
     const rootBag: InterpolationBag = { config, chain: getMainChainInfo(config) }
 
@@ -67,7 +67,7 @@ export class WarpInterpolator {
     return JSON.parse(modifiable)
   }
 
-  private static async applyActionGlobals(config: WarpConfig, action: WarpAction): Promise<WarpAction> {
+  private static async applyActionGlobals(config: WarpInitConfig, action: WarpAction): Promise<WarpAction> {
     const chain = await WarpUtils.getChainInfoForAction(config, action)
     let modifiable = JSON.stringify(action)
     const bag: InterpolationBag = { config, chain }

@@ -1,7 +1,7 @@
 import QRCodeStyling from 'qr-code-styling'
-import { Config } from './config'
+import { WarpConfig } from './config'
 import { WarpConstants } from './constants'
-import { Brand, RegistryInfo, Warp, WarpCacheConfig, WarpConfig, WarpIdType } from './types'
+import { Brand, Warp, WarpCacheConfig, WarpIdType, WarpInitConfig, WarpRegistryInfo } from './types'
 import { WarpBuilder } from './WarpBuilder'
 import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
@@ -12,7 +12,7 @@ type DetectionResult = {
   match: boolean
   url: string
   warp: Warp | null
-  registryInfo: RegistryInfo | null
+  registryInfo: WarpRegistryInfo | null
   brand: Brand | null
 }
 
@@ -27,7 +27,7 @@ type DetectionResultFromHtml = {
 // Example Link (Transaction Hash as ID): https://usewarp.to/to?warp=hash%3A<MYHASH>
 // Example Link (Alias as ID): https://usewarp.to/to?warp=alias%3A<MYALIAS>
 export class WarpLink {
-  constructor(private config: WarpConfig) {
+  constructor(private config: WarpInitConfig) {
     this.config = config
   }
 
@@ -66,7 +66,7 @@ export class WarpLink {
       const builder = new WarpBuilder(this.config)
       const registry = new WarpRegistry(this.config)
       let warp: Warp | null = null
-      let registryInfo: RegistryInfo | null = null
+      let registryInfo: WarpRegistryInfo | null = null
       let brand: Brand | null = null
 
       if (type === 'hash') {
@@ -93,13 +93,13 @@ export class WarpLink {
   }
 
   build(type: WarpIdType, id: string): string {
-    const clientUrl = this.config.clientUrl || Config.DefaultClientUrl(this.config.env)
+    const clientUrl = this.config.clientUrl || WarpConfig.DefaultClientUrl(this.config.env)
     const encodedValue =
       type === WarpConstants.IdentifierType.Alias
         ? encodeURIComponent(id)
         : encodeURIComponent(type + WarpConstants.IdentifierParamSeparator + id)
 
-    return Config.SuperClientUrls.includes(clientUrl)
+    return WarpConfig.SuperClientUrls.includes(clientUrl)
       ? `${clientUrl}/${encodedValue}`
       : `${clientUrl}?${WarpConstants.IdentifierParamName}=${encodedValue}`
   }
@@ -131,7 +131,7 @@ export class WarpLink {
 
   private extractIdentifierInfoFromUrl(url: string): { type: WarpIdType; identifier: string; identifierBase: string } | null {
     const urlObj = new URL(url)
-    const isSuperClient = Config.SuperClientUrls.includes(urlObj.origin)
+    const isSuperClient = WarpConfig.SuperClientUrls.includes(urlObj.origin)
     const searchParamValue = urlObj.searchParams.get(WarpConstants.IdentifierParamName)
     const value = isSuperClient && !searchParamValue ? urlObj.pathname.split('/')[1] : searchParamValue
 

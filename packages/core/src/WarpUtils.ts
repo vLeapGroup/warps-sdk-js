@@ -1,7 +1,16 @@
 import { DevnetEntrypoint, MainnetEntrypoint, NetworkEntrypoint, TestnetEntrypoint } from '@multiversx/sdk-core'
 import { WarpConstants } from './constants'
 import { getMainChainInfo, replacePlaceholders } from './helpers/general'
-import { ChainEnv, ChainInfo, Warp, WarpAction, WarpConfig, WarpExecutionNextInfo, WarpExecutionResults, WarpIdType } from './types'
+import {
+  Warp,
+  WarpAction,
+  WarpChainEnv,
+  WarpChainInfo,
+  WarpExecutionNextInfo,
+  WarpExecutionResults,
+  WarpIdType,
+  WarpInitConfig,
+} from './types'
 import { CacheTtl } from './WarpCache'
 import { WarpLink } from './WarpLink'
 import { WarpRegistry } from './WarpRegistry'
@@ -23,7 +32,7 @@ export class WarpUtils {
     return { type: idType as WarpIdType, identifier, identifierBase }
   }
 
-  static getNextInfo(config: WarpConfig, warp: Warp, actionIndex: number, results: WarpExecutionResults): WarpExecutionNextInfo | null {
+  static getNextInfo(config: WarpInitConfig, warp: Warp, actionIndex: number, results: WarpExecutionResults): WarpExecutionNextInfo | null {
     const next = (warp.actions?.[actionIndex] as { next?: string })?.next || warp.next || null
     if (!next) return null
     if (next.startsWith(URL_PREFIX)) return [{ identifier: null, url: next }]
@@ -84,7 +93,7 @@ export class WarpUtils {
     return nextLinks
   }
 
-  private static buildNextUrl(identifier: string, config: WarpConfig): string {
+  private static buildNextUrl(identifier: string, config: WarpInitConfig): string {
     const [rawId, queryString] = identifier.split('?')
     const info = this.getInfoFromPrefixedIdentifier(rawId) || { type: 'alias', identifier: rawId, identifierBase: rawId }
     const warpLink = new WarpLink(config)
@@ -100,14 +109,14 @@ export class WarpUtils {
     return path.split('.').reduce((current, key) => current?.[key], obj)
   }
 
-  static async getChainInfoForAction(config: WarpConfig, action: WarpAction): Promise<ChainInfo> {
+  static async getChainInfoForAction(config: WarpInitConfig, action: WarpAction): Promise<WarpChainInfo> {
     if (!action.chain) return getMainChainInfo(config)
     const chainInfo = await new WarpRegistry(config).getChainInfo(action.chain, { ttl: CacheTtl.OneWeek })
     if (!chainInfo) throw new Error(`WarpActionExecutor: Chain info not found for ${action.chain}`)
     return chainInfo
   }
 
-  static getChainEntrypoint(chainInfo: ChainInfo, env: ChainEnv): NetworkEntrypoint {
+  static getChainEntrypoint(chainInfo: WarpChainInfo, env: WarpChainEnv): NetworkEntrypoint {
     const clientName = 'warp-sdk'
     const kind = 'api'
     if (env === 'devnet') return new DevnetEntrypoint(chainInfo.apiUrl, kind, clientName)

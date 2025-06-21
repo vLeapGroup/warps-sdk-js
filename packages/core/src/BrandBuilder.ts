@@ -1,13 +1,13 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
 import Ajv from 'ajv'
-import { Config } from './config'
+import { WarpConfig } from './config'
 import { getLatestProtocolIdentifier, getMainChainInfo } from './helpers/general'
-import { Brand, BrandColors, BrandCta, BrandUrls, WarpConfig } from './types'
+import { Brand, BrandColors, BrandCta, BrandUrls, WarpInitConfig } from './types'
 import { WarpLogger } from './WarpLogger'
 import { WarpUtils } from './WarpUtils'
 
 export class BrandBuilder {
-  private config: WarpConfig
+  private config: WarpInitConfig
 
   private pendingBrand: Brand = {
     protocol: getLatestProtocolIdentifier('brand'),
@@ -16,7 +16,7 @@ export class BrandBuilder {
     logo: '',
   }
 
-  constructor(config: WarpConfig) {
+  constructor(config: WarpInitConfig) {
     this.config = config
   }
 
@@ -110,7 +110,7 @@ export class BrandBuilder {
   }
 
   private async ensureValidSchema(brand: Brand): Promise<void> {
-    const schemaUrl = this.config.schema?.brand || Config.LatestBrandSchemaUrl
+    const schemaUrl = this.config.schema?.brand || WarpConfig.LatestBrandSchemaUrl
     const schemaResponse = await fetch(schemaUrl)
     const schema = await schemaResponse.json()
     const ajv = new Ajv()

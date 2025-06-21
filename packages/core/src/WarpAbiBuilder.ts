@@ -1,25 +1,25 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
 import { getLatestProtocolIdentifier, getMainChainInfo } from './helpers/general'
-import { AbiContents, WarpAbi, WarpCacheConfig, WarpConfig } from './types'
+import { WarpAbiContents, WarpCacheConfig, WarpInitConfig, WarpWarpAbi } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
 import { WarpLogger } from './WarpLogger'
 import { WarpUtils } from './WarpUtils'
 
 export class WarpAbiBuilder {
-  private config: WarpConfig
+  private config: WarpInitConfig
   private cache: WarpCache = new WarpCache()
 
-  constructor(config: WarpConfig) {
+  constructor(config: WarpInitConfig) {
     this.config = config
   }
 
-  createInscriptionTransaction(abi: AbiContents): Transaction {
+  createInscriptionTransaction(abi: WarpAbiContents): Transaction {
     if (!this.config.user?.wallet) throw new Error('WarpBuilder: user address not set')
     const chain = getMainChainInfo(this.config)
     const factoryConfig = new TransactionsFactoryConfig({ chainID: chain.chainId })
     const factory = new TransferTransactionsFactory({ config: factoryConfig })
 
-    const warpAbi: WarpAbi = {
+    const warpAbi: WarpWarpAbi = {
       protocol: getLatestProtocolIdentifier('abi'),
       content: abi,
     }
@@ -38,11 +38,11 @@ export class WarpAbiBuilder {
     return tx
   }
 
-  async createFromRaw(encoded: string): Promise<WarpAbi> {
-    return JSON.parse(encoded) as WarpAbi
+  async createFromRaw(encoded: string): Promise<WarpWarpAbi> {
+    return JSON.parse(encoded) as WarpWarpAbi
   }
 
-  async createFromTransaction(tx: TransactionOnNetwork): Promise<WarpAbi> {
+  async createFromTransaction(tx: TransactionOnNetwork): Promise<WarpWarpAbi> {
     const abi = await this.createFromRaw(tx.data.toString())
 
     abi.meta = {
@@ -54,11 +54,11 @@ export class WarpAbiBuilder {
     return abi
   }
 
-  async createFromTransactionHash(hash: string, cache?: WarpCacheConfig): Promise<WarpAbi | null> {
+  async createFromTransactionHash(hash: string, cache?: WarpCacheConfig): Promise<WarpWarpAbi | null> {
     const cacheKey = CacheKey.WarpAbi(hash)
 
     if (cache) {
-      const cached = this.cache.get<WarpAbi>(cacheKey)
+      const cached = this.cache.get<WarpWarpAbi>(cacheKey)
       if (cached) {
         WarpLogger.info(`WarpAbiBuilder (createFromTransactionHash): Warp abi found in cache: ${hash}`)
         return cached

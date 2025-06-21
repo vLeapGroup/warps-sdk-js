@@ -1,6 +1,6 @@
 import Ajv from 'ajv'
-import { Config } from './config'
-import { Warp, WarpConfig, WarpContractAction, WarpQueryAction } from './types'
+import { WarpConfig } from './config'
+import { Warp, WarpContractAction, WarpInitConfig, WarpQueryAction } from './types'
 
 type ValidationResult = {
   valid: boolean
@@ -10,7 +10,7 @@ type ValidationResult = {
 type ValidationError = string
 
 export class WarpValidator {
-  constructor(private config: WarpConfig) {
+  constructor(private config: WarpInitConfig) {
     this.config = config
   }
 
@@ -75,7 +75,7 @@ export class WarpValidator {
 
   private async validateSchema(warp: Warp): Promise<ValidationError[]> {
     try {
-      const schemaUrl = this.config.schema?.warp || Config.LatestWarpSchemaUrl
+      const schemaUrl = this.config.schema?.warp || WarpConfig.LatestWarpSchemaUrl
       const schemaResponse = await fetch(schemaUrl)
       const schema = await schemaResponse.json()
       const ajv = new Ajv()

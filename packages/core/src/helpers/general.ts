@@ -1,17 +1,17 @@
-import { Config, WarpProtocolVersions } from '../config'
-import { ChainInfo, ProtocolName, Warp, WarpConfig } from '../types'
+import { WarpConfig, WarpProtocolVersions } from '../config'
+import { ProtocolName, Warp, WarpChainInfo, WarpInitConfig } from '../types'
 
-export const getMainChainInfo = (config: WarpConfig): ChainInfo => ({
-  name: Config.MainChain.Name,
-  displayName: Config.MainChain.DisplayName,
-  chainId: Config.MainChain.ChainId(config.env),
-  blockTime: Config.MainChain.BlockTime(config.env),
-  addressHrp: Config.MainChain.AddressHrp,
-  apiUrl: Config.MainChain.ApiUrl(config.env),
-  explorerUrl: Config.MainChain.ExplorerUrl(config.env),
+export const getMainChainInfo = (config: WarpInitConfig): WarpChainInfo => ({
+  name: WarpConfig.MainChain.Name,
+  displayName: WarpConfig.MainChain.DisplayName,
+  chainId: WarpConfig.MainChain.ChainId(config.env),
+  blockTime: WarpConfig.MainChain.BlockTime(config.env),
+  addressHrp: WarpConfig.MainChain.AddressHrp,
+  apiUrl: WarpConfig.MainChain.ApiUrl(config.env),
+  explorerUrl: WarpConfig.MainChain.ExplorerUrl(config.env),
 })
 
-export const getChainExplorerUrl = (chain: ChainInfo, path?: string) => chain.explorerUrl + (path ? '/' + path : '')
+export const getChainExplorerUrl = (chain: WarpChainInfo, path?: string) => chain.explorerUrl + (path ? '/' + path : '')
 
 export const getLatestProtocolIdentifier = (name: ProtocolName): string => {
   if (name === 'warp') return `warp:${WarpProtocolVersions.Warp}`
@@ -22,7 +22,7 @@ export const getLatestProtocolIdentifier = (name: ProtocolName): string => {
 
 export const getWarpActionByIndex = (warp: Warp, index: number) => warp?.actions[index - 1]
 
-export const toTypedChainInfo = (chainInfo: any): ChainInfo => ({
+export const toTypedChainInfo = (chainInfo: any): WarpChainInfo => ({
   name: chainInfo.name.toString(),
   displayName: chainInfo.display_name.toString(),
   chainId: chainInfo.chain_id.toString(),

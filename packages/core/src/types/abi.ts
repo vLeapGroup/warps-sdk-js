@@ -1,12 +1,12 @@
 import { WarpMeta } from './warp'
 
-export type WarpAbi = {
+export type WarpWarpAbi = {
   protocol: string
-  content: AbiContents
+  content: WarpAbiContents
   meta?: WarpMeta
 }
 
-export type AbiContents = {
+export type WarpAbiContents = {
   name?: string
   constructor?: any
   upgradeConstructor?: any
