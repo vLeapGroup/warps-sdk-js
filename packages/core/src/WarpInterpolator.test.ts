@@ -1,10 +1,10 @@
 import { WarpConfig } from './config'
 import { getMainChainInfo } from './helpers/general'
-import { Warp } from './types/warp'
+import { Warp, WarpInitConfig } from './types/warp'
 import { CacheKey, CacheTtl, WarpCache } from './WarpCache'
 import { WarpInterpolator } from './WarpInterpolator'
 
-const testConfig: WarpConfig = {
+const testConfig: WarpInitConfig = {
   env: 'devnet',
   clientUrl: 'https://anyclient.com',
   currentUrl: 'https://anyclient.com',
@@ -91,7 +91,7 @@ describe('WarpInterpolator per-action chain info', () => {
       apiUrl: 'https://api.chainA.com',
       explorerUrl: 'https://explorer.chainA.com',
     }
-    cache.set(CacheKey.ChainInfo('A'), chainA, CacheTtl.OneWeek)
+    cache.set(CacheKey.ChainInfo(config.env, 'A'), chainA, CacheTtl.OneWeek)
 
     const chainB = {
       chainId: 'B',
@@ -99,7 +99,7 @@ describe('WarpInterpolator per-action chain info', () => {
       apiUrl: 'https://api.chainB.com',
       explorerUrl: 'https://explorer.chainB.com',
     }
-    cache.set(CacheKey.ChainInfo('B'), chainB, CacheTtl.OneWeek)
+    cache.set(CacheKey.ChainInfo(config.env, 'B'), chainB, CacheTtl.OneWeek)
 
     const warp: Warp = {
       description: 'Test',

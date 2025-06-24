@@ -1,7 +1,7 @@
-import { WarpConfig } from './types'
+import { WarpInitConfig } from './types'
 import { WarpBuilder } from './WarpBuilder'
 
-const Config: WarpConfig = {
+const Config: WarpInitConfig = {
   env: 'devnet',
   user: {
     wallet: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',

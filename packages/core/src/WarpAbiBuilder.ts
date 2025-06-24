@@ -55,7 +55,7 @@ export class WarpAbiBuilder {
   }
 
   async createFromTransactionHash(hash: string, cache?: WarpCacheConfig): Promise<WarpWarpAbi | null> {
-    const cacheKey = CacheKey.WarpAbi(hash)
+    const cacheKey = CacheKey.WarpAbi(this.config.env, hash)
 
     if (cache) {
       const cached = this.cache.get<WarpWarpAbi>(cacheKey)

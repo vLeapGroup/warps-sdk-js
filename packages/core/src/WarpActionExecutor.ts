@@ -102,7 +102,7 @@ export class WarpActionExecutor {
     }
 
     if (!tx) throw new Error(`WarpActionExecutor: Invalid action type (${action.type})`)
-    this.cache.set(CacheKey.LastWarpExecutionInputs(warp.meta?.hash || '', actionIndex), resolvedInputs, CacheTtl.OneWeek)
+    this.cache.set(CacheKey.LastWarpExecutionInputs(this.config.env, warp.meta?.hash || '', actionIndex), resolvedInputs, CacheTtl.OneWeek)
 
     return tx
   }
@@ -112,7 +112,8 @@ export class WarpActionExecutor {
     const action = getWarpActionByIndex(preparedWarp, actionIndex) as WarpContractAction
 
     // Restore inputs via cache as transactions are broadcasted and processed asynchronously
-    const inputs: ResolvedInput[] = this.cache.get(CacheKey.LastWarpExecutionInputs(warp.meta?.hash || '', actionIndex)) ?? []
+    const inputs: ResolvedInput[] =
+      this.cache.get(CacheKey.LastWarpExecutionInputs(this.config.env, warp.meta?.hash || '', actionIndex)) ?? []
 
     const { values, results } = await extractContractResults(this, preparedWarp, action, tx, actionIndex, inputs)
     const next = WarpUtils.getNextInfo(this.config, preparedWarp, actionIndex, results)

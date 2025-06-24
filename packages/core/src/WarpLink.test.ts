@@ -1,4 +1,4 @@
-import { Brand, Warp, WarpConfig, WarpRegistryInfo } from './types'
+import { Brand, Warp, WarpInitConfig, WarpRegistryInfo } from './types'
 import { WarpBuilder } from './WarpBuilder'
 import { WarpLink } from './WarpLink'
 import { WarpRegistry } from './WarpRegistry'
@@ -7,7 +7,7 @@ import { WarpRegistry } from './WarpRegistry'
 jest.mock('./WarpBuilder')
 jest.mock('./WarpRegistry')
 
-const Config: WarpConfig = {
+const Config: WarpInitConfig = {
   env: 'devnet',
   clientUrl: 'https://anyclient.com',
 }
@@ -36,11 +36,12 @@ const mockWarp: Warp = {
 }
 
 const mockRegistryInfo: WarpRegistryInfo = {
-  hash: '123',
-  alias: 'mywarp',
+  hash: 'test123',
+  alias: 'test-alias',
   trust: 'unverified',
-  owner: 'test-creator',
-  createdAt: 1234567890,
+  owner: 'test-owner',
+  createdAt: 123456789,
+  upgradedAt: 123456789,
   brand: null,
   upgrade: null,
 }

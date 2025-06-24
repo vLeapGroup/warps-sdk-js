@@ -8,11 +8,11 @@ import {
 } from '@multiversx/sdk-core/out'
 import { promises as fs, PathLike } from 'fs'
 import { setupHttpMock } from '../test-utils/mockHttp'
-import { Warp, WarpConfig, WarpContractAction } from '../types'
+import { Warp, WarpContractAction, WarpInitConfig } from '../types'
 import { WarpActionExecutor } from '../WarpActionExecutor'
 import { extractCollectResults, extractContractResults, extractQueryResults } from './results'
 
-const testConfig: WarpConfig = {
+const testConfig: WarpInitConfig = {
   env: 'devnet',
   user: {
     wallet: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',

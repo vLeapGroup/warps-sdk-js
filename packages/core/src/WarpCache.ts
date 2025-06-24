@@ -1,7 +1,7 @@
 import { CacheStrategy } from './cache/CacheStrategy'
 import { LocalStorageCacheStrategy } from './cache/LocalStorageCacheStrategy'
 import { MemoryCacheStrategy } from './cache/MemoryCacheStrategy'
-import { WarpChain } from './types'
+import { WarpChain, WarpChainEnv } from './types'
 
 export const CacheTtl = {
   OneMinute: 60,
@@ -13,13 +13,13 @@ export const CacheTtl = {
 }
 
 export const CacheKey = {
-  Warp: (id: string) => `warp:${id}`,
-  WarpAbi: (id: string) => `warp-abi:${id}`,
-  LastWarpExecutionInputs: (id: string, action: number) => `warp-exec-inputs:${id}:${action}`,
-  RegistryInfo: (id: string) => `registry-info:${id}`,
-  Brand: (hash: string) => `brand:${hash}`,
-  ChainInfo: (chain: WarpChain) => `chain:${chain}`,
-  ChainInfos: () => 'chains',
+  Warp: (env: WarpChainEnv, id: string) => `warp:${env}:${id}`,
+  WarpAbi: (env: WarpChainEnv, id: string) => `warp-abi:${env}:${id}`,
+  LastWarpExecutionInputs: (env: WarpChainEnv, id: string, action: number) => `warp-exec-inputs:${env}:${id}:${action}`,
+  RegistryInfo: (env: WarpChainEnv, id: string) => `registry-info:${env}:${id}`,
+  Brand: (env: WarpChainEnv, hash: string) => `brand:${env}:${hash}`,
+  ChainInfo: (env: WarpChainEnv, chain: WarpChain) => `chain:${env}:${chain}`,
+  ChainInfos: (env: WarpChainEnv) => `chains:${env}`,
 }
 
 export type CacheType = 'memory' | 'localStorage'
