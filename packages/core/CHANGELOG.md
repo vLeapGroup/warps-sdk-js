@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.12
+
+### Patch Changes
+
+- 27a5e55: fix multi-env caching
+
 ## 3.0.0-alpha.11
 
 ### Major Changes
