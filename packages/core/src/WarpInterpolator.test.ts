@@ -23,13 +23,6 @@ describe('WarpInterpolator', () => {
   it('interpolates vars and globals together', async () => {
     const config = { ...testConfig, vars: { AGE: 10 }, currentUrl: 'https://anyclient.com?age2=20' }
 
-    const chain = {
-      chainId: 'custom',
-      apiUrl: 'https://devnet-api.multiversx.com',
-      explorerUrl: 'https://devnet-explorer.multiversx.com',
-      blockTime: 1000,
-    }
-
     const warp: Warp = {
       description: 'Wallet: {{USER_WALLET}}, API: {{CHAIN_API}}, Explorer: {{CHAIN_EXPLORER}}, Age: {{AGE}}, Age2: {{AGE2}}',
       vars: { AGE: 'env:AGE', AGE2: 'query:age2' },
@@ -61,7 +54,6 @@ describe('WarpInterpolator', () => {
 
   it('returns unchanged warp if no placeholders present', async () => {
     const config = { ...testConfig, user: { wallet: 'erd1abc' } }
-    const chain = getMainChainInfo(config)
 
     const warp: Warp = {
       description: 'No placeholders here',
