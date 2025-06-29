@@ -23,22 +23,22 @@ export class WarpUtils {
   ): { type: WarpIdType; identifier: string; identifierBase: string } | null {
     const decodedIdentifier = decodeURIComponent(prefixedIdentifier)
 
-    // If the input has no separator and the base part (before query params) has exactly 64 characters, treat it as a hash
-    if (!decodedIdentifier.includes(WarpConstants.IdentifierParamSeparator)) {
-      const identifierBase = decodedIdentifier.split('?')[0]
-      if (identifierBase.length === 64) {
-        return { type: WarpConstants.IdentifierType.Hash as WarpIdType, identifier: decodedIdentifier, identifierBase }
-      }
+    // Handle prefixed identifier (contains separator)
+    if (decodedIdentifier.includes(WarpConstants.IdentifierParamSeparator)) {
+      const [idType, identifier] = decodedIdentifier.split(WarpConstants.IdentifierParamSeparator)
+      const identifierBase = identifier.split('?')[0]
+      return { type: idType as WarpIdType, identifier, identifierBase }
     }
 
-    const normalizedParam = decodedIdentifier.includes(WarpConstants.IdentifierParamSeparator)
-      ? decodedIdentifier
-      : `${WarpConstants.IdentifierType.Alias}${WarpConstants.IdentifierParamSeparator}${decodedIdentifier}`
+    const identifierBase = decodedIdentifier.split('?')[0]
 
-    const [idType, identifier] = normalizedParam.split(WarpConstants.IdentifierParamSeparator)
-    const identifierBase = identifier.split('?')[0]
+    // If exactly 64 characters, treat as hash
+    if (identifierBase.length === 64) {
+      return { type: WarpConstants.IdentifierType.Hash, identifier: decodedIdentifier, identifierBase }
+    }
 
-    return { type: idType as WarpIdType, identifier, identifierBase }
+    // Otherwise treat as alias
+    return { type: WarpConstants.IdentifierType.Alias, identifier: decodedIdentifier, identifierBase }
   }
 
   static getNextInfo(config: WarpInitConfig, warp: Warp, actionIndex: number, results: WarpExecutionResults): WarpExecutionNextInfo | null {

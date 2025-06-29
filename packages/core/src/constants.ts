@@ -1,3 +1,4 @@
+import { WarpIdType } from './types'
 import { InterpolationBag } from './WarpInterpolator'
 
 export const WarpConstants = {
@@ -8,8 +9,8 @@ export const WarpConstants = {
   IdentifierParamSeparator: ':',
 
   IdentifierType: {
-    Alias: 'alias',
-    Hash: 'hash',
+    Alias: 'alias' as WarpIdType,
+    Hash: 'hash' as WarpIdType,
   },
 
   Source: {
