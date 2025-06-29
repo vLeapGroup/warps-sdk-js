@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.13
+
+### Patch Changes
+
+- 1957541: update detection for hashes
+
 ## 3.0.0-alpha.12
 
 ### Patch Changes
