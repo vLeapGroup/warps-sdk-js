@@ -3,7 +3,6 @@ import { WarpBuilder } from './WarpBuilder'
 import { WarpLink } from './WarpLink'
 import { WarpRegistry } from './WarpRegistry'
 
-// Mock dependencies
 jest.mock('./WarpBuilder')
 jest.mock('./WarpRegistry')
 
@@ -268,6 +267,88 @@ describe('detect', () => {
     expect(result).toEqual({
       match: false,
       url: 'invalid-url',
+      warp: null,
+      registryInfo: null,
+      brand: null,
+    })
+  })
+
+  it('detects a 64-character string as a hash', async () => {
+    const hashString = '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+    const link = new WarpLink(Config)
+    const result = await link.detect(hashString)
+
+    expect(result).toEqual({
+      match: true,
+      url: hashString,
+      warp: mockWarp,
+      registryInfo: mockRegistryInfo,
+      brand: mockBrand,
+    })
+  })
+
+  it('detects a prefixed hash identifier', async () => {
+    const link = new WarpLink(Config)
+    const result = await link.detect('hash:abc123def456')
+
+    expect(result).toEqual({
+      match: true,
+      url: 'hash:abc123def456',
+      warp: mockWarp,
+      registryInfo: mockRegistryInfo,
+      brand: mockBrand,
+    })
+  })
+
+  it('detects a direct alias identifier', async () => {
+    const link = new WarpLink(Config)
+    const result = await link.detect('my-warp-alias')
+
+    expect(result).toEqual({
+      match: true,
+      url: 'my-warp-alias',
+      warp: mockWarp,
+      registryInfo: mockRegistryInfo,
+      brand: mockBrand,
+    })
+  })
+
+  it('does not treat short strings as hashes even if numeric', async () => {
+    const shortString = '123456'
+    ;(WarpBuilder as jest.Mock).mockImplementation(() => ({
+      createFromTransactionHash: jest.fn().mockResolvedValue(null),
+    }))
+    ;(WarpRegistry as jest.Mock).mockImplementation(() => ({
+      getInfoByAlias: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
+    }))
+
+    const link = new WarpLink(Config)
+    const result = await link.detect(shortString)
+
+    expect(result).toEqual({
+      match: false,
+      url: shortString,
+      warp: null,
+      registryInfo: null,
+      brand: null,
+    })
+  })
+
+  it('does not treat long strings (>64 chars) as hashes', async () => {
+    const longString = '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12345'
+    ;(WarpBuilder as jest.Mock).mockImplementation(() => ({
+      createFromTransactionHash: jest.fn().mockResolvedValue(null),
+    }))
+    ;(WarpRegistry as jest.Mock).mockImplementation(() => ({
+      getInfoByAlias: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
+    }))
+
+    const link = new WarpLink(Config)
+    const result = await link.detect(longString)
+
+    expect(result).toEqual({
+      match: false,
+      url: longString,
       warp: null,
       registryInfo: null,
       brand: null,

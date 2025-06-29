@@ -1,7 +1,6 @@
 import { WarpChainEnv } from './types/general'
 import { WarpExecutionResults } from './types/results'
 import { Warp, WarpInitConfig } from './types/warp'
-import { WarpInterpolator } from './WarpInterpolator'
 import { WarpUtils } from './WarpUtils'
 
 const testConfig: WarpInitConfig = {
@@ -11,70 +10,6 @@ const testConfig: WarpInitConfig = {
   vars: {},
   user: undefined,
 }
-
-describe('applyVars', () => {
-  it('replaces placeholders with values', () => {
-    const config = { ...testConfig }
-    const warp: Warp = {
-      description: 'You are {{AGE}} years old',
-      vars: {
-        AGE: 10,
-      },
-    } as any
-
-    const actual = WarpInterpolator.applyVars(config, warp)
-
-    expect(actual.description).toBe('You are 10 years old')
-  })
-
-  it('replaces vars with env vars from config', () => {
-    const config = { ...testConfig, vars: { AGE: 10 } }
-    const warp: Warp = {
-      title: 'Age: {{AGE}}',
-      description: 'You are {{AGE}} years old',
-      vars: {
-        AGE: 'env:AGE',
-      },
-    } as any
-
-    const actual = WarpInterpolator.applyVars(config, warp)
-
-    expect(actual.title).toBe('Age: 10')
-    expect(actual.description).toBe('You are 10 years old')
-  })
-
-  it('replaces vars with query params from the current url', () => {
-    const config = { ...testConfig, currentUrl: 'https://anyclient.com?age=10' }
-    const warp: Warp = {
-      title: 'Age: {{AGE}}',
-      description: 'You are {{AGE}} years old',
-      vars: {
-        AGE: 'query:age',
-      },
-    } as any
-
-    const actual = WarpInterpolator.applyVars(config, warp)
-
-    expect(actual.title).toBe('Age: 10')
-    expect(actual.description).toBe('You are 10 years old')
-  })
-
-  it('replaces var with user wallet', () => {
-    const config = { ...testConfig, user: { wallet: 'erd123456789' } }
-    const warp: Warp = {
-      title: 'Age: {{AGE}}',
-      description: 'You are {{AGE}} years old',
-      vars: {
-        AGE: 'user:wallet',
-      },
-    } as any
-
-    const actual = WarpInterpolator.applyVars(config, warp)
-
-    expect(actual.title).toBe('Age: erd123456789')
-    expect(actual.description).toBe('You are erd123456789 years old')
-  })
-})
 
 describe('getNextInfo', () => {
   it('returns info for an alias', () => {
@@ -221,5 +156,139 @@ describe('getNextInfo', () => {
         url: 'https://anyclient.com?warp=stake-distribution&user=bob&amount=250',
       },
     ])
+  })
+})
+
+describe('getInfoFromPrefixedIdentifier', () => {
+  it('returns info for an unprefixed alias (defaults to alias type)', () => {
+    const result = WarpUtils.getInfoFromPrefixedIdentifier('mywarp')
+    expect(result).toEqual({
+      type: 'alias',
+      identifier: 'mywarp',
+      identifierBase: 'mywarp',
+    })
+  })
+
+  it('returns info for a prefixed alias', () => {
+    const result = WarpUtils.getInfoFromPrefixedIdentifier('alias:mywarp')
+    expect(result).toEqual({
+      type: 'alias',
+      identifier: 'mywarp',
+      identifierBase: 'mywarp',
+    })
+  })
+
+  it('returns info for a hash identifier', () => {
+    const result = WarpUtils.getInfoFromPrefixedIdentifier('hash:abc123def456')
+    expect(result).toEqual({
+      type: 'hash',
+      identifier: 'abc123def456',
+      identifierBase: 'abc123def456',
+    })
+  })
+
+  it('returns info for an alias with query parameters', () => {
+    const result = WarpUtils.getInfoFromPrefixedIdentifier('alias:mywarp?param1=value1&param2=value2')
+    expect(result).toEqual({
+      type: 'alias',
+      identifier: 'mywarp?param1=value1&param2=value2',
+      identifierBase: 'mywarp',
+    })
+  })
+
+  it('returns info for a hash with query parameters', () => {
+    const result = WarpUtils.getInfoFromPrefixedIdentifier('hash:abc123?param1=value1')
+    expect(result).toEqual({
+      type: 'hash',
+      identifier: 'abc123?param1=value1',
+      identifierBase: 'abc123',
+    })
+  })
+
+  it('returns info for an unprefixed alias with query parameters', () => {
+    const result = WarpUtils.getInfoFromPrefixedIdentifier('mywarp?param1=value1&param2=value2')
+    expect(result).toEqual({
+      type: 'alias',
+      identifier: 'mywarp?param1=value1&param2=value2',
+      identifierBase: 'mywarp',
+    })
+  })
+
+  it('handles URL encoded identifier with query parameters', () => {
+    const encoded = encodeURIComponent('alias:mywarp?param1=value with spaces&param2=value2')
+    const result = WarpUtils.getInfoFromPrefixedIdentifier(encoded)
+    expect(result).toEqual({
+      type: 'alias',
+      identifier: 'mywarp?param1=value with spaces&param2=value2',
+      identifierBase: 'mywarp',
+    })
+  })
+
+  it('handles empty identifier after prefix', () => {
+    const result = WarpUtils.getInfoFromPrefixedIdentifier('alias:')
+    expect(result).toEqual({
+      type: 'alias',
+      identifier: '',
+      identifierBase: '',
+    })
+  })
+
+  it('handles empty hash identifier', () => {
+    const result = WarpUtils.getInfoFromPrefixedIdentifier('hash:')
+    expect(result).toEqual({
+      type: 'hash',
+      identifier: '',
+      identifierBase: '',
+    })
+  })
+
+  it('treats 64-character strings as hashes', () => {
+    const hashString = '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+    const result = WarpUtils.getInfoFromPrefixedIdentifier(hashString)
+    expect(result).toEqual({
+      type: 'hash',
+      identifier: hashString,
+      identifierBase: hashString,
+    })
+  })
+
+  it('treats 64-character strings with query params as hashes', () => {
+    const hashString = '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef?param=value'
+    const result = WarpUtils.getInfoFromPrefixedIdentifier(hashString)
+    expect(result).toEqual({
+      type: 'hash',
+      identifier: hashString,
+      identifierBase: '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+    })
+  })
+
+  it('does not treat short strings as hashes', () => {
+    const shortString = '123456789'
+    const result = WarpUtils.getInfoFromPrefixedIdentifier(shortString)
+    expect(result).toEqual({
+      type: 'alias',
+      identifier: shortString,
+      identifierBase: shortString,
+    })
+  })
+
+  it('does not treat long strings (>64 chars) as hashes', () => {
+    const longString = '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12345'
+    const result = WarpUtils.getInfoFromPrefixedIdentifier(longString)
+    expect(result).toEqual({
+      type: 'alias',
+      identifier: longString,
+      identifierBase: longString,
+    })
+  })
+
+  it('does not treat 64-character strings with separators as hashes', () => {
+    const stringWithSeparator = '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcd:ef'
+    const result = WarpUtils.getInfoFromPrefixedIdentifier(stringWithSeparator)
+    expect(result).toEqual({
+      type: '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcd',
+      identifier: 'ef',
+      identifierBase: 'ef',
+    })
   })
 })

@@ -22,6 +22,15 @@ export class WarpUtils {
     prefixedIdentifier: string
   ): { type: WarpIdType; identifier: string; identifierBase: string } | null {
     const decodedIdentifier = decodeURIComponent(prefixedIdentifier)
+
+    // If the input has no separator and the base part (before query params) has exactly 64 characters, treat it as a hash
+    if (!decodedIdentifier.includes(WarpConstants.IdentifierParamSeparator)) {
+      const identifierBase = decodedIdentifier.split('?')[0]
+      if (identifierBase.length === 64) {
+        return { type: WarpConstants.IdentifierType.Hash as WarpIdType, identifier: decodedIdentifier, identifierBase }
+      }
+    }
+
     const normalizedParam = decodedIdentifier.includes(WarpConstants.IdentifierParamSeparator)
       ? decodedIdentifier
       : `${WarpConstants.IdentifierType.Alias}${WarpConstants.IdentifierParamSeparator}${decodedIdentifier}`
