@@ -298,7 +298,7 @@ export class WarpRegistry {
     }
   }
 
-  async setChain(chain: WarpChain, info: WarpChainInfo): Promise<Transaction> {
+  async setChain(info: WarpChainInfo): Promise<Transaction> {
     if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
     const sender = Address.newFromBech32(this.config.user.wallet)
 
