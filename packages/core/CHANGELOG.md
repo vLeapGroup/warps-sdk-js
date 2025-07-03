@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.20
+
+### Minor Changes
+
+- 0476e7e: add input defaults
+
 ## 3.0.0-alpha.19
 
 ### Minor Changes
