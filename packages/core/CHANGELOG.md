@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.16
+
+### Patch Changes
+
+- c113bf6: fix registry chain set args
+
 ## 3.0.0-alpha.15
 
 ### Minor Changes
