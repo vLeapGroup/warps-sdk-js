@@ -13,6 +13,7 @@ import { WarpConfig } from './config'
 import { getMainChainInfo, toTypedChainInfo } from './helpers/general'
 import { toTypedConfigInfo, toTypedRegistryInfo } from './helpers/registry'
 import { Brand, WarpCacheConfig, WarpChain, WarpChainInfo, WarpInitConfig, WarpRegistryConfigInfo, WarpRegistryInfo } from './types'
+import { string, u32 } from './utils.codec'
 import { CacheKey, WarpCache } from './WarpCache'
 import { WarpLogger } from './WarpLogger'
 import { WarpUtils } from './WarpUtils'
@@ -295,6 +296,40 @@ export class WarpRegistry {
     } catch (error) {
       return null
     }
+  }
+
+  async setChain(chain: WarpChain, info: WarpChainInfo): Promise<Transaction> {
+    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.user.wallet)
+
+    return this.getFactory().createTransactionForExecute(sender, {
+      contract: this.getRegistryContractAddress(),
+      function: 'setChain',
+      gasLimit: BigInt(5_000_000),
+      arguments: [
+        string(chain),
+        string(info.name),
+        string(info.displayName),
+        string(info.chainId),
+        u32(info.blockTime),
+        string(info.addressHrp),
+        string(info.apiUrl),
+        string(info.explorerUrl),
+        string(info.nativeToken),
+      ],
+    })
+  }
+
+  async removeChain(chain: WarpChain): Promise<Transaction> {
+    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.config.user.wallet)
+
+    return this.getFactory().createTransactionForExecute(sender, {
+      contract: this.getRegistryContractAddress(),
+      function: 'removeChain',
+      gasLimit: BigInt(5_000_000),
+      arguments: [string(chain)],
+    })
   }
 
   async fetchBrand(hash: string, cache?: WarpCacheConfig): Promise<Brand | null> {
