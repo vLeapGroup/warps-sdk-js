@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.17
+
+### Patch Changes
+
+- df98dcd: remove obsolete registry arg
+
 ## 3.0.0-alpha.16
 
 ### Patch Changes
