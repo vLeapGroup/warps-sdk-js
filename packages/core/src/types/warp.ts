@@ -169,7 +169,7 @@ export type BaseWarpActionInputType =
 
 export type WarpActionInputType = string
 
-export type WarpActionInputPosition = 'receiver' | 'value' | 'transfer' | `arg:${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}` | 'data'
+export type WarpActionInputPosition = 'receiver' | 'value' | 'transfer' | `arg:${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}` | 'data' | 'chain'
 
 export type WarpActionInputModifier = 'scale'
 

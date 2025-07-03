@@ -21,6 +21,7 @@ import {
   WarpAction,
   WarpActionInput,
   WarpActionInputType,
+  WarpChain,
   WarpChainInfo,
   WarpCollectAction,
   WarpContractAction,
@@ -36,9 +37,11 @@ import { CacheKey, CacheTtl, WarpCache } from './WarpCache'
 import { WarpContractLoader } from './WarpContractLoader'
 import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
+import { WarpRegistry } from './WarpRegistry'
 import { WarpUtils } from './WarpUtils'
 
 type TxComponents = {
+  chain: WarpChainInfo
   destination: Address
   args: string[]
   value: bigint
@@ -53,6 +56,7 @@ export class WarpActionExecutor {
   private serializer: WarpArgSerializer
   private contractLoader: WarpContractLoader
   private cache: WarpCache
+  private registry: WarpRegistry
 
   constructor(config: WarpInitConfig) {
     if (!config.currentUrl) throw new Error('WarpActionExecutor: currentUrl config not set')
@@ -61,39 +65,34 @@ export class WarpActionExecutor {
     this.serializer = new WarpArgSerializer()
     this.contractLoader = new WarpContractLoader(config)
     this.cache = new WarpCache(config.cache?.type)
+    this.registry = new WarpRegistry(config)
   }
 
   async createTransactionForExecute(warp: Warp, actionIndex: number, inputs: string[]): Promise<Transaction> {
     const action = getWarpActionByIndex(warp, actionIndex) as WarpTransferAction | WarpContractAction
     if (!this.config.user?.wallet) throw new Error('WarpActionExecutor: user address not set')
     const sender = Address.newFromBech32(this.config.user.wallet)
-    const chain = await WarpUtils.getChainInfoForAction(this.config, action)
-    const config = new TransactionsFactoryConfig({ chainID: chain.chainId })
 
-    const { destination, args, value, transfers, data, resolvedInputs } = await this.getTxComponentsFromInputs(
-      chain,
-      action,
-      inputs,
-      sender
-    )
-    const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
+    const components = await this.getTxComponentsFromInputs(action, inputs, sender)
+    const config = new TransactionsFactoryConfig({ chainID: components.chain.chainId })
+    const typedArgs = components.args.map((arg) => this.serializer.stringToTyped(arg))
 
     let tx: Transaction | null = null
     if (action.type === 'transfer') {
       tx = new TransferTransactionsFactory({ config }).createTransactionForTransfer(sender, {
-        receiver: destination,
-        nativeAmount: value,
-        tokenTransfers: transfers,
-        data: data ? new Uint8Array(data) : undefined,
+        receiver: components.destination,
+        nativeAmount: components.value,
+        tokenTransfers: components.transfers,
+        data: components.data ? new Uint8Array(components.data) : undefined,
       })
-    } else if (action.type === 'contract' && destination.isSmartContract()) {
+    } else if (action.type === 'contract' && components.destination.isSmartContract()) {
       tx = new SmartContractTransactionsFactory({ config }).createTransactionForExecute(sender, {
-        contract: destination,
+        contract: components.destination,
         function: 'func' in action ? action.func || '' : '',
         gasLimit: 'gasLimit' in action ? BigInt(action.gasLimit || 0) : 0n,
         arguments: typedArgs,
-        tokenTransfers: transfers,
-        nativeTransferAmount: value,
+        tokenTransfers: components.transfers,
+        nativeTransferAmount: components.value,
       })
     } else if (action.type === 'query') {
       throw new Error('WarpActionExecutor: Invalid action type for createTransactionForExecute; Use executeQuery instead')
@@ -102,7 +101,11 @@ export class WarpActionExecutor {
     }
 
     if (!tx) throw new Error(`WarpActionExecutor: Invalid action type (${action.type})`)
-    this.cache.set(CacheKey.LastWarpExecutionInputs(this.config.env, warp.meta?.hash || '', actionIndex), resolvedInputs, CacheTtl.OneWeek)
+    this.cache.set(
+      CacheKey.LastWarpExecutionInputs(this.config.env, warp.meta?.hash || '', actionIndex),
+      components.resolvedInputs,
+      CacheTtl.OneWeek
+    )
 
     return tx
   }
@@ -137,10 +140,9 @@ export class WarpActionExecutor {
     if (!action) throw new Error('WarpActionExecutor: Action not found')
     if (!action.func) throw new Error('WarpActionExecutor: Function not found')
 
-    const chain = await WarpUtils.getChainInfoForAction(this.config, action)
     const preparedWarp = await WarpInterpolator.apply(this.config, warp)
     const abi = await this.getAbiForAction(action)
-    const { args, resolvedInputs } = await this.getTxComponentsFromInputs(chain, action, inputs)
+    const { chain, args, resolvedInputs } = await this.getTxComponentsFromInputs(action, inputs)
     const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
     const entrypoint = WarpUtils.getChainEntrypoint(chain, this.config.env)
     const contractAddress = Address.newFromBech32(action.address)
@@ -243,11 +245,11 @@ export class WarpActionExecutor {
   }
 
   async getTxComponentsFromInputs(
-    chain: WarpChainInfo,
     action: WarpTransferAction | WarpContractAction | WarpQueryAction,
     inputs: string[],
     sender?: Address
   ): Promise<TxComponents> {
+    const chain = await this.getChainForAction(action, inputs)
     const resolvedInputs = await this.getResolvedInputs(chain, action, inputs)
     const modifiedInputs = this.getModifiedInputs(resolvedInputs)
 
@@ -276,7 +278,23 @@ export class WarpActionExecutor {
     const dataValue = dataCombined ? this.serializer.stringToTyped(dataCombined).valueOf() : null
     const data = dataValue ? Buffer.from(dataValue) : null
 
-    return { destination, args, value, transfers, data, resolvedInputs: modifiedInputs }
+    return { chain, destination, args, value, transfers, data, resolvedInputs: modifiedInputs }
+  }
+
+  private async getChainForAction(action: WarpAction, inputs: string[]): Promise<WarpChainInfo> {
+    const chainPositionIndex = action.inputs?.findIndex((i) => i.position === 'chain')
+
+    if (chainPositionIndex === -1 || chainPositionIndex === undefined) {
+      return await WarpUtils.getChainInfoForAction(this.config, action)
+    }
+
+    const chainInput = inputs[chainPositionIndex] as WarpChain | undefined
+    if (!chainInput) throw new Error('WarpActionExecutor: Chain input not found')
+
+    const chain = await this.registry.getChainInfo(chainInput)
+    if (!chain) throw new Error(`WarpActionExecutor: Chain info not found for ${chainInput}`)
+
+    return chain
   }
 
   public async getResolvedInputs(chain: WarpChainInfo, action: WarpAction, inputArgs: string[]): Promise<ResolvedInput[]> {

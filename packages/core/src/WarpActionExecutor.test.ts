@@ -1,7 +1,6 @@
 import { SmartContractResult, TransactionEvent, TransactionLogs, TransactionOnNetwork } from '@multiversx/sdk-core/out'
 import { bigIntToHex, utf8ToHex } from '@multiversx/sdk-core/out/core/utils.codec'
 import { promises as fs, PathLike } from 'fs'
-import { getMainChainInfo } from './helpers/general'
 import { setupHttpMock } from './test-utils/mockHttp'
 import { Warp, WarpCollectAction, WarpInitConfig as WarpConfig, WarpContractAction, WarpQueryAction, WarpTransferAction } from './types'
 import { WarpActionExecutor } from './WarpActionExecutor'
@@ -416,7 +415,7 @@ describe('WarpActionExecutor', () => {
       inputs: [{ name: 'myvalue', type: 'biguint', position: 'value', source: 'field', modifier: 'scale:18' }],
     }
 
-    const { args, value, transfers } = await subject.getTxComponentsFromInputs(getMainChainInfo(testConfig), action, ['biguint:2'])
+    const { args, value, transfers } = await subject.getTxComponentsFromInputs(action, ['biguint:2'])
 
     expect(value.toString()).toBe('2000000000000000000')
     expect(args).toEqual([])
@@ -439,7 +438,7 @@ describe('WarpActionExecutor', () => {
       inputs: [{ name: 'myvalue', type: 'biguint', position: 'value', source: 'query' }],
     }
 
-    const { value } = await subject.getTxComponentsFromInputs(getMainChainInfo(testConfig), action, [])
+    const { value } = await subject.getTxComponentsFromInputs(action, [])
 
     expect(value.toString()).toBe('2000000000000000000')
   })
@@ -462,7 +461,7 @@ describe('WarpActionExecutor', () => {
       ],
     }
 
-    const { args } = await subject.getTxComponentsFromInputs(getMainChainInfo(testConfig), action, ['string:hello', 'biguint:1'])
+    const { args } = await subject.getTxComponentsFromInputs(action, ['string:hello', 'biguint:1'])
 
     expect(args[0].toString()).toBe('string:hello')
     expect(args[1].toString()).toBe('biguint:1000000000000000000')
@@ -486,7 +485,7 @@ describe('WarpActionExecutor', () => {
       ],
     }
 
-    const { args, value } = await subject.getTxComponentsFromInputs(getMainChainInfo(testConfig), action, ['biguint:2.2', 'biguint:0.1'])
+    const { args, value } = await subject.getTxComponentsFromInputs(action, ['biguint:2.2', 'biguint:0.1'])
 
     expect(value.toString()).toBe('100000000000000000')
     expect(args[0].toString()).toBe('biguint:2200000000000000000')
@@ -510,7 +509,7 @@ describe('WarpActionExecutor', () => {
       ],
     }
 
-    const { args } = await subject.getTxComponentsFromInputs(getMainChainInfo(testConfig), action, ['biguint:1', 'uint8:18'])
+    const { args } = await subject.getTxComponentsFromInputs(action, ['biguint:1', 'uint8:18'])
 
     expect(args[0].toString()).toBe('string:hello')
     expect(args[1].toString()).toBe('biguint:1000000000000000000')
@@ -537,12 +536,7 @@ describe('WarpActionExecutor', () => {
       ],
     }
 
-    const { args, value } = await subject.getTxComponentsFromInputs(getMainChainInfo(testConfig), action, [
-      'biguint:1',
-      'biguint:5',
-      'string:four',
-      'string:one',
-    ])
+    const { args, value } = await subject.getTxComponentsFromInputs(action, ['biguint:1', 'biguint:5', 'string:four', 'string:one'])
 
     expect(args).toEqual(['string:one', 'string:two', 'biguint:500', 'string:four'])
     expect(value.toString()).toEqual('1000000000000000000')
@@ -574,7 +568,7 @@ describe('WarpActionExecutor', () => {
       ],
     }
 
-    const { args, transfers } = await subject.getTxComponentsFromInputs(getMainChainInfo(config), action, [
+    const { args, transfers } = await subject.getTxComponentsFromInputs(action, [
       'esdt:USH-111e09|0|1000',
       'esdt:USH-111e09|0|1.2',
       'esdt:USH-111e09|0|1.5',
@@ -609,7 +603,7 @@ describe('WarpActionExecutor', () => {
       ],
     }
 
-    const { args, transfers } = await subject.getTxComponentsFromInputs(getMainChainInfo(testConfig), action, [
+    const { args, transfers } = await subject.getTxComponentsFromInputs(action, [
       'esdt:EGLD-000000|0|1000',
       'esdt:EGLD-000000|0|1.2',
       'esdt:EGLD-000000|0|1.5',
@@ -637,9 +631,115 @@ describe('WarpActionExecutor', () => {
       inputs: [{ name: 'token', type: 'esdt', position: 'arg:1', source: 'field' }],
     }
 
-    const { args } = await subject.getTxComponentsFromInputs(getMainChainInfo(testConfig), action, ['esdt:USH-111e09|0|1000|2'])
+    const { args } = await subject.getTxComponentsFromInputs(action, ['esdt:USH-111e09|0|1000|2'])
 
     expect(args).toEqual(['esdt:USH-111e09|0|1000|2'])
+  })
+
+  describe('chain position functionality', () => {
+    it('uses chain from input when chain position is specified', async () => {
+      const subject = new WarpActionExecutor(testConfig)
+
+      jest.spyOn(subject['registry'], 'getChainInfo').mockResolvedValue({
+        name: 'mainnet',
+        displayName: 'Mainnet',
+        chainId: '1',
+        blockTime: 6,
+        addressHrp: 'erd',
+        apiUrl: 'https://api.multiversx.com',
+        explorerUrl: 'https://explorer.multiversx.com',
+        nativeToken: 'EGLD',
+      })
+
+      const action: WarpContractAction = {
+        type: 'contract',
+        label: 'test',
+        description: 'test',
+        address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+        func: 'testFunc',
+        args: [],
+        gasLimit: 1000000,
+        inputs: [
+          { name: 'targetChain', type: 'string', position: 'chain', source: 'field' },
+          { name: 'amount', type: 'biguint', position: 'value', source: 'field' },
+        ],
+      }
+
+      const { chain } = await subject.getTxComponentsFromInputs(action, ['mainnet', 'biguint:1000000000000000000'])
+
+      expect(chain.name).toBe('mainnet') // Should use the mocked chain
+      expect(subject['registry'].getChainInfo).toHaveBeenCalledWith('mainnet')
+    })
+
+    it('uses default chain when no chain position is specified', async () => {
+      const subject = new WarpActionExecutor(testConfig)
+
+      const action: WarpContractAction = {
+        type: 'contract',
+        label: 'test',
+        description: 'test',
+        address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+        func: 'testFunc',
+        args: [],
+        gasLimit: 1000000,
+        inputs: [{ name: 'amount', type: 'biguint', position: 'value', source: 'field' }],
+      }
+
+      const { chain } = await subject.getTxComponentsFromInputs(action, ['biguint:1000000000000000000'])
+
+      expect(chain.name).toBe('multiversx') // Default chain name from config
+    })
+
+    it('handles chain position at index 0 correctly (critical bug test)', async () => {
+      const subject = new WarpActionExecutor(testConfig)
+
+      jest.spyOn(subject['registry'], 'getChainInfo').mockResolvedValue({
+        name: 'testnet',
+        displayName: 'Testnet',
+        chainId: 'T',
+        blockTime: 6,
+        addressHrp: 'erd',
+        apiUrl: 'https://testnet-api.multiversx.com',
+        explorerUrl: 'https://testnet-explorer.multiversx.com',
+        nativeToken: 'EGLD',
+      })
+
+      const action: WarpContractAction = {
+        type: 'contract',
+        label: 'test',
+        description: 'test',
+        address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+        func: 'testFunc',
+        args: [],
+        gasLimit: 1000000,
+        inputs: [
+          { name: 'targetChain', type: 'string', position: 'chain', source: 'field' }, // At index 0
+          { name: 'amount', type: 'biguint', position: 'value', source: 'field' },
+        ],
+      }
+
+      const { chain } = await subject.getTxComponentsFromInputs(action, ['testnet', 'biguint:500'])
+
+      expect(chain.name).toBe('testnet')
+      expect(subject['registry'].getChainInfo).toHaveBeenCalledWith('testnet')
+    })
+
+    it('throws error when chain input is not found at specified position', async () => {
+      const subject = new WarpActionExecutor(testConfig)
+
+      const action: WarpContractAction = {
+        type: 'contract',
+        label: 'test',
+        description: 'test',
+        address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+        func: 'testFunc',
+        args: [],
+        gasLimit: 1000000,
+        inputs: [{ name: 'targetChain', type: 'string', position: 'chain', source: 'field' }],
+      }
+
+      await expect(subject.getTxComponentsFromInputs(action, [])).rejects.toThrow('Chain input not found')
+    })
   })
 
   describe('transform results', () => {
