@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.15
+
+### Minor Changes
+
+- f371878: add registry chain management
+
 ## 3.0.0-alpha.14
 
 ### Patch Changes
