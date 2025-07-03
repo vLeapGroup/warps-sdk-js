@@ -305,7 +305,7 @@ export class WarpRegistry {
     return this.getFactory().createTransactionForExecute(sender, {
       contract: this.getRegistryContractAddress(),
       function: 'setChain',
-      gasLimit: BigInt(5_000_000),
+      gasLimit: BigInt(10_000_000),
       arguments: [
         string(info.name),
         string(info.displayName),
@@ -326,7 +326,7 @@ export class WarpRegistry {
     return this.getFactory().createTransactionForExecute(sender, {
       contract: this.getRegistryContractAddress(),
       function: 'removeChain',
-      gasLimit: BigInt(5_000_000),
+      gasLimit: BigInt(10_000_000),
       arguments: [string(chain)],
     })
   }
