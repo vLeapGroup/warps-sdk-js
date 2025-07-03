@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.21
+
+### Minor Changes
+
+- f842245: update protocol version
+
 ## 3.0.0-alpha.20
 
 ### Minor Changes

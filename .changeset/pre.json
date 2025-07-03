@@ -9,6 +9,7 @@
     "@warps/playground": "0.1.0"
   },
   "changesets": [
+    "crazy-candles-post",
     "cuddly-wolves-hang",
     "curly-clubs-take",
     "curly-rockets-carry",
