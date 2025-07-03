@@ -307,7 +307,6 @@ export class WarpRegistry {
       function: 'setChain',
       gasLimit: BigInt(5_000_000),
       arguments: [
-        string(chain),
         string(info.name),
         string(info.displayName),
         string(info.chainId),
