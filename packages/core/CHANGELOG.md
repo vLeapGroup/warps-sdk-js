@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.19
+
+### Minor Changes
+
+- 65baae4: add chain position
+
 ## 3.0.0-alpha.18
 
 ### Patch Changes
