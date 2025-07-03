@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.18
+
+### Patch Changes
+
+- 396f7bb: update gas limits
+
 ## 3.0.0-alpha.17
 
 ### Patch Changes
