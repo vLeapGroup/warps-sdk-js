@@ -847,6 +847,104 @@ describe('WarpActionExecutor', () => {
       httpMock.cleanup()
     })
   })
+
+  describe('default values', () => {
+    it('uses default value when input is not provided', async () => {
+      const subject = new WarpActionExecutor(testConfig)
+
+      const action: WarpContractAction = {
+        type: 'contract',
+        label: 'test',
+        description: 'test',
+        address: 'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqplllst77y4l',
+        func: 'testFunc',
+        args: [],
+        gasLimit: 1000000,
+        inputs: [
+          { name: 'amount', type: 'biguint', position: 'value', source: 'field', default: 1000 },
+          { name: 'message', type: 'string', position: 'data', source: 'field', default: 'hello world' },
+        ],
+      }
+
+      const chain = await subject['getChainForAction'](action, [])
+      const resolvedInputs = await subject.getResolvedInputs(chain, action, [])
+
+      expect(resolvedInputs).toHaveLength(2)
+      expect(resolvedInputs[0].value).toBe('biguint:1000')
+      expect(resolvedInputs[1].value).toBe('string:hello world')
+    })
+
+    it('prioritizes actual input over default value', async () => {
+      const subject = new WarpActionExecutor(testConfig)
+
+      const action: WarpContractAction = {
+        type: 'contract',
+        label: 'test',
+        description: 'test',
+        address: 'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqplllst77y4l',
+        func: 'testFunc',
+        args: [],
+        gasLimit: 1000000,
+        inputs: [{ name: 'amount', type: 'biguint', position: 'value', source: 'field', default: 1000 }],
+      }
+
+      const chain = await subject['getChainForAction'](action, [])
+      const resolvedInputs = await subject.getResolvedInputs(chain, action, ['biguint:2000'])
+
+      expect(resolvedInputs).toHaveLength(1)
+      expect(resolvedInputs[0].value).toBe('biguint:2000') // Should use actual input, not default
+    })
+
+    it('handles multiple input types with defaults', async () => {
+      const subject = new WarpActionExecutor(testConfig)
+
+      const action: WarpContractAction = {
+        type: 'contract',
+        label: 'test',
+        description: 'test',
+        address: 'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqplllst77y4l',
+        func: 'testFunc',
+        args: [],
+        gasLimit: 1000000,
+        inputs: [
+          { name: 'stringField', type: 'string', position: 'arg:1', source: 'field', default: 'defaultString' },
+          { name: 'numberField', type: 'uint64', position: 'arg:2', source: 'field', default: 42 },
+          { name: 'boolField', type: 'bool', position: 'arg:3', source: 'field', default: false },
+        ],
+      }
+
+      const chain = await subject['getChainForAction'](action, [])
+      const resolvedInputs = await subject.getResolvedInputs(chain, action, [])
+
+      expect(resolvedInputs).toHaveLength(3)
+      expect(resolvedInputs[0].value).toBe('string:defaultString')
+      expect(resolvedInputs[1].value).toBe('uint64:42')
+      expect(resolvedInputs[2].value).toBe('bool:false')
+    })
+
+    it('does not use default when no default is specified', async () => {
+      const subject = new WarpActionExecutor(testConfig)
+
+      const action: WarpContractAction = {
+        type: 'contract',
+        label: 'test',
+        description: 'test',
+        address: 'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqplllst77y4l',
+        func: 'testFunc',
+        args: [],
+        gasLimit: 1000000,
+        inputs: [
+          { name: 'amount', type: 'biguint', position: 'value', source: 'field' }, // No default
+        ],
+      }
+
+      const chain = await subject['getChainForAction'](action, [])
+      const resolvedInputs = await subject.getResolvedInputs(chain, action, [])
+
+      expect(resolvedInputs).toHaveLength(1)
+      expect(resolvedInputs[0].value).toBeNull()
+    })
+  })
 })
 
 const loadAbiContents = async (path: PathLike): Promise<any> => {

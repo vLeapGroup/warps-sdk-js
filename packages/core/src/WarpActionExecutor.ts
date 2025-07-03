@@ -314,10 +314,13 @@ export class WarpActionExecutor {
       }
     }
 
-    return argInputs.map((input, index) => ({
-      input,
-      value: toValueByType(input, index),
-    }))
+    return argInputs.map((input, index) => {
+      const value = toValueByType(input, index)
+      return {
+        input,
+        value: value || (input.default !== undefined ? this.serializer.nativeToString(input.type, input.default) : null),
+      }
+    })
   }
 
   public getModifiedInputs(inputs: ResolvedInput[]): ResolvedInput[] {

@@ -188,6 +188,7 @@ export type WarpActionInput = {
   patternDescription?: string
   options?: string[] | { [key: string]: string }
   modifier?: string
+  default?: string | number | boolean
 }
 
 export type ResolvedInput = {
