@@ -43,6 +43,7 @@ export const WarpConfig = {
       if (env === 'testnet') return 'T'
       return '1'
     },
+    NativeToken: 'EGLD',
   },
 
   Registry: {

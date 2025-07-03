@@ -328,6 +328,10 @@
                 {
                     "name": "explorer_url",
                     "type": "bytes"
+                },
+                {
+                    "name": "native_token",
+                    "type": "bytes"
                 }
             ],
             "outputs": []
@@ -500,6 +504,10 @@
                 },
                 {
                     "name": "explorer_url",
+                    "type": "bytes"
+                },
+                {
+                    "name": "native_token",
                     "type": "bytes"
                 }
             ]

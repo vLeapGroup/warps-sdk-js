@@ -9,6 +9,7 @@ export const getMainChainInfo = (config: WarpInitConfig): WarpChainInfo => ({
   addressHrp: WarpConfig.MainChain.AddressHrp,
   apiUrl: WarpConfig.MainChain.ApiUrl(config.env),
   explorerUrl: WarpConfig.MainChain.ExplorerUrl(config.env),
+  nativeToken: WarpConfig.MainChain.NativeToken,
 })
 
 export const getChainExplorerUrl = (chain: WarpChainInfo, path?: string) => chain.explorerUrl + (path ? '/' + path : '')
@@ -30,6 +31,7 @@ export const toTypedChainInfo = (chainInfo: any): WarpChainInfo => ({
   addressHrp: chainInfo.address_hrp.toString(),
   apiUrl: chainInfo.api_url.toString(),
   explorerUrl: chainInfo.explorer_url.toString(),
+  nativeToken: chainInfo.native_token.toString(),
 })
 
 export const shiftBigintBy = (value: bigint | string, decimals: number): bigint => {

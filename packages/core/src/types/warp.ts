@@ -41,6 +41,7 @@ export type WarpChainInfo = {
   addressHrp: string
   apiUrl: string
   explorerUrl: string
+  nativeToken: string
 }
 
 export type WarpIdType = 'hash' | 'alias'
