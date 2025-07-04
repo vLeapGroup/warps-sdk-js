@@ -113,7 +113,7 @@ export class BrandBuilder {
     const schemaUrl = this.config.schema?.brand || WarpConfig.LatestBrandSchemaUrl
     const schemaResponse = await fetch(schemaUrl)
     const schema = await schemaResponse.json()
-    const ajv = new Ajv()
+    const ajv = new Ajv({ strict: false })
     const validate = ajv.compile(schema)
 
     if (!validate(brand)) {
