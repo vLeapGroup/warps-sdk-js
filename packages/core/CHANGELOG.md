@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.22
+
+### Patch Changes
+
+- 1fa32fc: fix chain position from inputs
+
 ## 3.0.0-alpha.21
 
 ### Minor Changes
