@@ -637,6 +637,125 @@ describe('WarpActionExecutor', () => {
     expect(args).toEqual(['esdt:USH-111e09|0|1000|2'])
   })
 
+  it('getTxComponentsFromInputs - converts single native token ESDT transfer to native value', async () => {
+    const subject = new WarpActionExecutor(testConfig)
+
+    const action: WarpContractAction = {
+      type: 'contract',
+      label: 'test',
+      description: 'test',
+      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      func: null,
+      args: [],
+      gasLimit: 1000000,
+      inputs: [{ name: 'nativeTransfer', type: 'esdt', position: 'transfer', source: 'field' }],
+    }
+
+    const { value, transfers } = await subject.getTxComponentsFromInputs(action, ['esdt:EGLD-000000|0|1.5'])
+
+    expect(value.toString()).toBe('1500000000000000000')
+    expect(transfers).toEqual([])
+  })
+
+  it('getTxComponentsFromInputs - does not convert native ESDT when other ESDT tokens present', async () => {
+    const subject = new WarpActionExecutor(testConfig)
+
+    const action: WarpContractAction = {
+      type: 'contract',
+      label: 'test',
+      description: 'test',
+      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      func: null,
+      args: [],
+      gasLimit: 1000000,
+      inputs: [
+        { name: 'tokenArg', type: 'esdt', position: 'arg:1', source: 'field' },
+        { name: 'nativeTransfer', type: 'esdt', position: 'transfer', source: 'field' },
+      ],
+    }
+
+    const { value, transfers } = await subject.getTxComponentsFromInputs(action, ['esdt:USDC-c76f1f|0|1000000', 'esdt:EGLD-000000|0|1.5'])
+
+    expect(value.toString()).toBe('0')
+    expect(transfers.length).toBe(1)
+    expect(transfers[0].token.identifier).toBe('EGLD-000000')
+  })
+
+  it('getTxComponentsFromInputs - converts native ESDT and adds to existing value', async () => {
+    const subject = new WarpActionExecutor(testConfig)
+
+    const action: WarpContractAction = {
+      type: 'contract',
+      label: 'test',
+      description: 'test',
+      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      func: null,
+      args: [],
+      value: '500000000000000000',
+      gasLimit: 1000000,
+      inputs: [{ name: 'nativeTransfer', type: 'esdt', position: 'transfer', source: 'field' }],
+    }
+
+    const { value, transfers } = await subject.getTxComponentsFromInputs(action, ['esdt:EGLD-000000|0|1'])
+
+    expect(value.toString()).toBe('1500000000000000000')
+    expect(transfers).toEqual([])
+  })
+
+  it('getTxComponentsFromInputs - does not convert native ESDT when multiple transfers exist', async () => {
+    const subject = new WarpActionExecutor(testConfig)
+
+    const action: WarpContractAction = {
+      type: 'contract',
+      label: 'test',
+      description: 'test',
+      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      func: null,
+      args: [],
+      gasLimit: 1000000,
+      inputs: [
+        { name: 'nativeTransfer', type: 'esdt', position: 'transfer', source: 'field' },
+        { name: 'tokenTransfer', type: 'esdt', position: 'transfer', source: 'field' },
+      ],
+    }
+
+    const { value, transfers } = await subject.getTxComponentsFromInputs(action, ['esdt:EGLD-000000|0|1.5', 'esdt:USDC-c76f1f|0|1000000'])
+
+    expect(value.toString()).toBe('0')
+    expect(transfers.length).toBe(2)
+    expect(transfers[0].token.identifier).toBe('EGLD-000000')
+    expect(transfers[0].amount.toString()).toBe('1500000000000000000')
+    expect(transfers[1].token.identifier).toBe('USDC-c76f1f')
+    expect(transfers[1].amount.toString()).toBe('1000000')
+  })
+
+  it('getTxComponentsFromInputs - does not convert native ESDT when transfers come from action definition', async () => {
+    const subject = new WarpActionExecutor(testConfig)
+
+    const action: WarpContractAction = {
+      type: 'contract',
+      label: 'test',
+      description: 'test',
+      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      func: null,
+      args: [],
+      gasLimit: 1000000,
+      transfers: [
+        { token: 'EGLD-000000', nonce: 0, amount: '1500000000000000000' },
+        { token: 'USDC-c76f1f', nonce: 0, amount: '1000000' },
+      ],
+    }
+
+    const { value, transfers } = await subject.getTxComponentsFromInputs(action, [])
+
+    expect(value.toString()).toBe('0')
+    expect(transfers.length).toBe(2)
+    expect(transfers[0].token.identifier).toBe('EGLD-000000')
+    expect(transfers[0].amount.toString()).toBe('1500000000000000000')
+    expect(transfers[1].token.identifier).toBe('USDC-c76f1f')
+    expect(transfers[1].amount.toString()).toBe('1000000')
+  })
+
   describe('transform results', () => {
     it('evaluates transform results from collect action', async () => {
       const subject = new WarpActionExecutor(testConfig)

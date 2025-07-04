@@ -262,14 +262,22 @@ export class WarpActionExecutor {
 
     const valueInput = modifiedInputs.find((i) => i.input.position === 'value')?.value || null
     const valueInAction = 'value' in action ? action.value : null
-    const value = BigInt(valueInput?.split(':')[1] || valueInAction || 0)
+    let value = BigInt(valueInput?.split(':')[1] || valueInAction || 0)
 
     const transferInputs = modifiedInputs.filter((i) => i.input.position === 'transfer' && i.value).map((i) => i.value) as string[]
     const transfersInAction = 'transfers' in action ? action.transfers : []
-    const transfers = [
+    let transfers = [
       ...(transfersInAction?.map(this.toTypedTransfer) || []),
       ...(transferInputs?.map((t) => this.serializer.stringToNative(t)[1] as TokenTransfer) || []),
     ]
+
+    const isSingleTransfer = transfers.length === 1 && transferInputs.length === 1 && !transfersInAction?.length
+    const isNativeEsdt = transfers[0]?.token.identifier === `${chain.nativeToken}-000000`
+    const hasNoOtherEsdtInputs = !modifiedInputs.some((i) => i.value && i.input.position !== 'transfer' && i.input.type === 'esdt')
+    if (isSingleTransfer && isNativeEsdt && hasNoOtherEsdtInputs) {
+      value += transfers[0].amount
+      transfers = []
+    }
 
     const dataInput = modifiedInputs.find((i) => i.input.position === 'data')?.value
     const dataInAction = 'data' in action ? action.data || '' : null
