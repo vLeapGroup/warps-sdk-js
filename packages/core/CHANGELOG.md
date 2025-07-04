@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.24
+
+### Patch Changes
+
+- f6ee4e7: update native esdt handling
+
 ## 3.0.0-alpha.23
 
 ### Patch Changes
