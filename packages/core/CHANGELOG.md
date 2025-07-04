@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.23
+
+### Patch Changes
+
+- 53cdfdd: refactor chain determination
+
 ## 3.0.0-alpha.22
 
 ### Patch Changes
