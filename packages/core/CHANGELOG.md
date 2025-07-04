@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.25
+
+### Patch Changes
+
+- b6277da: add vibe esdt to known tokens
+
 ## 3.0.0-alpha.24
 
 ### Patch Changes
