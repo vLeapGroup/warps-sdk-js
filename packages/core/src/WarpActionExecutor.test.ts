@@ -665,7 +665,7 @@ describe('WarpActionExecutor', () => {
         ],
       }
 
-      const { chain } = await subject.getTxComponentsFromInputs(action, ['mainnet', 'biguint:1000000000000000000'])
+      const { chain } = await subject.getTxComponentsFromInputs(action, ['string:mainnet', 'biguint:1000000000000000000'])
 
       expect(chain.name).toBe('mainnet') // Should use the mocked chain
       expect(subject['registry'].getChainInfo).toHaveBeenCalledWith('mainnet')
@@ -718,7 +718,7 @@ describe('WarpActionExecutor', () => {
         ],
       }
 
-      const { chain } = await subject.getTxComponentsFromInputs(action, ['testnet', 'biguint:500'])
+      const { chain } = await subject.getTxComponentsFromInputs(action, ['string:testnet', 'biguint:500'])
 
       expect(chain.name).toBe('testnet')
       expect(subject['registry'].getChainInfo).toHaveBeenCalledWith('testnet')
@@ -866,7 +866,7 @@ describe('WarpActionExecutor', () => {
         ],
       }
 
-      const chain = await subject['getChainForAction'](action, [])
+      const chain = await subject['getChainForActionWithInputs'](action, [])
       const resolvedInputs = await subject.getResolvedInputs(chain, action, [])
 
       expect(resolvedInputs).toHaveLength(2)
@@ -888,7 +888,7 @@ describe('WarpActionExecutor', () => {
         inputs: [{ name: 'amount', type: 'biguint', position: 'value', source: 'field', default: 1000 }],
       }
 
-      const chain = await subject['getChainForAction'](action, [])
+      const chain = await subject['getChainForActionWithInputs'](action, [])
       const resolvedInputs = await subject.getResolvedInputs(chain, action, ['biguint:2000'])
 
       expect(resolvedInputs).toHaveLength(1)
@@ -913,7 +913,7 @@ describe('WarpActionExecutor', () => {
         ],
       }
 
-      const chain = await subject['getChainForAction'](action, [])
+      const chain = await subject['getChainForActionWithInputs'](action, [])
       const resolvedInputs = await subject.getResolvedInputs(chain, action, [])
 
       expect(resolvedInputs).toHaveLength(3)
@@ -938,7 +938,7 @@ describe('WarpActionExecutor', () => {
         ],
       }
 
-      const chain = await subject['getChainForAction'](action, [])
+      const chain = await subject['getChainForActionWithInputs'](action, [])
       const resolvedInputs = await subject.getResolvedInputs(chain, action, [])
 
       expect(resolvedInputs).toHaveLength(1)
