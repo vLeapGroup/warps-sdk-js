@@ -21,7 +21,6 @@ import {
   WarpAction,
   WarpActionInput,
   WarpActionInputType,
-  WarpChain,
   WarpChainInfo,
   WarpCollectAction,
   WarpContractAction,
@@ -249,7 +248,7 @@ export class WarpActionExecutor {
     inputs: string[],
     sender?: Address
   ): Promise<TxComponents> {
-    const chain = await this.getChainForActionWithInputs(action, inputs)
+    const chain = await WarpUtils.getChainInfoForAction(this.config, action, inputs)
     const resolvedInputs = await this.getResolvedInputs(chain, action, inputs)
     const modifiedInputs = this.getModifiedInputs(resolvedInputs)
 
@@ -279,23 +278,6 @@ export class WarpActionExecutor {
     const data = dataValue ? Buffer.from(dataValue) : null
 
     return { chain, destination, args, value, transfers, data, resolvedInputs: modifiedInputs }
-  }
-
-  private async getChainForActionWithInputs(action: WarpAction, inputs: string[]): Promise<WarpChainInfo> {
-    const chainPositionIndex = action.inputs?.findIndex((i) => i.position === 'chain')
-
-    if (chainPositionIndex === -1 || chainPositionIndex === undefined) {
-      return await WarpUtils.getChainInfoForAction(this.config, action)
-    }
-
-    const chainInput = inputs[chainPositionIndex] as WarpChain | undefined
-    if (!chainInput) throw new Error('WarpActionExecutor: Chain input not found')
-
-    const chainInputNative = this.serializer.stringToNative(chainInput)[1] as WarpChain
-    const chain = await this.registry.getChainInfo(chainInputNative)
-    if (!chain) throw new Error(`WarpActionExecutor: Chain info not found for ${chainInputNative}`)
-
-    return chain
   }
 
   public async getResolvedInputs(chain: WarpChainInfo, action: WarpAction, inputArgs: string[]): Promise<ResolvedInput[]> {

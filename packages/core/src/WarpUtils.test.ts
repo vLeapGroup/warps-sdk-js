@@ -1,6 +1,8 @@
+import { WarpContractAction } from './types'
 import { WarpChainEnv } from './types/general'
 import { WarpExecutionResults } from './types/results'
 import { Warp, WarpInitConfig } from './types/warp'
+import { WarpRegistry } from './WarpRegistry'
 import { WarpUtils } from './WarpUtils'
 
 const testConfig: WarpInitConfig = {
@@ -290,5 +292,128 @@ describe('getInfoFromPrefixedIdentifier', () => {
       identifier: 'ef',
       identifierBase: 'ef',
     })
+  })
+})
+
+describe('getChainInfoForAction', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  it('uses chain from input when chain position is specified', async () => {
+    const mockGetChainInfo = jest.fn().mockResolvedValue({
+      name: 'mainnet',
+      displayName: 'Mainnet',
+      chainId: '1',
+      blockTime: 6,
+      addressHrp: 'erd',
+      apiUrl: 'https://api.multiversx.com',
+      explorerUrl: 'https://explorer.multiversx.com',
+      nativeToken: 'EGLD',
+    })
+
+    jest.spyOn(WarpRegistry.prototype, 'getChainInfo').mockImplementation(mockGetChainInfo)
+
+    const action: WarpContractAction = {
+      type: 'contract',
+      label: 'test',
+      description: 'test',
+      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      func: 'testFunc',
+      args: [],
+      gasLimit: 1000000,
+      inputs: [
+        { name: 'targetChain', type: 'string', position: 'chain', source: 'field' },
+        { name: 'amount', type: 'biguint', position: 'value', source: 'field' },
+      ],
+    }
+
+    const chain = await WarpUtils.getChainInfoForAction(testConfig, action, ['string:mainnet', 'biguint:1000000000000000000'])
+
+    expect(chain.name).toBe('mainnet')
+    expect(mockGetChainInfo).toHaveBeenCalledWith('mainnet')
+  })
+
+  it('uses default chain when no chain position is specified', async () => {
+    const action: WarpContractAction = {
+      type: 'contract',
+      label: 'test',
+      description: 'test',
+      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      func: 'testFunc',
+      args: [],
+      gasLimit: 1000000,
+      inputs: [{ name: 'amount', type: 'biguint', position: 'value', source: 'field' }],
+    }
+
+    const chain = await WarpUtils.getChainInfoForAction(testConfig, action, ['biguint:1000000000000000000'])
+
+    expect(chain.name).toBe('multiversx') // Default chain name from config
+  })
+
+  it('handles chain position at index 0 correctly (critical bug test)', async () => {
+    const mockGetChainInfo = jest.fn().mockResolvedValue({
+      name: 'testnet',
+      displayName: 'Testnet',
+      chainId: 'T',
+      blockTime: 6,
+      addressHrp: 'erd',
+      apiUrl: 'https://testnet-api.multiversx.com',
+      explorerUrl: 'https://testnet-explorer.multiversx.com',
+      nativeToken: 'EGLD',
+    })
+
+    jest.spyOn(WarpRegistry.prototype, 'getChainInfo').mockImplementation(mockGetChainInfo)
+
+    const action: WarpContractAction = {
+      type: 'contract',
+      label: 'test',
+      description: 'test',
+      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      func: 'testFunc',
+      args: [],
+      gasLimit: 1000000,
+      inputs: [
+        { name: 'targetChain', type: 'string', position: 'chain', source: 'field' }, // At index 0
+        { name: 'amount', type: 'biguint', position: 'value', source: 'field' },
+      ],
+    }
+
+    const chain = await WarpUtils.getChainInfoForAction(testConfig, action, ['string:testnet', 'biguint:500'])
+
+    expect(chain.name).toBe('testnet')
+    expect(mockGetChainInfo).toHaveBeenCalledWith('testnet')
+  })
+
+  it('throws error when chain input is not found at specified position', async () => {
+    const action: WarpContractAction = {
+      type: 'contract',
+      label: 'test',
+      description: 'test',
+      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      func: 'testFunc',
+      args: [],
+      gasLimit: 1000000,
+      inputs: [{ name: 'targetChain', type: 'string', position: 'chain', source: 'field' }],
+    }
+
+    await expect(WarpUtils.getChainInfoForAction(testConfig, action, [])).rejects.toThrow('Chain input not found')
+  })
+
+  it('uses default chain when no inputs are provided', async () => {
+    const action: WarpContractAction = {
+      type: 'contract',
+      label: 'test',
+      description: 'test',
+      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      func: 'testFunc',
+      args: [],
+      gasLimit: 1000000,
+      inputs: [{ name: 'targetChain', type: 'string', position: 'chain', source: 'field' }],
+    }
+
+    const chain = await WarpUtils.getChainInfoForAction(testConfig, action)
+
+    expect(chain.name).toBe('multiversx') // Default chain name from config
   })
 })
