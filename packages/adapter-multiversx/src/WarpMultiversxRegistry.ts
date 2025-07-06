@@ -1,24 +1,35 @@
 import {
-  AbiRegistry,
-  Address,
-  AddressValue,
-  BytesValue,
-  SmartContractController,
-  SmartContractTransactionsFactory,
-  Transaction,
-  TransactionsFactoryConfig,
-} from '@multiversx/sdk-core/out'
-import { WarpConfig } from '@vleap/warps-core'
-import { WarpMultiversxExecutor } from '../../adapter-multiversx/src/WarpMultiversxExecutor'
-import RegistryAbi from './abis/registry.abi.json'
-import { getMainChainInfo, toTypedChainInfo } from './helpers/general'
-import { toTypedConfigInfo, toTypedRegistryInfo } from './helpers/registry'
-import { Brand, WarpCacheConfig, WarpChain, WarpChainInfo, WarpInitConfig, WarpRegistryConfigInfo, WarpRegistryInfo } from './types'
+    AbiRegistry,
+    Address,
+    AddressValue,
+    BytesValue,
+    SmartContractController,
+    SmartContractTransactionsFactory,
+    Transaction,
+    TransactionsFactoryConfig,
+} from '@multiversx/sdk-core'
+import {
+    Brand,
+    getMainChainInfo,
+    toTypedChainInfo,
+    toTypedConfigInfo,
+    toTypedRegistryInfo,
+    WarpCache,
+    WarpCacheConfig,
+    WarpCacheKey,
+    WarpChain,
+    WarpChainInfo,
+    WarpConfig,
+    WarpInitConfig,
+    WarpLogger,
+    WarpRegistryConfigInfo,
+    WarpRegistryInfo,
+} from '@vleap/warps-core'
+import RegistryAbi from '../../warps/src/abis/registry.abi.json'
+import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 import { string, u32 } from './utils.codec'
-import { CacheKey, WarpCache } from './WarpCache'
-import { WarpLogger } from './WarpLogger'
 
-export class WarpRegistry {
+export class WarpMultiversxRegistry {
   private config: WarpInitConfig
   private cache: WarpCache
 
@@ -155,7 +166,7 @@ export class WarpRegistry {
 
   async getInfoByAlias(alias: string, cache?: WarpCacheConfig): Promise<{ registryInfo: WarpRegistryInfo | null; brand: Brand | null }> {
     try {
-      const cacheKey = CacheKey.RegistryInfo(this.config.env, alias)
+      const cacheKey = WarpCacheKey.RegistryInfo(this.config.env, alias)
       const cached = cache ? this.cache.get<{ registryInfo: WarpRegistryInfo | null; brand: Brand | null }>(cacheKey) : null
       if (cached) {
         WarpLogger.info(`WarpRegistry (getInfoByAlias): RegistryInfo found in cache: ${alias}`)
@@ -182,7 +193,7 @@ export class WarpRegistry {
 
   async getInfoByHash(hash: string, cache?: WarpCacheConfig): Promise<{ registryInfo: WarpRegistryInfo | null; brand: Brand | null }> {
     try {
-      const cacheKey = CacheKey.RegistryInfo(this.config.env, hash)
+      const cacheKey = WarpCacheKey.RegistryInfo(this.config.env, hash)
 
       if (cache) {
         const cached = this.cache.get<{ registryInfo: WarpRegistryInfo | null; brand: Brand | null }>(cacheKey)
@@ -244,7 +255,7 @@ export class WarpRegistry {
   }
 
   async getChainInfos(cache?: WarpCacheConfig): Promise<WarpChainInfo[]> {
-    const cacheListKey = CacheKey.ChainInfos(this.config.env)
+    const cacheListKey = WarpCacheKey.ChainInfos(this.config.env)
     if (cache && cache.ttl) {
       const cachedList = this.cache.get<WarpChainInfo[]>(cacheListKey)
       if (cachedList) {
@@ -263,7 +274,7 @@ export class WarpRegistry {
     if (cache && cache.ttl) {
       // Cache each individually for efficient reuse in getChainInfo
       for (const chainInfo of chainInfos) {
-        this.cache.set(CacheKey.ChainInfo(this.config.env, chainInfo.chain), chainInfo, cache.ttl)
+        this.cache.set(WarpCacheKey.ChainInfo(this.config.env, chainInfo.chain), chainInfo, cache.ttl)
       }
       // Cache the full list
       this.cache.set(cacheListKey, chainInfos, cache.ttl)
@@ -274,7 +285,7 @@ export class WarpRegistry {
 
   async getChainInfo(chain: WarpChain, cache?: WarpCacheConfig): Promise<WarpChainInfo | null> {
     try {
-      const cacheKey = CacheKey.ChainInfo(this.config.env, chain)
+      const cacheKey = WarpCacheKey.ChainInfo(this.config.env, chain)
       const cached = cache ? this.cache.get<WarpChainInfo>(cacheKey) : null
       if (cached) {
         WarpLogger.info(`WarpRegistry (getChainInfo): ChainInfo found in cache: ${chain}`)
@@ -332,7 +343,7 @@ export class WarpRegistry {
   }
 
   async fetchBrand(hash: string, cache?: WarpCacheConfig): Promise<Brand | null> {
-    const cacheKey = CacheKey.Brand(this.config.env, hash)
+    const cacheKey = WarpCacheKey.Brand(this.config.env, hash)
     const cached = cache ? this.cache.get<Brand>(cacheKey) : null
     if (cached) {
       WarpLogger.info(`WarpRegistry (fetchBrand): Brand found in cache: ${hash}`)

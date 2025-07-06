@@ -1,9 +1,9 @@
 {
-  "extends": "tsconfig/base.json",
+  "extends": "../../packages/tsconfig/base.json",
   "compilerOptions": {
     "target": "ES2020",
     "module": "esnext"
   },
-  "include": ["src", "../adapter-multiversx/src/WarpMultiversxContractLoader.ts"],
+  "include": ["src", "../adapter-multiversx/src/WarpMultiversxContractLoader.ts", "../adapter-multiversx/src/WarpMultiversxRegistry.ts"],
   "exclude": ["dist", "build", "node_modules"]
 }

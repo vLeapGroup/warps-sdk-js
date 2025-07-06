@@ -7,7 +7,7 @@ import {
   TransactionOnNetwork,
   TypedValue,
 } from '@multiversx/sdk-core/out'
-import { Warp, WarpActionExecutor, WarpContractAction, WarpInitConfig } from '@vleap/warps'
+import { Warp, WarpContractAction, WarpInitConfig } from '@vleap/warps-core'
 import { promises as fs, PathLike } from 'fs'
 import fetchMock from 'jest-fetch-mock'
 import path from 'path'

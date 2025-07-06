@@ -9,7 +9,7 @@ import { getWarpActionByIndex } from './general'
  * Parses out[N] notation and returns the action index (1-based) or null if invalid.
  * Also handles plain "out" which defaults to action index 1.
  */
-const parseOutActionIndex = (resultPath: string): number | null => {
+export const parseOutActionIndex = (resultPath: string): number | null => {
   if (resultPath === 'out') return 1
   const outIndexMatch = resultPath.match(/^out\[(\d+)\]/)
   if (outIndexMatch) return parseInt(outIndexMatch[1], 10)

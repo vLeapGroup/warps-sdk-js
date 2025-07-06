@@ -1,4 +1,4 @@
-import { TokenTransfer } from '@multiversx/sdk-core/out'
+import { TokenTransfer } from '@multiversx/sdk-core'
 import { WarpConstants } from './constants'
 import { BaseWarpActionInputType, WarpActionInputType, WarpNativeValue } from './types'
 

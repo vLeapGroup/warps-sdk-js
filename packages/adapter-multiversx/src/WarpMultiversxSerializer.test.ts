@@ -29,8 +29,8 @@ import {
   VariadicType,
   VariadicValue,
 } from '@multiversx/sdk-core/out'
-import { esdt } from '@vleap/warps'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
+import { esdt } from './utils.codec'
 
 describe('WarpMultiversxSerializer', () => {
   let serializer: WarpMultiversxSerializer

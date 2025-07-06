@@ -1,16 +1,16 @@
-import { AbiRegistry, TransactionOnNetwork } from '@multiversx/sdk-core/out'
+import { AbiRegistry, TransactionOnNetwork } from '@multiversx/sdk-core'
 import {
-  getMainChainInfo,
-  WarpAbi,
-  WarpCache,
-  WarpCacheConfig,
-  WarpCacheKey,
-  WarpConstants,
-  WarpContractAction,
-  WarpInitConfig,
-  WarpLogger,
-  WarpQueryAction,
-} from '@vleap/warps'
+    getMainChainInfo,
+    WarpAbi,
+    WarpCache,
+    WarpCacheConfig,
+    WarpCacheKey,
+    WarpConstants,
+    WarpContractAction,
+    WarpInitConfig,
+    WarpLogger,
+    WarpQueryAction,
+} from '@vleap/warps-core'
 import { WarpMultiversxContractLoader } from './WarpMultiversxContractLoader'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 

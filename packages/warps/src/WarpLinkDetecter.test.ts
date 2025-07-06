@@ -1,7 +1,6 @@
-import { Brand, Warp, WarpInitConfig, WarpRegistryInfo } from './types'
+import { Brand, Warp, WarpInitConfig, WarpRegistryInfo } from '@vleap/warps-core'
 import { WarpBuilder } from './WarpBuilder'
-import { WarpLink } from './WarpLink'
-import { WarpRegistry } from './WarpRegistry'
+import { WarpLinkDetecter } from './WarpLinkDetecter'
 
 jest.mock('./WarpBuilder')
 jest.mock('./WarpRegistry')
@@ -60,24 +59,6 @@ const mockBrand: Brand = {
   },
 }
 
-describe('build', () => {
-  it('builds a link with hash', () => {
-    const link = new WarpLink(Config).build('hash', '123')
-    expect(link).toBe('https://anyclient.com?warp=hash%3A123')
-  })
-
-  it('builds a link with alias', () => {
-    const link = new WarpLink(Config).build('alias', 'mywarp')
-    expect(link).toBe('https://anyclient.com?warp=mywarp')
-  })
-
-  it('builds a link with alias for super client', () => {
-    Config.clientUrl = 'https://devnet.usewarp.to'
-    const link = new WarpLink(Config).build('alias', 'mywarp')
-    expect(link).toBe('https://devnet.usewarp.to/mywarp')
-  })
-})
-
 describe('detect', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -91,7 +72,7 @@ describe('detect', () => {
   })
 
   it('detects a hash-based warp link', async () => {
-    const link = new WarpLink(Config)
+    const link = new WarpLinkDetecter(Config)
     const result = await link.detect('https://anyclient.com?warp=hash:123')
 
     expect(result).toEqual({
@@ -104,7 +85,7 @@ describe('detect', () => {
   })
 
   it('detects an alias-based warp link', async () => {
-    const link = new WarpLink(Config)
+    const link = new WarpLinkDetecter(Config)
     const result = await link.detect('https://anyclient.com?warp=mywarp')
 
     expect(result).toEqual({
@@ -118,7 +99,7 @@ describe('detect', () => {
 
   it('detects a super client warp link with alias', async () => {
     Config.clientUrl = 'https://devnet.usewarp.to'
-    const link = new WarpLink(Config)
+    const link = new WarpLinkDetecter(Config)
     const result = await link.detect('https://devnet.usewarp.to/mywarp')
 
     expect(result).toEqual({
@@ -132,7 +113,7 @@ describe('detect', () => {
 
   it('detects a super client warp link with hash', async () => {
     Config.clientUrl = 'https://devnet.usewarp.to'
-    const link = new WarpLink(Config)
+    const link = new WarpLinkDetecter(Config)
     const result = await link.detect('https://devnet.usewarp.to/' + encodeURIComponent('hash:123'))
 
     expect(result).toEqual({
@@ -146,7 +127,7 @@ describe('detect', () => {
 
   it('detects a super client warp link with hash when search param is given', async () => {
     Config.clientUrl = 'https://devnet.usewarp.to'
-    const link = new WarpLink(Config)
+    const link = new WarpLinkDetecter(Config)
     const result = await link.detect('https://devnet.usewarp.to/details?warp=' + encodeURIComponent('hash:123'))
 
     expect(result).toEqual({
@@ -159,7 +140,7 @@ describe('detect', () => {
   })
 
   it('detects a warp by alias', async () => {
-    const link = new WarpLink(Config)
+    const link = new WarpLinkDetecter(Config)
     const result = await link.detect('mywarp')
 
     expect(result).toEqual({
@@ -172,7 +153,7 @@ describe('detect', () => {
   })
 
   it('detects a warp by alias with query params', async () => {
-    const link = new WarpLink(Config)
+    const link = new WarpLinkDetecter(Config)
     const result = await link.detect('mywarp?param1=value1&param2=value2')
 
     expect(result).toEqual({
@@ -185,7 +166,7 @@ describe('detect', () => {
   })
 
   it('returns no match for invalid URLs', async () => {
-    const link = new WarpLink(Config)
+    const link = new WarpLinkDetecter(Config)
     const result = await link.detect('https://example.com')
 
     expect(result).toEqual({
@@ -202,7 +183,7 @@ describe('detect', () => {
       getInfoByHash: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
     }))
 
-    const link = new WarpLink(Config)
+    const link = new WarpLinkDetecter(Config)
     const result = await link.detect('https://anyclient.com?warp=hash:123')
 
     expect(result).toEqual({
@@ -219,7 +200,7 @@ describe('detect', () => {
       getInfoByAlias: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
     }))
 
-    const link = new WarpLink(Config)
+    const link = new WarpLinkDetecter(Config)
     const result = await link.detect('https://anyclient.com?warp=mywarp')
 
     expect(result).toEqual({
@@ -237,7 +218,7 @@ describe('detect', () => {
       createFromTransactionHash: jest.fn().mockRejectedValue(mockError),
     }))
 
-    const link = new WarpLink(Config)
+    const link = new WarpLinkDetecter(Config)
     const result = await link.detect('https://anyclient.com?warp=hash:123')
 
     expect(result).toEqual({
@@ -261,7 +242,7 @@ describe('detect', () => {
       getInfoByAlias: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
     }))
 
-    const link = new WarpLink(Config)
+    const link = new WarpLinkDetecter(Config)
     const result = await link.detect('invalid-url')
 
     expect(result).toEqual({
@@ -275,7 +256,7 @@ describe('detect', () => {
 
   it('detects a 64-character string as a hash', async () => {
     const hashString = '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
-    const link = new WarpLink(Config)
+    const link = new WarpLinkDetecter(Config)
     const result = await link.detect(hashString)
 
     expect(result).toEqual({
@@ -288,7 +269,7 @@ describe('detect', () => {
   })
 
   it('detects a prefixed hash identifier', async () => {
-    const link = new WarpLink(Config)
+    const link = new WarpLinkDetecter(Config)
     const result = await link.detect('hash:abc123def456')
 
     expect(result).toEqual({
@@ -301,7 +282,7 @@ describe('detect', () => {
   })
 
   it('detects a direct alias identifier', async () => {
-    const link = new WarpLink(Config)
+    const link = new WarpLinkDetecter(Config)
     const result = await link.detect('my-warp-alias')
 
     expect(result).toEqual({
@@ -322,7 +303,7 @@ describe('detect', () => {
       getInfoByAlias: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
     }))
 
-    const link = new WarpLink(Config)
+    const link = new WarpLinkDetecter(Config)
     const result = await link.detect(shortString)
 
     expect(result).toEqual({
@@ -343,7 +324,7 @@ describe('detect', () => {
       getInfoByAlias: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
     }))
 
-    const link = new WarpLink(Config)
+    const link = new WarpLinkDetecter(Config)
     const result = await link.detect(longString)
 
     expect(result).toEqual({

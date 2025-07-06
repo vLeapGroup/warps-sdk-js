@@ -1,6 +1,8 @@
-import { WarpConfig, WarpConstants, WarpIdType, WarpInitConfig } from '@vleap/warps-core'
 import QRCodeStyling from 'qr-code-styling'
+import { WarpConfig } from './config'
+import { WarpConstants } from './constants'
 import { getWarpInfoFromIdentifier } from './helpers/identifier'
+import { WarpIdType, WarpInitConfig } from './types'
 
 // Example Link (Transaction Hash as ID): https://usewarp.to/to?warp=hash%3A<MYHASH>
 // Example Link (Alias as ID): https://usewarp.to/to?warp=alias%3A<MYALIAS>

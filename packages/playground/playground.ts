@@ -1,6 +1,6 @@
 // Playground for testing warps in isolation
 import { Address, DevnetEntrypoint, TransactionComputer, UserSigner } from '@multiversx/sdk-core'
-import { getWarpActionByIndex, WarpActionExecutor, WarpBuilder, WarpConfig, WarpExecution, WarpInterpolator } from '@vleap/warps'
+import { getWarpActionByIndex, WarpExecution, WarpInterpolator } from '@vleap/warps-core'
 import * as fs from 'fs'
 import * as path from 'path'
 

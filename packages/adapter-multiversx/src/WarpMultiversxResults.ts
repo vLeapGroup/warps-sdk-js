@@ -1,21 +1,21 @@
-import { SmartContractTransactionsOutcomeParser, TransactionEventsParser, TransactionOnNetwork, TypedValue } from '@multiversx/sdk-core/out'
+import { SmartContractTransactionsOutcomeParser, TransactionEventsParser, TransactionOnNetwork, TypedValue } from '@multiversx/sdk-core'
 import {
-  ResolvedInput,
-  Warp,
-  WarpCache,
-  WarpCacheKey,
-  WarpConstants,
-  WarpContractAction,
-  WarpExecution,
-  WarpExecutionResults,
-  WarpInitConfig,
-  WarpInterpolator,
-  applyResultsToMessages,
-  evaluateResultsCommon,
-  getNextInfo,
-  getWarpActionByIndex,
+    ResolvedInput,
+    Warp,
+    WarpCache,
+    WarpCacheKey,
+    WarpConstants,
+    WarpContractAction,
+    WarpExecution,
+    WarpExecutionResults,
+    WarpInitConfig,
+    WarpInterpolator,
+    applyResultsToMessages,
+    evaluateResultsCommon,
+    getNextInfo,
+    getWarpActionByIndex,
+    parseOutActionIndex,
 } from '@vleap/warps-core'
-import { Buffer } from 'buffer'
 import { WarpMultiversxAbi } from './WarpMultiversxAbi'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
 
@@ -169,73 +169,41 @@ export class WarpMultiversxResults {
 
   async extractQueryResults(
     warp: Warp,
-    tx: TransactionOnNetwork,
+    typedValues: TypedValue[],
     actionIndex: number,
     inputs: ResolvedInput[]
-  ): Promise<{ values: any[]; results: WarpExecutionResults; success: boolean; txHash: string }> {
-    const typedValues: TypedValue[] = (tx as any).typedValues || []
-    const values: any[] = typedValues.map((t: TypedValue) => this.serializer.typedToString(t))
-    const valuesRaw: any[] = typedValues.map((t: TypedValue) => this.serializer.typedToNative(t)[1])
+  ): Promise<{ values: any[]; results: WarpExecutionResults }> {
+    const values = typedValues.map((t) => this.serializer.typedToString(t))
+    const valuesRaw = typedValues.map((t) => this.serializer.typedToNative(t)[1])
     let results: WarpExecutionResults = {}
-    if (!warp.results) return { values, results, success: true, txHash: (tx as any).hash || '' }
-    const getOutValue = (path: string): unknown => {
-      if (path.startsWith('out.')) {
-        const idx = parseInt(path.split('.')[1], 10) - 1
-        let value = typedValues[idx]
-        if (value !== undefined && value !== null) {
-          const str = this.serializer.typedToString(value)
-          if (str.startsWith('address:')) return str.slice('address:'.length)
-          if (str.startsWith('hex:')) return str.slice('hex:'.length)
-          const colonIdx = str.indexOf(':')
-          return colonIdx !== -1 ? str.slice(colonIdx + 1) : str
-        }
-        return null
+    if (!warp.results) return { values, results }
+    const getNestedValue = (path: string): unknown => {
+      const indices = path
+        .split('.')
+        .slice(1)
+        .map((i) => parseInt(i) - 1)
+      if (indices.length === 0) return undefined
+      let value: any = valuesRaw[indices[0]]
+      for (let i = 1; i < indices.length; i++) {
+        if (value === undefined || value === null) return undefined
+        value = value[indices[i]]
       }
-      if (path === 'out') {
-        return typedValues.map((t: TypedValue) => {
-          const str = this.serializer.typedToString(t)
-          if (str.startsWith('address:')) return str.slice('address:'.length)
-          if (str.startsWith('hex:')) return str.slice('hex:'.length)
-          const colonIdx = str.indexOf(':')
-          return colonIdx !== -1 ? str.slice(colonIdx + 1) : str
-        })
-      }
-      const outIndexMatch = path.match(/^out\[(\d+)\]/)
-      if (outIndexMatch) {
-        const idx = parseInt(outIndexMatch[1], 10) - 1
-        let value = typedValues[idx]
-        if (value !== undefined && value !== null) {
-          const str = this.serializer.typedToString(value)
-          if (str.startsWith('address:')) return str.slice('address:'.length)
-          if (str.startsWith('hex:')) return str.slice('hex:'.length)
-          const colonIdx = str.indexOf(':')
-          return colonIdx !== -1 ? str.slice(colonIdx + 1) : str
-        }
-        return null
-      }
-      return null
+      return value
     }
     for (const [key, path] of Object.entries(warp.results)) {
-      if (typeof path !== 'string') continue
       if (path.startsWith(WarpConstants.Transform.Prefix)) continue
-      const currentActionIndex = WarpMultiversxResults.parseOutActionIndex(path)
+      const currentActionIndex = parseOutActionIndex(path)
       if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
         results[key] = null
         continue
       }
       if (path.startsWith('out.') || path === 'out' || path.startsWith('out[')) {
-        const value = getOutValue(path)
-        results[key] = value !== undefined ? value : null
+        results[key] = getNestedValue(path) || null
       } else {
         results[key] = path
       }
     }
-    return {
-      values,
-      results: await evaluateResultsCommon(warp, results, actionIndex, inputs),
-      success: true,
-      txHash: (tx as any).hash || '',
-    }
+    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
   }
 
   async extractCollectResults(

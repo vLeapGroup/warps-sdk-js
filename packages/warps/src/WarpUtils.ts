@@ -1,8 +1,8 @@
-import { WarpSerializer } from '@vleap/warps/src/WarpSerializer'
-import { getMainChainInfo } from '../../core/src/helpers/general'
-import { WarpAction, WarpChain, WarpChainInfo, WarpInitConfig } from '../../core/src/types'
-import { CacheTtl } from '../../core/src/WarpCache'
-import { WarpRegistry } from './WarpRegistry'
+import { WarpMultiversxRegistry } from '@vleap/warps-adapter-multiversx'
+import { getMainChainInfo } from '@vleap/warps-core/dist/helpers/general'
+import { CacheTtl } from '@vleap/warps-core/dist/WarpCache'
+import { WarpSerializer } from '@vleap/warps-core/dist/WarpSerializer'
+import { WarpAction, WarpChain, WarpChainInfo, WarpInitConfig } from './types/index'
 
 export class WarpUtils {
   static async getChainInfoForAction(config: WarpInitConfig, action: WarpAction, inputs?: string[]): Promise<WarpChainInfo> {
@@ -10,7 +10,6 @@ export class WarpUtils {
       const chainFromInputs = await this.tryGetChainFromInputs(config, action, inputs)
       if (chainFromInputs) return chainFromInputs
     }
-
     return this.getDefaultChainInfo(config, action)
   }
 
@@ -24,7 +23,7 @@ export class WarpUtils {
     const serializer = new WarpSerializer()
     const chainValue = serializer.stringToNative(chainInput)[1] as WarpChain
 
-    const registry = new WarpRegistry(config)
+    const registry = new WarpMultiversxRegistry(config)
     const chainInfo = await registry.getChainInfo(chainValue)
     if (!chainInfo) throw new Error(`WarpUtils: Chain info not found for ${chainValue}`)
 
@@ -34,7 +33,7 @@ export class WarpUtils {
   private static async getDefaultChainInfo(config: WarpInitConfig, action: WarpAction): Promise<WarpChainInfo> {
     if (!action.chain) return getMainChainInfo(config)
 
-    const registry = new WarpRegistry(config)
+    const registry = new WarpMultiversxRegistry(config)
     const chainInfo = await registry.getChainInfo(action.chain, { ttl: CacheTtl.OneWeek })
     if (!chainInfo) throw new Error(`WarpUtils: Chain info not found for ${action.chain}`)
 
