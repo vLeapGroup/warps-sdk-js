@@ -1,4 +1,4 @@
-import { WarpInitConfig } from './types'
+import { WarpInitConfig } from '@vleap/warps-core'
 import { WarpBuilder } from './WarpBuilder'
 
 const Config: WarpInitConfig = {

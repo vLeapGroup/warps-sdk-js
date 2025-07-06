@@ -1,20 +1,49 @@
 import { SmartContractTransactionsOutcomeParser, TransactionEventsParser, TransactionOnNetwork, TypedValue } from '@multiversx/sdk-core/out'
 import {
-  IChainResults,
   ResolvedInput,
   Warp,
-  WarpActionExecutor,
-  WarpArgSerializer,
   WarpConstants,
   WarpContractAction,
   WarpExecutionResults,
-  WarpLogger,
-  getWarpActionByIndex,
-} from '@vleap/warps'
+  WarpInitConfig,
+  evaluateResultsCommon,
+} from '@vleap/warps-core'
 import { Buffer } from 'buffer'
+import { WarpMultiversxAbi } from './WarpMultiversxAbi'
+import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
 
-export class WarpMultiversxResults implements IChainResults<TransactionOnNetwork> {
-  constructor() {}
+export class WarpMultiversxResults {
+  private readonly abi: WarpMultiversxAbi
+  private readonly serializer: WarpMultiversxSerializer
+
+  constructor(config: WarpInitConfig) {
+    this.abi = new WarpMultiversxAbi(config)
+    this.serializer = new WarpMultiversxSerializer()
+  }
+
+  async getTransactionExecutionResults(warp: Warp, actionIndex: number, tx: TransactionOnNetwork): Promise<WarpExecution> {
+    const preparedWarp = await WarpInterpolator.apply(this.config, warp)
+    const action = getWarpActionByIndex(preparedWarp, actionIndex) as WarpContractAction
+
+    // Restore inputs via cache as transactions are broadcasted and processed asynchronously
+    const inputs: ResolvedInput[] = this.cache.get(WarpCacheKey.WarpExecutable(this.config.env, warp.meta?.hash || '', actionIndex)) ?? []
+
+    const results = await this.extractContractResults(preparedWarp, action, tx, actionIndex, inputs)
+    const next = WarpUtils.getNextInfo(this.config, preparedWarp, actionIndex, results)
+    const messages = this.getPreparedMessages(preparedWarp, results.results)
+
+    return {
+      success: results.success,
+      warp: preparedWarp,
+      action: actionIndex,
+      user: this.config.user?.wallet || null,
+      txHash: results.txHash,
+      next,
+      values: results.values,
+      results: results.results,
+      messages,
+    }
+  }
 
   static parseOutActionIndex(resultPath: string): number | null {
     if (resultPath === 'out') return 1
@@ -29,7 +58,6 @@ export class WarpMultiversxResults implements IChainResults<TransactionOnNetwork
   }
 
   async extractContractResults(
-    executor: WarpActionExecutor,
     warp: Warp,
     action: WarpContractAction,
     tx: TransactionOnNetwork,
@@ -50,16 +78,15 @@ export class WarpMultiversxResults implements IChainResults<TransactionOnNetwork
       }
       return {
         values,
-        results: await this.evaluateResultsCommon(warp, results, actionIndex, inputs),
+        results: await evaluateResultsCommon(warp, results, actionIndex, inputs),
         success: tx.status.isSuccessful(),
         txHash: tx.hash,
       }
     }
-    const abi = await executor.getAbiForAction(action)
+    const abi = await this.abi.getAbiForAction(action)
     const eventParser = new TransactionEventsParser({ abi })
     const outcomeParser = new SmartContractTransactionsOutcomeParser({ abi })
     const outcome = outcomeParser.parseExecute({ transactionOnNetwork: tx, function: action.func || undefined })
-    const serializer = new (require('./MultiversxSerializer').MultiversxSerializer)()
     for (const [resultName, resultPath] of Object.entries(warp.results)) {
       if (typeof resultPath !== 'string') continue
       if (resultPath.startsWith(WarpConstants.Transform.Prefix)) continue
@@ -109,7 +136,7 @@ export class WarpMultiversxResults implements IChainResults<TransactionOnNetwork
         }
         let str = null
         if (outputAtPosition && typeof outputAtPosition === 'object' && typeof outputAtPosition.hasClassOrSuperclass === 'function') {
-          str = serializer.typedToString(outputAtPosition)
+          str = this.serializer.typedToString(outputAtPosition)
         } else if (outputAtPosition != null) {
           str = outputAtPosition.toString()
         }
@@ -129,23 +156,21 @@ export class WarpMultiversxResults implements IChainResults<TransactionOnNetwork
     }
     return {
       values,
-      results: await this.evaluateResultsCommon(warp, results, actionIndex, inputs),
+      results: await evaluateResultsCommon(warp, results, actionIndex, inputs),
       success: tx.status.isSuccessful(),
       txHash: tx.hash,
     }
   }
 
   async extractQueryResults(
-    executor: WarpActionExecutor,
     warp: Warp,
     tx: TransactionOnNetwork,
     actionIndex: number,
     inputs: ResolvedInput[]
   ): Promise<{ values: any[]; results: WarpExecutionResults; success: boolean; txHash: string }> {
     const typedValues: TypedValue[] = (tx as any).typedValues || []
-    const serializer = new (require('./MultiversxSerializer').MultiversxSerializer)()
-    const values: any[] = typedValues.map((t: TypedValue) => serializer.typedToString(t))
-    const valuesRaw: any[] = typedValues.map((t: TypedValue) => serializer.typedToNative(t)[1])
+    const values: any[] = typedValues.map((t: TypedValue) => this.serializer.typedToString(t))
+    const valuesRaw: any[] = typedValues.map((t: TypedValue) => this.serializer.typedToNative(t)[1])
     let results: WarpExecutionResults = {}
     if (!warp.results) return { values, results, success: true, txHash: (tx as any).hash || '' }
     const getOutValue = (path: string): unknown => {
@@ -153,7 +178,7 @@ export class WarpMultiversxResults implements IChainResults<TransactionOnNetwork
         const idx = parseInt(path.split('.')[1], 10) - 1
         let value = typedValues[idx]
         if (value !== undefined && value !== null) {
-          const str = serializer.typedToString(value)
+          const str = this.serializer.typedToString(value)
           if (str.startsWith('address:')) return str.slice('address:'.length)
           if (str.startsWith('hex:')) return str.slice('hex:'.length)
           const colonIdx = str.indexOf(':')
@@ -163,7 +188,7 @@ export class WarpMultiversxResults implements IChainResults<TransactionOnNetwork
       }
       if (path === 'out') {
         return typedValues.map((t: TypedValue) => {
-          const str = serializer.typedToString(t)
+          const str = this.serializer.typedToString(t)
           if (str.startsWith('address:')) return str.slice('address:'.length)
           if (str.startsWith('hex:')) return str.slice('hex:'.length)
           const colonIdx = str.indexOf(':')
@@ -175,7 +200,7 @@ export class WarpMultiversxResults implements IChainResults<TransactionOnNetwork
         const idx = parseInt(outIndexMatch[1], 10) - 1
         let value = typedValues[idx]
         if (value !== undefined && value !== null) {
-          const str = serializer.typedToString(value)
+          const str = this.serializer.typedToString(value)
           if (str.startsWith('address:')) return str.slice('address:'.length)
           if (str.startsWith('hex:')) return str.slice('hex:'.length)
           const colonIdx = str.indexOf(':')
@@ -202,14 +227,13 @@ export class WarpMultiversxResults implements IChainResults<TransactionOnNetwork
     }
     return {
       values,
-      results: await this.evaluateResultsCommon(warp, results, actionIndex, inputs),
+      results: await evaluateResultsCommon(warp, results, actionIndex, inputs),
       success: true,
       txHash: (tx as any).hash || '',
     }
   }
 
   async extractCollectResults(
-    executor: WarpActionExecutor,
     warp: Warp,
     tx: TransactionOnNetwork,
     actionIndex: number,
@@ -240,7 +264,7 @@ export class WarpMultiversxResults implements IChainResults<TransactionOnNetwork
     }
     return {
       values,
-      results: await this.evaluateResultsCommon(warp, results, actionIndex, inputs),
+      results: await evaluateResultsCommon(warp, results, actionIndex, inputs),
       success: true,
       txHash: response.hash || '',
     }
@@ -302,58 +326,12 @@ export class WarpMultiversxResults implements IChainResults<TransactionOnNetwork
         }
       }
     }
-    const finalResults = await this.evaluateResultsCommon(warp, combinedResults, entryActionIndex, inputs)
+    const finalResults = await evaluateResultsCommon(warp, combinedResults, entryActionIndex, inputs)
     const entryExecution = resultsCache.get(entryActionIndex)
     return {
       ...entryExecution,
       action: entryActionIndex,
       results: finalResults,
     }
-  }
-
-  async evaluateResultsCommon(
-    warp: Warp,
-    baseResults: Record<string, any>,
-    actionIndex: number,
-    inputs: ResolvedInput[]
-  ): Promise<Record<string, any>> {
-    if (!warp.results) return baseResults
-    let results: Record<string, any> = { ...baseResults }
-    results = this.evaluateInputResults(results, warp, actionIndex, inputs)
-    results = await this.evaluateTransformResults(warp, results)
-    return results
-  }
-
-  evaluateInputResults(results: Record<string, any>, warp: Warp, actionIndex: number, inputs: ResolvedInput[]): Record<string, any> {
-    const modifiable: Record<string, any> = { ...results }
-    const actionInputs = getWarpActionByIndex(warp, actionIndex)?.inputs || []
-    const serializer = new WarpArgSerializer()
-    for (const [key, value] of Object.entries(modifiable)) {
-      if (typeof value === 'string' && value.startsWith('input.')) {
-        const inputName = value.split('.')[1]
-        const inputIndex = actionInputs.findIndex((i: any) => i.as === inputName || i.name === inputName)
-        const valueAtIndex = inputIndex !== -1 ? inputs[inputIndex]?.value : null
-        modifiable[key] = valueAtIndex ? serializer.stringToNative(valueAtIndex)[1] : null
-      }
-    }
-    return modifiable
-  }
-
-  async evaluateTransformResults(warp: Warp, baseResults: Record<string, any>): Promise<Record<string, any>> {
-    if (!warp.results) return baseResults
-    const modifiable: Record<string, any> = { ...baseResults }
-    const transforms = Object.entries(warp.results)
-      .filter(([, path]) => typeof path === 'string' && path.startsWith(WarpConstants.Transform.Prefix))
-      .map(([key, path]) => ({ key, code: (path as string).substring(WarpConstants.Transform.Prefix.length) }))
-    for (const { key, code } of transforms) {
-      try {
-        const mod = await import('@vleap/warps')
-        modifiable[key] = await mod.runInVm(code, modifiable)
-      } catch (err) {
-        WarpLogger.error(`Transform error for result '${key}':`, err)
-        modifiable[key] = null
-      }
-    }
-    return modifiable
   }
 }

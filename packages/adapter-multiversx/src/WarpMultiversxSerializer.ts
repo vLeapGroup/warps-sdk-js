@@ -41,22 +41,15 @@ import {
   VariadicType,
   VariadicValue,
 } from '@multiversx/sdk-core/out'
-import {
-  BaseWarpActionInputType,
-  IChainSerializer,
-  WarpActionInputType,
-  WarpArgSerializer,
-  WarpConstants,
-  WarpNativeValue,
-} from '@vleap/warps'
+import { BaseWarpActionInputType, WarpActionInputType, WarpConstants, WarpNativeValue, WarpSerializer } from '@vleap/warps-core'
 
 const SplitParamsRegex = new RegExp(`${WarpConstants.ArgParamsSeparator}(.*)`)
 
-export class WarpMultiversxSerializer implements IChainSerializer<TypedValue> {
-  private coreSerializer: WarpArgSerializer
+export class WarpMultiversxSerializer {
+  private coreSerializer: WarpSerializer
 
   constructor() {
-    this.coreSerializer = new WarpArgSerializer()
+    this.coreSerializer = new WarpSerializer()
   }
 
   typedToString(value: TypedValue): string {

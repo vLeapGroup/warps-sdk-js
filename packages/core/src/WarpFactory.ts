@@ -1,8 +1,8 @@
 import { WarpUtils } from '../../warps/src/WarpUtils'
+import { WarpExecutable } from '../dist'
 import { WarpConstants } from './constants'
 import { getWarpActionByIndex, replacePlaceholders, shiftBigintBy } from './helpers/general'
 import { extractCollectResults } from './helpers/results'
-import { findKnownTokenById } from './tokens'
 import {
   ResolvedInput,
   Warp,
@@ -13,25 +13,13 @@ import {
   WarpCollectAction,
   WarpContractAction,
   WarpInitConfig,
-  WarpQueryAction,
   WarpTransferAction,
 } from './types'
 import { WarpExecution } from './types/results'
-import { CacheKey, CacheTtl, WarpCache } from './WarpCache'
+import { CacheTtl, WarpCache, WarpCacheKey } from './WarpCache'
 import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
 import { WarpSerializer } from './WarpSerializer'
-
-export type WarpExecutable = {
-  chain: WarpChainInfo
-  warp: Warp
-  destination: string
-  args: string[]
-  value: bigint
-  transfers: string[]
-  data: string | null
-  resolvedInputs: ResolvedInput[]
-}
 
 export class WarpFactory {
   private config: WarpInitConfig
@@ -68,80 +56,40 @@ export class WarpFactory {
 
     const transferInputs = modifiedInputs.filter((i) => i.input.position === 'transfer' && i.value).map((i) => i.value) as string[]
     const transfersInAction = 'transfers' in action ? action.transfers : []
-    let transfers = [
-      ...(transfersInAction?.map(this.toTypedTransfer) || []),
-      ...(transferInputs?.map((t) => this.serializer.stringToNative(t)[1] as TokenTransfer) || []),
-    ]
+    const transfers = [...(transfersInAction || []), ...(transferInputs || [])]
 
-    const isSingleTransfer = transfers.length === 1 && transferInputs.length === 1 && !transfersInAction?.length
-    const isNativeEsdt = transfers[0]?.token.identifier === `${chain.nativeToken}-000000`
-    const hasNoOtherEsdtInputs = !modifiedInputs.some((i) => i.value && i.input.position !== 'transfer' && i.input.type === 'esdt')
-    if (isSingleTransfer && isNativeEsdt && hasNoOtherEsdtInputs) {
-      value += transfers[0].amount
-      transfers = []
-    }
+    // TODO: extract to multiversx adapter?
+    // const isSingleTransfer = transfers.length === 1 && transferInputs.length === 1 && !transfersInAction?.length
+    // const isNativeEsdt = transfers[0]?.token.identifier === `${chain.nativeToken}-000000`
+    // const hasNoOtherEsdtInputs = !modifiedInputs.some((i) => i.value && i.input.position !== 'transfer' && i.input.type === 'esdt')
+    // if (isSingleTransfer && isNativeEsdt && hasNoOtherEsdtInputs) {
+    //   value += transfers[0].amount
+    //   transfers = []
+    // }
 
     const dataInput = modifiedInputs.find((i) => i.input.position === 'data')?.value
     const dataInAction = 'data' in action ? action.data || '' : null
     const data = dataInput || dataInAction || null
 
-    const executable: WarpExecutable = { warp, chain, destination, args, value, transfers, data, resolvedInputs: modifiedInputs }
+    const executable: WarpExecutable = {
+      warp,
+      chain,
+      action: actionIndex,
+      destination,
+      args,
+      value,
+      transfers,
+      data,
+      resolvedInputs: modifiedInputs,
+    }
 
     this.cache.set(
-      CacheKey.WarpExecutable(this.config.env, warp.meta?.hash || '', actionIndex),
+      WarpCacheKey.WarpExecutable(this.config.env, warp.meta?.hash || '', actionIndex),
       executable.resolvedInputs,
       CacheTtl.OneWeek
     )
 
     return executable
-  }
-
-  async getTransactionExecutionResults<T>(warp: Warp, actionIndex: number, tx: T): Promise<WarpExecution> {
-    const preparedWarp = await WarpInterpolator.apply(this.config, warp)
-    const action = getWarpActionByIndex(preparedWarp, actionIndex) as WarpContractAction
-
-    // Restore inputs via cache as transactions are broadcasted and processed asynchronously
-    const inputs: ResolvedInput[] = this.cache.get(CacheKey.WarpExecutable(this.config.env, warp.meta?.hash || '', actionIndex)) ?? []
-
-    const results = await this.adapter.results().extractContractResults(this, preparedWarp, action, tx, actionIndex, inputs)
-    const next = WarpUtils.getNextInfo(this.config, preparedWarp, actionIndex, results)
-    const messages = this.getPreparedMessages(preparedWarp, results.results)
-
-    return {
-      success: results.success,
-      warp: preparedWarp,
-      action: actionIndex,
-      user: this.config.user?.wallet || null,
-      txHash: results.txHash,
-      next,
-      values: results.values,
-      results: results.results,
-      messages,
-    }
-  }
-
-  async executeQuery(warp: Warp, actionIndex: number, inputs: string[]): Promise<WarpExecution> {
-    const action = getWarpActionByIndex(warp, actionIndex) as WarpQueryAction | null
-    if (!action) throw new Error('WarpActionExecutor: Action not found')
-    if (!action.func) throw new Error('WarpActionExecutor: Function not found')
-
-    const components = await this.createExecutable(warp, actionIndex, inputs)
-    const tx = await this.adapter.factory().executeQuery(components)
-    const preparedWarp = await WarpInterpolator.apply(this.config, warp)
-    const results = await this.adapter.results().extractQueryResults(this, preparedWarp, tx, actionIndex, components.resolvedInputs)
-    const next = WarpUtils.getNextInfo(this.config, preparedWarp, actionIndex, results)
-
-    return {
-      success: results.success,
-      warp: preparedWarp,
-      action: actionIndex,
-      user: this.config.user?.wallet || null,
-      txHash: null,
-      next,
-      values: results.values,
-      results,
-      messages: this.getPreparedMessages(preparedWarp, results),
-    }
   }
 
   async executeCollect(warp: Warp, actionIndex: number, inputs: string[], extra?: Record<string, any>): Promise<WarpExecution> {
@@ -159,8 +107,9 @@ export class WarpFactory {
       if (resolvedInput.input.type === 'biguint') {
         return (value as bigint).toString() // json-stringify doesn't support bigint
       } else if (resolvedInput.input.type === 'esdt') {
-        const casted = value as TokenTransfer
-        return { token: casted.token.identifier, nonce: casted.token.nonce.toString(), amount: casted.amount.toString() }
+        return {
+          /* TODO: cast to native transferable */
+        }
       } else {
         return value
       }
@@ -277,23 +226,24 @@ export class WarpFactory {
   public async preprocessInput(chain: WarpChainInfo, input: string): Promise<string> {
     try {
       const [type, value] = input.split(WarpConstants.ArgParamsSeparator, 2) as [WarpActionInputType, string]
-      if (type === 'esdt') {
-        const [tokenId, nonce, amount, existingDecimals] = value.split(WarpConstants.ArgCompositeSeparator)
-        if (existingDecimals) return input
-        const token = new Token({ identifier: tokenId, nonce: BigInt(nonce) })
-        const isFungible = new TokenComputer().isFungible(token)
-        if (!isFungible) return input // TODO: handle non-fungible tokens like meta-esdts
-        const knownToken = findKnownTokenById(tokenId)
-        let decimals = knownToken?.decimals
-        if (!decimals) {
-          const definitionRes = await fetch(`${chain.apiUrl}/tokens/${tokenId}`) // TODO: use chainApi directly; currently causes circular reference for whatever reason
-          const definition = await definitionRes.json()
-          decimals = definition.decimals
-        }
-        if (!decimals) throw new Error(`WarpActionExecutor: Decimals not found for token ${tokenId}`)
-        const processed = new TokenTransfer({ token, amount: shiftBigintBy(amount, decimals) })
-        return this.serializer.nativeToString(type, processed) + WarpConstants.ArgCompositeSeparator + decimals
-      }
+      // TODO
+      //   if (type === 'esdt') {
+      //     const [tokenId, nonce, amount, existingDecimals] = value.split(WarpConstants.ArgCompositeSeparator)
+      //     if (existingDecimals) return input
+      //     const token = new Token({ identifier: tokenId, nonce: BigInt(nonce) })
+      //     const isFungible = new TokenComputer().isFungible(token)
+      //     if (!isFungible) return input // TODO: handle non-fungible tokens like meta-esdts
+      //     const knownToken = findKnownTokenById(tokenId)
+      //     let decimals = knownToken?.decimals
+      //     if (!decimals) {
+      //       const definitionRes = await fetch(`${chain.apiUrl}/tokens/${tokenId}`) // TODO: use chainApi directly; currently causes circular reference for whatever reason
+      //       const definition = await definitionRes.json()
+      //       decimals = definition.decimals
+      //     }
+      //     if (!decimals) throw new Error(`WarpActionExecutor: Decimals not found for token ${tokenId}`)
+      //     const processed = new TokenTransfer({ token, amount: shiftBigintBy(amount, decimals) })
+      //     return this.serializer.nativeToString(type, processed) + WarpConstants.ArgCompositeSeparator + decimals
+      //   }
       return input
     } catch (e) {
       return input

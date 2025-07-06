@@ -1,10 +1,18 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
+import {
+  getLatestProtocolIdentifier,
+  getMainChainInfo,
+  toPreviewText,
+  Warp,
+  WarpAction,
+  WarpCache,
+  WarpCacheConfig,
+  WarpCacheKey,
+  WarpInitConfig,
+  WarpLogger,
+  WarpValidator,
+} from '@vleap/warps-core'
 import { WarpMultiversxExecutor } from '../../adapter-multiversx/src/WarpMultiversxExecutor'
-import { getLatestProtocolIdentifier, getMainChainInfo, toPreviewText } from './helpers/general'
-import { Warp, WarpAction, WarpCacheConfig, WarpInitConfig } from './types'
-import { CacheKey, WarpCache } from './WarpCache'
-import { WarpLogger } from './WarpLogger'
-import { WarpValidator } from './WarpValidator'
 
 export class WarpBuilder {
   private config: WarpInitConfig
@@ -66,7 +74,7 @@ export class WarpBuilder {
   }
 
   async createFromTransactionHash(hash: string, cache?: WarpCacheConfig): Promise<Warp | null> {
-    const cacheKey = CacheKey.Warp(this.config.env, hash)
+    const cacheKey = WarpCacheKey.Warp(this.config.env, hash)
 
     if (cache) {
       const cached = this.cache.get<Warp>(cacheKey)

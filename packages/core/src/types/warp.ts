@@ -87,7 +87,7 @@ export type WarpTransferAction = {
   address?: string
   data?: string
   value?: string
-  transfers?: WarpContractActionTransfer[]
+  transfers?: string[]
   inputs?: WarpActionInput[]
   next?: string
 }
@@ -102,16 +102,10 @@ export type WarpContractAction = {
   args?: string[]
   value?: string
   gasLimit: number
-  transfers?: WarpContractActionTransfer[]
+  transfers?: string[]
   abi?: string
   inputs?: WarpActionInput[]
   next?: string
-}
-
-export type WarpContractActionTransfer = {
-  token: string
-  nonce?: number
-  amount?: string
 }
 
 export type WarpQueryAction = {
@@ -207,4 +201,16 @@ export type WarpContract = {
 export type WarpContractVerification = {
   codeHash: string
   abi: object
+}
+
+export type WarpExecutable = {
+  chain: WarpChainInfo
+  warp: Warp
+  action: number
+  destination: string
+  args: string[]
+  value: bigint
+  transfers: string[]
+  data: string | null
+  resolvedInputs: ResolvedInput[]
 }
