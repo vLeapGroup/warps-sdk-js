@@ -1,7 +1,7 @@
+import { WarpUtils } from '../../warps/src/WarpUtils'
 import { WarpConstants } from './constants'
 import { getMainChainInfo } from './helpers/general'
 import { Warp, WarpAction, WarpChainInfo, WarpInitConfig } from './types'
-import { WarpUtils } from './WarpUtils'
 
 export type InterpolationBag = {
   config: WarpInitConfig

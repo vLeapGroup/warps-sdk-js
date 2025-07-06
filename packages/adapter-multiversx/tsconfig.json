@@ -4,6 +4,6 @@
     "target": "ES2020",
     "module": "esnext"
   },
-  "include": ["src", "../warps/src/WarpUtils.test.ts", "../warps/src/WarpUtils.ts"],
+  "include": ["src"],
   "exclude": ["dist", "build", "node_modules"]
 }

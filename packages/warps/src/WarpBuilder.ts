@@ -1,9 +1,9 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
+import { WarpMultiversxExecutor } from '../../adapter-multiversx/src/WarpMultiversxExecutor'
 import { getLatestProtocolIdentifier, getMainChainInfo, toPreviewText } from './helpers/general'
 import { Warp, WarpAction, WarpCacheConfig, WarpInitConfig } from './types'
 import { CacheKey, WarpCache } from './WarpCache'
 import { WarpLogger } from './WarpLogger'
-import { WarpUtils } from './WarpUtils'
 import { WarpValidator } from './WarpValidator'
 
 export class WarpBuilder {
@@ -77,7 +77,7 @@ export class WarpBuilder {
     }
 
     const chainInfo = getMainChainInfo(this.config)
-    const chainEntry = WarpUtils.getChainEntrypoint(chainInfo, this.config.env)
+    const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(chainInfo, this.config.env)
     const chainProvider = chainEntry.createNetworkProvider()
 
     try {

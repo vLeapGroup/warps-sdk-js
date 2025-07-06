@@ -1,8 +1,8 @@
 import { WarpConstants } from '../constants'
 import { ResolvedInput, Warp } from '../types'
 import { WarpExecutionResults } from '../types/results'
+import { WarpArgSerializer } from '../WarpArgSerializer'
 import { WarpLogger } from '../WarpLogger'
-import { WarpSerializer } from '../WarpSerializer'
 import { getWarpActionByIndex } from './general'
 
 /**
@@ -139,7 +139,7 @@ const evaluateInputResults = (
 ): WarpExecutionResults => {
   const modifiable = { ...results }
   const actionInputs = getWarpActionByIndex(warp, actionIndex)?.inputs || []
-  const serializer = new WarpSerializer()
+  const serializer = new WarpArgSerializer()
   for (const [key, value] of Object.entries(modifiable)) {
     if (typeof value === 'string' && value.startsWith('input.')) {
       const inputName = value.split('.')[1]

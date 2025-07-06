@@ -1,7 +1,7 @@
 import { createMockAdapter } from '../test-utils/mockAdapter'
 import { setupHttpMock } from '../test-utils/mockHttp'
 import { Warp, WarpInitConfig } from '../types'
-import { WarpFactory } from '../WarpFactory'
+import { WarpActionExecutor } from '../WarpActionExecutor'
 import { extractCollectResults } from './results'
 
 const testConfig: WarpInitConfig = {
@@ -215,7 +215,7 @@ describe('Result Helpers', () => {
 
   describe('resolveWarpResultsRecursively', () => {
     it('properly resolves results with out[N] references', async () => {
-      const subject = new WarpFactory(createMockAdapter(testConfig))
+      const subject = new WarpActionExecutor(createMockAdapter(testConfig))
       const httpMock = setupHttpMock()
 
       // First action returns user info
@@ -279,7 +279,7 @@ describe('Result Helpers', () => {
     })
 
     it('executes a warp with dependencies and transforms', async () => {
-      const subject = new WarpFactory(createMockAdapter(testConfig))
+      const subject = new WarpActionExecutor(createMockAdapter(testConfig))
       const httpMock = setupHttpMock()
 
       // First action returns user info

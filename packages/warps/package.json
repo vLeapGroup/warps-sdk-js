@@ -1,6 +1,6 @@
 {
-  "name": "@vleap/warps-core",
-  "version": "0.1.0",
+  "name": "@vleap/warps",
+  "version": "3.0.0-alpha.25",
   "description": "",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -17,9 +17,6 @@
   "files": [
     "dist"
   ],
-  "peerDependencies": {
-    "vm2": "^3.9.17"
-  },
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "jest": "^30.0.0",
@@ -27,14 +24,13 @@
     "jest-fetch-mock": "^3.0.3",
     "ts-jest": "^29.4.0",
     "tsup": "^8.5.0",
-    "typescript": "^5.8.3",
-    "vm2": "^3.9.19"
+    "typescript": "^5.8.3"
   },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
-    "ajv": "^8.17.1",
-    "qr-code-styling": "^1.9.2"
+    "@vleap/warps-core": "^0.1.0",
+    "@vleap/warps-adapter-multiversx": "^0.1.0"
   }
 }

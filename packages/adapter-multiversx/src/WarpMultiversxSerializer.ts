@@ -26,10 +26,8 @@ import {
   StringValue,
   Struct,
   StructType,
-  Token,
   TokenIdentifierType,
   TokenIdentifierValue,
-  TokenTransfer,
   Type,
   TypedValue,
   U16Type,
@@ -43,19 +41,22 @@ import {
   VariadicType,
   VariadicValue,
 } from '@multiversx/sdk-core/out'
-import { WarpConstants } from './constants'
-import { BaseWarpActionInputType, WarpActionInputType } from './types'
-
-export type WarpNativeValue = string | number | bigint | boolean | null | TokenTransfer | WarpNativeValue[]
+import {
+  BaseWarpActionInputType,
+  IChainSerializer,
+  WarpActionInputType,
+  WarpArgSerializer,
+  WarpConstants,
+  WarpNativeValue,
+} from '@vleap/warps'
 
 const SplitParamsRegex = new RegExp(`${WarpConstants.ArgParamsSeparator}(.*)`)
 
-export class WarpArgSerializer {
-  nativeToString(type: WarpActionInputType, value: WarpNativeValue): string {
-    if (type === 'esdt' && value instanceof TokenTransfer) {
-      return `esdt:${value.token.identifier}|${value.token.nonce.toString()}|${value.amount.toString()}`
-    }
-    return `${type}:${value?.toString() ?? ''}`
+export class WarpMultiversxSerializer implements IChainSerializer<TypedValue> {
+  private coreSerializer: WarpArgSerializer
+
+  constructor() {
+    this.coreSerializer = new WarpArgSerializer()
   }
 
   typedToString(value: TypedValue): string {
@@ -116,11 +117,11 @@ export class WarpArgSerializer {
 
   typedToNative(value: TypedValue): [WarpActionInputType, WarpNativeValue] {
     const stringValue = this.typedToString(value)
-    return this.stringToNative(stringValue)
+    return this.coreSerializer.stringToNative(stringValue)
   }
 
   nativeToTyped(type: WarpActionInputType, value: WarpNativeValue): TypedValue {
-    const stringValue = this.nativeToString(type, value)
+    const stringValue = this.coreSerializer.nativeToString(type, value)
     return this.stringToTyped(stringValue)
   }
 
@@ -149,54 +150,6 @@ export class WarpArgSerializer {
         new FieldDefinition('amount', '', new BigUIntType()),
       ])
     throw new Error(`WarpArgSerializer (nativeToType): Unsupported input type: ${type}`)
-  }
-
-  stringToNative(value: string): [WarpActionInputType, WarpNativeValue] {
-    const parts = value.split(WarpConstants.ArgParamsSeparator)
-    const baseType = parts[0]
-    const val = parts.slice(1).join(WarpConstants.ArgParamsSeparator)
-
-    if (baseType === 'null') {
-      return [baseType, null]
-    }
-    if (baseType === 'option') {
-      const [baseType, baseValue] = val.split(WarpConstants.ArgParamsSeparator) as [WarpActionInputType, WarpNativeValue]
-      return [`option:${baseType}`, baseValue || null]
-    } else if (baseType === 'optional') {
-      const [baseType, baseValue] = val.split(WarpConstants.ArgParamsSeparator) as [WarpActionInputType, WarpNativeValue]
-      return [`optional:${baseType}`, baseValue || null]
-    } else if (baseType === 'list') {
-      const listParts = val.split(WarpConstants.ArgParamsSeparator) as [WarpActionInputType, WarpNativeValue]
-      const baseType = listParts.slice(0, -1).join(WarpConstants.ArgParamsSeparator)
-      const valuesRaw = listParts[listParts.length - 1]
-      const valuesStrings = valuesRaw ? (valuesRaw as string).split(',') : []
-      const values = valuesStrings.map((v) => this.stringToNative(`${baseType}:${v}`)[1])
-      return [`list:${baseType}`, values]
-    } else if (baseType === 'variadic') {
-      const variadicParts = (val as string).split(WarpConstants.ArgParamsSeparator) as [WarpActionInputType, WarpNativeValue]
-      const baseType = variadicParts.slice(0, -1).join(WarpConstants.ArgParamsSeparator)
-      const valuesRaw = variadicParts[variadicParts.length - 1]
-      const valuesStrings = valuesRaw ? (valuesRaw as string).split(',') : []
-      const values = valuesStrings.map((v) => this.stringToNative(`${baseType}:${v}`)[1])
-      return [`variadic:${baseType}`, values]
-    } else if (baseType.startsWith('composite')) {
-      const rawTypes = baseType.match(/\(([^)]+)\)/)?.[1]?.split(WarpConstants.ArgCompositeSeparator) as BaseWarpActionInputType[]
-      const valuesStrings = val.split(WarpConstants.ArgCompositeSeparator)
-      const values = valuesStrings.map((val, index) => this.stringToNative(`${rawTypes[index]}:${val}`)[1])
-      return [baseType, values]
-    } else if (baseType === 'string') return [baseType, val]
-    else if (baseType === 'uint8' || baseType === 'uint16' || baseType === 'uint32') return [baseType, Number(val)]
-    else if (baseType === 'uint64' || baseType === 'biguint') return [baseType, BigInt((val as string) || 0)]
-    else if (baseType === 'bool') return [baseType, val === 'true']
-    else if (baseType === 'address') return [baseType, val]
-    else if (baseType === 'token') return [baseType, val]
-    else if (baseType === 'hex') return [baseType, val]
-    else if (baseType === 'codemeta') return [baseType, val]
-    else if (baseType === 'esdt') {
-      const [identifier, nonce, amount] = (val as string).split(WarpConstants.ArgCompositeSeparator)
-      return [baseType, new TokenTransfer({ token: new Token({ identifier, nonce: BigInt(nonce) }), amount: BigInt(amount) })]
-    }
-    throw new Error(`WarpArgSerializer (stringToNative): Unsupported input type: ${baseType}`)
   }
 
   stringToTyped(value: string): TypedValue {

@@ -1,0 +1,77 @@
+(node:26262) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+FAIL packages/core/src/WarpActionExecutor.test.ts
+  WarpActionExecutor
+    ✓ createTransactionForExecute - creates a native transfer with message (2 ms)
+    ✓ createTransactionForExecute - creates a native transfer with message from input (1 ms)
+    ✓ createTransactionForExecute - creates a native transfer field-based receiver
+    ✓ createTransactionForExecute - creates a native transfer with esdt from field (85 ms)
+    ✓ createTransactionForExecute - creates a contract call with esdt transfer from field (43 ms)
+    ✓ createTransactionForExecute - creates a contract call with scaled value from field
+    ✓ createTransactionForExecute - creates a contract call with modified values from url (1 ms)
+    ✕ getTransactionExecutionResults - gets the results and messages from the transaction (3 ms)
+    ✕ executeQuery - gets the results and messages from the query (1 ms)
+    ✓ executeCollect - creates correct input payload structure (2 ms)
+    ✓ createExecutable - gets the value from the field
+    ✓ createExecutable - gets the value from the url
+    ✓ createExecutable - scales an arg by fixed amount
+    ✓ createExecutable - scales a inputs with decimals
+    ✓ createExecutable - scales a value by another input field (1 ms)
+    ✓ createExecutable - sorts the args by position index
+    ✓ createExecutable - resolves esdt decimal places from network when no provided
+    ✓ createExecutable - resolves esdt decimal places from known tokens when no provided (1 ms)
+    ✓ createExecutable - does not resolve esdt decimal places when decimal is provided
+    ✓ createExecutable - converts single native token ESDT transfer to native value
+    ✓ createExecutable - does not convert native ESDT when other ESDT tokens present
+    ✓ createExecutable - converts native ESDT and adds to existing value
+    ✓ createExecutable - does not convert native ESDT when multiple transfers exist (1 ms)
+    ✓ createExecutable - does not convert native ESDT when transfers come from action definition
+    transform results
+      ✓ evaluates transform results from collect action (13 ms)
+      ✓ evaluates multiple transform results that depend on each other (2 ms)
+      ✓ handles transform errors gracefully (1 ms)
+    default values
+      ✓ uses default value when input is not provided
+      ✓ prioritizes actual input over default value
+      ✓ handles multiple input types with defaults
+      ✓ does not use default when no default is specified
+
+  ● WarpActionExecutor › getTransactionExecutionResults - gets the results and messages from the transaction
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "ABC-123456"
+    Received: undefined
+
+      245 |     const actual = await subject.getTransactionExecutionResults(warp, 1, transactionOnNetwork)
+      246 |
+    > 247 |     expect(actual.results.FIRST_EVENT).toBe('ABC-123456')
+          |                                        ^
+      248 |     expect(actual.results.SECOND_EVENT).toBe('DEF-123456')
+      249 |     expect(actual.results.THIRD_EVENT).toBe('1209600')
+      250 |     expect(actual.results.FOURTH_EVENT).toBeNull()
+
+      at Object.<anonymous> (packages/core/src/WarpActionExecutor.test.ts:247:40)
+
+  ● WarpActionExecutor › executeQuery - gets the results and messages from the query
+
+    expect(received).toEqual(expected) // deep equality
+
+    Expected: "erd1tt8fvp7m6u0e0sfxnlcc6eyk28mtaq50gdd7ryqdxrx544hdl3tsqqk9uw"
+    Received: undefined
+
+      324 |     const actual = await subject.executeQuery(warp, 1, ['address:erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8'])
+      325 |
+    > 326 |     expect(actual.results.FIRST_ADDRESS).toEqual('erd1tt8fvp7m6u0e0sfxnlcc6eyk28mtaq50gdd7ryqdxrx544hdl3tsqqk9uw')
+          |                                          ^
+      327 |     expect(actual.results.FIRST_VALUE).toEqual('706565726d6568712c362e362c')
+      328 |     expect(actual.results.SECOND_ADDRESS).toEqual('erd1770jpvxsdctegqf45gzct0vljlxezu4jmdsjr922afxdkhrz25gqv9qcsw')
+      329 |     expect(actual.results.SECOND_VALUE).toEqual('636865737375636174696f6e2c362e36252c')
+
+      at Object.<anonymous> (packages/core/src/WarpActionExecutor.test.ts:326:42)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 29 passed, 31 total
+Snapshots:   0 total
+Time:        0.993 s, estimated 1 s
+Ran all test suites matching packages/core/src/WarpActionExecutor.test.ts.

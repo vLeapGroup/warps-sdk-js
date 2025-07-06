@@ -8,15 +8,15 @@ import {
   Transaction,
   TransactionsFactoryConfig,
 } from '@multiversx/sdk-core/out'
+import { WarpConfig } from '@vleap/warps-core'
+import { WarpMultiversxExecutor } from '../../adapter-multiversx/src/WarpMultiversxExecutor'
 import RegistryAbi from './abis/registry.abi.json'
-import { WarpConfig } from './config'
 import { getMainChainInfo, toTypedChainInfo } from './helpers/general'
 import { toTypedConfigInfo, toTypedRegistryInfo } from './helpers/registry'
 import { Brand, WarpCacheConfig, WarpChain, WarpChainInfo, WarpInitConfig, WarpRegistryConfigInfo, WarpRegistryInfo } from './types'
 import { string, u32 } from './utils.codec'
 import { CacheKey, WarpCache } from './WarpCache'
 import { WarpLogger } from './WarpLogger'
-import { WarpUtils } from './WarpUtils'
 
 export class WarpRegistry {
   private config: WarpInitConfig
@@ -340,7 +340,7 @@ export class WarpRegistry {
     }
 
     const chainInfo = getMainChainInfo(this.config)
-    const chainEntry = WarpUtils.getChainEntrypoint(chainInfo, this.config.env)
+    const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(chainInfo, this.config.env)
     const chainProvider = chainEntry.createNetworkProvider()
 
     try {
@@ -385,7 +385,7 @@ export class WarpRegistry {
 
   private getController(): SmartContractController {
     const chainInfo = getMainChainInfo(this.config)
-    const entrypoint = WarpUtils.getChainEntrypoint(chainInfo, this.config.env)
+    const entrypoint = WarpMultiversxExecutor.getChainEntrypoint(chainInfo, this.config.env)
     const abi = AbiRegistry.create(RegistryAbi)
     return entrypoint.createSmartContractController(abi)
   }

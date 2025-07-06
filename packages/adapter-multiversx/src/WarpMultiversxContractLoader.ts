@@ -1,13 +1,12 @@
-import { WarpChainInfo, WarpContract, WarpContractVerification, WarpInitConfig } from './types'
-import { WarpLogger } from './WarpLogger'
-import { WarpUtils } from './WarpUtils'
+import { WarpChainInfo, WarpContract, WarpContractVerification, WarpInitConfig, WarpLogger } from '@vleap/warps-core'
+import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
-export class WarpContractLoader {
+export class WarpMultiversxContractLoader {
   constructor(private readonly config: WarpInitConfig) {}
 
   async getContract(address: string, chain: WarpChainInfo): Promise<WarpContract | null> {
     try {
-      const chainEntry = WarpUtils.getChainEntrypoint(chain, this.config.env)
+      const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(chain, this.config.env)
       const chainProvider = chainEntry.createNetworkProvider()
       const res = await chainProvider.doGetGeneric(`accounts/${address}`)
 
@@ -24,7 +23,7 @@ export class WarpContractLoader {
 
   async getVerificationInfo(address: string, chain: WarpChainInfo): Promise<WarpContractVerification | null> {
     try {
-      const chainEntry = WarpUtils.getChainEntrypoint(chain, this.config.env)
+      const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(chain, this.config.env)
       const chainProvider = chainEntry.createNetworkProvider()
       const res = await chainProvider.doGetGeneric(`accounts/${address}/verification`)
 

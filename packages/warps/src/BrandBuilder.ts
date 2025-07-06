@@ -1,10 +1,10 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
 import Ajv from 'ajv'
+import { WarpMultiversxExecutor } from '../../adapter-multiversx/src/WarpMultiversxExecutor'
 import { WarpConfig } from './config'
 import { getLatestProtocolIdentifier, getMainChainInfo } from './helpers/general'
 import { Brand, BrandColors, BrandCta, BrandUrls, WarpInitConfig } from './types'
 import { WarpLogger } from './WarpLogger'
-import { WarpUtils } from './WarpUtils'
 
 export class BrandBuilder {
   private config: WarpInitConfig
@@ -51,7 +51,7 @@ export class BrandBuilder {
 
   async createFromTransactionHash(hash: string): Promise<Brand | null> {
     const chainInfo = getMainChainInfo(this.config)
-    const chainEntry = WarpUtils.getChainEntrypoint(chainInfo, this.config.env)
+    const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(chainInfo, this.config.env)
     const chainProvider = chainEntry.createNetworkProvider()
 
     try {
@@ -113,7 +113,7 @@ export class BrandBuilder {
     const schemaUrl = this.config.schema?.brand || WarpConfig.LatestBrandSchemaUrl
     const schemaResponse = await fetch(schemaUrl)
     const schema = await schemaResponse.json()
-    const ajv = new Ajv({ strict: false })
+    const ajv = new Ajv()
     const validate = ajv.compile(schema)
 
     if (!validate(brand)) {

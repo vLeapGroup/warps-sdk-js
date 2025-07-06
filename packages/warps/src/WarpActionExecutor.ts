@@ -1,19 +1,6 @@
-import {
-  AbiRegistry,
-  Address,
-  ArgSerializer,
-  SmartContractTransactionsFactory,
-  Token,
-  TokenComputer,
-  TokenTransfer,
-  Transaction,
-  TransactionOnNetwork,
-  TransactionsFactoryConfig,
-  TransferTransactionsFactory,
-} from '@multiversx/sdk-core'
+import { WarpMultiversxContractLoader } from '../../adapter-multiversx/src/WarpMultiversxContractLoader'
 import { WarpConstants } from './constants'
 import { getMainChainInfo, getWarpActionByIndex, replacePlaceholders, shiftBigintBy } from './helpers/general'
-import { extractCollectResults, extractContractResults, extractQueryResults } from './helpers/results'
 import { findKnownTokenById } from './tokens'
 import {
   ResolvedInput,
@@ -29,70 +16,54 @@ import {
   WarpQueryAction,
   WarpTransferAction,
 } from './types'
+import { IChainAdapter } from './types/adapter'
 import { WarpExecution } from './types/results'
 import { WarpAbiBuilder } from './WarpAbiBuilder'
 import { WarpArgSerializer } from './WarpArgSerializer'
 import { CacheKey, CacheTtl, WarpCache } from './WarpCache'
-import { WarpContractLoader } from './WarpContractLoader'
 import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
-import { WarpRegistry } from './WarpRegistry'
 import { WarpUtils } from './WarpUtils'
 
-type TxComponents = {
+export type TxComponents = {
   chain: WarpChainInfo
-  destination: Address
+  destination: string
   args: string[]
   value: bigint
-  transfers: TokenTransfer[]
-  data: Buffer | null
+  transfers: string[]
+  data: string | null
   resolvedInputs: ResolvedInput[]
 }
+
+type WarpExecutable = {}
 
 export class WarpActionExecutor {
   private config: WarpInitConfig
   private url: URL
   private serializer: WarpArgSerializer
-  private contractLoader: WarpContractLoader
+  private contractLoader: WarpMultiversxContractLoader
   private cache: WarpCache
-  private registry: WarpRegistry
+  private adapter: IChainAdapter
 
-  constructor(config: WarpInitConfig) {
-    if (!config.currentUrl) throw new Error('WarpActionExecutor: currentUrl config not set')
-    this.config = config
-    this.url = new URL(config.currentUrl)
+  constructor(adapter: IChainAdapter) {
+    if (!adapter.config.currentUrl) throw new Error('WarpActionExecutor: currentUrl config not set')
+    this.config = adapter.config
+    this.url = new URL(adapter.config.currentUrl)
     this.serializer = new WarpArgSerializer()
-    this.contractLoader = new WarpContractLoader(config)
-    this.cache = new WarpCache(config.cache?.type)
-    this.registry = new WarpRegistry(config)
+    this.contractLoader = new WarpMultiversxContractLoader(adapter.config)
+    this.cache = new WarpCache(adapter.config.cache?.type)
+    this.adapter = adapter
   }
 
   async createTransactionForExecute(warp: Warp, actionIndex: number, inputs: string[]): Promise<Transaction> {
     const action = getWarpActionByIndex(warp, actionIndex) as WarpTransferAction | WarpContractAction
-    if (!this.config.user?.wallet) throw new Error('WarpActionExecutor: user address not set')
-    const sender = Address.newFromBech32(this.config.user.wallet)
-
-    const components = await this.getTxComponentsFromInputs(action, inputs, sender)
-    const config = new TransactionsFactoryConfig({ chainID: components.chain.chainId })
-    const typedArgs = components.args.map((arg) => this.serializer.stringToTyped(arg))
+    const components = await this.createExecutable(action, inputs)
 
     let tx: Transaction | null = null
     if (action.type === 'transfer') {
-      tx = new TransferTransactionsFactory({ config }).createTransactionForTransfer(sender, {
-        receiver: components.destination,
-        nativeAmount: components.value,
-        tokenTransfers: components.transfers,
-        data: components.data ? new Uint8Array(components.data) : undefined,
-      })
-    } else if (action.type === 'contract' && components.destination.isSmartContract()) {
-      tx = new SmartContractTransactionsFactory({ config }).createTransactionForExecute(sender, {
-        contract: components.destination,
-        function: 'func' in action ? action.func || '' : '',
-        gasLimit: 'gasLimit' in action ? BigInt(action.gasLimit || 0) : 0n,
-        arguments: typedArgs,
-        tokenTransfers: components.transfers,
-        nativeTransferAmount: components.value,
-      })
+      tx = await this.adapter.factory().createTransfer(components)
+    } else if (action.type === 'contract') {
+      tx = await this.adapter.factory().createContractCall(components, action as WarpContractAction)
     } else if (action.type === 'query') {
       throw new Error('WarpActionExecutor: Invalid action type for createTransactionForExecute; Use executeQuery instead')
     } else if (action.type === 'collect') {
@@ -109,7 +80,7 @@ export class WarpActionExecutor {
     return tx
   }
 
-  async getTransactionExecutionResults(warp: Warp, actionIndex: number, tx: TransactionOnNetwork): Promise<WarpExecution> {
+  async getTransactionExecutionResults<T>(warp: Warp, actionIndex: number, tx: T): Promise<WarpExecution> {
     const preparedWarp = await WarpInterpolator.apply(this.config, warp)
     const action = getWarpActionByIndex(preparedWarp, actionIndex) as WarpContractAction
 
@@ -117,19 +88,19 @@ export class WarpActionExecutor {
     const inputs: ResolvedInput[] =
       this.cache.get(CacheKey.LastWarpExecutionInputs(this.config.env, warp.meta?.hash || '', actionIndex)) ?? []
 
-    const { values, results } = await extractContractResults(this, preparedWarp, action, tx, actionIndex, inputs)
+    const results = await this.adapter.results().extractContractResults(this, preparedWarp, action, tx, actionIndex, inputs)
     const next = WarpUtils.getNextInfo(this.config, preparedWarp, actionIndex, results)
-    const messages = this.getPreparedMessages(preparedWarp, results)
+    const messages = this.getPreparedMessages(preparedWarp, results.results)
 
     return {
-      success: tx.status.isSuccessful(),
+      success: results.success,
       warp: preparedWarp,
       action: actionIndex,
       user: this.config.user?.wallet || null,
-      txHash: tx.hash,
+      txHash: results.txHash,
       next,
-      values,
-      results,
+      values: results.values,
+      results: results.results,
       messages,
     }
   }
@@ -139,31 +110,20 @@ export class WarpActionExecutor {
     if (!action) throw new Error('WarpActionExecutor: Action not found')
     if (!action.func) throw new Error('WarpActionExecutor: Function not found')
 
+    const components = await this.createExecutable(action, inputs)
+    const tx = await this.adapter.factory().executeQuery(components)
     const preparedWarp = await WarpInterpolator.apply(this.config, warp)
-    const abi = await this.getAbiForAction(action)
-    const { chain, args, resolvedInputs } = await this.getTxComponentsFromInputs(action, inputs)
-    const typedArgs = args.map((arg) => this.serializer.stringToTyped(arg))
-    const entrypoint = WarpUtils.getChainEntrypoint(chain, this.config.env)
-    const contractAddress = Address.newFromBech32(action.address)
-    const controller = entrypoint.createSmartContractController(abi)
-    const query = controller.createQuery({ contract: contractAddress, function: action.func, arguments: typedArgs })
-    const response = await controller.runQuery(query)
-    const isSuccess = response.returnCode === 'ok'
-    const argsSerializer = new ArgSerializer()
-    const endpoint = abi.getEndpoint(response.function)
-    const parts = response.returnDataParts.map((part) => Buffer.from(part))
-    const typedValues = argsSerializer.buffersToValues(parts, endpoint.output)
-    const { values, results } = await extractQueryResults(preparedWarp, typedValues, actionIndex, resolvedInputs)
+    const results = await this.adapter.results().extractQueryResults(this, preparedWarp, tx, actionIndex, components.resolvedInputs)
     const next = WarpUtils.getNextInfo(this.config, preparedWarp, actionIndex, results)
 
     return {
-      success: isSuccess,
+      success: results.success,
       warp: preparedWarp,
       action: actionIndex,
       user: this.config.user?.wallet || null,
       txHash: null,
       next,
-      values,
+      values: results.values,
       results,
       messages: this.getPreparedMessages(preparedWarp, results),
     }
@@ -213,7 +173,9 @@ export class WarpActionExecutor {
     try {
       const response = await fetch(action.destination.url, { method: httpMethod, headers, body })
       const content = await response.json()
-      const { values, results } = await extractCollectResults(preparedWarp, content, actionIndex, modifiedInputs)
+      const { values, results, success, txHash } = await this.adapter
+        .results()
+        .extractCollectResults(this, preparedWarp, content, actionIndex, modifiedInputs)
       const next = WarpUtils.getNextInfo(this.config, preparedWarp, actionIndex, results)
 
       return {
@@ -243,20 +205,16 @@ export class WarpActionExecutor {
     }
   }
 
-  async getTxComponentsFromInputs(
-    action: WarpTransferAction | WarpContractAction | WarpQueryAction,
-    inputs: string[],
-    sender?: Address
-  ): Promise<TxComponents> {
+  async createExecutable(action: WarpTransferAction | WarpContractAction | WarpQueryAction, inputs: string[]): Promise<TxComponents> {
     const chain = await WarpUtils.getChainInfoForAction(this.config, action, inputs)
     const resolvedInputs = await this.getResolvedInputs(chain, action, inputs)
     const modifiedInputs = this.getModifiedInputs(resolvedInputs)
 
     const destinationInput = modifiedInputs.find((i) => i.input.position === 'receiver')?.value
     const detinationInAction = 'address' in action ? action.address : null
-    const destinationRaw = destinationInput?.split(':')[1] || detinationInAction || sender?.toBech32()
+    const destinationRaw = destinationInput?.split(':')[1] || detinationInAction
     if (!destinationRaw) throw new Error('WarpActionExecutor: Destination/Receiver not provided')
-    const destination = Address.newFromBech32(destinationRaw)
+    const destination = destinationRaw
 
     const args = this.getPreparedArgs(action, modifiedInputs)
 
@@ -281,9 +239,7 @@ export class WarpActionExecutor {
 
     const dataInput = modifiedInputs.find((i) => i.input.position === 'data')?.value
     const dataInAction = 'data' in action ? action.data || '' : null
-    const dataCombined = dataInput || dataInAction || null
-    const dataValue = dataCombined ? this.serializer.stringToTyped(dataCombined).valueOf() : null
-    const data = dataValue ? Buffer.from(dataValue) : null
+    const data = dataInput || dataInAction || null
 
     return { chain, destination, args, value, transfers, data, resolvedInputs: modifiedInputs }
   }

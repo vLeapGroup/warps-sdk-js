@@ -1,12 +1,7 @@
+import { WarpConfig, WarpConstants, WarpInterpolator, WarpLogger, WarpRegistry, WarpUtils } from '@vleap/warps-core'
 import QRCodeStyling from 'qr-code-styling'
-import { WarpConfig } from './config'
-import { WarpConstants } from './constants'
 import { Brand, Warp, WarpCacheConfig, WarpIdType, WarpInitConfig, WarpRegistryInfo } from './types'
 import { WarpBuilder } from './WarpBuilder'
-import { WarpInterpolator } from './WarpInterpolator'
-import { WarpLogger } from './WarpLogger'
-import { WarpRegistry } from './WarpRegistry'
-import { WarpUtils } from './WarpUtils'
 
 type DetectionResult = {
   match: boolean

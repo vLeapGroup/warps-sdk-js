@@ -1,21 +1,17 @@
-import { DevnetEntrypoint, MainnetEntrypoint, NetworkEntrypoint, TestnetEntrypoint } from '@multiversx/sdk-core'
-import { WarpConstants } from './constants'
-import { getMainChainInfo, replacePlaceholders } from './helpers/general'
+import { WarpSerializer } from '@vleap/warps/src/WarpSerializer'
+import { WarpConstants } from '../../core/src/constants'
+import { getMainChainInfo, replacePlaceholders } from '../../core/src/helpers/general'
 import {
   Warp,
   WarpAction,
   WarpChain,
-  WarpChainEnv,
   WarpChainInfo,
   WarpExecutionNextInfo,
   WarpExecutionResults,
   WarpIdType,
   WarpInitConfig,
-} from './types'
-import { WarpArgSerializer } from './WarpArgSerializer'
-import { CacheTtl } from './WarpCache'
-import { WarpLink } from './WarpLink'
-import { WarpRegistry } from './WarpRegistry'
+} from '../../core/src/types'
+import { CacheTtl } from '../../core/src/WarpCache'
 
 const URL_PREFIX = 'https://'
 
@@ -136,7 +132,7 @@ export class WarpUtils {
     const chainInput = inputs[chainPositionIndex]
     if (!chainInput) throw new Error('WarpUtils: Chain input not found')
 
-    const serializer = new WarpArgSerializer()
+    const serializer = new WarpSerializer()
     const chainValue = serializer.stringToNative(chainInput)[1] as WarpChain
 
     const registry = new WarpRegistry(config)
@@ -154,13 +150,5 @@ export class WarpUtils {
     if (!chainInfo) throw new Error(`WarpUtils: Chain info not found for ${action.chain}`)
 
     return chainInfo
-  }
-
-  static getChainEntrypoint(chainInfo: WarpChainInfo, env: WarpChainEnv): NetworkEntrypoint {
-    const clientName = 'warp-sdk'
-    const kind = 'api'
-    if (env === 'devnet') return new DevnetEntrypoint(chainInfo.apiUrl, kind, clientName)
-    if (env === 'testnet') return new TestnetEntrypoint(chainInfo.apiUrl, kind, clientName)
-    return new MainnetEntrypoint(chainInfo.apiUrl, kind, clientName)
   }
 }

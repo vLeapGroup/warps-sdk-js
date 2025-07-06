@@ -1,9 +1,9 @@
-import { WarpContractAction } from './types'
-import { WarpChainEnv } from './types/general'
-import { WarpExecutionResults } from './types/results'
-import { Warp, WarpInitConfig } from './types/warp'
+import { WarpContractAction } from '../../core/src/types'
+import { WarpChainEnv } from '../../core/src/types/general'
+import { WarpExecutionResults } from '../../core/src/types/results'
+import { Warp, WarpInitConfig } from '../../core/src/types/warp'
+import { WarpUtils } from '../../core/src/WarpUtils'
 import { WarpRegistry } from './WarpRegistry'
-import { WarpUtils } from './WarpUtils'
 
 const testConfig: WarpInitConfig = {
   env: 'devnet' as WarpChainEnv,

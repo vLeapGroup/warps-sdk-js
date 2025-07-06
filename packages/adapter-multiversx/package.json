@@ -1,5 +1,5 @@
 {
-  "name": "@vleap/warps-core",
+  "name": "@vleap/warps-adapter-multiversx",
   "version": "0.1.0",
   "description": "",
   "main": "./dist/index.js",
@@ -17,10 +17,8 @@
   "files": [
     "dist"
   ],
-  "peerDependencies": {
-    "vm2": "^3.9.17"
-  },
   "devDependencies": {
+    "@multiversx/sdk-core": "^14.2.1",
     "@types/jest": "^29.5.14",
     "jest": "^30.0.0",
     "jest-environment-jsdom": "^30.0.0",
@@ -34,7 +32,7 @@
     "access": "public"
   },
   "dependencies": {
-    "ajv": "^8.17.1",
-    "qr-code-styling": "^1.9.2"
+    "@vleap/warps-core": "^0.1.0",
+    "@multiversx/sdk-core": "^14.2.1"
   }
 }

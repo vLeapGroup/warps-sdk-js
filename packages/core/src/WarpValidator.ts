@@ -78,7 +78,7 @@ export class WarpValidator {
       const schemaUrl = this.config.schema?.warp || WarpConfig.LatestWarpSchemaUrl
       const schemaResponse = await fetch(schemaUrl)
       const schema = await schemaResponse.json()
-      const ajv = new Ajv({ strict: false })
+      const ajv = new Ajv()
       const validate = ajv.compile(schema)
 
       return validate(warp) ? [] : [`Schema validation failed: ${ajv.errorsText(validate.errors)}`]
