@@ -2,11 +2,18 @@ import { SmartContractTransactionsOutcomeParser, TransactionEventsParser, Transa
 import {
   ResolvedInput,
   Warp,
+  WarpCache,
+  WarpCacheKey,
   WarpConstants,
   WarpContractAction,
+  WarpExecution,
   WarpExecutionResults,
   WarpInitConfig,
+  WarpInterpolator,
+  applyResultsToMessages,
   evaluateResultsCommon,
+  getNextInfo,
+  getWarpActionByIndex,
 } from '@vleap/warps-core'
 import { Buffer } from 'buffer'
 import { WarpMultiversxAbi } from './WarpMultiversxAbi'
@@ -15,10 +22,12 @@ import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
 export class WarpMultiversxResults {
   private readonly abi: WarpMultiversxAbi
   private readonly serializer: WarpMultiversxSerializer
+  private readonly cache: WarpCache
 
-  constructor(config: WarpInitConfig) {
+  constructor(private readonly config: WarpInitConfig) {
     this.abi = new WarpMultiversxAbi(config)
     this.serializer = new WarpMultiversxSerializer()
+    this.cache = new WarpCache(config.cache?.type)
   }
 
   async getTransactionExecutionResults(warp: Warp, actionIndex: number, tx: TransactionOnNetwork): Promise<WarpExecution> {
@@ -29,8 +38,8 @@ export class WarpMultiversxResults {
     const inputs: ResolvedInput[] = this.cache.get(WarpCacheKey.WarpExecutable(this.config.env, warp.meta?.hash || '', actionIndex)) ?? []
 
     const results = await this.extractContractResults(preparedWarp, action, tx, actionIndex, inputs)
-    const next = WarpUtils.getNextInfo(this.config, preparedWarp, actionIndex, results)
-    const messages = this.getPreparedMessages(preparedWarp, results.results)
+    const next = getNextInfo(this.config, preparedWarp, actionIndex, results)
+    const messages = applyResultsToMessages(preparedWarp, results.results)
 
     return {
       success: results.success,
@@ -51,10 +60,6 @@ export class WarpMultiversxResults {
     if (outIndexMatch) return parseInt(outIndexMatch[1], 10)
     if (resultPath.startsWith('out.') || resultPath.startsWith('event.')) return null
     return null
-  }
-
-  static getNestedValueFromObject(obj: any, path: string[]): any {
-    return path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : null), obj)
   }
 
   async extractContractResults(
@@ -254,8 +259,7 @@ export class WarpMultiversxResults {
       const resultType = parts[0]
       const pathParts = parts.slice(1)
       if (resultType === 'out' || resultType.startsWith('out[')) {
-        const value =
-          pathParts.length === 0 ? response?.data || response : WarpMultiversxResults.getNestedValueFromObject(response, pathParts)
+        const value = pathParts.length === 0 ? response?.data || response : this.getNestedValueFromObject(response, pathParts)
         values.push(value)
         results[resultName] = value
       } else {
@@ -268,6 +272,10 @@ export class WarpMultiversxResults {
       success: true,
       txHash: response.hash || '',
     }
+  }
+
+  private getNestedValueFromObject(obj: any, path: string[]): any {
+    return path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : null), obj)
   }
 
   async resolveWarpResultsRecursively(props: {

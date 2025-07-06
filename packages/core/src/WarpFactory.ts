@@ -1,7 +1,7 @@
 import { WarpUtils } from '../../warps/src/WarpUtils'
-import { WarpExecutable } from '../dist'
 import { WarpConstants } from './constants'
-import { getWarpActionByIndex, replacePlaceholders, shiftBigintBy } from './helpers/general'
+import { applyResultsToMessages, getWarpActionByIndex, shiftBigintBy } from './helpers/general'
+import { getNextInfo } from './helpers/next'
 import { extractCollectResults } from './helpers/results'
 import {
   ResolvedInput,
@@ -16,6 +16,7 @@ import {
   WarpTransferAction,
 } from './types'
 import { WarpExecution } from './types/results'
+import { WarpExecutable } from './types/warp'
 import { CacheTtl, WarpCache, WarpCacheKey } from './WarpCache'
 import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
@@ -137,7 +138,7 @@ export class WarpFactory {
       const response = await fetch(action.destination.url, { method: httpMethod, headers, body })
       const content = await response.json()
       const { values, results } = await extractCollectResults(preparedWarp, content, actionIndex, modifiedInputs)
-      const next = WarpUtils.getNextInfo(this.config, preparedWarp, actionIndex, results)
+      const next = getNextInfo(this.config, preparedWarp, actionIndex, results)
 
       return {
         success: response.ok,
@@ -148,7 +149,7 @@ export class WarpFactory {
         next,
         values,
         results: { ...results, _DATA: content },
-        messages: this.getPreparedMessages(preparedWarp, results),
+        messages: applyResultsToMessages(preparedWarp, results),
       }
     } catch (error) {
       WarpLogger.error('WarpActionExecutor: Error executing collect', error)
@@ -260,11 +261,5 @@ export class WarpFactory {
     })
 
     return args
-  }
-
-  private getPreparedMessages(warp: Warp, results: Record<string, any>): Record<string, string> {
-    const parts = Object.entries(warp.messages || {}).map(([key, value]) => [key, replacePlaceholders(value, results)])
-
-    return Object.fromEntries(parts)
   }
 }

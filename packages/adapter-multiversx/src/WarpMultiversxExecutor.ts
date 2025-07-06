@@ -11,6 +11,8 @@ import {
   TransferTransactionsFactory,
 } from '@multiversx/sdk-core/out'
 import {
+  applyResultsToMessages,
+  getNextInfo,
   getWarpActionByIndex,
   WarpCache,
   WarpChainEnv,
@@ -19,34 +21,40 @@ import {
   WarpExecution,
   WarpInitConfig,
   WarpInterpolator,
+  WarpQueryAction,
 } from '@vleap/warps-core'
 import { WarpMultiversxAbi } from './WarpMultiversxAbi'
+import { WarpMultiversxResults } from './WarpMultiversxResults'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
 
 export class WarpMultiversxExecutor {
   private readonly serializer: WarpMultiversxSerializer
   private readonly abi: WarpMultiversxAbi
   private readonly cache: WarpCache
+  private readonly results: WarpMultiversxResults
 
   constructor(private readonly config: WarpInitConfig) {
     this.serializer = new WarpMultiversxSerializer()
     this.abi = new WarpMultiversxAbi(this.config)
     this.cache = new WarpCache(this.config.cache?.type)
+    this.results = new WarpMultiversxResults(this.config)
   }
 
   async createTransaction(executable: WarpExecutable): Promise<Transaction> {
+    const action = getWarpActionByIndex(executable.warp, executable.action)
+
     let tx: Transaction | null = null
-    if (executable.action.type === 'transfer') {
+    if (action.type === 'transfer') {
       tx = await this.createTransferTransaction(executable)
-    } else if (executable.action.type === 'contract') {
+    } else if (action.type === 'contract') {
       tx = await this.createContractCallTransaction(executable)
-    } else if (executable.action.type === 'query') {
+    } else if (action.type === 'query') {
       throw new Error('WarpMultiversxExecutor: Invalid action type for createTransactionForExecute; Use executeQuery instead')
-    } else if (executable.action.type === 'collect') {
+    } else if (action.type === 'collect') {
       throw new Error('WarpMultiversxExecutor: Invalid action type for createTransactionForExecute; Use executeCollect instead')
     }
 
-    if (!tx) throw new Error(`WarpMultiversxExecutor: Invalid action type (${executable.action.type})`)
+    if (!tx) throw new Error(`WarpMultiversxExecutor: Invalid action type (${action.type})`)
 
     return tx
   }
@@ -72,8 +80,8 @@ export class WarpMultiversxExecutor {
     const config = new TransactionsFactoryConfig({ chainID: executable.chain.chainId })
     return new SmartContractTransactionsFactory({ config }).createTransactionForExecute(sender, {
       contract: Address.newFromBech32(executable.destination),
-      function: 'func' in executable.action ? executable.action.func || '' : '',
-      gasLimit: 'gasLimit' in executable.action ? BigInt(executable.action.gasLimit || 0) : 0n,
+      function: 'func' in action ? action.func || '' : '',
+      gasLimit: 'gasLimit' in action ? BigInt(action.gasLimit || 0) : 0n,
       arguments: typedArgs,
       //   tokenTransfers: executable.transfers, // TODO
       nativeTransferAmount: executable.value,
@@ -81,33 +89,35 @@ export class WarpMultiversxExecutor {
   }
 
   async executeQuery(executable: WarpExecutable): Promise<WarpExecution> {
-    const preparedWarp = await WarpInterpolator.apply(this.config, warp)
-    const abi = await this.getAbiForAction(action)
-    const typedArgs = components.args.map((arg) => this.serializer.stringToTyped(arg))
-    const entrypoint = WarpMultiversxExecutor.getChainEntrypoint(components.chain, this.config.env)
+    const action = getWarpActionByIndex(executable.warp, executable.action) as WarpQueryAction
+    if (action.type !== 'query') throw new Error(`WarpMultiversxExecutor: Invalid action type for executeQuery: ${action.type}`)
+    const preparedWarp = await WarpInterpolator.apply(this.config, executable.warp)
+    const abi = await this.abi.getAbiForAction(action)
+    const typedArgs = executable.args.map((arg) => this.serializer.stringToTyped(arg))
+    const entrypoint = WarpMultiversxExecutor.getChainEntrypoint(executable.chain, this.config.env)
     const contractAddress = Address.newFromBech32(executable.destination)
     const controller = entrypoint.createSmartContractController(abi)
-    const query = controller.createQuery({ contract: contractAddress, function: executable.action.func || '', arguments: typedArgs })
+    const query = controller.createQuery({ contract: contractAddress, function: action.func || '', arguments: typedArgs })
     const response = await controller.runQuery(query)
     const isSuccess = response.returnCode === 'ok'
     const argsSerializer = new ArgSerializer()
-    const endpoint = abi.getEndpoint(response.function || executable.action.func || '')
+    const endpoint = abi.getEndpoint(response.function || action.func || '')
     const parts = (response.returnDataParts || []).map((part: any) => (typeof part === 'string' ? Buffer.from(part) : Buffer.from(part)))
     const typedValues = argsSerializer.buffersToValues(parts, endpoint.output)
 
-    const results = await this.adapter.results().extractQueryResults(this, preparedWarp, tx, actionIndex, components.resolvedInputs)
-    const next = WarpUtils.getNextInfo(this.config, preparedWarp, actionIndex, results)
+    const results = await this.results.extractQueryResults(preparedWarp, tx, executable.action, executable.resolvedInputs)
+    const next = getNextInfo(this.config, preparedWarp, executable.action, results)
 
     return {
       success: results.success,
       warp: preparedWarp,
-      action: actionIndex,
+      action: executable.action,
       user: this.config.user?.wallet || null,
       txHash: null,
       next,
       values: results.values,
       results,
-      messages: this.getPreparedMessages(preparedWarp, results),
+      messages: applyResultsToMessages(preparedWarp, results),
     }
   }
 

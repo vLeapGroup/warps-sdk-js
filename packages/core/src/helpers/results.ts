@@ -17,10 +17,6 @@ const parseOutActionIndex = (resultPath: string): number | null => {
   return null
 }
 
-const getNestedValueFromObject = (obj: any, path: string[]): any => {
-  return path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : null), obj)
-}
-
 export const extractCollectResults = async (
   warp: Warp,
   response: any,
@@ -118,7 +114,7 @@ export async function resolveWarpResultsRecursively(
   }
 }
 
-const evaluateResultsCommon = async (
+export const evaluateResultsCommon = async (
   warp: Warp,
   baseResults: WarpExecutionResults,
   actionIndex: number,
@@ -149,6 +145,10 @@ const evaluateInputResults = (
     }
   }
   return modifiable
+}
+
+const getNestedValueFromObject = (obj: any, path: string[]): any => {
+  return path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : null), obj)
 }
 
 const evaluateTransformResults = async (warp: Warp, baseResults: WarpExecutionResults): Promise<WarpExecutionResults> => {

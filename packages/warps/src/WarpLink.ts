@@ -9,11 +9,11 @@ import {
   WarpInterpolator,
   WarpLogger,
   WarpRegistryInfo,
+  getWarpInfoFromIdentifier,
 } from '@vleap/warps-core'
 import QRCodeStyling from 'qr-code-styling'
 import { WarpBuilder } from './WarpBuilder'
 import { WarpRegistry } from './WarpRegistry'
-import { WarpUtils } from './WarpUtils'
 
 type DetectionResult = {
   match: boolean
@@ -62,7 +62,7 @@ export class WarpLink {
 
     const idResult = url.startsWith(WarpConstants.HttpProtocolPrefix)
       ? this.extractIdentifierInfoFromUrl(url)
-      : WarpUtils.getInfoFromPrefixedIdentifier(url)
+      : getWarpInfoFromIdentifier(url)
 
     if (!idResult) {
       return emptyResult
@@ -112,7 +112,7 @@ export class WarpLink {
   }
 
   buildFromPrefixedIdentifier(prefixedIdentifier: string): string {
-    const idResult = WarpUtils.getInfoFromPrefixedIdentifier(prefixedIdentifier)
+    const idResult = getWarpInfoFromIdentifier(prefixedIdentifier)
     if (!idResult) return ''
     return this.build(idResult.type, idResult.identifierBase)
   }
@@ -148,6 +148,6 @@ export class WarpLink {
 
     const decodedParam = decodeURIComponent(value)
 
-    return WarpUtils.getInfoFromPrefixedIdentifier(decodedParam)
+    return getWarpInfoFromIdentifier(decodedParam)
   }
 }
