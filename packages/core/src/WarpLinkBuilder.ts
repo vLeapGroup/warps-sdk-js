@@ -1,7 +1,7 @@
 import QRCodeStyling from 'qr-code-styling'
 import { WarpConfig } from './config'
 import { WarpConstants } from './constants'
-import { getWarpInfoFromIdentifier } from './helpers/identifier'
+import { extractIdentifierInfoFromUrl, getWarpInfoFromIdentifier } from './helpers/identifier'
 import { WarpIdType, WarpInitConfig } from './types'
 
 // Example Link (Transaction Hash as ID): https://usewarp.to/to?warp=hash%3A<MYHASH>
@@ -13,7 +13,7 @@ export class WarpLinkBuilder {
 
   isValid(url: string): boolean {
     if (!url.startsWith(WarpConstants.HttpProtocolPrefix)) return false
-    const idResult = this.extractIdentifierInfoFromUrl(url)
+    const idResult = extractIdentifierInfoFromUrl(url)
     return !!idResult
   }
 
@@ -52,20 +52,5 @@ export class WarpLinkBuilder {
       imageOptions: { hideBackgroundDots: true, imageSize: 0.4, margin: 8 },
       image: `data:image/svg+xml;utf8,<svg width="16" height="16" viewBox="0 0 100 100" fill="${encodeURIComponent(logoColor)}" xmlns="http://www.w3.org/2000/svg"><path d="M54.8383 50.0242L95 28.8232L88.2456 16L51.4717 30.6974C50.5241 31.0764 49.4759 31.0764 48.5283 30.6974L11.7544 16L5 28.8232L45.1616 50.0242L5 71.2255L11.7544 84.0488L48.5283 69.351C49.4759 68.9724 50.5241 68.9724 51.4717 69.351L88.2456 84.0488L95 71.2255L54.8383 50.0242Z"/></svg>`,
     })
-  }
-
-  private extractIdentifierInfoFromUrl(url: string): { type: WarpIdType; identifier: string; identifierBase: string } | null {
-    const urlObj = new URL(url)
-    const isSuperClient = WarpConfig.SuperClientUrls.includes(urlObj.origin)
-    const searchParamValue = urlObj.searchParams.get(WarpConstants.IdentifierParamName)
-    const value = isSuperClient && !searchParamValue ? urlObj.pathname.split('/')[1] : searchParamValue
-
-    if (!value) {
-      return null
-    }
-
-    const decodedParam = decodeURIComponent(value)
-
-    return getWarpInfoFromIdentifier(decodedParam)
   }
 }

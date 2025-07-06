@@ -34,7 +34,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@multiversx/sdk-core": "^14.2.1",
     "ajv": "^8.17.1",
     "protobufjs": "^7.5.3",
     "qr-code-styling": "^1.9.2"

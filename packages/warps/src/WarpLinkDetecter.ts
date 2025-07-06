@@ -8,6 +8,7 @@ import {
     WarpInterpolator,
     WarpLogger,
     WarpRegistryInfo,
+    extractIdentifierInfoFromUrl,
     getWarpInfoFromIdentifier
 } from '@vleap/warps-core'
 import { WarpBuilder } from './WarpBuilder'
@@ -39,7 +40,7 @@ export class WarpLinkDetecter {
 
   isValid(url: string): boolean {
     if (!url.startsWith(WarpConstants.HttpProtocolPrefix)) return false
-    const idResult = this.extractIdentifierInfoFromUrl(url)
+    const idResult = extractIdentifierInfoFromUrl(url)
     return !!idResult
   }
 
@@ -60,7 +61,7 @@ export class WarpLinkDetecter {
     const emptyResult: DetectionResult = { match: false, url, warp: null, registryInfo: null, brand: null }
 
     const idResult = url.startsWith(WarpConstants.HttpProtocolPrefix)
-      ? this.extractIdentifierInfoFromUrl(url)
+      ? extractIdentifierInfoFromUrl(url)
       : getWarpInfoFromIdentifier(url)
 
     if (!idResult) {

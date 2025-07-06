@@ -1,33 +1,32 @@
 import {
-    AbiRegistry,
-    Address,
-    AddressValue,
-    BytesValue,
-    SmartContractController,
-    SmartContractTransactionsFactory,
-    Transaction,
-    TransactionsFactoryConfig,
+  AbiRegistry,
+  Address,
+  AddressValue,
+  BytesValue,
+  SmartContractController,
+  SmartContractTransactionsFactory,
+  Transaction,
+  TransactionsFactoryConfig,
 } from '@multiversx/sdk-core'
 import {
-    Brand,
-    getMainChainInfo,
-    toTypedChainInfo,
-    toTypedConfigInfo,
-    toTypedRegistryInfo,
-    WarpCache,
-    WarpCacheConfig,
-    WarpCacheKey,
-    WarpChain,
-    WarpChainInfo,
-    WarpConfig,
-    WarpInitConfig,
-    WarpLogger,
-    WarpRegistryConfigInfo,
-    WarpRegistryInfo,
+  Brand,
+  getMainChainInfo,
+  toTypedChainInfo,
+  WarpCache,
+  WarpCacheConfig,
+  WarpCacheKey,
+  WarpChain,
+  WarpChainInfo,
+  WarpConfig,
+  WarpInitConfig,
+  WarpLogger,
+  WarpRegistryConfigInfo,
+  WarpRegistryInfo,
 } from '@vleap/warps-core'
 import RegistryAbi from '../../warps/src/abis/registry.abi.json'
-import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
+import { toTypedConfigInfo, toTypedRegistryInfo } from './helpers/registry'
 import { string, u32 } from './utils.codec'
+import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
 export class WarpMultiversxRegistry {
   private config: WarpInitConfig

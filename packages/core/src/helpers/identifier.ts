@@ -1,5 +1,6 @@
-import { WarpConstants } from '../constants'
-import { WarpIdType } from '../types'
+import { WarpConfig } from '../config';
+import { WarpConstants } from '../constants';
+import { WarpIdType } from '../types';
 
 export const getWarpInfoFromIdentifier = (
   prefixedIdentifier: string
@@ -23,3 +24,18 @@ export const getWarpInfoFromIdentifier = (
   // Otherwise treat as alias
   return { type: WarpConstants.IdentifierType.Alias, identifier: decodedIdentifier, identifierBase }
 }
+
+export const extractIdentifierInfoFromUrl = (url: string): { type: WarpIdType; identifier: string; identifierBase: string } | null => {
+    const urlObj = new URL(url)
+    const isSuperClient = WarpConfig.SuperClientUrls.includes(urlObj.origin)
+    const searchParamValue = urlObj.searchParams.get(WarpConstants.IdentifierParamName)
+    const value = isSuperClient && !searchParamValue ? urlObj.pathname.split('/')[1] : searchParamValue
+
+    if (!value) {
+      return null
+    }
+
+    const decodedParam = decodeURIComponent(value)
+
+    return getWarpInfoFromIdentifier(decodedParam)
+  }

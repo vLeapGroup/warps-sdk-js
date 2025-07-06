@@ -1,8 +1,5 @@
 import { WarpMultiversxRegistry } from '@vleap/warps-adapter-multiversx'
-import { getMainChainInfo } from '@vleap/warps-core/dist/helpers/general'
-import { CacheTtl } from '@vleap/warps-core/dist/WarpCache'
-import { WarpSerializer } from '@vleap/warps-core/dist/WarpSerializer'
-import { WarpAction, WarpChain, WarpChainInfo, WarpInitConfig } from './types/index'
+import { getMainChainInfo, WarpSerializer, WarpAction, WarpChain, WarpChainInfo, WarpInitConfig, CacheTtl } from '@vleap/warps-core'
 
 export class WarpUtils {
   static async getChainInfoForAction(config: WarpInitConfig, action: WarpAction, inputs?: string[]): Promise<WarpChainInfo> {

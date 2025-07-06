@@ -1,12 +1,12 @@
-import { TokenTransfer } from '@multiversx/sdk-core'
 import { WarpConstants } from './constants'
 import { BaseWarpActionInputType, WarpActionInputType, WarpNativeValue } from './types'
 
 export class WarpSerializer {
   nativeToString(type: WarpActionInputType, value: WarpNativeValue): string {
-    if (type === 'esdt' && value instanceof TokenTransfer) {
-      return `esdt:${value.token.identifier}|${value.token.nonce.toString()}|${value.amount.toString()}`
-    }
+    // TODO: esdt type should technically not be in core since it's mvx specific. call it token instead?
+    // if (type === 'esdt' && value instanceof TokenTransfer) {
+    //   return `esdt:${value.token.identifier}|${value.token.nonce.toString()}|${value.amount.toString()}`
+    // }
     return `${type}:${value?.toString() ?? ''}`
   }
 

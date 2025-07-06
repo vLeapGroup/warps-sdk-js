@@ -30,8 +30,8 @@
     "access": "public"
   },
   "dependencies": {
-    "ajv": "^8.17.1",
+    "@vleap/warps-adapter-multiversx": "^0.1.0",
     "@vleap/warps-core": "^0.1.0",
-    "@vleap/warps-adapter-multiversx": "^0.1.0"
+    "ajv": "^8.17.1"
   }
 }
