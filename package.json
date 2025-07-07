@@ -10,17 +10,17 @@
     "typegen": "ts-json-schema-generator --path 'packages/core/src/types/index.ts' --type 'Warp'"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.28.1",
-    "@typescript-eslint/eslint-plugin": "^8.29.1",
-    "@typescript-eslint/parser": "^8.29.1",
-    "eslint": "^9.24.0",
+    "@changesets/cli": "^2.29.5",
+    "@typescript-eslint/eslint-plugin": "^8.36.0",
+    "@typescript-eslint/parser": "^8.36.0",
+    "eslint": "^9.30.1",
     "eslint-config-custom": "*",
-    "prettier": "^3.5.3",
+    "prettier": "^3.6.2",
     "ts-json-schema-generator": "^2.4.0",
-    "turbo": "^2.5.3"
+    "turbo": "^2.5.4"
   },
   "name": "warp-sdk-js",
-  "packageManager": "npm@11.3.0",
+  "packageManager": "npm@11.4.2",
   "workspaces": [
     "packages/*"
   ]
