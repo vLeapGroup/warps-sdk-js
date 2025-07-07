@@ -1,6 +1,7 @@
 // Playground for testing warps in isolation
-import { Address, DevnetEntrypoint, TransactionComputer, UserSigner } from '@multiversx/sdk-core'
-import { getWarpActionByIndex, WarpExecution, WarpInterpolator } from '@vleap/warps-core'
+import { UserSigner } from '@multiversx/sdk-core'
+import { WarpBuilder, WarpExecutor, WarpInterpolator } from '@vleap/warps'
+import { getWarpActionByIndex, WarpExecution, WarpInitConfig } from '@vleap/warps-core'
 import * as fs from 'fs'
 import * as path from 'path'
 
@@ -21,7 +22,7 @@ const runWarp = async (warpFile: string) => {
 
   const warpRaw = fs.readFileSync(warpPath, 'utf-8')
 
-  const config: WarpConfig = {
+  const config: WarpInitConfig = {
     env: 'devnet',
     currentUrl: 'https://usewarp.to',
     user: {
@@ -32,7 +33,7 @@ const runWarp = async (warpFile: string) => {
   const actionIndex = 1
 
   const builder = new WarpBuilder(config)
-  const executor = new WarpActionExecutor(config)
+  const executor = new WarpExecutor(config)
 
   const warp = await builder.createFromRaw(warpRaw)
   const preparedWarp = await WarpInterpolator.apply(config, warp)
@@ -40,23 +41,25 @@ const runWarp = async (warpFile: string) => {
   let execution: WarpExecution | null = null
 
   if (action.type === 'contract') {
-    const entrypoint = new DevnetEntrypoint(undefined, 'api', 'warp-test-playground')
-    const provider = entrypoint.createNetworkProvider()
-    const userAddress = Address.newFromBech32(config.user?.wallet || '')
-    const account = await provider.getAccount(userAddress)
-    const tx = await executor.createTransactionForExecute(warp, actionIndex, warpInputs)
-    tx.nonce = account.nonce
-    const serializedTx = new TransactionComputer().computeBytesForSigning(tx)
-    tx.signature = await signer.sign(serializedTx)
-    const txHash = await provider.sendTransaction(tx)
-    console.log(`Sent tx: https://devnet-explorer.multiversx.com/transactions/${txHash}`)
-    await provider.awaitTransactionCompleted(txHash)
-    const txOnNetwork = await provider.getTransaction(txHash)
-    execution = await executor.getTransactionExecutionResults(warp, actionIndex, txOnNetwork)
+    const [tx, chain] = await executor.execute(warp, actionIndex, warpInputs)
+    console.log('tx', tx)
+    console.log('chain', chain)
+    // const entrypoint = new DevnetEntrypoint(undefined, 'api', 'warp-test-playground')
+    // const provider = entrypoint.createNetworkProvider()
+    // const userAddress = Address.newFromBech32(config.user?.wallet || '')
+    // const account = await provider.getAccount(userAddress)
+    // tx.nonce = account.nonce
+    // const serializedTx = new TransactionComputer().computeBytesForSigning(tx)
+    // tx.signature = await signer.sign(serializedTx)
+    // const txHash = await provider.sendTransaction(tx)
+    // console.log(`Sent tx: https://devnet-explorer.multiversx.com/transactions/${txHash}`)
+    // await provider.awaitTransactionCompleted(txHash)
+    // const txOnNetwork = await provider.getTransaction(txHash)
+    // execution = await executor.getTransactionExecutionResults(warp, action, txOnNetwork)
   } else if (action.type === 'query') {
-    execution = await executor.executeQuery(preparedWarp, actionIndex, [])
+    // execution = await executor.executeQuery(preparedWarp, action, [])
   } else if (action.type === 'collect') {
-    execution = await executor.executeCollect(preparedWarp, actionIndex, [])
+    // execution = await executor.executeCollect(preparedWarp, action, [])
   }
 
   console.log('Execution:', execution)
