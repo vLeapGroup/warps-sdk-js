@@ -1,8 +1,5 @@
 import {
-  applyResultsToMessages,
   CacheTtl,
-  extractCollectResults,
-  getNextInfo,
   getWarpActionByIndex,
   ResolvedInput,
   shiftBigintBy,
@@ -13,17 +10,13 @@ import {
   WarpCache,
   WarpCacheKey,
   WarpChainInfo,
-  WarpCollectAction,
   WarpConstants,
   WarpContractAction,
   WarpExecutable,
-  WarpExecution,
   WarpInitConfig,
-  WarpLogger,
   WarpSerializer,
   WarpTransferAction,
 } from '@vleap/warps-core'
-import { WarpInterpolator } from './WarpInterpolator'
 import { WarpUtils } from './WarpUtils'
 
 export class WarpFactory {
@@ -42,6 +35,7 @@ export class WarpFactory {
 
   async createExecutable(warp: Warp, actionIndex: number, inputs: string[]): Promise<WarpExecutable> {
     const action = getWarpActionByIndex(warp, actionIndex) as WarpTransferAction | WarpContractAction
+    if (!action) throw new Error('WarpFactory: Action not found')
     const chain = await WarpUtils.getChainInfoForAction(this.config, action, inputs)
 
     const resolvedInputs = await this.getResolvedInputs(chain, action, inputs)
@@ -97,80 +91,6 @@ export class WarpFactory {
     return executable
   }
 
-  async executeCollect(warp: Warp, actionIndex: number, inputs: string[], extra?: Record<string, any>): Promise<WarpExecution> {
-    const action = getWarpActionByIndex(warp, actionIndex) as WarpCollectAction | null
-    if (!action) throw new Error('WarpActionExecutor: Action not found')
-
-    const chain = await WarpUtils.getChainInfoForAction(this.config, action)
-    const preparedWarp = await WarpInterpolator.apply(this.config, warp)
-    const resolvedInputs = await this.getResolvedInputs(chain, action, inputs)
-    const modifiedInputs = this.getModifiedInputs(resolvedInputs)
-
-    const toInputPayloadValue = (resolvedInput: ResolvedInput) => {
-      if (!resolvedInput.value) return null
-      const value = this.serializer.stringToNative(resolvedInput.value)[1]
-      if (resolvedInput.input.type === 'biguint') {
-        return (value as bigint).toString() // json-stringify doesn't support bigint
-      } else if (resolvedInput.input.type === 'esdt') {
-        return {
-          /* TODO: cast to native transferable */
-        }
-      } else {
-        return value
-      }
-    }
-
-    const headers = new Headers()
-    headers.set('Content-Type', 'application/json')
-    headers.set('Accept', 'application/json')
-    Object.entries(action.destination.headers || {}).forEach(([key, value]) => {
-      headers.set(key, value as string)
-    })
-
-    const payload = Object.fromEntries(modifiedInputs.map((i) => [i.input.as || i.input.name, toInputPayloadValue(i)]))
-    const httpMethod = action.destination.method || 'GET'
-    const body = httpMethod === 'GET' ? undefined : JSON.stringify({ ...payload, ...extra })
-
-    WarpLogger.info('Executing collect', {
-      url: action.destination.url,
-      method: httpMethod,
-      headers,
-      body,
-    })
-
-    try {
-      const response = await fetch(action.destination.url, { method: httpMethod, headers, body })
-      const content = await response.json()
-      const { values, results } = await extractCollectResults(preparedWarp, content, actionIndex, modifiedInputs)
-      const next = getNextInfo(this.config, preparedWarp, actionIndex, results)
-
-      return {
-        success: response.ok,
-        warp: preparedWarp,
-        action: actionIndex,
-        user: this.config.user?.wallet || null,
-        txHash: null,
-        next,
-        values,
-        results: { ...results, _DATA: content },
-        messages: applyResultsToMessages(preparedWarp, results),
-      }
-    } catch (error) {
-      WarpLogger.error('WarpActionExecutor: Error executing collect', error)
-      return {
-        success: false,
-        warp: preparedWarp,
-        action: actionIndex,
-        user: this.config.user?.wallet || null,
-        txHash: null,
-        next: null,
-        values: [],
-        results: { _DATA: error },
-        messages: {},
-      }
-    }
-  }
-
   public async getResolvedInputs(chain: WarpChainInfo, action: WarpAction, inputArgs: string[]): Promise<ResolvedInput[]> {
     const argInputs = action.inputs || []
     const preprocessed = await Promise.all(inputArgs.map((arg) => this.preprocessInput(chain, arg)))
@@ -188,7 +108,7 @@ export class WarpFactory {
       }
     }
 
-    return argInputs.map((input, index) => {
+    return argInputs.map((input: WarpActionInput, index: number) => {
       const value = toValueByType(input, index)
       return {
         input,

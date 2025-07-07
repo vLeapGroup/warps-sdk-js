@@ -1,87 +1,85 @@
-import { Warp, WarpChainEnv, WarpCollectAction, WarpInitConfig } from '@vleap/warps-core'
-import { setupHttpMock } from './test-utils/mockHttp'
+import { WarpAction, WarpChainInfo, WarpConstants, WarpInitConfig } from '@vleap/warps-core'
 import { WarpFactory } from './WarpFactory'
-
-const testConfig: WarpInitConfig = {
-  env: 'devnet' as WarpChainEnv,
-  user: {
-    wallet: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
-  },
-  currentUrl: 'https://example.com',
-}
+import { WarpUtils } from './WarpUtils'
 
 describe('WarpFactory', () => {
-  it('executeCollect - creates correct input payload structure', async () => {
-    testConfig.currentUrl = 'https://example.com?queryParam=testValue'
-    const subject = new WarpFactory(testConfig)
-    const httpMock = setupHttpMock()
+  const config: WarpInitConfig = {
+    env: 'devnet',
+    user: { wallet: 'erd1testwallet' },
+    currentUrl: 'https://example.com?foo=bar',
+  }
+  const chain: WarpChainInfo = {
+    name: 'multiversx',
+    displayName: 'MultiversX',
+    chainId: 'D',
+    blockTime: 6,
+    addressHrp: 'erd',
+    apiUrl: 'https://api',
+    explorerUrl: 'https://explorer',
+    nativeToken: 'EGLD',
+  }
 
-    const action: WarpCollectAction = {
-      type: 'collect',
-      label: 'test',
-      description: 'test',
-      destination: {
-        url: 'https://example.com/collect',
-        method: 'POST',
-        headers: {},
-      },
-      inputs: [
-        { name: 'amount', type: 'biguint', source: 'field', position: 'arg:1' },
-        { name: 'token', type: 'esdt', source: 'field', position: 'arg:2' },
-        { name: 'address', type: 'address', source: 'user:wallet', position: 'arg:3' },
-        { name: 'queryParam', type: 'string', source: 'query', position: 'arg:4' },
+  let chainInfoMock: jest.SpyInstance
+  beforeEach(() => {
+    chainInfoMock = jest.spyOn(WarpUtils, 'getChainInfoForAction').mockResolvedValue(chain)
+  })
+  afterEach(() => {
+    chainInfoMock.mockRestore()
+  })
+
+  it('createExecutable returns expected structure', async () => {
+    const factory = new WarpFactory(config)
+    const warp: any = {
+      meta: { hash: 'abc' },
+      chain: 'multiversx',
+      actions: [
+        {
+          type: 'transfer',
+          label: 'Test',
+          chain: 'multiversx',
+          address: 'erd1dest',
+          value: '42',
+          inputs: [
+            { name: 'receiver', type: 'address', position: 'arg:1', source: 'field' },
+            { name: 'amount', type: 'biguint', position: 'value', source: 'field' },
+          ],
+        },
       ],
     }
+    const result = await factory.createExecutable(warp, 1, ['address:erd1dest', 'biguint:123'])
+    expect(result.destination).toBe('erd1dest')
+    expect(result.value).toBe(BigInt(123))
+    expect(result.args.length).toBeGreaterThan(0)
+  })
 
-    const warp = {
-      actions: [action],
-      results: {
-        USERNAME: 'out.data.username',
-        ID: 'out.data.id',
-        ALL: 'out',
-      },
-      messages: {
-        successRegistration: 'Your registration has the username: {{USERNAME}}',
-        successIdentifier: 'Your registration has the id: {{ID}}',
-      },
-    } as any as Warp
+  it('getResolvedInputs resolves query and user wallet', async () => {
+    const factory = new WarpFactory(config)
+    const action: WarpAction = {
+      type: 'transfer',
+      label: 'Test',
+      chain: 'multiversx',
+      address: 'erd1dest',
+      value: '0',
+      inputs: [
+        { name: 'foo', type: 'string', source: 'query' } as any,
+        { name: 'wallet', type: 'address', source: WarpConstants.Source.UserWallet } as any,
+      ],
+    }
+    const result = await factory.getResolvedInputs(chain, action, ['string:ignored', 'address:ignored'])
+    expect(result[0].value).toBe('string:bar')
+    expect(result[1].value).toBe('address:erd1testwallet')
+  })
 
-    httpMock.registerResponse('https://example.com/collect', {
-      data: {
-        username: 'abcdef',
-        id: '12',
-      },
-    })
+  it('getModifiedInputs applies scale modifier', () => {
+    const factory = new WarpFactory(config)
+    const inputs = [{ input: { name: 'amount', type: 'biguint', modifier: 'scale:2' }, value: 'biguint:5' }]
+    const result = factory.getModifiedInputs(inputs as any)
+    expect(result[0].value).toBe('biguint:500')
+  })
 
-    const actual = await subject.executeCollect(warp, 1, ['biguint:1000', 'esdt:WARP-123456|0|1000000000000000000|18'])
-
-    httpMock.assertCall('https://example.com/collect', {
-      method: 'POST',
-      body: {
-        amount: '1000',
-        token: {}, // TODO: implement handling for custom adapter types
-        address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
-        queryParam: 'testValue',
-      },
-    })
-
-    expect(actual.success).toBe(true)
-    expect(actual.results).toEqual({
-      USERNAME: 'abcdef',
-      ID: '12',
-      ALL: { username: 'abcdef', id: '12' },
-      _DATA: {
-        data: {
-          username: 'abcdef',
-          id: '12',
-        },
-      },
-    })
-    expect(actual.messages).toEqual({
-      successRegistration: 'Your registration has the username: abcdef',
-      successIdentifier: 'Your registration has the id: 12',
-    })
-
-    httpMock.cleanup()
+  it('preprocessInput returns input as-is for non-esdt', async () => {
+    const factory = new WarpFactory(config)
+    const result = await factory.preprocessInput(chain, 'biguint:123')
+    expect(result).toBe('biguint:123')
   })
 })
