@@ -31,7 +31,7 @@ export class WarpExecutor {
     if (!adapterLoader) throw new Error(`No adapter registered for chain: ${chainName}`)
     const AdapterExecutor = await adapterLoader()
     const executor = new AdapterExecutor(this.config)
-    const tx = await executor.execute(executable)
+    const tx = await executor.createTransaction(executable)
     return [tx, executable.chain]
   }
 
