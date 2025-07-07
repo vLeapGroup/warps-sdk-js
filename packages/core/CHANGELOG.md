@@ -1,5 +1,12 @@
 # @vleap/warps-core
 
+## 0.2.0-alpha.2
+
+### Patch Changes
+
+- 00f1527: remove vm2 peer dep
+- 6552747: remove vm2 peer dep
+
 ## 0.2.0-alpha.1
 
 ### Patch Changes
