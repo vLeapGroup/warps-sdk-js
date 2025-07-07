@@ -17,9 +17,6 @@
   "files": [
     "dist"
   ],
-  "peerDependencies": {
-    "vm2": "^3.9.17"
-  },
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "jest": "^30.0.0",
