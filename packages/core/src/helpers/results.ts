@@ -64,14 +64,16 @@ const evaluateInputResults = (
   inputs: ResolvedInput[]
 ): WarpExecutionResults => {
   const modifiable = { ...results }
-  const actionInputs = getWarpActionByIndex(warp, actionIndex)?.inputs || []
   const serializer = new WarpSerializer()
   for (const [key, value] of Object.entries(modifiable)) {
     if (typeof value === 'string' && value.startsWith('input.')) {
       const inputName = value.split('.')[1]
-      const inputIndex = actionInputs.findIndex((i) => i.as === inputName || i.name === inputName)
-      const valueAtIndex = inputIndex !== -1 ? inputs[inputIndex]?.value : null
-      modifiable[key] = valueAtIndex ? serializer.stringToNative(valueAtIndex)[1] : null
+      // Find input by matching name or alias in the inputs array
+      const inputValue = inputs.find((resolvedInput) => {
+        const input = resolvedInput.input
+        return input.as === inputName || input.name === inputName
+      })?.value
+      modifiable[key] = inputValue ? serializer.stringToNative(inputValue)[1] : null
     }
   }
   return modifiable

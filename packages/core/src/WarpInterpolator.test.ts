@@ -3,6 +3,12 @@ import { getMainChainInfo } from './helpers/general'
 import { Warp, WarpInitConfig } from './types/warp'
 import { CacheTtl, WarpCache, WarpCacheKey } from './WarpCache'
 import { WarpInterpolator } from './WarpInterpolator'
+import { WarpUtils } from '../../warps/src/WarpUtils'
+
+// Mock WarpUtils to return cached chain info
+jest.mock('../../warps/src/WarpUtils', () => ({
+  getChainInfoForAction: jest.fn(),
+}))
 
 const testConfig: WarpInitConfig = {
   env: 'devnet',
@@ -75,23 +81,35 @@ describe('WarpInterpolator per-action chain info', () => {
       currentUrl: 'https://anyclient.com?age=10',
     }
 
-    const cache = new WarpCache()
-
     const chainA = {
       chainId: 'A',
+      name: 'Chain A',
+      displayName: 'Chain A',
+      addressHrp: 'erd',
+      nativeToken: 'EGLD',
       blockTime: 1000,
       apiUrl: 'https://api.chainA.com',
       explorerUrl: 'https://explorer.chainA.com',
     }
-    cache.set(WarpCacheKey.ChainInfo(config.env, 'A'), chainA, CacheTtl.OneWeek)
 
     const chainB = {
       chainId: 'B',
+      name: 'Chain B',
+      displayName: 'Chain B',
+      addressHrp: 'erd',
+      nativeToken: 'EGLD',
       blockTime: 2000,
       apiUrl: 'https://api.chainB.com',
       explorerUrl: 'https://explorer.chainB.com',
     }
-    cache.set(WarpCacheKey.ChainInfo(config.env, 'B'), chainB, CacheTtl.OneWeek)
+
+    // Mock the getChainInfoForAction to return appropriate chain info
+    const mockGetChainInfo = WarpUtils.getChainInfoForAction as jest.MockedFunction<typeof WarpUtils.getChainInfoForAction>
+    mockGetChainInfo.mockImplementation(async (config, action) => {
+      if (action.chain === 'A') return chainA
+      if (action.chain === 'B') return chainB
+      return getMainChainInfo(config)
+    })
 
     const warp: Warp = {
       description: 'Test',

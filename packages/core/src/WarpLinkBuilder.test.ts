@@ -1,8 +1,6 @@
 import { WarpInitConfig } from './types'
 import { WarpLinkBuilder } from './WarpLinkBuilder'
 
-jest.mock('./WarpLinkBuilder')
-
 const Config: WarpInitConfig = {
   env: 'devnet',
   clientUrl: 'https://anyclient.com',

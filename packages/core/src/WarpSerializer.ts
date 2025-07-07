@@ -3,10 +3,14 @@ import { BaseWarpActionInputType, WarpActionInputType, WarpNativeValue } from '.
 
 export class WarpSerializer {
   nativeToString(type: WarpActionInputType, value: WarpNativeValue): string {
-    // TODO: esdt type should technically not be in core since it's mvx specific. call it token instead?
-    // if (type === 'esdt' && value instanceof TokenTransfer) {
-    //   return `esdt:${value.token.identifier}|${value.token.nonce.toString()}|${value.amount.toString()}`
-    // }
+    if (type === 'esdt' && typeof value === 'string') {
+      // Convert from dash format (AAA-123456-05-100) to pipe format (AAA-123456|5|100)
+      const parts = value.split('-')
+      if (parts.length === 4) {
+        const [token, id, nonce, amount] = parts
+        return `esdt:${token}-${id}|${parseInt(nonce, 10)}|${amount}`
+      }
+    }
     return `${type}:${value?.toString() ?? ''}`
   }
 
@@ -53,8 +57,9 @@ export class WarpSerializer {
     else if (baseType === 'codemeta') return [baseType, val]
     else if (baseType === 'esdt') {
       const [identifier, nonce, amount] = (val as string).split(WarpConstants.ArgCompositeSeparator)
-      return [baseType, `${identifier}|${nonce}|${amount}`]
-      //   return [baseType, new TokenTransfer({ token: new Token({ identifier, nonce: BigInt(nonce) }), amount: BigInt(amount) })]
+      // Convert from pipe format (AAA-123456|5|100) to dash format (AAA-123456-05-100)
+      const formattedNonce = nonce.padStart(2, '0')
+      return [baseType, `${identifier}-${formattedNonce}-${amount}`]
     }
     throw new Error(`WarpArgSerializer (stringToNative): Unsupported input type: ${baseType}`)
   }
