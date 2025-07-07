@@ -407,7 +407,8 @@ describe('WarpFactory', () => {
       inputs: [{ name: 'myvalue', type: 'biguint', position: 'value', source: 'field', modifier: 'scale:18' }],
     }
 
-    const { args, value, transfers } = await subject.createExecutable(action, ['biguint:2'])
+    const warp = { actions: [action] } as any
+    const { args, value, transfers } = await subject.createExecutable(warp, 1, ['biguint:2'])
 
     expect(value.toString()).toBe('2000000000000000000')
     expect(args).toEqual([])
@@ -430,7 +431,8 @@ describe('WarpFactory', () => {
       inputs: [{ name: 'myvalue', type: 'biguint', position: 'value', source: 'query' }],
     }
 
-    const { value } = await subject.createExecutable(action, [])
+    const warp = { actions: [action] } as any
+    const { value } = await subject.createExecutable(warp, 1, [])
 
     expect(value.toString()).toBe('2000000000000000000')
   })
@@ -453,7 +455,8 @@ describe('WarpFactory', () => {
       ],
     }
 
-    const { args } = await subject.createExecutable(action, ['string:hello', 'biguint:1'])
+    const warp = { actions: [action] } as any
+    const { args } = await subject.createExecutable(warp, 1, ['string:hello', 'biguint:1'])
 
     expect(args[0].toString()).toBe('string:hello')
     expect(args[1].toString()).toBe('biguint:1000000000000000000')
@@ -477,7 +480,8 @@ describe('WarpFactory', () => {
       ],
     }
 
-    const { args, value } = await subject.createExecutable(action, ['biguint:2.2', 'biguint:0.1'])
+    const warp = { actions: [action] } as any
+    const { args, value } = await subject.createExecutable(warp, 1, ['biguint:2.2', 'biguint:0.1'])
 
     expect(value.toString()).toBe('100000000000000000')
     expect(args[0].toString()).toBe('biguint:2200000000000000000')
@@ -501,7 +505,8 @@ describe('WarpFactory', () => {
       ],
     }
 
-    const { args } = await subject.createExecutable(action, ['biguint:1', 'uint8:18'])
+    const warp = { actions: [action] } as any
+    const { args } = await subject.createExecutable(warp, 1, ['biguint:1', 'uint8:18'])
 
     expect(args[0].toString()).toBe('string:hello')
     expect(args[1].toString()).toBe('biguint:1000000000000000000')
@@ -528,7 +533,8 @@ describe('WarpFactory', () => {
       ],
     }
 
-    const { args, value } = await subject.createExecutable(action, ['biguint:1', 'biguint:5', 'string:four', 'string:one'])
+    const warp = { actions: [action] } as any
+    const { args, value } = await subject.createExecutable(warp, 1, ['biguint:1', 'biguint:5', 'string:four', 'string:one'])
 
     expect(args).toEqual(['string:one', 'string:two', 'biguint:500', 'string:four'])
     expect(value.toString()).toEqual('1000000000000000000')
@@ -560,7 +566,8 @@ describe('WarpFactory', () => {
       ],
     }
 
-    const { args, transfers } = await subject.createExecutable(action, [
+    const warp = { actions: [action] } as any
+    const { args, transfers } = await subject.createExecutable(warp, 1, [
       'esdt:USH-111e09|0|1000',
       'esdt:USH-111e09|0|1.2',
       'esdt:USH-111e09|0|1.5',
@@ -595,7 +602,8 @@ describe('WarpFactory', () => {
       ],
     }
 
-    const { args, transfers } = await subject.createExecutable(action, [
+    const warp = { actions: [action] } as any
+    const { args, transfers } = await subject.createExecutable(warp, 1, [
       'esdt:EGLD-000000|0|1000',
       'esdt:EGLD-000000|0|1.2',
       'esdt:EGLD-000000|0|1.5',
@@ -623,7 +631,8 @@ describe('WarpFactory', () => {
       inputs: [{ name: 'token', type: 'esdt', position: 'arg:1', source: 'field' }],
     }
 
-    const { args } = await subject.createExecutable(action, ['esdt:USH-111e09|0|1000|2'])
+    const warp = { actions: [action] } as any
+    const { args } = await subject.createExecutable(warp, 1, ['esdt:USH-111e09|0|1000|2'])
 
     expect(args).toEqual(['esdt:USH-111e09|0|1000|2'])
   })
@@ -642,7 +651,8 @@ describe('WarpFactory', () => {
       inputs: [{ name: 'nativeTransfer', type: 'esdt', position: 'transfer', source: 'field' }],
     }
 
-    const { value, transfers } = await subject.createExecutable(action, ['esdt:EGLD-000000|0|1.5'])
+    const warp = { actions: [action] } as any
+    const { value, transfers } = await subject.createExecutable(warp, 1, ['esdt:EGLD-000000|0|1.5'])
 
     expect(value.toString()).toBe('1500000000000000000')
     expect(transfers).toEqual([])
@@ -671,7 +681,8 @@ describe('WarpFactory', () => {
       ],
     }
 
-    const { value, transfers } = await subject.createExecutable(action, ['esdt:USDC-c76f1f|0|1000000', 'esdt:EGLD-000000|0|1.5'])
+    const warp = { actions: [action] } as any
+    const { value, transfers } = await subject.createExecutable(warp, 1, ['esdt:USDC-c76f1f|0|1000000', 'esdt:EGLD-000000|0|1.5'])
 
     expect(value.toString()).toBe('0')
     expect(transfers.length).toBe(1)
@@ -695,7 +706,8 @@ describe('WarpFactory', () => {
       inputs: [{ name: 'nativeTransfer', type: 'esdt', position: 'transfer', source: 'field' }],
     }
 
-    const { value, transfers } = await subject.createExecutable(action, ['esdt:EGLD-000000|0|1'])
+    const warp = { actions: [action] } as any
+    const { value, transfers } = await subject.createExecutable(warp, 1, ['esdt:EGLD-000000|0|1'])
 
     expect(value.toString()).toBe('1500000000000000000')
     expect(transfers).toEqual([])
@@ -724,7 +736,8 @@ describe('WarpFactory', () => {
       ],
     }
 
-    const { value, transfers } = await subject.createExecutable(action, ['esdt:EGLD-000000|0|1.5', 'esdt:USDC-c76f1f|0|1000000'])
+    const warp = { actions: [action] } as any
+    const { value, transfers } = await subject.createExecutable(warp, 1, ['esdt:EGLD-000000|0|1.5', 'esdt:USDC-c76f1f|0|1000000'])
 
     expect(value.toString()).toBe('0')
     expect(transfers.length).toBe(2)
@@ -753,7 +766,8 @@ describe('WarpFactory', () => {
       ],
     }
 
-    const { value, transfers } = await subject.createExecutable(action, [])
+    const warp = { actions: [action] } as any
+    const { value, transfers } = await subject.createExecutable(warp, 1, [])
 
     expect(value.toString()).toBe('0')
     expect(transfers.length).toBe(2)

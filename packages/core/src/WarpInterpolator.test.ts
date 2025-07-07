@@ -3,11 +3,12 @@ import { getMainChainInfo } from './helpers/general'
 import { Warp, WarpInitConfig } from './types/warp'
 import { CacheTtl, WarpCache, WarpCacheKey } from './WarpCache'
 import { WarpInterpolator } from './WarpInterpolator'
-import { WarpUtils } from '../../warps/src/WarpUtils'
 
-// Mock WarpUtils to return cached chain info
+// Mock WarpUtils since it's now in the warps package
 jest.mock('../../warps/src/WarpUtils', () => ({
-  getChainInfoForAction: jest.fn(),
+  WarpUtils: {
+    getChainInfoForAction: jest.fn(),
+  }
 }))
 
 const testConfig: WarpInitConfig = {
@@ -73,6 +74,10 @@ describe('WarpInterpolator', () => {
 })
 
 describe('WarpInterpolator per-action chain info', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
   it('interpolates actions with different chain info', async () => {
     const config = {
       ...testConfig,
@@ -104,8 +109,9 @@ describe('WarpInterpolator per-action chain info', () => {
     }
 
     // Mock the getChainInfoForAction to return appropriate chain info
-    const mockGetChainInfo = WarpUtils.getChainInfoForAction as jest.MockedFunction<typeof WarpUtils.getChainInfoForAction>
-    mockGetChainInfo.mockImplementation(async (config, action) => {
+    const { WarpUtils } = require('../../warps/src/WarpUtils')
+    const mockGetChainInfo = WarpUtils.getChainInfoForAction as jest.MockedFunction<any>
+    mockGetChainInfo.mockImplementation(async (config: any, action: any) => {
       if (action.chain === 'A') return chainA
       if (action.chain === 'B') return chainB
       return getMainChainInfo(config)
@@ -144,6 +150,11 @@ describe('WarpInterpolator per-action chain info', () => {
       currentUrl: 'https://anyclient.com?age=10',
     }
     const defaultChain = getMainChainInfo(config)
+
+    // Mock the getChainInfoForAction to return default chain info
+    const { WarpUtils } = require('../../warps/src/WarpUtils')
+    const mockGetChainInfo = WarpUtils.getChainInfoForAction as jest.MockedFunction<any>
+    mockGetChainInfo.mockResolvedValue(defaultChain)
 
     const warp: Warp = {
       description: 'Test',

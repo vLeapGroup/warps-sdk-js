@@ -192,6 +192,10 @@ export class WarpMultiversxResults {
     }
     for (const [key, path] of Object.entries(warp.results)) {
       if (path.startsWith(WarpConstants.Transform.Prefix)) continue
+      if (path.startsWith('input.')) {
+        results[key] = path
+        continue
+      }
       const currentActionIndex = parseOutActionIndex(path)
       if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
         results[key] = null
@@ -218,6 +222,10 @@ export class WarpMultiversxResults {
     for (const [resultName, resultPath] of Object.entries(warp.results || {})) {
       if (typeof resultPath !== 'string') continue
       if (resultPath.startsWith(WarpConstants.Transform.Prefix)) continue
+      if (resultPath.startsWith('input.')) {
+        results[resultName] = resultPath
+        continue
+      }
       const currentActionIndex = WarpMultiversxResults.parseOutActionIndex(resultPath)
       if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
         results[resultName] = null
