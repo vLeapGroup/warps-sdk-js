@@ -1,6 +1,6 @@
 {
-  "name": "@vleap/warps",
-  "version": "3.0.0-alpha.25",
+  "name": "@vleap/warps-core",
+  "version": "0.1.0",
   "description": "",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -18,11 +18,9 @@
     "dist"
   ],
   "peerDependencies": {
-    "@multiversx/sdk-core": "^14.0.2",
     "vm2": "^3.9.17"
   },
   "devDependencies": {
-    "@multiversx/sdk-core": "^14.2.1",
     "@types/jest": "^29.5.14",
     "jest": "^30.0.0",
     "jest-environment-jsdom": "^30.0.0",
@@ -37,6 +35,7 @@
   },
   "dependencies": {
     "ajv": "^8.17.1",
+    "protobufjs": "^7.5.3",
     "qr-code-styling": "^1.9.2"
   }
 }

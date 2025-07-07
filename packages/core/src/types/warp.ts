@@ -77,6 +77,8 @@ export type WarpMeta = {
 
 export type WarpAction = WarpTransferAction | WarpContractAction | WarpQueryAction | WarpCollectAction | WarpLinkAction
 
+export type WarpActionIndex = number
+
 export type WarpActionType = 'transfer' | 'contract' | 'query' | 'collect' | 'link'
 
 export type WarpTransferAction = {
@@ -87,7 +89,7 @@ export type WarpTransferAction = {
   address?: string
   data?: string
   value?: string
-  transfers?: WarpContractActionTransfer[]
+  transfers?: string[]
   inputs?: WarpActionInput[]
   next?: string
 }
@@ -97,21 +99,15 @@ export type WarpContractAction = {
   chain?: WarpChain
   label: string
   description?: string | null
-  address: string
-  func: string | null
-  args: string[]
+  address?: string
+  func?: string | null
+  args?: string[]
   value?: string
   gasLimit: number
-  transfers?: WarpContractActionTransfer[]
+  transfers?: string[]
   abi?: string
   inputs?: WarpActionInput[]
   next?: string
-}
-
-export type WarpContractActionTransfer = {
-  token: string
-  nonce?: number
-  amount?: string
 }
 
 export type WarpQueryAction = {
@@ -119,9 +115,9 @@ export type WarpQueryAction = {
   chain?: WarpChain
   label: string
   description?: string | null
-  address: string
-  func: string
-  args: string[]
+  address?: string
+  func?: string
+  args?: string[]
   abi?: string
   inputs?: WarpActionInput[]
   next?: string
@@ -169,6 +165,8 @@ export type BaseWarpActionInputType =
 
 export type WarpActionInputType = string
 
+export type WarpNativeValue = string | number | bigint | boolean | null | WarpNativeValue[]
+
 export type WarpActionInputPosition = 'receiver' | 'value' | 'transfer' | `arg:${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}` | 'data' | 'chain'
 
 export type WarpActionInputModifier = 'scale'
@@ -205,4 +203,16 @@ export type WarpContract = {
 export type WarpContractVerification = {
   codeHash: string
   abi: object
+}
+
+export type WarpExecutable = {
+  chain: WarpChainInfo
+  warp: Warp
+  action: number
+  destination: string
+  args: string[]
+  value: bigint
+  transfers: string[]
+  data: string | null
+  resolvedInputs: ResolvedInput[]
 }

@@ -1,0 +1,38 @@
+{
+  "name": "@vleap/warps-adapter-multiversx",
+  "version": "0.1.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.js",
+  "scripts": {
+    "build": "tsup src/index.ts --dts --format cjs,esm --minify --clean",
+    "test": "jest --config jest.config.js",
+    "lint": "tsc --noEmit",
+    "prepare": "npm run build",
+    "preversion": "npm run lint && npm run build"
+  },
+  "author": "",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@multiversx/sdk-core": "^14.2.1",
+    "@types/jest": "^29.5.14",
+    "jest": "^30.0.0",
+    "jest-environment-jsdom": "^30.0.0",
+    "jest-fetch-mock": "^3.0.3",
+    "ts-jest": "^29.4.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "vm2": "^3.9.19"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@vleap/warps-core": "^0.1.0",
+    "@multiversx/sdk-core": "^14.2.1"
+  }
+}

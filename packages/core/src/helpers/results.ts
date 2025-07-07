@@ -1,136 +1,9 @@
-import {
-  SmartContractTransactionsOutcomeParser,
-  TransactionEventsParser,
-  TransactionOnNetwork,
-  TypedValue,
-  findEventsByFirstTopic,
-} from '@multiversx/sdk-core/out'
 import { WarpConstants } from '../constants'
-import { ResolvedInput, Warp, WarpContractAction } from '../types'
+import { ResolvedInput, Warp } from '../types'
 import { WarpExecutionResults } from '../types/results'
-import { WarpActionExecutor } from '../WarpActionExecutor'
-import { WarpArgSerializer } from '../WarpArgSerializer'
 import { WarpLogger } from '../WarpLogger'
+import { WarpSerializer } from '../WarpSerializer'
 import { getWarpActionByIndex } from './general'
-
-/**
- * Parses out[N] notation and returns the action index (1-based) or null if invalid.
- * Also handles plain "out" which defaults to action index 1.
- */
-const parseOutActionIndex = (resultPath: string): number | null => {
-  if (resultPath === 'out') return 1
-  const outIndexMatch = resultPath.match(/^out\[(\d+)\]/)
-  if (outIndexMatch) return parseInt(outIndexMatch[1], 10)
-  if (resultPath.startsWith('out.') || resultPath.startsWith('event.')) return null
-  return null
-}
-
-const getNestedValueFromObject = (obj: any, path: string[]): any => {
-  return path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : null), obj)
-}
-
-export const extractContractResults = async (
-  executor: WarpActionExecutor,
-  warp: Warp,
-  action: WarpContractAction,
-  tx: TransactionOnNetwork,
-  actionIndex: number,
-  inputs: ResolvedInput[]
-): Promise<{ values: any[]; results: WarpExecutionResults }> => {
-  let values: any[] = []
-  let results: WarpExecutionResults = {}
-  if (!warp.results || action.type !== 'contract') {
-    return { values, results }
-  }
-  const needsAbi = Object.values(warp.results).some((resultPath) => resultPath.includes('out') || resultPath.includes('event'))
-  if (!needsAbi) {
-    for (const [resultName, resultPath] of Object.entries(warp.results)) {
-      results[resultName] = resultPath
-    }
-    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
-  }
-  const abi = await executor.getAbiForAction(action)
-  const eventParser = new TransactionEventsParser({ abi })
-  const outcomeParser = new SmartContractTransactionsOutcomeParser({ abi })
-  const outcome = outcomeParser.parseExecute({ transactionOnNetwork: tx, function: action.func || undefined })
-  for (const [resultName, resultPath] of Object.entries(warp.results)) {
-    if (resultPath.startsWith(WarpConstants.Transform.Prefix)) continue
-    if (resultPath.startsWith('input.')) {
-      results[resultName] = resultPath
-      continue
-    }
-    const currentActionIndex = parseOutActionIndex(resultPath)
-    if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
-      results[resultName] = null
-      continue
-    }
-    const [resultType, partOne, partTwo] = resultPath.split('.')
-    if (resultType === 'event') {
-      if (!partOne || isNaN(Number(partTwo))) continue
-      const topicPosition = Number(partTwo)
-      const events = findEventsByFirstTopic(tx, partOne)
-      const outcome = eventParser.parseEvents({ events })[0]
-      const outcomeAtPosition = (Object.values(outcome)[topicPosition] || null) as object | null
-      values.push(outcomeAtPosition)
-      results[resultName] = outcomeAtPosition ? outcomeAtPosition.valueOf() : outcomeAtPosition
-    } else if (resultType === 'out' || resultType.startsWith('out[')) {
-      if (!partOne) continue
-      const outputIndex = Number(partOne)
-      let outputAtPosition = outcome.values[outputIndex - 1] || null
-      if (partTwo) {
-        outputAtPosition = outputAtPosition[partTwo] || null
-      }
-      if (outputAtPosition && typeof outputAtPosition === 'object') {
-        outputAtPosition = 'toFixed' in outputAtPosition ? outputAtPosition.toFixed() : outputAtPosition.valueOf()
-      }
-      values.push(outputAtPosition)
-      results[resultName] = outputAtPosition ? outputAtPosition.valueOf() : outputAtPosition
-    } else {
-      results[resultName] = resultPath
-    }
-  }
-  return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
-}
-
-export const extractQueryResults = async (
-  warp: Warp,
-  typedValues: TypedValue[],
-  actionIndex: number,
-  inputs: ResolvedInput[]
-): Promise<{ values: any[]; results: WarpExecutionResults }> => {
-  const was = new WarpArgSerializer()
-  const values = typedValues.map((t) => was.typedToString(t))
-  const valuesRaw = typedValues.map((t) => was.typedToNative(t)[1])
-  let results: WarpExecutionResults = {}
-  if (!warp.results) return { values, results }
-  const getNestedValue = (path: string): unknown => {
-    const indices = path
-      .split('.')
-      .slice(1)
-      .map((i) => parseInt(i) - 1)
-    if (indices.length === 0) return undefined
-    let value: any = valuesRaw[indices[0]]
-    for (let i = 1; i < indices.length; i++) {
-      if (value === undefined || value === null) return undefined
-      value = value[indices[i]]
-    }
-    return value
-  }
-  for (const [key, path] of Object.entries(warp.results)) {
-    if (path.startsWith(WarpConstants.Transform.Prefix)) continue
-    const currentActionIndex = parseOutActionIndex(path)
-    if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
-      results[key] = null
-      continue
-    }
-    if (path.startsWith('out.') || path === 'out' || path.startsWith('out[')) {
-      results[key] = getNestedValue(path) || null
-    } else {
-      results[key] = path
-    }
-  }
-  return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
-}
 
 export const extractCollectResults = async (
   warp: Warp,
@@ -142,12 +15,16 @@ export const extractCollectResults = async (
   let results: WarpExecutionResults = {}
   for (const [resultName, resultPath] of Object.entries(warp.results || {})) {
     if (resultPath.startsWith(WarpConstants.Transform.Prefix)) continue
-    const currentActionIndex = parseOutActionIndex(resultPath)
+    const currentActionIndex = parseResultsOutIndex(resultPath)
     if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
       results[resultName] = null
       continue
     }
     const [resultType, ...pathParts] = resultPath.split('.')
+
+    const getNestedValueFromObject = (obj: any, path: string[]): any =>
+      path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : null), obj)
+
     if (resultType === 'out' || resultType.startsWith('out[')) {
       const value = pathParts.length === 0 ? response?.data || response : getNestedValueFromObject(response, pathParts)
       values.push(value)
@@ -159,74 +36,11 @@ export const extractCollectResults = async (
   return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
 }
 
-/**
- * Resolves all results for a warp, including dependencies referenced via out[N], recursively.
- * Executes all required actions and applies transforms, returning the final results for the entry action.
- */
-export async function resolveWarpResultsRecursively(
-  warp: any,
-  entryActionIndex: number,
-  executor: { executeQuery: Function; executeCollect: Function },
-  inputs: ResolvedInput[],
-  meta?: Record<string, any>
-): Promise<any> {
-  const resultsCache = new Map<number, any>()
-  const resolving = new Set<number>()
-
-  async function resolveAction(actionIndex: number, actionInputs: ResolvedInput[] = []): Promise<any> {
-    if (resultsCache.has(actionIndex)) return resultsCache.get(actionIndex)
-    if (resolving.has(actionIndex)) throw new Error(`Circular dependency detected at action ${actionIndex}`)
-    resolving.add(actionIndex)
-    const action = warp.actions[actionIndex - 1]
-    if (!action) throw new Error(`Action ${actionIndex} not found`)
-    let execution: any
-    if (action.type === 'query') {
-      execution = await executor.executeQuery(warp, actionIndex, actionInputs)
-    } else if (action.type === 'collect') {
-      execution = await executor.executeCollect(warp, actionIndex, actionInputs, meta)
-    } else {
-      throw new Error(`Unsupported or interactive action type: ${action.type}`)
-    }
-    resultsCache.set(actionIndex, execution)
-    // Recursively resolve dependencies referenced by out[N] in warp.results
-    if (warp.results) {
-      for (const pathRaw of Object.values(warp.results)) {
-        const path = String(pathRaw)
-        const outIndexMatch = path.match(/^out\[(\d+)\]/)
-        if (outIndexMatch) {
-          const depIndex = parseInt(outIndexMatch[1], 10)
-          if (depIndex !== actionIndex && !resultsCache.has(depIndex)) {
-            await resolveAction(depIndex)
-          }
-        }
-      }
-    }
-    resolving.delete(actionIndex)
-    return execution
-  }
-
-  await resolveAction(entryActionIndex, inputs)
-
-  // Merge all results for transforms
-  const combinedResults: Record<string, any> = {}
-  for (const exec of resultsCache.values()) {
-    for (const [key, value] of Object.entries(exec.results)) {
-      if (value !== null) {
-        combinedResults[key] = value
-      } else if (!(key in combinedResults)) {
-        combinedResults[key] = null
-      }
-    }
-  }
-  const finalResults = await evaluateResultsCommon(warp, combinedResults, entryActionIndex, inputs)
-  const entryExecution = resultsCache.get(entryActionIndex)!
-  return {
-    ...entryExecution,
-    results: finalResults,
-  }
-}
-
-const evaluateResultsCommon = async (
+// Processes and finalizes the results of a Warp action, supporting result definitions like:
+//   - 'input.amount' to echo input values
+//   - 'transform: return out.value * 2' for computed results
+// Enables users to define results that are static, input-based, or computed via custom code.
+export const evaluateResultsCommon = async (
   warp: Warp,
   baseResults: WarpExecutionResults,
   actionIndex: number,
@@ -239,6 +53,8 @@ const evaluateResultsCommon = async (
   return results
 }
 
+// Supports result fields like 'input.amount', replacing them with the actual value provided for 'amount' in the action's inputs.
+// Lets users expose or echo specific input values directly in the results by referencing them as 'input.<name>'.
 const evaluateInputResults = (
   results: WarpExecutionResults,
   warp: Warp,
@@ -247,7 +63,7 @@ const evaluateInputResults = (
 ): WarpExecutionResults => {
   const modifiable = { ...results }
   const actionInputs = getWarpActionByIndex(warp, actionIndex)?.inputs || []
-  const serializer = new WarpArgSerializer()
+  const serializer = new WarpSerializer()
   for (const [key, value] of Object.entries(modifiable)) {
     if (typeof value === 'string' && value.startsWith('input.')) {
       const inputName = value.split('.')[1]
@@ -259,6 +75,9 @@ const evaluateInputResults = (
   return modifiable
 }
 
+// Supports result fields starting with 'transform:', e.g., 'transform: return out.value * 2',
+// which run user-defined code to compute the result value based on other results.
+// Enables advanced, programmable result shaping using custom JavaScript logic in the result definition.
 const evaluateTransformResults = async (warp: Warp, baseResults: WarpExecutionResults): Promise<WarpExecutionResults> => {
   if (!warp.results) return baseResults
   const modifiable = { ...baseResults }
@@ -279,4 +98,16 @@ const evaluateTransformResults = async (warp: Warp, baseResults: WarpExecutionRe
   }
 
   return modifiable
+}
+
+/**
+ * Parses out[N] notation and returns the action index (1-based) or null if invalid.
+ * Also handles plain "out" which defaults to action index 1.
+ */
+export const parseResultsOutIndex = (resultPath: string): number | null => {
+  if (resultPath === 'out') return 1
+  const outIndexMatch = resultPath.match(/^out\[(\d+)\]/)
+  if (outIndexMatch) return parseInt(outIndexMatch[1], 10)
+  if (resultPath.startsWith('out.') || resultPath.startsWith('event.')) return null
+  return null
 }

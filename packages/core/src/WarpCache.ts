@@ -12,10 +12,10 @@ export const CacheTtl = {
   OneYear: 60 * 60 * 24 * 365,
 }
 
-export const CacheKey = {
+export const WarpCacheKey = {
   Warp: (env: WarpChainEnv, id: string) => `warp:${env}:${id}`,
   WarpAbi: (env: WarpChainEnv, id: string) => `warp-abi:${env}:${id}`,
-  LastWarpExecutionInputs: (env: WarpChainEnv, id: string, action: number) => `warp-exec-inputs:${env}:${id}:${action}`,
+  WarpExecutable: (env: WarpChainEnv, id: string, action: number) => `warp-exec:${env}:${id}:${action}`,
   RegistryInfo: (env: WarpChainEnv, id: string) => `registry-info:${env}:${id}`,
   Brand: (env: WarpChainEnv, hash: string) => `brand:${env}:${hash}`,
   ChainInfo: (env: WarpChainEnv, chain: WarpChain) => `chain:${env}:${chain}`,

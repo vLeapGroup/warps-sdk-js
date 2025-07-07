@@ -1,6 +1,6 @@
 import { WarpMeta } from './warp'
 
-export type WarpWarpAbi = {
+export type WarpAbi = {
   protocol: string
   content: WarpAbiContents
   meta?: WarpMeta

@@ -9,6 +9,7 @@ describe('WarpCache', () => {
   cacheTypes.forEach((type) => {
     describe(`${type} cache`, () => {
       let cache: any
+
       beforeEach(() => {
         cache = new WarpCache(type as CacheType)
         cache.clear()
