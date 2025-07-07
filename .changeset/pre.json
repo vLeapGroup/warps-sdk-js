@@ -8,7 +8,8 @@
     "tsconfig": "0.0.1",
     "@warps/playground": "0.1.0",
     "@vleap/warps-adapter-multiversx": "0.1.0",
-    "@vleap/warps-core": "0.1.0"
+    "@vleap/warps-core": "0.1.0",
+    "@vleap/warps-adapter-sui": "0.2.0-alpha.0"
   },
   "changesets": [
     "crazy-candles-post",
@@ -18,6 +19,8 @@
     "eighty-cycles-visit",
     "empty-friends-wonder",
     "evil-clouds-tap",
+    "five-dancers-thank",
+    "flat-experts-move",
     "happy-keys-divide",
     "mean-views-strive",
     "modern-sloths-create",
@@ -26,6 +29,7 @@
     "proud-beans-vanish",
     "puny-seals-rescue",
     "purple-pugs-design",
+    "rare-meals-smell",
     "sad-paths-fold",
     "short-singers-relax",
     "shy-regions-battle",

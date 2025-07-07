@@ -1,5 +1,13 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.28
+
+### Patch Changes
+
+- d9bb08c: fix executor
+- Updated dependencies [1042334]
+  - @vleap/warps-adapter-multiversx@0.2.0-alpha.1
+
 ## 3.0.0-alpha.27
 
 ### Minor Changes
