@@ -1,7 +1,7 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
 import { WarpMultiversxExecutor } from '@vleap/warps-adapter-multiversx'
 import { Brand, getLatestProtocolIdentifier, getMainChainInfo, WarpConfig, WarpInitConfig, WarpLogger } from '@vleap/warps-core'
-import { BrandColors, BrandCta, BrandUrls } from '@vleap/warps-core/src/types'
+import { WarpBrandColors, WarpBrandCta, WarpBrandUrls } from '@vleap/warps-core/src/types'
 import Ajv from 'ajv'
 import { Buffer } from 'buffer'
 
@@ -77,17 +77,17 @@ export class BrandBuilder {
     return this
   }
 
-  setUrls(urls: BrandUrls): BrandBuilder {
+  setUrls(urls: WarpBrandUrls): BrandBuilder {
     this.pendingBrand.urls = urls
     return this
   }
 
-  setColors(colors: BrandColors): BrandBuilder {
+  setColors(colors: WarpBrandColors): BrandBuilder {
     this.pendingBrand.colors = colors
     return this
   }
 
-  setCta(cta: BrandCta): BrandBuilder {
+  setCta(cta: WarpBrandCta): BrandBuilder {
     this.pendingBrand.cta = cta
     return this
   }

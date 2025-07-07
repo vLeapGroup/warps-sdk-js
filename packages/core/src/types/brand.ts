@@ -1,31 +1,31 @@
-export type Brand = {
+export type WarpBrand = {
   protocol: string
   name: string
   description: string
   logo: string
-  urls?: BrandUrls
-  colors?: BrandColors
-  cta?: BrandCta
-  meta?: BrandMeta
+  urls?: WarpBrandUrls
+  colors?: WarpBrandColors
+  cta?: WarpBrandCta
+  meta?: WarpBrandMeta
 }
 
-export type BrandUrls = {
+export type WarpBrandUrls = {
   web?: string
 }
 
-export type BrandColors = {
+export type WarpBrandColors = {
   primary?: string
   secondary?: string
 }
 
-export type BrandCta = {
+export type WarpBrandCta = {
   title: string
   description: string
   label: string
   url: string
 }
 
-export type BrandMeta = {
+export type WarpBrandMeta = {
   hash: string
   creator: string
   createdAt: string
