@@ -6,7 +6,9 @@
     "eslint-config-custom": "0.0.0",
     "@vleap/warps-react": "0.0.11",
     "tsconfig": "0.0.1",
-    "@warps/playground": "0.1.0"
+    "@warps/playground": "0.1.0",
+    "@vleap/warps-adapter-multiversx": "0.1.0",
+    "@vleap/warps-core": "0.1.0"
   },
   "changesets": [
     "crazy-candles-post",
@@ -16,7 +18,10 @@
     "eighty-cycles-visit",
     "empty-friends-wonder",
     "evil-clouds-tap",
+    "mean-views-strive",
+    "modern-sloths-create",
     "odd-hats-hunt",
+    "open-horses-lick",
     "proud-beans-vanish",
     "puny-seals-rescue",
     "purple-pugs-design",

@@ -1,5 +1,22 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.26
+
+### Major Changes
+
+- 8d57441: re-arch multi-package + adapters
+
+### Minor Changes
+
+- 40e8470: rearch + adapters
+- rearch + adapters
+
+### Patch Changes
+
+- Updated dependencies [40e8470]
+  - @vleap/warps-adapter-multiversx@0.2.0-alpha.0
+  - @vleap/warps-core@0.2.0-alpha.0
+
 ## 3.0.0-alpha.25
 
 ### Patch Changes

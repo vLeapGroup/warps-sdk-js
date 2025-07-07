@@ -1,6 +1,6 @@
 {
   "name": "@vleap/warps-adapter-multiversx",
-  "version": "0.1.0",
+  "version": "0.2.0-alpha.0",
   "description": "",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -32,7 +32,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vleap/warps-core": "^0.1.0",
+    "@vleap/warps-core": "^0.2.0-alpha.0",
     "@multiversx/sdk-core": "^14.2.1"
   }
 }
