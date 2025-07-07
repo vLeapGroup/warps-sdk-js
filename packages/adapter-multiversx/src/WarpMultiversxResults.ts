@@ -14,7 +14,7 @@ import {
   evaluateResultsCommon,
   getNextInfo,
   getWarpActionByIndex,
-  parseOutActionIndex,
+  parseResultsOutIndex,
 } from '@vleap/warps-core'
 import { WarpMultiversxAbi } from './WarpMultiversxAbi'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
@@ -54,7 +54,7 @@ export class WarpMultiversxResults {
     }
   }
 
-  static parseOutActionIndex(resultPath: string): number | null {
+  static parseResultsOutIndex(resultPath: string): number | null {
     if (resultPath === 'out') return 1
     const outIndexMatch = resultPath.match(/^out\[(\d+)\]/)
     if (outIndexMatch) return parseInt(outIndexMatch[1], 10)
@@ -99,7 +99,7 @@ export class WarpMultiversxResults {
         results[resultName] = resultPath
         continue
       }
-      const currentActionIndex = WarpMultiversxResults.parseOutActionIndex(resultPath)
+      const currentActionIndex = WarpMultiversxResults.parseResultsOutIndex(resultPath)
       if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
         results[resultName] = null
         continue
@@ -192,7 +192,7 @@ export class WarpMultiversxResults {
     }
     for (const [key, path] of Object.entries(warp.results)) {
       if (path.startsWith(WarpConstants.Transform.Prefix)) continue
-      const currentActionIndex = parseOutActionIndex(path)
+      const currentActionIndex = parseResultsOutIndex(path)
       if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
         results[key] = null
         continue
@@ -204,46 +204,6 @@ export class WarpMultiversxResults {
       }
     }
     return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
-  }
-
-  async extractCollectResults(
-    warp: Warp,
-    tx: TransactionOnNetwork,
-    actionIndex: number,
-    inputs: ResolvedInput[]
-  ): Promise<{ values: any[]; results: WarpExecutionResults; success: boolean; txHash: string }> {
-    const response = tx as any
-    const values: any[] = []
-    let results: WarpExecutionResults = {}
-    for (const [resultName, resultPath] of Object.entries(warp.results || {})) {
-      if (typeof resultPath !== 'string') continue
-      if (resultPath.startsWith(WarpConstants.Transform.Prefix)) continue
-      const currentActionIndex = WarpMultiversxResults.parseOutActionIndex(resultPath)
-      if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
-        results[resultName] = null
-        continue
-      }
-      const parts = resultPath.split('.')
-      const resultType = parts[0]
-      const pathParts = parts.slice(1)
-      if (resultType === 'out' || resultType.startsWith('out[')) {
-        const value = pathParts.length === 0 ? response?.data || response : this.getNestedValueFromObject(response, pathParts)
-        values.push(value)
-        results[resultName] = value
-      } else {
-        results[resultName] = resultPath
-      }
-    }
-    return {
-      values,
-      results: await evaluateResultsCommon(warp, results, actionIndex, inputs),
-      success: true,
-      txHash: response.hash || '',
-    }
-  }
-
-  private getNestedValueFromObject(obj: any, path: string[]): any {
-    return path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : null), obj)
   }
 
   async resolveWarpResultsRecursively(props: {

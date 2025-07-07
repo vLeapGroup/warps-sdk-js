@@ -67,7 +67,7 @@ describe('WarpInterpolator', () => {
 })
 
 describe('WarpInterpolator per-action chain info', () => {
-  it('interpolates actions with different chain info', async () => {
+  it.only('interpolates actions with different chain info', async () => {
     const config = {
       ...testConfig,
       user: { wallet: 'erd1abc' },

@@ -5,18 +5,6 @@ import { WarpLogger } from '../WarpLogger'
 import { WarpSerializer } from '../WarpSerializer'
 import { getWarpActionByIndex } from './general'
 
-/**
- * Parses out[N] notation and returns the action index (1-based) or null if invalid.
- * Also handles plain "out" which defaults to action index 1.
- */
-export const parseOutActionIndex = (resultPath: string): number | null => {
-  if (resultPath === 'out') return 1
-  const outIndexMatch = resultPath.match(/^out\[(\d+)\]/)
-  if (outIndexMatch) return parseInt(outIndexMatch[1], 10)
-  if (resultPath.startsWith('out.') || resultPath.startsWith('event.')) return null
-  return null
-}
-
 export const extractCollectResults = async (
   warp: Warp,
   response: any,
@@ -27,12 +15,16 @@ export const extractCollectResults = async (
   let results: WarpExecutionResults = {}
   for (const [resultName, resultPath] of Object.entries(warp.results || {})) {
     if (resultPath.startsWith(WarpConstants.Transform.Prefix)) continue
-    const currentActionIndex = parseOutActionIndex(resultPath)
+    const currentActionIndex = parseResultsOutIndex(resultPath)
     if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
       results[resultName] = null
       continue
     }
     const [resultType, ...pathParts] = resultPath.split('.')
+
+    const getNestedValueFromObject = (obj: any, path: string[]): any =>
+      path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : null), obj)
+
     if (resultType === 'out' || resultType.startsWith('out[')) {
       const value = pathParts.length === 0 ? response?.data || response : getNestedValueFromObject(response, pathParts)
       values.push(value)
@@ -44,6 +36,10 @@ export const extractCollectResults = async (
   return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
 }
 
+// Processes and finalizes the results of a Warp action, supporting result definitions like:
+//   - 'input.amount' to echo input values
+//   - 'transform: return out.value * 2' for computed results
+// Enables users to define results that are static, input-based, or computed via custom code.
 export const evaluateResultsCommon = async (
   warp: Warp,
   baseResults: WarpExecutionResults,
@@ -57,6 +53,8 @@ export const evaluateResultsCommon = async (
   return results
 }
 
+// Supports result fields like 'input.amount', replacing them with the actual value provided for 'amount' in the action's inputs.
+// Lets users expose or echo specific input values directly in the results by referencing them as 'input.<name>'.
 const evaluateInputResults = (
   results: WarpExecutionResults,
   warp: Warp,
@@ -77,10 +75,9 @@ const evaluateInputResults = (
   return modifiable
 }
 
-const getNestedValueFromObject = (obj: any, path: string[]): any => {
-  return path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : null), obj)
-}
-
+// Supports result fields starting with 'transform:', e.g., 'transform: return out.value * 2',
+// which run user-defined code to compute the result value based on other results.
+// Enables advanced, programmable result shaping using custom JavaScript logic in the result definition.
 const evaluateTransformResults = async (warp: Warp, baseResults: WarpExecutionResults): Promise<WarpExecutionResults> => {
   if (!warp.results) return baseResults
   const modifiable = { ...baseResults }
@@ -101,4 +98,16 @@ const evaluateTransformResults = async (warp: Warp, baseResults: WarpExecutionRe
   }
 
   return modifiable
+}
+
+/**
+ * Parses out[N] notation and returns the action index (1-based) or null if invalid.
+ * Also handles plain "out" which defaults to action index 1.
+ */
+export const parseResultsOutIndex = (resultPath: string): number | null => {
+  if (resultPath === 'out') return 1
+  const outIndexMatch = resultPath.match(/^out\[(\d+)\]/)
+  if (outIndexMatch) return parseInt(outIndexMatch[1], 10)
+  if (resultPath.startsWith('out.') || resultPath.startsWith('event.')) return null
+  return null
 }
