@@ -1,3 +1,4 @@
+export * from './constants'
 export * from './utils.codec'
 export * from './WarpMultiversxAbi'
 export * from './WarpMultiversxContractLoader'
