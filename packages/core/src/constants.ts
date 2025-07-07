@@ -43,11 +43,21 @@ export const WarpConstants = {
   Transform: {
     Prefix: 'transform:',
   },
+}
 
-  Egld: {
-    Identifier: 'EGLD',
-    EsdtIdentifier: 'EGLD-000000',
-    DisplayName: 'eGold',
-    Decimals: 18,
-  },
+export const WarpInputTypes = {
+  Option: 'option',
+  Optional: 'optional',
+  List: 'list',
+  Variadic: 'variadic',
+  Composite: 'composite',
+  String: 'string',
+  U8: 'u8',
+  U16: 'u16',
+  U32: 'u32',
+  U64: 'u64',
+  Biguint: 'biguint',
+  Boolean: 'boolean',
+  Address: 'address',
+  Hex: 'hex',
 }

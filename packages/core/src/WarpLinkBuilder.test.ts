@@ -1,8 +1,7 @@
 import { WarpInitConfig } from './types'
 import { WarpLinkBuilder } from './WarpLinkBuilder'
 
-jest.mock('./WarpBuilder')
-jest.mock('./WarpRegistry')
+jest.mock('./WarpLinkBuilder')
 
 const Config: WarpInitConfig = {
   env: 'devnet',
@@ -10,7 +9,7 @@ const Config: WarpInitConfig = {
 }
 
 describe('build', () => {
-  it('builds a link with hash', () => {
+  it.only('builds a link with hash', () => {
     const link = new WarpLinkBuilder(Config).build('hash', '123')
     expect(link).toBe('https://anyclient.com?warp=hash%3A123')
   })

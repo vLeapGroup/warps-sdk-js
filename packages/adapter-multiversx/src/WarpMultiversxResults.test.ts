@@ -1,12 +1,5 @@
 // Tests for the MultiversxResults class. All tests focus on the MultiversxResults class directly.
-import {
-  AbiRegistry,
-  SmartContractResult,
-  TransactionEvent,
-  TransactionLogs,
-  TransactionOnNetwork,
-  TypedValue,
-} from '@multiversx/sdk-core/out'
+import { SmartContractResult, TransactionEvent, TransactionLogs, TransactionOnNetwork, TypedValue } from '@multiversx/sdk-core/out'
 import { Warp, WarpContractAction, WarpInitConfig } from '@vleap/warps-core'
 import { promises as fs, PathLike } from 'fs'
 import fetchMock from 'jest-fetch-mock'
@@ -41,10 +34,9 @@ afterEach(async () => {
 })
 
 describe('Result Helpers', () => {
-  const { MultiversxAdapter } = require('./MultiversxAdapter')
-  let subject: any
+  let subject: WarpMultiversxResults
   beforeEach(() => {
-    subject = new WarpActionExecutor(new MultiversxAdapter(testConfig))
+    subject = new WarpMultiversxResults(testConfig)
   })
 
   describe('input-based results', () => {
@@ -79,7 +71,7 @@ describe('Result Helpers', () => {
       ]
       const tx = new TransactionOnNetwork()
       ;(tx as any).typedValues = typedValues
-      const { results } = await new WarpMultiversxResults().extractQueryResults(subject, warp, tx, 1, inputs)
+      const { results } = await new WarpMultiversxResults(testConfig).extractQueryResults(warp, typedValues, 0, inputs)
       expect(results.FOO).toBe('abc')
       expect(results.BAR).toBe(1234567890n)
     })
@@ -108,7 +100,7 @@ describe('Result Helpers', () => {
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:aliased' }]
       const tx = new TransactionOnNetwork()
       ;(tx as any).typedValues = typedValues
-      const { results } = await new WarpMultiversxResults().extractQueryResults(subject, warp, tx, 1, inputs)
+      const { results } = await new WarpMultiversxResults(testConfig).extractQueryResults(warp, typedValues, 0, inputs)
       expect(results.FOO).toBe('aliased')
     })
 
@@ -136,7 +128,7 @@ describe('Result Helpers', () => {
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:abc' }]
       const tx = new TransactionOnNetwork()
       ;(tx as any).typedValues = typedValues
-      const { results } = await new WarpMultiversxResults().extractQueryResults(subject, warp, tx, 1, inputs)
+      const { results } = await new WarpMultiversxResults(testConfig).extractQueryResults(warp, typedValues, 0, inputs)
       expect(results.BAR).toBeNull()
     })
 
@@ -169,7 +161,7 @@ describe('Result Helpers', () => {
       ]
       const tx = new TransactionOnNetwork()
       Object.assign(tx, response)
-      const { results } = await new WarpMultiversxResults().extractCollectResults(subject, warp, tx, 1, inputs)
+      const { results } = await new WarpMultiversxResults(testConfig).extractCollectResults(warp, tx, 0, inputs)
       expect(results.FOO).toBe('abc')
       expect(results.BAR).toBe('xyz')
     })
@@ -196,7 +188,7 @@ describe('Result Helpers', () => {
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:aliased' }]
       const tx = new TransactionOnNetwork()
       Object.assign(tx, response)
-      const { results } = await new WarpMultiversxResults().extractCollectResults(subject, warp, tx, 1, inputs)
+      const { results } = await new WarpMultiversxResults(testConfig).extractCollectResults(warp, tx, 0, inputs)
       expect(results.FOO).toBe('aliased')
     })
 
@@ -222,14 +214,13 @@ describe('Result Helpers', () => {
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:abc' }]
       const tx = new TransactionOnNetwork()
       Object.assign(tx, response)
-      const { results } = await new WarpMultiversxResults().extractCollectResults(subject, warp, tx, 1, inputs)
+      const { results } = await new WarpMultiversxResults(testConfig).extractCollectResults(warp, tx, 0, inputs)
       expect(results.BAR).toBeNull()
     })
   })
 
   describe('input-based results (contract)', () => {
     it('returns input-based result by input name (contract)', async () => {
-      jest.spyOn(subject, 'getAbiForAction').mockResolvedValue(AbiRegistry.create({ name: 'Dummy', endpoints: [] }))
       const warp = {
         protocol: 'test',
         name: 'test',
@@ -260,13 +251,12 @@ describe('Result Helpers', () => {
         { input: warp.actions[0].inputs[0], value: 'string:abc' },
         { input: warp.actions[0].inputs[1], value: 'string:xyz' },
       ]
-      const { values, results } = await new WarpMultiversxResults().extractContractResults(subject, warp, action, tx, 1, inputs)
+      const { values, results } = await new WarpMultiversxResults(testConfig).extractContractResults(warp, action, tx, 0, inputs)
       expect(results.FOO).toBe('abc')
       expect(results.BAR).toBe('xyz')
     })
 
     it('returns input-based result by input.as alias (contract)', async () => {
-      jest.spyOn(subject, 'getAbiForAction').mockResolvedValue(AbiRegistry.create({ name: 'Dummy', endpoints: [] }))
       const warp = {
         protocol: 'test',
         name: 'test',
@@ -290,12 +280,11 @@ describe('Result Helpers', () => {
       const action = warp.actions[0]
       const tx = new TransactionOnNetwork()
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:aliased' }]
-      const { values, results } = await new WarpMultiversxResults().extractContractResults(subject, warp, action, tx, 1, inputs)
+      const { values, results } = await new WarpMultiversxResults(testConfig).extractContractResults(warp, action, tx, 0, inputs)
       expect(results.FOO).toBe('aliased')
     })
 
     it('returns null for missing input (contract)', async () => {
-      jest.spyOn(subject, 'getAbiForAction').mockResolvedValue(AbiRegistry.create({ name: 'Dummy', endpoints: [] }))
       const warp = {
         protocol: 'test',
         name: 'test',
@@ -319,7 +308,7 @@ describe('Result Helpers', () => {
       const action = warp.actions[0]
       const tx = new TransactionOnNetwork()
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:abc' }]
-      const { values, results } = await new WarpMultiversxResults().extractContractResults(subject, warp, action, tx, 1, inputs)
+      const { values, results } = await new WarpMultiversxResults(testConfig).extractContractResults(warp, action, tx, 0, inputs)
       expect(results.BAR).toBeNull()
     })
   })
@@ -336,7 +325,7 @@ describe('Result Helpers', () => {
       const action = { type: 'contract' } as WarpContractAction
       const tx = new TransactionOnNetwork()
 
-      const { values, results } = await new WarpMultiversxResults().extractContractResults(subject, warp, action, tx, 1, [])
+      const { values, results } = await new WarpMultiversxResults(testConfig).extractContractResults(warp, action, tx, 0, [])
 
       expect(values).toEqual([])
       expect(results).toEqual({})
@@ -397,7 +386,7 @@ describe('Result Helpers', () => {
         ],
       })
 
-      const { values, results } = await new WarpMultiversxResults().extractContractResults(subject, warp, action, tx, 1, [])
+      const { values, results } = await new WarpMultiversxResults(testConfig).extractContractResults(warp, action, tx, 0, [])
 
       expect(results.TOKEN_ID).toBe('ABC-123456')
       expect(results.DURATION).toBe('1209600')
@@ -446,7 +435,7 @@ describe('Result Helpers', () => {
         ],
       })
 
-      const { values, results } = await new WarpMultiversxResults().extractContractResults(subject, warp, action, tx, 1, [])
+      const { values, results } = await new WarpMultiversxResults(testConfig).extractContractResults(warp, action, tx, 0, [])
 
       expect(results.FIRST_OUT).toBe('22')
       expect(results.SECOND_OUT).toBeNull()
@@ -468,7 +457,7 @@ describe('Result Helpers', () => {
 
       const tx = new TransactionOnNetwork()
       ;(tx as any).typedValues = typedValues
-      const { values, results } = await new WarpMultiversxResults().extractQueryResults(subject, warp, tx, 1, [])
+      const { values, results } = await new WarpMultiversxResults(testConfig).extractQueryResults(warp, typedValues, 0, [])
 
       expect(values).toEqual([])
       expect(results).toEqual({})
@@ -488,7 +477,7 @@ describe('Result Helpers', () => {
 
       const tx = new TransactionOnNetwork()
       Object.assign(tx, response)
-      const { values, results } = await new WarpMultiversxResults().extractCollectResults(subject, warp, tx, 1, [])
+      const { values, results } = await new WarpMultiversxResults(testConfig).extractCollectResults(warp, tx, 0, [])
 
       expect(values).toEqual([])
       expect(results).toEqual({})
@@ -517,7 +506,7 @@ describe('Result Helpers', () => {
 
       const tx = new TransactionOnNetwork()
       Object.assign(tx, response)
-      const { values, results } = await new WarpMultiversxResults().extractCollectResults(subject, warp, tx, 1, [])
+      const { values, results } = await new WarpMultiversxResults(testConfig).extractCollectResults(warp, tx, 0, [])
 
       expect(results.USERNAME).toBe('testuser')
       expect(results.ID).toBe('123')
@@ -546,7 +535,7 @@ describe('Result Helpers', () => {
 
       const tx = new TransactionOnNetwork()
       Object.assign(tx, response)
-      const { values, results } = await new WarpMultiversxResults().extractCollectResults(subject, warp, tx, 1, [])
+      const { values, results } = await new WarpMultiversxResults(testConfig).extractCollectResults(warp, tx, 0, [])
 
       expect(results.USERNAME).toBeNull()
       expect(results.MISSING).toBeNull()
@@ -572,7 +561,7 @@ describe('Result Helpers', () => {
 
       const tx = new TransactionOnNetwork()
       Object.assign(tx, response)
-      const { values, results } = await new WarpMultiversxResults().extractCollectResults(subject, warp, tx, 1, [])
+      const { values, results } = await new WarpMultiversxResults(testConfig).extractCollectResults(warp, tx, 0, [])
 
       expect(results.BASE).toBe(10)
       expect(results.DOUBLED).toBe(20)
@@ -595,7 +584,7 @@ describe('Result Helpers', () => {
         const response = { data: 'current-action-data' }
         const tx = new TransactionOnNetwork()
         Object.assign(tx, response)
-        const { results } = await new WarpMultiversxResults().extractCollectResults(subject, warp, tx, 1, [])
+        const { results } = await new WarpMultiversxResults(testConfig).extractCollectResults(warp, tx, 0, [])
         expect(results.USERS_FROM_ACTION1).toBeNull()
         expect(results.BALANCE_FROM_ACTION2).toBeNull()
         expect(results.CURRENT_ACTION_DATA).toBe('current-action-data')
@@ -654,10 +643,10 @@ describe('Result Helpers', () => {
       }
 
       // Create subject after mock server is started
-      const subject = new WarpActionExecutor(new MultiversxAdapter(testConfig))
+      const subject = new WarpMultiversxResults(testConfig)
       // Patch executeCollect and executeQuery to always return a full WarpExecution object
-      subject.executeCollect = async (warpArg, actionIndex, actionInputs, meta) => {
-        return {
+      const mockExecutor = {
+        executeCollect: async (warpArg: any, actionIndex: any, actionInputs: any, meta: any) => ({
           success: true,
           warp: warpArg,
           action: actionIndex,
@@ -674,24 +663,24 @@ describe('Result Helpers', () => {
             ],
           },
           messages: {},
-        }
+        }),
+        executeQuery: async (warpArg: any, actionIndex: any, actionInputs: any) => ({
+          success: true,
+          warp,
+          action: 1,
+          user: testConfig.user?.wallet || null,
+          txHash: '',
+          next: null,
+          values: [],
+          results: {},
+          messages: {},
+        }),
       }
-      subject.executeQuery = async () => ({
-        success: true,
-        warp,
-        action: 1,
-        user: testConfig.user?.wallet || null,
-        txHash: '',
-        next: null,
-        values: [],
-        results: {},
-        messages: {},
-      })
 
-      const result = await new WarpMultiversxResults().resolveWarpResultsRecursively({
+      const result = await new WarpMultiversxResults(testConfig).resolveWarpResultsRecursively({
         warp,
         entryActionIndex: 1,
-        executor: subject,
+        executor: mockExecutor,
         inputs: [],
       })
 
@@ -759,10 +748,10 @@ describe('Result Helpers', () => {
       }
 
       // Create subject after mock server is started
-      const subject = new WarpActionExecutor(new MultiversxAdapter(testConfig))
+      const subject = new WarpMultiversxResults(testConfig)
       // Patch executeCollect and executeQuery to always return a full WarpExecution object
-      subject.executeCollect = async (warpArg, actionIndex, actionInputs, meta) => {
-        return {
+      const mockExecutor = {
+        executeCollect: async (warpArg: any, actionIndex: any, actionInputs: any, meta: any) => ({
           success: true,
           warp: warpArg,
           action: actionIndex,
@@ -779,25 +768,25 @@ describe('Result Helpers', () => {
             ],
           },
           messages: {},
-        }
+        }),
+        executeQuery: async (warpArg: any, actionIndex: any, actionInputs: any) => ({
+          success: true,
+          warp,
+          action: 1,
+          user: testConfig.user?.wallet || null,
+          txHash: '',
+          next: null,
+          values: [],
+          results: {},
+          messages: {},
+        }),
       }
-      subject.executeQuery = async () => ({
-        success: true,
-        warp,
-        action: 1,
-        user: testConfig.user?.wallet || null,
-        txHash: '',
-        next: null,
-        values: [],
-        results: {},
-        messages: {},
-      })
 
       // Execute the warp from the first action (entry point 1)
-      const result = await new WarpMultiversxResults().resolveWarpResultsRecursively({
+      const result = await new WarpMultiversxResults(testConfig).resolveWarpResultsRecursively({
         warp,
         entryActionIndex: 1,
-        executor: subject,
+        executor: mockExecutor,
         inputs: [],
       })
 

@@ -1,9 +1,10 @@
+import { WarpMultiversxRegistry } from '@vleap/warps-adapter-multiversx'
 import { Brand, Warp, WarpInitConfig, WarpRegistryInfo } from '@vleap/warps-core'
 import { WarpBuilder } from './WarpBuilder'
 import { WarpLinkDetecter } from './WarpLinkDetecter'
 
 jest.mock('./WarpBuilder')
-jest.mock('./WarpRegistry')
+jest.mock('@vleap/warps-adapter-multiversx')
 
 const Config: WarpInitConfig = {
   env: 'devnet',
@@ -61,11 +62,10 @@ const mockBrand: Brand = {
 
 describe('detect', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
     ;(WarpBuilder as jest.Mock).mockImplementation(() => ({
       createFromTransactionHash: jest.fn().mockResolvedValue(mockWarp),
     }))
-    ;(WarpRegistry as jest.Mock).mockImplementation(() => ({
+    ;(WarpMultiversxRegistry as jest.Mock).mockImplementation(() => ({
       getInfoByHash: jest.fn().mockResolvedValue({ registryInfo: mockRegistryInfo, brand: mockBrand }),
       getInfoByAlias: jest.fn().mockResolvedValue({ registryInfo: mockRegistryInfo, brand: mockBrand }),
     }))
@@ -179,7 +179,7 @@ describe('detect', () => {
   })
 
   it('handles null registry info for hash', async () => {
-    ;(WarpRegistry as jest.Mock).mockImplementation(() => ({
+    ;(WarpMultiversxRegistry as jest.Mock).mockImplementation(() => ({
       getInfoByHash: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
     }))
 
@@ -196,7 +196,7 @@ describe('detect', () => {
   })
 
   it('handles null registry info for alias', async () => {
-    ;(WarpRegistry as jest.Mock).mockImplementation(() => ({
+    ;(WarpMultiversxRegistry as jest.Mock).mockImplementation(() => ({
       getInfoByAlias: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
     }))
 
@@ -237,7 +237,7 @@ describe('detect', () => {
         return Promise.resolve(mockWarp)
       }),
     }))
-    ;(WarpRegistry as jest.Mock).mockImplementation(() => ({
+    ;(WarpMultiversxRegistry as jest.Mock).mockImplementation(() => ({
       getInfoByHash: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
       getInfoByAlias: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
     }))
@@ -299,7 +299,7 @@ describe('detect', () => {
     ;(WarpBuilder as jest.Mock).mockImplementation(() => ({
       createFromTransactionHash: jest.fn().mockResolvedValue(null),
     }))
-    ;(WarpRegistry as jest.Mock).mockImplementation(() => ({
+    ;(WarpMultiversxRegistry as jest.Mock).mockImplementation(() => ({
       getInfoByAlias: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
     }))
 
@@ -320,7 +320,7 @@ describe('detect', () => {
     ;(WarpBuilder as jest.Mock).mockImplementation(() => ({
       createFromTransactionHash: jest.fn().mockResolvedValue(null),
     }))
-    ;(WarpRegistry as jest.Mock).mockImplementation(() => ({
+    ;(WarpMultiversxRegistry as jest.Mock).mockImplementation(() => ({
       getInfoByAlias: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
     }))
 

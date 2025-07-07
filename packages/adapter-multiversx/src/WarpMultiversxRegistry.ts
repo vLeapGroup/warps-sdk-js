@@ -25,7 +25,7 @@ import {
 } from '@vleap/warps-core'
 import RegistryAbi from '../../warps/src/abis/registry.abi.json'
 import { toTypedConfigInfo, toTypedRegistryInfo } from './helpers/registry'
-import { string, u32 } from './utils.codec'
+import { string_value, u32_value } from './utils.codec'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
 export class WarpMultiversxRegistry {
@@ -317,14 +317,14 @@ export class WarpMultiversxRegistry {
       function: 'setChain',
       gasLimit: BigInt(10_000_000),
       arguments: [
-        string(info.name),
-        string(info.displayName),
-        string(info.chainId),
-        u32(info.blockTime),
-        string(info.addressHrp),
-        string(info.apiUrl),
-        string(info.explorerUrl),
-        string(info.nativeToken),
+        string_value(info.name),
+        string_value(info.displayName),
+        string_value(info.chainId),
+        u32_value(info.blockTime),
+        string_value(info.addressHrp),
+        string_value(info.apiUrl),
+        string_value(info.explorerUrl),
+        string_value(info.nativeToken),
       ],
     })
   }
@@ -337,7 +337,7 @@ export class WarpMultiversxRegistry {
       contract: this.getRegistryContractAddress(),
       function: 'removeChain',
       gasLimit: BigInt(10_000_000),
-      arguments: [string(chain)],
+      arguments: [string_value(chain)],
     })
   }
 

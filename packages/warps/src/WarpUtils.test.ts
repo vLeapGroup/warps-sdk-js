@@ -1,9 +1,10 @@
-import { WarpRegistry } from '../../adapter-multiversx/src/WarpMultiversxRegistry'
+import { WarpMultiversxRegistry } from '@vleap/warps-adapter-multiversx'
+import { getNextInfo } from '@vleap/warps-core'
 import { WarpContractAction } from '../../core/src/types'
 import { WarpChainEnv } from '../../core/src/types/general'
 import { WarpExecutionResults } from '../../core/src/types/results'
 import { Warp, WarpInitConfig } from '../../core/src/types/warp'
-import { WarpUtils } from '../../core/src/WarpUtils'
+import { WarpUtils } from './WarpUtils'
 
 const testConfig: WarpInitConfig = {
   env: 'devnet' as WarpChainEnv,
@@ -16,14 +17,14 @@ const testConfig: WarpInitConfig = {
 describe('getNextInfo', () => {
   it('returns info for an alias', () => {
     const warp: Warp = { next: 'mywarp' } as any
-    const result = WarpUtils.getNextInfo(testConfig, warp, 1, {})
+    const result = getNextInfo(testConfig, warp, 1, {})
     expect(result?.[0].identifier).toBe('mywarp')
     expect(result?.[0].url).toBe('https://anyclient.com?warp=mywarp')
   })
 
   it('returns info for a prefixed alias', () => {
     const warp: Warp = { next: 'alias:mywarp' } as any
-    const result = WarpUtils.getNextInfo(testConfig, warp, 1, {})
+    const result = getNextInfo(testConfig, warp, 1, {})
     expect(result?.[0].identifier).toBe('alias:mywarp')
     expect(result?.[0].url).toBe('https://anyclient.com?warp=mywarp')
   })
@@ -31,33 +32,33 @@ describe('getNextInfo', () => {
   it('returns info for a super client', () => {
     const config = { ...testConfig, clientUrl: 'https://usewarp.to', currentUrl: 'https://usewarp.to' }
     const warp: Warp = { next: 'mywarp?param1=value1&param2=value2' } as any
-    const result = WarpUtils.getNextInfo(config, warp, 1, {})
+    const result = getNextInfo(config, warp, 1, {})
     expect(result?.[0].identifier).toBe('mywarp?param1=value1&param2=value2')
     expect(result?.[0].url).toBe('https://usewarp.to/mywarp?param1=value1&param2=value2')
   })
 
   it('returns an url for a prefixed hash', () => {
     const warp: Warp = { next: 'hash:123' } as any
-    const result = WarpUtils.getNextInfo(testConfig, warp, 1, {})
+    const result = getNextInfo(testConfig, warp, 1, {})
     expect(result?.[0].identifier).toBe('hash:123')
     expect(result?.[0].url).toBe('https://anyclient.com?warp=hash%3A123')
   })
 
   it('returns an external url as is', () => {
     const warp: Warp = { next: 'https://example.com' } as any
-    const result = WarpUtils.getNextInfo(testConfig, warp, 1, {})
+    const result = getNextInfo(testConfig, warp, 1, {})
     expect(result).toEqual([{ identifier: null, url: 'https://example.com' }])
   })
 
   it('returns null when warp has no next step', () => {
     const warp: Warp = { next: undefined } as any
-    const result = WarpUtils.getNextInfo(testConfig, warp, 1, {})
+    const result = getNextInfo(testConfig, warp, 1, {})
     expect(result).toBeNull()
   })
 
   it('keeps url params as part of the identifier', () => {
     const warp: Warp = { next: 'mywarp?param1=value1&param2=value2' } as any
-    const result = WarpUtils.getNextInfo(testConfig, warp, 1, {})
+    const result = getNextInfo(testConfig, warp, 1, {})
     expect(result?.[0].identifier).toBe('mywarp?param1=value1&param2=value2')
     expect(result?.[0].url).toBe('https://anyclient.com?warp=mywarp&param1=value1&param2=value2')
   })
@@ -70,7 +71,7 @@ describe('getNextInfo', () => {
       },
     } as any
     const results = warp.results as WarpExecutionResults
-    const result = WarpUtils.getNextInfo(testConfig, warp, 1, results)
+    const result = getNextInfo(testConfig, warp, 1, results)
     expect(result).toEqual([])
   })
 
@@ -82,7 +83,7 @@ describe('getNextInfo', () => {
       },
     } as any
     const results = warp.results as WarpExecutionResults
-    const result = WarpUtils.getNextInfo(testConfig, warp, 1, results)
+    const result = getNextInfo(testConfig, warp, 1, results)
     expect(result).toEqual([
       { identifier: 'mywarp?address=ABC', url: 'https://anyclient.com?warp=mywarp&address=ABC' },
       { identifier: 'mywarp?address=DEF', url: 'https://anyclient.com?warp=mywarp&address=DEF' },
@@ -97,7 +98,7 @@ describe('getNextInfo', () => {
       },
     } as any
     const results = warp.results as WarpExecutionResults
-    const result = WarpUtils.getNextInfo(testConfig, warp, 1, results)
+    const result = getNextInfo(testConfig, warp, 1, results)
     expect(result).toEqual([
       { identifier: 'mywarp?value=A', url: 'https://anyclient.com?warp=mywarp&value=A' },
       { identifier: 'mywarp?value=B', url: 'https://anyclient.com?warp=mywarp&value=B' },
@@ -113,7 +114,7 @@ describe('getNextInfo', () => {
       },
     } as any
     const results = warp.results as WarpExecutionResults
-    const result = WarpUtils.getNextInfo(testConfig, warp, 1, results)
+    const result = getNextInfo(testConfig, warp, 1, results)
     expect(result).toEqual([{ identifier: 'mywarp?value=A', url: 'https://anyclient.com?warp=mywarp&value=A' }])
   })
 
@@ -125,7 +126,7 @@ describe('getNextInfo', () => {
       },
     } as any
     const results = warp.results as WarpExecutionResults
-    const result = WarpUtils.getNextInfo(testConfig, warp, 1, results)
+    const result = getNextInfo(testConfig, warp, 1, results)
     expect(result).toEqual([
       { identifier: 'mywarp?value=A', url: 'https://anyclient.com?warp=mywarp&value=A' },
       { identifier: 'mywarp?value=C', url: 'https://anyclient.com?warp=mywarp&value=C' },
@@ -147,7 +148,7 @@ describe('getNextInfo', () => {
       },
     } as any
     const results = warp.results as WarpExecutionResults
-    const result = WarpUtils.getNextInfo(testConfig, warp, 1, results)
+    const result = getNextInfo(testConfig, warp, 1, results)
     expect(result).toEqual([
       {
         identifier: 'stake-distribution?user=alice&amount=150',
@@ -178,7 +179,7 @@ describe('getChainInfoForAction', () => {
       nativeToken: 'EGLD',
     })
 
-    jest.spyOn(WarpRegistry.prototype, 'getChainInfo').mockImplementation(mockGetChainInfo)
+    jest.spyOn(WarpMultiversxRegistry.prototype, 'getChainInfo').mockImplementation(mockGetChainInfo)
 
     const action: WarpContractAction = {
       type: 'contract',
@@ -229,7 +230,7 @@ describe('getChainInfoForAction', () => {
       nativeToken: 'EGLD',
     })
 
-    jest.spyOn(WarpRegistry.prototype, 'getChainInfo').mockImplementation(mockGetChainInfo)
+    jest.spyOn(WarpMultiversxRegistry.prototype, 'getChainInfo').mockImplementation(mockGetChainInfo)
 
     const action: WarpContractAction = {
       type: 'contract',
