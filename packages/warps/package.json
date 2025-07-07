@@ -33,5 +33,9 @@
     "@vleap/warps-adapter-multiversx": "^0.2.0-alpha.1",
     "@vleap/warps-core": "^0.2.0-alpha.0",
     "ajv": "^8.17.1"
+  },
+  "optionalDependencies": {
+    "@vleap/warps-adapter-multiversx": "^0.2.0-alpha.1",
+    "@vleap/warps-adapter-sui": "^0.2.0-alpha.1"
   }
 }
