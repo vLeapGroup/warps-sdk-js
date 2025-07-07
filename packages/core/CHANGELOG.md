@@ -1,5 +1,11 @@
 # @vleap/warps-core
 
+## 0.2.0-alpha.1
+
+### Patch Changes
+
+- e354f53: update dependencies
+
 ## 0.2.0-alpha.0
 
 ### Minor Changes
