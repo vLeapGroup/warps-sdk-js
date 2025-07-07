@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.27
+
+### Minor Changes
+
+- b6fbfef: update executor
+
 ## 3.0.0-alpha.26
 
 ### Major Changes
