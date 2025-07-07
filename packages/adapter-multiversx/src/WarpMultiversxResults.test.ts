@@ -233,7 +233,7 @@ describe('Result Helpers', () => {
         { input: warp.actions[0].inputs[0], value: 'string:abc' },
         { input: warp.actions[0].inputs[1], value: 'string:xyz' },
       ]
-      const { results } = await subject.extractContractResults(warp, action, tx, 1, inputs)
+      const { results } = await subject.extractContractResults(warp, 1, tx, inputs)
       expect(results.FOO).toBe('abc')
       expect(results.BAR).toBe('xyz')
     })
@@ -262,7 +262,7 @@ describe('Result Helpers', () => {
       const action = warp.actions[0]
       const tx = new TransactionOnNetwork()
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:aliased' }]
-      const { results } = await subject.extractContractResults(warp, action, tx, 1, inputs)
+      const { results } = await subject.extractContractResults(warp, 1, tx, inputs)
       expect(results.FOO).toBe('aliased')
     })
 
@@ -290,7 +290,7 @@ describe('Result Helpers', () => {
       const action = warp.actions[0]
       const tx = new TransactionOnNetwork()
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:abc' }]
-      const { results } = await subject.extractContractResults(warp, action, tx, 1, inputs)
+      const { results } = await subject.extractContractResults(warp, 1, tx, inputs)
       expect(results.BAR).toBeNull()
     })
   })
@@ -307,7 +307,7 @@ describe('Result Helpers', () => {
       const action = { type: 'contract' } as WarpContractAction
       const tx = new TransactionOnNetwork()
 
-      const { values, results } = await subject.extractContractResults(warp, action, tx, 1, [])
+      const { values, results } = await subject.extractContractResults(warp, 1, tx, [])
 
       expect(values).toEqual([])
       expect(results).toEqual({})
@@ -321,22 +321,22 @@ describe('Result Helpers', () => {
         name: 'test',
         title: 'test',
         description: 'test',
-        actions: [],
+        actions: [
+          {
+            type: 'contract',
+            label: 'test',
+            description: 'test',
+            address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+            func: 'register',
+            abi: 'https://example.com/test.abi.json',
+            gasLimit: 1000000,
+          } as WarpContractAction,
+        ],
         results: {
           TOKEN_ID: 'event.registeredWithToken.2',
           DURATION: 'event.registeredWithToken.4',
         },
       } as Warp
-
-      const action = {
-        type: 'contract',
-        label: 'test',
-        description: 'test',
-        address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
-        func: 'register',
-        abi: 'https://example.com/test.abi.json',
-        gasLimit: 1000000,
-      } as WarpContractAction
 
       const tx = new TransactionOnNetwork({
         nonce: 7n,
@@ -362,7 +362,7 @@ describe('Result Helpers', () => {
         ],
       })
 
-      const { values, results } = await subject.extractContractResults(warp, action, tx, 1, [])
+      const { values, results } = await subject.extractContractResults(warp, 1, tx, [])
 
       expect(results.TOKEN_ID).toBe('DEF-123456')
       expect(results.DURATION).toBeNull()
@@ -371,18 +371,6 @@ describe('Result Helpers', () => {
     it('extracts output results from transaction', async () => {
       const httpMock = setupHttpMock()
       httpMock.registerResponse('https://example.com/test.abi.json', await loadAbiContents(path.join(__dirname, 'testdata/test.abi.json')))
-      const warp = {
-        protocol: 'test',
-        name: 'test',
-        title: 'test',
-        description: 'test',
-        actions: [],
-        results: {
-          FIRST_OUT: 'out.1',
-          SECOND_OUT: 'out.2',
-        },
-      } as Warp
-
       const action = {
         type: 'contract',
         label: 'test',
@@ -402,7 +390,19 @@ describe('Result Helpers', () => {
         ],
       })
 
-      const { values, results } = await subject.extractContractResults(warp, action, tx, 1, [])
+      const warp = {
+        protocol: 'test',
+        name: 'test',
+        title: 'test',
+        description: 'test',
+        actions: [action],
+        results: {
+          FIRST_OUT: 'out.1',
+          SECOND_OUT: 'out.2',
+        },
+      } as Warp
+
+      const { results } = await subject.extractContractResults(warp, 1, tx, [])
 
       expect(results.FIRST_OUT).toBe('22')
       expect(results.SECOND_OUT).toBeNull()

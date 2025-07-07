@@ -77,6 +77,8 @@ export type WarpMeta = {
 
 export type WarpAction = WarpTransferAction | WarpContractAction | WarpQueryAction | WarpCollectAction | WarpLinkAction
 
+export type WarpActionIndex = number
+
 export type WarpActionType = 'transfer' | 'contract' | 'query' | 'collect' | 'link'
 
 export type WarpTransferAction = {
