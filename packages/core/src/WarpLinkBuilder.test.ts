@@ -7,7 +7,7 @@ const Config: WarpInitConfig = {
 }
 
 describe('build', () => {
-  it.only('builds a link with hash', () => {
+  it('builds a link with hash', () => {
     const link = new WarpLinkBuilder(Config).build('hash', '123')
     expect(link).toBe('https://anyclient.com?warp=hash%3A123')
   })

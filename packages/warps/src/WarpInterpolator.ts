@@ -1,12 +1,6 @@
-import { WarpUtils } from '../../warps/src/WarpUtils'
-import { WarpConstants } from './constants'
-import { getMainChainInfo } from './helpers/general'
-import { Warp, WarpAction, WarpChainInfo, WarpInitConfig } from './types'
-
-export type InterpolationBag = {
-  config: WarpInitConfig
-  chain: WarpChainInfo
-}
+import { getMainChainInfo, Warp, WarpAction, WarpConstants, WarpInitConfig } from '@vleap/warps-core'
+import { InterpolationBag } from '@vleap/warps-core/src/types'
+import { WarpUtils } from './WarpUtils'
 
 export class WarpInterpolator {
   static async apply(config: WarpInitConfig, warp: Warp): Promise<Warp> {

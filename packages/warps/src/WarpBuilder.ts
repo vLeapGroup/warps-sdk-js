@@ -1,4 +1,5 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
+import { WarpMultiversxExecutor } from '@vleap/warps-adapter-multiversx'
 import {
   getLatestProtocolIdentifier,
   getMainChainInfo,
@@ -12,7 +13,6 @@ import {
   WarpLogger,
   WarpValidator,
 } from '@vleap/warps-core'
-import { WarpMultiversxExecutor } from '../../adapter-multiversx/src/WarpMultiversxExecutor'
 
 export class WarpBuilder {
   private config: WarpInitConfig

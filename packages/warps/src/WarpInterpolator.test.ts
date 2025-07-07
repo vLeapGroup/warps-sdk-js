@@ -1,7 +1,4 @@
-import { WarpConfig } from './config'
-import { getMainChainInfo } from './helpers/general'
-import { Warp, WarpInitConfig } from './types/warp'
-import { CacheTtl, WarpCache, WarpCacheKey } from './WarpCache'
+import { CacheTtl, getMainChainInfo, Warp, WarpCache, WarpCacheKey, WarpConfig, WarpInitConfig } from '@vleap/warps-core'
 import { WarpInterpolator } from './WarpInterpolator'
 
 const testConfig: WarpInitConfig = {
@@ -67,30 +64,43 @@ describe('WarpInterpolator', () => {
 })
 
 describe('WarpInterpolator per-action chain info', () => {
-  it.only('interpolates actions with different chain info', async () => {
-    const config = {
+  beforeEach(() => {
+    new WarpCache('memory').clear()
+  })
+
+  it('interpolates actions with different chain info', async () => {
+    const config: WarpInitConfig = {
       ...testConfig,
       user: { wallet: 'erd1abc' },
       vars: { AGE: 10 },
       currentUrl: 'https://anyclient.com?age=10',
+      cache: { type: 'memory' },
     }
 
-    const cache = new WarpCache()
+    const cache = new WarpCache('memory')
 
     const chainA = {
+      name: 'A',
+      displayName: 'Chain A',
       chainId: 'A',
       blockTime: 1000,
+      addressHrp: 'erd',
       apiUrl: 'https://api.chainA.com',
       explorerUrl: 'https://explorer.chainA.com',
+      nativeToken: 'EGLD',
     }
-    cache.set(WarpCacheKey.ChainInfo(config.env, 'A'), chainA, CacheTtl.OneWeek)
-
     const chainB = {
+      name: 'B',
+      displayName: 'Chain B',
       chainId: 'B',
       blockTime: 2000,
+      addressHrp: 'erd',
       apiUrl: 'https://api.chainB.com',
       explorerUrl: 'https://explorer.chainB.com',
+      nativeToken: 'EGLD',
     }
+
+    cache.set(WarpCacheKey.ChainInfo(config.env, 'A'), chainA, CacheTtl.OneWeek)
     cache.set(WarpCacheKey.ChainInfo(config.env, 'B'), chainB, CacheTtl.OneWeek)
 
     const warp: Warp = {

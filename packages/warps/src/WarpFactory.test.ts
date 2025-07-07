@@ -1,8 +1,8 @@
+import { Warp, WarpChainEnv, WarpCollectAction, WarpInitConfig } from '@vleap/warps-core'
 import { setupHttpMock } from './test-utils/mockHttp'
-import { Warp, WarpChainEnv, WarpCollectAction, WarpInitConfig as WarpConfig } from './types'
 import { WarpFactory } from './WarpFactory'
 
-const testConfig: WarpConfig = {
+const testConfig: WarpInitConfig = {
   env: 'devnet' as WarpChainEnv,
   user: {
     wallet: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',

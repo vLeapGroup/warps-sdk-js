@@ -165,7 +165,7 @@ describe('Result Helpers', () => {
         { input: warp.actions[0].inputs[0], value: 'string:abc' },
         { input: warp.actions[0].inputs[1], value: 'string:xyz' },
       ]
-      const { values, results } = await new WarpMultiversxResults(testConfig).extractContractResults(warp, action, tx, 0, inputs)
+      const { values, results } = await new WarpMultiversxResults(testConfig).extractContractResults(warp, action, tx, 1, inputs)
       expect(results.FOO).toBe('abc')
       expect(results.BAR).toBe('xyz')
     })
@@ -194,7 +194,8 @@ describe('Result Helpers', () => {
       const action = warp.actions[0]
       const tx = new TransactionOnNetwork()
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:aliased' }]
-      const { values, results } = await new WarpMultiversxResults(testConfig).extractContractResults(warp, action, tx, 0, inputs)
+      const { values, results } = await new WarpMultiversxResults(testConfig).extractContractResults(warp, action, tx, 1, inputs)
+
       expect(results.FOO).toBe('aliased')
     })
 
@@ -222,7 +223,7 @@ describe('Result Helpers', () => {
       const action = warp.actions[0]
       const tx = new TransactionOnNetwork()
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:abc' }]
-      const { values, results } = await new WarpMultiversxResults(testConfig).extractContractResults(warp, action, tx, 0, inputs)
+      const { values, results } = await new WarpMultiversxResults(testConfig).extractContractResults(warp, action, tx, 1, inputs)
       expect(results.BAR).toBeNull()
     })
   })
@@ -239,7 +240,7 @@ describe('Result Helpers', () => {
       const action = { type: 'contract' } as WarpContractAction
       const tx = new TransactionOnNetwork()
 
-      const { values, results } = await new WarpMultiversxResults(testConfig).extractContractResults(warp, action, tx, 0, [])
+      const { values, results } = await new WarpMultiversxResults(testConfig).extractContractResults(warp, action, tx, 1, [])
 
       expect(values).toEqual([])
       expect(results).toEqual({})
@@ -300,7 +301,7 @@ describe('Result Helpers', () => {
         ],
       })
 
-      const { values, results } = await new WarpMultiversxResults(testConfig).extractContractResults(warp, action, tx, 0, [])
+      const { values, results } = await new WarpMultiversxResults(testConfig).extractContractResults(warp, action, tx, 1, [])
 
       expect(results.TOKEN_ID).toBe('ABC-123456')
       expect(results.DURATION).toBe('1209600')
@@ -349,7 +350,7 @@ describe('Result Helpers', () => {
         ],
       })
 
-      const { values, results } = await new WarpMultiversxResults(testConfig).extractContractResults(warp, action, tx, 0, [])
+      const { values, results } = await new WarpMultiversxResults(testConfig).extractContractResults(warp, action, tx, 1, [])
 
       expect(results.FIRST_OUT).toBe('22')
       expect(results.SECOND_OUT).toBeNull()
@@ -371,7 +372,7 @@ describe('Result Helpers', () => {
 
       const tx = new TransactionOnNetwork()
       ;(tx as any).typedValues = typedValues
-      const { values, results } = await new WarpMultiversxResults(testConfig).extractQueryResults(warp, typedValues, 0, [])
+      const { values, results } = await new WarpMultiversxResults(testConfig).extractQueryResults(warp, typedValues, 1, [])
 
       expect(values).toEqual([])
       expect(results).toEqual({})

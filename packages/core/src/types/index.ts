@@ -1,6 +1,7 @@
 export * from './abi'
 export * from './brand'
 export * from './general'
+export * from './interpolation'
 export * from './registry'
 export * from './results'
 export * from './search'

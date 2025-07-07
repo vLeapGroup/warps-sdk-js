@@ -1,5 +1,16 @@
-import { SmartContractTransactionsOutcomeParser, TransactionEventsParser, TransactionOnNetwork, TypedValue } from '@multiversx/sdk-core'
 import {
+  findEventsByFirstTopic,
+  SmartContractTransactionsOutcomeParser,
+  TransactionEventsParser,
+  TransactionOnNetwork,
+  TypedValue,
+} from '@multiversx/sdk-core'
+import {
+  applyResultsToMessages,
+  evaluateResultsCommon,
+  getNextInfo,
+  getWarpActionByIndex,
+  parseResultsOutIndex,
   ResolvedInput,
   Warp,
   WarpCache,
@@ -9,12 +20,6 @@ import {
   WarpExecution,
   WarpExecutionResults,
   WarpInitConfig,
-  WarpInterpolator,
-  applyResultsToMessages,
-  evaluateResultsCommon,
-  getNextInfo,
-  getWarpActionByIndex,
-  parseResultsOutIndex,
 } from '@vleap/warps-core'
 import { WarpMultiversxAbi } from './WarpMultiversxAbi'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
@@ -31,22 +36,21 @@ export class WarpMultiversxResults {
   }
 
   async getTransactionExecutionResults(warp: Warp, actionIndex: number, tx: TransactionOnNetwork): Promise<WarpExecution> {
-    const preparedWarp = await WarpInterpolator.apply(this.config, warp)
-    const action = getWarpActionByIndex(preparedWarp, actionIndex) as WarpContractAction
+    const action = getWarpActionByIndex(warp, actionIndex) as WarpContractAction
 
     // Restore inputs via cache as transactions are broadcasted and processed asynchronously
     const inputs: ResolvedInput[] = this.cache.get(WarpCacheKey.WarpExecutable(this.config.env, warp.meta?.hash || '', actionIndex)) ?? []
 
-    const results = await this.extractContractResults(preparedWarp, action, tx, actionIndex, inputs)
-    const next = getNextInfo(this.config, preparedWarp, actionIndex, results)
-    const messages = applyResultsToMessages(preparedWarp, results.results)
+    const results = await this.extractContractResults(warp, action, tx, actionIndex, inputs)
+    const next = getNextInfo(this.config, warp, actionIndex, results)
+    const messages = applyResultsToMessages(warp, results.results)
 
     return {
-      success: results.success,
-      warp: preparedWarp,
+      success: tx.status.isSuccessful(),
+      warp,
       action: actionIndex,
       user: this.config.user?.wallet || null,
-      txHash: results.txHash,
+      txHash: tx.hash,
       next,
       values: results.values,
       results: results.results,
@@ -68,70 +72,43 @@ export class WarpMultiversxResults {
     tx: TransactionOnNetwork,
     actionIndex: number,
     inputs: ResolvedInput[]
-  ): Promise<{ values: any[]; results: WarpExecutionResults; success: boolean; txHash: string }> {
+  ): Promise<{ values: any[]; results: WarpExecutionResults }> {
     let values: any[] = []
     let results: WarpExecutionResults = {}
     if (!warp.results || action.type !== 'contract') {
-      return { values, results, success: tx.status.isSuccessful(), txHash: tx.hash }
+      return { values, results }
     }
-    const needsAbi = Object.values(warp.results).some(
-      (resultPath) => typeof resultPath === 'string' && (resultPath.includes('out') || resultPath.includes('event'))
-    )
+    const needsAbi = Object.values(warp.results).some((resultPath) => resultPath.includes('out') || resultPath.includes('event'))
     if (!needsAbi) {
       for (const [resultName, resultPath] of Object.entries(warp.results)) {
         results[resultName] = resultPath
       }
-      return {
-        values,
-        results: await evaluateResultsCommon(warp, results, actionIndex, inputs),
-        success: tx.status.isSuccessful(),
-        txHash: tx.hash,
-      }
+      return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
     }
     const abi = await this.abi.getAbiForAction(action)
     const eventParser = new TransactionEventsParser({ abi })
     const outcomeParser = new SmartContractTransactionsOutcomeParser({ abi })
     const outcome = outcomeParser.parseExecute({ transactionOnNetwork: tx, function: action.func || undefined })
     for (const [resultName, resultPath] of Object.entries(warp.results)) {
-      if (typeof resultPath !== 'string') continue
       if (resultPath.startsWith(WarpConstants.Transform.Prefix)) continue
       if (resultPath.startsWith('input.')) {
         results[resultName] = resultPath
         continue
       }
-      const currentActionIndex = WarpMultiversxResults.parseResultsOutIndex(resultPath)
+      const currentActionIndex = parseResultsOutIndex(resultPath)
       if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
         results[resultName] = null
         continue
       }
-      const parts = resultPath.split('.')
-      const resultType = parts[0]
-      const partOne = parts[1]
-      const partTwo = parts[2]
+      const [resultType, partOne, partTwo] = resultPath.split('.')
       if (resultType === 'event') {
         if (!partOne || isNaN(Number(partTwo))) continue
         const topicPosition = Number(partTwo)
-        const events = tx.smartContractResults[0].logs.events
-        const event = events.find((e: any) => {
-          const id = Buffer.isBuffer(e.identifier) ? e.identifier.toString('utf8') : e.identifier
-          return id === partOne
-        })
-        const fallbackTopic = event ? event.topics[topicPosition] : undefined
-        let outcomeAtPosition = null
-        if (Buffer.isBuffer(fallbackTopic)) {
-          outcomeAtPosition = fallbackTopic.toString('utf8')
-        } else if (typeof fallbackTopic === 'string') {
-          outcomeAtPosition = fallbackTopic
-        } else if (fallbackTopic && fallbackTopic.toString) {
-          outcomeAtPosition = fallbackTopic.toString()
-        } else {
-          outcomeAtPosition = fallbackTopic
-        }
-        if (typeof outcomeAtPosition !== 'string') {
-          outcomeAtPosition = String(outcomeAtPosition)
-        }
+        const events = findEventsByFirstTopic(tx, partOne)
+        const outcome = eventParser.parseEvents({ events })[0]
+        const outcomeAtPosition = (Object.values(outcome)[topicPosition] || null) as object | null
         values.push(outcomeAtPosition)
-        results[resultName] = outcomeAtPosition !== undefined ? outcomeAtPosition : null
+        results[resultName] = outcomeAtPosition ? outcomeAtPosition.valueOf() : outcomeAtPosition
       } else if (resultType === 'out' || resultType.startsWith('out[')) {
         if (!partOne) continue
         const outputIndex = Number(partOne)
@@ -139,32 +116,16 @@ export class WarpMultiversxResults {
         if (partTwo) {
           outputAtPosition = outputAtPosition[partTwo] || null
         }
-        let str = null
-        if (outputAtPosition && typeof outputAtPosition === 'object' && typeof outputAtPosition.hasClassOrSuperclass === 'function') {
-          str = this.serializer.typedToString(outputAtPosition)
-        } else if (outputAtPosition != null) {
-          str = outputAtPosition.toString()
-        }
-        if (str !== null) {
-          if (str.startsWith('address:')) outputAtPosition = str.slice('address:'.length)
-          else if (str.startsWith('hex:')) outputAtPosition = str.slice('hex:'.length)
-          else {
-            const colonIdx = str.indexOf(':')
-            outputAtPosition = colonIdx !== -1 ? str.slice(colonIdx + 1) : str
-          }
+        if (outputAtPosition && typeof outputAtPosition === 'object') {
+          outputAtPosition = 'toFixed' in outputAtPosition ? outputAtPosition.toFixed() : outputAtPosition.valueOf()
         }
         values.push(outputAtPosition)
-        results[resultName] = outputAtPosition !== undefined ? outputAtPosition : null
+        results[resultName] = outputAtPosition ? outputAtPosition.valueOf() : outputAtPosition
       } else {
         results[resultName] = resultPath
       }
     }
-    return {
-      values,
-      results: await evaluateResultsCommon(warp, results, actionIndex, inputs),
-      success: tx.status.isSuccessful(),
-      txHash: tx.hash,
-    }
+    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
   }
 
   async extractQueryResults(

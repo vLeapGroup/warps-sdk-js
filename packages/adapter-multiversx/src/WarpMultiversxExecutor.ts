@@ -1,26 +1,25 @@
 import {
-    Address,
-    ArgSerializer,
-    DevnetEntrypoint,
-    MainnetEntrypoint,
-    NetworkEntrypoint,
-    SmartContractTransactionsFactory,
-    TestnetEntrypoint,
-    Transaction,
-    TransactionsFactoryConfig,
-    TransferTransactionsFactory,
+  Address,
+  ArgSerializer,
+  DevnetEntrypoint,
+  MainnetEntrypoint,
+  NetworkEntrypoint,
+  SmartContractTransactionsFactory,
+  TestnetEntrypoint,
+  Transaction,
+  TransactionsFactoryConfig,
+  TransferTransactionsFactory,
 } from '@multiversx/sdk-core'
 import {
-    applyResultsToMessages,
-    getNextInfo,
-    getWarpActionByIndex,
-    WarpChainEnv,
-    WarpChainInfo,
-    WarpExecutable,
-    WarpExecution,
-    WarpInitConfig,
-    WarpInterpolator,
-    WarpQueryAction
+  applyResultsToMessages,
+  getNextInfo,
+  getWarpActionByIndex,
+  WarpChainEnv,
+  WarpChainInfo,
+  WarpExecutable,
+  WarpExecution,
+  WarpInitConfig,
+  WarpQueryAction,
 } from '@vleap/warps-core'
 import { WarpMultiversxAbi } from './WarpMultiversxAbi'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
@@ -88,7 +87,6 @@ export class WarpMultiversxExecutor {
   async executeQuery(executable: WarpExecutable): Promise<WarpExecution> {
     const action = getWarpActionByIndex(executable.warp, executable.action) as WarpQueryAction
     if (action.type !== 'query') throw new Error(`WarpMultiversxExecutor: Invalid action type for executeQuery: ${action.type}`)
-    const preparedWarp = await WarpInterpolator.apply(this.config, executable.warp)
     const abi = await this.abi.getAbiForAction(action)
     const typedArgs = executable.args.map((arg) => this.serializer.stringToTyped(arg))
     const entrypoint = WarpMultiversxExecutor.getChainEntrypoint(executable.chain, this.config.env)
@@ -101,19 +99,24 @@ export class WarpMultiversxExecutor {
     const endpoint = abi.getEndpoint(response.function || action.func || '')
     const parts = (response.returnDataParts || []).map((part: any) => (typeof part === 'string' ? Buffer.from(part) : Buffer.from(part)))
     const typedValues = argsSerializer.buffersToValues(parts, endpoint.output)
-    const { values, results } = await this.results.extractQueryResults(preparedWarp, typedValues, executable.action, executable.resolvedInputs)
-    const next = getNextInfo(this.config, preparedWarp, executable.action, results)
+    const { values, results } = await this.results.extractQueryResults(
+      executable.warp,
+      typedValues,
+      executable.action,
+      executable.resolvedInputs
+    )
+    const next = getNextInfo(this.config, executable.warp, executable.action, results)
 
     return {
       success: isSuccess,
-      warp: preparedWarp,
+      warp: executable.warp,
       action: executable.action,
       user: this.config.user?.wallet || null,
       txHash: null,
       next,
       values,
       results,
-      messages: applyResultsToMessages(preparedWarp, results),
+      messages: applyResultsToMessages(executable.warp, results),
     }
   }
 

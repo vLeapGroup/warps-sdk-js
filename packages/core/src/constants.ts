@@ -1,5 +1,4 @@
-import { WarpIdType } from './types'
-import { InterpolationBag } from './WarpInterpolator'
+import { InterpolationBag, WarpIdType } from './types'
 
 export const WarpConstants = {
   HttpProtocolPrefix: 'http',

@@ -1,17 +1,17 @@
 import { WarpMultiversxRegistry } from '@vleap/warps-adapter-multiversx'
 import {
-    Brand,
-    Warp,
-    WarpCacheConfig,
-    WarpConstants,
-    WarpInitConfig,
-    WarpInterpolator,
-    WarpLogger,
-    WarpRegistryInfo,
-    extractIdentifierInfoFromUrl,
-    getWarpInfoFromIdentifier
+  Brand,
+  Warp,
+  WarpCacheConfig,
+  WarpConstants,
+  WarpInitConfig,
+  WarpLogger,
+  WarpRegistryInfo,
+  extractIdentifierInfoFromUrl,
+  getWarpInfoFromIdentifier,
 } from '@vleap/warps-core'
 import { WarpBuilder } from './WarpBuilder'
+import { WarpInterpolator } from './WarpInterpolator'
 
 // @ts-ignore: no type declarations for qr-code-styling
 
@@ -60,9 +60,7 @@ export class WarpLinkDetecter {
   async detect(url: string, cache?: WarpCacheConfig): Promise<DetectionResult> {
     const emptyResult: DetectionResult = { match: false, url, warp: null, registryInfo: null, brand: null }
 
-    const idResult = url.startsWith(WarpConstants.HttpProtocolPrefix)
-      ? extractIdentifierInfoFromUrl(url)
-      : getWarpInfoFromIdentifier(url)
+    const idResult = url.startsWith(WarpConstants.HttpProtocolPrefix) ? extractIdentifierInfoFromUrl(url) : getWarpInfoFromIdentifier(url)
 
     if (!idResult) {
       return emptyResult
