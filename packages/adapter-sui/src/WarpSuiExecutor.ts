@@ -4,6 +4,7 @@ import {
   applyResultsToMessages,
   getNextInfo,
   getWarpActionByIndex,
+  WarpContractAction,
   WarpExecutable,
   WarpExecution,
   WarpInitConfig,
@@ -47,35 +48,13 @@ export class WarpSuiExecutor {
     return tx
   }
 
-  private serializeArg(tx: Transaction, arg: any) {
-    if (typeof arg === 'string' && arg.includes(':')) {
-      const [type, raw] = arg.split(':', 2)
-      switch (type) {
-        case 'string':
-          return tx.pure.string(raw)
-        case 'bool':
-          return tx.pure.bool(raw === 'true')
-        case 'uint64':
-          return tx.pure.u64(BigInt(raw))
-        case 'address':
-          return tx.pure.address(raw)
-        default:
-          throw new Error(`WarpSuiExecutor: Unsupported argument type: ${type}`)
-      }
-    }
-    // fallback: try string
-    return tx.pure.string(String(arg))
-  }
-
   async createContractCallTransaction(executable: WarpExecutable): Promise<Transaction> {
     if (!this.config.user?.wallet) throw new Error('WarpSuiExecutor: createContractCall - user address not set')
-    const action = getWarpActionByIndex(executable.warp, executable.action)
+    const action = getWarpActionByIndex(executable.warp, executable.action) as WarpContractAction
+    if (!action.func) throw new Error('WarpSuiExecutor: createContractCall - function not set')
     const tx = new Transaction()
-    // SUI: Move call
-    tx.moveCall({
-      target: (action as any).func,
-      arguments: executable.args.map((arg: any) => this.serializeArg(tx, arg)),
-    })
+    const pureArgs = executable.args.map((arg) => this.serializer.stringToTyped(tx, arg))
+    tx.moveCall({ target: action.func, arguments: pureArgs })
     return tx
   }
 

@@ -51,4 +51,24 @@ describe('WarpSuiExecutor', () => {
     expect(tx).toBeDefined()
     expect(typeof tx.moveCall).toBe('function')
   })
+
+  it('createContractCallTransaction - uses tx.pure for arguments', async () => {
+    const action = { type: 'contract', label: 'test', description: 'test', func: '0xpackage::module::func' }
+    const warp = { actions: [action] } as any
+    const executable = {
+      warp,
+      chain,
+      action: 1,
+      destination: '0xpackage',
+      args: ['string:hello', 'bool:true', 'uint64:42'],
+      value: 0n,
+      transfers: [],
+      data: null,
+      resolvedInputs: [],
+    }
+    const tx = await executor.createContractCallTransaction(executable)
+
+    expect(tx).toBeDefined()
+    expect(typeof tx.moveCall).toBe('function')
+  })
 })

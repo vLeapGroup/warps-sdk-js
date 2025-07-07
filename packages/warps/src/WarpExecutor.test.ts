@@ -77,6 +77,9 @@ describe('WarpExecutor', () => {
       async execute() {
         return 'multiversx-result'
       }
+      async createTransaction() {
+        return 'multiversx-result'
+      }
     }
     jest.spyOn(adapterRegistry, 'getAdapter').mockImplementation((chain) => {
       if (chain === 'multiversx') return () => MockMultiversxExecutor
@@ -105,6 +108,9 @@ describe('WarpExecutor', () => {
       async execute() {
         return 'sui-result'
       }
+      async createTransaction() {
+        return 'sui-result'
+      }
     }
     jest.spyOn(adapterRegistry, 'getAdapter').mockImplementation((chain) => {
       if (chain === 'sui') return () => MockSuiExecutor
@@ -112,6 +118,9 @@ describe('WarpExecutor', () => {
         return () =>
           class {
             async execute() {
+              return 'multiversx-result'
+            }
+            async createTransaction() {
               return 'multiversx-result'
             }
           }
