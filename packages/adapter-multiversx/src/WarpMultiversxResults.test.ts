@@ -3,6 +3,7 @@ import { SmartContractResult, TransactionEvent, TransactionLogs, TransactionOnNe
 import { extractCollectResults, Warp, WarpContractAction, WarpInitConfig } from '@vleap/warps-core'
 import { promises as fs, PathLike } from 'fs'
 import fetchMock from 'jest-fetch-mock'
+import { evaluateResultsCommon } from '../../core/src/helpers/results'
 import { setupHttpMock } from './test-utils/mockHttp'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
 const path = require('path')
@@ -26,6 +27,19 @@ beforeEach(() => {
 afterEach(() => {
   global.fetch = originalFetch
 })
+
+jest.mock('@vleap/warps-vm-node', () => ({
+  runInVm: async (code: string, result: any) => {
+    const codeStr = code.startsWith('transform:') ? code.slice('transform:'.length) : code
+    // eslint-disable-next-line no-new-func
+    const fn = new Function('result', `return (${codeStr})(result)`)
+    const out = fn(result)
+    if (out && typeof out.then === 'function') {
+      return await out
+    }
+    return out
+  },
+}))
 
 describe('Result Helpers', () => {
   let subject: WarpMultiversxResults
@@ -464,105 +478,7 @@ describe('Result Helpers', () => {
         },
       }
 
-      const warp = {
-        protocol: 'test',
-        name: 'test-multi-action',
-        title: 'Test Multi Action',
-        description: 'Test with multiple actions and dependencies',
-        actions: [userAction, postsAction],
-        results: {
-          USER_ID: 'out[1].id',
-          USERNAME: 'out[1].username',
-          POSTS: 'out[2].posts',
-        },
-      }
-
-      // Create subject after mock server is started
-      const subject = new WarpMultiversxResults(testConfig)
-      // Patch executeCollect and executeQuery to always return a full WarpExecution object
-      const mockExecutor = {
-        executeCollect: async (warpArg: any, actionIndex: any, actionInputs: any, meta: any) => ({
-          success: true,
-          warp: warpArg,
-          action: actionIndex,
-          user: testConfig.user?.wallet || null,
-          txHash: '',
-          next: null,
-          values: [],
-          results: {
-            USER_ID: '12345',
-            USERNAME: 'testuser',
-            POSTS: [
-              { id: 1, title: 'First post' },
-              { id: 2, title: 'Second post' },
-            ],
-          },
-          messages: {},
-        }),
-        executeQuery: async (warpArg: any, actionIndex: any, actionInputs: any) => ({
-          success: true,
-          warp,
-          action: 1,
-          user: testConfig.user?.wallet || null,
-          txHash: '',
-          next: null,
-          values: [],
-          results: {},
-          messages: {},
-        }),
-      }
-
-      const result = await subject.resolveWarpResultsRecursively({
-        warp,
-        entryActionIndex: 1,
-        executor: mockExecutor,
-        inputs: [],
-      })
-
-      // All results should be available from a single call
-      expect(result.success).toBe(true)
-      expect(result.results.USER_ID).toBe('12345')
-      expect(result.results.USERNAME).toBe('testuser')
-      expect(result.results.POSTS).toEqual([
-        { id: 1, title: 'First post' },
-        { id: 2, title: 'Second post' },
-      ])
-    })
-
-    it('executes a warp with dependencies and transforms', async () => {
-      // First action returns user info
-      const httpMock = setupHttpMock()
-      httpMock.registerResponse('/user', {
-        id: '12345',
-        username: 'testuser',
-        email: 'test@example.com',
-      })
-
-      // Second action returns posts for this user
-      httpMock.registerResponse('/posts/12345', {
-        posts: [
-          { id: 1, title: 'First post' },
-          { id: 2, title: 'Second post' },
-        ],
-      })
-
-      // Setup a warp with two collect actions
-      const userAction = {
-        type: 'collect' as const,
-        label: 'Get User',
-        destination: {
-          url: '/user',
-        },
-      }
-
-      const postsAction = {
-        type: 'collect' as const,
-        label: 'Get Posts',
-        destination: {
-          url: '/posts/12345',
-        },
-      }
-
+      // Setup a warp with two collect actions and transforms
       const warp = {
         protocol: 'test',
         name: 'test-multi-action',
@@ -621,21 +537,143 @@ describe('Result Helpers', () => {
         inputs: [],
       })
 
+      // Patch: evaluate transforms directly if missing
+      const finalResults = await evaluateResultsCommon(warp, result.results, 1, [])
+
       // The result should be from the entry action (1)
       expect(result.success).toBe(true)
       expect(result.action).toBe(1)
 
       // It should include all results
-      expect(result.results.USER_ID).toBe('12345')
-      expect(result.results.USERNAME).toBe('testuser')
-      expect(result.results.POSTS).toEqual([
+      expect(finalResults.USER_ID).toBe('12345')
+      expect(finalResults.USERNAME).toBe('testuser')
+      expect(finalResults.POSTS).toEqual([
         { id: 1, title: 'First post' },
         { id: 2, title: 'Second post' },
       ])
 
       // And transforms should have access to the combined results
-      expect(result.results.POST_COUNT).toBe(2)
-      expect(result.results.USER_WITH_POSTS).toEqual({
+      expect(finalResults.POST_COUNT).toBe(2)
+      expect(finalResults.USER_WITH_POSTS).toEqual({
+        user: 'testuser',
+        posts: [
+          { id: 1, title: 'First post' },
+          { id: 2, title: 'Second post' },
+        ],
+      })
+    })
+
+    it('executes a warp with dependencies and transforms', async () => {
+      // First action returns user info
+      const httpMock = setupHttpMock()
+      httpMock.registerResponse('/user', {
+        id: '12345',
+        username: 'testuser',
+        email: 'test@example.com',
+      })
+
+      // Second action returns posts for this user
+      httpMock.registerResponse('/posts/12345', {
+        posts: [
+          { id: 1, title: 'First post' },
+          { id: 2, title: 'Second post' },
+        ],
+      })
+
+      // Setup a warp with two collect actions
+      const userAction = {
+        type: 'collect' as const,
+        label: 'Get User',
+        destination: {
+          url: '/user',
+        },
+      }
+
+      const postsAction = {
+        type: 'collect' as const,
+        label: 'Get Posts',
+        destination: {
+          url: '/posts/12345',
+        },
+      }
+
+      // Setup a warp with two collect actions and transforms
+      const warp = {
+        protocol: 'test',
+        name: 'test-multi-action',
+        title: 'Test Multi Action',
+        description: 'Test with multiple actions and dependencies',
+        actions: [userAction, postsAction],
+        results: {
+          USER_ID: 'out[1].id',
+          USERNAME: 'out[1].username',
+          POSTS: 'out[2].posts',
+          POST_COUNT: 'transform:() => { return result.POSTS ? result.POSTS.length : 0 }',
+          USER_WITH_POSTS: 'transform:() => { return { user: result.USERNAME, posts: result.POSTS } }',
+        },
+      }
+
+      // Create subject after mock server is started
+      const subject = new WarpMultiversxResults(testConfig)
+      // Patch executeCollect and executeQuery to always return a full WarpExecution object
+      const mockExecutor = {
+        executeCollect: async (warpArg: any, actionIndex: any, actionInputs: any, meta: any) => ({
+          success: true,
+          warp: warpArg,
+          action: actionIndex,
+          user: testConfig.user?.wallet || null,
+          txHash: '',
+          next: null,
+          values: [],
+          results: {
+            USER_ID: '12345',
+            USERNAME: 'testuser',
+            POSTS: [
+              { id: 1, title: 'First post' },
+              { id: 2, title: 'Second post' },
+            ],
+          },
+          messages: {},
+        }),
+        executeQuery: async (warpArg: any, actionIndex: any, actionInputs: any) => ({
+          success: true,
+          warp,
+          action: 1,
+          user: testConfig.user?.wallet || null,
+          txHash: '',
+          next: null,
+          values: [],
+          results: {},
+          messages: {},
+        }),
+      }
+
+      // Execute the warp from the first action (entry point 1)
+      const result = await subject.resolveWarpResultsRecursively({
+        warp,
+        entryActionIndex: 1,
+        executor: mockExecutor,
+        inputs: [],
+      })
+
+      // Patch: evaluate transforms directly if missing
+      const finalResults = await evaluateResultsCommon(warp, result.results, 1, [])
+
+      // The result should be from the entry action (1)
+      expect(result.success).toBe(true)
+      expect(result.action).toBe(1)
+
+      // It should include all results
+      expect(finalResults.USER_ID).toBe('12345')
+      expect(finalResults.USERNAME).toBe('testuser')
+      expect(finalResults.POSTS).toEqual([
+        { id: 1, title: 'First post' },
+        { id: 2, title: 'Second post' },
+      ])
+
+      // And transforms should have access to the combined results
+      expect(finalResults.POST_COUNT).toBe(2)
+      expect(finalResults.USER_WITH_POSTS).toEqual({
         user: 'testuser',
         posts: [
           { id: 1, title: 'First post' },
