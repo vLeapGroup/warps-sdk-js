@@ -1,0 +1,6 @@
+---
+description: Use to ensure quality of changes via build and test commands
+alwaysApply: false
+---
+
+Please iterate run "npm run build" and "npm test" to make sure there are no errors and all tests pass. If they don't pass, fix them iterate, iterate, iterate, using "npm run build" and "npm test" until everything works. Do not stop, do not ask me for anything, just do it.
