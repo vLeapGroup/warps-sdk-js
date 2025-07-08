@@ -1,4 +1,5 @@
-import { WarpAction, WarpChainInfo, WarpConstants, WarpInitConfig } from '@vleap/warps-core'
+import { WarpConstants } from './constants'
+import { WarpAction, WarpChainInfo, WarpInitConfig } from './types'
 import { WarpFactory } from './WarpFactory'
 import { WarpUtils } from './WarpUtils'
 

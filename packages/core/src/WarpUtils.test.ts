@@ -1,9 +1,9 @@
 import { WarpMultiversxRegistry } from '@vleap/warps-adapter-multiversx'
 import { getNextInfo } from '@vleap/warps-core'
-import { WarpContractAction } from '../../core/src/types'
-import { WarpChainEnv } from '../../core/src/types/general'
-import { WarpExecutionResults } from '../../core/src/types/results'
-import { Warp, WarpInitConfig } from '../../core/src/types/warp'
+import { WarpContractAction } from './types'
+import { WarpChainEnv } from './types/general'
+import { WarpExecutionResults } from './types/results'
+import { Warp, WarpInitConfig } from './types/warp'
 import { WarpUtils } from './WarpUtils'
 
 const testConfig: WarpInitConfig = {
@@ -12,6 +12,66 @@ const testConfig: WarpInitConfig = {
   currentUrl: 'https://anyclient.com',
   vars: {},
   user: undefined,
+  repository: {
+    chain: 'multiversx',
+    builder: class {
+      createInscriptionTransaction() {
+        return {}
+      }
+      createFromTransaction() {
+        return Promise.resolve({ protocol: '', name: '', title: '', description: '', actions: [] })
+      }
+      createFromTransactionHash() {
+        return Promise.resolve(null)
+      }
+    },
+    executor: class {
+      createTransaction() {
+        return Promise.resolve({})
+      }
+      preprocessInput() {
+        return Promise.resolve('')
+      }
+    },
+    results: class {
+      getTransactionExecutionResults() {
+        return Promise.resolve({
+          success: true,
+          warp: { protocol: '', name: '', title: '', description: '', actions: [] },
+          action: 0,
+          user: null,
+          txHash: null,
+          next: null,
+          values: [],
+          results: {},
+          messages: {},
+        })
+      }
+    },
+    serializer: class {
+      typedToString() {
+        return ''
+      }
+      typedToNative() {
+        return ['', ''] as [string, any]
+      }
+      nativeToTyped() {
+        return ''
+      }
+      nativeToType() {
+        return ''
+      }
+      stringToTyped() {
+        return ''
+      }
+      stringToNative(value: string) {
+        const [type, val] = value.split(':')
+        return [type, val]
+      }
+    },
+    registry: WarpMultiversxRegistry,
+  },
+  adapters: [],
 }
 
 describe('getNextInfo', () => {

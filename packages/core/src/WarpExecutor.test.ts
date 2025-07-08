@@ -1,4 +1,4 @@
-import { Warp, WarpInitConfig } from '@vleap/warps-core'
+import { Warp, WarpInitConfig } from './types'
 import { WarpExecutor } from './WarpExecutor'
 
 describe('WarpExecutor', () => {

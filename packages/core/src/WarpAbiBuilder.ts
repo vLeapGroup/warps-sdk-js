@@ -1,4 +1,4 @@
-import { WarpAbi } from '@vleap/warps-core'
+import { WarpAbi } from './types'
 
 export class WarpAbiBuilder {
   async createFromRaw(encoded: string): Promise<WarpAbi> {

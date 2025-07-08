@@ -1,19 +1,9 @@
-import {
-  applyResultsToMessages,
-  extractCollectResults,
-  getNextInfo,
-  getWarpActionByIndex,
-  Warp,
-  WarpActionIndex,
-  WarpAdapterGenericRemoteTransaction,
-  WarpAdapterGenericTransaction,
-  WarpChainInfo,
-  WarpExecution,
-  WarpInitConfig,
-  WarpInterpolator,
-  WarpLogger,
-} from '@vleap/warps-core'
+import { WarpAdapterGenericRemoteTransaction, WarpAdapterGenericTransaction } from './adapters'
+import { applyResultsToMessages, extractCollectResults, getNextInfo, getWarpActionByIndex } from './helpers'
+import { Warp, WarpActionIndex, WarpChainInfo, WarpExecution, WarpInitConfig } from './types'
 import { WarpFactory } from './WarpFactory'
+import { WarpInterpolator } from './WarpInterpolator'
+import { WarpLogger } from './WarpLogger'
 import { WarpUtils } from './WarpUtils'
 
 type ExecutionHandlers = {

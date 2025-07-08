@@ -1,9 +1,0 @@
-{
-  "extends": "../../packages/tsconfig/base.json",
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "esnext"
-  },
-  "include": ["src", "../core/src/WarpBrandBuilder.ts"],
-  "exclude": ["dist", "build", "node_modules"]
-}

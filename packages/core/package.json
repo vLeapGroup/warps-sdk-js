@@ -1,6 +1,6 @@
 {
-  "name": "@vleap/warps-core",
-  "version": "0.2.0-alpha.5",
+  "name": "@vleap/warps",
+  "version": "3.0.0-alpha.33",
   "description": "",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
