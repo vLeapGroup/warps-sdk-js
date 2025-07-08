@@ -57,14 +57,6 @@ export class WarpMultiversxResults {
     }
   }
 
-  static parseResultsOutIndex(resultPath: string): number | null {
-    if (resultPath === 'out') return 1
-    const outIndexMatch = resultPath.match(/^out\[(\d+)\]/)
-    if (outIndexMatch) return parseInt(outIndexMatch[1], 10)
-    if (resultPath.startsWith('out.') || resultPath.startsWith('event.')) return null
-    return null
-  }
-
   async extractContractResults(
     warp: Warp,
     actionIndex: WarpActionIndex,
