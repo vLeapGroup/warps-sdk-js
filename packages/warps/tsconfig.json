@@ -4,6 +4,6 @@
     "target": "ES2020",
     "module": "esnext"
   },
-  "include": ["src", "../adapter-multiversx/src/WarpMultiversxContractLoader.ts", "../adapter-multiversx/src/WarpMultiversxRegistry.ts"],
+  "include": ["src"],
   "exclude": ["dist", "build", "node_modules"]
 }
