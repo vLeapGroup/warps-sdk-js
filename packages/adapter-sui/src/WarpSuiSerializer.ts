@@ -42,31 +42,19 @@ export class WarpSuiSerializer implements AdapterWarpSerializer {
     return this.stringToTyped(stringValue)
   }
 
-  stringToTyped(value: string): any {
+  stringToTyped(value: string, tx?: Transaction): any {
+    const transaction = tx || new Transaction()
     const [type, raw] = value.split(/:(.*)/, 2) as [WarpActionInputType, string]
-    const tx = new Transaction()
-    if (type === 'object') return tx.object(raw)
-    if (type === 'string') return tx.pure.string(raw)
-    if (type === 'bool') return tx.pure.bool(raw === 'true')
-    if (type === 'u8') return tx.pure.u8(Number(raw))
-    if (type === 'u16') return tx.pure.u16(Number(raw))
-    if (type === 'u32') return tx.pure.u32(Number(raw))
-    if (type === 'u64' || type === 'uint64') return tx.pure.u64(BigInt(raw))
-    if (type === 'u128') return tx.pure.u128(BigInt(raw))
-    if (type === 'u256') return tx.pure.u256(BigInt(raw))
-    if (type === 'address') return tx.pure.address(raw)
-    // if (type === 'vector') {
-    //   const [elemType, listValues] = raw.split(/:(.*)/, 2)
-    //   if (!listValues) return tx.pure.vector(elemType, [])
-    //   const values = listValues.split(',').map((v: string) => this.stringToTyped(tx, `${elemType}:${v}`))
-    //   return tx.pure.vector(elemType, values)
-    // }
-    // if (type === 'option') {
-    //   if (raw === 'null' || raw === undefined) return tx.pure.option('u64', null)
-    //   // Try to infer the type from the inner value
-    //   const [innerType] = raw.split(':', 1)
-    //   return tx.pure.option(innerType, this.stringToTyped(tx, raw))
-    // }
+    if (type === 'object') return transaction.object(raw)
+    if (type === 'string') return transaction.pure.string(raw)
+    if (type === 'bool') return transaction.pure.bool(raw === 'true')
+    if (type === 'u8') return transaction.pure.u8(Number(raw))
+    if (type === 'u16') return transaction.pure.u16(Number(raw))
+    if (type === 'u32') return transaction.pure.u32(Number(raw))
+    if (type === 'u64' || type === 'uint64') return transaction.pure.u64(BigInt(raw))
+    if (type === 'u128') return transaction.pure.u128(BigInt(raw))
+    if (type === 'u256') return transaction.pure.u256(BigInt(raw))
+    if (type === 'address') return transaction.pure.address(raw)
     throw new Error(`WarpSuiSerializer (stringToTyped): Unsupported type: ${type}`)
   }
 

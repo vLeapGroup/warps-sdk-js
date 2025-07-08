@@ -8,12 +8,12 @@ const mockAdapter = {
     createFromTransaction = jest.fn()
     createFromTransactionHash = jest.fn().mockResolvedValue(null)
   },
-  serializer: {
-    typedToString: jest.fn(),
-    typedToNative: jest.fn(),
-    nativeToTyped: jest.fn(),
-    nativeToType: jest.fn(),
-    stringToTyped: jest.fn(),
+  serializer: class {
+    typedToString = jest.fn()
+    typedToNative = jest.fn()
+    nativeToTyped = jest.fn()
+    nativeToType = jest.fn()
+    stringToTyped = jest.fn()
   },
   registry: class {
     createWarpRegisterTransaction = jest.fn()
@@ -127,6 +127,7 @@ describe('WarpInterpolator per-action chain info', () => {
     }
 
     const cache = new WarpCache('memory')
+    config.cache = { type: 'memory' }
 
     const chainA = {
       name: 'A',
@@ -150,18 +151,15 @@ describe('WarpInterpolator per-action chain info', () => {
     }
 
     cache.set(WarpCacheKey.ChainInfo(config.env, 'A'), chainA, CacheTtl.OneWeek)
-    cache.set(
-      WarpCacheKey.ChainInfo(config.env, 'B'),
-      chainB,
-      CacheTtl.OneWeek
-    )(
-      // Set the registry mock on the prototype before instantiating WarpInterpolator
-      mockAdapter.registry.prototype as any
-    ).getChainInfo = jest.fn((chain: string, _cache?: any) => {
-      if (chain === 'A') return Promise.resolve(chainA)
-      if (chain === 'B') return Promise.resolve(chainB)
-      return Promise.resolve(null)
-    })
+    cache.set(WarpCacheKey.ChainInfo(config.env, 'B'), chainB, CacheTtl.OneWeek)
+    // Set the registry mock on the class, not the prototype, before instantiating WarpInterpolator
+    mockAdapter.registry = class {
+      getChainInfo(chain: string, _cache?: any) {
+        if (chain === 'A') return Promise.resolve(chainA)
+        if (chain === 'B') return Promise.resolve(chainB)
+        return Promise.resolve(null)
+      }
+    } as any
     config.repository = { ...mockAdapter, registry: mockAdapter.registry }
 
     const warp: Warp = {

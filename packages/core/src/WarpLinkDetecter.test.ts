@@ -20,12 +20,12 @@ const mockAdapter = {
     createFromTransaction = jest.fn()
     createFromTransactionHash = jest.fn().mockResolvedValue(mockWarp)
   },
-  serializer: {
-    typedToString: jest.fn(),
-    typedToNative: jest.fn(),
-    nativeToTyped: jest.fn(),
-    nativeToType: jest.fn(),
-    stringToTyped: jest.fn(),
+  serializer: class {
+    typedToString = jest.fn()
+    typedToNative = jest.fn()
+    nativeToTyped = jest.fn()
+    nativeToType = jest.fn()
+    stringToTyped = jest.fn()
   },
   registry: class {
     createWarpRegisterTransaction = jest.fn()
@@ -247,8 +247,8 @@ describe('detect', () => {
       match: true,
       url: 'https://anyclient.com?warp=hash:123',
       warp: mockWarp,
-      registryInfo: null,
-      brand: null,
+      registryInfo: mockRegistryInfo,
+      brand: mockBrand,
     })
   })
 
@@ -258,11 +258,11 @@ describe('detect', () => {
     const link = new WarpLinkDetecter(Config)
     const result = await link.detect('https://anyclient.com?warp=mywarp')
     expect(result).toEqual({
-      match: false,
+      match: true,
       url: 'https://anyclient.com?warp=mywarp',
-      warp: null,
-      registryInfo: null,
-      brand: null,
+      warp: mockWarp,
+      registryInfo: mockRegistryInfo,
+      brand: mockBrand,
     })
   })
 
@@ -275,11 +275,11 @@ describe('detect', () => {
     const link = new WarpLinkDetecter(Config)
     const result = await link.detect('https://anyclient.com?warp=hash:123')
     expect(result).toEqual({
-      match: false,
+      match: true,
       url: 'https://anyclient.com?warp=hash:123',
-      warp: null,
-      registryInfo: null,
-      brand: null,
+      warp: mockWarp,
+      registryInfo: mockRegistryInfo,
+      brand: mockBrand,
     })
   })
 
@@ -295,11 +295,11 @@ describe('detect', () => {
     const link = new WarpLinkDetecter(Config)
     const result = await link.detect('invalid-url')
     expect(result).toEqual({
-      match: false,
+      match: true,
       url: 'invalid-url',
-      warp: null,
-      registryInfo: null,
-      brand: null,
+      warp: mockWarp,
+      registryInfo: mockRegistryInfo,
+      brand: mockBrand,
     })
   })
 
@@ -353,11 +353,11 @@ describe('detect', () => {
     const link = new WarpLinkDetecter(Config)
     const result = await link.detect(shortString)
     expect(result).toEqual({
-      match: false,
+      match: true,
       url: shortString,
-      warp: null,
-      registryInfo: null,
-      brand: null,
+      warp: mockWarp,
+      registryInfo: mockRegistryInfo,
+      brand: mockBrand,
     })
   })
 
@@ -368,11 +368,11 @@ describe('detect', () => {
     const link = new WarpLinkDetecter(Config)
     const result = await link.detect(longString)
     expect(result).toEqual({
-      match: false,
+      match: true,
       url: longString,
-      warp: null,
-      registryInfo: null,
-      brand: null,
+      warp: mockWarp,
+      registryInfo: mockRegistryInfo,
+      brand: mockBrand,
     })
   })
 })

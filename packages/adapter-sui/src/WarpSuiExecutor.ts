@@ -53,7 +53,7 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
     if (!action.func) throw new Error('WarpSuiExecutor: createContractCall - function not set')
     const tx = new Transaction()
     const target = `${action.address}::${action.func}`
-    const pureArgs = executable.args.map((arg) => this.serializer.stringToTyped(tx, arg))
+    const pureArgs = executable.args.map((arg) => this.serializer.stringToTyped(arg, tx))
     tx.moveCall({ target, arguments: pureArgs })
     return tx
   }
