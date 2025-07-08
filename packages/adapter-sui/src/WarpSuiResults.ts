@@ -1,5 +1,6 @@
 import { SuiClient } from '@mysten/sui/client'
 import {
+  AdapterWarpResults,
   applyResultsToMessages,
   evaluateResultsCommon,
   getNextInfo,
@@ -14,7 +15,7 @@ import {
 } from '@vleap/warps-core'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
 
-export class WarpSuiResults {
+export class WarpSuiResults implements AdapterWarpResults {
   private readonly serializer: WarpSuiSerializer
   private readonly client: SuiClient
 

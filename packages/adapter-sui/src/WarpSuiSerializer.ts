@@ -1,7 +1,7 @@
-import { Transaction } from '@mysten/sui/dist/cjs/transactions'
-import { WarpActionInputType, WarpNativeValue, WarpSerializer } from '@vleap/warps-core'
+import { Transaction } from '@mysten/sui/transactions'
+import { AdapterWarpSerializer, WarpActionInputType, WarpNativeValue, WarpSerializer } from '@vleap/warps-core'
 
-export class WarpSuiSerializer {
+export class WarpSuiSerializer implements AdapterWarpSerializer {
   public readonly coreSerializer: WarpSerializer
 
   constructor() {
@@ -37,13 +37,14 @@ export class WarpSuiSerializer {
     return this.coreSerializer.stringToNative(stringValue)
   }
 
-  nativeToTyped(tx: Transaction, type: WarpActionInputType, value: WarpNativeValue): any {
+  nativeToTyped(type: WarpActionInputType, value: WarpNativeValue): any {
     const stringValue = this.coreSerializer.nativeToString(type, value)
-    return this.stringToTyped(tx, stringValue)
+    return this.stringToTyped(stringValue)
   }
 
-  stringToTyped(tx: Transaction, value: string): any {
+  stringToTyped(value: string): any {
     const [type, raw] = value.split(/:(.*)/, 2) as [WarpActionInputType, string]
+    const tx = new Transaction()
     if (type === 'object') return tx.object(raw)
     if (type === 'string') return tx.pure.string(raw)
     if (type === 'bool') return tx.pure.bool(raw === 'true')
@@ -82,5 +83,10 @@ export class WarpSuiSerializer {
     if (type === 'vector') return 'vector'
     if (type === 'option') return 'option'
     throw new Error(`WarpSuiSerializer (typeToString): Unsupported input type: ${type}`)
+  }
+
+  nativeToType(type: any): any {
+    // TODO: Implement Sui-specific nativeToType
+    throw new Error('Not implemented')
   }
 }

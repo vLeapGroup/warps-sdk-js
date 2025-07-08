@@ -1,19 +1,9 @@
-import { WarpMultiversxRegistry } from '@vleap/warps-adapter-multiversx'
-import {
-  Warp,
-  WarpBrand,
-  WarpCacheConfig,
-  WarpConstants,
-  WarpInitConfig,
-  WarpLogger,
-  WarpRegistryInfo,
-  extractIdentifierInfoFromUrl,
-  getWarpInfoFromIdentifier,
-} from '@vleap/warps-core'
-import { WarpBuilder } from './WarpBuilder'
+import { AdapterWarpBuilder, AdapterWarpRegistry } from './adapters'
+import { WarpConstants } from './constants'
+import { extractIdentifierInfoFromUrl, getWarpInfoFromIdentifier } from './helpers'
+import { Warp, WarpBrand, WarpCacheConfig, WarpInitConfig, WarpRegistryInfo } from './types'
 import { WarpInterpolator } from './WarpInterpolator'
-
-// @ts-ignore: no type declarations for qr-code-styling
+import { WarpLogger } from './WarpLogger'
 
 type DetectionResult = {
   match: boolean
@@ -34,8 +24,12 @@ type DetectionResultFromHtml = {
 // Example Link (Transaction Hash as ID): https://usewarp.to/to?warp=hash%3A<MYHASH>
 // Example Link (Alias as ID): https://usewarp.to/to?warp=alias%3A<MYALIAS>
 export class WarpLinkDetecter {
+  private registry: AdapterWarpRegistry
+  private builder: AdapterWarpBuilder
+
   constructor(private config: WarpInitConfig) {
-    this.config = config
+    this.registry = new this.config.repository.registry(this.config)
+    this.builder = new this.config.repository.builder(this.config)
   }
 
   isValid(url: string): boolean {
@@ -68,27 +62,26 @@ export class WarpLinkDetecter {
 
     try {
       const { type, identifierBase } = idResult
-      const builder = new WarpBuilder(this.config)
-      const registry = new WarpMultiversxRegistry(this.config)
       let warp: Warp | null = null
       let registryInfo: WarpRegistryInfo | null = null
       let brand: WarpBrand | null = null
 
       if (type === 'hash') {
-        warp = await builder.createFromTransactionHash(identifierBase, cache)
-        const result = await registry.getInfoByHash(identifierBase, cache)
+        warp = await this.builder.createFromTransactionHash(identifierBase, cache)
+        const result = await this.registry.getInfoByHash(identifierBase, cache)
         registryInfo = result.registryInfo
         brand = result.brand
       } else if (type === 'alias') {
-        const result = await registry.getInfoByAlias(identifierBase, cache)
+        const result = await this.registry.getInfoByAlias(identifierBase, cache)
         registryInfo = result.registryInfo
         brand = result.brand
         if (result.registryInfo) {
-          warp = await builder.createFromTransactionHash(result.registryInfo.hash, cache)
+          warp = await this.builder.createFromTransactionHash(result.registryInfo.hash, cache)
         }
       }
 
-      const preparedWarp = warp ? await WarpInterpolator.apply(this.config, warp) : null
+      const interpolator = new WarpInterpolator(this.config)
+      const preparedWarp = warp ? await interpolator.apply(this.config, warp) : null
 
       return preparedWarp ? { match: true, url, warp: preparedWarp, registryInfo, brand } : emptyResult
     } catch (e) {

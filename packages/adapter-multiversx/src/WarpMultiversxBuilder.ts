@@ -1,35 +1,26 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
-import { WarpMultiversxExecutor } from '@vleap/warps-adapter-multiversx'
 import {
-  getLatestProtocolIdentifier,
+  AdapterWarpBuilder,
   getMainChainInfo,
-  toPreviewText,
   Warp,
-  WarpAction,
+  WarpBuilder,
   WarpCache,
   WarpCacheConfig,
   WarpCacheKey,
   WarpInitConfig,
   WarpLogger,
-  WarpValidator,
 } from '@vleap/warps-core'
+import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
-export class WarpBuilder {
+export class WarpMultiversxBuilder implements AdapterWarpBuilder {
   private config: WarpInitConfig
   private cache: WarpCache
-
-  private pendingWarp: Warp = {
-    protocol: getLatestProtocolIdentifier('warp'),
-    name: '',
-    title: '',
-    description: null,
-    preview: '',
-    actions: [],
-  }
+  private core: WarpBuilder
 
   constructor(config: WarpInitConfig) {
     this.config = config
     this.cache = new WarpCache(config.cache?.type)
+    this.core = new WarpBuilder(config)
   }
 
   createInscriptionTransaction(warp: Warp): Transaction {
@@ -51,18 +42,8 @@ export class WarpBuilder {
     return tx
   }
 
-  async createFromRaw(encoded: string, validate = true): Promise<Warp> {
-    const warp = JSON.parse(encoded) as Warp
-
-    if (validate) {
-      await this.validate(warp)
-    }
-
-    return warp
-  }
-
   async createFromTransaction(tx: TransactionOnNetwork, validate = false): Promise<Warp> {
-    const warp = await this.createFromRaw(tx.data.toString(), validate)
+    const warp = await this.core.createFromRaw(tx.data.toString(), validate)
 
     warp.meta = {
       hash: tx.hash,
@@ -100,66 +81,6 @@ export class WarpBuilder {
     } catch (error) {
       WarpLogger.error('WarpBuilder: Error creating from transaction hash', error)
       return null
-    }
-  }
-
-  setName(name: string): WarpBuilder {
-    this.pendingWarp.name = name
-    return this
-  }
-
-  setTitle(title: string): WarpBuilder {
-    this.pendingWarp.title = title
-    return this
-  }
-
-  setDescription(description: string): WarpBuilder {
-    this.pendingWarp.description = description
-    return this
-  }
-
-  setPreview(preview: string): WarpBuilder {
-    this.pendingWarp.preview = preview
-    return this
-  }
-
-  setActions(actions: WarpAction[]): WarpBuilder {
-    this.pendingWarp.actions = actions
-    return this
-  }
-
-  addAction(action: WarpAction): WarpBuilder {
-    this.pendingWarp.actions.push(action)
-    return this
-  }
-
-  async build(): Promise<Warp> {
-    this.ensure(this.pendingWarp.protocol, 'protocol is required')
-    this.ensure(this.pendingWarp.name, 'name is required')
-    this.ensure(this.pendingWarp.title, 'title is required')
-    this.ensure(this.pendingWarp.actions.length > 0, 'actions are required')
-
-    await this.validate(this.pendingWarp)
-
-    return this.pendingWarp
-  }
-
-  getDescriptionPreview(description: string, maxChars = 100): string {
-    return toPreviewText(description, maxChars)
-  }
-
-  private ensure(value: string | null | boolean, errorMessage: string): void {
-    if (!value) {
-      throw new Error(errorMessage)
-    }
-  }
-
-  private async validate(warp: Warp): Promise<void> {
-    const validator = new WarpValidator(this.config)
-    const validationResult = await validator.validate(warp)
-
-    if (!validationResult.valid) {
-      throw new Error(validationResult.errors.join('\n'))
     }
   }
 }

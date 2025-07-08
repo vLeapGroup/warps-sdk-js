@@ -1,13 +1,7 @@
 import { Warp, WarpInitConfig } from '@vleap/warps-core'
-import * as adapterRegistry from '../config/adapter'
 import { WarpExecutor } from './WarpExecutor'
 
 describe('WarpExecutor', () => {
-  const config: WarpInitConfig = {
-    env: 'devnet',
-    user: { wallet: 'erd1...' },
-    currentUrl: 'https://example.com',
-  }
   const handlers = { onExecuted: jest.fn() }
   const warp: Warp = {
     protocol: 'warp',
@@ -56,11 +50,142 @@ describe('WarpExecutor', () => {
     nativeToken: 'SUI',
   }
 
+  const mockAdapter = {
+    chain: 'mockchain',
+    builder: class {
+      createInscriptionTransaction = jest.fn()
+      createFromTransaction = jest.fn()
+      createFromTransactionHash = jest.fn().mockResolvedValue(null)
+    },
+    executor: class {},
+    results: class {
+      async getTransactionExecutionResults() {
+        return {
+          success: true,
+          warp: {},
+          action: 0,
+          user: null,
+          txHash: null,
+          next: null,
+          values: [],
+          results: {},
+          messages: {},
+        }
+      }
+    },
+    serializer: {
+      typedToString: jest.fn(),
+      typedToNative: jest.fn(),
+      nativeToTyped: jest.fn(),
+      nativeToType: jest.fn(),
+      stringToTyped: jest.fn(),
+    },
+    registry: class {
+      createWarpRegisterTransaction() {
+        return {}
+      }
+      createWarpUnregisterTransaction() {
+        return {}
+      }
+      createWarpUpgradeTransaction() {
+        return {}
+      }
+      createWarpAliasSetTransaction() {
+        return {}
+      }
+      createWarpVerifyTransaction() {
+        return {}
+      }
+      createWarpTransferOwnershipTransaction() {
+        return {}
+      }
+      createBrandRegisterTransaction() {
+        return {}
+      }
+      createWarpBrandingTransaction() {
+        return {}
+      }
+      getInfoByAlias() {
+        return Promise.resolve({ registryInfo: null, brand: null })
+      }
+      getInfoByHash() {
+        return Promise.resolve({ registryInfo: null, brand: null })
+      }
+      getUserWarpRegistryInfos() {
+        return Promise.resolve([])
+      }
+      getUserBrands() {
+        return Promise.resolve([])
+      }
+      getChainInfos() {
+        return Promise.resolve([])
+      }
+      getChainInfo() {
+        return Promise.resolve(null)
+      }
+      setChain() {
+        return Promise.resolve({})
+      }
+      removeChain() {
+        return Promise.resolve({})
+      }
+      fetchBrand() {
+        return Promise.resolve(null)
+      }
+    },
+  }
+
+  const minimalWarp = {
+    protocol: 'warp',
+    name: 'mock',
+    title: 'mock',
+    description: '',
+    actions: [],
+  }
+
   afterEach(() => {
     jest.restoreAllMocks()
   })
 
   it('executes using Multiversx executor by default', async () => {
+    const config: WarpInitConfig = {
+      env: 'devnet',
+      user: { wallet: 'erd1...' },
+      currentUrl: 'https://example.com',
+      repository: mockAdapter as any,
+      adapters: [
+        {
+          chain: 'multiversx',
+          executor: class MockMultiversxExecutor {
+            async createTransaction() {
+              return 'multiversx-result'
+            }
+          },
+          results: class {
+            async getTransactionExecutionResults() {
+              return {
+                success: true,
+                warp: minimalWarp,
+                action: 0,
+                user: null,
+                txHash: null,
+                next: null,
+                values: [],
+                results: {},
+                messages: {},
+              }
+            }
+          },
+          serializer: mockAdapter.serializer,
+          registry: mockAdapter.registry,
+          builder: class {
+            createInscriptionTransaction = jest.fn()
+            createFromTransaction = jest.fn()
+            createFromTransactionHash = jest.fn().mockResolvedValue(null)
+          },
+        },
+      ],
+    }
     const executor: WarpExecutor = new WarpExecutor(config, handlers)
     ;(executor as any).factory.createExecutable = async () => ({
       chain: mockChainInfo,
@@ -73,29 +198,80 @@ describe('WarpExecutor', () => {
       data: null,
       resolvedInputs: [],
     })
-    class MockMultiversxExecutor {
-      constructor() {}
-      async execute() {
-        return 'multiversx-result'
-      }
-      async createTransaction() {
-        return 'multiversx-result'
-      }
-    }
-    jest.spyOn(adapterRegistry, 'getAdapter').mockImplementation((chain) => {
-      if (chain === 'multiversx')
-        return {
-          executor: () => MockMultiversxExecutor,
-          results: () => class {},
-        }
-      return null
-    })
     const result = await executor.execute(warp, [])
     expect(result[0]).toBe('multiversx-result')
     expect(result[1]).toEqual(mockChainInfo)
   })
 
   it('executes using Sui executor if chain is sui and adapter is present', async () => {
+    const config: WarpInitConfig = {
+      env: 'devnet',
+      user: { wallet: 'erd1...' },
+      currentUrl: 'https://example.com',
+      repository: mockAdapter as any,
+      adapters: [
+        {
+          chain: 'sui',
+          executor: class MockSuiExecutor {
+            async createTransaction() {
+              return 'sui-result'
+            }
+          },
+          results: class {
+            async getTransactionExecutionResults() {
+              return {
+                success: true,
+                warp: minimalWarp,
+                action: 0,
+                user: null,
+                txHash: null,
+                next: null,
+                values: [],
+                results: {},
+                messages: {},
+              }
+            }
+          },
+          serializer: mockAdapter.serializer,
+          registry: mockAdapter.registry,
+          builder: class {
+            createInscriptionTransaction = jest.fn()
+            createFromTransaction = jest.fn()
+            createFromTransactionHash = jest.fn().mockResolvedValue(null)
+          },
+        },
+        {
+          chain: 'multiversx',
+          executor: class MockMultiversxExecutor {
+            async createTransaction() {
+              return 'multiversx-result'
+            }
+          },
+          results: class {
+            async getTransactionExecutionResults() {
+              return {
+                success: true,
+                warp: minimalWarp,
+                action: 0,
+                user: null,
+                txHash: null,
+                next: null,
+                values: [],
+                results: {},
+                messages: {},
+              }
+            }
+          },
+          serializer: mockAdapter.serializer,
+          registry: mockAdapter.registry,
+          builder: class {
+            createInscriptionTransaction = jest.fn()
+            createFromTransaction = jest.fn()
+            createFromTransactionHash = jest.fn().mockResolvedValue(null)
+          },
+        },
+      ],
+    }
     const executor: WarpExecutor = new WarpExecutor(config, handlers)
     ;(executor as any).factory.createExecutable = async () => ({
       chain: mockSuiChainInfo,
@@ -108,42 +284,19 @@ describe('WarpExecutor', () => {
       data: null,
       resolvedInputs: [],
     })
-    class MockSuiExecutor {
-      constructor() {}
-      async execute() {
-        return 'sui-result'
-      }
-      async createTransaction() {
-        return 'sui-result'
-      }
-    }
-    jest.spyOn(adapterRegistry, 'getAdapter').mockImplementation((chain) => {
-      if (chain === 'sui')
-        return {
-          executor: () => MockSuiExecutor,
-          results: () => class {},
-        }
-      if (chain === 'multiversx')
-        return {
-          executor: () =>
-            class {
-              async execute() {
-                return 'multiversx-result'
-              }
-              async createTransaction() {
-                return 'multiversx-result'
-              }
-            },
-          results: () => class {},
-        }
-      return null
-    })
     const result = await executor.execute(warp, [])
     expect(result[0]).toBe('sui-result')
     expect(result[1]).toEqual(mockSuiChainInfo)
   })
 
   it('throws error if no adapter is registered for chain', async () => {
+    const config: WarpInitConfig = {
+      env: 'devnet',
+      user: { wallet: 'erd1...' },
+      currentUrl: 'https://example.com',
+      repository: mockAdapter as any,
+      adapters: [],
+    }
     const executor: WarpExecutor = new WarpExecutor(config, handlers)
     ;(executor as any).factory.createExecutable = async () => ({
       chain: { ...mockSuiChainInfo, name: 'unknown' },
@@ -156,13 +309,48 @@ describe('WarpExecutor', () => {
       data: null,
       resolvedInputs: [],
     })
-    jest.spyOn(adapterRegistry, 'getAdapter').mockReturnValue(null)
     await expect(executor.execute(warp, [])).rejects.toThrow('No adapter registered for chain: unknown')
   })
 
   it('executeCollect - creates correct input payload structure', async () => {
-    config.currentUrl = 'https://example.com?queryParam=testValue'
-    const handlers = { onExecuted: jest.fn() }
+    const config: WarpInitConfig = {
+      env: 'devnet',
+      user: { wallet: 'erd1...' },
+      currentUrl: 'https://example.com?queryParam=testValue',
+      repository: mockAdapter as any,
+      adapters: [
+        {
+          chain: 'multiversx',
+          executor: class MockMultiversxExecutor {
+            async createTransaction() {
+              return 'multiversx-result'
+            }
+          },
+          results: class {
+            async getTransactionExecutionResults() {
+              return {
+                success: true,
+                warp: minimalWarp,
+                action: 0,
+                user: null,
+                txHash: null,
+                next: null,
+                values: [],
+                results: {},
+                messages: {},
+              }
+            }
+          },
+          serializer: mockAdapter.serializer,
+          registry: mockAdapter.registry,
+          builder: class {
+            createInscriptionTransaction = jest.fn()
+            createFromTransaction = jest.fn()
+            createFromTransactionHash = jest.fn().mockResolvedValue(null)
+          },
+        },
+      ],
+    }
     const subject = new WarpExecutor(config, handlers)
     const httpMock = require('./test-utils/mockHttp').setupHttpMock()
 

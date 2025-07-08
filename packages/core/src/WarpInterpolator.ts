@@ -1,23 +1,30 @@
-import { getMainChainInfo, Warp, WarpAction, WarpConstants, WarpInitConfig } from '@vleap/warps-core'
-import { InterpolationBag } from '@vleap/warps-core/src/types'
-import { WarpUtils } from './WarpUtils'
+import { AdapterWarpRegistry } from './adapters'
+import { WarpConstants } from './constants'
+import { getMainChainInfo } from './helpers'
+import { InterpolationBag, Warp, WarpAction, WarpInitConfig } from './types'
 
 export class WarpInterpolator {
-  static async apply(config: WarpInitConfig, warp: Warp): Promise<Warp> {
+  private registry: AdapterWarpRegistry
+
+  constructor(private config: WarpInitConfig) {
+    this.registry = new this.config.repository.registry(this.config)
+  }
+
+  async apply(config: WarpInitConfig, warp: Warp): Promise<Warp> {
     const modifiable = this.applyVars(config, warp)
     return await this.applyGlobals(config, modifiable)
   }
 
-  static async applyGlobals(config: WarpInitConfig, warp: Warp): Promise<Warp> {
+  async applyGlobals(config: WarpInitConfig, warp: Warp): Promise<Warp> {
     let modifiable = { ...warp }
-    modifiable.actions = await Promise.all(modifiable.actions.map(async (action) => await this.applyActionGlobals(config, action)))
+    modifiable.actions = await Promise.all(modifiable.actions.map(async (action) => await this.applyActionGlobals(action)))
 
     modifiable = await this.applyRootGlobals(modifiable, config)
 
     return modifiable
   }
 
-  static applyVars(config: WarpInitConfig, warp: Warp): Warp {
+  applyVars(config: WarpInitConfig, warp: Warp): Warp {
     if (!warp?.vars) return warp
     let modifiable = JSON.stringify(warp)
 
@@ -47,7 +54,7 @@ export class WarpInterpolator {
     return JSON.parse(modifiable)
   }
 
-  private static async applyRootGlobals(warp: Warp, config: WarpInitConfig): Promise<Warp> {
+  private async applyRootGlobals(warp: Warp, config: WarpInitConfig): Promise<Warp> {
     let modifiable = JSON.stringify(warp)
     const rootBag: InterpolationBag = { config, chain: getMainChainInfo(config) }
 
@@ -61,10 +68,11 @@ export class WarpInterpolator {
     return JSON.parse(modifiable)
   }
 
-  private static async applyActionGlobals(config: WarpInitConfig, action: WarpAction): Promise<WarpAction> {
-    const chain = await WarpUtils.getChainInfoForAction(config, action)
+  private async applyActionGlobals(action: WarpAction): Promise<WarpAction> {
+    const chain = action.chain ? await this.registry.getChainInfo(action.chain) : getMainChainInfo(this.config)
+    if (!chain) throw new Error(`Chain info not found for ${action.chain}`)
     let modifiable = JSON.stringify(action)
-    const bag: InterpolationBag = { config, chain }
+    const bag: InterpolationBag = { config: this.config, chain }
 
     Object.values(WarpConstants.Globals).forEach((global) => {
       const value = global.Accessor(bag)

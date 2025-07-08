@@ -11,6 +11,7 @@ import {
   TransferTransactionsFactory,
 } from '@multiversx/sdk-core'
 import {
+  AdapterWarpExecutor,
   applyResultsToMessages,
   getNextInfo,
   getWarpActionByIndex,
@@ -25,7 +26,7 @@ import { WarpMultiversxAbi } from './WarpMultiversxAbi'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
 
-export class WarpMultiversxExecutor {
+export class WarpMultiversxExecutor implements AdapterWarpExecutor {
   private readonly serializer: WarpMultiversxSerializer
   private readonly abi: WarpMultiversxAbi
   private readonly results: WarpMultiversxResults

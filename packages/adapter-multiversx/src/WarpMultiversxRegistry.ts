@@ -9,6 +9,7 @@ import {
   TransactionsFactoryConfig,
 } from '@multiversx/sdk-core'
 import {
+  AdapterWarpRegistry,
   getMainChainInfo,
   toTypedChainInfo,
   WarpBrand,
@@ -23,12 +24,12 @@ import {
   WarpRegistryConfigInfo,
   WarpRegistryInfo,
 } from '@vleap/warps-core'
-import RegistryAbi from '../../warps/src/abis/registry.abi.json'
+import RegistryAbi from './abis/registry.abi.json'
 import { toTypedConfigInfo, toTypedRegistryInfo } from './helpers/registry'
 import { string_value, u32_value } from './utils.codec'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
-export class WarpMultiversxRegistry {
+export class WarpMultiversxRegistry implements AdapterWarpRegistry {
   private config: WarpInitConfig
   private cache: WarpCache
 

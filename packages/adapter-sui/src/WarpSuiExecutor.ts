@@ -1,6 +1,7 @@
 import { SuiClient } from '@mysten/sui/client'
 import { Transaction } from '@mysten/sui/transactions'
 import {
+  AdapterWarpExecutor,
   applyResultsToMessages,
   getNextInfo,
   getWarpActionByIndex,
@@ -13,7 +14,7 @@ import {
 import { WarpSuiResults } from './WarpSuiResults'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
 
-export class WarpSuiExecutor {
+export class WarpSuiExecutor implements AdapterWarpExecutor {
   private readonly serializer: WarpSuiSerializer
   private readonly results: WarpSuiResults
   private readonly client: SuiClient

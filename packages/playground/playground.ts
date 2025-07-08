@@ -1,11 +1,20 @@
 // Playground for testing warps in isolation
-import { Address, DevnetEntrypoint, Transaction as MultiversxTransaction, TransactionComputer, UserSigner } from '@multiversx/sdk-core'
+import {
+  Address,
+  DevnetEntrypoint,
+  Transaction as MultiversxTransaction,
+  TransactionComputer,
+  TransactionOnNetwork,
+  UserSigner,
+} from '@multiversx/sdk-core'
 import { getFullnodeUrl, SuiClient } from '@mysten/sui/client'
 import { Keypair } from '@mysten/sui/dist/cjs/cryptography'
 import { getFaucetHost, requestSuiFromFaucetV2 } from '@mysten/sui/faucet'
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519'
 import { SerialTransactionExecutor, Transaction as SuiTransaction } from '@mysten/sui/transactions'
 import { WarpBuilder, WarpExecutor, WarpUtils } from '@vleap/warps'
+import { getMultiversxAdapter } from '@vleap/warps-adapter-multiversx'
+import { getSuiAdapter } from '@vleap/warps-adapter-sui'
 import { getWarpActionByIndex, WarpInitConfig } from '@vleap/warps-core'
 import * as fs from 'fs'
 import * as path from 'path'
@@ -30,6 +39,8 @@ const runWarp = async (warpFile: string) => {
     env: 'devnet',
     currentUrl: 'https://usewarp.to',
     user: {},
+    repository: getMultiversxAdapter(),
+    adapters: [getMultiversxAdapter(), getSuiAdapter()],
   }
 
   const actionIndex = 1
@@ -47,13 +58,21 @@ const runWarp = async (warpFile: string) => {
     throw new Error(`Unsupported chain: ${chain}`)
   }
 
-  const executor = new WarpExecutor(config)
-  const [tx] = await executor.execute(warp, actionIndex, warpInputs)
+  const executor = new WarpExecutor(config, {
+    onExecuted: (result) => {
+      console.log('--------------------------------')
+      console.log('Executed:', result)
+      console.log('--------------------------------')
+    },
+  })
+  const [tx] = await executor.execute(warp, warpInputs)
 
   if (chain.name === 'multiversx') {
-    await signAndSendWithMultiversX(tx)
+    const txOnNetwork = await signAndSendWithMultiversX(tx)
+    executor.evaluateResults(warp, chain, txOnNetwork)
   } else if (chain.name === 'sui') {
-    await signAndSendWithSui(tx)
+    const txOnNetwork = await signAndSendWithSui(tx)
+    // executor.evaluateResults(txOnNetwork)
   } else {
     throw new Error(`Unsupported chain: ${chain}`)
   }
@@ -77,7 +96,7 @@ const getMultiversxWallet = async (): Promise<{ address: string; signer: UserSig
   return { address: signer.getAddress().toBech32(), signer }
 }
 
-const signAndSendWithMultiversX = async (tx: MultiversxTransaction) => {
+const signAndSendWithMultiversX = async (tx: MultiversxTransaction): Promise<TransactionOnNetwork> => {
   const { address, signer } = await getMultiversxWallet()
   const entrypoint = new DevnetEntrypoint(undefined, 'api', 'warp-test-playground')
   const provider = entrypoint.createNetworkProvider()
@@ -87,10 +106,11 @@ const signAndSendWithMultiversX = async (tx: MultiversxTransaction) => {
   tx.signature = await signer.sign(serializedTx)
   const txHash = await provider.sendTransaction(tx)
   await provider.awaitTransactionCompleted(txHash)
-  const txOnNetwork = await provider.getTransaction(txHash)
   console.log('--------------------------------')
   console.log('Sent transaction on MultiversX:', txHash)
   console.log('--------------------------------')
+  const txOnNetwork = await provider.getTransaction(txHash)
+  return txOnNetwork
 }
 
 const getSuiWallet = async (): Promise<{ address: string; keypair: Keypair }> => {
@@ -100,7 +120,7 @@ const getSuiWallet = async (): Promise<{ address: string; keypair: Keypair }> =>
   return { address: keypair.getPublicKey().toSuiAddress(), keypair }
 }
 
-const signAndSendWithSui = async (tx: SuiTransaction) => {
+const signAndSendWithSui = async (tx: SuiTransaction): Promise<any> => {
   const { address, keypair } = await getSuiWallet()
   const client = new SuiClient({ url: getFullnodeUrl(suiNetwork) })
   const balance = await client.getBalance({ owner: address })
@@ -112,4 +132,5 @@ const signAndSendWithSui = async (tx: SuiTransaction) => {
   console.log('--------------------------------')
   console.log('Sent transaction on Sui:', result.digest)
   console.log('--------------------------------')
+  return result
 }

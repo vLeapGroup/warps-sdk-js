@@ -1,3 +1,4 @@
+import { Adapter } from '../adapters'
 import { CacheType } from '../WarpCache'
 import { WarpChainEnv } from './general'
 
@@ -5,6 +6,8 @@ export type WarpChain = string
 
 export type WarpInitConfig = {
   env: WarpChainEnv
+  repository: Adapter
+  adapters: Adapter[]
   preferredChain?: WarpChain
   clientUrl?: string
   currentUrl?: string
@@ -149,20 +152,7 @@ export type WarpLinkAction = {
 
 export type WarpActionInputSource = 'field' | 'query' | 'user:wallet'
 
-export type BaseWarpActionInputType =
-  | 'string'
-  | 'uint8'
-  | 'uint16'
-  | 'uint32'
-  | 'uint64'
-  | 'biguint'
-  | 'bool'
-  | 'address'
-  | 'token'
-  | 'codemeta'
-  | 'hex'
-  | 'esdt'
-  | 'nft'
+export type BaseWarpActionInputType = 'string' | 'uint8' | 'uint16' | 'uint32' | 'uint64' | 'biguint' | 'bool' | 'address' | 'hex' | string
 
 export type WarpActionInputType = string
 

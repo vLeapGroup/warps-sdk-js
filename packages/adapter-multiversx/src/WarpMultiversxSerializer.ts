@@ -41,11 +41,19 @@ import {
   VariadicType,
   VariadicValue,
 } from '@multiversx/sdk-core'
-import { BaseWarpActionInputType, WarpActionInputType, WarpConstants, WarpNativeValue, WarpSerializer } from '@vleap/warps-core'
+import {
+  AdapterWarpSerializer,
+  BaseWarpActionInputType,
+  WarpActionInputType,
+  WarpAdapterGenericType,
+  WarpConstants,
+  WarpNativeValue,
+  WarpSerializer,
+} from '@vleap/warps-core'
 
 const SplitParamsRegex = new RegExp(`${WarpConstants.ArgParamsSeparator}(.*)`)
 
-export class WarpMultiversxSerializer {
+export class WarpMultiversxSerializer implements AdapterWarpSerializer {
   public readonly coreSerializer: WarpSerializer
 
   constructor() {
@@ -118,7 +126,7 @@ export class WarpMultiversxSerializer {
     return this.stringToTyped(stringValue)
   }
 
-  nativeToType(type: BaseWarpActionInputType): Type {
+  nativeToType(type: BaseWarpActionInputType): WarpAdapterGenericType {
     if (type.startsWith('composite')) {
       const rawTypes = type.match(/\(([^)]+)\)/)?.[1] as BaseWarpActionInputType
       return new CompositeType(

@@ -4,6 +4,6 @@
     "target": "ES2020",
     "module": "esnext"
   },
-  "include": ["src"],
+  "include": ["src", "../core/src/WarpLinkDetecter.ts", "../core/src/WarpLinkDetecter.test.ts"],
   "exclude": ["dist", "build", "node_modules"]
 }

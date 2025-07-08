@@ -6,6 +6,7 @@ import {
   TypedValue,
 } from '@multiversx/sdk-core'
 import {
+  AdapterWarpResults,
   applyResultsToMessages,
   evaluateResultsCommon,
   getNextInfo,
@@ -25,7 +26,7 @@ import {
 import { WarpMultiversxAbi } from './WarpMultiversxAbi'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
 
-export class WarpMultiversxResults {
+export class WarpMultiversxResults implements AdapterWarpResults {
   private readonly abi: WarpMultiversxAbi
   private readonly serializer: WarpMultiversxSerializer
   private readonly cache: WarpCache
