@@ -57,9 +57,6 @@ const runWarp = async (warpFile: string) => {
   } else {
     throw new Error(`Unsupported chain: ${chain}`)
   }
-
-  console.log('tx', tx)
-  console.log('chain', chain)
 }
 
 const listWarps = () => fs.readdirSync(warpsDir).filter((f) => f.endsWith('.ts') || f.endsWith('.js') || f.endsWith('.json'))
@@ -91,7 +88,9 @@ const signAndSendWithMultiversX = async (tx: MultiversxTransaction) => {
   const txHash = await provider.sendTransaction(tx)
   await provider.awaitTransactionCompleted(txHash)
   const txOnNetwork = await provider.getTransaction(txHash)
-  console.log('MultiversX tx result:', txOnNetwork)
+  console.log('--------------------------------')
+  console.log('Sent transaction on MultiversX:', txHash)
+  console.log('--------------------------------')
 }
 
 const getSuiWallet = async (): Promise<{ address: string; keypair: Keypair }> => {
@@ -110,5 +109,7 @@ const signAndSendWithSui = async (tx: SuiTransaction) => {
   }
   const executor = new SerialTransactionExecutor({ client, signer: keypair })
   const result = await executor.executeTransaction(tx)
-  console.log('Sui tx result:', result)
+  console.log('--------------------------------')
+  console.log('Sent transaction on Sui:', result.digest)
+  console.log('--------------------------------')
 }
