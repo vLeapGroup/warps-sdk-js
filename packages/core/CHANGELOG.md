@@ -1,5 +1,15 @@
 # @vleap/warps-core
 
+## 0.2.0-alpha.4
+
+### Minor Changes
+
+- 5321a6b: further rearch
+
+### Patch Changes
+
+- a707263: add missing link builder export
+
 ## 0.2.0-alpha.3
 
 ### Patch Changes
