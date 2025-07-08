@@ -14,6 +14,8 @@ const walletMultiversxFileName = 'mvx.pem'
 const walletSuiFileName = 'sui.mnemonic'
 const warpInputs: string[] = []
 
+const suiNetwork = 'testnet'
+
 const warpsDir = path.join(__dirname, 'warps')
 
 const runWarp = async (warpFile: string) => {
@@ -101,8 +103,11 @@ const getSuiWallet = async (): Promise<{ address: string; keypair: Keypair }> =>
 
 const signAndSendWithSui = async (tx: SuiTransaction) => {
   const { address, keypair } = await getSuiWallet()
-  await requestSuiFromFaucetV2({ host: getFaucetHost('devnet'), recipient: address })
-  const client = new SuiClient({ url: getFullnodeUrl('devnet') })
+  const client = new SuiClient({ url: getFullnodeUrl(suiNetwork) })
+  const balance = await client.getBalance({ owner: address })
+  if (!balance.totalBalance || BigInt(balance.totalBalance) === 0n) {
+    await requestSuiFromFaucetV2({ host: getFaucetHost(suiNetwork), recipient: address })
+  }
   const executor = new SerialTransactionExecutor({ client, signer: keypair })
   const result = await executor.executeTransaction(tx)
   console.log('Sui tx result:', result)
