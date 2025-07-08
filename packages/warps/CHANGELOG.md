@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.31
+
+### Patch Changes
+
+- 3926ed6: update executor
+
 ## 3.0.0-alpha.30
 
 ### Patch Changes
