@@ -1,11 +1,17 @@
 // Playground for testing warps in isolation
-import { UserSigner } from '@multiversx/sdk-core'
-import { WarpBuilder, WarpExecutor, WarpInterpolator } from '@vleap/warps'
-import { getWarpActionByIndex, WarpExecution, WarpInitConfig } from '@vleap/warps-core'
+import { Address, DevnetEntrypoint, Transaction as MultiversxTransaction, TransactionComputer, UserSigner } from '@multiversx/sdk-core'
+import { getFullnodeUrl, SuiClient } from '@mysten/sui/client'
+import { Keypair } from '@mysten/sui/dist/cjs/cryptography'
+import { getFaucetHost, requestSuiFromFaucetV2 } from '@mysten/sui/faucet'
+import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519'
+import { SerialTransactionExecutor, Transaction as SuiTransaction } from '@mysten/sui/transactions'
+import { WarpBuilder, WarpExecutor, WarpUtils } from '@vleap/warps'
+import { getWarpActionByIndex, WarpInitConfig } from '@vleap/warps-core'
 import * as fs from 'fs'
 import * as path from 'path'
 
-const walletFileName = 'wallet.pem'
+const walletMultiversxFileName = 'mvx.pem'
+const walletSuiFileName = 'sui.mnemonic'
 const warpInputs: string[] = []
 
 const warpsDir = path.join(__dirname, 'warps')
@@ -16,53 +22,42 @@ const runWarp = async (warpFile: string) => {
     return
   }
 
-  const pemPath = path.join(__dirname, walletFileName)
-  const pemText = await fs.promises.readFile(pemPath, { encoding: 'utf8' })
-  const signer = UserSigner.fromPem(pemText)
-
   const warpRaw = fs.readFileSync(warpPath, 'utf-8')
 
   const config: WarpInitConfig = {
     env: 'devnet',
     currentUrl: 'https://usewarp.to',
-    user: {
-      wallet: signer.getAddress().toBech32(),
-    },
+    user: {},
   }
 
   const actionIndex = 1
 
   const builder = new WarpBuilder(config)
-  const executor = new WarpExecutor(config)
-
   const warp = await builder.createFromRaw(warpRaw)
-  const preparedWarp = await WarpInterpolator.apply(config, warp)
-  const action = getWarpActionByIndex(preparedWarp, actionIndex)
-  let execution: WarpExecution | null = null
+  const action = getWarpActionByIndex(warp, actionIndex)
+  const chain = await WarpUtils.getChainInfoForAction(config, action, warpInputs)
 
-  if (action.type === 'contract') {
-    const [tx, chain] = await executor.execute(warp, actionIndex, warpInputs)
-    console.log('tx', tx)
-    console.log('chain', chain)
-    // const entrypoint = new DevnetEntrypoint(undefined, 'api', 'warp-test-playground')
-    // const provider = entrypoint.createNetworkProvider()
-    // const userAddress = Address.newFromBech32(config.user?.wallet || '')
-    // const account = await provider.getAccount(userAddress)
-    // tx.nonce = account.nonce
-    // const serializedTx = new TransactionComputer().computeBytesForSigning(tx)
-    // tx.signature = await signer.sign(serializedTx)
-    // const txHash = await provider.sendTransaction(tx)
-    // console.log(`Sent tx: https://devnet-explorer.multiversx.com/transactions/${txHash}`)
-    // await provider.awaitTransactionCompleted(txHash)
-    // const txOnNetwork = await provider.getTransaction(txHash)
-    // execution = await executor.getTransactionExecutionResults(warp, action, txOnNetwork)
-  } else if (action.type === 'query') {
-    // execution = await executor.executeQuery(preparedWarp, action, [])
-  } else if (action.type === 'collect') {
-    // execution = await executor.executeCollect(preparedWarp, action, [])
+  if (chain.name === 'multiversx') {
+    config.user.wallet = (await getMultiversxWallet()).address
+  } else if (chain.name === 'sui') {
+    config.user.wallet = (await getSuiWallet()).address
+  } else {
+    throw new Error(`Unsupported chain: ${chain}`)
   }
 
-  console.log('Execution:', execution)
+  const executor = new WarpExecutor(config)
+  const [tx] = await executor.execute(warp, actionIndex, warpInputs)
+
+  if (chain.name === 'multiversx') {
+    await signAndSendWithMultiversX(tx)
+  } else if (chain.name === 'sui') {
+    await signAndSendWithSui(tx)
+  } else {
+    throw new Error(`Unsupported chain: ${chain}`)
+  }
+
+  console.log('tx', tx)
+  console.log('chain', chain)
 }
 
 const listWarps = () => fs.readdirSync(warpsDir).filter((f) => f.endsWith('.ts') || f.endsWith('.js') || f.endsWith('.json'))
@@ -73,5 +68,42 @@ if (warps.length === 0) {
   process.exit(1)
 }
 
-const warpToRun = warps.find((f) => f === 'colombia-staking-user-stake-calculation.json') || warps[0]
+const warpToRun = warps[0] // Run the first warp we find
 runWarp(warpToRun)
+
+const getMultiversxWallet = async (): Promise<{ address: string; signer: UserSigner }> => {
+  const pemPath = path.join(__dirname, 'wallets', walletMultiversxFileName)
+  const pemText = await fs.promises.readFile(pemPath, { encoding: 'utf8' })
+  const signer = UserSigner.fromPem(pemText)
+  return { address: signer.getAddress().toBech32(), signer }
+}
+
+const signAndSendWithMultiversX = async (tx: MultiversxTransaction) => {
+  const { address, signer } = await getMultiversxWallet()
+  const entrypoint = new DevnetEntrypoint(undefined, 'api', 'warp-test-playground')
+  const provider = entrypoint.createNetworkProvider()
+  const account = await provider.getAccount(Address.newFromBech32(address))
+  tx.nonce = account.nonce
+  const serializedTx = new TransactionComputer().computeBytesForSigning(tx)
+  tx.signature = await signer.sign(serializedTx)
+  const txHash = await provider.sendTransaction(tx)
+  await provider.awaitTransactionCompleted(txHash)
+  const txOnNetwork = await provider.getTransaction(txHash)
+  console.log('MultiversX tx result:', txOnNetwork)
+}
+
+const getSuiWallet = async (): Promise<{ address: string; keypair: Keypair }> => {
+  const mnemonicPath = path.join(__dirname, 'wallets', walletSuiFileName)
+  const mnemonic = await fs.promises.readFile(mnemonicPath, { encoding: 'utf8' })
+  const keypair = Ed25519Keypair.deriveKeypair(mnemonic.trim())
+  return { address: keypair.getPublicKey().toSuiAddress(), keypair }
+}
+
+const signAndSendWithSui = async (tx: SuiTransaction) => {
+  const { address, keypair } = await getSuiWallet()
+  await requestSuiFromFaucetV2({ host: getFaucetHost('devnet'), recipient: address })
+  const client = new SuiClient({ url: getFullnodeUrl('devnet') })
+  const executor = new SerialTransactionExecutor({ client, signer: keypair })
+  const result = await executor.executeTransaction(tx)
+  console.log('Sui tx result:', result)
+}
