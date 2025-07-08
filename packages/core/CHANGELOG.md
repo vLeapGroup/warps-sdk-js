@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.34
+
+### Patch Changes
+
+- 3ad6ca0: further rearch
+- 0d85c51: further rearch
+
 ## 3.0.0-alpha.33
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # @warps/playground
 
+## 0.1.1-alpha.25
+
+### Patch Changes
+
+- 0d85c51: further rearch
+- Updated dependencies [3ad6ca0]
+- Updated dependencies [0d85c51]
+  - @vleap/warps@3.0.0-alpha.34
+  - @vleap/warps-adapter-multiversx@0.2.0-alpha.5
+  - @vleap/warps-adapter-sui@0.2.0-alpha.5
+
 ## 0.1.1-alpha.24
 
 ### Patch Changes
