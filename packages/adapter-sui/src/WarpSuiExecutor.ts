@@ -41,8 +41,6 @@ export class WarpSuiExecutor {
   async createTransferTransaction(executable: WarpExecutable): Promise<Transaction> {
     if (!this.config.user?.wallet) throw new Error('WarpSuiExecutor: createTransfer - user address not set')
     const tx = new Transaction()
-    // SUI: transfer SUI to destination
-    // For now, just use tx.gas as the coin to transfer
     const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(Number(executable.value))])
     tx.transferObjects([coin], tx.pure.address(executable.destination))
     return tx
@@ -61,7 +59,6 @@ export class WarpSuiExecutor {
   async executeQuery(executable: WarpExecutable): Promise<WarpExecution> {
     const action = getWarpActionByIndex(executable.warp, executable.action) as WarpQueryAction
     if (action.type !== 'query') throw new Error(`WarpSuiExecutor: Invalid action type for executeQuery: ${action.type}`)
-    // SUI: query contract state or object
     const result = await this.client.getObject({ id: executable.destination, options: { showContent: true } })
     const values = [result]
     const { values: extractedValues, results } = await this.results.extractQueryResults(
