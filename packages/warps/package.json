@@ -1,6 +1,6 @@
 {
   "name": "@vleap/warps",
-  "version": "3.0.0-alpha.29",
+  "version": "3.0.0-alpha.30",
   "description": "",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -30,12 +30,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@vleap/warps-adapter-multiversx": "^0.2.0-alpha.1",
-    "@vleap/warps-core": "^0.2.0-alpha.1",
+    "@vleap/warps-adapter-multiversx": "^0.2.0-alpha.2",
+    "@vleap/warps-core": "^0.2.0-alpha.3",
     "ajv": "^8.17.1"
   },
   "optionalDependencies": {
-    "@vleap/warps-adapter-multiversx": "^0.2.0-alpha.1",
+    "@vleap/warps-adapter-multiversx": "^0.2.0-alpha.2",
     "@vleap/warps-adapter-sui": "^0.2.0-alpha.1"
   }
 }

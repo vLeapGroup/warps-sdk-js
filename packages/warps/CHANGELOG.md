@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.30
+
+### Patch Changes
+
+- 29942ac: add warp brand prefixes
+- Updated dependencies [60574d5]
+- Updated dependencies [29942ac]
+  - @vleap/warps-adapter-multiversx@0.2.0-alpha.2
+  - @vleap/warps-core@0.2.0-alpha.3
+
 ## 3.0.0-alpha.29
 
 ### Patch Changes

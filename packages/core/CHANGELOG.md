@@ -1,5 +1,12 @@
 # @vleap/warps-core
 
+## 0.2.0-alpha.3
+
+### Patch Changes
+
+- 60574d5: fix brand references
+- 29942ac: add warp brand prefixes
+
 ## 0.2.0-alpha.2
 
 ### Patch Changes

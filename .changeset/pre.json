@@ -9,13 +9,17 @@
     "@warps/playground": "0.1.0",
     "@vleap/warps-adapter-multiversx": "0.1.0",
     "@vleap/warps-core": "0.1.0",
-    "@vleap/warps-adapter-sui": "0.2.0-alpha.0"
+    "@vleap/warps-adapter-sui": "0.2.0-alpha.0",
+    "@vleap/warps-vm-browser": "0.0.0",
+    "@vleap/warps-vm-node": "0.0.0"
   },
   "changesets": [
     "crazy-candles-post",
     "cuddly-wolves-hang",
     "curly-clubs-take",
     "curly-rockets-carry",
+    "dry-phones-play",
+    "eight-lions-join",
     "eighty-cycles-visit",
     "empty-friends-wonder",
     "evil-clouds-tap",
@@ -25,6 +29,7 @@
     "funny-spoons-look",
     "happy-keys-divide",
     "huge-bats-mix",
+    "long-ravens-wink",
     "mean-views-strive",
     "modern-sloths-create",
     "odd-hats-hunt",
