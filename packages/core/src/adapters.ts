@@ -44,6 +44,7 @@ export interface AdapterWarpExecutorConstructor {
 
 export interface AdapterWarpExecutor {
   createTransaction(executable: WarpExecutable): Promise<WarpAdapterGenericTransaction>
+  preprocessInput(chain: WarpChainInfo, input: string, type: WarpActionInputType, value: string): Promise<string>
 }
 
 export interface AdapterWarpResultsConstructor {

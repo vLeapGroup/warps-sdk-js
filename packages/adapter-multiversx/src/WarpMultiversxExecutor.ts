@@ -6,6 +6,9 @@ import {
   NetworkEntrypoint,
   SmartContractTransactionsFactory,
   TestnetEntrypoint,
+  Token,
+  TokenComputer,
+  TokenTransfer,
   Transaction,
   TransactionsFactoryConfig,
   TransferTransactionsFactory,
@@ -13,10 +16,14 @@ import {
 import {
   AdapterWarpExecutor,
   applyResultsToMessages,
+  findKnownTokenById,
   getNextInfo,
   getWarpActionByIndex,
+  shiftBigintBy,
+  WarpActionInputType,
   WarpChainEnv,
   WarpChainInfo,
+  WarpConstants,
   WarpExecutable,
   WarpExecution,
   WarpInitConfig,
@@ -25,6 +32,7 @@ import {
 import { WarpMultiversxAbi } from './WarpMultiversxAbi'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
+import { esdt_value } from './utils.codec'
 
 export class WarpMultiversxExecutor implements AdapterWarpExecutor {
   private readonly serializer: WarpMultiversxSerializer
@@ -119,6 +127,27 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
       results,
       messages: applyResultsToMessages(executable.warp, results),
     }
+  }
+
+  async preprocessInput(chain: WarpChainInfo, input: string, type: WarpActionInputType, value: string): Promise<string> {
+    if (type === 'esdt') {
+      const [tokenId, nonce, amount, existingDecimals] = value.split(WarpConstants.ArgCompositeSeparator)
+      if (existingDecimals) return input
+      const token = new Token({ identifier: tokenId, nonce: BigInt(nonce) })
+      const isFungible = new TokenComputer().isFungible(token)
+      if (!isFungible) return input // TODO: handle non-fungible tokens like meta-esdts
+      const knownToken = findKnownTokenById(tokenId)
+      let decimals = knownToken?.decimals
+      if (!decimals) {
+        const definitionRes = await fetch(`${chain.apiUrl}/tokens/${tokenId}`) // TODO: use chainApi directly; currently causes circular reference for whatever reason
+        const definition = await definitionRes.json()
+        decimals = definition.decimals
+      }
+      if (!decimals) throw new Error(`WarpActionExecutor: Decimals not found for token ${tokenId}`)
+      const processed = esdt_value(new TokenTransfer({ token, amount: shiftBigintBy(amount, decimals) }))
+      return this.serializer.typedToString(processed) + WarpConstants.ArgCompositeSeparator + decimals
+    }
+    return input
   }
 
   static getChainEntrypoint(chainInfo: WarpChainInfo, env: WarpChainEnv): NetworkEntrypoint {

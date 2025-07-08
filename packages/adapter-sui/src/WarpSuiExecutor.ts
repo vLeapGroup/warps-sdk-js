@@ -5,6 +5,8 @@ import {
   applyResultsToMessages,
   getNextInfo,
   getWarpActionByIndex,
+  WarpActionInputType,
+  WarpChainInfo,
   WarpContractAction,
   WarpExecutable,
   WarpExecution,
@@ -81,5 +83,9 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
       results,
       messages: applyResultsToMessages(executable.warp, results),
     }
+  }
+
+  async preprocessInput(chain: WarpChainInfo, input: string, type: WarpActionInputType, value: string): Promise<string> {
+    return input
   }
 }

@@ -74,7 +74,6 @@ export class WarpSuiSerializer implements AdapterWarpSerializer {
   }
 
   nativeToType(type: any): any {
-    // TODO: Implement Sui-specific nativeToType
     throw new Error('Not implemented')
   }
 }

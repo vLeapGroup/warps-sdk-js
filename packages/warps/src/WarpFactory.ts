@@ -151,25 +151,10 @@ export class WarpFactory {
   public async preprocessInput(chain: WarpChainInfo, input: string): Promise<string> {
     try {
       const [type, value] = input.split(WarpConstants.ArgParamsSeparator, 2) as [WarpActionInputType, string]
-      // TODO
-      //   if (type === 'esdt') {
-      //     const [tokenId, nonce, amount, existingDecimals] = value.split(WarpConstants.ArgCompositeSeparator)
-      //     if (existingDecimals) return input
-      //     const token = new Token({ identifier: tokenId, nonce: BigInt(nonce) })
-      //     const isFungible = new TokenComputer().isFungible(token)
-      //     if (!isFungible) return input // TODO: handle non-fungible tokens like meta-esdts
-      //     const knownToken = findKnownTokenById(tokenId)
-      //     let decimals = knownToken?.decimals
-      //     if (!decimals) {
-      //       const definitionRes = await fetch(`${chain.apiUrl}/tokens/${tokenId}`) // TODO: use chainApi directly; currently causes circular reference for whatever reason
-      //       const definition = await definitionRes.json()
-      //       decimals = definition.decimals
-      //     }
-      //     if (!decimals) throw new Error(`WarpActionExecutor: Decimals not found for token ${tokenId}`)
-      //     const processed = new TokenTransfer({ token, amount: shiftBigintBy(amount, decimals) })
-      //     return this.serializer.nativeToString(type, processed) + WarpConstants.ArgCompositeSeparator + decimals
-      //   }
-      return input
+      const executorClass = this.config.adapters.find((a) => a.chain === chain.name)?.executor
+      const executor = executorClass ? new executorClass(this.config) : null
+      if (!executor) return input
+      return executor.preprocessInput(chain, input, type, value)
     } catch (e) {
       return input
     }

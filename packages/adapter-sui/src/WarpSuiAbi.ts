@@ -1,7 +1,5 @@
 import { SuiClient } from '@mysten/sui/client'
 
-// TODO: Implement WarpSuiAbi for SUI contract ABI handling
-
 export class WarpSuiAbi {
   private readonly client: SuiClient
 

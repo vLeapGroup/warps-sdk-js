@@ -1,7 +1,5 @@
 import { WarpSuiAbi } from './WarpSuiAbi'
 
-// TODO: Implement WarpSuiContractLoader for SUI contract loading
-
 export class WarpSuiContractLoader {
   private readonly abi: WarpSuiAbi
 

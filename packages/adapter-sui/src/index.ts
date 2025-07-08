@@ -1,6 +1,5 @@
 export * from './constants'
 export * from './main'
-export * from './utils.codec'
 export * from './WarpSuiAbi'
 export * from './WarpSuiBuilder'
 export * from './WarpSuiContractLoader'
