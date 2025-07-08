@@ -8,7 +8,7 @@
   ],
   "license": "MIT",
   "scripts": {
-    "build": "tsup src/runInVm.ts --dts --format cjs,esm --minify --clean",
+    "build": "tsup",
     "test": "jest --env=jsdom"
   },
   "devDependencies": {
