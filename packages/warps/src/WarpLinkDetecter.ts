@@ -1,7 +1,7 @@
 import { WarpMultiversxRegistry } from '@vleap/warps-adapter-multiversx'
 import {
-  Brand,
   Warp,
+  WarpBrand,
   WarpCacheConfig,
   WarpConstants,
   WarpInitConfig,
@@ -20,7 +20,7 @@ type DetectionResult = {
   url: string
   warp: Warp | null
   registryInfo: WarpRegistryInfo | null
-  brand: Brand | null
+  brand: WarpBrand | null
 }
 
 type DetectionResultFromHtml = {
@@ -72,7 +72,7 @@ export class WarpLinkDetecter {
       const registry = new WarpMultiversxRegistry(this.config)
       let warp: Warp | null = null
       let registryInfo: WarpRegistryInfo | null = null
-      let brand: Brand | null = null
+      let brand: WarpBrand | null = null
 
       if (type === 'hash') {
         warp = await builder.createFromTransactionHash(identifierBase, cache)

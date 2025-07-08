@@ -9,9 +9,9 @@ import {
   TransactionsFactoryConfig,
 } from '@multiversx/sdk-core'
 import {
-  Brand,
   getMainChainInfo,
   toTypedChainInfo,
+  WarpBrand,
   WarpCache,
   WarpCacheConfig,
   WarpCacheKey,
@@ -163,10 +163,13 @@ export class WarpMultiversxRegistry {
     })
   }
 
-  async getInfoByAlias(alias: string, cache?: WarpCacheConfig): Promise<{ registryInfo: WarpRegistryInfo | null; brand: Brand | null }> {
+  async getInfoByAlias(
+    alias: string,
+    cache?: WarpCacheConfig
+  ): Promise<{ registryInfo: WarpRegistryInfo | null; brand: WarpBrand | null }> {
     try {
       const cacheKey = WarpCacheKey.RegistryInfo(this.config.env, alias)
-      const cached = cache ? this.cache.get<{ registryInfo: WarpRegistryInfo | null; brand: Brand | null }>(cacheKey) : null
+      const cached = cache ? this.cache.get<{ registryInfo: WarpRegistryInfo | null; brand: WarpBrand | null }>(cacheKey) : null
       if (cached) {
         WarpLogger.info(`WarpRegistry (getInfoByAlias): RegistryInfo found in cache: ${alias}`)
         return cached
@@ -190,12 +193,12 @@ export class WarpMultiversxRegistry {
     }
   }
 
-  async getInfoByHash(hash: string, cache?: WarpCacheConfig): Promise<{ registryInfo: WarpRegistryInfo | null; brand: Brand | null }> {
+  async getInfoByHash(hash: string, cache?: WarpCacheConfig): Promise<{ registryInfo: WarpRegistryInfo | null; brand: WarpBrand | null }> {
     try {
       const cacheKey = WarpCacheKey.RegistryInfo(this.config.env, hash)
 
       if (cache) {
-        const cached = this.cache.get<{ registryInfo: WarpRegistryInfo | null; brand: Brand | null }>(cacheKey)
+        const cached = this.cache.get<{ registryInfo: WarpRegistryInfo | null; brand: WarpBrand | null }>(cacheKey)
         if (cached) {
           WarpLogger.info(`WarpRegistry (getInfoByHash): RegistryInfo found in cache: ${hash}`)
           return cached
@@ -235,7 +238,7 @@ export class WarpMultiversxRegistry {
     }
   }
 
-  async getUserBrands(user?: string): Promise<Brand[]> {
+  async getUserBrands(user?: string): Promise<WarpBrand[]> {
     try {
       const userWallet = user || this.config.user?.wallet
       if (!userWallet) throw new Error('WarpRegistry: user address not set')
@@ -247,7 +250,7 @@ export class WarpMultiversxRegistry {
       const brandHashes: string[] = brandsRaw.map((b: any) => b.toString('hex'))
       const brandCacheConfig: WarpCacheConfig = { ttl: 365 * 24 * 60 * 60 } // 1 year
       const brands = await Promise.all(brandHashes.map((hash) => this.fetchBrand(hash, brandCacheConfig)))
-      return brands.filter((b) => b !== null) as Brand[]
+      return brands.filter((b) => b !== null) as WarpBrand[]
     } catch (error) {
       return []
     }
@@ -341,9 +344,9 @@ export class WarpMultiversxRegistry {
     })
   }
 
-  async fetchBrand(hash: string, cache?: WarpCacheConfig): Promise<Brand | null> {
+  async fetchBrand(hash: string, cache?: WarpCacheConfig): Promise<WarpBrand | null> {
     const cacheKey = WarpCacheKey.Brand(this.config.env, hash)
-    const cached = cache ? this.cache.get<Brand>(cacheKey) : null
+    const cached = cache ? this.cache.get<WarpBrand>(cacheKey) : null
     if (cached) {
       WarpLogger.info(`WarpRegistry (fetchBrand): Brand found in cache: ${hash}`)
       return cached
@@ -355,7 +358,7 @@ export class WarpMultiversxRegistry {
 
     try {
       const tx = await chainProvider.getTransaction(hash)
-      const brand = JSON.parse(tx.data.toString()) as Brand
+      const brand = JSON.parse(tx.data.toString()) as WarpBrand
 
       brand.meta = {
         hash: tx.hash,

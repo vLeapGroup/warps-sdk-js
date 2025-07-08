@@ -1,6 +1,6 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
 import { WarpMultiversxExecutor } from '@vleap/warps-adapter-multiversx'
-import { Brand, getLatestProtocolIdentifier, getMainChainInfo, WarpConfig, WarpInitConfig, WarpLogger } from '@vleap/warps-core'
+import { getLatestProtocolIdentifier, getMainChainInfo, WarpBrand, WarpConfig, WarpInitConfig, WarpLogger } from '@vleap/warps-core'
 import { WarpBrandColors, WarpBrandCta, WarpBrandUrls } from '@vleap/warps-core/src/types'
 import Ajv from 'ajv'
 import { Buffer } from 'buffer'
@@ -8,7 +8,7 @@ import { Buffer } from 'buffer'
 export class BrandBuilder {
   private config: WarpInitConfig
 
-  private pendingBrand: Brand = {
+  private pendingBrand: WarpBrand = {
     protocol: getLatestProtocolIdentifier('brand'),
     name: '',
     description: '',
@@ -19,7 +19,7 @@ export class BrandBuilder {
     this.config = config
   }
 
-  createInscriptionTransaction(brand: Brand): Transaction {
+  createInscriptionTransaction(brand: WarpBrand): Transaction {
     if (!this.config.user?.wallet) throw new Error('BrandBuilder: user address not set')
     const chain = getMainChainInfo(this.config)
     const factoryConfig = new TransactionsFactoryConfig({ chainID: chain.chainId })
@@ -34,8 +34,8 @@ export class BrandBuilder {
     })
   }
 
-  async createFromRaw(encoded: string, validateSchema = true): Promise<Brand> {
-    const brand = JSON.parse(encoded) as Brand
+  async createFromRaw(encoded: string, validateSchema = true): Promise<WarpBrand> {
+    const brand = JSON.parse(encoded) as WarpBrand
 
     if (validateSchema) {
       await this.ensureValidSchema(brand)
@@ -44,11 +44,11 @@ export class BrandBuilder {
     return brand
   }
 
-  async createFromTransaction(tx: TransactionOnNetwork, validateSchema = false): Promise<Brand> {
+  async createFromTransaction(tx: TransactionOnNetwork, validateSchema = false): Promise<WarpBrand> {
     return await this.createFromRaw(tx.data.toString(), validateSchema)
   }
 
-  async createFromTransactionHash(hash: string): Promise<Brand | null> {
+  async createFromTransactionHash(hash: string): Promise<WarpBrand | null> {
     const chainInfo = getMainChainInfo(this.config)
     const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(chainInfo, this.config.env)
     const chainProvider = chainEntry.createNetworkProvider()
@@ -92,7 +92,7 @@ export class BrandBuilder {
     return this
   }
 
-  async build(): Promise<Brand> {
+  async build(): Promise<WarpBrand> {
     this.ensure(this.pendingBrand.name, 'name is required')
     this.ensure(this.pendingBrand.description, 'description is required')
     this.ensure(this.pendingBrand.logo, 'logo is required')
@@ -108,7 +108,7 @@ export class BrandBuilder {
     }
   }
 
-  private async ensureValidSchema(brand: Brand): Promise<void> {
+  private async ensureValidSchema(brand: WarpBrand): Promise<void> {
     const schemaUrl = this.config.schema?.brand || WarpConfig.LatestBrandSchemaUrl
     const schemaResponse = await fetch(schemaUrl)
     const schema = await schemaResponse.json()
