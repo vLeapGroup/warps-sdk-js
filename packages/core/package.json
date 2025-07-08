@@ -24,8 +24,7 @@
     "jest-fetch-mock": "^3.0.3",
     "ts-jest": "^29.4.0",
     "tsup": "^8.5.0",
-    "typescript": "^5.8.3",
-    "vm2": "^3.9.19"
+    "typescript": "^5.8.3"
   },
   "publishConfig": {
     "access": "public"
@@ -34,8 +33,5 @@
     "ajv": "^8.17.1",
     "protobufjs": "^7.5.3",
     "qr-code-styling": "^1.9.2"
-  },
-  "optionalDependencies": {
-    "vm2": "^3.9.19"
   }
 }

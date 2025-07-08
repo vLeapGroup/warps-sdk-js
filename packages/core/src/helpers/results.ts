@@ -88,8 +88,14 @@ const evaluateTransformResults = async (warp: Warp, baseResults: WarpExecutionRe
 
   for (const { key, code } of transforms) {
     try {
-      // Dynamically import runInVm only when needed
-      const { runInVm } = await import('./vm')
+      let runInVm: any
+      if (typeof window === 'undefined') {
+        // @ts-ignore
+        runInVm = (await import('@vleap/warps-vm-node')).runInVm
+      } else {
+        // @ts-ignore
+        runInVm = (await import('@vleap/warps-vm-browser')).runInVm
+      }
       modifiable[key] = await runInVm(code, modifiable)
     } catch (err) {
       WarpLogger.error(`Transform error for result '${key}':`, err)

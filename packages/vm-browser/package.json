@@ -1,0 +1,24 @@
+{
+  "name": "@vleap/warps-vm-browser",
+  "version": "0.0.0",
+  "main": "dist/runInVm.js",
+  "types": "dist/runInVm.d.ts",
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "tsup src/runInVm.ts --dts --format cjs,esm --minify --clean",
+    "test": "jest --env=jsdom"
+  },
+  "devDependencies": {
+    "jest": "^29.6.0",
+    "ts-jest": "^29.1.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/runInVm.mjs",
+      "require": "./dist/runInVm.js"
+    }
+  }
+}

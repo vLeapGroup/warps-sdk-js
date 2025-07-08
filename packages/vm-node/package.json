@@ -1,0 +1,27 @@
+{
+  "name": "@vleap/warps-vm-node",
+  "version": "0.0.0",
+  "main": "dist/runInVm.js",
+  "types": "dist/runInVm.d.ts",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "vm2": "^3.9.19"
+  },
+  "devDependencies": {
+    "jest": "^29.6.0",
+    "ts-jest": "^29.1.0"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "tsup src/runInVm.ts --dts --format cjs,esm --minify --clean",
+    "test": "jest --env=node"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/runInVm.mjs",
+      "require": "./dist/runInVm.js"
+    }
+  }
+}
