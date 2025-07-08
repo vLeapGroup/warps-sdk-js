@@ -1,4 +1,4 @@
-import { Warp, WarpCollectAction, WarpInitConfig } from '@vleap/warps-core'
+import { Warp, WarpInitConfig } from '@vleap/warps-core'
 import * as adapterRegistry from '../config/adapter'
 import { WarpExecutor } from './WarpExecutor'
 
@@ -8,6 +8,7 @@ describe('WarpExecutor', () => {
     user: { wallet: 'erd1...' },
     currentUrl: 'https://example.com',
   }
+  const handlers = { onExecuted: jest.fn() }
   const warp: Warp = {
     protocol: 'warp',
     name: 'test',
@@ -60,7 +61,7 @@ describe('WarpExecutor', () => {
   })
 
   it('executes using Multiversx executor by default', async () => {
-    const executor: WarpExecutor = new WarpExecutor(config)
+    const executor: WarpExecutor = new WarpExecutor(config, handlers)
     ;(executor as any).factory.createExecutable = async () => ({
       chain: mockChainInfo,
       warp,
@@ -82,16 +83,20 @@ describe('WarpExecutor', () => {
       }
     }
     jest.spyOn(adapterRegistry, 'getAdapter').mockImplementation((chain) => {
-      if (chain === 'multiversx') return () => MockMultiversxExecutor
+      if (chain === 'multiversx')
+        return {
+          executor: () => MockMultiversxExecutor,
+          results: () => class {},
+        }
       return null
     })
-    const result = await executor.execute(warp, 0, [])
+    const result = await executor.execute(warp, [])
     expect(result[0]).toBe('multiversx-result')
     expect(result[1]).toEqual(mockChainInfo)
   })
 
   it('executes using Sui executor if chain is sui and adapter is present', async () => {
-    const executor: WarpExecutor = new WarpExecutor(config)
+    const executor: WarpExecutor = new WarpExecutor(config, handlers)
     ;(executor as any).factory.createExecutable = async () => ({
       chain: mockSuiChainInfo,
       warp,
@@ -113,26 +118,33 @@ describe('WarpExecutor', () => {
       }
     }
     jest.spyOn(adapterRegistry, 'getAdapter').mockImplementation((chain) => {
-      if (chain === 'sui') return () => MockSuiExecutor
+      if (chain === 'sui')
+        return {
+          executor: () => MockSuiExecutor,
+          results: () => class {},
+        }
       if (chain === 'multiversx')
-        return () =>
-          class {
-            async execute() {
-              return 'multiversx-result'
-            }
-            async createTransaction() {
-              return 'multiversx-result'
-            }
-          }
+        return {
+          executor: () =>
+            class {
+              async execute() {
+                return 'multiversx-result'
+              }
+              async createTransaction() {
+                return 'multiversx-result'
+              }
+            },
+          results: () => class {},
+        }
       return null
     })
-    const result = await executor.execute(warp, 1, [])
+    const result = await executor.execute(warp, [])
     expect(result[0]).toBe('sui-result')
     expect(result[1]).toEqual(mockSuiChainInfo)
   })
 
   it('throws error if no adapter is registered for chain', async () => {
-    const executor: WarpExecutor = new WarpExecutor(config)
+    const executor: WarpExecutor = new WarpExecutor(config, handlers)
     ;(executor as any).factory.createExecutable = async () => ({
       chain: { ...mockSuiChainInfo, name: 'unknown' },
       warp,
@@ -145,15 +157,16 @@ describe('WarpExecutor', () => {
       resolvedInputs: [],
     })
     jest.spyOn(adapterRegistry, 'getAdapter').mockReturnValue(null)
-    await expect(executor.execute(warp, 1, [])).rejects.toThrow('No adapter registered for chain: unknown')
+    await expect(executor.execute(warp, [])).rejects.toThrow('No adapter registered for chain: unknown')
   })
 
   it('executeCollect - creates correct input payload structure', async () => {
     config.currentUrl = 'https://example.com?queryParam=testValue'
-    const subject = new WarpExecutor(config)
+    const handlers = { onExecuted: jest.fn() }
+    const subject = new WarpExecutor(config, handlers)
     const httpMock = require('./test-utils/mockHttp').setupHttpMock()
 
-    const action: WarpCollectAction = {
+    const action: any = {
       type: 'collect',
       label: 'test',
       description: 'test',
@@ -162,6 +175,7 @@ describe('WarpExecutor', () => {
         method: 'POST',
         headers: {},
       },
+      address: 'https://example.com/collect',
       inputs: [
         { name: 'amount', type: 'biguint', source: 'field', position: 'arg:1' },
         { name: 'token', type: 'esdt', source: 'field', position: 'arg:2' },
@@ -195,7 +209,7 @@ describe('WarpExecutor', () => {
       },
     })
 
-    const actual = await subject.executeCollect(warp, 1, ['biguint:1000', 'esdt:WARP-123456|0|1000000000000000000|18'])
+    await subject.execute(warp, ['biguint:1000', 'esdt:WARP-123456|0|1000000000000000000|18', 'erd1...', 'testValue'])
 
     httpMock.assertCall('https://example.com/collect', {
       method: 'POST',
@@ -207,6 +221,7 @@ describe('WarpExecutor', () => {
       },
     })
 
+    const actual = handlers.onExecuted.mock.calls[0][0]
     expect(actual.success).toBe(true)
     expect(actual.results).toEqual({
       USERNAME: 'abcdef',

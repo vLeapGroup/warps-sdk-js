@@ -6,7 +6,7 @@ import {
   Warp,
   WarpActionIndex,
   WarpChainInfo,
-  WarpExecutionResults,
+  WarpExecution,
   WarpInitConfig,
   WarpLogger,
 } from '@vleap/warps-core'
@@ -15,32 +15,62 @@ import { WarpFactory } from './WarpFactory'
 
 export type WarpAdapterTransaction = any
 
+type ExecutionHandlers = {
+  onExecuted?: (result: WarpExecution) => void
+}
+
 export class WarpExecutor {
   private config: WarpInitConfig
   private factory: WarpFactory
+  private handlers: ExecutionHandlers
 
-  constructor(config: WarpInitConfig) {
+  constructor(config: WarpInitConfig, handlers: ExecutionHandlers) {
     this.config = config
     this.factory = new WarpFactory(config)
+    this.handlers = handlers
   }
 
-  async execute(warp: Warp, action: WarpActionIndex, inputs: string[]): Promise<[WarpAdapterTransaction, WarpChainInfo]> {
-    const executable = await this.factory.createExecutable(warp, action, inputs)
+  async execute(warp: Warp, inputs: string[]): Promise<[WarpAdapterTransaction | null, WarpChainInfo | null]> {
+    const actionIndex = this.determineActionIndex(warp, inputs)
+    const executable = await this.factory.createExecutable(warp, actionIndex, inputs)
+    const action = getWarpActionByIndex(warp, actionIndex)
+
+    if (action.type === 'collect') {
+      const results = await this.executeCollect(warp, actionIndex, inputs)
+      this.handlers.onExecuted?.(results)
+      return [null, null]
+    }
+
     const chainName = executable.chain.name.toLowerCase()
     const adapterLoader = getAdapter(chainName) || getAdapter('multiversx')
     if (!adapterLoader) throw new Error(`No adapter registered for chain: ${chainName}`)
-    const AdapterExecutor = await adapterLoader()
+    const AdapterExecutor = await adapterLoader.executor()
     const executor = new AdapterExecutor(this.config)
     const tx = await executor.createTransaction(executable)
+
     return [tx, executable.chain]
   }
 
-  public async executeCollect(
-    warp: Warp,
-    action: WarpActionIndex,
-    inputs: string[],
-    extra?: Record<string, any>
-  ): Promise<WarpExecutionResults> {
+  async evaluateResults(tx: WarpAdapterTransaction): Promise<void> {
+    const adapterLoader = getAdapter(tx.chain.name.toLowerCase())
+    if (!adapterLoader) throw new Error(`No adapter registered for chain: ${tx.chain.name}`)
+    const AdapterResults = await adapterLoader.results()
+    const results = new AdapterResults(tx)
+    const executionResult = (await results.getTransactionExecutionResults(tx)) as WarpExecution
+    this.handlers.onExecuted?.(executionResult)
+  }
+
+  private determineActionIndex(warp: Warp, inputs: string[]): WarpActionIndex {
+    const available = warp.actions.filter((action) => action.type !== 'link')
+    const preferredChain = this.config.preferredChain?.toLowerCase()
+    if (preferredChain) {
+      const preferred = available.findIndex((action) => action.chain?.toLowerCase() === preferredChain)
+      if (preferred !== -1) return preferred
+    }
+    return 1
+  }
+
+  private async executeCollect(warp: Warp, action: WarpActionIndex, inputs: string[], extra?: Record<string, any>): Promise<WarpExecution> {
     const { WarpInterpolator } = await import('./WarpInterpolator')
     const { WarpUtils } = await import('./WarpUtils')
     const collectAction = getWarpActionByIndex(warp, action) as any | null

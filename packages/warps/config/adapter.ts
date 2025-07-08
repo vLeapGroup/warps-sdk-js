@@ -1,19 +1,25 @@
 type AdapterLoader = () => Promise<any> | any
 
-interface AdapterEntry {
+type AdapterEntry = {
   chain: string
-  loader: AdapterLoader
+  executor: AdapterLoader
+  results: AdapterLoader
+}
+
+type AdapterComponents = {
+  executor: AdapterLoader
+  results: AdapterLoader
 }
 
 const adapters: AdapterEntry[] = []
 
-export function registerAdapter(chain: string, loader: AdapterLoader) {
-  adapters.push({ chain: chain.toLowerCase(), loader })
+export function registerAdapter(chain: string, components: AdapterComponents) {
+  adapters.push({ chain: chain.toLowerCase(), ...components })
 }
 
-export function getAdapter(chain: string): AdapterLoader | null {
+export function getAdapter(chain: string): AdapterComponents | null {
   const entry = adapters.find((a) => a.chain === chain.toLowerCase())
-  return entry?.loader || null
+  return entry || null
 }
 
 export function getAllAdapters(): AdapterEntry[] {
@@ -22,14 +28,20 @@ export function getAllAdapters(): AdapterEntry[] {
 
 // Register Multiversx adapter by default
 try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { WarpMultiversxExecutor } = require('@vleap/warps-adapter-multiversx')
-  registerAdapter('multiversx', () => WarpMultiversxExecutor)
+  const { WarpMultiversxResults } = require('@vleap/warps-adapter-multiversx')
+  registerAdapter('multiversx', {
+    executor: () => WarpMultiversxExecutor,
+    results: () => WarpMultiversxResults,
+  })
 } catch {}
 
 // Register Sui adapter if available
 try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { WarpSuiExecutor } = require('@vleap/warps-adapter-sui')
-  registerAdapter('sui', () => WarpSuiExecutor)
+  const { WarpSuiResults } = require('@vleap/warps-adapter-sui')
+  registerAdapter('sui', {
+    executor: () => WarpSuiExecutor,
+    results: () => WarpSuiResults,
+  })
 } catch {}

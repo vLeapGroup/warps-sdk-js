@@ -5,6 +5,7 @@ export type WarpChain = string
 
 export type WarpInitConfig = {
   env: WarpChainEnv
+  preferredChain?: WarpChain
   clientUrl?: string
   currentUrl?: string
   vars?: Record<string, string | number>
