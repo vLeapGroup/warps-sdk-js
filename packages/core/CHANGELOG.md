@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.35
+
+### Patch Changes
+
+- bd2031e: extend warp builder
+
 ## 3.0.0-alpha.34
 
 ### Patch Changes
