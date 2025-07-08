@@ -1,4 +1,4 @@
-import { AdapterWarpBuilder, Warp, WarpCache, WarpCacheConfig, WarpInitConfig } from '@vleap/warps-core'
+import { AdapterWarpBuilder, Warp, WarpCache, WarpCacheConfig, WarpInitConfig } from '@vleap/warps'
 
 export class WarpSuiBuilder implements AdapterWarpBuilder {
   private config: WarpInitConfig

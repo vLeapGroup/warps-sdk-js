@@ -28,7 +28,7 @@ import {
   WarpExecution,
   WarpInitConfig,
   WarpQueryAction,
-} from '@vleap/warps-core'
+} from '@vleap/warps'
 import { WarpMultiversxAbi } from './WarpMultiversxAbi'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'

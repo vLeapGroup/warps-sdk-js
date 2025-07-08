@@ -9,7 +9,7 @@ import {
   WarpCacheKey,
   WarpInitConfig,
   WarpLogger,
-} from '@vleap/warps-core'
+} from '@vleap/warps'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
 export class WarpMultiversxBuilder implements AdapterWarpBuilder {

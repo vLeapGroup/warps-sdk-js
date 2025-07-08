@@ -1,4 +1,4 @@
-import { Warp, WarpBrand, WarpRegistryInfo } from '@vleap/warps-core'
+import { Warp, WarpBrand, WarpRegistryInfo } from '@vleap/warps'
 import { WarpBuilder } from './WarpBuilder'
 import { WarpLinkDetecter } from './WarpLinkDetecter'
 

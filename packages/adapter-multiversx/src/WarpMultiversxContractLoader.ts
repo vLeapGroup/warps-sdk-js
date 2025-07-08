@@ -1,4 +1,4 @@
-import { WarpChainInfo, WarpContract, WarpContractVerification, WarpInitConfig, WarpLogger } from '@vleap/warps-core'
+import { WarpChainInfo, WarpContract, WarpContractVerification, WarpInitConfig, WarpLogger } from '@vleap/warps'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
 export class WarpMultiversxContractLoader {

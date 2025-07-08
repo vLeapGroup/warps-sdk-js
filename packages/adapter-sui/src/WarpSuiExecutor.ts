@@ -12,7 +12,7 @@ import {
   WarpExecution,
   WarpInitConfig,
   WarpQueryAction,
-} from '@vleap/warps-core'
+} from '@vleap/warps'
 import { WarpSuiResults } from './WarpSuiResults'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
 

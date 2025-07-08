@@ -1,5 +1,5 @@
+import { getNextInfo } from '@vleap/warps'
 import { WarpMultiversxRegistry } from '@vleap/warps-adapter-multiversx'
-import { getNextInfo } from '@vleap/warps-core'
 import { WarpContractAction } from './types'
 import { WarpChainEnv } from './types/general'
 import { WarpExecutionResults } from './types/results'

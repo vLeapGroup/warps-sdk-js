@@ -7,7 +7,7 @@
 - dca45d6: further rearch
 - Updated dependencies [dca45d6]
 - Updated dependencies [7885ddd]
-  - @vleap/warps-core@0.2.0-alpha.5
+  - @vleap/warps@0.2.0-alpha.5
 
 ## 0.2.0-alpha.3
 
@@ -19,7 +19,7 @@
 
 - Updated dependencies [5321a6b]
 - Updated dependencies [a707263]
-  - @vleap/warps-core@0.2.0-alpha.4
+  - @vleap/warps@0.2.0-alpha.4
 
 ## 0.2.0-alpha.2
 

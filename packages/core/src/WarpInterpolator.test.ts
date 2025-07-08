@@ -1,4 +1,4 @@
-import { CacheTtl, getMainChainInfo, Warp, WarpCache, WarpCacheKey, WarpConfig, WarpInitConfig } from '@vleap/warps-core'
+import { CacheTtl, getMainChainInfo, Warp, WarpCache, WarpCacheKey, WarpConfig, WarpInitConfig } from '@vleap/warps'
 import { WarpInterpolator } from './WarpInterpolator'
 
 const mockAdapter = {

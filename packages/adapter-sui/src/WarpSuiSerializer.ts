@@ -1,5 +1,5 @@
 import { Transaction } from '@mysten/sui/transactions'
-import { AdapterWarpSerializer, WarpActionInputType, WarpNativeValue, WarpSerializer } from '@vleap/warps-core'
+import { AdapterWarpSerializer, WarpActionInputType, WarpNativeValue, WarpSerializer } from '@vleap/warps'
 
 export class WarpSuiSerializer implements AdapterWarpSerializer {
   public readonly coreSerializer: WarpSerializer

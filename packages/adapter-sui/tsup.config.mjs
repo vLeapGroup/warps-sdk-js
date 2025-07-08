@@ -6,5 +6,5 @@ export default defineConfig({
   format: ['cjs', 'esm'],
   minify: true,
   clean: true,
-  external: ['@vleap/warps-core', '@mysten/sui'],
+  external: ['@vleap/warps', '@mysten/sui'],
 })

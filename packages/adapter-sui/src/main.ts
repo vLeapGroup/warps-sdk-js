@@ -1,4 +1,4 @@
-import { Adapter } from '@vleap/warps-core'
+import { Adapter } from '@vleap/warps'
 import { WarpSuiBuilder } from './WarpSuiBuilder'
 import { WarpSuiExecutor } from './WarpSuiExecutor'
 import { WarpSuiRegistry } from './WarpSuiRegistry'

@@ -1,4 +1,4 @@
-import { Adapter } from '@vleap/warps-core'
+import { Adapter } from '@vleap/warps'
 import { WarpMultiversxBuilder } from './WarpMultiversxBuilder'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 import { WarpMultiversxRegistry } from './WarpMultiversxRegistry'

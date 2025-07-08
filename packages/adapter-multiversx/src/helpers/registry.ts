@@ -1,5 +1,5 @@
 import { Address } from '@multiversx/sdk-core/out'
-import { WarpRegistryConfigInfo, WarpRegistryInfo } from '@vleap/warps-core'
+import { WarpRegistryConfigInfo, WarpRegistryInfo } from '@vleap/warps'
 
 export const toTypedRegistryInfo = (registryInfo: any): WarpRegistryInfo => ({
   hash: registryInfo.hash.toString('hex'),

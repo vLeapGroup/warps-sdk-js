@@ -49,7 +49,7 @@ import {
   WarpConstants,
   WarpNativeValue,
   WarpSerializer,
-} from '@vleap/warps-core'
+} from '@vleap/warps'
 
 const SplitParamsRegex = new RegExp(`${WarpConstants.ArgParamsSeparator}(.*)`)
 

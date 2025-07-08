@@ -8,7 +8,7 @@
 - 7885ddd: further rearch
 - Updated dependencies [dca45d6]
 - Updated dependencies [7885ddd]
-  - @vleap/warps-core@0.2.0-alpha.5
+  - @vleap/warps@0.2.0-alpha.5
 
 ## 3.0.0-alpha.32
 
@@ -20,7 +20,7 @@
 
 - Updated dependencies [5321a6b]
 - Updated dependencies [a707263]
-  - @vleap/warps-core@0.2.0-alpha.4
+  - @vleap/warps@0.2.0-alpha.4
   - @vleap/warps-adapter-multiversx@0.2.0-alpha.3
 
 ## 3.0.0-alpha.31
@@ -37,7 +37,7 @@
 - Updated dependencies [60574d5]
 - Updated dependencies [29942ac]
   - @vleap/warps-adapter-multiversx@0.2.0-alpha.2
-  - @vleap/warps-core@0.2.0-alpha.3
+  - @vleap/warps@0.2.0-alpha.3
 
 ## 3.0.0-alpha.29
 
@@ -45,7 +45,7 @@
 
 - e354f53: update dependencies
 - Updated dependencies [e354f53]
-  - @vleap/warps-core@0.2.0-alpha.1
+  - @vleap/warps@0.2.0-alpha.1
 
 ## 3.0.0-alpha.28
 
@@ -76,7 +76,7 @@
 
 - Updated dependencies [40e8470]
   - @vleap/warps-adapter-multiversx@0.2.0-alpha.0
-  - @vleap/warps-core@0.2.0-alpha.0
+  - @vleap/warps@0.2.0-alpha.0
 
 ## 3.0.0-alpha.25
 

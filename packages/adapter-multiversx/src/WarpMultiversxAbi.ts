@@ -10,7 +10,7 @@ import {
   WarpInitConfig,
   WarpLogger,
   WarpQueryAction,
-} from '@vleap/warps-core'
+} from '@vleap/warps'
 import { WarpMultiversxContractLoader } from './WarpMultiversxContractLoader'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 

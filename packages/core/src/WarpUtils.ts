@@ -1,4 +1,4 @@
-import { CacheTtl, getMainChainInfo, WarpAction, WarpChain, WarpChainInfo, WarpInitConfig, WarpSerializer } from '@vleap/warps-core'
+import { CacheTtl, getMainChainInfo, WarpAction, WarpChain, WarpChainInfo, WarpInitConfig, WarpSerializer } from '@vleap/warps'
 
 export class WarpUtils {
   static async getChainInfoForAction(config: WarpInitConfig, action: WarpAction, inputs?: string[]): Promise<WarpChainInfo> {

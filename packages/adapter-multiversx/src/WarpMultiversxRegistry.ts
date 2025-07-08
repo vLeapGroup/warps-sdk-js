@@ -23,7 +23,7 @@ import {
   WarpLogger,
   WarpRegistryConfigInfo,
   WarpRegistryInfo,
-} from '@vleap/warps-core'
+} from '@vleap/warps'
 import RegistryAbi from './abis/registry.abi.json'
 import { toTypedConfigInfo, toTypedRegistryInfo } from './helpers/registry'
 import { string_value, u32_value } from './utils.codec'

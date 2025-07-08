@@ -1,12 +1,4 @@
-import {
-  AdapterWarpRegistry,
-  WarpBrand,
-  WarpCacheConfig,
-  WarpChain,
-  WarpChainInfo,
-  WarpInitConfig,
-  WarpRegistryInfo,
-} from '@vleap/warps-core'
+import { AdapterWarpRegistry, WarpBrand, WarpCacheConfig, WarpChain, WarpChainInfo, WarpInitConfig, WarpRegistryInfo } from '@vleap/warps'
 
 export class WarpSuiRegistry implements AdapterWarpRegistry {
   constructor(private config: WarpInitConfig) {}

@@ -1,5 +1,5 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
-import { getMainChainInfo, WarpBrand, WarpBrandBuilder, WarpInitConfig, WarpLogger } from '@vleap/warps-core'
+import { getMainChainInfo, WarpBrand, WarpBrandBuilder, WarpInitConfig, WarpLogger } from '@vleap/warps'
 import { Buffer } from 'buffer'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 

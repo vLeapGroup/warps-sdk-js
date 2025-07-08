@@ -6,5 +6,5 @@ export default defineConfig({
   format: ['cjs', 'esm'],
   minify: true,
   clean: true,
-  external: ['@vleap/warps-core', '@multiversx/sdk-core'],
+  external: ['@vleap/warps', '@multiversx/sdk-core'],
 })
