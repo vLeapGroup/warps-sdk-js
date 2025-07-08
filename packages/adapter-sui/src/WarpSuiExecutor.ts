@@ -51,8 +51,9 @@ export class WarpSuiExecutor {
     const action = getWarpActionByIndex(executable.warp, executable.action) as WarpContractAction
     if (!action.func) throw new Error('WarpSuiExecutor: createContractCall - function not set')
     const tx = new Transaction()
+    const target = `${action.address}::${action.func}`
     const pureArgs = executable.args.map((arg) => this.serializer.stringToTyped(tx, arg))
-    tx.moveCall({ target: action.func, arguments: pureArgs })
+    tx.moveCall({ target, arguments: pureArgs })
     return tx
   }
 
