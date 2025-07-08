@@ -23,5 +23,8 @@
       "import": "./dist/runInVm.mjs",
       "require": "./dist/runInVm.js"
     }
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
