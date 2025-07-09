@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.36
+
+### Patch Changes
+
+- 451e003: add missing imports
+
 ## 3.0.0-alpha.35
 
 ### Patch Changes
