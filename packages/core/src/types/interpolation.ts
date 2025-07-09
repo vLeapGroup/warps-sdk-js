@@ -1,4 +1,5 @@
-import { WarpChainInfo, WarpInitConfig } from './warp'
+import { WarpInitConfig } from './config'
+import { WarpChainInfo } from './warp'
 
 export type InterpolationBag = {
   config: WarpInitConfig

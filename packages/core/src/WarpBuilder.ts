@@ -1,6 +1,13 @@
-import { AdapterWarpBuilder, WarpAdapterGenericRemoteTransaction, WarpAdapterGenericTransaction } from './adapters'
 import { getLatestProtocolIdentifier, toPreviewText } from './helpers'
-import { Warp, WarpAction, WarpCacheConfig, WarpInitConfig } from './types'
+import {
+  AdapterWarpBuilder,
+  Warp,
+  WarpAction,
+  WarpAdapterGenericRemoteTransaction,
+  WarpAdapterGenericTransaction,
+  WarpCacheConfig,
+  WarpInitConfig,
+} from './types'
 import { WarpValidator } from './WarpValidator'
 
 export class WarpBuilder {

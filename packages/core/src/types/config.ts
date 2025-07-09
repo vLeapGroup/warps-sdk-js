@@ -1,18 +1,51 @@
+import { WarpBrand } from './brand'
+import { WarpCacheType } from './cache'
+import { WarpChainEnv } from './general'
+import { WarpRegistryInfo } from './registry'
+import { WarpExecution } from './results'
 import {
   BaseWarpActionInputType,
   Warp,
   WarpActionIndex,
   WarpActionInputType,
-  WarpBrand,
-  WarpCacheConfig,
   WarpChain,
   WarpChainInfo,
   WarpExecutable,
-  WarpExecution,
-  WarpInitConfig,
   WarpNativeValue,
-  WarpRegistryInfo,
-} from './types'
+} from './warp'
+
+export type WarpInitConfig = {
+  env: WarpChainEnv
+  repository: Adapter
+  adapters: Adapter[]
+  preferredChain?: WarpChain
+  clientUrl?: string
+  currentUrl?: string
+  vars?: Record<string, string | number>
+  user?: {
+    wallet?: string
+  }
+  schema?: {
+    warp?: string
+    brand?: string
+  }
+  cache?: {
+    ttl?: number
+    type?: WarpCacheType
+  }
+  registry?: {
+    contract?: string
+  }
+  index?: {
+    url?: string
+    apiKey?: string
+    searchParamName?: string
+  }
+}
+
+export type WarpCacheConfig = {
+  ttl?: number
+}
 
 export type Adapter = {
   chain: WarpChain

@@ -1,7 +1,6 @@
-import { AdapterWarpBuilder, AdapterWarpRegistry } from './adapters'
 import { WarpConstants } from './constants'
 import { extractIdentifierInfoFromUrl, getWarpInfoFromIdentifier } from './helpers'
-import { Warp, WarpBrand, WarpCacheConfig, WarpInitConfig, WarpRegistryInfo } from './types'
+import { AdapterWarpBuilder, AdapterWarpRegistry, Warp, WarpBrand, WarpCacheConfig, WarpInitConfig, WarpRegistryInfo } from './types'
 import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
 

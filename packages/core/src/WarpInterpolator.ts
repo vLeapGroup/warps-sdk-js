@@ -1,7 +1,6 @@
-import { AdapterWarpRegistry } from './adapters'
 import { WarpConstants } from './constants'
 import { getMainChainInfo } from './helpers'
-import { InterpolationBag, Warp, WarpAction, WarpInitConfig } from './types'
+import { AdapterWarpRegistry, InterpolationBag, Warp, WarpAction, WarpInitConfig } from './types'
 
 export class WarpInterpolator {
   private registry: AdapterWarpRegistry

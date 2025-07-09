@@ -1,5 +1,6 @@
+import { WarpInitConfig } from '../types'
 import { WarpExecutionNextInfo, WarpExecutionResults } from '../types/results'
-import { Warp, WarpInitConfig } from '../types/warp'
+import { Warp } from '../types/warp'
 import { WarpLinkBuilder } from '../WarpLinkBuilder'
 import { replacePlaceholders } from './general'
 import { getWarpInfoFromIdentifier } from './identifier'

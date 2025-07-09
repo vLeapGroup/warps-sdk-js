@@ -1,5 +1,6 @@
 export * from './abi'
 export * from './brand'
+export * from './config'
 export * from './general'
 export * from './interpolation'
 export * from './registry'

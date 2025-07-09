@@ -1,41 +1,4 @@
-import { Adapter } from '../adapters'
-import { WarpCacheType } from './cache'
-import { WarpChainEnv } from './general'
-
 export type WarpChain = string
-
-export type WarpInitConfig = {
-  env: WarpChainEnv
-  repository: Adapter
-  adapters: Adapter[]
-  preferredChain?: WarpChain
-  clientUrl?: string
-  currentUrl?: string
-  vars?: Record<string, string | number>
-  user?: {
-    wallet?: string
-  }
-  schema?: {
-    warp?: string
-    brand?: string
-  }
-  cache?: {
-    ttl?: number
-    type?: WarpCacheType
-  }
-  registry?: {
-    contract?: string
-  }
-  index?: {
-    url?: string
-    apiKey?: string
-    searchParamName?: string
-  }
-}
-
-export type WarpCacheConfig = {
-  ttl?: number
-}
 
 export type WarpChainInfo = {
   name: WarpChain
