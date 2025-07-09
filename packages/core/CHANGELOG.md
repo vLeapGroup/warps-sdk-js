@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.43
+
+### Patch Changes
+
+- 790aa8e: add factory to client
+- 71bcf40: add results to client
+
 ## 3.0.0-alpha.42
 
 ### Patch Changes
