@@ -22,9 +22,8 @@ export class WarpExecutor {
   }
 
   async execute(warp: Warp, inputs: string[]): Promise<[WarpAdapterGenericTransaction | null, WarpChainInfo | null]> {
-    const actionIndex = this.determineActionIndex(warp, inputs)
+    const [action, actionIndex] = this.factory.determineAction(warp, inputs)
     const executable = await this.factory.createExecutable(warp, actionIndex, inputs)
-    const action = getWarpActionByIndex(warp, actionIndex)
 
     if (action.type === 'collect') {
       const results = await this.executeCollect(warp, actionIndex, inputs)
@@ -47,16 +46,6 @@ export class WarpExecutor {
     const results = new adapterLoader.results(this.config)
     const executionResult = (await results.getTransactionExecutionResults(warp, 1, tx)) as WarpExecution
     this.handlers?.onExecuted?.(executionResult)
-  }
-
-  private determineActionIndex(warp: Warp, inputs: string[]): WarpActionIndex {
-    const available = warp.actions.filter((action) => action.type !== 'link')
-    const preferredChain = this.config.preferredChain?.toLowerCase()
-    if (preferredChain) {
-      const preferred = available.findIndex((action) => action.chain?.toLowerCase() === preferredChain)
-      if (preferred !== -1) return preferred
-    }
-    return 1
   }
 
   private async executeCollect(warp: Warp, action: WarpActionIndex, inputs: string[], extra?: Record<string, any>): Promise<WarpExecution> {

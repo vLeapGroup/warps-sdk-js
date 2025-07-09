@@ -4,6 +4,7 @@ import {
   ResolvedInput,
   Warp,
   WarpAction,
+  WarpActionIndex,
   WarpActionInput,
   WarpActionInputType,
   WarpChainInfo,
@@ -86,6 +87,18 @@ export class WarpFactory {
     )
 
     return executable
+  }
+
+  determineAction(warp: Warp, inputs: string[]): [WarpAction, WarpActionIndex] {
+    const available = warp.actions.filter((action) => action.type !== 'link')
+    const preferredChain = this.config.preferredChain?.toLowerCase()
+    let index = 1
+    if (preferredChain) {
+      const preferred = available.findIndex((action) => action.chain?.toLowerCase() === preferredChain)
+      if (preferred !== -1) index = preferred
+    }
+
+    return [getWarpActionByIndex(warp, index), index]
   }
 
   public async getResolvedInputs(chain: WarpChainInfo, action: WarpAction, inputArgs: string[]): Promise<ResolvedInput[]> {
