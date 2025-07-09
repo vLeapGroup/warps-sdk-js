@@ -1,13 +1,8 @@
-import { Warp, WarpInitConfig } from '../types'
+import { createMockConfig } from '../test-utils/mockConfig'
+import { Warp } from '../types'
 import { extractCollectResults } from './results'
 
-const testConfig: WarpInitConfig = {
-  env: 'devnet',
-  user: {
-    wallet: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
-  },
-  currentUrl: 'https://example.com',
-}
+const testConfig = createMockConfig()
 
 describe('Result Helpers', () => {
   it('returns input-based result by input name (collect)', async () => {

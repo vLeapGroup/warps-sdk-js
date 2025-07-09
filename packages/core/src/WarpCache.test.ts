@@ -1,4 +1,5 @@
-import { CacheType, WarpCache } from './WarpCache'
+import { WarpCacheType } from './types/cache'
+import { WarpCache } from './WarpCache'
 
 describe('WarpCache', () => {
   let cacheTypes = ['memory']
@@ -11,7 +12,7 @@ describe('WarpCache', () => {
       let cache: any
 
       beforeEach(() => {
-        cache = new WarpCache(type as CacheType)
+        cache = new WarpCache(type as WarpCacheType)
         cache.clear()
       })
 

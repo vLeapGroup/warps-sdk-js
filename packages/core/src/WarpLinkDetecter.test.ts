@@ -1,4 +1,5 @@
-import { Warp, WarpBrand, WarpRegistryInfo } from '@vleap/warps'
+import { createMockAdapter, createMockConfig } from './test-utils/mockConfig'
+import { Warp, WarpBrand, WarpRegistryInfo } from './types'
 import { WarpBuilder } from './WarpBuilder'
 import { WarpLinkDetecter } from './WarpLinkDetecter'
 
@@ -14,18 +15,12 @@ const minimalWarp = {
 }
 
 const mockAdapter = {
+  ...createMockAdapter(),
   chain: 'devnet',
   builder: class {
     createInscriptionTransaction = jest.fn()
     createFromTransaction = jest.fn()
     createFromTransactionHash = jest.fn().mockResolvedValue(mockWarp)
-  },
-  serializer: class {
-    typedToString = jest.fn()
-    typedToNative = jest.fn()
-    nativeToTyped = jest.fn()
-    nativeToType = jest.fn()
-    stringToTyped = jest.fn()
   },
   registry: class {
     createWarpRegisterTransaction = jest.fn()
@@ -45,11 +40,6 @@ const mockAdapter = {
     setChain = jest.fn()
     removeChain = jest.fn()
     fetchBrand = jest.fn()
-  },
-  executor: class {
-    async createTransaction() {
-      return {}
-    }
   },
   results: class {
     getTransactionExecutionResults = jest.fn()
@@ -105,12 +95,11 @@ const mockBrand: WarpBrand = {
   },
 }
 
-const Config = {
-  env: 'devnet' as const,
+const Config = createMockConfig({
+  env: 'devnet',
   clientUrl: 'https://anyclient.com',
-  repository: mockAdapter,
-  adapters: [],
-}
+  repository: mockAdapter as any,
+})
 
 describe('detect', () => {
   beforeEach(() => {

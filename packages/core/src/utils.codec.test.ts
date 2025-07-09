@@ -1,6 +1,5 @@
-import { address, biguint, boolean, hex, string, u16, u32, u64, u8 } from './utils.codec'
-
 import { WarpInputTypes } from './constants'
+import { address, biguint, boolean, hex, string, u16, u32, u64, u8 } from './utils.codec'
 
 describe('utils.codec', () => {
   describe('string', () => {

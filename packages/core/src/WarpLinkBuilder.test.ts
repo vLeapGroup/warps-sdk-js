@@ -1,10 +1,10 @@
-import { WarpInitConfig } from './types'
+import { createMockConfig } from './test-utils/mockConfig'
 import { WarpLinkBuilder } from './WarpLinkBuilder'
 
-const Config: WarpInitConfig = {
+const Config = createMockConfig({
   env: 'devnet',
   clientUrl: 'https://anyclient.com',
-}
+})
 
 describe('build', () => {
   it('builds a link with hash', () => {

@@ -1,19 +1,14 @@
 import { CacheTtl, getMainChainInfo, Warp, WarpCache, WarpCacheKey, WarpConfig, WarpInitConfig } from '@vleap/warps'
 import { WarpInterpolator } from './WarpInterpolator'
+import { createMockAdapter, createMockConfig } from './test-utils/mockConfig'
 
 const mockAdapter = {
+  ...createMockAdapter(),
   chain: 'devnet',
   builder: class {
     createInscriptionTransaction = jest.fn()
     createFromTransaction = jest.fn()
     createFromTransactionHash = jest.fn().mockResolvedValue(null)
-  },
-  serializer: class {
-    typedToString = jest.fn()
-    typedToNative = jest.fn()
-    nativeToTyped = jest.fn()
-    nativeToType = jest.fn()
-    stringToTyped = jest.fn()
   },
   registry: class {
     createWarpRegisterTransaction = jest.fn()
@@ -34,17 +29,12 @@ const mockAdapter = {
     removeChain = jest.fn()
     fetchBrand = jest.fn()
   },
-  executor: class {
-    async createTransaction() {
-      return {}
-    }
-  },
   results: class {
     getTransactionExecutionResults = jest.fn()
   },
 }
 
-const testConfig: WarpInitConfig = {
+const testConfig = createMockConfig({
   env: 'devnet',
   clientUrl: 'https://anyclient.com',
   currentUrl: 'https://anyclient.com',
@@ -57,9 +47,8 @@ const testConfig: WarpInitConfig = {
   registry: {
     contract: WarpConfig.Registry.Contract('devnet'),
   },
-  repository: mockAdapter,
-  adapters: [],
-}
+  repository: mockAdapter as any,
+})
 
 describe('WarpInterpolator', () => {
   it('interpolates vars and globals together', async () => {

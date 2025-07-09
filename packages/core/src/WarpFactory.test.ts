@@ -1,14 +1,14 @@
 import { WarpConstants } from './constants'
-import { WarpAction, WarpChainInfo, WarpInitConfig } from './types'
+import { createMockConfig } from './test-utils/mockConfig'
+import { WarpAction, WarpChainInfo } from './types'
 import { WarpFactory } from './WarpFactory'
 import { WarpUtils } from './WarpUtils'
 
 describe('WarpFactory', () => {
-  const config: WarpInitConfig = {
-    env: 'devnet',
+  const config = createMockConfig({
     user: { wallet: 'erd1testwallet' },
     currentUrl: 'https://example.com?foo=bar',
-  }
+  })
   const chain: WarpChainInfo = {
     name: 'multiversx',
     displayName: 'MultiversX',

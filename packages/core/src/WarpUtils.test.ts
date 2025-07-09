@@ -1,53 +1,19 @@
-import { getNextInfo } from '@vleap/warps'
-import { WarpMultiversxRegistry } from '@vleap/warps-adapter-multiversx'
-import { WarpContractAction } from './types'
+import { getNextInfo } from './helpers'
+import { createMockConfig } from './test-utils/mockConfig'
+import { Warp, WarpContractAction } from './types'
 import { WarpChainEnv } from './types/general'
 import { WarpExecutionResults } from './types/results'
-import { Warp, WarpInitConfig } from './types/warp'
 import { WarpUtils } from './WarpUtils'
 
-const testConfig: WarpInitConfig = {
+const testConfig = createMockConfig({
   env: 'devnet' as WarpChainEnv,
   clientUrl: 'https://anyclient.com',
   currentUrl: 'https://anyclient.com',
   vars: {},
   user: undefined,
   repository: {
+    ...createMockConfig().repository,
     chain: 'multiversx',
-    builder: class {
-      createInscriptionTransaction() {
-        return {}
-      }
-      createFromTransaction() {
-        return Promise.resolve({ protocol: '', name: '', title: '', description: '', actions: [] })
-      }
-      createFromTransactionHash() {
-        return Promise.resolve(null)
-      }
-    },
-    executor: class {
-      createTransaction() {
-        return Promise.resolve({})
-      }
-      preprocessInput() {
-        return Promise.resolve('')
-      }
-    },
-    results: class {
-      getTransactionExecutionResults() {
-        return Promise.resolve({
-          success: true,
-          warp: { protocol: '', name: '', title: '', description: '', actions: [] },
-          action: 0,
-          user: null,
-          txHash: null,
-          next: null,
-          values: [],
-          results: {},
-          messages: {},
-        })
-      }
-    },
     serializer: class {
       typedToString() {
         return ''
@@ -69,10 +35,8 @@ const testConfig: WarpInitConfig = {
         return [type, val]
       }
     },
-    registry: WarpMultiversxRegistry,
   },
-  adapters: [],
-}
+})
 
 describe('getNextInfo', () => {
   it('returns info for an alias', () => {
@@ -239,7 +203,7 @@ describe('getChainInfoForAction', () => {
       nativeToken: 'EGLD',
     })
 
-    jest.spyOn(WarpMultiversxRegistry.prototype, 'getChainInfo').mockImplementation(mockGetChainInfo)
+    jest.spyOn(testConfig.repository.registry.prototype, 'getChainInfo').mockImplementation(mockGetChainInfo)
 
     const action: WarpContractAction = {
       type: 'contract',
@@ -290,7 +254,7 @@ describe('getChainInfoForAction', () => {
       nativeToken: 'EGLD',
     })
 
-    jest.spyOn(WarpMultiversxRegistry.prototype, 'getChainInfo').mockImplementation(mockGetChainInfo)
+    jest.spyOn(testConfig.repository.registry.prototype, 'getChainInfo').mockImplementation(mockGetChainInfo)
 
     const action: WarpContractAction = {
       type: 'contract',
