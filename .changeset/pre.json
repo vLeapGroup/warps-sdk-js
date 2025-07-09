@@ -13,6 +13,7 @@
     "@vleap/warps-vm-node": "0.0.0"
   },
   "changesets": [
+    "bright-buses-appear",
     "common-numbers-own",
     "crazy-candles-post",
     "cuddly-wolves-hang",

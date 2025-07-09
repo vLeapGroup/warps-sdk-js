@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.42
+
+### Patch Changes
+
+- b674296: expose client config
+
 ## 3.0.0-alpha.41
 
 ### Minor Changes
