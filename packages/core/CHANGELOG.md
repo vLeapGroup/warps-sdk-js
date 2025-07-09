@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.37
+
+### Patch Changes
+
+- 2f7e079: update action determination
+- df7ab42: update exec handlers to optional
+
 ## 3.0.0-alpha.36
 
 ### Patch Changes

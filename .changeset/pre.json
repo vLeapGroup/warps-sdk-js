@@ -13,6 +13,7 @@
     "@vleap/warps-vm-node": "0.0.0"
   },
   "changesets": [
+    "common-numbers-own",
     "crazy-candles-post",
     "cuddly-wolves-hang",
     "curly-clubs-take",
@@ -57,6 +58,7 @@
     "twenty-boats-shave",
     "twenty-cycles-worry",
     "violet-turkeys-lay",
-    "weak-coats-tickle"
+    "weak-coats-tickle",
+    "weak-lands-sit"
   ]
 }
