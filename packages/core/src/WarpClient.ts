@@ -4,11 +4,10 @@ import {
   WarpAdapterGenericRemoteTransaction,
   WarpAdapterGenericTransaction,
   WarpCacheConfig,
-  WarpChainInfo,
   WarpClientConfig,
 } from './types'
 import { WarpBuilder } from './WarpBuilder'
-import { WarpExecutor } from './WarpExecutor'
+import { ExecutionHandlers, WarpExecutor } from './WarpExecutor'
 import { DetectionResult, WarpLinkDetecter } from './WarpLinkDetecter'
 
 export class WarpClient {
@@ -16,6 +15,10 @@ export class WarpClient {
 
   createBuilder(): WarpBuilder {
     return new WarpBuilder(this.config)
+  }
+
+  createExecutor(handlers: ExecutionHandlers): WarpExecutor {
+    return new WarpExecutor(this.config, handlers)
   }
 
   async detectWarp(url: string, cache?: WarpCacheConfig): Promise<DetectionResult> {
@@ -35,15 +38,7 @@ export class WarpClient {
     return this.config.repository.builder.createFromTransactionHash(hash, cache)
   }
 
-  async executeWarp(warp: Warp, inputs: string[]): Promise<[WarpAdapterGenericTransaction | null, WarpChainInfo | null]> {
-    return this.executor.execute(warp, inputs)
-  }
-
   get registry(): AdapterWarpRegistry {
     return this.config.repository.registry
-  }
-
-  private get executor(): WarpExecutor {
-    return new WarpExecutor(this.config)
   }
 }

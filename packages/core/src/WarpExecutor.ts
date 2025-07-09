@@ -13,7 +13,7 @@ import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
 import { WarpUtils } from './WarpUtils'
 
-type ExecutionHandlers = {
+export type ExecutionHandlers = {
   onExecuted?: (result: WarpExecution) => void
 }
 
