@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.39
+
+### Patch Changes
+
+- 08f2815: update types
+
 ## 3.0.0-alpha.38
 
 ### Patch Changes
