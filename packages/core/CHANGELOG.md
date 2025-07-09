@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.41
+
+### Minor Changes
+
+- 98a47e1: update client executor impl
+
 ## 3.0.0-alpha.40
 
 ### Minor Changes

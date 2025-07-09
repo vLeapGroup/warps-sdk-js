@@ -1,5 +1,16 @@
 # @warps/playground
 
+## 0.2.0-alpha.27
+
+### Minor Changes
+
+- 98a47e1: update client executor impl
+
+### Patch Changes
+
+- Updated dependencies [98a47e1]
+  - @vleap/warps@3.0.0-alpha.41
+
 ## 0.2.0-alpha.26
 
 ### Minor Changes
