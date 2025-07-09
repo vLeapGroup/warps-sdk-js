@@ -11,7 +11,7 @@ import { ExecutionHandlers, WarpExecutor } from './WarpExecutor'
 import { DetectionResult, WarpLinkDetecter } from './WarpLinkDetecter'
 
 export class WarpClient {
-  constructor(private config: WarpClientConfig) {}
+  constructor(public readonly config: WarpClientConfig) {}
 
   createBuilder(): WarpBuilder {
     return new WarpBuilder(this.config)
