@@ -1,5 +1,6 @@
 import {
   AdapterWarpRegistry,
+  AdapterWarpResults,
   Warp,
   WarpAdapterGenericRemoteTransaction,
   WarpAdapterGenericTransaction,
@@ -41,6 +42,10 @@ export class WarpClient {
 
   get factory(): WarpFactory {
     return new WarpFactory(this.config)
+  }
+
+  get results(): AdapterWarpResults {
+    return this.config.repository.results
   }
 
   get registry(): AdapterWarpRegistry {
