@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.38
+
+### Patch Changes
+
+- a08385f: fix circ dep
+
 ## 3.0.0-alpha.37
 
 ### Patch Changes
