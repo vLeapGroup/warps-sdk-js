@@ -13,9 +13,9 @@ type ExecutionHandlers = {
 export class WarpExecutor {
   private config: WarpInitConfig
   private factory: WarpFactory
-  private handlers: ExecutionHandlers
+  private handlers: ExecutionHandlers | undefined
 
-  constructor(config: WarpInitConfig, handlers: ExecutionHandlers) {
+  constructor(config: WarpInitConfig, handlers?: ExecutionHandlers) {
     this.config = config
     this.factory = new WarpFactory(config)
     this.handlers = handlers
@@ -28,7 +28,7 @@ export class WarpExecutor {
 
     if (action.type === 'collect') {
       const results = await this.executeCollect(warp, actionIndex, inputs)
-      this.handlers.onExecuted?.(results)
+      this.handlers?.onExecuted?.(results)
       return [null, null]
     }
 
@@ -46,7 +46,7 @@ export class WarpExecutor {
     if (!adapterLoader) throw new Error(`No adapter registered for chain: ${chain.name}`)
     const results = new adapterLoader.results(this.config)
     const executionResult = (await results.getTransactionExecutionResults(warp, 1, tx)) as WarpExecution
-    this.handlers.onExecuted?.(executionResult)
+    this.handlers?.onExecuted?.(executionResult)
   }
 
   private determineActionIndex(warp: Warp, inputs: string[]): WarpActionIndex {
