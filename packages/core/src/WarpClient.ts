@@ -8,6 +8,7 @@ import {
 } from './types'
 import { WarpBuilder } from './WarpBuilder'
 import { ExecutionHandlers, WarpExecutor } from './WarpExecutor'
+import { WarpFactory } from './WarpFactory'
 import { DetectionResult, WarpLinkDetecter } from './WarpLinkDetecter'
 
 export class WarpClient {
@@ -36,6 +37,10 @@ export class WarpClient {
 
   async createFromTransactionHash(hash: string, cache?: WarpCacheConfig): Promise<Warp | null> {
     return this.config.repository.builder.createFromTransactionHash(hash, cache)
+  }
+
+  get factory(): WarpFactory {
+    return new WarpFactory(this.config)
   }
 
   get registry(): AdapterWarpRegistry {
