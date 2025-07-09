@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.6
+
+### Minor Changes
+
+- cc79e6b: further rearch
+
+### Patch Changes
+
+- Updated dependencies [cc79e6b]
+  - @vleap/warps@3.0.0-alpha.40
+
 ## 0.2.0-alpha.5
 
 ### Patch Changes

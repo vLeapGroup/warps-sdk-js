@@ -1,6 +1,6 @@
 {
   "name": "@warps/playground",
-  "version": "0.1.1-alpha.25",
+  "version": "0.2.0-alpha.26",
   "private": true,
   "main": "playground.ts",
   "devDependencies": {
@@ -9,8 +9,8 @@
   },
   "dependencies": {
     "@mysten/sui": "^1.35.0",
-    "@vleap/warps": "^3.0.0-alpha.34",
-    "@vleap/warps-adapter-multiversx": "^0.2.0-alpha.5",
-    "@vleap/warps-adapter-sui": "^0.2.0-alpha.5"
+    "@vleap/warps": "^3.0.0-alpha.40",
+    "@vleap/warps-adapter-multiversx": "^0.2.0-alpha.6",
+    "@vleap/warps-adapter-sui": "^0.2.0-alpha.6"
   }
 }

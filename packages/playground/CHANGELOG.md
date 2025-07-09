@@ -1,5 +1,18 @@
 # @warps/playground
 
+## 0.2.0-alpha.26
+
+### Minor Changes
+
+- cc79e6b: further rearch
+
+### Patch Changes
+
+- Updated dependencies [cc79e6b]
+  - @vleap/warps-adapter-multiversx@0.2.0-alpha.6
+  - @vleap/warps-adapter-sui@0.2.0-alpha.6
+  - @vleap/warps@3.0.0-alpha.40
+
 ## 0.1.1-alpha.25
 
 ### Patch Changes
