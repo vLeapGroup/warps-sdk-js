@@ -2,6 +2,7 @@ import { CacheStrategy } from './cache/CacheStrategy'
 import { LocalStorageCacheStrategy } from './cache/LocalStorageCacheStrategy'
 import { MemoryCacheStrategy } from './cache/MemoryCacheStrategy'
 import { WarpChain, WarpChainEnv } from './types'
+import { WarpCacheType } from './types/cache'
 
 export const CacheTtl = {
   OneMinute: 60,
@@ -22,16 +23,14 @@ export const WarpCacheKey = {
   ChainInfos: (env: WarpChainEnv) => `chains:${env}`,
 }
 
-export type CacheType = 'memory' | 'localStorage'
-
 export class WarpCache {
   private strategy: CacheStrategy
 
-  constructor(type?: CacheType) {
+  constructor(type?: WarpCacheType) {
     this.strategy = this.selectStrategy(type)
   }
 
-  private selectStrategy(type?: CacheType): CacheStrategy {
+  private selectStrategy(type?: WarpCacheType): CacheStrategy {
     if (type === 'localStorage') return new LocalStorageCacheStrategy()
     if (type === 'memory') return new MemoryCacheStrategy()
 

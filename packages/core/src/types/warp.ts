@@ -1,5 +1,5 @@
 import { Adapter } from '../adapters'
-import { CacheType } from '../WarpCache'
+import { WarpCacheType } from './cache'
 import { WarpChainEnv } from './general'
 
 export type WarpChain = string
@@ -21,7 +21,7 @@ export type WarpInitConfig = {
   }
   cache?: {
     ttl?: number
-    type?: CacheType
+    type?: WarpCacheType
   }
   registry?: {
     contract?: string
