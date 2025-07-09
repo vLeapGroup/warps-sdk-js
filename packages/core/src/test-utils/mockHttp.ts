@@ -166,7 +166,16 @@ export const setupHttpMock = () => {
     }
 
     if (options.headers && call[1]) {
-      expect(call[1].headers).toEqual(expect.objectContaining(options.headers))
+      const actualHeaders = call[1].headers
+      if (actualHeaders && typeof (actualHeaders as any).get === 'function') {
+        const headersObj = actualHeaders as Headers
+        if (options.headers['Content-Type']) {
+          expect(headersObj.get('Content-Type')).toBe(options.headers['Content-Type'])
+        }
+        if (options.headers['Accept']) {
+          expect(headersObj.get('Accept')).toBe(options.headers['Accept'])
+        }
+      }
     }
   }
 

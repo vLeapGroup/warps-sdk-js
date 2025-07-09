@@ -1,10 +1,10 @@
 import { WarpConstants } from './constants'
 import { extractIdentifierInfoFromUrl, getWarpInfoFromIdentifier } from './helpers'
-import { AdapterWarpBuilder, AdapterWarpRegistry, Warp, WarpBrand, WarpCacheConfig, WarpInitConfig, WarpRegistryInfo } from './types'
+import { Adapter, Warp, WarpBrand, WarpCacheConfig, WarpInitConfig, WarpRegistryInfo } from './types'
 import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
 
-type DetectionResult = {
+export type DetectionResult = {
   match: boolean
   url: string
   warp: Warp | null
@@ -12,7 +12,7 @@ type DetectionResult = {
   brand: WarpBrand | null
 }
 
-type DetectionResultFromHtml = {
+export type DetectionResultFromHtml = {
   match: boolean
   results: {
     url: string
@@ -23,12 +23,13 @@ type DetectionResultFromHtml = {
 // Example Link (Transaction Hash as ID): https://usewarp.to/to?warp=hash%3A<MYHASH>
 // Example Link (Alias as ID): https://usewarp.to/to?warp=alias%3A<MYALIAS>
 export class WarpLinkDetecter {
-  private registry: AdapterWarpRegistry
-  private builder: AdapterWarpBuilder
+  private interpolator: WarpInterpolator
 
-  constructor(private config: WarpInitConfig) {
-    this.registry = new this.config.repository.registry(this.config)
-    this.builder = new this.config.repository.builder(this.config)
+  constructor(
+    private config: WarpInitConfig,
+    private repository: Adapter
+  ) {
+    this.interpolator = new WarpInterpolator(config, repository)
   }
 
   isValid(url: string): boolean {
@@ -66,21 +67,20 @@ export class WarpLinkDetecter {
       let brand: WarpBrand | null = null
 
       if (type === 'hash') {
-        warp = await this.builder.createFromTransactionHash(identifierBase, cache)
-        const result = await this.registry.getInfoByHash(identifierBase, cache)
+        warp = await this.repository.builder.createFromTransactionHash(identifierBase, cache)
+        const result = await this.repository.registry.getInfoByHash(identifierBase, cache)
         registryInfo = result.registryInfo
         brand = result.brand
       } else if (type === 'alias') {
-        const result = await this.registry.getInfoByAlias(identifierBase, cache)
+        const result = await this.repository.registry.getInfoByAlias(identifierBase, cache)
         registryInfo = result.registryInfo
         brand = result.brand
         if (result.registryInfo) {
-          warp = await this.builder.createFromTransactionHash(result.registryInfo.hash, cache)
+          warp = await this.repository.builder.createFromTransactionHash(result.registryInfo.hash, cache)
         }
       }
 
-      const interpolator = new WarpInterpolator(this.config)
-      const preparedWarp = warp ? await interpolator.apply(this.config, warp) : null
+      const preparedWarp = warp ? await this.interpolator.apply(this.config, warp) : null
 
       return preparedWarp ? { match: true, url, warp: preparedWarp, registryInfo, brand } : emptyResult
     } catch (e) {

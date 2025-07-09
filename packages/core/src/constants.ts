@@ -29,6 +29,10 @@ export const WarpConstants = {
       Placeholder: 'CHAIN_EXPLORER',
       Accessor: (bag: InterpolationBag) => bag.chain.explorerUrl,
     },
+    ChainAddressHrp: {
+      Placeholder: 'chain.addressHrp',
+      Accessor: (bag: InterpolationBag) => bag.chain.addressHrp,
+    },
   },
 
   Vars: {

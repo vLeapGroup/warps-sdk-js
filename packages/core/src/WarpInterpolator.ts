@@ -1,13 +1,12 @@
 import { WarpConstants } from './constants'
 import { getMainChainInfo } from './helpers'
-import { AdapterWarpRegistry, InterpolationBag, Warp, WarpAction, WarpInitConfig } from './types'
+import { Adapter, InterpolationBag, Warp, WarpAction, WarpInitConfig } from './types'
 
 export class WarpInterpolator {
-  private registry: AdapterWarpRegistry
-
-  constructor(private config: WarpInitConfig) {
-    this.registry = new this.config.repository.registry(this.config)
-  }
+  constructor(
+    private config: WarpInitConfig,
+    private repository: Adapter
+  ) {}
 
   async apply(config: WarpInitConfig, warp: Warp): Promise<Warp> {
     const modifiable = this.applyVars(config, warp)
@@ -68,7 +67,7 @@ export class WarpInterpolator {
   }
 
   private async applyActionGlobals(action: WarpAction): Promise<WarpAction> {
-    const chain = action.chain ? await this.registry.getChainInfo(action.chain) : getMainChainInfo(this.config)
+    const chain = action.chain ? await this.repository.registry.getChainInfo(action.chain) : getMainChainInfo(this.config)
     if (!chain) throw new Error(`Chain info not found for ${action.chain}`)
     let modifiable = JSON.stringify(action)
     const bag: InterpolationBag = { config: this.config, chain }

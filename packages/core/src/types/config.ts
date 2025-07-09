@@ -14,10 +14,13 @@ import {
   WarpNativeValue,
 } from './warp'
 
-export type WarpInitConfig = {
-  env: WarpChainEnv
+export type WarpClientConfig = WarpInitConfig & {
   repository: Adapter
   adapters: Adapter[]
+}
+
+export type WarpInitConfig = {
+  env: WarpChainEnv
   preferredChain?: WarpChain
   clientUrl?: string
   currentUrl?: string
@@ -49,11 +52,11 @@ export type WarpCacheConfig = {
 
 export type Adapter = {
   chain: WarpChain
-  builder: AdapterWarpBuilderConstructor
-  executor: AdapterWarpExecutorConstructor
-  results: AdapterWarpResultsConstructor
-  serializer: AdapterWarpSerializerConstructor
-  registry: AdapterWarpRegistryConstructor
+  builder: AdapterWarpBuilder
+  executor: AdapterWarpExecutor
+  results: AdapterWarpResults
+  serializer: AdapterWarpSerializer
+  registry: AdapterWarpRegistry
 }
 
 export type WarpAdapterGenericTransaction = any
@@ -61,18 +64,10 @@ export type WarpAdapterGenericRemoteTransaction = any
 export type WarpAdapterGenericValue = any
 export type WarpAdapterGenericType = any
 
-export interface AdapterWarpBuilderConstructor {
-  new (config: WarpInitConfig): AdapterWarpBuilder
-}
-
 export interface AdapterWarpBuilder {
   createInscriptionTransaction(warp: Warp): WarpAdapterGenericTransaction
   createFromTransaction(tx: WarpAdapterGenericTransaction, validate?: boolean): Promise<Warp>
   createFromTransactionHash(hash: string, cache?: WarpCacheConfig): Promise<Warp | null>
-}
-
-export interface AdapterWarpExecutorConstructor {
-  new (config: WarpInitConfig): AdapterWarpExecutor
 }
 
 export interface AdapterWarpExecutor {
@@ -80,16 +75,8 @@ export interface AdapterWarpExecutor {
   preprocessInput(chain: WarpChainInfo, input: string, type: WarpActionInputType, value: string): Promise<string>
 }
 
-export interface AdapterWarpResultsConstructor {
-  new (config: WarpInitConfig): AdapterWarpResults
-}
-
 export interface AdapterWarpResults {
   getTransactionExecutionResults(warp: Warp, actionIndex: WarpActionIndex, tx: WarpAdapterGenericRemoteTransaction): Promise<WarpExecution>
-}
-
-export interface AdapterWarpSerializerConstructor {
-  new (): AdapterWarpSerializer
 }
 
 export interface AdapterWarpSerializer {
@@ -98,10 +85,6 @@ export interface AdapterWarpSerializer {
   nativeToTyped(type: WarpActionInputType, value: WarpNativeValue): WarpAdapterGenericValue
   nativeToType(type: BaseWarpActionInputType): WarpAdapterGenericType
   stringToTyped(value: string): WarpAdapterGenericValue
-}
-
-export interface AdapterWarpRegistryConstructor {
-  new (config: WarpInitConfig): AdapterWarpRegistry
 }
 
 export interface AdapterWarpRegistry {

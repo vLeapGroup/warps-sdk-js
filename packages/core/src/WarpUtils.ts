@@ -1,10 +1,10 @@
 import { getMainChainInfo } from './helpers'
-import { WarpAction, WarpChain, WarpChainInfo, WarpInitConfig } from './types'
+import { WarpAction, WarpChain, WarpChainInfo, WarpClientConfig } from './types'
 import { CacheTtl } from './WarpCache'
 import { WarpSerializer } from './WarpSerializer'
 
 export class WarpUtils {
-  static async getChainInfoForAction(config: WarpInitConfig, action: WarpAction, inputs?: string[]): Promise<WarpChainInfo> {
+  static async getChainInfoForAction(config: WarpClientConfig, action: WarpAction, inputs?: string[]): Promise<WarpChainInfo> {
     if (inputs) {
       const chainFromInputs = await this.tryGetChainFromInputs(config, action, inputs)
       if (chainFromInputs) return chainFromInputs
@@ -12,7 +12,11 @@ export class WarpUtils {
     return this.getDefaultChainInfo(config, action)
   }
 
-  private static async tryGetChainFromInputs(config: WarpInitConfig, action: WarpAction, inputs: string[]): Promise<WarpChainInfo | null> {
+  private static async tryGetChainFromInputs(
+    config: WarpClientConfig,
+    action: WarpAction,
+    inputs: string[]
+  ): Promise<WarpChainInfo | null> {
     const chainPositionIndex = action.inputs?.findIndex((i) => i.position === 'chain')
     if (chainPositionIndex === -1 || chainPositionIndex === undefined) return null
 
@@ -22,18 +26,16 @@ export class WarpUtils {
     const serializer = new WarpSerializer()
     const chainValue = serializer.stringToNative(chainInput)[1] as WarpChain
 
-    const registry = new config.repository.registry(config)
-    const chainInfo = await registry.getChainInfo(chainValue)
+    const chainInfo = await config.repository.registry.getChainInfo(chainValue)
     if (!chainInfo) throw new Error(`WarpUtils: Chain info not found for ${chainValue}`)
 
     return chainInfo
   }
 
-  private static async getDefaultChainInfo(config: WarpInitConfig, action: WarpAction): Promise<WarpChainInfo> {
+  private static async getDefaultChainInfo(config: WarpClientConfig, action: WarpAction): Promise<WarpChainInfo> {
     if (!action.chain) return getMainChainInfo(config)
 
-    const registry = new config.repository.registry(config)
-    const chainInfo = await registry.getChainInfo(action.chain, { ttl: CacheTtl.OneWeek })
+    const chainInfo = await config.repository.registry.getChainInfo(action.chain, { ttl: CacheTtl.OneWeek })
     if (!chainInfo) throw new Error(`WarpUtils: Chain info not found for ${action.chain}`)
 
     return chainInfo

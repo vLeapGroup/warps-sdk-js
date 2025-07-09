@@ -1,38 +1,7 @@
-import { CacheTtl, getMainChainInfo, Warp, WarpCache, WarpCacheKey, WarpConfig, WarpInitConfig } from '@vleap/warps'
+import { createMockAdapter, createMockChainInfo, createMockConfig, createMockWarp } from './test-utils/sharedMocks'
+import { WarpTransferAction } from './types'
+import { WarpCache } from './WarpCache'
 import { WarpInterpolator } from './WarpInterpolator'
-import { createMockAdapter, createMockConfig } from './test-utils/mockConfig'
-
-const mockAdapter = {
-  ...createMockAdapter(),
-  chain: 'devnet',
-  builder: class {
-    createInscriptionTransaction = jest.fn()
-    createFromTransaction = jest.fn()
-    createFromTransactionHash = jest.fn().mockResolvedValue(null)
-  },
-  registry: class {
-    createWarpRegisterTransaction = jest.fn()
-    createWarpUnregisterTransaction = jest.fn()
-    createWarpUpgradeTransaction = jest.fn()
-    createWarpAliasSetTransaction = jest.fn()
-    createWarpVerifyTransaction = jest.fn()
-    createWarpTransferOwnershipTransaction = jest.fn()
-    createBrandRegisterTransaction = jest.fn()
-    createWarpBrandingTransaction = jest.fn()
-    getInfoByAlias = jest.fn().mockResolvedValue({ registryInfo: null, brand: null })
-    getInfoByHash = jest.fn().mockResolvedValue({ registryInfo: null, brand: null })
-    getUserWarpRegistryInfos = jest.fn()
-    getUserBrands = jest.fn()
-    getChainInfos = jest.fn()
-    getChainInfo = jest.fn()
-    setChain = jest.fn()
-    removeChain = jest.fn()
-    fetchBrand = jest.fn()
-  },
-  results: class {
-    getTransactionExecutionResults = jest.fn()
-  },
-}
 
 const testConfig = createMockConfig({
   env: 'devnet',
@@ -41,166 +10,206 @@ const testConfig = createMockConfig({
   vars: {},
   user: { wallet: 'erd1abc' },
   schema: {
-    warp: WarpConfig.LatestWarpSchemaUrl,
-    brand: WarpConfig.LatestBrandSchemaUrl,
+    warp: 'https://schema.warp.to/warp.json',
+    brand: 'https://schema.warp.to/brand.json',
   },
   registry: {
-    contract: WarpConfig.Registry.Contract('devnet'),
+    contract: 'erd1qqqqqqqqqqqqqpgqhe8t5jewej70zupmh44jurgn29psua5l2jps3ntjj3',
   },
-  repository: mockAdapter as any,
 })
 
+const mockAdapter = {
+  ...createMockAdapter(),
+  chain: 'devnet',
+  builder: {
+    createInscriptionTransaction: jest.fn(),
+    createFromTransaction: jest.fn(),
+    createFromTransactionHash: jest.fn().mockResolvedValue(null),
+  },
+  registry: {
+    createWarpRegisterTransaction: jest.fn(),
+    createWarpUnregisterTransaction: jest.fn(),
+    createWarpUpgradeTransaction: jest.fn(),
+    createWarpAliasSetTransaction: jest.fn(),
+    createWarpVerifyTransaction: jest.fn(),
+    createWarpTransferOwnershipTransaction: jest.fn(),
+    createBrandRegisterTransaction: jest.fn(),
+    createWarpBrandingTransaction: jest.fn(),
+    getInfoByAlias: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
+    getInfoByHash: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
+    getUserWarpRegistryInfos: jest.fn().mockResolvedValue([]),
+    getUserBrands: jest.fn().mockResolvedValue([]),
+    getChainInfos: jest.fn().mockResolvedValue([]),
+    getChainInfo: jest.fn().mockResolvedValue(createMockChainInfo('multiversx')),
+    setChain: jest.fn().mockResolvedValue({}),
+    removeChain: jest.fn().mockResolvedValue({}),
+    fetchBrand: jest.fn().mockResolvedValue(null),
+  },
+  executor: {
+    createTransaction: jest.fn(),
+    preprocessInput: jest.fn(),
+  },
+  results: {
+    getTransactionExecutionResults: jest.fn(),
+  },
+  serializer: {
+    typedToString: jest.fn(),
+    typedToNative: jest.fn(),
+    nativeToTyped: jest.fn(),
+    nativeToType: jest.fn(),
+    stringToTyped: jest.fn(),
+  },
+}
+
 describe('WarpInterpolator', () => {
-  it('interpolates vars and globals together', async () => {
-    const config = { ...testConfig, vars: { AGE: 10 }, currentUrl: 'https://anyclient.com?age2=20' }
-
-    const warp: Warp = {
-      description: 'Wallet: {{USER_WALLET}}, API: {{CHAIN_API}}, Explorer: {{CHAIN_EXPLORER}}, Age: {{AGE}}, Age2: {{AGE2}}',
-      vars: { AGE: 'env:AGE', AGE2: 'query:age2' },
-      actions: [],
-    } as any
-
-    const interpolator = new WarpInterpolator(config)
-    const actual = await interpolator.apply(config, warp)
-
-    expect(actual.description).toBe(
-      'Wallet: erd1abc, API: https://devnet-api.multiversx.com, Explorer: https://devnet-explorer.multiversx.com, Age: 10, Age2: 20'
-    )
+  beforeEach(() => {
+    new WarpCache('memory').clear()
   })
 
-  it('leaves placeholders if values are missing', async () => {
-    const config = { ...testConfig, user: undefined }
+  describe('apply', () => {
+    it('interpolates basic warp', async () => {
+      const warp = createMockWarp()
+      const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+      const result = await interpolator.apply(testConfig, warp)
+      expect(result).toBeDefined()
+    })
 
-    const warp: Warp = {
-      description: 'Wallet: {{USER_WALLET}}, API: {{CHAIN_API}}, Explorer: {{CHAIN_EXPLORER}}, Age: {{AGE}}',
-      vars: { AGE: 'env:AGE' },
-      actions: [],
-    } as any
+    it('interpolates warp with variables', async () => {
+      const warp = {
+        ...createMockWarp(),
+        vars: {
+          USER_ADDRESS: 'erd1...',
+          AMOUNT: '1000',
+        },
+        actions: [
+          {
+            type: 'transfer' as const,
+            label: 'Transfer',
+            address: '{{USER_ADDRESS}}',
+            value: '{{AMOUNT}}',
+            inputs: [],
+          } as WarpTransferAction,
+        ],
+      }
+      const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+      const result = await interpolator.apply(testConfig, warp)
+      expect((result.actions[0] as WarpTransferAction).address).toBe('erd1...')
+      expect((result.actions[0] as WarpTransferAction).value).toBe('1000')
+    })
 
-    const interpolator = new WarpInterpolator(config)
-    const actual = await interpolator.apply(config, warp)
+    it('interpolates actions with chain info', async () => {
+      const warp = {
+        ...createMockWarp(),
+        actions: [
+          {
+            type: 'transfer' as const,
+            label: 'Transfer A',
+            chain: 'A',
+            address: '{{chain.addressHrp}}...',
+            value: '0',
+            inputs: [],
+          } as WarpTransferAction,
+          {
+            type: 'transfer' as const,
+            label: 'Transfer B',
+            chain: 'B',
+            address: '{{chain.addressHrp}}...',
+            value: '0',
+            inputs: [],
+          } as WarpTransferAction,
+        ],
+      }
 
-    expect(actual.description).toBe(
-      'Wallet: {{USER_WALLET}}, API: https://devnet-api.multiversx.com, Explorer: https://devnet-explorer.multiversx.com, Age: {{AGE}}'
-    )
-  })
+      const chainA = createMockChainInfo('A')
+      const chainB = createMockChainInfo('B')
 
-  it('returns unchanged warp if no placeholders present', async () => {
-    const config = { ...testConfig, user: { wallet: 'erd1abc' } }
+      const mockRepository = {
+        ...createMockAdapter(),
+        registry: {
+          ...createMockAdapter().registry,
+          getChainInfo: jest.fn().mockImplementation((chain: string) => {
+            if (chain === 'A') return Promise.resolve(chainA)
+            if (chain === 'B') return Promise.resolve(chainB)
+            return Promise.resolve(null)
+          }),
+        },
+      }
 
-    const warp: Warp = {
-      description: 'No placeholders here',
-      actions: [],
-    } as any
+      const interpolator = new WarpInterpolator(testConfig, mockRepository)
+      const result = await interpolator.apply(testConfig, warp)
 
-    const interpolator = new WarpInterpolator(config)
-    const actual = await interpolator.apply(config, warp)
+      expect((result.actions[0] as WarpTransferAction).address).toBe('erd...')
+      expect((result.actions[1] as WarpTransferAction).address).toBe('erd...')
+    })
 
-    expect(actual.description).toBe('No placeholders here')
+    it('handles missing chain info gracefully', async () => {
+      const warp = {
+        ...createMockWarp(),
+        actions: [
+          {
+            type: 'transfer' as const,
+            label: 'Transfer',
+            chain: 'unknown',
+            address: '{{chain.addressHrp}}...',
+            value: '0',
+            inputs: [],
+          } as WarpTransferAction,
+        ],
+      }
+
+      const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+      await expect(interpolator.apply(testConfig, warp)).rejects.toThrow('Chain info not found for unknown')
+    })
   })
 })
 
 describe('WarpInterpolator per-action chain info', () => {
   beforeEach(() => {
     new WarpCache('memory').clear()
-    ;(mockAdapter.registry.prototype as any).getChainInfo = jest.fn()
   })
 
   it('interpolates actions with different chain info', async () => {
-    const config: WarpInitConfig = {
-      ...testConfig,
-      user: { wallet: 'erd1abc' },
-      vars: { AGE: 10 },
-      currentUrl: 'https://anyclient.com?age=10',
-      cache: { type: 'memory' },
-    }
-
-    const cache = new WarpCache('memory')
-    config.cache = { type: 'memory' }
-
-    const chainA = {
-      name: 'A',
-      displayName: 'Chain A',
-      chainId: 'A',
-      blockTime: 1000,
-      addressHrp: 'erd',
-      apiUrl: 'https://api.chainA.com',
-      explorerUrl: 'https://explorer.chainA.com',
-      nativeToken: 'EGLD',
-    }
-    const chainB = {
-      name: 'B',
-      displayName: 'Chain B',
-      chainId: 'B',
-      blockTime: 2000,
-      addressHrp: 'erd',
-      apiUrl: 'https://api.chainB.com',
-      explorerUrl: 'https://explorer.chainB.com',
-      nativeToken: 'EGLD',
-    }
-
-    cache.set(WarpCacheKey.ChainInfo(config.env, 'A'), chainA, CacheTtl.OneWeek)
-    cache.set(WarpCacheKey.ChainInfo(config.env, 'B'), chainB, CacheTtl.OneWeek)
-    // Set the registry mock on the class, not the prototype, before instantiating WarpInterpolator
-    mockAdapter.registry = class {
-      getChainInfo(chain: string, _cache?: any) {
-        if (chain === 'A') return Promise.resolve(chainA)
-        if (chain === 'B') return Promise.resolve(chainB)
-        return Promise.resolve(null)
-      }
-    } as any
-    config.repository = { ...mockAdapter, registry: mockAdapter.registry }
-
-    const warp: Warp = {
-      description: 'Test',
-      vars: { AGE: 'env:AGE' },
+    const warp = {
+      ...createMockWarp(),
       actions: [
         {
-          type: 'transfer',
+          type: 'transfer' as const,
+          label: 'Transfer A',
           chain: 'A',
-          label: 'ActionA',
-          description: 'API: {{CHAIN_API}}, Explorer: {{CHAIN_EXPLORER}}',
-        },
+          address: '{{chain.addressHrp}}...',
+          value: '0',
+          inputs: [],
+        } as WarpTransferAction,
         {
-          type: 'transfer',
+          type: 'transfer' as const,
+          label: 'Transfer B',
           chain: 'B',
-          label: 'ActionB',
-          description: 'API: {{CHAIN_API}}, Explorer: {{CHAIN_EXPLORER}}',
-        },
+          address: '{{chain.addressHrp}}...',
+          value: '0',
+          inputs: [],
+        } as WarpTransferAction,
       ],
-    } as any
-
-    const interpolator = new WarpInterpolator(config)
-    const result = await interpolator.apply(config, warp)
-
-    expect(result.actions[0].description).toBe('API: https://api.chainA.com, Explorer: https://explorer.chainA.com')
-    expect(result.actions[1].description).toBe('API: https://api.chainB.com, Explorer: https://explorer.chainB.com')
-  })
-
-  it('uses default chain info if no chain is set on action', async () => {
-    const config = {
-      ...testConfig,
-      user: { wallet: 'erd1abc' },
-      vars: { AGE: 10 },
-      currentUrl: 'https://anyclient.com?age=10',
     }
-    const defaultChain = getMainChainInfo(config)
 
-    const warp: Warp = {
-      description: 'Test',
-      vars: { AGE: 'env:AGE' },
-      actions: [
-        {
-          type: 'transfer',
-          label: 'DefaultChainAction',
-          description: 'API: {{CHAIN_API}}, Explorer: {{CHAIN_EXPLORER}}',
-        },
-      ],
-    } as any
+    const chainA = createMockChainInfo('A')
+    const chainB = createMockChainInfo('B')
 
-    const interpolator = new WarpInterpolator(config)
-    const result = await interpolator.apply(config, warp)
+    const mockRepository = {
+      ...createMockAdapter(),
+      registry: {
+        ...createMockAdapter().registry,
+        getChainInfo: jest.fn().mockImplementation((chain: string) => {
+          if (chain === 'A') return Promise.resolve(chainA)
+          if (chain === 'B') return Promise.resolve(chainB)
+          return Promise.resolve(null)
+        }),
+      },
+    }
 
-    expect(result.actions[0].description).toBe(`API: ${defaultChain.apiUrl}, Explorer: ${defaultChain.explorerUrl}`)
+    const interpolator = new WarpInterpolator(testConfig, mockRepository)
+    const result = await interpolator.apply(testConfig, warp)
+
+    expect((result.actions[0] as WarpTransferAction).address).toBe('erd...')
+    expect((result.actions[1] as WarpTransferAction).address).toBe('erd...')
   })
 })

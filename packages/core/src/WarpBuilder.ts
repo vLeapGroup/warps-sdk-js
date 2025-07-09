@@ -1,19 +1,8 @@
 import { getLatestProtocolIdentifier, toPreviewText } from './helpers'
-import {
-  AdapterWarpBuilder,
-  Warp,
-  WarpAction,
-  WarpAdapterGenericRemoteTransaction,
-  WarpAdapterGenericTransaction,
-  WarpCacheConfig,
-  WarpInitConfig,
-} from './types'
+import { Warp, WarpAction, WarpInitConfig } from './types'
 import { WarpValidator } from './WarpValidator'
 
 export class WarpBuilder {
-  private config: WarpInitConfig
-  private adapterBuilder: AdapterWarpBuilder
-
   private pendingWarp: Warp = {
     protocol: getLatestProtocolIdentifier('warp'),
     name: '',
@@ -23,22 +12,7 @@ export class WarpBuilder {
     actions: [],
   }
 
-  constructor(config: WarpInitConfig) {
-    this.config = config
-    this.adapterBuilder = new config.repository.builder(config)
-  }
-
-  createInscriptionTransaction(warp: Warp): WarpAdapterGenericTransaction {
-    return this.adapterBuilder.createInscriptionTransaction(warp)
-  }
-
-  async createFromTransaction(tx: WarpAdapterGenericRemoteTransaction, validate = false): Promise<Warp> {
-    return this.adapterBuilder.createFromTransaction(tx, validate)
-  }
-
-  async createFromTransactionHash(hash: string, cache?: WarpCacheConfig): Promise<Warp | null> {
-    return this.adapterBuilder.createFromTransactionHash(hash, cache)
-  }
+  constructor(private config: WarpInitConfig) {}
 
   async createFromRaw(encoded: string, validate = true): Promise<Warp> {
     const warp = JSON.parse(encoded) as Warp

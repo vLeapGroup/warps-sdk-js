@@ -8,9 +8,9 @@ import {
   WarpActionInput,
   WarpActionInputType,
   WarpChainInfo,
+  WarpClientConfig,
   WarpContractAction,
   WarpExecutable,
-  WarpInitConfig,
   WarpTransferAction,
 } from './types'
 import { CacheTtl, WarpCache, WarpCacheKey } from './WarpCache'
@@ -18,14 +18,12 @@ import { WarpSerializer } from './WarpSerializer'
 import { WarpUtils } from './WarpUtils'
 
 export class WarpFactory {
-  private config: WarpInitConfig
   private url: URL
   private serializer: WarpSerializer
   private cache: WarpCache
 
-  constructor(config: WarpInitConfig) {
+  constructor(private config: WarpClientConfig) {
     if (!config.currentUrl) throw new Error('WarpFactory: currentUrl config not set')
-    this.config = config
     this.url = new URL(config.currentUrl)
     this.serializer = new WarpSerializer()
     this.cache = new WarpCache(config.cache?.type)
@@ -161,8 +159,7 @@ export class WarpFactory {
   public async preprocessInput(chain: WarpChainInfo, input: string): Promise<string> {
     try {
       const [type, value] = input.split(WarpConstants.ArgParamsSeparator, 2) as [WarpActionInputType, string]
-      const executorClass = this.config.adapters.find((a) => a.chain === chain.name)?.executor
-      const executor = executorClass ? new executorClass(this.config) : null
+      const executor = this.config.adapters.find((a) => a.chain === chain.name)?.executor
       if (!executor) return input
       return executor.preprocessInput(chain, input, type, value)
     } catch (e) {
