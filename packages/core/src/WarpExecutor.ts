@@ -1,4 +1,4 @@
-import { applyResultsToMessages, extractCollectResults, getNextInfo, getWarpActionByIndex } from './helpers'
+import { applyResultsToMessages, extractCollectResults, findWarpExecutableAction, getNextInfo, getWarpActionByIndex } from './helpers'
 import {
   Warp,
   WarpActionIndex,
@@ -11,7 +11,6 @@ import {
 import { WarpFactory } from './WarpFactory'
 import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
-import { WarpUtils } from './WarpUtils'
 
 export type ExecutionHandlers = {
   onExecuted?: (result: WarpExecution) => void
@@ -31,7 +30,7 @@ export class WarpExecutor {
   }
 
   async execute(warp: Warp, inputs: string[]): Promise<[WarpAdapterGenericTransaction | null, WarpChainInfo | null]> {
-    const [action, actionIndex] = this.factory.determineAction(warp, inputs)
+    const [action, actionIndex] = findWarpExecutableAction(warp)
 
     if (action.type === 'collect') {
       const results = await this.executeCollect(warp, actionIndex, inputs)
@@ -51,7 +50,7 @@ export class WarpExecutor {
   async evaluateResults(warp: Warp, chain: WarpChainInfo, tx: WarpAdapterGenericRemoteTransaction): Promise<void> {
     const adapterLoader = this.config.adapters.find((a) => a.chain.toLowerCase() === chain.name.toLowerCase())
     if (!adapterLoader) throw new Error(`No adapter registered for chain: ${chain.name}`)
-    const result = (await adapterLoader.results.getTransactionExecutionResults(warp, 1, tx)) as WarpExecution
+    const result = (await adapterLoader.results.getTransactionExecutionResults(warp, tx)) as WarpExecution
     this.handlers?.onExecuted?.(result)
   }
 
@@ -59,7 +58,7 @@ export class WarpExecutor {
     const collectAction = getWarpActionByIndex(warp, action) as any | null
     if (!collectAction) throw new Error('WarpActionExecutor: Action not found')
 
-    const chain = await WarpUtils.getChainInfoForAction(this.config, collectAction)
+    const chain = await this.factory.getChainInfoForAction(collectAction)
     const preparedWarp = await this.interpolator.apply(this.config, warp)
     const resolvedInputs = await this.factory.getResolvedInputs(chain, collectAction, inputs)
     const modifiedInputs = this.factory.getModifiedInputs(resolvedInputs)

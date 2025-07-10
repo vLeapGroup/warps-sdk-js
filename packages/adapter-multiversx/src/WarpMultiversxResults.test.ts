@@ -247,7 +247,7 @@ describe('Result Helpers', () => {
         { input: warp.actions[0].inputs[0], value: 'string:abc' },
         { input: warp.actions[0].inputs[1], value: 'string:xyz' },
       ]
-      const { results } = await subject.extractContractResults(warp, 1, tx, inputs)
+      const { results } = await subject.extractContractResults(warp, tx, inputs)
       expect(results.FOO).toBe('abc')
       expect(results.BAR).toBe('xyz')
     })
@@ -276,7 +276,7 @@ describe('Result Helpers', () => {
       const action = warp.actions[0]
       const tx = new TransactionOnNetwork()
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:aliased' }]
-      const { results } = await subject.extractContractResults(warp, 1, tx, inputs)
+      const { results } = await subject.extractContractResults(warp, tx, inputs)
       expect(results.FOO).toBe('aliased')
     })
 
@@ -304,7 +304,7 @@ describe('Result Helpers', () => {
       const action = warp.actions[0]
       const tx = new TransactionOnNetwork()
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:abc' }]
-      const { results } = await subject.extractContractResults(warp, 1, tx, inputs)
+      const { results } = await subject.extractContractResults(warp, tx, inputs)
       expect(results.BAR).toBeNull()
     })
   })
@@ -321,7 +321,7 @@ describe('Result Helpers', () => {
       const action = { type: 'contract' } as WarpContractAction
       const tx = new TransactionOnNetwork()
 
-      const { values, results } = await subject.extractContractResults(warp, 1, tx, [])
+      const { values, results } = await subject.extractContractResults(warp, tx, [])
 
       expect(values).toEqual([])
       expect(results).toEqual({})
@@ -376,7 +376,7 @@ describe('Result Helpers', () => {
         ],
       })
 
-      const { values, results } = await subject.extractContractResults(warp, 1, tx, [])
+      const { values, results } = await subject.extractContractResults(warp, tx, [])
 
       expect(results.TOKEN_ID).toBe('DEF-123456')
       expect(results.DURATION).toBeNull()
@@ -416,7 +416,7 @@ describe('Result Helpers', () => {
         },
       } as Warp
 
-      const { results } = await subject.extractContractResults(warp, 1, tx, [])
+      const { results } = await subject.extractContractResults(warp, tx, [])
 
       expect(results.FIRST_OUT).toBe('22')
       expect(results.SECOND_OUT).toBeNull()

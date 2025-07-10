@@ -10,7 +10,6 @@ import {
   applyResultsToMessages,
   evaluateResultsCommon,
   getNextInfo,
-  getWarpActionByIndex,
   parseResultsOutIndex,
   ResolvedInput,
   Warp,
@@ -23,6 +22,7 @@ import {
   WarpExecutionResults,
   WarpInitConfig,
 } from '@vleap/warps'
+import { findWarpExecutableAction } from '@vleap/warps/src/helpers'
 import { WarpMultiversxAbi } from './WarpMultiversxAbi'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
 
@@ -37,11 +37,13 @@ export class WarpMultiversxResults implements AdapterWarpResults {
     this.cache = new WarpCache(config.cache?.type)
   }
 
-  async getTransactionExecutionResults(warp: Warp, actionIndex: WarpActionIndex, tx: TransactionOnNetwork): Promise<WarpExecution> {
+  async getTransactionExecutionResults(warp: Warp, tx: TransactionOnNetwork): Promise<WarpExecution> {
+    const [action, actionIndex] = findWarpExecutableAction(warp)
+
     // Restore inputs via cache as transactions are broadcasted and processed asynchronously
     const inputs: ResolvedInput[] = this.cache.get(WarpCacheKey.WarpExecutable(this.config.env, warp.meta?.hash || '', actionIndex)) ?? []
 
-    const results = await this.extractContractResults(warp, actionIndex, tx, inputs)
+    const results = await this.extractContractResults(warp, tx, inputs)
     const next = getNextInfo(this.config, warp, actionIndex, results)
     const messages = applyResultsToMessages(warp, results.results)
 
@@ -60,11 +62,10 @@ export class WarpMultiversxResults implements AdapterWarpResults {
 
   async extractContractResults(
     warp: Warp,
-    actionIndex: WarpActionIndex,
     tx: TransactionOnNetwork,
     inputs: ResolvedInput[]
   ): Promise<{ values: any[]; results: WarpExecutionResults }> {
-    const action = getWarpActionByIndex(warp, actionIndex) as WarpContractAction
+    const [action, actionIndex] = findWarpExecutableAction(warp) as [WarpContractAction, WarpActionIndex]
     let values: any[] = []
     let results: WarpExecutionResults = {}
     if (!warp.results || action.type !== 'contract') {

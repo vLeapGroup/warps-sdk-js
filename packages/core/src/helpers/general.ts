@@ -1,5 +1,5 @@
 import { WarpConfig, WarpProtocolVersions } from '../config'
-import { ProtocolName, Warp, WarpChainInfo, WarpInitConfig } from '../types'
+import { ProtocolName, Warp, WarpAction, WarpActionIndex, WarpChainInfo, WarpInitConfig } from '../types'
 
 export const getMainChainInfo = (config: WarpInitConfig): WarpChainInfo => ({
   name: WarpConfig.MainChain.Name,
@@ -22,6 +22,15 @@ export const getLatestProtocolIdentifier = (name: ProtocolName): string => {
 }
 
 export const getWarpActionByIndex = (warp: Warp, index: number) => warp?.actions[index - 1]
+
+export const findWarpExecutableAction = (warp: Warp): [WarpAction, WarpActionIndex] => {
+  warp.actions.forEach((action, index) => {
+    if (action.type === 'link') return
+    return [action, index]
+  })
+
+  return [getWarpActionByIndex(warp, 1), 1]
+}
 
 export const toTypedChainInfo = (chainInfo: any): WarpChainInfo => ({
   name: chainInfo.name.toString(),

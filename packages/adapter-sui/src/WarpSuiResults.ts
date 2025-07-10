@@ -3,12 +3,14 @@ import {
   AdapterWarpResults,
   applyResultsToMessages,
   evaluateResultsCommon,
+  findWarpExecutableAction,
   getNextInfo,
   parseResultsOutIndex,
   ResolvedInput,
   Warp,
   WarpActionIndex,
   WarpConstants,
+  WarpContractAction,
   WarpExecution,
   WarpExecutionResults,
   WarpInitConfig,
@@ -24,7 +26,8 @@ export class WarpSuiResults implements AdapterWarpResults {
     this.client = new SuiClient({ url: String(config.currentUrl) })
   }
 
-  async getTransactionExecutionResults(warp: Warp, actionIndex: WarpActionIndex, tx: any): Promise<WarpExecution> {
+  async getTransactionExecutionResults(warp: Warp, tx: any): Promise<WarpExecution> {
+    const [action, actionIndex] = findWarpExecutableAction(warp) as [WarpContractAction, WarpActionIndex]
     // SUI: tx is a TransactionBlockResponse
     const results = await this.extractContractResults(warp, actionIndex, tx, [])
     const next = getNextInfo(this.config, warp, actionIndex, results)

@@ -1,12 +1,12 @@
 import { WarpConstants } from './constants'
-import { getWarpActionByIndex, shiftBigintBy } from './helpers'
+import { getMainChainInfo, getWarpActionByIndex, shiftBigintBy } from './helpers'
 import {
   ResolvedInput,
   Warp,
   WarpAction,
-  WarpActionIndex,
   WarpActionInput,
   WarpActionInputType,
+  WarpChain,
   WarpChainInfo,
   WarpClientConfig,
   WarpContractAction,
@@ -15,7 +15,6 @@ import {
 } from './types'
 import { CacheTtl, WarpCache, WarpCacheKey } from './WarpCache'
 import { WarpSerializer } from './WarpSerializer'
-import { WarpUtils } from './WarpUtils'
 
 export class WarpFactory {
   private url: URL
@@ -32,7 +31,7 @@ export class WarpFactory {
   async createExecutable(warp: Warp, actionIndex: number, inputs: string[]): Promise<WarpExecutable> {
     const action = getWarpActionByIndex(warp, actionIndex) as WarpTransferAction | WarpContractAction
     if (!action) throw new Error('WarpFactory: Action not found')
-    const chain = await WarpUtils.getChainInfoForAction(this.config, action, inputs)
+    const chain = await this.getChainInfoForAction(action, inputs)
 
     const resolvedInputs = await this.getResolvedInputs(chain, action, inputs)
     const modifiedInputs = this.getModifiedInputs(resolvedInputs)
@@ -87,16 +86,12 @@ export class WarpFactory {
     return executable
   }
 
-  determineAction(warp: Warp, inputs: string[]): [WarpAction, WarpActionIndex] {
-    const available = warp.actions.filter((action) => action.type !== 'link')
-    const preferredChain = this.config.preferredChain?.toLowerCase()
-    let index = 1
-    if (preferredChain) {
-      const preferred = available.findIndex((action) => action.chain?.toLowerCase() === preferredChain)
-      if (preferred !== -1) index = preferred
+  async getChainInfoForAction(action: WarpAction, inputs?: string[]): Promise<WarpChainInfo> {
+    if (inputs) {
+      const chainFromInputs = await this.tryGetChainFromInputs(action, inputs)
+      if (chainFromInputs) return chainFromInputs
     }
-
-    return [getWarpActionByIndex(warp, index), index]
+    return this.getDefaultChainInfo(action)
   }
 
   public async getResolvedInputs(chain: WarpChainInfo, action: WarpAction, inputArgs: string[]): Promise<ResolvedInput[]> {
@@ -177,5 +172,30 @@ export class WarpFactory {
     })
 
     return args
+  }
+
+  private async tryGetChainFromInputs(action: WarpAction, inputs: string[]): Promise<WarpChainInfo | null> {
+    const chainPositionIndex = action.inputs?.findIndex((i) => i.position === 'chain')
+    if (chainPositionIndex === -1 || chainPositionIndex === undefined) return null
+
+    const chainInput = inputs[chainPositionIndex]
+    if (!chainInput) throw new Error('WarpUtils: Chain input not found')
+
+    const serializer = new WarpSerializer()
+    const chainValue = serializer.stringToNative(chainInput)[1] as WarpChain
+
+    const chainInfo = await this.config.repository.registry.getChainInfo(chainValue)
+    if (!chainInfo) throw new Error(`WarpUtils: Chain info not found for ${chainValue}`)
+
+    return chainInfo
+  }
+
+  private async getDefaultChainInfo(action: WarpAction): Promise<WarpChainInfo> {
+    if (!action.chain) return getMainChainInfo(this.config)
+
+    const chainInfo = await this.config.repository.registry.getChainInfo(action.chain, { ttl: CacheTtl.OneWeek })
+    if (!chainInfo) throw new Error(`WarpUtils: Chain info not found for ${action.chain}`)
+
+    return chainInfo
   }
 }

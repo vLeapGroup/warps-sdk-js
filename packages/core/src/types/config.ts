@@ -3,16 +3,7 @@ import { WarpCacheType } from './cache'
 import { WarpChainEnv } from './general'
 import { WarpRegistryInfo } from './registry'
 import { WarpExecution } from './results'
-import {
-  BaseWarpActionInputType,
-  Warp,
-  WarpActionIndex,
-  WarpActionInputType,
-  WarpChain,
-  WarpChainInfo,
-  WarpExecutable,
-  WarpNativeValue,
-} from './warp'
+import { BaseWarpActionInputType, Warp, WarpActionInputType, WarpChain, WarpChainInfo, WarpExecutable, WarpNativeValue } from './warp'
 
 export type WarpClientConfig = WarpInitConfig & {
   repository: Adapter
@@ -21,7 +12,6 @@ export type WarpClientConfig = WarpInitConfig & {
 
 export type WarpInitConfig = {
   env: WarpChainEnv
-  preferredChain?: WarpChain
   clientUrl?: string
   currentUrl?: string
   vars?: Record<string, string | number>
@@ -76,7 +66,7 @@ export interface AdapterWarpExecutor {
 }
 
 export interface AdapterWarpResults {
-  getTransactionExecutionResults(warp: Warp, actionIndex: WarpActionIndex, tx: WarpAdapterGenericRemoteTransaction): Promise<WarpExecution>
+  getTransactionExecutionResults(warp: Warp, tx: WarpAdapterGenericRemoteTransaction): Promise<WarpExecution>
 }
 
 export interface AdapterWarpSerializer {

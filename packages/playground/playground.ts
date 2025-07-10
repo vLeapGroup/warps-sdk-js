@@ -12,7 +12,7 @@ import { Keypair } from '@mysten/sui/dist/cjs/cryptography'
 import { getFaucetHost, requestSuiFromFaucetV2 } from '@mysten/sui/faucet'
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519'
 import { SerialTransactionExecutor, Transaction as SuiTransaction } from '@mysten/sui/transactions'
-import { getWarpActionByIndex, WarpClient, WarpClientConfig, WarpInitConfig, WarpUtils } from '@vleap/warps'
+import { findWarpExecutableAction, WarpClient, WarpClientConfig, WarpInitConfig } from '@vleap/warps'
 import { getMultiversxAdapter } from '@vleap/warps-adapter-multiversx'
 import { getSuiAdapter } from '@vleap/warps-adapter-sui'
 import * as fs from 'fs'
@@ -49,9 +49,8 @@ const runWarp = async (warpFile: string) => {
   const client = new WarpClient(clientConfig)
   const warp = await client.createBuilder().createFromRaw(warpRaw)
 
-  const actionIndex = 1
-  const action = getWarpActionByIndex(warp, actionIndex)
-  const chain = await WarpUtils.getChainInfoForAction(clientConfig, action, warpInputs)
+  const [action] = findWarpExecutableAction(warp)
+  const chain = await client.factory.getChainInfoForAction(action, warpInputs)
 
   if (chain.name === 'multiversx') {
     config.user.wallet = (await getMultiversxWallet()).address
