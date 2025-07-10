@@ -9,6 +9,7 @@ import {
   AdapterWarpResults,
   applyResultsToMessages,
   evaluateResultsCommon,
+  findWarpExecutableAction,
   getNextInfo,
   parseResultsOutIndex,
   ResolvedInput,
@@ -22,7 +23,6 @@ import {
   WarpExecutionResults,
   WarpInitConfig,
 } from '@vleap/warps'
-import { findWarpExecutableAction } from '@vleap/warps/src/helpers'
 import { WarpMultiversxAbi } from './WarpMultiversxAbi'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
 
