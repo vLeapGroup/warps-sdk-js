@@ -47,6 +47,7 @@ export type Adapter = {
   results: AdapterWarpResults
   serializer: AdapterWarpSerializer
   registry: AdapterWarpRegistry
+  explorer: (chainInfo: WarpChainInfo) => AdapterWarpExplorer
 }
 
 export type WarpAdapterGenericTransaction = any
@@ -95,4 +96,9 @@ export interface AdapterWarpRegistry {
   setChain(info: WarpChainInfo): Promise<WarpAdapterGenericTransaction>
   removeChain(chain: WarpChain): Promise<WarpAdapterGenericTransaction>
   fetchBrand(hash: string, cache?: WarpCacheConfig): Promise<WarpBrand | null>
+}
+
+export interface AdapterWarpExplorer {
+  getAccountUrl(address: string): string
+  getTransactionUrl(hash: string): string
 }

@@ -1,5 +1,10 @@
 import { WarpConfig, WarpProtocolVersions } from '../config'
-import { ProtocolName, Warp, WarpAction, WarpActionIndex, WarpChainInfo, WarpInitConfig } from '../types'
+import { Adapter, ProtocolName, Warp, WarpAction, WarpActionIndex, WarpChainInfo, WarpClientConfig, WarpInitConfig } from '../types'
+
+export const findWarpAdapter = (config: WarpClientConfig, chainInfo: WarpChainInfo): Adapter => {
+  const adapter = config.adapters.find((a) => a.chain.toLowerCase() === chainInfo.name.toLowerCase())
+  return adapter || config.adapters[0]
+}
 
 export const getMainChainInfo = (config: WarpInitConfig): WarpChainInfo => ({
   name: WarpConfig.MainChain.Name,
@@ -11,8 +16,6 @@ export const getMainChainInfo = (config: WarpInitConfig): WarpChainInfo => ({
   explorerUrl: WarpConfig.MainChain.ExplorerUrl(config.env),
   nativeToken: WarpConfig.MainChain.NativeToken,
 })
-
-export const getChainExplorerUrl = (chain: WarpChainInfo, path?: string) => chain.explorerUrl + (path ? '/' + path : '')
 
 export const getLatestProtocolIdentifier = (name: ProtocolName): string => {
   if (name === 'warp') return `warp:${WarpProtocolVersions.Warp}`
