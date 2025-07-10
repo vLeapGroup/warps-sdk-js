@@ -1,10 +1,13 @@
+import { findWarpAdapter } from './helpers'
 import {
+  AdapterWarpExplorer,
   AdapterWarpRegistry,
   AdapterWarpResults,
   Warp,
   WarpAdapterGenericRemoteTransaction,
   WarpAdapterGenericTransaction,
   WarpCacheConfig,
+  WarpChainInfo,
   WarpClientConfig,
 } from './types'
 import { WarpBuilder } from './WarpBuilder'
@@ -49,12 +52,16 @@ export class WarpClient {
     return this.config.repository.builder.createFromTransactionHash(hash, cache)
   }
 
-  get factory(): WarpFactory {
-    return new WarpFactory(this.config)
+  getExplorer(chain: WarpChainInfo): AdapterWarpExplorer {
+    return findWarpAdapter(this.config, chain).explorer(chain)
   }
 
-  get results(): AdapterWarpResults {
-    return this.config.repository.results
+  getResults(chain: WarpChainInfo): AdapterWarpResults {
+    return findWarpAdapter(this.config, chain).results
+  }
+
+  get factory(): WarpFactory {
+    return new WarpFactory(this.config)
   }
 
   get registry(): AdapterWarpRegistry {
