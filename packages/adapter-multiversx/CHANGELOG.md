@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.8
+
+### Patch Changes
+
+- ce0daea: fix import
+
 ## 0.2.0-alpha.7
 
 ### Minor Changes
