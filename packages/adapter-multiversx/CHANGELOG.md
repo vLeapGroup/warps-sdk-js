@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.7
+
+### Minor Changes
+
+- 924b053: further rearch
+
+### Patch Changes
+
+- Updated dependencies [924b053]
+  - @vleap/warps@3.0.0-alpha.44
+
 ## 0.2.0-alpha.6
 
 ### Minor Changes
