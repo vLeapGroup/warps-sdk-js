@@ -13,13 +13,22 @@ import { WarpFactory } from './WarpFactory'
 import { DetectionResult, WarpLinkDetecter } from './WarpLinkDetecter'
 
 export class WarpClient {
-  constructor(public readonly config: WarpClientConfig) {}
+  constructor(private config: WarpClientConfig) {}
+
+  getConfig(): WarpClientConfig {
+    return this.config
+  }
+
+  setConfig(config: WarpClientConfig): WarpClient {
+    this.config = config
+    return this
+  }
 
   createBuilder(): WarpBuilder {
     return new WarpBuilder(this.config)
   }
 
-  createExecutor(handlers: ExecutionHandlers): WarpExecutor {
+  createExecutor(handlers?: ExecutionHandlers): WarpExecutor {
     return new WarpExecutor(this.config, handlers)
   }
 
