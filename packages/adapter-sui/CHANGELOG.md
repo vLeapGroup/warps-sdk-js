@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.8
+
+### Minor Changes
+
+- 1a32114: add chain explorers
+
+### Patch Changes
+
+- Updated dependencies [1a32114]
+  - @vleap/warps@3.0.0-alpha.45
+
 ## 0.2.0-alpha.7
 
 ### Minor Changes

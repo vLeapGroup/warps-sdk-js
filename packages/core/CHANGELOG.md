@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.45
+
+### Minor Changes
+
+- 1a32114: add chain explorers
+
 ## 3.0.0-alpha.44
 
 ### Minor Changes
