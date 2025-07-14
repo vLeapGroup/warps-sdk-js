@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.46
+
+### Minor Changes
+
+- 66cd2fd: expand registry multi-chain
+
 ## 3.0.0-alpha.45
 
 ### Minor Changes

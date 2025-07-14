@@ -1,5 +1,18 @@
 # @warps/playground
 
+## 0.2.0-alpha.29
+
+### Minor Changes
+
+- 66cd2fd: expand registry multi-chain
+
+### Patch Changes
+
+- Updated dependencies [66cd2fd]
+  - @vleap/warps-adapter-multiversx@0.2.0-alpha.10
+  - @vleap/warps-adapter-sui@0.2.0-alpha.9
+  - @vleap/warps@3.0.0-alpha.46
+
 ## 0.2.0-alpha.28
 
 ### Minor Changes

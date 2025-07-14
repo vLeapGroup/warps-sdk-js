@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.9
+
+### Minor Changes
+
+- 66cd2fd: expand registry multi-chain
+
+### Patch Changes
+
+- Updated dependencies [66cd2fd]
+  - @vleap/warps@3.0.0-alpha.46
+
 ## 0.2.0-alpha.8
 
 ### Minor Changes
