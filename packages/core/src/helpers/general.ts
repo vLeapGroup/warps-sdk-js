@@ -1,12 +1,25 @@
 import { WarpConfig, WarpProtocolVersions } from '../config'
-import { Adapter, ProtocolName, Warp, WarpAction, WarpActionIndex, WarpChainInfo, WarpClientConfig, WarpInitConfig } from '../types'
+import { Adapter, ProtocolName, Warp, WarpAction, WarpActionIndex, WarpChain, WarpChainInfo, WarpClientConfig } from '../types'
 
-export const findWarpAdapter = (config: WarpClientConfig, chainInfo: WarpChainInfo): Adapter => {
-  const adapter = config.adapters.find((a) => a.chain.toLowerCase() === chainInfo.name.toLowerCase())
-  return adapter || config.adapters[0]
+export const findWarpDefaultAdapter = (adapters: Adapter[]): Adapter => {
+  const adapter = adapters.find((a) => a.chain.toLowerCase() === WarpConfig.MainChain.Name.toLowerCase())
+  if (!adapter) throw new Error(`Adapter not found for chain: ${WarpConfig.MainChain.Name}`)
+  return adapter
 }
 
-export const getMainChainInfo = (config: WarpInitConfig): WarpChainInfo => ({
+export const findWarpAdapterForChain = (chain: WarpChain, adapters: Adapter[]): Adapter => {
+  const adapter = adapters.find((a) => a.chain.toLowerCase() === chain.toLowerCase())
+  if (!adapter) throw new Error(`Adapter not found for chain: ${chain}`)
+  return adapter
+}
+
+export const findWarpAdapterByPrefix = (prefix: string, adapters: Adapter[]): Adapter => {
+  const adapter = adapters.find((a) => a.prefix.toLowerCase() === prefix.toLowerCase())
+  if (!adapter) throw new Error(`Adapter not found for prefix: ${prefix}`)
+  return adapter
+}
+
+export const getMainChainInfo = (config: WarpClientConfig): WarpChainInfo => ({
   name: WarpConfig.MainChain.Name,
   displayName: WarpConfig.MainChain.DisplayName,
   chainId: WarpConfig.MainChain.ChainId(config.env),

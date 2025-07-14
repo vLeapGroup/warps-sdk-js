@@ -7,18 +7,16 @@ import {
   WarpCache,
   WarpCacheConfig,
   WarpCacheKey,
-  WarpInitConfig,
+  WarpClientConfig,
   WarpLogger,
 } from '@vleap/warps'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
 export class WarpMultiversxBuilder implements AdapterWarpBuilder {
-  private config: WarpInitConfig
   private cache: WarpCache
   private core: WarpBuilder
 
-  constructor(config: WarpInitConfig) {
-    this.config = config
+  constructor(private config: WarpClientConfig) {
     this.cache = new WarpCache(config.cache?.type)
     this.core = new WarpBuilder(config)
   }

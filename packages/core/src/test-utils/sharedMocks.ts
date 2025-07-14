@@ -1,4 +1,4 @@
-import { WarpInitConfig, WarpTransferAction } from '../types'
+import { WarpClientConfig, WarpTransferAction } from '../types'
 
 export const createMockChainInfo = (chainName: string = 'multiversx') => ({
   name: chainName,
@@ -13,6 +13,14 @@ export const createMockChainInfo = (chainName: string = 'multiversx') => ({
 
 export const createMockAdapter = () => ({
   chain: 'testchain',
+  prefix: 'test',
+  explorer: () => ({
+    getTransactionUrl: () => '',
+    getAddressUrl: () => '',
+    getTokenUrl: () => '',
+    getBlockUrl: () => '',
+    getAccountUrl: () => '',
+  }),
   builder: {
     createInscriptionTransaction() {
       return {}
@@ -122,14 +130,12 @@ export const createMockAdapter = () => ({
   },
 })
 
-export const createMockConfig = (overrides: Partial<WarpInitConfig> = {}): WarpInitConfig => ({
+export const createMockConfig = (overrides: Partial<WarpClientConfig> = {}): WarpClientConfig => ({
   env: 'devnet',
   user: {
     wallet: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
   },
   currentUrl: 'https://example.com',
-  repository: createMockAdapter(),
-  adapters: [],
   ...overrides,
 })
 

@@ -1,4 +1,4 @@
-import { Adapter, WarpInitConfig } from '@vleap/warps'
+import { Adapter, WarpClientConfig } from '@vleap/warps'
 import { WarpChainInfo } from '@vleap/warps/src/types'
 import { WarpMultiversxBuilder } from './WarpMultiversxBuilder'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
@@ -7,9 +7,10 @@ import { WarpMultiversxRegistry } from './WarpMultiversxRegistry'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
 
-export const getMultiversxAdapter = (config: WarpInitConfig): Adapter => {
+export const getMultiversxAdapter = (config: WarpClientConfig): Adapter => {
   return {
     chain: 'multiversx',
+    prefix: 'mvx',
     builder: new WarpMultiversxBuilder(config),
     executor: new WarpMultiversxExecutor(config),
     results: new WarpMultiversxResults(config),

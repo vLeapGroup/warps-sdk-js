@@ -5,12 +5,7 @@ import { WarpRegistryInfo } from './registry'
 import { WarpExecution } from './results'
 import { BaseWarpActionInputType, Warp, WarpActionInputType, WarpChain, WarpChainInfo, WarpExecutable, WarpNativeValue } from './warp'
 
-export type WarpClientConfig = WarpInitConfig & {
-  repository: Adapter
-  adapters: Adapter[]
-}
-
-export type WarpInitConfig = {
+export type WarpClientConfig = {
   env: WarpChainEnv
   clientUrl?: string
   currentUrl?: string
@@ -42,6 +37,7 @@ export type WarpCacheConfig = {
 
 export type Adapter = {
   chain: WarpChain
+  prefix: string
   builder: AdapterWarpBuilder
   executor: AdapterWarpExecutor
   results: AdapterWarpResults

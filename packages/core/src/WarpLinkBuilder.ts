@@ -2,12 +2,12 @@ import QRCodeStyling from 'qr-code-styling'
 import { WarpConfig } from './config'
 import { WarpConstants } from './constants'
 import { extractIdentifierInfoFromUrl, getWarpInfoFromIdentifier } from './helpers/identifier'
-import { WarpIdType, WarpInitConfig } from './types'
+import { WarpClientConfig, WarpIdType } from './types'
 
 // Example Link (Transaction Hash as ID): https://usewarp.to/to?warp=hash%3A<MYHASH>
 // Example Link (Alias as ID): https://usewarp.to/to?warp=alias%3A<MYALIAS>
 export class WarpLinkBuilder {
-  constructor(private config: WarpInitConfig) {
+  constructor(private config: WarpClientConfig) {
     this.config = config
   }
 

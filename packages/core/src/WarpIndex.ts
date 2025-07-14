@@ -1,8 +1,8 @@
-import { WarpInitConfig, WarpSearchHit, WarpSearchResult } from './types'
+import { WarpClientConfig, WarpSearchHit, WarpSearchResult } from './types'
 import { WarpLogger } from './WarpLogger'
 
 export class WarpIndex {
-  constructor(private config: WarpInitConfig) {}
+  constructor(private config: WarpClientConfig) {}
 
   async search(query: string, params?: Record<string, any>, headers?: Record<string, string>): Promise<WarpSearchHit[]> {
     if (!this.config.index?.url) throw new Error('WarpIndex: Index URL is not set')

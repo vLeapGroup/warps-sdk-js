@@ -18,8 +18,8 @@ import {
   WarpCacheKey,
   WarpChain,
   WarpChainInfo,
+  WarpClientConfig,
   WarpConfig,
-  WarpInitConfig,
   WarpLogger,
   WarpRegistryConfigInfo,
   WarpRegistryInfo,
@@ -30,13 +30,11 @@ import { string_value, u32_value } from './utils.codec'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
 export class WarpMultiversxRegistry implements AdapterWarpRegistry {
-  private config: WarpInitConfig
   private cache: WarpCache
 
   public registryConfig: WarpRegistryConfigInfo
 
-  constructor(config: WarpInitConfig) {
-    this.config = config
+  constructor(private config: WarpClientConfig) {
     this.cache = new WarpCache(config.cache?.type)
     this.registryConfig = {
       unitPrice: BigInt(0),

@@ -7,10 +7,10 @@ import {
   getWarpActionByIndex,
   WarpActionInputType,
   WarpChainInfo,
+  WarpClientConfig,
   WarpContractAction,
   WarpExecutable,
   WarpExecution,
-  WarpInitConfig,
   WarpQueryAction,
 } from '@vleap/warps'
 import { WarpSuiResults } from './WarpSuiResults'
@@ -21,7 +21,7 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
   private readonly results: WarpSuiResults
   private readonly client: SuiClient
 
-  constructor(private readonly config: WarpInitConfig) {
+  constructor(private readonly config: WarpClientConfig) {
     this.serializer = new WarpSuiSerializer()
     this.results = new WarpSuiResults(this.config)
     this.client = new SuiClient({ url: this.config.currentUrl! })

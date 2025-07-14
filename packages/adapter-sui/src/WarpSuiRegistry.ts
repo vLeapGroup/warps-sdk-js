@@ -1,7 +1,7 @@
-import { AdapterWarpRegistry, WarpBrand, WarpCacheConfig, WarpChain, WarpChainInfo, WarpInitConfig, WarpRegistryInfo } from '@vleap/warps'
+import { AdapterWarpRegistry, WarpBrand, WarpCacheConfig, WarpChain, WarpChainInfo, WarpClientConfig, WarpRegistryInfo } from '@vleap/warps'
 
 export class WarpSuiRegistry implements AdapterWarpRegistry {
-  constructor(private config: WarpInitConfig) {}
+  constructor(private config: WarpClientConfig) {}
 
   createWarpRegisterTransaction(txHash: string, alias?: string | null, brand?: string | null): any {
     throw new Error('Not implemented')

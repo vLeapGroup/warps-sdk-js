@@ -9,11 +9,11 @@ import {
   ResolvedInput,
   Warp,
   WarpActionIndex,
+  WarpClientConfig,
   WarpConstants,
   WarpContractAction,
   WarpExecution,
   WarpExecutionResults,
-  WarpInitConfig,
 } from '@vleap/warps'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
 
@@ -21,7 +21,7 @@ export class WarpSuiResults implements AdapterWarpResults {
   private readonly serializer: WarpSuiSerializer
   private readonly client: SuiClient
 
-  constructor(private readonly config: WarpInitConfig) {
+  constructor(private readonly config: WarpClientConfig) {
     this.serializer = new WarpSuiSerializer()
     this.client = new SuiClient({ url: String(config.currentUrl) })
   }

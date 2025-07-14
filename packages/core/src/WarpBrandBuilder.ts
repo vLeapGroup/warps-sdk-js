@@ -1,10 +1,10 @@
 import Ajv from 'ajv'
 import { WarpConfig } from './config'
 import { getLatestProtocolIdentifier } from './helpers'
-import { WarpBrand, WarpBrandColors, WarpBrandCta, WarpBrandUrls, WarpInitConfig } from './types'
+import { WarpBrand, WarpBrandColors, WarpBrandCta, WarpBrandUrls, WarpClientConfig } from './types'
 
 export class WarpBrandBuilder {
-  private config: WarpInitConfig
+  private config: WarpClientConfig
 
   private pendingBrand: WarpBrand = {
     protocol: getLatestProtocolIdentifier('brand'),
@@ -13,7 +13,7 @@ export class WarpBrandBuilder {
     logo: '',
   }
 
-  constructor(config: WarpInitConfig) {
+  constructor(config: WarpClientConfig) {
     this.config = config
   }
 

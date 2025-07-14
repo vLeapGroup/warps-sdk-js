@@ -1,14 +1,12 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
-import { getMainChainInfo, WarpBrand, WarpBrandBuilder, WarpInitConfig, WarpLogger } from '@vleap/warps'
+import { getMainChainInfo, WarpBrand, WarpBrandBuilder, WarpClientConfig, WarpLogger } from '@vleap/warps'
 import { Buffer } from 'buffer'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
 export class WarpMultiversxBrandBuilder {
-  private config: WarpInitConfig
   private core: WarpBrandBuilder
 
-  constructor(config: WarpInitConfig) {
-    this.config = config
+  constructor(private config: WarpClientConfig) {
     this.core = new WarpBrandBuilder(config)
   }
 

@@ -1,5 +1,6 @@
-import { findWarpAdapter } from './helpers'
+import { findWarpAdapterForChain } from './helpers'
 import {
+  Adapter,
   AdapterWarpExplorer,
   AdapterWarpRegistry,
   AdapterWarpResults,
@@ -7,6 +8,7 @@ import {
   WarpAdapterGenericRemoteTransaction,
   WarpAdapterGenericTransaction,
   WarpCacheConfig,
+  WarpChain,
   WarpChainInfo,
   WarpClientConfig,
 } from './types'
@@ -16,7 +18,10 @@ import { WarpFactory } from './WarpFactory'
 import { DetectionResult, WarpLinkDetecter } from './WarpLinkDetecter'
 
 export class WarpClient {
-  constructor(private config: WarpClientConfig) {}
+  constructor(
+    private config: WarpClientConfig,
+    private adapters: Adapter[]
+  ) {}
 
   getConfig(): WarpClientConfig {
     return this.config
@@ -27,44 +32,49 @@ export class WarpClient {
     return this
   }
 
+  addAdapter(adapter: Adapter): WarpClient {
+    this.adapters.push(adapter)
+    return this
+  }
+
   createBuilder(): WarpBuilder {
     return new WarpBuilder(this.config)
   }
 
   createExecutor(handlers?: ExecutionHandlers): WarpExecutor {
-    return new WarpExecutor(this.config, handlers)
+    return new WarpExecutor(this.config, this.adapters, handlers)
   }
 
   async detectWarp(url: string, cache?: WarpCacheConfig): Promise<DetectionResult> {
-    const detecter = new WarpLinkDetecter(this.config, this.config.repository)
+    const detecter = new WarpLinkDetecter(this.config, this.adapters)
     return detecter.detect(url, cache)
   }
 
-  createInscriptionTransaction(warp: Warp): WarpAdapterGenericTransaction {
-    return this.config.repository.builder.createInscriptionTransaction(warp)
+  createInscriptionTransaction(chain: WarpChain, warp: Warp): WarpAdapterGenericTransaction {
+    return findWarpAdapterForChain(chain, this.adapters).builder.createInscriptionTransaction(warp)
   }
 
-  async createFromTransaction(tx: WarpAdapterGenericRemoteTransaction, validate = false): Promise<Warp> {
-    return this.config.repository.builder.createFromTransaction(tx, validate)
+  async createFromTransaction(chain: WarpChain, tx: WarpAdapterGenericRemoteTransaction, validate = false): Promise<Warp> {
+    return findWarpAdapterForChain(chain, this.adapters).builder.createFromTransaction(tx, validate)
   }
 
-  async createFromTransactionHash(hash: string, cache?: WarpCacheConfig): Promise<Warp | null> {
-    return this.config.repository.builder.createFromTransactionHash(hash, cache)
+  async createFromTransactionHash(chain: WarpChain, hash: string, cache?: WarpCacheConfig): Promise<Warp | null> {
+    return findWarpAdapterForChain(chain, this.adapters).builder.createFromTransactionHash(hash, cache)
   }
 
   getExplorer(chain: WarpChainInfo): AdapterWarpExplorer {
-    return findWarpAdapter(this.config, chain).explorer(chain)
+    return findWarpAdapterForChain(chain.name, this.adapters).explorer(chain)
   }
 
   getResults(chain: WarpChainInfo): AdapterWarpResults {
-    return findWarpAdapter(this.config, chain).results
+    return findWarpAdapterForChain(chain.name, this.adapters).results
+  }
+
+  getRegistry(chain: WarpChain): AdapterWarpRegistry {
+    return findWarpAdapterForChain(chain, this.adapters).registry
   }
 
   get factory(): WarpFactory {
-    return new WarpFactory(this.config)
-  }
-
-  get registry(): AdapterWarpRegistry {
-    return this.config.repository.registry
+    return new WarpFactory(this.config, this.adapters)
   }
 }

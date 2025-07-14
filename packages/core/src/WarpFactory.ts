@@ -1,6 +1,7 @@
 import { WarpConstants } from './constants'
-import { getMainChainInfo, getWarpActionByIndex, shiftBigintBy } from './helpers'
+import { findWarpAdapterForChain, findWarpDefaultAdapter, getMainChainInfo, getWarpActionByIndex, shiftBigintBy } from './helpers'
 import {
+  Adapter,
   ResolvedInput,
   Warp,
   WarpAction,
@@ -21,7 +22,10 @@ export class WarpFactory {
   private serializer: WarpSerializer
   private cache: WarpCache
 
-  constructor(private config: WarpClientConfig) {
+  constructor(
+    private config: WarpClientConfig,
+    private adapters: Adapter[]
+  ) {
     if (!config.currentUrl) throw new Error('WarpFactory: currentUrl config not set')
     this.url = new URL(config.currentUrl)
     this.serializer = new WarpSerializer()
@@ -154,9 +158,8 @@ export class WarpFactory {
   public async preprocessInput(chain: WarpChainInfo, input: string): Promise<string> {
     try {
       const [type, value] = input.split(WarpConstants.ArgParamsSeparator, 2) as [WarpActionInputType, string]
-      const executor = this.config.adapters.find((a) => a.chain === chain.name)?.executor
-      if (!executor) return input
-      return executor.preprocessInput(chain, input, type, value)
+      const adapter = findWarpAdapterForChain(chain.name, this.adapters)
+      return adapter.executor.preprocessInput(chain, input, type, value)
     } catch (e) {
       return input
     }
@@ -184,7 +187,8 @@ export class WarpFactory {
     const serializer = new WarpSerializer()
     const chainValue = serializer.stringToNative(chainInput)[1] as WarpChain
 
-    const chainInfo = await this.config.repository.registry.getChainInfo(chainValue)
+    const adapter = findWarpAdapterForChain(chainValue, this.adapters)
+    const chainInfo = await adapter.registry.getChainInfo(chainValue)
     if (!chainInfo) throw new Error(`WarpUtils: Chain info not found for ${chainValue}`)
 
     return chainInfo
@@ -193,7 +197,8 @@ export class WarpFactory {
   private async getDefaultChainInfo(action: WarpAction): Promise<WarpChainInfo> {
     if (!action.chain) return getMainChainInfo(this.config)
 
-    const chainInfo = await this.config.repository.registry.getChainInfo(action.chain, { ttl: CacheTtl.OneWeek })
+    const adapter = findWarpDefaultAdapter(this.adapters)
+    const chainInfo = await adapter.registry.getChainInfo(action.chain, { ttl: CacheTtl.OneWeek })
     if (!chainInfo) throw new Error(`WarpUtils: Chain info not found for ${action.chain}`)
 
     return chainInfo

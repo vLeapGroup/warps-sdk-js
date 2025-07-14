@@ -5,9 +5,9 @@ import {
   WarpCache,
   WarpCacheConfig,
   WarpCacheKey,
+  WarpClientConfig,
   WarpConstants,
   WarpContractAction,
-  WarpInitConfig,
   WarpLogger,
   WarpQueryAction,
 } from '@vleap/warps'
@@ -18,7 +18,7 @@ export class WarpMultiversxAbi {
   private readonly contractLoader: WarpMultiversxContractLoader
   private readonly cache: WarpCache
 
-  constructor(private readonly config: WarpInitConfig) {
+  constructor(private readonly config: WarpClientConfig) {
     this.contractLoader = new WarpMultiversxContractLoader(this.config)
     this.cache = new WarpCache(this.config.cache?.type)
   }

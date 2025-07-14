@@ -17,11 +17,11 @@ import {
   WarpActionIndex,
   WarpCache,
   WarpCacheKey,
+  WarpClientConfig,
   WarpConstants,
   WarpContractAction,
   WarpExecution,
   WarpExecutionResults,
-  WarpInitConfig,
 } from '@vleap/warps'
 import { WarpMultiversxAbi } from './WarpMultiversxAbi'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
@@ -31,7 +31,7 @@ export class WarpMultiversxResults implements AdapterWarpResults {
   private readonly serializer: WarpMultiversxSerializer
   private readonly cache: WarpCache
 
-  constructor(private readonly config: WarpInitConfig) {
+  constructor(private readonly config: WarpClientConfig) {
     this.abi = new WarpMultiversxAbi(config)
     this.serializer = new WarpMultiversxSerializer()
     this.cache = new WarpCache(config.cache?.type)

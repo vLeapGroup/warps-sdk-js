@@ -1,6 +1,6 @@
 // Tests for the MultiversxResults class. All tests focus on the MultiversxResults class directly.
 import { SmartContractResult, TransactionEvent, TransactionLogs, TransactionOnNetwork, TypedValue } from '@multiversx/sdk-core/out'
-import { extractCollectResults, Warp, WarpContractAction, WarpInitConfig } from '@vleap/warps'
+import { extractCollectResults, Warp, WarpClientConfig, WarpContractAction } from '@vleap/warps'
 import { promises as fs, PathLike } from 'fs'
 import fetchMock from 'jest-fetch-mock'
 import { evaluateResultsCommon } from '../../core/src/helpers/results'
@@ -8,7 +8,7 @@ import { setupHttpMock } from './test-utils/mockHttp'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
 const path = require('path')
 
-const testConfig: WarpInitConfig = {
+const testConfig: WarpClientConfig = {
   env: 'devnet',
   user: {
     wallet: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',

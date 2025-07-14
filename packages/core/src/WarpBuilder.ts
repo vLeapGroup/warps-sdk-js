@@ -1,5 +1,5 @@
 import { getLatestProtocolIdentifier, toPreviewText } from './helpers'
-import { Warp, WarpAction, WarpInitConfig } from './types'
+import { Warp, WarpAction, WarpClientConfig } from './types'
 import { WarpValidator } from './WarpValidator'
 
 export class WarpBuilder {
@@ -12,7 +12,7 @@ export class WarpBuilder {
     actions: [],
   }
 
-  constructor(private config: WarpInitConfig) {}
+  constructor(private config: WarpClientConfig) {}
 
   async createFromRaw(encoded: string, validate = true): Promise<Warp> {
     const warp = JSON.parse(encoded) as Warp

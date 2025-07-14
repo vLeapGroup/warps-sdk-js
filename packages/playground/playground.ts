@@ -12,7 +12,7 @@ import { Keypair } from '@mysten/sui/dist/cjs/cryptography'
 import { getFaucetHost, requestSuiFromFaucetV2 } from '@mysten/sui/faucet'
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519'
 import { SerialTransactionExecutor, Transaction as SuiTransaction } from '@mysten/sui/transactions'
-import { findWarpExecutableAction, WarpClient, WarpClientConfig, WarpInitConfig } from '@vleap/warps'
+import { findWarpExecutableAction, WarpClient, WarpClientConfig } from '@vleap/warps'
 import { getMultiversxAdapter } from '@vleap/warps-adapter-multiversx'
 import { getSuiAdapter } from '@vleap/warps-adapter-sui'
 import * as fs from 'fs'
@@ -34,19 +34,13 @@ const runWarp = async (warpFile: string) => {
 
   const warpRaw = fs.readFileSync(warpPath, 'utf-8')
 
-  const config: WarpInitConfig = {
+  const config: WarpClientConfig = {
     env: 'devnet',
     currentUrl: 'https://usewarp.to',
     user: {},
   }
 
-  const clientConfig: WarpClientConfig = {
-    ...config,
-    repository: getMultiversxAdapter(config),
-    adapters: [getMultiversxAdapter(config), getSuiAdapter(config)],
-  }
-
-  const client = new WarpClient(clientConfig)
+  const client = new WarpClient(config, [getMultiversxAdapter(config), getSuiAdapter(config)])
   const warp = await client.createBuilder().createFromRaw(warpRaw)
 
   const [action] = findWarpExecutableAction(warp)

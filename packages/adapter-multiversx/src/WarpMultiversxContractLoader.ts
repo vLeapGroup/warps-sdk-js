@@ -1,8 +1,8 @@
-import { WarpChainInfo, WarpContract, WarpContractVerification, WarpInitConfig, WarpLogger } from '@vleap/warps'
+import { WarpChainInfo, WarpClientConfig, WarpContract, WarpContractVerification, WarpLogger } from '@vleap/warps'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
 export class WarpMultiversxContractLoader {
-  constructor(private readonly config: WarpInitConfig) {}
+  constructor(private readonly config: WarpClientConfig) {}
 
   async getContract(address: string, chain: WarpChainInfo): Promise<WarpContract | null> {
     try {

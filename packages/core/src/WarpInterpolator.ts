@@ -1,19 +1,19 @@
 import { WarpConstants } from './constants'
 import { getMainChainInfo } from './helpers'
-import { Adapter, InterpolationBag, Warp, WarpAction, WarpInitConfig } from './types'
+import { Adapter, InterpolationBag, Warp, WarpAction, WarpClientConfig } from './types'
 
 export class WarpInterpolator {
   constructor(
-    private config: WarpInitConfig,
-    private repository: Adapter
+    private config: WarpClientConfig,
+    private adapter: Adapter
   ) {}
 
-  async apply(config: WarpInitConfig, warp: Warp): Promise<Warp> {
+  async apply(config: WarpClientConfig, warp: Warp): Promise<Warp> {
     const modifiable = this.applyVars(config, warp)
     return await this.applyGlobals(config, modifiable)
   }
 
-  async applyGlobals(config: WarpInitConfig, warp: Warp): Promise<Warp> {
+  async applyGlobals(config: WarpClientConfig, warp: Warp): Promise<Warp> {
     let modifiable = { ...warp }
     modifiable.actions = await Promise.all(modifiable.actions.map(async (action) => await this.applyActionGlobals(action)))
 
@@ -22,7 +22,7 @@ export class WarpInterpolator {
     return modifiable
   }
 
-  applyVars(config: WarpInitConfig, warp: Warp): Warp {
+  applyVars(config: WarpClientConfig, warp: Warp): Warp {
     if (!warp?.vars) return warp
     let modifiable = JSON.stringify(warp)
 
@@ -52,7 +52,7 @@ export class WarpInterpolator {
     return JSON.parse(modifiable)
   }
 
-  private async applyRootGlobals(warp: Warp, config: WarpInitConfig): Promise<Warp> {
+  private async applyRootGlobals(warp: Warp, config: WarpClientConfig): Promise<Warp> {
     let modifiable = JSON.stringify(warp)
     const rootBag: InterpolationBag = { config, chain: getMainChainInfo(config) }
 
@@ -67,7 +67,7 @@ export class WarpInterpolator {
   }
 
   private async applyActionGlobals(action: WarpAction): Promise<WarpAction> {
-    const chain = action.chain ? await this.repository.registry.getChainInfo(action.chain) : getMainChainInfo(this.config)
+    const chain = action.chain ? await this.adapter.registry.getChainInfo(action.chain) : getMainChainInfo(this.config)
     if (!chain) throw new Error(`Chain info not found for ${action.chain}`)
     let modifiable = JSON.stringify(action)
     const bag: InterpolationBag = { config: this.config, chain }

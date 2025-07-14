@@ -1,4 +1,4 @@
-import { Warp, WarpChainEnv, WarpInitConfig as WarpConfig, WarpTransferAction } from '@vleap/warps/src/types'
+import { Warp, WarpChainEnv, WarpClientConfig as WarpConfig, WarpTransferAction } from '@vleap/warps/src/types'
 import { promises as fs, PathLike } from 'fs'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 

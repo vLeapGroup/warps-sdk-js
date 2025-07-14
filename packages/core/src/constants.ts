@@ -7,6 +7,8 @@ export const WarpConstants = {
 
   IdentifierParamSeparator: ':',
 
+  IdentifierChainDefault: 'mvx',
+
   IdentifierType: {
     Alias: 'alias' as WarpIdType,
     Hash: 'hash' as WarpIdType,

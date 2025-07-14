@@ -1,35 +1,77 @@
-import { WarpConfig } from '../config'
 import { WarpConstants } from '../constants'
 import { WarpIdType } from '../types'
 
 export const getWarpInfoFromIdentifier = (
   prefixedIdentifier: string
-): { type: WarpIdType; identifier: string; identifierBase: string } | null => {
-  const decodedIdentifier = decodeURIComponent(prefixedIdentifier)
+): { chainPrefix: string; type: WarpIdType; identifier: string; identifierBase: string } | null => {
+  const decoded = decodeURIComponent(prefixedIdentifier).trim()
+  const parts = decoded.split(WarpConstants.IdentifierParamSeparator)
+  const base = decoded.split('?')[0]
 
-  // Handle prefixed identifier (contains separator)
-  if (decodedIdentifier.includes(WarpConstants.IdentifierParamSeparator)) {
-    const [idType, identifier] = decodedIdentifier.split(WarpConstants.IdentifierParamSeparator)
-    const identifierBase = identifier.split('?')[0]
-    return { type: idType as WarpIdType, identifier, identifierBase }
+  // chain:type:identifier
+  if (parts.length === 3 && (parts[1] === WarpConstants.IdentifierType.Alias || parts[1] === WarpConstants.IdentifierType.Hash)) {
+    return {
+      chainPrefix: parts[0],
+      type: parts[1] as WarpIdType,
+      identifier: parts[2],
+      identifierBase: parts[2].split('?')[0],
+    }
   }
 
-  const identifierBase = decodedIdentifier.split('?')[0]
-
-  // If exactly 64 characters, treat as hash
-  if (identifierBase.length === 64) {
-    return { type: WarpConstants.IdentifierType.Hash, identifier: decodedIdentifier, identifierBase }
+  // type:identifier (type is 'alias' or 'hash')
+  if (parts.length === 2 && (parts[0] === WarpConstants.IdentifierType.Alias || parts[0] === WarpConstants.IdentifierType.Hash)) {
+    return {
+      chainPrefix: WarpConstants.IdentifierChainDefault,
+      type: parts[0] as WarpIdType,
+      identifier: parts[1],
+      identifierBase: parts[1].split('?')[0],
+    }
   }
 
-  // Otherwise treat as alias
-  return { type: WarpConstants.IdentifierType.Alias, identifier: decodedIdentifier, identifierBase }
+  // Edge case: 62-char:xx is invalid (first part is exactly 62 chars, two parts, second part is exactly 2 alphanumeric chars, and nothing else)
+  if (parts.length === 2 && /^[a-zA-Z0-9]{62}$/.test(parts[0]) && /^[a-zA-Z0-9]{2}$/.test(parts[1])) {
+    return null
+  }
+
+  // chain:identifier (chain is not 'alias' or 'hash')
+  if (parts.length === 2 && parts[0] !== WarpConstants.IdentifierType.Alias && parts[0] !== WarpConstants.IdentifierType.Hash) {
+    return {
+      chainPrefix: parts[0],
+      type: WarpConstants.IdentifierType.Alias,
+      identifier: parts[1],
+      identifierBase: parts[1].split('?')[0],
+    }
+  }
+
+  // 64-char hash (no separator)
+  if (base.length === 64) {
+    return {
+      chainPrefix: WarpConstants.IdentifierChainDefault,
+      type: WarpConstants.IdentifierType.Hash,
+      identifier: decoded,
+      identifierBase: base,
+    }
+  }
+
+  // fallback: treat as alias
+  return {
+    chainPrefix: WarpConstants.IdentifierChainDefault,
+    type: WarpConstants.IdentifierType.Alias,
+    identifier: decoded,
+    identifierBase: base,
+  }
 }
 
-export const extractIdentifierInfoFromUrl = (url: string): { type: WarpIdType; identifier: string; identifierBase: string } | null => {
+export const extractIdentifierInfoFromUrl = (
+  url: string
+): { chainPrefix: string; type: WarpIdType; identifier: string; identifierBase: string } | null => {
   const urlObj = new URL(url)
-  const isSuperClient = WarpConfig.SuperClientUrls.includes(urlObj.origin)
   const searchParamValue = urlObj.searchParams.get(WarpConstants.IdentifierParamName)
-  const value = isSuperClient && !searchParamValue ? urlObj.pathname.split('/')[1] : searchParamValue
+  let value = searchParamValue
+  if (!value) {
+    // fallback for superclient style URLs
+    value = urlObj.pathname.split('/')[1]
+  }
 
   if (!value) {
     return null

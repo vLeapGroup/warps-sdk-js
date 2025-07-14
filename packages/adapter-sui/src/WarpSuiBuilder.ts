@@ -1,11 +1,9 @@
-import { AdapterWarpBuilder, Warp, WarpCache, WarpCacheConfig, WarpInitConfig } from '@vleap/warps'
+import { AdapterWarpBuilder, Warp, WarpCache, WarpCacheConfig, WarpClientConfig } from '@vleap/warps'
 
 export class WarpSuiBuilder implements AdapterWarpBuilder {
-  private config: WarpInitConfig
   private cache: WarpCache
 
-  constructor(config: WarpInitConfig) {
-    this.config = config
+  constructor(private config: WarpClientConfig) {
     this.cache = new WarpCache(config.cache?.type)
   }
 

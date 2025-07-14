@@ -1,6 +1,6 @@
 import Ajv from 'ajv'
 import { WarpConfig } from './config'
-import { Warp, WarpContractAction, WarpInitConfig, WarpQueryAction } from './types'
+import { Warp, WarpClientConfig, WarpContractAction, WarpQueryAction } from './types'
 
 type ValidationResult = {
   valid: boolean
@@ -10,7 +10,7 @@ type ValidationResult = {
 type ValidationError = string
 
 export class WarpValidator {
-  constructor(private config: WarpInitConfig) {
+  constructor(private config: WarpClientConfig) {
     this.config = config
   }
 

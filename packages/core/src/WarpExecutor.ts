@@ -1,5 +1,13 @@
-import { applyResultsToMessages, extractCollectResults, findWarpExecutableAction, getNextInfo, getWarpActionByIndex } from './helpers'
 import {
+  applyResultsToMessages,
+  extractCollectResults,
+  findWarpAdapterForChain,
+  findWarpExecutableAction,
+  getNextInfo,
+  getWarpActionByIndex,
+} from './helpers'
+import {
+  Adapter,
   Warp,
   WarpActionIndex,
   WarpAdapterGenericRemoteTransaction,
@@ -18,14 +26,13 @@ export type ExecutionHandlers = {
 
 export class WarpExecutor {
   private factory: WarpFactory
-  private interpolator: WarpInterpolator
 
   constructor(
     private config: WarpClientConfig,
+    private adapters: Adapter[],
     private handlers?: ExecutionHandlers
   ) {
-    this.factory = new WarpFactory(config)
-    this.interpolator = new WarpInterpolator(config, config.repository)
+    this.factory = new WarpFactory(config, adapters)
     this.handlers = handlers
   }
 
@@ -40,7 +47,7 @@ export class WarpExecutor {
 
     const executable = await this.factory.createExecutable(warp, actionIndex, inputs)
     const chainName = executable.chain.name.toLowerCase()
-    const adapterLoader = this.config.adapters.find((a) => a.chain.toLowerCase() === chainName)
+    const adapterLoader = this.adapters.find((a) => a.chain.toLowerCase() === chainName)
     if (!adapterLoader) throw new Error(`No adapter registered for chain: ${chainName}`)
     const tx = await adapterLoader.executor.createTransaction(executable)
 
@@ -48,7 +55,7 @@ export class WarpExecutor {
   }
 
   async evaluateResults(warp: Warp, chain: WarpChainInfo, tx: WarpAdapterGenericRemoteTransaction): Promise<void> {
-    const adapterLoader = this.config.adapters.find((a) => a.chain.toLowerCase() === chain.name.toLowerCase())
+    const adapterLoader = this.adapters.find((a) => a.chain.toLowerCase() === chain.name.toLowerCase())
     if (!adapterLoader) throw new Error(`No adapter registered for chain: ${chain.name}`)
     const result = (await adapterLoader.results.getTransactionExecutionResults(warp, tx)) as WarpExecution
     this.handlers?.onExecuted?.(result)
@@ -59,7 +66,8 @@ export class WarpExecutor {
     if (!collectAction) throw new Error('WarpActionExecutor: Action not found')
 
     const chain = await this.factory.getChainInfoForAction(collectAction)
-    const preparedWarp = await this.interpolator.apply(this.config, warp)
+    const adapter = findWarpAdapterForChain(chain.name, this.adapters)
+    const preparedWarp = await new WarpInterpolator(this.config, adapter).apply(this.config, warp)
     const resolvedInputs = await this.factory.getResolvedInputs(chain, collectAction, inputs)
     const modifiedInputs = this.factory.getModifiedInputs(resolvedInputs)
     const serializer = this.factory['serializer']

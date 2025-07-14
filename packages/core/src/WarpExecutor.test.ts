@@ -13,108 +13,22 @@ describe('WarpExecutor', () => {
     user: { wallet: 'erd1...' },
     clientUrl: 'https://anyclient.com',
     currentUrl: 'https://anyclient.com',
-    repository: {
-      ...createMockAdapter(),
-      registry: {
-        ...createMockAdapter().registry,
-        getChainInfo: jest.fn().mockResolvedValue(mockChainInfo),
-      },
-    },
-    adapters: [
-      {
-        chain: 'multiversx',
-        builder: {
-          createInscriptionTransaction: jest.fn(),
-          createFromTransaction: jest.fn(),
-          createFromTransactionHash: jest.fn(),
-        },
-        executor: {
-          async createTransaction() {
-            return 'multiversx-result'
-          },
-          async preprocessInput() {
-            return ''
-          },
-        },
-        results: {
-          getTransactionExecutionResults: jest.fn(),
-        },
-        serializer: {
-          typedToString: jest.fn(),
-          typedToNative: jest.fn(),
-          nativeToTyped: jest.fn(),
-          nativeToType: jest.fn(),
-          stringToTyped: jest.fn(),
-        },
-        registry: {
-          createWarpRegisterTransaction: jest.fn(),
-          createWarpUnregisterTransaction: jest.fn(),
-          createWarpUpgradeTransaction: jest.fn(),
-          createWarpAliasSetTransaction: jest.fn(),
-          createWarpVerifyTransaction: jest.fn(),
-          createWarpTransferOwnershipTransaction: jest.fn(),
-          createBrandRegisterTransaction: jest.fn(),
-          createWarpBrandingTransaction: jest.fn(),
-          getInfoByAlias: jest.fn(),
-          getInfoByHash: jest.fn(),
-          getUserWarpRegistryInfos: jest.fn(),
-          getUserBrands: jest.fn(),
-          getChainInfos: jest.fn(),
-          getChainInfo: jest.fn().mockResolvedValue(mockChainInfo),
-          setChain: jest.fn(),
-          removeChain: jest.fn(),
-          fetchBrand: jest.fn(),
-        },
-      },
-      {
-        chain: 'sui',
-        builder: {
-          createInscriptionTransaction: jest.fn(),
-          createFromTransaction: jest.fn(),
-          createFromTransactionHash: jest.fn(),
-        },
-        executor: {
-          async createTransaction() {
-            return 'sui-result'
-          },
-          async preprocessInput() {
-            return ''
-          },
-        },
-        results: {
-          getTransactionExecutionResults: jest.fn(),
-        },
-        serializer: {
-          typedToString: jest.fn(),
-          typedToNative: jest.fn(),
-          nativeToTyped: jest.fn(),
-          nativeToType: jest.fn(),
-          stringToTyped: jest.fn(),
-        },
-        registry: {
-          createWarpRegisterTransaction: jest.fn(),
-          createWarpUnregisterTransaction: jest.fn(),
-          createWarpUpgradeTransaction: jest.fn(),
-          createWarpAliasSetTransaction: jest.fn(),
-          createWarpVerifyTransaction: jest.fn(),
-          createWarpTransferOwnershipTransaction: jest.fn(),
-          createBrandRegisterTransaction: jest.fn(),
-          createWarpBrandingTransaction: jest.fn(),
-          getInfoByAlias: jest.fn(),
-          getInfoByHash: jest.fn(),
-          getUserWarpRegistryInfos: jest.fn(),
-          getUserBrands: jest.fn(),
-          getChainInfos: jest.fn(),
-          getChainInfo: jest.fn(),
-          setChain: jest.fn(),
-          removeChain: jest.fn(),
-          fetchBrand: jest.fn(),
-        },
-      },
-    ],
   }
-
-  const executor = new WarpExecutor(config, handlers)
+  const adapters = [
+    (() => {
+      const a = createMockAdapter()
+      a.chain = 'multiversx'
+      a.prefix = 'mvx'
+      return a
+    })(),
+    (() => {
+      const a = createMockAdapter()
+      a.chain = 'sui'
+      a.prefix = 'sui'
+      return a
+    })(),
+  ]
+  const executor = new WarpExecutor(config, adapters, handlers)
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -142,8 +56,7 @@ describe('WarpExecutor', () => {
           },
         ],
       }
-      const result = await executor.execute(errorWarp, [])
-      expect(result).toBeDefined()
+      await expect(executor.execute(errorWarp, [])).rejects.toThrow('WarpUtils: Chain info not found for invalid-chain')
     })
   })
 

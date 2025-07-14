@@ -23,10 +23,10 @@ import {
   WarpActionInputType,
   WarpChainEnv,
   WarpChainInfo,
+  WarpClientConfig,
   WarpConstants,
   WarpExecutable,
   WarpExecution,
-  WarpInitConfig,
   WarpQueryAction,
 } from '@vleap/warps'
 import { WarpMultiversxAbi } from './WarpMultiversxAbi'
@@ -39,7 +39,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
   private readonly abi: WarpMultiversxAbi
   private readonly results: WarpMultiversxResults
 
-  constructor(private readonly config: WarpInitConfig) {
+  constructor(private readonly config: WarpClientConfig) {
     this.serializer = new WarpMultiversxSerializer()
     this.abi = new WarpMultiversxAbi(this.config)
     this.results = new WarpMultiversxResults(this.config)

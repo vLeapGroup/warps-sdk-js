@@ -1,7 +1,6 @@
 import { WarpConstants } from './constants'
 import { getNextInfo } from './helpers'
-import { createMockConfig } from './test-utils/mockConfig'
-import { createMockWarp } from './test-utils/sharedMocks'
+import { createMockAdapter, createMockConfig, createMockWarp } from './test-utils/sharedMocks'
 import { WarpAction, WarpChainInfo, WarpClientConfig, WarpContractAction } from './types'
 import { WarpFactory } from './WarpFactory'
 
@@ -10,64 +9,6 @@ const testConfig: WarpClientConfig = {
   user: { wallet: 'erd1...' },
   clientUrl: 'https://devnet.usewarp.to',
   currentUrl: 'https://devnet.usewarp.to',
-  repository: {
-    chain: 'mockchain',
-    builder: {
-      createInscriptionTransaction: jest.fn(),
-      createFromTransaction: jest.fn(),
-      createFromTransactionHash: jest.fn().mockResolvedValue(null),
-    },
-    executor: {
-      async createTransaction() {
-        return {}
-      },
-      async preprocessInput() {
-        return ''
-      },
-    },
-    results: {
-      async getTransactionExecutionResults() {
-        return {
-          success: true,
-          warp: { protocol: '', name: '', title: '', description: '', actions: [] },
-          action: 0,
-          user: null,
-          txHash: null,
-          next: null,
-          values: [],
-          results: {},
-          messages: {},
-        }
-      },
-    },
-    serializer: {
-      typedToString: jest.fn(),
-      typedToNative: jest.fn(),
-      nativeToTyped: jest.fn(),
-      nativeToType: jest.fn(),
-      stringToTyped: jest.fn(),
-    },
-    registry: {
-      createWarpRegisterTransaction: jest.fn(),
-      createWarpUnregisterTransaction: jest.fn(),
-      createWarpUpgradeTransaction: jest.fn(),
-      createWarpAliasSetTransaction: jest.fn(),
-      createWarpVerifyTransaction: jest.fn(),
-      createWarpTransferOwnershipTransaction: jest.fn(),
-      createBrandRegisterTransaction: jest.fn(),
-      createWarpBrandingTransaction: jest.fn(),
-      getInfoByAlias: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
-      getInfoByHash: jest.fn().mockResolvedValue({ registryInfo: null, brand: null }),
-      getUserWarpRegistryInfos: jest.fn().mockResolvedValue([]),
-      getUserBrands: jest.fn().mockResolvedValue([]),
-      getChainInfos: jest.fn().mockResolvedValue([]),
-      getChainInfo: jest.fn().mockResolvedValue(null),
-      setChain: jest.fn().mockResolvedValue({}),
-      removeChain: jest.fn().mockResolvedValue({}),
-      fetchBrand: jest.fn().mockResolvedValue(null),
-    },
-  },
-  adapters: [],
 }
 
 describe('getNextInfo', () => {
@@ -155,7 +96,7 @@ describe('WarpFactory', () => {
   })
 
   it('createExecutable returns expected structure', async () => {
-    const factory = new WarpFactory(config)
+    const factory = new WarpFactory(config, [createMockAdapter()])
     const warp: any = {
       meta: { hash: 'abc' },
       chain: 'multiversx',
@@ -180,7 +121,7 @@ describe('WarpFactory', () => {
   })
 
   it('getResolvedInputs resolves query and user wallet', async () => {
-    const factory = new WarpFactory(config)
+    const factory = new WarpFactory(config, [createMockAdapter()])
     const action: WarpAction = {
       type: 'transfer',
       label: 'Test',
@@ -198,14 +139,14 @@ describe('WarpFactory', () => {
   })
 
   it('getModifiedInputs applies scale modifier', () => {
-    const factory = new WarpFactory(config)
+    const factory = new WarpFactory(config, [createMockAdapter()])
     const inputs = [{ input: { name: 'amount', type: 'biguint', modifier: 'scale:2' }, value: 'biguint:5' }]
     const result = factory.getModifiedInputs(inputs as any)
     expect(result[0].value).toBe('biguint:500')
   })
 
   it('preprocessInput returns input as-is for non-esdt', async () => {
-    const factory = new WarpFactory(config)
+    const factory = new WarpFactory(config, [createMockAdapter()])
     const result = await factory.preprocessInput(chain, 'biguint:123')
     expect(result).toBe('biguint:123')
   })
@@ -227,9 +168,10 @@ describe('getChainInfoForAction', () => {
       explorerUrl: 'https://explorer.multiversx.com',
       nativeToken: 'EGLD',
     })
-
-    testConfig.repository.registry.getChainInfo = mockGetChainInfo
-
+    const adapter = createMockAdapter()
+    adapter.chain = 'mainnet'
+    adapter.registry.getChainInfo = mockGetChainInfo
+    const factory = new WarpFactory(testConfig, [adapter])
     const action: WarpContractAction = {
       type: 'contract',
       label: 'test',
@@ -243,10 +185,7 @@ describe('getChainInfoForAction', () => {
         { name: 'amount', type: 'biguint', position: 'value', source: 'field' },
       ],
     }
-
-    const factory = new WarpFactory(testConfig)
     const chain = await factory.getChainInfoForAction(action, ['string:mainnet', 'biguint:1000000000000000000'])
-
     expect(chain.name).toBe('mainnet')
     expect(mockGetChainInfo).toHaveBeenCalledWith('mainnet')
   })
@@ -263,7 +202,7 @@ describe('getChainInfoForAction', () => {
       inputs: [{ name: 'amount', type: 'biguint', position: 'value', source: 'field' }],
     }
 
-    const factory = new WarpFactory(testConfig)
+    const factory = new WarpFactory(testConfig, [createMockAdapter()])
     const chain = await factory.getChainInfoForAction(action, ['biguint:1000000000000000000'])
 
     expect(chain.name).toBe('multiversx') // Default chain name from config
@@ -280,9 +219,10 @@ describe('getChainInfoForAction', () => {
       explorerUrl: 'https://testnet-explorer.multiversx.com',
       nativeToken: 'EGLD',
     })
-
-    testConfig.repository.registry.getChainInfo = mockGetChainInfo
-
+    const adapter = createMockAdapter()
+    adapter.chain = 'testnet'
+    adapter.registry.getChainInfo = mockGetChainInfo
+    const factory = new WarpFactory(testConfig, [adapter])
     const action: WarpContractAction = {
       type: 'contract',
       label: 'test',
@@ -296,10 +236,7 @@ describe('getChainInfoForAction', () => {
         { name: 'amount', type: 'biguint', position: 'value', source: 'field' },
       ],
     }
-
-    const factory = new WarpFactory(testConfig)
     const chain = await factory.getChainInfoForAction(action, ['string:testnet', 'biguint:500'])
-
     expect(chain.name).toBe('testnet')
     expect(mockGetChainInfo).toHaveBeenCalledWith('testnet')
   })
@@ -316,7 +253,7 @@ describe('getChainInfoForAction', () => {
       inputs: [{ name: 'targetChain', type: 'string', position: 'chain', source: 'field' }],
     }
 
-    const factory = new WarpFactory(testConfig)
+    const factory = new WarpFactory(testConfig, [createMockAdapter()])
     await expect(factory.getChainInfoForAction(action, [])).rejects.toThrow('Chain input not found')
   })
 
@@ -332,7 +269,7 @@ describe('getChainInfoForAction', () => {
       inputs: [{ name: 'targetChain', type: 'string', position: 'chain', source: 'field' }],
     }
 
-    const factory = new WarpFactory(testConfig)
+    const factory = new WarpFactory(testConfig, [createMockAdapter()])
     const chain = await factory.getChainInfoForAction(action)
 
     expect(chain.name).toBe('multiversx') // Default chain name from config
