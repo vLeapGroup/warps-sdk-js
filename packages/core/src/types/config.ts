@@ -21,9 +21,6 @@ export type WarpClientConfig = {
     ttl?: number
     type?: WarpCacheType
   }
-  registry?: {
-    contract?: string
-  }
   index?: {
     url?: string
     apiKey?: string

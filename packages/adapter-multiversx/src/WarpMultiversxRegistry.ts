@@ -19,12 +19,12 @@ import {
   WarpChain,
   WarpChainInfo,
   WarpClientConfig,
-  WarpConfig,
   WarpLogger,
   WarpRegistryConfigInfo,
   WarpRegistryInfo,
 } from '@vleap/warps'
 import RegistryAbi from './abis/registry.abi.json'
+import { getMultiversxRegistryAddress } from './config'
 import { toTypedConfigInfo, toTypedRegistryInfo } from './helpers/registry'
 import { string_value, u32_value } from './utils.codec'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
@@ -65,7 +65,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
     }
 
     return this.getFactory().createTransactionForExecute(sender, {
-      contract: this.getRegistryContractAddress(),
+      contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
       function: 'registerWarp',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: calculateCostAmount(),
@@ -77,7 +77,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
     if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
     const sender = Address.newFromBech32(this.config.user.wallet)
     return this.getFactory().createTransactionForExecute(sender, {
-      contract: this.getRegistryContractAddress(),
+      contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
       function: 'unregisterWarp',
       gasLimit: BigInt(10_000_000),
       arguments: [BytesValue.fromHex(txHash)],
@@ -90,7 +90,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
     const sender = Address.newFromBech32(this.config.user.wallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
-      contract: this.getRegistryContractAddress(),
+      contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
       function: 'upgradeWarp',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: this.isCurrentUserAdmin() ? undefined : this.registryConfig.unitPrice,
@@ -103,7 +103,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
     const sender = Address.newFromBech32(this.config.user.wallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
-      contract: this.getRegistryContractAddress(),
+      contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
       function: 'setWarpAlias',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: this.isCurrentUserAdmin() ? undefined : this.registryConfig.unitPrice,
@@ -116,7 +116,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
     const sender = Address.newFromBech32(this.config.user.wallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
-      contract: this.getRegistryContractAddress(),
+      contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
       function: 'verifyWarp',
       gasLimit: BigInt(10_000_000),
       arguments: [BytesValue.fromHex(txHash)],
@@ -128,7 +128,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
     const sender = Address.newFromBech32(this.config.user.wallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
-      contract: this.getRegistryContractAddress(),
+      contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
       function: 'transferOwnership',
       gasLimit: BigInt(10_000_000),
       arguments: [BytesValue.fromHex(txHash), new AddressValue(new Address(newOwner))],
@@ -141,7 +141,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
     const sender = Address.newFromBech32(this.config.user.wallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
-      contract: this.getRegistryContractAddress(),
+      contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
       function: 'registerBrand',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: this.isCurrentUserAdmin() ? undefined : this.registryConfig.unitPrice,
@@ -154,7 +154,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
     const sender = Address.newFromBech32(this.config.user.wallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
-      contract: this.getRegistryContractAddress(),
+      contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
       function: 'brandWarp',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: this.isCurrentUserAdmin() ? undefined : this.registryConfig.unitPrice,
@@ -174,7 +174,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
         return cached
       }
 
-      const contract = this.getRegistryContractAddress()
+      const contract = Address.newFromBech32(getMultiversxRegistryAddress(this.config.env))
       const controller = this.getController()
       const query = controller.createQuery({ contract, function: 'getInfoByAlias', arguments: [BytesValue.fromUTF8(alias)] })
       const res = await controller.runQuery(query)
@@ -204,7 +204,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
         }
       }
 
-      const contract = this.getRegistryContractAddress()
+      const contract = Address.newFromBech32(getMultiversxRegistryAddress(this.config.env))
       const controller = this.getController()
       const query = controller.createQuery({ contract, function: 'getInfoByHash', arguments: [BytesValue.fromHex(hash)] })
       const res = await controller.runQuery(query)
@@ -226,7 +226,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
     try {
       const userWallet = user || this.config.user?.wallet
       if (!userWallet) throw new Error('WarpRegistry: user address not set')
-      const contract = this.getRegistryContractAddress()
+      const contract = Address.newFromBech32(getMultiversxRegistryAddress(this.config.env))
       const controller = this.getController()
       const query = controller.createQuery({ contract, function: 'getUserWarps', arguments: [new AddressValue(new Address(userWallet))] })
       const res = await controller.runQuery(query)
@@ -241,7 +241,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
     try {
       const userWallet = user || this.config.user?.wallet
       if (!userWallet) throw new Error('WarpRegistry: user address not set')
-      const contract = this.getRegistryContractAddress()
+      const contract = Address.newFromBech32(getMultiversxRegistryAddress(this.config.env))
       const controller = this.getController()
       const query = controller.createQuery({ contract, function: 'getUserBrands', arguments: [new AddressValue(new Address(userWallet))] })
       const res = await controller.runQuery(query)
@@ -265,7 +265,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
       }
     }
 
-    const contract = this.getRegistryContractAddress()
+    const contract = Address.newFromBech32(getMultiversxRegistryAddress(this.config.env))
     const controller = this.getController()
     const query = controller.createQuery({ contract, function: 'getChains', arguments: [] })
     const res = await controller.runQuery(query)
@@ -293,7 +293,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
         return cached
       }
 
-      const contract = this.getRegistryContractAddress()
+      const contract = Address.newFromBech32(getMultiversxRegistryAddress(this.config.env))
       const controller = this.getController()
       const query = controller.createQuery({ contract, function: 'getChain', arguments: [BytesValue.fromUTF8(chain)] })
       const res = await controller.runQuery(query)
@@ -315,7 +315,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
     const sender = Address.newFromBech32(this.config.user.wallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
-      contract: this.getRegistryContractAddress(),
+      contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
       function: 'setChain',
       gasLimit: BigInt(10_000_000),
       arguments: [
@@ -336,7 +336,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
     const sender = Address.newFromBech32(this.config.user.wallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
-      contract: this.getRegistryContractAddress(),
+      contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
       function: 'removeChain',
       gasLimit: BigInt(10_000_000),
       arguments: [string_value(chain)],
@@ -375,12 +375,8 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
     }
   }
 
-  getRegistryContractAddress(): Address {
-    return Address.newFromBech32(this.config.registry?.contract || WarpConfig.Registry.Contract(this.config.env))
-  }
-
   private async loadRegistryConfigs(): Promise<void> {
-    const contract = this.getRegistryContractAddress()
+    const contract = Address.newFromBech32(getMultiversxRegistryAddress(this.config.env))
     const controller = this.getController()
     const [configInfoRaw] = await controller.query({ contract, function: 'getConfig', arguments: [] })
     const configInfo = configInfoRaw ? toTypedConfigInfo(configInfoRaw) : null
