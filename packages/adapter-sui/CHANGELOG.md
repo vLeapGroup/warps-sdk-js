@@ -1,5 +1,14 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.10
+
+### Patch Changes
+
+- 1b9eac0: update sui impl
+- Updated dependencies [67223b1]
+- Updated dependencies [0cf15c7]
+  - @vleap/warps@3.0.0-alpha.47
+
 ## 0.2.0-alpha.9
 
 ### Minor Changes

@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.47
+
+### Minor Changes
+
+- 67223b1: update registry configs
+
+### Patch Changes
+
+- 0cf15c7: update execution
+
 ## 3.0.0-alpha.46
 
 ### Minor Changes

@@ -1,5 +1,17 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.11
+
+### Minor Changes
+
+- 67223b1: update registry configs
+
+### Patch Changes
+
+- Updated dependencies [67223b1]
+- Updated dependencies [0cf15c7]
+  - @vleap/warps@3.0.0-alpha.47
+
 ## 0.2.0-alpha.10
 
 ### Minor Changes
