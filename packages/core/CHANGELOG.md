@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.48
+
+### Minor Changes
+
+- 1f9aa05: add user multi-wallet
+
 ## 3.0.0-alpha.47
 
 ### Minor Changes

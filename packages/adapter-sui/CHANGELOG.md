@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.11
+
+### Minor Changes
+
+- 1f9aa05: add user multi-wallet
+
+### Patch Changes
+
+- Updated dependencies [1f9aa05]
+  - @vleap/warps@3.0.0-alpha.48
+
 ## 0.2.0-alpha.10
 
 ### Patch Changes
