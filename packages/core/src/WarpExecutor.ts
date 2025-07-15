@@ -36,13 +36,13 @@ export class WarpExecutor {
     this.handlers = handlers
   }
 
-  async execute(warp: Warp, inputs: string[]): Promise<[WarpAdapterGenericTransaction | null, WarpChainInfo | null]> {
+  async execute(warp: Warp, inputs: string[]): Promise<{ tx: WarpAdapterGenericTransaction | null; chain: WarpChainInfo | null }> {
     const [action, actionIndex] = findWarpExecutableAction(warp)
 
     if (action.type === 'collect') {
       const results = await this.executeCollect(warp, actionIndex, inputs)
       this.handlers?.onExecuted?.(results)
-      return [null, null]
+      return { tx: null, chain: null }
     }
 
     const executable = await this.factory.createExecutable(warp, actionIndex, inputs)
@@ -51,7 +51,7 @@ export class WarpExecutor {
     if (!adapterLoader) throw new Error(`No adapter registered for chain: ${chainName}`)
     const tx = await adapterLoader.executor.createTransaction(executable)
 
-    return [tx, executable.chain]
+    return { tx, chain: executable.chain }
   }
 
   async evaluateResults(warp: Warp, chain: WarpChainInfo, tx: WarpAdapterGenericRemoteTransaction): Promise<void> {
