@@ -11,12 +11,8 @@ import {
   WarpRegistryInfo,
 } from '@vleap/warps'
 import { getSuiApiUrl } from './config'
-import { WarpSuiConstants } from './constants'
 import { toRegistryMoveTarget, toTypedChainInfo, toTypedRegistryInfo } from './helpers/registry'
 
-const REGISTRY = WarpSuiConstants.Sui
-
-// Simple in-memory cache for registry info, brands, and chain info
 const cache: Record<string, any> = {}
 const setCache = (key: string, value: any, ttl?: number) => {
   cache[key] = { value, expires: ttl ? Date.now() + ttl * 1000 : undefined }
@@ -29,6 +25,11 @@ const getCache = (key: string) => {
     return null
   }
   return entry.value
+}
+
+const getRegistryObjectId = (config: WarpClientConfig): string => {
+  if (typeof (config as any).registryObjectId === 'string') return (config as any).registryObjectId
+  throw new Error('WarpSuiRegistry: registryObjectId must be provided in config')
 }
 
 export class WarpSuiRegistry implements AdapterWarpRegistry {
@@ -58,12 +59,20 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
   }
 
   createWarpRegisterTransaction(txHash: string, alias?: string | null, brand?: string | null): Transaction {
+    return this._createWarpRegisterTransaction(getRegistryObjectId(this.config), txHash, alias, brand)
+  }
+  private _createWarpRegisterTransaction(
+    registryObjectId: string,
+    txHash: string,
+    alias?: string | null,
+    brand?: string | null
+  ): Transaction {
     if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
     const tx = new Transaction()
     tx.moveCall({
       target: toRegistryMoveTarget(this.config.env, 'register_warp'),
       arguments: [
-        tx.object(REGISTRY.RegistryObjectId),
+        tx.object(registryObjectId),
         tx.pure.vector('u8', Array.from(Buffer.from(txHash, 'hex'))),
         alias ? tx.pure.option('string', alias) : tx.pure.option('string', undefined),
         brand ? tx.pure.option('vector<u8>', Array.from(Buffer.from(brand, 'hex'))) : tx.pure.option('vector<u8>', undefined),
@@ -75,12 +84,15 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
   }
 
   createWarpUnregisterTransaction(txHash: string): Transaction {
+    return this._createWarpUnregisterTransaction(getRegistryObjectId(this.config), txHash)
+  }
+  private _createWarpUnregisterTransaction(registryObjectId: string, txHash: string): Transaction {
     if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
     const tx = new Transaction()
     tx.moveCall({
-      target: `${REGISTRY.RegistryPackageId}::${REGISTRY.RegistryModule}::unregister_warp`,
+      target: toRegistryMoveTarget(this.config.env, 'unregister_warp'),
       arguments: [
-        tx.object(REGISTRY.RegistryObjectId),
+        tx.object(registryObjectId),
         tx.pure.vector('u8', Array.from(Buffer.from(txHash, 'hex'))),
         tx.gas,
         tx.pure.address(this.config.user.wallet),
@@ -90,12 +102,15 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
   }
 
   createWarpUpgradeTransaction(alias: string, txHash: string): Transaction {
+    return this._createWarpUpgradeTransaction(getRegistryObjectId(this.config), alias, txHash)
+  }
+  private _createWarpUpgradeTransaction(registryObjectId: string, alias: string, txHash: string): Transaction {
     if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
     const tx = new Transaction()
     tx.moveCall({
-      target: `${REGISTRY.RegistryPackageId}::${REGISTRY.RegistryModule}::upgrade_warp`,
+      target: toRegistryMoveTarget(this.config.env, 'upgrade_warp'),
       arguments: [
-        tx.object(REGISTRY.RegistryObjectId),
+        tx.object(registryObjectId),
         tx.pure.string(alias),
         tx.pure.vector('u8', Array.from(Buffer.from(txHash, 'hex'))),
         tx.gas,
@@ -106,12 +121,15 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
   }
 
   createWarpAliasSetTransaction(txHash: string, alias: string): Transaction {
+    return this._createWarpAliasSetTransaction(getRegistryObjectId(this.config), txHash, alias)
+  }
+  private _createWarpAliasSetTransaction(registryObjectId: string, txHash: string, alias: string): Transaction {
     if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
     const tx = new Transaction()
     tx.moveCall({
-      target: `${REGISTRY.RegistryPackageId}::${REGISTRY.RegistryModule}::set_warp_alias`,
+      target: toRegistryMoveTarget(this.config.env, 'set_warp_alias'),
       arguments: [
-        tx.object(REGISTRY.RegistryObjectId),
+        tx.object(registryObjectId),
         tx.pure.vector('u8', Array.from(Buffer.from(txHash, 'hex'))),
         tx.pure.string(alias),
         tx.gas,
@@ -122,12 +140,15 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
   }
 
   createWarpVerifyTransaction(txHash: string): Transaction {
+    return this._createWarpVerifyTransaction(getRegistryObjectId(this.config), txHash)
+  }
+  private _createWarpVerifyTransaction(registryObjectId: string, txHash: string): Transaction {
     if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
     const tx = new Transaction()
     tx.moveCall({
-      target: `${REGISTRY.RegistryPackageId}::${REGISTRY.RegistryModule}::verify_warp`,
+      target: toRegistryMoveTarget(this.config.env, 'verify_warp'),
       arguments: [
-        tx.object(REGISTRY.RegistryObjectId),
+        tx.object(registryObjectId),
         tx.pure.vector('u8', Array.from(Buffer.from(txHash, 'hex'))),
         tx.gas,
         tx.pure.address(this.config.user.wallet),
@@ -137,12 +158,15 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
   }
 
   createWarpTransferOwnershipTransaction(txHash: string, newOwner: string): Transaction {
+    return this._createWarpTransferOwnershipTransaction(getRegistryObjectId(this.config), txHash, newOwner)
+  }
+  private _createWarpTransferOwnershipTransaction(registryObjectId: string, txHash: string, newOwner: string): Transaction {
     if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
     const tx = new Transaction()
     tx.moveCall({
-      target: `${REGISTRY.RegistryPackageId}::${REGISTRY.RegistryModule}::transfer_ownership`,
+      target: toRegistryMoveTarget(this.config.env, 'transfer_ownership'),
       arguments: [
-        tx.object(REGISTRY.RegistryObjectId),
+        tx.object(registryObjectId),
         tx.pure.vector('u8', Array.from(Buffer.from(txHash, 'hex'))),
         tx.pure.address(newOwner),
         tx.gas,
@@ -153,12 +177,15 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
   }
 
   createBrandRegisterTransaction(brand: string): Transaction {
+    return this._createBrandRegisterTransaction(getRegistryObjectId(this.config), brand)
+  }
+  private _createBrandRegisterTransaction(registryObjectId: string, brand: string): Transaction {
     if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
     const tx = new Transaction()
     tx.moveCall({
-      target: `${REGISTRY.RegistryPackageId}::${REGISTRY.RegistryModule}::register_brand`,
+      target: toRegistryMoveTarget(this.config.env, 'register_brand'),
       arguments: [
-        tx.object(REGISTRY.RegistryObjectId),
+        tx.object(registryObjectId),
         tx.pure.vector('u8', Array.from(Buffer.from(brand, 'hex'))),
         tx.gas,
         tx.pure.address(this.config.user.wallet),
@@ -168,12 +195,15 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
   }
 
   createWarpBrandingTransaction(warpHash: string, brandHash: string): Transaction {
+    return this._createWarpBrandingTransaction(getRegistryObjectId(this.config), warpHash, brandHash)
+  }
+  private _createWarpBrandingTransaction(registryObjectId: string, warpHash: string, brandHash: string): Transaction {
     if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
     const tx = new Transaction()
     tx.moveCall({
-      target: `${REGISTRY.RegistryPackageId}::${REGISTRY.RegistryModule}::brand_warp`,
+      target: toRegistryMoveTarget(this.config.env, 'brand_warp'),
       arguments: [
-        tx.object(REGISTRY.RegistryObjectId),
+        tx.object(registryObjectId),
         tx.pure.vector('u8', Array.from(Buffer.from(warpHash, 'hex'))),
         tx.pure.vector('u8', Array.from(Buffer.from(brandHash, 'hex'))),
         tx.gas,
@@ -187,6 +217,13 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
     alias: string,
     cacheConfig?: WarpCacheConfig
   ): Promise<{ registryInfo: WarpRegistryInfo | null; brand: WarpBrand | null }> {
+    return this._getInfoByAlias(getRegistryObjectId(this.config), alias, cacheConfig)
+  }
+  private async _getInfoByAlias(
+    registryObjectId: string,
+    alias: string,
+    cacheConfig?: WarpCacheConfig
+  ): Promise<{ registryInfo: WarpRegistryInfo | null; brand: WarpBrand | null }> {
     const cacheKey = `sui:registry:info:alias:${alias}`
     const cached = cacheConfig ? getCache(cacheKey) : null
     if (cached) {
@@ -194,10 +231,7 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
       return cached
     }
     try {
-      const res = await this.client.call(`${REGISTRY.RegistryPackageId}::${REGISTRY.RegistryModule}::get_info_by_alias`, [
-        REGISTRY.RegistryObjectId,
-        alias,
-      ])
+      const res = await this.client.call(toRegistryMoveTarget(this.config.env, 'get_info_by_alias'), [registryObjectId, alias])
       const infoView = res ? res : null
       const registryInfo = infoView ? toTypedRegistryInfo(infoView) : null
       const brand = registryInfo?.brand ? await this.fetchBrand(registryInfo.brand, cacheConfig) : null
@@ -210,6 +244,13 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
   }
 
   async getInfoByHash(hash: string, cache?: WarpCacheConfig): Promise<{ registryInfo: WarpRegistryInfo | null; brand: WarpBrand | null }> {
+    return this._getInfoByHash(getRegistryObjectId(this.config), hash, cache)
+  }
+  private async _getInfoByHash(
+    registryObjectId: string,
+    hash: string,
+    cache?: WarpCacheConfig
+  ): Promise<{ registryInfo: WarpRegistryInfo | null; brand: WarpBrand | null }> {
     const cacheKey = `sui:registry:info:hash:${hash}`
     const cached = cache ? getCache(cacheKey) : null
     if (cached) {
@@ -217,8 +258,8 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
       return cached
     }
     try {
-      const res = await this.client.call(`${REGISTRY.RegistryPackageId}::${REGISTRY.RegistryModule}::get_info_by_hash`, [
-        REGISTRY.RegistryObjectId,
+      const res = await this.client.call(toRegistryMoveTarget(this.config.env, 'get_info_by_hash'), [
+        registryObjectId,
         Array.from(Buffer.from(hash, 'hex')),
       ])
       const infoView = res ? res : null
@@ -233,6 +274,9 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
   }
 
   async getUserWarpRegistryInfos(user?: string): Promise<WarpRegistryInfo[]> {
+    return this._getUserWarpRegistryInfos(getRegistryObjectId(this.config), user)
+  }
+  private async _getUserWarpRegistryInfos(registryObjectId: string, user?: string): Promise<WarpRegistryInfo[]> {
     const cacheKey = `sui:registry:user:${user || this.config.user?.wallet}`
     const cached = getCache(cacheKey)
     if (cached) {
@@ -244,10 +288,7 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
     try {
       const userAddress = user || this.config.user?.wallet
       if (!userAddress) throw new Error('WarpRegistry: user address not set')
-      const res = await this.client.call(`${REGISTRY.RegistryPackageId}::${REGISTRY.RegistryModule}::get_user_warps`, [
-        REGISTRY.RegistryObjectId,
-        userAddress,
-      ])
+      const res = await this.client.call(toRegistryMoveTarget(this.config.env, 'get_user_warps'), [registryObjectId, userAddress])
       const registryInfos = Array.isArray(res) ? res.map(toTypedRegistryInfo) : []
       if (user) setCache(cacheKey, registryInfos)
       return registryInfos
@@ -258,6 +299,9 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
   }
 
   async getUserBrands(user?: string): Promise<WarpBrand[]> {
+    return this._getUserBrands(getRegistryObjectId(this.config), user)
+  }
+  private async _getUserBrands(registryObjectId: string, user?: string): Promise<WarpBrand[]> {
     const cacheKey = `sui:registry:user:brands:${user || this.config.user?.wallet}`
     const cached = getCache(cacheKey)
     if (cached) {
@@ -267,10 +311,7 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
     try {
       const userAddress = user || this.config.user?.wallet
       if (!userAddress) throw new Error('WarpRegistry: user address not set')
-      const res = await this.client.call(`${REGISTRY.RegistryPackageId}::${REGISTRY.RegistryModule}::get_user_brands`, [
-        REGISTRY.RegistryObjectId,
-        userAddress,
-      ])
+      const res = await this.client.call(toRegistryMoveTarget(this.config.env, 'get_user_brands'), [registryObjectId, userAddress])
       if (!Array.isArray(res)) return []
       const brands = await Promise.all(res.map((hash: string) => this.fetchBrand(hash)))
       const filteredBrands = brands.filter((b) => b !== null) as WarpBrand[]
@@ -283,6 +324,9 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
   }
 
   async getChainInfos(cache?: WarpCacheConfig): Promise<WarpChainInfo[]> {
+    return this._getChainInfos(getRegistryObjectId(this.config), cache)
+  }
+  private async _getChainInfos(registryObjectId: string, cache?: WarpCacheConfig): Promise<WarpChainInfo[]> {
     const cacheKey = `sui:registry:chains`
     const cached = cache ? getCache(cacheKey) : null
     if (cached) {
@@ -290,9 +334,7 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
       return cached
     }
     try {
-      const res = await this.client.call(`${REGISTRY.RegistryPackageId}::${REGISTRY.RegistryModule}::get_chains`, [
-        REGISTRY.RegistryObjectId,
-      ])
+      const res = await this.client.call(toRegistryMoveTarget(this.config.env, 'get_chains'), [registryObjectId])
       const chainInfos = Array.isArray(res) ? res.map(toTypedChainInfo) : []
       if (cache && cache.ttl) setCache(cacheKey, chainInfos, cache.ttl)
       return chainInfos
@@ -304,7 +346,6 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
 
   async getChainInfo(chain: WarpChain, _cache?: WarpCacheConfig): Promise<WarpChainInfo | null> {
     if (chain !== 'sui') return null
-
     return {
       name: 'sui',
       displayName: 'Sui',
@@ -333,10 +374,8 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
       return cached
     }
     try {
-      // Sui: fetch transaction by hash and parse data as WarpBrand
       const tx = await this.client.getTransactionBlock({ digest: hash })
       if (!tx || !tx.effects) return null
-      // Sui: try to extract brand from transaction's events or object changes
       let brandData: any = null
       if (tx.events && Array.isArray(tx.events)) {
         for (const event of tx.events) {
@@ -352,7 +391,6 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
         for (const obj of tx.objectChanges) {
           if (obj.type === 'created' && obj.objectType && obj.objectType.includes('Brand')) {
             try {
-              // No 'fields' or 'data' property available, skip
               break
             } catch {}
           }
