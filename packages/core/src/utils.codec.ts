@@ -36,7 +36,7 @@ export const u16 = (value: number): string => `${WarpInputTypes.U16}:${value}`
 
 export const u32 = (value: number): string => `${WarpInputTypes.U32}:${value}`
 
-export const u64 = (value: bigint): string => `${WarpInputTypes.U64}:${value}`
+export const u64 = (value: bigint | number): string => `${WarpInputTypes.U64}:${value}`
 
 export const biguint = (value: bigint | string | number): string => `${WarpInputTypes.Biguint}:${value}`
 
