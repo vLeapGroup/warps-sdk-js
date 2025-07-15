@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.49
+
+### Patch Changes
+
+- e69c5b9: update u64 util
+
 ## 3.0.0-alpha.48
 
 ### Minor Changes
