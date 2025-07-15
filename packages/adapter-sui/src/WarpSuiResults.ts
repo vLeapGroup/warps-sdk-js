@@ -16,6 +16,7 @@ import {
   WarpExecutionResults,
 } from '@vleap/warps'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
+import { WarpSuiConstants } from './constants'
 
 export class WarpSuiResults implements AdapterWarpResults {
   private readonly serializer: WarpSuiSerializer
@@ -36,7 +37,7 @@ export class WarpSuiResults implements AdapterWarpResults {
       success: tx.effects?.status?.status === 'success',
       warp,
       action: actionIndex,
-      user: this.config.user?.wallet || null,
+      user: this.config.user?.wallets?.[WarpSuiConstants.ChainName] || null,
       txHash: tx.digest,
       next,
       values: results.values,

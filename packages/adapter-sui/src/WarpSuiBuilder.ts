@@ -1,20 +1,23 @@
 import { SuiClient } from '@mysten/sui/client'
 import { Transaction } from '@mysten/sui/transactions'
 import { AdapterWarpBuilder, Warp, WarpCache, WarpCacheConfig, WarpClientConfig } from '@vleap/warps'
+import { WarpSuiConstants } from './constants'
 import { toRegistryMoveTarget } from './helpers/registry'
 
 export class WarpSuiBuilder implements AdapterWarpBuilder {
   private cache: WarpCache
   private client: SuiClient
+  private userWallet: string | null
 
   constructor(private config: WarpClientConfig) {
     this.cache = new WarpCache(config.cache?.type)
     this.client = new SuiClient({ url: String(config.currentUrl) })
+    this.userWallet = this.config.user?.wallets?.[WarpSuiConstants.ChainName] || null
   }
 
   createInscriptionTransaction(warp: Warp, registryObjectId?: string): Transaction {
     if (!registryObjectId) throw new Error('WarpSuiBuilder: registryObjectId is required')
-    if (!this.config.user?.wallet) throw new Error('WarpSuiBuilder: user address not set')
+    if (!this.userWallet) throw new Error('WarpSuiBuilder: user address not set')
     if (!warp.meta || !warp.meta.hash) throw new Error('WarpSuiBuilder: warp.meta.hash is required')
     const hashBytes = Array.from(Buffer.from(warp.meta.hash, 'hex'))
     const alias = (warp as any).meta?.alias ?? undefined
@@ -28,7 +31,7 @@ export class WarpSuiBuilder implements AdapterWarpBuilder {
         alias ? tx.pure.option('string', alias) : tx.pure.option('string', undefined),
         brandBytes ? tx.pure.option('vector<u8>', brandBytes) : tx.pure.option('vector<u8>', undefined),
         tx.gas,
-        tx.pure.address(this.config.user.wallet),
+        tx.pure.address(this.userWallet),
       ],
     })
     return tx

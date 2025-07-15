@@ -5,10 +5,11 @@ import { WarpSuiExplorer } from './WarpSuiExplorer'
 import { WarpSuiRegistry } from './WarpSuiRegistry'
 import { WarpSuiResults } from './WarpSuiResults'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
+import { WarpSuiConstants } from './constants'
 
 export const getSuiAdapter = (config: WarpClientConfig): Adapter => {
   return {
-    chain: 'sui',
+    chain: WarpSuiConstants.ChainName,
     prefix: 'sui',
     builder: new WarpSuiBuilder(config),
     executor: new WarpSuiExecutor(config),

@@ -21,7 +21,7 @@ export const WarpConstants = {
   Globals: {
     UserWallet: {
       Placeholder: 'USER_WALLET',
-      Accessor: (bag: InterpolationBag) => bag.config.user?.wallet,
+      Accessor: (bag: InterpolationBag) => bag.config.user?.wallets?.[bag.chain.name],
     },
     ChainApiUrl: {
       Placeholder: 'CHAIN_API',

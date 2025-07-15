@@ -65,8 +65,9 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
   }
 
   async createTransferTransaction(executable: WarpExecutable): Promise<Transaction> {
-    if (!this.config.user?.wallet) throw new Error('WarpMultiversxExecutor: createTransfer - user address not set')
-    const sender = Address.newFromBech32(this.config.user.wallet)
+    const userWallet = this.config.user?.wallets?.[executable.chain.name]
+    if (!userWallet) throw new Error('WarpMultiversxExecutor: createTransfer - user address not set')
+    const sender = Address.newFromBech32(userWallet)
     const config = new TransactionsFactoryConfig({ chainID: executable.chain.chainId })
     const data = executable.data ? Buffer.from(this.serializer.stringToTyped(executable.data).valueOf()) : null
     return new TransferTransactionsFactory({ config }).createTransactionForTransfer(sender, {
@@ -78,9 +79,10 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
   }
 
   async createContractCallTransaction(executable: WarpExecutable): Promise<Transaction> {
-    if (!this.config.user?.wallet) throw new Error('WarpMultiversxExecutor: createContractCall - user address not set')
+    const userWallet = this.config.user?.wallets?.[executable.chain.name]
+    if (!userWallet) throw new Error('WarpMultiversxExecutor: createContractCall - user address not set')
     const action = getWarpActionByIndex(executable.warp, executable.action)
-    const sender = Address.newFromBech32(this.config.user.wallet)
+    const sender = Address.newFromBech32(userWallet)
     const typedArgs = executable.args.map((arg) => this.serializer.stringToTyped(arg))
     const config = new TransactionsFactoryConfig({ chainID: executable.chain.chainId })
     return new SmartContractTransactionsFactory({ config }).createTransactionForExecute(sender, {
@@ -120,7 +122,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
       success: isSuccess,
       warp: executable.warp,
       action: executable.action,
-      user: this.config.user?.wallet || null,
+      user: this.config.user?.wallets?.[executable.chain.name] || null,
       txHash: null,
       next,
       values,

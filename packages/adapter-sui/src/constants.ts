@@ -1,4 +1,5 @@
 export const WarpSuiConstants = {
+  ChainName: 'sui',
   Sui: {
     Identifier: 'SUI',
     DisplayName: 'Sui',

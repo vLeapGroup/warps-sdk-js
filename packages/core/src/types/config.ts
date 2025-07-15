@@ -5,13 +5,15 @@ import { WarpRegistryInfo } from './registry'
 import { WarpExecution } from './results'
 import { BaseWarpActionInputType, Warp, WarpActionInputType, WarpChain, WarpChainInfo, WarpExecutable, WarpNativeValue } from './warp'
 
+export type WarpUserWallets = Record<WarpChain, string | null>
+
 export type WarpClientConfig = {
   env: WarpChainEnv
   clientUrl?: string
   currentUrl?: string
   vars?: Record<string, string | number>
   user?: {
-    wallet?: string
+    wallets?: WarpUserWallets
   }
   schema?: {
     warp?: string

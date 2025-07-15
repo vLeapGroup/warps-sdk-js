@@ -11,7 +11,9 @@ const path = require('path')
 const testConfig: WarpClientConfig = {
   env: 'devnet',
   user: {
-    wallet: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+    wallets: {
+      MULTIVERSX: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+    },
   },
   currentUrl: 'https://example.com',
 }
@@ -502,7 +504,7 @@ describe('Result Helpers', () => {
           success: true,
           warp: warpArg,
           action: actionIndex,
-          user: testConfig.user?.wallet || null,
+          user: testConfig.user?.wallets?.MULTIVERSX || null,
           txHash: '',
           next: null,
           values: [],
@@ -520,7 +522,7 @@ describe('Result Helpers', () => {
           success: true,
           warp,
           action: 1,
-          user: testConfig.user?.wallet || null,
+          user: testConfig.user?.wallets?.MULTIVERSX || null,
           txHash: '',
           next: null,
           values: [],
@@ -621,7 +623,7 @@ describe('Result Helpers', () => {
           success: true,
           warp: warpArg,
           action: actionIndex,
-          user: testConfig.user?.wallet || null,
+          user: testConfig.user?.wallets?.MULTIVERSX || null,
           txHash: '',
           next: null,
           values: [],
@@ -639,7 +641,7 @@ describe('Result Helpers', () => {
           success: true,
           warp,
           action: 1,
-          user: testConfig.user?.wallet || null,
+          user: testConfig.user?.wallets?.MULTIVERSX || null,
           txHash: '',
           next: null,
           values: [],

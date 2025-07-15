@@ -72,7 +72,7 @@ const Config: WarpClientConfig = createMockConfig({
   clientUrl: 'https://anyclient.com',
   currentUrl: 'https://anyclient.com',
   vars: {},
-  user: { wallet: 'erd1abc' },
+  user: { wallets: { MULTIVERSX: 'erd1abc' } },
   schema: {
     warp: 'https://schema.warp.to/warp.json',
     brand: 'https://schema.warp.to/brand.json',

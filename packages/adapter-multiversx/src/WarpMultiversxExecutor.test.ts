@@ -4,9 +4,7 @@ import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
 const testConfig: WarpConfig = {
   env: 'devnet' as WarpChainEnv,
-  user: {
-    wallet: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
-  },
+  user: { wallets: { MULTIVERSX: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8' } },
   currentUrl: 'https://example.com',
 }
 
@@ -23,7 +21,16 @@ describe('WarpMultiversxExecutor', () => {
     const warp = { actions: [action] } as any as Warp
     const executable = {
       warp,
-      chain: { chainId: 'D', apiUrl: '', addressHrp: '', blockTime: 0, displayName: '', explorerUrl: '', name: '', nativeToken: '' },
+      chain: {
+        chainId: 'D',
+        apiUrl: '',
+        addressHrp: '',
+        blockTime: 0,
+        displayName: '',
+        explorerUrl: '',
+        name: 'MULTIVERSX',
+        nativeToken: '',
+      },
       action: 1,
       destination: action.address!,
       args: [],
@@ -49,7 +56,16 @@ describe('WarpMultiversxExecutor', () => {
     const warp = { actions: [action] } as any as Warp
     const executable = {
       warp,
-      chain: { chainId: 'D', apiUrl: '', addressHrp: '', blockTime: 0, displayName: '', explorerUrl: '', name: '', nativeToken: '' },
+      chain: {
+        chainId: 'D',
+        apiUrl: '',
+        addressHrp: '',
+        blockTime: 0,
+        displayName: '',
+        explorerUrl: '',
+        name: 'MULTIVERSX',
+        nativeToken: '',
+      },
       action: 1,
       destination: action.address!,
       args: [],
@@ -75,7 +91,16 @@ describe('WarpMultiversxExecutor', () => {
     const warp = { actions: [action] } as any as Warp
     const executable = {
       warp,
-      chain: { chainId: 'D', apiUrl: '', addressHrp: '', blockTime: 0, displayName: '', explorerUrl: '', name: '', nativeToken: '' },
+      chain: {
+        chainId: 'D',
+        apiUrl: '',
+        addressHrp: '',
+        blockTime: 0,
+        displayName: '',
+        explorerUrl: '',
+        name: 'MULTIVERSX',
+        nativeToken: '',
+      },
       action: 1,
       destination: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
       args: [],

@@ -6,7 +6,7 @@ import { WarpFactory } from './WarpFactory'
 
 const testConfig: WarpClientConfig = {
   env: 'devnet',
-  user: { wallet: 'erd1...' },
+  user: { wallets: { multiversx: 'erd1...' } },
   clientUrl: 'https://devnet.usewarp.to',
   currentUrl: 'https://devnet.usewarp.to',
 }
@@ -73,7 +73,7 @@ describe('getNextInfo', () => {
 
 describe('WarpFactory', () => {
   const config = createMockConfig({
-    user: { wallet: 'erd1testwallet' },
+    user: { wallets: { multiversx: 'erd1testwallet' } },
     currentUrl: 'https://example.com?foo=bar',
   })
   const chain: WarpChainInfo = {

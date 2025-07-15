@@ -108,8 +108,8 @@ export class WarpFactory {
         if (!value) return null
         return this.serializer.nativeToString(input.type, value)
       } else if (input.source === WarpConstants.Source.UserWallet) {
-        if (!this.config.user?.wallet) return null
-        return this.serializer.nativeToString('address', this.config.user.wallet)
+        if (!this.config.user?.wallets?.[chain.name]) return null
+        return this.serializer.nativeToString('address', this.config.user.wallets[chain.name])
       } else {
         return preprocessed[index] || null
       }

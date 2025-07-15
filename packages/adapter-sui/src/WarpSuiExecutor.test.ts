@@ -1,7 +1,7 @@
 import { WarpSuiExecutor } from './WarpSuiExecutor'
 
 describe('WarpSuiExecutor', () => {
-  const config = { currentUrl: 'https://fullnode.devnet.sui.io', user: { wallet: '0x1234' } } as any
+  const config = { currentUrl: 'https://fullnode.devnet.sui.io', user: { wallets: { sui: '0x1234' } } } as any
   const executor = new WarpSuiExecutor(config)
   const chain = {
     name: 'sui',

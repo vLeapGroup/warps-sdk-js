@@ -25,13 +25,14 @@ import {
 } from '@vleap/warps'
 import RegistryAbi from './abis/registry.abi.json'
 import { getMultiversxRegistryAddress } from './config'
+import { WarpMultiversxConstants } from './constants'
 import { toTypedConfigInfo, toTypedRegistryInfo } from './helpers/registry'
 import { string_value, u32_value } from './utils.codec'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
 export class WarpMultiversxRegistry implements AdapterWarpRegistry {
   private cache: WarpCache
-
+  private userWallet: string | null
   public registryConfig: WarpRegistryConfigInfo
 
   constructor(private config: WarpClientConfig) {
@@ -40,6 +41,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
       unitPrice: BigInt(0),
       admins: [],
     }
+    this.userWallet = this.config.user?.wallets?.[WarpMultiversxConstants.ChainName] || null
   }
 
   async init(): Promise<void> {
@@ -48,8 +50,8 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
 
   createWarpRegisterTransaction(txHash: string, alias?: string | null, brand?: string | null): Transaction {
     if (this.registryConfig.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
-    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.user.wallet)
+    if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.userWallet)
 
     const calculateCostAmount = (): bigint => {
       if (this.isCurrentUserAdmin()) return BigInt(0)
@@ -74,8 +76,8 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
   }
 
   createWarpUnregisterTransaction(txHash: string): Transaction {
-    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.user.wallet)
+    if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.userWallet)
     return this.getFactory().createTransactionForExecute(sender, {
       contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
       function: 'unregisterWarp',
@@ -86,8 +88,8 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
 
   createWarpUpgradeTransaction(alias: string, txHash: string): Transaction {
     if (this.registryConfig.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
-    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.user.wallet)
+    if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.userWallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
       contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
@@ -99,8 +101,8 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
   }
 
   createWarpAliasSetTransaction(txHash: string, alias: string): Transaction {
-    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.user.wallet)
+    if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.userWallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
       contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
@@ -112,8 +114,8 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
   }
 
   createWarpVerifyTransaction(txHash: string): Transaction {
-    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.user.wallet)
+    if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.userWallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
       contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
@@ -124,8 +126,8 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
   }
 
   createWarpTransferOwnershipTransaction(txHash: string, newOwner: string): Transaction {
-    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.user.wallet)
+    if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.userWallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
       contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
@@ -137,8 +139,8 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
 
   createBrandRegisterTransaction(txHash: string): Transaction {
     if (this.registryConfig.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
-    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.user.wallet)
+    if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.userWallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
       contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
@@ -150,8 +152,8 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
   }
 
   createWarpBrandingTransaction(warpHash: string, brandHash: string): Transaction {
-    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.user.wallet)
+    if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.userWallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
       contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
@@ -224,7 +226,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
 
   async getUserWarpRegistryInfos(user?: string): Promise<WarpRegistryInfo[]> {
     try {
-      const userWallet = user || this.config.user?.wallet
+      const userWallet = user || this.userWallet
       if (!userWallet) throw new Error('WarpRegistry: user address not set')
       const contract = Address.newFromBech32(getMultiversxRegistryAddress(this.config.env))
       const controller = this.getController()
@@ -239,7 +241,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
 
   async getUserBrands(user?: string): Promise<WarpBrand[]> {
     try {
-      const userWallet = user || this.config.user?.wallet
+      const userWallet = user || this.userWallet
       if (!userWallet) throw new Error('WarpRegistry: user address not set')
       const contract = Address.newFromBech32(getMultiversxRegistryAddress(this.config.env))
       const controller = this.getController()
@@ -311,8 +313,8 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
   }
 
   async setChain(info: WarpChainInfo): Promise<Transaction> {
-    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.user.wallet)
+    if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.userWallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
       contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
@@ -332,8 +334,8 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
   }
 
   async removeChain(chain: WarpChain): Promise<Transaction> {
-    if (!this.config.user?.wallet) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.config.user.wallet)
+    if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
+    const sender = Address.newFromBech32(this.userWallet)
 
     return this.getFactory().createTransactionForExecute(sender, {
       contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
@@ -399,6 +401,6 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
   }
 
   private isCurrentUserAdmin(): boolean {
-    return !!this.config.user?.wallet && this.registryConfig.admins.includes(this.config.user.wallet)
+    return !!this.userWallet && this.registryConfig.admins.includes(this.userWallet)
   }
 }

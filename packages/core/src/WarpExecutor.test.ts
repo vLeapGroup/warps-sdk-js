@@ -10,7 +10,7 @@ describe('WarpExecutor', () => {
 
   const config: WarpClientConfig = {
     env: 'devnet',
-    user: { wallet: 'erd1...' },
+    user: { wallets: { MULTIVERSX: 'erd1...' } },
     clientUrl: 'https://anyclient.com',
     currentUrl: 'https://anyclient.com',
   }

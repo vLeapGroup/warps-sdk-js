@@ -6,10 +6,11 @@ import { WarpMultiversxExplorer } from './WarpMultiversxExplorer'
 import { WarpMultiversxRegistry } from './WarpMultiversxRegistry'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
+import { WarpMultiversxConstants } from './constants'
 
 export const getMultiversxAdapter = (config: WarpClientConfig): Adapter => {
   return {
-    chain: 'multiversx',
+    chain: WarpMultiversxConstants.ChainName,
     prefix: 'mvx',
     builder: new WarpMultiversxBuilder(config),
     executor: new WarpMultiversxExecutor(config),

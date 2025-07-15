@@ -25,6 +25,7 @@ import {
 } from '@vleap/warps'
 import { WarpMultiversxAbi } from './WarpMultiversxAbi'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
+import { WarpMultiversxConstants } from './constants'
 
 export class WarpMultiversxResults implements AdapterWarpResults {
   private readonly abi: WarpMultiversxAbi
@@ -51,7 +52,7 @@ export class WarpMultiversxResults implements AdapterWarpResults {
       success: tx.status.isSuccessful(),
       warp,
       action: actionIndex,
-      user: this.config.user?.wallet || null,
+      user: this.config.user?.wallets?.[WarpMultiversxConstants.ChainName] || null,
       txHash: tx.hash,
       next,
       values: results.values,

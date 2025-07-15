@@ -15,16 +15,19 @@ import {
 } from '@vleap/warps'
 import { WarpSuiResults } from './WarpSuiResults'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
+import { WarpSuiConstants } from './constants'
 
 export class WarpSuiExecutor implements AdapterWarpExecutor {
   private readonly serializer: WarpSuiSerializer
   private readonly results: WarpSuiResults
   private readonly client: SuiClient
+  private readonly userWallet: string | null
 
   constructor(private readonly config: WarpClientConfig) {
     this.serializer = new WarpSuiSerializer()
     this.results = new WarpSuiResults(this.config)
     this.client = new SuiClient({ url: this.config.currentUrl! })
+    this.userWallet = this.config.user?.wallets?.[WarpSuiConstants.ChainName] || null
   }
 
   async createTransaction(executable: WarpExecutable): Promise<Transaction> {
@@ -42,7 +45,7 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
   }
 
   async createTransferTransaction(executable: WarpExecutable): Promise<Transaction> {
-    if (!this.config.user?.wallet) throw new Error('WarpSuiExecutor: createTransfer - user address not set')
+    if (!this.userWallet) throw new Error('WarpSuiExecutor: createTransfer - user address not set')
     const tx = new Transaction()
     const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(Number(executable.value))])
     tx.transferObjects([coin], tx.pure.address(executable.destination))
@@ -50,7 +53,7 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
   }
 
   async createContractCallTransaction(executable: WarpExecutable): Promise<Transaction> {
-    if (!this.config.user?.wallet) throw new Error('WarpSuiExecutor: createContractCall - user address not set')
+    if (!this.userWallet) throw new Error('WarpSuiExecutor: createContractCall - user address not set')
     const action = getWarpActionByIndex(executable.warp, executable.action) as WarpContractAction
     if (!action.func) throw new Error('WarpSuiExecutor: createContractCall - function not set')
     const tx = new Transaction()
@@ -76,7 +79,7 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
       success: true,
       warp: executable.warp,
       action: executable.action,
-      user: this.config.user?.wallet || null,
+      user: this.userWallet,
       txHash: null,
       next,
       values: extractedValues,

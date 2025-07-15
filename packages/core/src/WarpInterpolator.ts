@@ -42,8 +42,9 @@ export class WarpInterpolator {
         const envVarName = value.split(`${WarpConstants.Vars.Env}:`)[1]
         const envVarValue = config.vars?.[envVarName]
         if (envVarValue) modify(placeholder, envVarValue)
-      } else if (value === WarpConstants.Source.UserWallet && config.user?.wallet) {
-        modify(placeholder, config.user.wallet)
+      } else if (value === WarpConstants.Source.UserWallet && config.user?.wallets?.[this.adapter.chain]) {
+        const wallet = config.user.wallets[this.adapter.chain]
+        if (wallet) modify(placeholder, wallet)
       } else {
         modify(placeholder, value)
       }
