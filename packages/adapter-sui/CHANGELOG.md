@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.12
+
+### Patch Changes
+
+- 8e3d840: add registry config accessor
+- Updated dependencies [8e3d840]
+  - @vleap/warps@3.0.0-alpha.53
+
 ## 0.2.0-alpha.11
 
 ### Minor Changes

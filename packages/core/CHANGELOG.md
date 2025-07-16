@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.53
+
+### Patch Changes
+
+- 8e3d840: add registry config accessor
+
 ## 3.0.0-alpha.52
 
 ### Patch Changes
