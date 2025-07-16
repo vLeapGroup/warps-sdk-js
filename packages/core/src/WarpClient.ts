@@ -33,6 +33,10 @@ export class WarpClient {
     return this
   }
 
+  getAdapters(): Adapter[] {
+    return this.adapters
+  }
+
   addAdapter(adapter: Adapter): WarpClient {
     this.adapters.push(adapter)
     return this
