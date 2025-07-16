@@ -101,8 +101,10 @@ export class WarpClient {
     return findWarpAdapterForChain(chain.name, this.adapters).results
   }
 
-  getRegistry(chain: WarpChain): AdapterWarpRegistry {
-    return findWarpAdapterForChain(chain, this.adapters).registry
+  async getRegistry(chain: WarpChain): Promise<AdapterWarpRegistry> {
+    const registry = findWarpAdapterForChain(chain, this.adapters).registry
+    await registry.init()
+    return registry
   }
 
   get factory(): WarpFactory {

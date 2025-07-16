@@ -74,6 +74,7 @@ export interface AdapterWarpSerializer {
 }
 
 export interface AdapterWarpRegistry {
+  init(): Promise<void>
   createWarpRegisterTransaction(txHash: string, alias?: string | null, brand?: string | null): WarpAdapterGenericTransaction
   createWarpUnregisterTransaction(txHash: string): WarpAdapterGenericTransaction
   createWarpUpgradeTransaction(alias: string, txHash: string): WarpAdapterGenericTransaction
