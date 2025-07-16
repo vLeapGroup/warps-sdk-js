@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.50
+
+### Minor Changes
+
+- c4287f5: add index to client
+
+### Patch Changes
+
+- 8739a1f: update client create from tx hash
+
 ## 3.0.0-alpha.49
 
 ### Patch Changes
