@@ -1,4 +1,4 @@
-import { findWarpAdapterForChain } from './helpers'
+import { findWarpAdapterByPrefix, findWarpAdapterForChain, getWarpInfoFromIdentifier } from './helpers'
 import {
   Adapter,
   AdapterWarpExplorer,
@@ -15,6 +15,7 @@ import {
 import { WarpBuilder } from './WarpBuilder'
 import { ExecutionHandlers, WarpExecutor } from './WarpExecutor'
 import { WarpFactory } from './WarpFactory'
+import { WarpIndex } from './WarpIndex'
 import { DetectionResult, WarpLinkDetecter } from './WarpLinkDetecter'
 
 export class WarpClient {
@@ -81,8 +82,11 @@ export class WarpClient {
     return findWarpAdapterForChain(chain, this.adapters).builder.createFromTransaction(tx, validate)
   }
 
-  async createFromTransactionHash(chain: WarpChain, hash: string, cache?: WarpCacheConfig): Promise<Warp | null> {
-    return findWarpAdapterForChain(chain, this.adapters).builder.createFromTransactionHash(hash, cache)
+  async createFromTransactionHash(hash: string, cache?: WarpCacheConfig): Promise<Warp | null> {
+    const identifierInfo = getWarpInfoFromIdentifier(hash)
+    if (!identifierInfo) throw new Error('WarpClient: createFromTransactionHash - invalid hash')
+    const adapter = findWarpAdapterByPrefix(identifierInfo.chainPrefix, this.adapters)
+    return adapter.builder.createFromTransactionHash(hash, cache)
   }
 
   getExplorer(chain: WarpChainInfo): AdapterWarpExplorer {
