@@ -37,6 +37,7 @@ export type Warp = {
 }
 
 export type WarpMeta = {
+  chain: WarpChain
   hash: string
   creator: string
   createdAt: string

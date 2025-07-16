@@ -45,6 +45,7 @@ export class WarpSuiBuilder implements AdapterWarpBuilder {
     const createdAt = info.created_at ? new Date(Number(info.created_at)).toISOString() : ''
     const warp: Warp = {
       meta: {
+        chain: WarpSuiConstants.ChainName,
         hash,
         alias,
         creator,

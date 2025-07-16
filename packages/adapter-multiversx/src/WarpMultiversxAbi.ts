@@ -13,6 +13,7 @@ import {
 } from '@vleap/warps'
 import { WarpMultiversxContractLoader } from './WarpMultiversxContractLoader'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
+import { WarpMultiversxConstants } from './constants'
 
 export class WarpMultiversxAbi {
   private readonly contractLoader: WarpMultiversxContractLoader
@@ -31,6 +32,7 @@ export class WarpMultiversxAbi {
     const abi = await this.createFromRaw(tx.data.toString())
 
     abi.meta = {
+      chain: WarpMultiversxConstants.ChainName,
       hash: tx.hash,
       creator: tx.sender.bech32(),
       createdAt: new Date(tx.timestamp * 1000).toISOString(),

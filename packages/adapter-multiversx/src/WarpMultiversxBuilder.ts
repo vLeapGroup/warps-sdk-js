@@ -11,6 +11,7 @@ import {
   WarpLogger,
 } from '@vleap/warps'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
+import { WarpMultiversxConstants } from './constants'
 
 export class WarpMultiversxBuilder implements AdapterWarpBuilder {
   private cache: WarpCache
@@ -45,6 +46,7 @@ export class WarpMultiversxBuilder implements AdapterWarpBuilder {
     const warp = await this.core.createFromRaw(tx.data.toString(), validate)
 
     warp.meta = {
+      chain: WarpMultiversxConstants.ChainName,
       hash: tx.hash,
       creator: tx.sender.toBech32(),
       createdAt: new Date(tx.timestamp * 1000).toISOString(),
