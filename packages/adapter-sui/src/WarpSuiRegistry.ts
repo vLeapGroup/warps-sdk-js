@@ -8,6 +8,7 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpLogger,
+  WarpRegistryConfigInfo,
   WarpRegistryInfo,
 } from '@vleap/warps'
 import { getSuiApiUrl } from './config'
@@ -45,6 +46,10 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
 
   async init(): Promise<void> {
     await this.loadRegistryConfigs()
+  }
+
+  getRegistryConfig(): WarpRegistryConfigInfo {
+    return this.registryConfig
   }
 
   private async loadRegistryConfigs(): Promise<void> {

@@ -1,7 +1,7 @@
 import { WarpBrand } from './brand'
 import { WarpCacheType } from './cache'
 import { WarpChainEnv } from './general'
-import { WarpRegistryInfo } from './registry'
+import { WarpRegistryConfigInfo, WarpRegistryInfo } from './registry'
 import { WarpExecution } from './results'
 import { BaseWarpActionInputType, Warp, WarpActionInputType, WarpChain, WarpChainInfo, WarpExecutable, WarpNativeValue } from './warp'
 
@@ -75,6 +75,7 @@ export interface AdapterWarpSerializer {
 
 export interface AdapterWarpRegistry {
   init(): Promise<void>
+  getRegistryConfig(): WarpRegistryConfigInfo
   createWarpRegisterTransaction(txHash: string, alias?: string | null, brand?: string | null): WarpAdapterGenericTransaction
   createWarpUnregisterTransaction(txHash: string): WarpAdapterGenericTransaction
   createWarpUpgradeTransaction(alias: string, txHash: string): WarpAdapterGenericTransaction

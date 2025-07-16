@@ -48,6 +48,10 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
     await this.loadRegistryConfigs()
   }
 
+  getRegistryConfig(): WarpRegistryConfigInfo {
+    return this.registryConfig
+  }
+
   createWarpRegisterTransaction(txHash: string, alias?: string | null, brand?: string | null): Transaction {
     if (this.registryConfig.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
     if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
