@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.51
+
+### Patch Changes
+
+- 517e93c: add client adapters accessor
+
 ## 3.0.0-alpha.50
 
 ### Minor Changes
