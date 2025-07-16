@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.52
+
+### Patch Changes
+
+- b6a76d9: add client registry init
+
 ## 3.0.0-alpha.51
 
 ### Patch Changes
