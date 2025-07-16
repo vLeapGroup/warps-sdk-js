@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.14
+
+### Patch Changes
+
+- 3dbc599: add chain to warp meta
+- Updated dependencies [3dbc599]
+  - @vleap/warps@3.0.0-alpha.54
+
 ## 0.2.0-alpha.13
 
 ### Patch Changes

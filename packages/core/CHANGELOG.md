@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.54
+
+### Patch Changes
+
+- 3dbc599: add chain to warp meta
+
 ## 3.0.0-alpha.53
 
 ### Patch Changes
