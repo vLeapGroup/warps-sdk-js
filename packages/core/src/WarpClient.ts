@@ -100,4 +100,8 @@ export class WarpClient {
   get factory(): WarpFactory {
     return new WarpFactory(this.config, this.adapters)
   }
+
+  get index(): WarpIndex {
+    return new WarpIndex(this.config)
+  }
 }
