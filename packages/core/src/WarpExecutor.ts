@@ -22,6 +22,7 @@ import { WarpLogger } from './WarpLogger'
 
 export type ExecutionHandlers = {
   onExecuted?: (result: WarpExecution) => void
+  onError?: (params: { message: string }) => void
 }
 
 export class WarpExecutor {
@@ -40,8 +41,8 @@ export class WarpExecutor {
     const [action, actionIndex] = findWarpExecutableAction(warp)
 
     if (action.type === 'collect') {
-      const results = await this.executeCollect(warp, actionIndex, inputs)
-      this.handlers?.onExecuted?.(results)
+      const result = await this.executeCollect(warp, actionIndex, inputs)
+      result.success ? this.handlers?.onExecuted?.(result) : this.handlers?.onError?.({ message: JSON.stringify(result.values) })
       return { tx: null, chain: null }
     }
 

@@ -2,8 +2,12 @@ import { createMockAdapter, createMockChainInfo, createMockWarp } from './test-u
 import { Warp, WarpClientConfig, WarpCollectAction } from './types'
 import { WarpExecutor } from './WarpExecutor'
 
+// Mock fetch globally
+const mockFetch = jest.fn()
+global.fetch = mockFetch as any
+
 describe('WarpExecutor', () => {
-  const handlers = { onExecuted: jest.fn() }
+  const handlers = { onExecuted: jest.fn(), onError: jest.fn() }
   const warp: Warp = createMockWarp()
 
   const mockChainInfo = createMockChainInfo('multiversx')
@@ -62,6 +66,12 @@ describe('WarpExecutor', () => {
 
   describe('collect actions', () => {
     it('handles collect actions correctly', async () => {
+      // Mock successful fetch response
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: 'test data' }),
+      })
+
       const collectWarp = {
         ...warp,
         actions: [
