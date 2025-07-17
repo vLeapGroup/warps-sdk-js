@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.55
+
+### Patch Changes
+
+- 40e26de: add warp exec error handler
+
 ## 3.0.0-alpha.54
 
 ### Patch Changes
