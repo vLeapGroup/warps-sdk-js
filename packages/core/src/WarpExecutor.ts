@@ -109,7 +109,7 @@ export class WarpExecutor {
       const response = await fetch(collectAction.destination.url, { method: httpMethod, headers, body })
       const content = await response.json()
       const { values, results } = await extractCollectResults(preparedWarp, content, action, modifiedInputs)
-      const next = getNextInfo(this.config, preparedWarp, action, results)
+      const next = getNextInfo(this.config, adapter, preparedWarp, action, results)
 
       return {
         success: response.ok,

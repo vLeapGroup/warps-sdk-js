@@ -32,6 +32,16 @@ export const createMockAdapter = () => ({
       return Promise.resolve(null)
     },
   },
+  abiBuilder: () => ({
+    createFromRaw: async () => ({}),
+    createFromTransaction: async () => ({}),
+    createFromTransactionHash: async () => null,
+  }),
+  brandBuilder: () => ({
+    createInscriptionTransaction: () => ({}),
+    createFromTransaction: async () => ({}),
+    createFromTransactionHash: async () => null,
+  }),
   executor: {
     createTransaction() {
       return Promise.resolve({})
@@ -133,7 +143,7 @@ export const createMockAdapter = () => ({
 export const createMockConfig = (overrides: Partial<WarpClientConfig> = {}): WarpClientConfig => ({
   env: 'devnet',
   user: {
-    wallet: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+    wallets: { multiversx: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8' },
   },
   currentUrl: 'https://example.com',
   ...overrides,

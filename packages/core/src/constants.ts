@@ -5,7 +5,8 @@ export const WarpConstants = {
 
   IdentifierParamName: 'warp',
 
-  IdentifierParamSeparator: ':',
+  IdentifierParamSeparator: [':', '.'],
+  IdentifierParamSeparatorDefault: '.',
 
   IdentifierChainDefault: 'mvx',
 

@@ -7,9 +7,10 @@ import { WarpClientConfig, WarpIdType } from './types'
 // Example Link (Transaction Hash as ID): https://usewarp.to/to?warp=hash%3A<MYHASH>
 // Example Link (Alias as ID): https://usewarp.to/to?warp=alias%3A<MYALIAS>
 export class WarpLinkBuilder {
-  constructor(private config: WarpClientConfig) {
-    this.config = config
-  }
+  constructor(
+    private readonly config: WarpClientConfig,
+    private readonly adapters: Adapter[]
+  ) {}
 
   isValid(url: string): boolean {
     if (!url.startsWith(WarpConstants.HttpProtocolPrefix)) return false
@@ -17,16 +18,17 @@ export class WarpLinkBuilder {
     return !!idResult
   }
 
-  build(type: WarpIdType, id: string): string {
+  build(chain: WarpChain, type: WarpIdType, id: string): string {
     const clientUrl = this.config.clientUrl || WarpConfig.DefaultClientUrl(this.config.env)
-    const encodedValue =
-      type === WarpConstants.IdentifierType.Alias
-        ? encodeURIComponent(id)
-        : encodeURIComponent(type + WarpConstants.IdentifierParamSeparator + id)
+    const adapter = findWarpAdapterForChain(chain, this.adapters)
+
+    const identifier = type === WarpConstants.IdentifierType.Alias ? id : type + WarpConstants.IdentifierParamSeparatorDefault + id
+    const identifierWithChainPrefix = adapter.prefix + WarpConstants.IdentifierParamSeparatorDefault + identifier
+    const encodedIdentifier = encodeURIComponent(identifierWithChainPrefix)
 
     return WarpConfig.SuperClientUrls.includes(clientUrl)
-      ? `${clientUrl}/${encodedValue}`
-      : `${clientUrl}?${WarpConstants.IdentifierParamName}=${encodedValue}`
+      ? `${clientUrl}/${encodedIdentifier}`
+      : `${clientUrl}?${WarpConstants.IdentifierParamName}=${encodedIdentifier}`
   }
 
   buildFromPrefixedIdentifier(identifier: string): string {

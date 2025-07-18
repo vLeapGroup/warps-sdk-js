@@ -117,7 +117,7 @@ export class WarpClient {
   }
 
   get linkBuilder(): WarpLinkBuilder {
-    return new WarpLinkBuilder(this.config)
+    return new WarpLinkBuilder(this.config, this.adapters)
   }
 
   createAdapterBuilder(chain: WarpChain) {
