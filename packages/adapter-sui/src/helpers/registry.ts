@@ -1,7 +1,7 @@
 import { WarpChainEnv, WarpChainInfo, WarpRegistryInfo, WarpTrustStatus } from '@vleap/warps'
-import { getSuiRegistryPackageId } from '../config'
+import { getSuiRegistryObjectId } from '../config'
 
-export const toRegistryMoveTarget = (env: WarpChainEnv, module: string) => `${getSuiRegistryPackageId(env)}::${module}`
+export const toRegistryMoveTarget = (env: WarpChainEnv, module: string) => `${getSuiRegistryObjectId(env)}::${module}`
 
 const toTrustStatus = (trust: any): WarpTrustStatus => {
   const str = Buffer.from(trust).toString()
