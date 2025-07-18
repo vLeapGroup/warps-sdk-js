@@ -29,19 +29,19 @@ import {
   WarpExecution,
   WarpQueryAction,
 } from '@vleap/warps'
-import { WarpMultiversxAbi } from './WarpMultiversxAbi'
+import { WarpMultiversxAbiBuilder } from './WarpMultiversxAbiBuilder'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
 import { esdt_value } from './utils.codec'
 
 export class WarpMultiversxExecutor implements AdapterWarpExecutor {
   private readonly serializer: WarpMultiversxSerializer
-  private readonly abi: WarpMultiversxAbi
+  private readonly abi: WarpMultiversxAbiBuilder
   private readonly results: WarpMultiversxResults
 
   constructor(private readonly config: WarpClientConfig) {
     this.serializer = new WarpMultiversxSerializer()
-    this.abi = new WarpMultiversxAbi(this.config)
+    this.abi = new WarpMultiversxAbiBuilder(this.config)
     this.results = new WarpMultiversxResults(this.config)
   }
 

@@ -1,15 +1,11 @@
-import { WarpSuiAbi } from './WarpSuiAbi'
+import { WarpClientConfig } from '@vleap/warps'
+import { WarpSuiAbiBuilder } from './WarpSuiAbiBuilder'
 
-describe('WarpSuiAbi', () => {
-  const url = 'https://fullnode.devnet.sui.io'
-  const abi = new WarpSuiAbi(url)
+describe('WarpSuiAbiBuilder', () => {
+  const config: WarpClientConfig = { env: 'devnet', currentUrl: 'https://fullnode.devnet.sui.io:443' }
+  const abi = new WarpSuiAbiBuilder(config)
 
-  it('should instantiate WarpSuiAbi', () => {
-    expect(abi).toBeInstanceOf(WarpSuiAbi)
-  })
-
-  it('should have getModuleAbi and getFunctionAbi methods', () => {
-    expect(typeof abi.getModuleAbi).toBe('function')
-    expect(typeof abi.getFunctionAbi).toBe('function')
+  it('should instantiate WarpSuiAbiBuilder', () => {
+    expect(abi).toBeInstanceOf(WarpSuiAbiBuilder)
   })
 })

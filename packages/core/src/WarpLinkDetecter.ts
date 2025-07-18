@@ -65,7 +65,7 @@ export class WarpLinkDetecter {
       const adapter = findWarpAdapterByPrefix(idResult.chainPrefix, this.adapters)
 
       if (type === 'hash') {
-        warp = await adapter.builder.createFromTransactionHash(identifierBase, cache)
+        warp = await adapter.builder().createFromTransactionHash(identifierBase, cache)
         const result = await adapter.registry.getInfoByHash(identifierBase, cache)
         registryInfo = result.registryInfo
         brand = result.brand
@@ -74,7 +74,7 @@ export class WarpLinkDetecter {
         registryInfo = result.registryInfo
         brand = result.brand
         if (result.registryInfo) {
-          warp = await adapter.builder.createFromTransactionHash(result.registryInfo.hash, cache)
+          warp = await adapter.builder().createFromTransactionHash(result.registryInfo.hash, cache)
         }
       }
 

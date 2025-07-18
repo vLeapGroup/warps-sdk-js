@@ -16,6 +16,7 @@ import { WarpBuilder } from './WarpBuilder'
 import { ExecutionHandlers, WarpExecutor } from './WarpExecutor'
 import { WarpFactory } from './WarpFactory'
 import { WarpIndex } from './WarpIndex'
+import { WarpLinkBuilder } from './WarpLinkBuilder'
 import { DetectionResult, WarpLinkDetecter } from './WarpLinkDetecter'
 
 export class WarpClient {
@@ -79,18 +80,18 @@ export class WarpClient {
   }
 
   createInscriptionTransaction(chain: WarpChain, warp: Warp): WarpAdapterGenericTransaction {
-    return findWarpAdapterForChain(chain, this.adapters).builder.createInscriptionTransaction(warp)
+    return findWarpAdapterForChain(chain, this.adapters).builder().createInscriptionTransaction(warp)
   }
 
   async createFromTransaction(chain: WarpChain, tx: WarpAdapterGenericRemoteTransaction, validate = false): Promise<Warp> {
-    return findWarpAdapterForChain(chain, this.adapters).builder.createFromTransaction(tx, validate)
+    return findWarpAdapterForChain(chain, this.adapters).builder().createFromTransaction(tx, validate)
   }
 
   async createFromTransactionHash(hash: string, cache?: WarpCacheConfig): Promise<Warp | null> {
     const identifierInfo = getWarpInfoFromIdentifier(hash)
     if (!identifierInfo) throw new Error('WarpClient: createFromTransactionHash - invalid hash')
     const adapter = findWarpAdapterByPrefix(identifierInfo.chainPrefix, this.adapters)
-    return adapter.builder.createFromTransactionHash(hash, cache)
+    return adapter.builder().createFromTransactionHash(hash, cache)
   }
 
   getExplorer(chain: WarpChainInfo): AdapterWarpExplorer {
@@ -113,5 +114,21 @@ export class WarpClient {
 
   get index(): WarpIndex {
     return new WarpIndex(this.config)
+  }
+
+  get linkBuilder(): WarpLinkBuilder {
+    return new WarpLinkBuilder(this.config)
+  }
+
+  createAdapterBuilder(chain: WarpChain) {
+    return findWarpAdapterForChain(chain, this.adapters).builder()
+  }
+
+  createAdapterAbiBuilder(chain: WarpChain) {
+    return findWarpAdapterForChain(chain, this.adapters).abiBuilder()
+  }
+
+  createAdapterBrandBuilder(chain: WarpChain) {
+    return findWarpAdapterForChain(chain, this.adapters).brandBuilder()
   }
 }

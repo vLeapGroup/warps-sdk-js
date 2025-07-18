@@ -37,12 +37,14 @@ export type WarpCacheConfig = {
 export type Adapter = {
   chain: WarpChain
   prefix: string
-  builder: AdapterWarpBuilder
+  builder: () => AdapterWarpBuilder
   executor: AdapterWarpExecutor
   results: AdapterWarpResults
   serializer: AdapterWarpSerializer
   registry: AdapterWarpRegistry
   explorer: (chainInfo: WarpChainInfo) => AdapterWarpExplorer
+  abiBuilder: () => AdapterWarpAbiBuilder
+  brandBuilder: () => AdapterWarpBrandBuilder
 }
 
 export type WarpAdapterGenericTransaction = any
@@ -54,6 +56,18 @@ export interface AdapterWarpBuilder {
   createInscriptionTransaction(warp: Warp): WarpAdapterGenericTransaction
   createFromTransaction(tx: WarpAdapterGenericTransaction, validate?: boolean): Promise<Warp>
   createFromTransactionHash(hash: string, cache?: WarpCacheConfig): Promise<Warp | null>
+}
+
+export interface AdapterWarpAbiBuilder {
+  createFromRaw(encoded: string): Promise<any>
+  createFromTransaction(tx: WarpAdapterGenericTransaction): Promise<any>
+  createFromTransactionHash(hash: string, cache?: WarpCacheConfig): Promise<any | null>
+}
+
+export interface AdapterWarpBrandBuilder {
+  createInscriptionTransaction(brand: WarpBrand): WarpAdapterGenericTransaction
+  createFromTransaction(tx: WarpAdapterGenericTransaction, validate?: boolean): Promise<WarpBrand>
+  createFromTransactionHash(hash: string, cache?: WarpCacheConfig): Promise<WarpBrand | null>
 }
 
 export interface AdapterWarpExecutor {

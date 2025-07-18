@@ -1,5 +1,6 @@
 import { AbiRegistry, TransactionOnNetwork } from '@multiversx/sdk-core'
 import {
+  AdapterWarpAbiBuilder,
   getMainChainInfo,
   WarpAbi,
   WarpCache,
@@ -15,7 +16,7 @@ import { WarpMultiversxContractLoader } from './WarpMultiversxContractLoader'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 import { WarpMultiversxConstants } from './constants'
 
-export class WarpMultiversxAbi {
+export class WarpMultiversxAbiBuilder implements AdapterWarpAbiBuilder {
   private readonly contractLoader: WarpMultiversxContractLoader
   private readonly cache: WarpCache
 
