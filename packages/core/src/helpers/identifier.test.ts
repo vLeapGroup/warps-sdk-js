@@ -194,6 +194,118 @@ describe('identifier', () => {
     })
   })
 
+  // Tests for dot separator
+  it('parses chain prefix with dot separator sui.hash.abc123', () => {
+    const result = getWarpInfoFromIdentifier('sui.hash.abc123')
+    expect(result).toEqual({
+      chainPrefix: 'sui',
+      type: 'hash',
+      identifier: 'abc123',
+      identifierBase: 'abc123',
+    })
+  })
+
+  it('parses chain prefix with dot separator sui.alias.mywarp', () => {
+    const result = getWarpInfoFromIdentifier('sui.alias.mywarp')
+    expect(result).toEqual({
+      chainPrefix: 'sui',
+      type: 'alias',
+      identifier: 'mywarp',
+      identifierBase: 'mywarp',
+    })
+  })
+
+  it('parses chain prefix with dot separator sui.alias.mywarp?param=1', () => {
+    const result = getWarpInfoFromIdentifier('sui.alias.mywarp?param=1')
+    expect(result).toEqual({
+      chainPrefix: 'sui',
+      type: 'alias',
+      identifier: 'mywarp?param=1',
+      identifierBase: 'mywarp',
+    })
+  })
+
+  it('parses chain prefix with dot separator sui.mywarp', () => {
+    const result = getWarpInfoFromIdentifier('sui.mywarp')
+    expect(result).toEqual({
+      chainPrefix: 'sui',
+      type: 'alias',
+      identifier: 'mywarp',
+      identifierBase: 'mywarp',
+    })
+  })
+
+  it('parses chain prefix with dot separator sui.hash.1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef', () => {
+    const hash = '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+    const result = getWarpInfoFromIdentifier(`sui.hash.${hash}`)
+    expect(result).toEqual({
+      chainPrefix: 'sui',
+      type: 'hash',
+      identifier: hash,
+      identifierBase: hash,
+    })
+  })
+
+  it('parses unprefixed alias with dot separator alias.mywarp', () => {
+    const result = getWarpInfoFromIdentifier('alias.mywarp')
+    expect(result).toEqual({
+      chainPrefix: 'mvx',
+      type: 'alias',
+      identifier: 'mywarp',
+      identifierBase: 'mywarp',
+    })
+  })
+
+  it('parses unprefixed hash with dot separator hash.abc123def456', () => {
+    const result = getWarpInfoFromIdentifier('hash.abc123def456')
+    expect(result).toEqual({
+      chainPrefix: 'mvx',
+      type: 'hash',
+      identifier: 'abc123def456',
+      identifierBase: 'abc123def456',
+    })
+  })
+
+  it('parses alias with dot separator and query parameters alias.mywarp?param1=value1&param2=value2', () => {
+    const result = getWarpInfoFromIdentifier('alias.mywarp?param1=value1&param2=value2')
+    expect(result).toEqual({
+      chainPrefix: 'mvx',
+      type: 'alias',
+      identifier: 'mywarp?param1=value1&param2=value2',
+      identifierBase: 'mywarp',
+    })
+  })
+
+  it('parses hash with dot separator and query parameters hash.abc123?param1=value1', () => {
+    const result = getWarpInfoFromIdentifier('hash.abc123?param1=value1')
+    expect(result).toEqual({
+      chainPrefix: 'mvx',
+      type: 'hash',
+      identifier: 'abc123?param1=value1',
+      identifierBase: 'abc123',
+    })
+  })
+
+  it('handles empty identifier after dot prefix alias.', () => {
+    const result = getWarpInfoFromIdentifier('alias.')
+    expect(result).toEqual({
+      chainPrefix: 'mvx',
+      type: 'alias',
+      identifier: '',
+      identifierBase: '',
+    })
+  })
+
+  it('handles empty hash identifier after dot prefix hash.', () => {
+    const result = getWarpInfoFromIdentifier('hash.')
+    expect(result).toEqual({
+      chainPrefix: 'mvx',
+      type: 'hash',
+      identifier: '',
+      identifierBase: '',
+    })
+  })
+
   // Add tests for extractIdentifierInfoFromUrl
   it('extractIdentifierInfoFromUrl returns null if no identifier', () => {
     const url = 'https://example.com/'
@@ -222,6 +334,26 @@ describe('identifier', () => {
 
   it('extractIdentifierInfoFromUrl parses encoded chain prefix', () => {
     const url = 'https://example.com/?warp=' + encodeURIComponent('sui:alias:mywarp')
+    expect(extractIdentifierInfoFromUrl(url)).toEqual({
+      chainPrefix: 'sui',
+      type: 'alias',
+      identifier: 'mywarp',
+      identifierBase: 'mywarp',
+    })
+  })
+
+  it('extractIdentifierInfoFromUrl parses chain prefix with dot separator', () => {
+    const url = 'https://example.com/?warp=sui.hash.abc123'
+    expect(extractIdentifierInfoFromUrl(url)).toEqual({
+      chainPrefix: 'sui',
+      type: 'hash',
+      identifier: 'abc123',
+      identifierBase: 'abc123',
+    })
+  })
+
+  it('extractIdentifierInfoFromUrl parses encoded chain prefix with dot separator', () => {
+    const url = 'https://example.com/?warp=' + encodeURIComponent('sui.alias.mywarp')
     expect(extractIdentifierInfoFromUrl(url)).toEqual({
       chainPrefix: 'sui',
       type: 'alias',

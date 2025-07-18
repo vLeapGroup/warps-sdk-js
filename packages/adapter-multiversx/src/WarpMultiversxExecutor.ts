@@ -32,6 +32,7 @@ import {
 import { WarpMultiversxAbiBuilder } from './WarpMultiversxAbiBuilder'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
+import { getMultiversxAdapter } from './main'
 import { esdt_value } from './utils.codec'
 
 export class WarpMultiversxExecutor implements AdapterWarpExecutor {
@@ -116,7 +117,8 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
       executable.action,
       executable.resolvedInputs
     )
-    const next = getNextInfo(this.config, executable.warp, executable.action, results)
+    const adapter = getMultiversxAdapter(this.config)
+    const next = getNextInfo(this.config, adapter, executable.warp, executable.action, results)
 
     return {
       success: isSuccess,

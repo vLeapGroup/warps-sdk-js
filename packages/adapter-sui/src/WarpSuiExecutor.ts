@@ -16,6 +16,7 @@ import {
 import { WarpSuiResults } from './WarpSuiResults'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
 import { WarpSuiConstants } from './constants'
+import { getSuiAdapter } from './main'
 
 export class WarpSuiExecutor implements AdapterWarpExecutor {
   private readonly serializer: WarpSuiSerializer
@@ -74,7 +75,8 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
       executable.action,
       executable.resolvedInputs
     )
-    const next = getNextInfo(this.config, executable.warp, executable.action, results)
+    const adapter = getSuiAdapter(this.config)
+    const next = getNextInfo(this.config, adapter, executable.warp, executable.action, results)
     return {
       success: true,
       warp: executable.warp,

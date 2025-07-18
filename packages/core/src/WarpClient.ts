@@ -12,7 +12,6 @@ import {
   WarpChainInfo,
   WarpClientConfig,
 } from './types'
-import { WarpBuilder } from './WarpBuilder'
 import { ExecutionHandlers, WarpExecutor } from './WarpExecutor'
 import { WarpFactory } from './WarpFactory'
 import { WarpIndex } from './WarpIndex'
@@ -41,10 +40,6 @@ export class WarpClient {
   addAdapter(adapter: Adapter): WarpClient {
     this.adapters.push(adapter)
     return this
-  }
-
-  createBuilder(): WarpBuilder {
-    return new WarpBuilder(this.config)
   }
 
   createExecutor(handlers?: ExecutionHandlers): WarpExecutor {
@@ -120,15 +115,15 @@ export class WarpClient {
     return new WarpLinkBuilder(this.config, this.adapters)
   }
 
-  createAdapterBuilder(chain: WarpChain) {
+  createBuilder(chain: WarpChain) {
     return findWarpAdapterForChain(chain, this.adapters).builder()
   }
 
-  createAdapterAbiBuilder(chain: WarpChain) {
+  createAbiBuilder(chain: WarpChain) {
     return findWarpAdapterForChain(chain, this.adapters).abiBuilder()
   }
 
-  createAdapterBrandBuilder(chain: WarpChain) {
+  createBrandBuilder(chain: WarpChain) {
     return findWarpAdapterForChain(chain, this.adapters).brandBuilder()
   }
 }

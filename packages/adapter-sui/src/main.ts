@@ -12,7 +12,7 @@ import { WarpSuiConstants } from './constants'
 export const getSuiAdapter = (config: WarpClientConfig): Adapter => {
   return {
     chain: WarpSuiConstants.ChainName,
-    prefix: 'sui',
+    prefix: WarpSuiConstants.ChainPrefix,
     builder: () => new WarpSuiBuilder(config),
     executor: new WarpSuiExecutor(config),
     results: new WarpSuiResults(config),

@@ -26,6 +26,7 @@ import {
 import { WarpMultiversxAbiBuilder } from './WarpMultiversxAbiBuilder'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
 import { WarpMultiversxConstants } from './constants'
+import { getMultiversxAdapter } from './main'
 
 export class WarpMultiversxResults implements AdapterWarpResults {
   private readonly abi: WarpMultiversxAbiBuilder
@@ -39,13 +40,14 @@ export class WarpMultiversxResults implements AdapterWarpResults {
   }
 
   async getTransactionExecutionResults(warp: Warp, tx: TransactionOnNetwork): Promise<WarpExecution> {
-    const [action, actionIndex] = findWarpExecutableAction(warp)
+    const { actionIndex } = findWarpExecutableAction(warp)
 
     // Restore inputs via cache as transactions are broadcasted and processed asynchronously
     const inputs: ResolvedInput[] = this.cache.get(WarpCacheKey.WarpExecutable(this.config.env, warp.meta?.hash || '', actionIndex)) ?? []
 
+    const adapter = getMultiversxAdapter(this.config)
     const results = await this.extractContractResults(warp, tx, inputs)
-    const next = getNextInfo(this.config, warp, actionIndex, results)
+    const next = getNextInfo(this.config, adapter, warp, actionIndex, results)
     const messages = applyResultsToMessages(warp, results.results)
 
     return {
@@ -66,7 +68,7 @@ export class WarpMultiversxResults implements AdapterWarpResults {
     tx: TransactionOnNetwork,
     inputs: ResolvedInput[]
   ): Promise<{ values: any[]; results: WarpExecutionResults }> {
-    const [action, actionIndex] = findWarpExecutableAction(warp) as [WarpContractAction, WarpActionIndex]
+    const { action, actionIndex } = findWarpExecutableAction(warp) as { action: WarpContractAction; actionIndex: WarpActionIndex }
     let values: any[] = []
     let results: WarpExecutionResults = {}
     if (!warp.results || action.type !== 'contract') {

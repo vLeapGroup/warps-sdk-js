@@ -13,7 +13,7 @@ import { WarpMultiversxConstants } from './constants'
 export const getMultiversxAdapter = (config: WarpClientConfig): Adapter => {
   return {
     chain: WarpMultiversxConstants.ChainName,
-    prefix: 'mvx',
+    prefix: WarpMultiversxConstants.ChainPrefix,
     builder: () => new WarpMultiversxBuilder(config),
     executor: new WarpMultiversxExecutor(config),
     results: new WarpMultiversxResults(config),

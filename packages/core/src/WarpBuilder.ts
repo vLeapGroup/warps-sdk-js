@@ -1,8 +1,8 @@
 import { getLatestProtocolIdentifier, toPreviewText } from './helpers'
-import { Warp, WarpAction, WarpClientConfig } from './types'
+import { BaseWarpBuilder, Warp, WarpAction, WarpClientConfig } from './types'
 import { WarpValidator } from './WarpValidator'
 
-export class WarpBuilder {
+export class WarpBuilder implements BaseWarpBuilder {
   private pendingWarp: Warp = {
     protocol: getLatestProtocolIdentifier('warp'),
     name: '',
@@ -12,7 +12,7 @@ export class WarpBuilder {
     actions: [],
   }
 
-  constructor(private config: WarpClientConfig) {}
+  constructor(protected readonly config: WarpClientConfig) {}
 
   async createFromRaw(encoded: string, validate = true): Promise<Warp> {
     const warp = JSON.parse(encoded) as Warp

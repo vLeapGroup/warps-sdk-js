@@ -12,8 +12,8 @@ export const createMockChainInfo = (chainName: string = 'multiversx') => ({
 })
 
 export const createMockAdapter = () => ({
-  chain: 'testchain',
-  prefix: 'test',
+  chain: 'multiversx',
+  prefix: 'mvx',
   explorer: () => ({
     getTransactionUrl: () => '',
     getAddressUrl: () => '',
@@ -21,7 +21,7 @@ export const createMockAdapter = () => ({
     getBlockUrl: () => '',
     getAccountUrl: () => '',
   }),
-  builder: {
+  builder: () => ({
     createInscriptionTransaction() {
       return {}
     },
@@ -31,7 +31,7 @@ export const createMockAdapter = () => ({
     createFromTransactionHash() {
       return Promise.resolve(null)
     },
-  },
+  }),
   abiBuilder: () => ({
     createFromRaw: async () => ({}),
     createFromTransaction: async () => ({}),
@@ -46,8 +46,8 @@ export const createMockAdapter = () => ({
     createTransaction() {
       return Promise.resolve({})
     },
-    preprocessInput() {
-      return Promise.resolve('')
+    preprocessInput(chain: any, input: string, type: string, value: string) {
+      return Promise.resolve(input)
     },
   },
   results: {
@@ -83,6 +83,8 @@ export const createMockAdapter = () => ({
     },
   },
   registry: {
+    init: async () => {},
+    getRegistryConfig: () => ({ unitPrice: 0n, admins: [] }),
     createWarpRegisterTransaction() {
       return {}
     },

@@ -12,7 +12,7 @@ import { Keypair } from '@mysten/sui/dist/cjs/cryptography'
 import { getFaucetHost, requestSuiFromFaucetV2 } from '@mysten/sui/faucet'
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519'
 import { SerialTransactionExecutor, Transaction as SuiTransaction } from '@mysten/sui/transactions'
-import { findWarpExecutableAction, WarpClient, WarpClientConfig } from '@vleap/warps'
+import { WarpClient, WarpClientConfig } from '@vleap/warps'
 import { getMultiversxAdapter } from '@vleap/warps-adapter-multiversx'
 import { getSuiAdapter } from '@vleap/warps-adapter-sui'
 import * as fs from 'fs'
@@ -25,6 +25,8 @@ const warpInputs: string[] = []
 const suiNetwork = 'testnet'
 
 const warpsDir = path.join(__dirname, 'warps')
+
+const Chain = 'multiversx'
 
 const runWarp = async (warpFile: string) => {
   const warpPath = path.join(warpsDir, warpFile)
@@ -41,17 +43,15 @@ const runWarp = async (warpFile: string) => {
   }
 
   const client = new WarpClient(config, [getMultiversxAdapter(config), getSuiAdapter(config)])
-  const warp = await client.createBuilder().createFromRaw(warpRaw)
 
-  const [action] = findWarpExecutableAction(warp)
-  const chain = await client.factory.getChainInfoForAction(action, warpInputs)
+  const warp = await client.createBuilder(Chain).createFromRaw(warpRaw)
 
-  if (chain.name === 'multiversx') {
-    config.user.wallet = (await getMultiversxWallet()).address
-  } else if (chain.name === 'sui') {
-    config.user.wallet = (await getSuiWallet()).address
-  } else {
-    throw new Error(`Unsupported chain: ${chain}`)
+  const registry = await client.getRegistry(Chain)
+  const chain = await registry.getChainInfo(Chain)
+
+  config.user.wallets = {
+    multiversx: (await getMultiversxWallet()).address,
+    sui: (await getSuiWallet()).address,
   }
 
   const executor = client.createExecutor({
@@ -61,7 +61,7 @@ const runWarp = async (warpFile: string) => {
       console.log('--------------------------------')
     },
   })
-  const [tx] = await executor.execute(warp, warpInputs)
+  const { tx } = await executor.execute(warp, warpInputs)
 
   if (chain.name === 'multiversx') {
     const txOnNetwork = await signAndSendWithMultiversX(tx)

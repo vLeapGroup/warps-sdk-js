@@ -17,8 +17,9 @@ describe('getNextInfo', () => {
       ...createMockWarp(),
       next: 'mywarp',
     }
-    const result = getNextInfo(testConfig, warp, 0, {})
-    expect(result?.[0].url).toBe('https://devnet.usewarp.to/mywarp')
+    const adapter = createMockAdapter()
+    const result = getNextInfo(testConfig, adapter, warp, 0, {})
+    expect(result?.[0].url).toBe('https://devnet.usewarp.to/mvx.mywarp')
   })
 
   it('returns info for a warp with next', () => {
@@ -26,8 +27,9 @@ describe('getNextInfo', () => {
       ...createMockWarp(),
       next: 'next-warp',
     }
-    const result = getNextInfo(testConfig, warp, 0, {})
-    expect(result?.[0].url).toBe('https://devnet.usewarp.to/next-warp')
+    const adapter = createMockAdapter()
+    const result = getNextInfo(testConfig, adapter, warp, 0, {})
+    expect(result?.[0].url).toBe('https://devnet.usewarp.to/mvx.next-warp')
   })
 
   it('returns info for a warp with hash', () => {
@@ -35,8 +37,9 @@ describe('getNextInfo', () => {
       ...createMockWarp(),
       next: 'hash:123',
     }
-    const result = getNextInfo(testConfig, warp, 0, {})
-    expect(result?.[0].url).toBe('https://devnet.usewarp.to/hash%3A123')
+    const adapter = createMockAdapter()
+    const result = getNextInfo(testConfig, adapter, warp, 0, {})
+    expect(result?.[0].url).toBe('https://devnet.usewarp.to/mvx.hash.123')
   })
 
   it('returns info for a warp with query params', () => {
@@ -44,8 +47,9 @@ describe('getNextInfo', () => {
       ...createMockWarp(),
       next: 'mywarp?param1=value1&param2=value2',
     }
-    const result = getNextInfo(testConfig, warp, 0, {})
-    expect(result?.[0].url).toBe('https://devnet.usewarp.to/mywarp?param1=value1&param2=value2')
+    const adapter = createMockAdapter()
+    const result = getNextInfo(testConfig, adapter, warp, 0, {})
+    expect(result?.[0].url).toBe('https://devnet.usewarp.to/mvx.mywarp?param1=value1&param2=value2')
   })
 
   it('returns info for multiple results', () => {
@@ -53,10 +57,11 @@ describe('getNextInfo', () => {
       ...createMockWarp(),
       next: 'mywarp?address={{address[]}}',
     }
-    const result = getNextInfo(testConfig, warp, 0, { address: ['ABC', 'DEF'] })
+    const adapter = createMockAdapter()
+    const result = getNextInfo(testConfig, adapter, warp, 0, { address: ['ABC', 'DEF'] })
     expect(result).toEqual([
-      { identifier: 'mywarp?address=ABC', url: 'https://devnet.usewarp.to/mywarp?address=ABC' },
-      { identifier: 'mywarp?address=DEF', url: 'https://devnet.usewarp.to/mywarp?address=DEF' },
+      { identifier: 'mywarp?address=ABC', url: 'https://devnet.usewarp.to/mvx.mywarp?address=ABC' },
+      { identifier: 'mywarp?address=DEF', url: 'https://devnet.usewarp.to/mvx.mywarp?address=DEF' },
     ])
   })
 
@@ -66,8 +71,9 @@ describe('getNextInfo', () => {
       ...createMockWarp(),
       next: 'mywarp?param1=value1&param2=value2',
     }
-    const result = getNextInfo(config, warp, 0, {})
-    expect(result?.[0].url).toBe('https://usewarp.to/mywarp?param1=value1&param2=value2')
+    const adapter = createMockAdapter()
+    const result = getNextInfo(config, adapter, warp, 0, {})
+    expect(result?.[0].url).toBe('https://usewarp.to/mvx.mywarp?param1=value1&param2=value2')
   })
 })
 

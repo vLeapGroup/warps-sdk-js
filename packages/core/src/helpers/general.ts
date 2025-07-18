@@ -39,13 +39,13 @@ export const getLatestProtocolIdentifier = (name: ProtocolName): string => {
 
 export const getWarpActionByIndex = (warp: Warp, index: number) => warp?.actions[index - 1]
 
-export const findWarpExecutableAction = (warp: Warp): [WarpAction, WarpActionIndex] => {
+export const findWarpExecutableAction = (warp: Warp): { action: WarpAction; actionIndex: WarpActionIndex } => {
   warp.actions.forEach((action, index) => {
     if (action.type === 'link') return
-    return [action, index]
+    return { action, actionIndex: index }
   })
 
-  return [getWarpActionByIndex(warp, 1), 1]
+  return { action: getWarpActionByIndex(warp, 1), actionIndex: 1 }
 }
 
 export const toTypedChainInfo = (chainInfo: any): WarpChainInfo => ({

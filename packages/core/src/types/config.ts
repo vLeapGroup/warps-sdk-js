@@ -3,7 +3,16 @@ import { WarpCacheType } from './cache'
 import { WarpChainEnv } from './general'
 import { WarpRegistryConfigInfo, WarpRegistryInfo } from './registry'
 import { WarpExecution } from './results'
-import { BaseWarpActionInputType, Warp, WarpActionInputType, WarpChain, WarpChainInfo, WarpExecutable, WarpNativeValue } from './warp'
+import {
+  BaseWarpActionInputType,
+  Warp,
+  WarpAction,
+  WarpActionInputType,
+  WarpChain,
+  WarpChainInfo,
+  WarpExecutable,
+  WarpNativeValue,
+} from './warp'
 
 export type WarpUserWallets = Record<WarpChain, string | null>
 
@@ -37,7 +46,7 @@ export type WarpCacheConfig = {
 export type Adapter = {
   chain: WarpChain
   prefix: string
-  builder: () => AdapterWarpBuilder
+  builder: () => CombinedWarpBuilder
   executor: AdapterWarpExecutor
   results: AdapterWarpResults
   serializer: AdapterWarpSerializer
@@ -52,11 +61,23 @@ export type WarpAdapterGenericRemoteTransaction = any
 export type WarpAdapterGenericValue = any
 export type WarpAdapterGenericType = any
 
+export interface BaseWarpBuilder {
+  createFromRaw(encoded: string): Promise<Warp>
+  setTitle(title: string): BaseWarpBuilder
+  setDescription(description: string): BaseWarpBuilder
+  setPreview(preview: string): BaseWarpBuilder
+  setActions(actions: WarpAction[]): BaseWarpBuilder
+  addAction(action: WarpAction): BaseWarpBuilder
+  build(): Promise<Warp>
+}
+
 export interface AdapterWarpBuilder {
   createInscriptionTransaction(warp: Warp): WarpAdapterGenericTransaction
   createFromTransaction(tx: WarpAdapterGenericTransaction, validate?: boolean): Promise<Warp>
   createFromTransactionHash(hash: string, cache?: WarpCacheConfig): Promise<Warp | null>
 }
+
+export type CombinedWarpBuilder = AdapterWarpBuilder & BaseWarpBuilder
 
 export interface AdapterWarpAbiBuilder {
   createFromRaw(encoded: string): Promise<any>

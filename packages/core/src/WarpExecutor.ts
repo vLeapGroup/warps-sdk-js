@@ -38,7 +38,7 @@ export class WarpExecutor {
   }
 
   async execute(warp: Warp, inputs: string[]): Promise<{ tx: WarpAdapterGenericTransaction | null; chain: WarpChainInfo | null }> {
-    const [action, actionIndex] = findWarpExecutableAction(warp)
+    const { action, actionIndex } = findWarpExecutableAction(warp)
 
     if (action.type === 'collect') {
       const result = await this.executeCollect(warp, actionIndex, inputs)

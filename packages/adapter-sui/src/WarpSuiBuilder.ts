@@ -1,15 +1,16 @@
 import { SuiClient } from '@mysten/sui/client'
 import { Transaction } from '@mysten/sui/transactions'
-import { AdapterWarpBuilder, Warp, WarpCache, WarpCacheConfig, WarpClientConfig } from '@vleap/warps'
+import { AdapterWarpBuilder, Warp, WarpBuilder, WarpCache, WarpCacheConfig, WarpClientConfig } from '@vleap/warps'
 import { WarpSuiConstants } from './constants'
 import { toRegistryMoveTarget } from './helpers/registry'
 
-export class WarpSuiBuilder implements AdapterWarpBuilder {
+export class WarpSuiBuilder extends WarpBuilder implements AdapterWarpBuilder {
   private cache: WarpCache
   private client: SuiClient
   private userWallet: string | null
 
-  constructor(private config: WarpClientConfig) {
+  constructor(protected readonly config: WarpClientConfig) {
+    super(config)
     this.cache = new WarpCache(config.cache?.type)
     this.client = new SuiClient({ url: String(config.currentUrl) })
     this.userWallet = this.config.user?.wallets?.[WarpSuiConstants.ChainName] || null
@@ -37,7 +38,7 @@ export class WarpSuiBuilder implements AdapterWarpBuilder {
     return tx
   }
 
-  createFromRaw(info: any): Warp {
+  async createFromRaw(info: any): Promise<Warp> {
     const hash = info.hash ? (Buffer.isBuffer(info.hash) ? info.hash.toString('hex') : Buffer.from(info.hash).toString('hex')) : ''
     const alias = info.alias ? (Buffer.isBuffer(info.alias) ? info.alias.toString() : Buffer.from(info.alias).toString()) : null
     const brand = info.brand ? (Buffer.isBuffer(info.brand) ? info.brand.toString('hex') : Buffer.from(info.brand).toString('hex')) : null

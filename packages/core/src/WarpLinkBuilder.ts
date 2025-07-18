@@ -1,11 +1,12 @@
 import QRCodeStyling from 'qr-code-styling'
 import { WarpConfig } from './config'
 import { WarpConstants } from './constants'
+import { findWarpAdapterByPrefix, findWarpAdapterForChain } from './helpers'
 import { extractIdentifierInfoFromUrl, getWarpInfoFromIdentifier } from './helpers/identifier'
-import { WarpClientConfig, WarpIdType } from './types'
+import { Adapter, WarpChain, WarpClientConfig, WarpIdType } from './types'
 
-// Example Link (Transaction Hash as ID): https://usewarp.to/to?warp=hash%3A<MYHASH>
-// Example Link (Alias as ID): https://usewarp.to/to?warp=alias%3A<MYALIAS>
+// Example Link (Transaction Hash as ID): https://usewarp.to/to?warp=hash.<MYHASH>
+// Example Link (Alias as ID): https://usewarp.to/to?warp=alias.<MYALIAS>
 export class WarpLinkBuilder {
   constructor(
     private readonly config: WarpClientConfig,
@@ -31,14 +32,25 @@ export class WarpLinkBuilder {
       : `${clientUrl}?${WarpConstants.IdentifierParamName}=${encodedIdentifier}`
   }
 
-  buildFromPrefixedIdentifier(identifier: string): string {
+  buildFromPrefixedIdentifier(identifier: string): string | null {
     const idResult = getWarpInfoFromIdentifier(identifier)
-    if (!idResult) return ''
-    return this.build(idResult.type, idResult.identifierBase)
+    if (!idResult) return null
+    const adapter = findWarpAdapterByPrefix(idResult.chainPrefix, this.adapters)
+    if (!adapter) return null
+    return this.build(adapter.chain, idResult.type, idResult.identifierBase)
   }
 
-  generateQrCode(type: WarpIdType, id: string, size = 512, background = 'white', color = 'black', logoColor = '#23F7DD'): QRCodeStyling {
-    const url = this.build(type, id)
+  generateQrCode(
+    chain: WarpChain,
+    type: WarpIdType,
+    id: string,
+    size = 512,
+    background = 'white',
+    color = 'black',
+    logoColor = '#23F7DD'
+  ): QRCodeStyling {
+    const adapter = findWarpAdapterForChain(chain, this.adapters)
+    const url = this.build(adapter.chain, type, id)
 
     return new QRCodeStyling({
       type: 'svg',

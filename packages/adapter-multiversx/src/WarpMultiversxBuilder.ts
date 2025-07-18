@@ -13,11 +13,12 @@ import {
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 import { WarpMultiversxConstants } from './constants'
 
-export class WarpMultiversxBuilder implements AdapterWarpBuilder {
+export class WarpMultiversxBuilder extends WarpBuilder implements AdapterWarpBuilder {
   private cache: WarpCache
   private core: WarpBuilder
 
-  constructor(private config: WarpClientConfig) {
+  constructor(protected readonly config: WarpClientConfig) {
+    super(config)
     this.cache = new WarpCache(config.cache?.type)
     this.core = new WarpBuilder(config)
   }

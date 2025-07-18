@@ -87,7 +87,7 @@ export class WarpMultiversxAbiBuilder implements AdapterWarpAbiBuilder {
   async fetchAbi(action: WarpContractAction | WarpQueryAction): Promise<AbiRegistry> {
     if (!action.abi) throw new Error('WarpActionExecutor: ABI not found')
     if (action.abi.startsWith(WarpConstants.IdentifierType.Hash)) {
-      const hashValue = action.abi.split(WarpConstants.IdentifierParamSeparator)[1]
+      const hashValue = action.abi.split(WarpConstants.IdentifierParamSeparatorDefault)[1]
       const abi = await this.createFromTransactionHash(hashValue)
       if (!abi) throw new Error(`WarpActionExecutor: ABI not found for hash: ${action.abi}`)
       return AbiRegistry.create(abi.content)
