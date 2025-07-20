@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.15
+
+### Patch Changes
+
+- 339cae5: update adapter configs
+
 ## 0.2.0-alpha.14
 
 ### Minor Changes

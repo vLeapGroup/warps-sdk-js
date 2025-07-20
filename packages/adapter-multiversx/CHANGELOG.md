@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.16
+
+### Patch Changes
+
+- 339cae5: update adapter configs
+
 ## 0.2.0-alpha.15
 
 ### Minor Changes
