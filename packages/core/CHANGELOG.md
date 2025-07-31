@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.57
+
+### Patch Changes
+
+- 4eed1a3: add chain to detection result
+
 ## 3.0.0-alpha.56
 
 ### Minor Changes
