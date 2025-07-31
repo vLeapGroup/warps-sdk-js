@@ -1,6 +1,6 @@
 import { WarpConstants } from './constants'
 import { extractIdentifierInfoFromUrl, findWarpAdapterByPrefix, getWarpInfoFromIdentifier } from './helpers'
-import { Adapter, Warp, WarpBrand, WarpCacheConfig, WarpClientConfig, WarpRegistryInfo } from './types'
+import { Adapter, Warp, WarpBrand, WarpCacheConfig, WarpChain, WarpClientConfig, WarpRegistryInfo } from './types'
 import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
 
@@ -8,6 +8,7 @@ export type DetectionResult = {
   match: boolean
   url: string
   warp: Warp | null
+  chain: WarpChain | null
   registryInfo: WarpRegistryInfo | null
   brand: WarpBrand | null
 }
@@ -48,7 +49,7 @@ export class WarpLinkDetecter {
   }
 
   async detect(url: string, cache?: WarpCacheConfig): Promise<DetectionResult> {
-    const emptyResult: DetectionResult = { match: false, url, warp: null, registryInfo: null, brand: null }
+    const emptyResult: DetectionResult = { match: false, url, warp: null, chain: null, registryInfo: null, brand: null }
 
     const idResult = url.startsWith(WarpConstants.HttpProtocolPrefix) ? extractIdentifierInfoFromUrl(url) : getWarpInfoFromIdentifier(url)
 
@@ -80,7 +81,7 @@ export class WarpLinkDetecter {
 
       const preparedWarp = warp ? await new WarpInterpolator(this.config, adapter).apply(this.config, warp) : null
 
-      return preparedWarp ? { match: true, url, warp: preparedWarp, registryInfo, brand } : emptyResult
+      return preparedWarp ? { match: true, url, warp: preparedWarp, chain: adapter.chain, registryInfo, brand } : emptyResult
     } catch (e) {
       WarpLogger.error('Error detecting warp link', e)
       return emptyResult
