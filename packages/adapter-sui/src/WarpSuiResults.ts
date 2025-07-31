@@ -16,6 +16,7 @@ import {
   WarpExecutionResults,
 } from '@vleap/warps'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
+import { getSuiApiUrl } from './config'
 import { WarpSuiConstants } from './constants'
 import { getSuiAdapter } from './main'
 
@@ -25,7 +26,7 @@ export class WarpSuiResults implements AdapterWarpResults {
 
   constructor(private readonly config: WarpClientConfig) {
     this.serializer = new WarpSuiSerializer()
-    this.client = new SuiClient({ url: String(config.currentUrl) })
+    this.client = new SuiClient({ url: getSuiApiUrl(config.env) })
   }
 
   async getTransactionExecutionResults(warp: Warp, tx: any): Promise<WarpExecution> {
