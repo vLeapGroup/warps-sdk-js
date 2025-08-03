@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.58
+
+### Minor Changes
+
+- a6d698b: upgrade deps
+
 ## 3.0.0-alpha.57
 
 ### Patch Changes

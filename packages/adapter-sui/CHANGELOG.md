@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.16
+
+### Minor Changes
+
+- a6d698b: upgrade deps
+
+### Patch Changes
+
+- Updated dependencies [a6d698b]
+  - @vleap/warps@3.0.0-alpha.58
+
 ## 0.2.0-alpha.15
 
 ### Patch Changes
