@@ -23,7 +23,7 @@ export class WarpMultiversxBuilder extends WarpBuilder implements AdapterWarpBui
     this.core = new WarpBuilder(config)
   }
 
-  createInscriptionTransaction(warp: Warp): Transaction {
+  async createInscriptionTransaction(warp: Warp): Promise<Transaction> {
     const chain = getMainChainInfo(this.config)
     const userWallet = this.config.user?.wallets?.[chain.name]
     if (!userWallet) throw new Error('WarpBuilder: user address not set')
@@ -32,7 +32,7 @@ export class WarpMultiversxBuilder extends WarpBuilder implements AdapterWarpBui
     const sender = Address.newFromBech32(userWallet)
     const serialized = JSON.stringify(warp)
 
-    const tx = factory.createTransactionForTransfer(sender, {
+    const tx = await factory.createTransactionForTransfer(sender, {
       receiver: Address.newFromBech32(userWallet),
       nativeAmount: BigInt(0),
       data: Uint8Array.from(Buffer.from(serialized)),

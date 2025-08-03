@@ -110,9 +110,9 @@ describe('WarpMultiversxExecutor', () => {
       resolvedInputs: [],
     }
     const tx = await subject.createTransaction(executable)
-    expect(tx.getReceiver().bech32()).toBe('erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8')
-    expect(tx.getData().toString()).toBe('')
-    expect(tx.getValue().toString()).toBe('1000000000000000000')
+    expect(tx.receiver.toBech32()).toBe('erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8')
+    expect(tx.data.toString()).toBe('')
+    expect(tx.value.toString()).toBe('1000000000000000000')
   })
 
   it('createTransactionForExecute - creates a native transfer with esdt from field', async () => {

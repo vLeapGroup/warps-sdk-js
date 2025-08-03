@@ -157,8 +157,8 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
   static getChainEntrypoint(chainInfo: WarpChainInfo, env: WarpChainEnv): NetworkEntrypoint {
     const clientName = 'warp-sdk'
     const kind = 'api'
-    if (env === 'devnet') return new DevnetEntrypoint(chainInfo.apiUrl, kind, clientName)
-    if (env === 'testnet') return new TestnetEntrypoint(chainInfo.apiUrl, kind, clientName)
-    return new MainnetEntrypoint(chainInfo.apiUrl, kind, clientName)
+    if (env === 'devnet') return new DevnetEntrypoint({ url: chainInfo.apiUrl, kind, clientName })
+    if (env === 'testnet') return new TestnetEntrypoint({ url: chainInfo.apiUrl, kind, clientName })
+    return new MainnetEntrypoint({ url: chainInfo.apiUrl, kind, clientName })
   }
 }

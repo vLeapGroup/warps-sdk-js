@@ -269,7 +269,7 @@ describe('WarpMultiversxSerializer', () => {
       const result = serializer.nativeToTyped('address', address)
       expect(result).toBeInstanceOf(AddressValue)
       expect(result.valueOf()).toBeInstanceOf(Address)
-      expect(result.valueOf().bech32()).toBe(address)
+      expect(result.valueOf().toBech32()).toBe(address)
     })
 
     it('converts token to TokenIdentifierValue', () => {
@@ -289,7 +289,7 @@ describe('WarpMultiversxSerializer', () => {
       const result = serializer.nativeToTyped('codemeta', '0106')
       expect(result).toBeInstanceOf(CodeMetadataValue)
       expect(result.valueOf()).toBeInstanceOf(CodeMetadata)
-      expect(result.valueOf().toBuffer().toString('hex')).toBe('0106')
+      expect(result.valueOf().toString()).toBe('0106')
     })
 
     it('converts esdt to EsdtTokenPayment Struct', () => {
@@ -380,7 +380,7 @@ describe('WarpMultiversxSerializer', () => {
       const result = serializer.stringToTyped(`address:${address}`)
       expect(result).toBeInstanceOf(AddressValue)
       expect(result.valueOf()).toBeInstanceOf(Address)
-      expect(result.valueOf().bech32()).toBe(address)
+      expect(result.valueOf().toBech32()).toBe(address)
     })
 
     it('converts hex encoded value to BytesValue', () => {

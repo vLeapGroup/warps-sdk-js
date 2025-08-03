@@ -177,7 +177,7 @@ describe('Codec Utilities', () => {
       const result = address_value(addrStr)
       expect(result).toBeInstanceOf(AddressValue)
       expect(result.valueOf()).toBeInstanceOf(Address)
-      expect(result.valueOf().bech32()).toBe(addrStr)
+      expect(result.valueOf().toBech32()).toBe(addrStr)
     })
   })
 
@@ -205,7 +205,7 @@ describe('Codec Utilities', () => {
       const result = codemeta_value(hexString)
       expect(result).toBeInstanceOf(CodeMetadataValue)
       expect(result.valueOf()).toBeInstanceOf(CodeMetadata)
-      expect(result.valueOf().toBuffer().toString('hex')).toBe(hexString)
+      expect(result.valueOf().toString()).toBe(hexString)
     })
   })
 

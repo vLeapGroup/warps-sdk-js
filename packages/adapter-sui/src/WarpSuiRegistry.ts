@@ -63,7 +63,7 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
     }
   }
 
-  createWarpRegisterTransaction(txHash: string, alias?: string | null, brand?: string | null): Transaction {
+  async createWarpRegisterTransaction(txHash: string, alias?: string | null, brand?: string | null): Promise<Transaction> {
     if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
     const tx = new Transaction()
     tx.moveCall({
@@ -79,7 +79,7 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
     return tx
   }
 
-  createWarpUnregisterTransaction(txHash: string): Transaction {
+  async createWarpUnregisterTransaction(txHash: string): Promise<Transaction> {
     if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
     const tx = new Transaction()
     tx.moveCall({
@@ -89,7 +89,7 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
     return tx
   }
 
-  createWarpUpgradeTransaction(alias: string, txHash: string): Transaction {
+  async createWarpUpgradeTransaction(alias: string, txHash: string): Promise<Transaction> {
     if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
     const tx = new Transaction()
     tx.moveCall({
@@ -104,7 +104,7 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
     return tx
   }
 
-  createWarpAliasSetTransaction(txHash: string, alias: string): Transaction {
+  async createWarpAliasSetTransaction(txHash: string, alias: string): Promise<Transaction> {
     if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
     const tx = new Transaction()
     tx.moveCall({
@@ -119,7 +119,7 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
     return tx
   }
 
-  createWarpVerifyTransaction(txHash: string): Transaction {
+  async createWarpVerifyTransaction(txHash: string): Promise<Transaction> {
     if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
     const tx = new Transaction()
     tx.moveCall({
@@ -129,7 +129,7 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
     return tx
   }
 
-  createWarpTransferOwnershipTransaction(txHash: string, newOwner: string): Transaction {
+  async createWarpTransferOwnershipTransaction(txHash: string, newOwner: string): Promise<Transaction> {
     if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
     const tx = new Transaction()
     tx.moveCall({
@@ -144,7 +144,7 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
     return tx
   }
 
-  createBrandRegisterTransaction(brand: string): Transaction {
+  async createBrandRegisterTransaction(brand: string): Promise<Transaction> {
     if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
     const tx = new Transaction()
     tx.moveCall({
@@ -154,7 +154,7 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
     return tx
   }
 
-  createWarpBrandingTransaction(warpHash: string, brandHash: string): Transaction {
+  async createWarpBrandingTransaction(warpHash: string, brandHash: string): Promise<Transaction> {
     if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
     const tx = new Transaction()
     tx.moveCall({

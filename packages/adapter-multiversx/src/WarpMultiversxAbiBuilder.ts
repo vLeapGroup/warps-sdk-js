@@ -35,7 +35,7 @@ export class WarpMultiversxAbiBuilder implements AdapterWarpAbiBuilder {
     abi.meta = {
       chain: WarpMultiversxConstants.ChainName,
       hash: tx.hash,
-      creator: tx.sender.bech32(),
+      creator: tx.sender.toBech32(),
       createdAt: new Date(tx.timestamp * 1000).toISOString(),
     }
 

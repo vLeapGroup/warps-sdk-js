@@ -10,7 +10,7 @@ export class WarpMultiversxBrandBuilder {
     this.core = new WarpBrandBuilder(config)
   }
 
-  createInscriptionTransaction(brand: WarpBrand): Transaction {
+  async createInscriptionTransaction(brand: WarpBrand): Promise<Transaction> {
     const chain = getMainChainInfo(this.config)
     const userWallet = this.config.user?.wallets?.[chain.name]
     if (!userWallet) throw new Error('BrandBuilder: user address not set')
@@ -19,7 +19,7 @@ export class WarpMultiversxBrandBuilder {
     const sender = Address.newFromBech32(userWallet)
     const serialized = JSON.stringify(brand)
 
-    return factory.createTransactionForNativeTokenTransfer(sender, {
+    return await factory.createTransactionForNativeTokenTransfer(sender, {
       receiver: Address.newFromBech32(userWallet),
       nativeAmount: BigInt(0),
       data: Uint8Array.from(Buffer.from(serialized)),

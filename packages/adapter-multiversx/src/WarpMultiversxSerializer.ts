@@ -101,11 +101,11 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
     if (value.hasClassOrSuperclass(U64Value.ClassName)) return `uint64:${BigInt((value as U64Value).valueOf().toFixed())}`
     if (value.hasClassOrSuperclass(StringValue.ClassName)) return `string:${(value as StringValue).valueOf()}`
     if (value.hasClassOrSuperclass(BooleanValue.ClassName)) return `bool:${(value as BooleanValue).valueOf()}`
-    if (value.hasClassOrSuperclass(AddressValue.ClassName)) return `address:${(value as AddressValue).valueOf().bech32()}`
+    if (value.hasClassOrSuperclass(AddressValue.ClassName)) return `address:${(value as AddressValue).valueOf().toBech32()}`
     if (value.hasClassOrSuperclass(TokenIdentifierValue.ClassName)) return `token:${(value as TokenIdentifierValue).valueOf()}`
     if (value.hasClassOrSuperclass(BytesValue.ClassName)) return `hex:${(value as BytesValue).valueOf().toString('hex')}`
     if (value.hasClassOrSuperclass(CodeMetadataValue.ClassName)) {
-      return `codemeta:${(value as CodeMetadataValue).valueOf().toBuffer().toString('hex')}`
+      return `codemeta:${(value as CodeMetadataValue).valueOf().toString()}`
     }
     if (value.getType().getName() === 'EsdtTokenPayment') {
       const identifier = (value as Struct).getFieldValue('token_identifier').valueOf()

@@ -111,14 +111,14 @@ export interface AdapterWarpSerializer {
 export interface AdapterWarpRegistry {
   init(): Promise<void>
   getRegistryConfig(): WarpRegistryConfigInfo
-  createWarpRegisterTransaction(txHash: string, alias?: string | null, brand?: string | null): WarpAdapterGenericTransaction
-  createWarpUnregisterTransaction(txHash: string): WarpAdapterGenericTransaction
-  createWarpUpgradeTransaction(alias: string, txHash: string): WarpAdapterGenericTransaction
-  createWarpAliasSetTransaction(txHash: string, alias: string): WarpAdapterGenericTransaction
-  createWarpVerifyTransaction(txHash: string): WarpAdapterGenericTransaction
-  createWarpTransferOwnershipTransaction(txHash: string, newOwner: string): WarpAdapterGenericTransaction
-  createBrandRegisterTransaction(txHash: string): WarpAdapterGenericTransaction
-  createWarpBrandingTransaction(warpHash: string, brandHash: string): WarpAdapterGenericTransaction
+  createWarpRegisterTransaction(txHash: string, alias?: string | null, brand?: string | null): Promise<WarpAdapterGenericTransaction>
+  createWarpUnregisterTransaction(txHash: string): Promise<WarpAdapterGenericTransaction>
+  createWarpUpgradeTransaction(alias: string, txHash: string): Promise<WarpAdapterGenericTransaction>
+  createWarpAliasSetTransaction(txHash: string, alias: string): Promise<WarpAdapterGenericTransaction>
+  createWarpVerifyTransaction(txHash: string): Promise<WarpAdapterGenericTransaction>
+  createWarpTransferOwnershipTransaction(txHash: string, newOwner: string): Promise<WarpAdapterGenericTransaction>
+  createBrandRegisterTransaction(txHash: string): Promise<WarpAdapterGenericTransaction>
+  createWarpBrandingTransaction(warpHash: string, brandHash: string): Promise<WarpAdapterGenericTransaction>
   getInfoByAlias(alias: string, cache?: WarpCacheConfig): Promise<{ registryInfo: WarpRegistryInfo | null; brand: WarpBrand | null }>
   getInfoByHash(hash: string, cache?: WarpCacheConfig): Promise<{ registryInfo: WarpRegistryInfo | null; brand: WarpBrand | null }>
   getUserWarpRegistryInfos(user?: string): Promise<WarpRegistryInfo[]>
