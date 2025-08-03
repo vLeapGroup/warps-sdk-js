@@ -101,6 +101,7 @@ describe('WarpLinkDetecter', () => {
       match: false,
       url: 'https://anyclient.com?warp=hash:123',
       warp: null,
+      chain: null,
       registryInfo: null,
       brand: null,
     })
@@ -130,6 +131,7 @@ describe('WarpLinkDetecter', () => {
       match: false,
       url: 'https://anyclient.com?warp=mywarp',
       warp: null,
+      chain: null,
       registryInfo: null,
       brand: null,
     })
@@ -144,6 +146,7 @@ describe('WarpLinkDetecter', () => {
       match: false,
       url: 'https://anyclient.com?warp=hash:123',
       warp: null,
+      chain: null,
       registryInfo: null,
       brand: null,
     })
@@ -158,6 +161,7 @@ describe('WarpLinkDetecter', () => {
       match: false,
       url: 'https://anyclient.com?warp=mywarp',
       warp: null,
+      chain: null,
       registryInfo: null,
       brand: null,
     })
@@ -171,6 +175,7 @@ describe('WarpLinkDetecter', () => {
       match: false,
       url: 'https://anyclient.com?warp=hash:123',
       warp: null,
+      chain: null,
       registryInfo: null,
       brand: null,
     })
@@ -183,6 +188,7 @@ describe('WarpLinkDetecter', () => {
       match: false,
       url: 'https://anyclient.com?other=value',
       warp: null,
+      chain: null,
       registryInfo: null,
       brand: null,
     })
@@ -224,6 +230,7 @@ describe('WarpLinkDetecter', () => {
       match: false,
       url: 'https://anyclient.com?warp=hash:123',
       warp: null,
+      chain: null,
       registryInfo: null,
       brand: null,
     })
