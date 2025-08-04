@@ -59,7 +59,7 @@ export const toTypedChainInfo = (chainInfo: any): WarpChainInfo => ({
   nativeToken: chainInfo.native_token.toString(),
 })
 
-export const shiftBigintBy = (value: bigint | string, decimals: number): bigint => {
+export const shiftBigintBy = (value: bigint | string | number, decimals: number): bigint => {
   const valueStr = value.toString()
   const [integerPart, fractionalPart = ''] = valueStr.split('.')
   const shiftPlaces = Math.abs(decimals)
