@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.18
+
+### Patch Changes
+
+- 38716b0: add codec utils export
+
 ## 0.2.0-alpha.17
 
 ### Minor Changes
