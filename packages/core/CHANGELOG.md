@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.59
+
+### Patch Changes
+
+- 0d9bbc7: add warp chain name enum
+
 ## 3.0.0-alpha.58
 
 ### Minor Changes
