@@ -1,5 +1,10 @@
 import { InterpolationBag, WarpIdType } from './types'
 
+export enum WarpChainName {
+  Multiversx = 'multiversx',
+  Sui = 'sui',
+}
+
 export const WarpConstants = {
   HttpProtocolPrefix: 'http',
 
