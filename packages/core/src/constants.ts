@@ -3,6 +3,7 @@ import { InterpolationBag, WarpIdType } from './types'
 export enum WarpChainName {
   Multiversx = 'multiversx',
   Sui = 'sui',
+  Evm = 'evm',
 }
 
 export const WarpConstants = {
