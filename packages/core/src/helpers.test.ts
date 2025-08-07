@@ -56,5 +56,10 @@ describe('Helpers', () => {
       expect(shiftBigintBy('123.', 2).toString()).toBe('12300')
       expect(shiftBigintBy('123.', 0).toString()).toBe('123')
     })
+
+    it('handles zero value with negative decimals', () => {
+      const result = shiftBigintBy('0', -18)
+      expect(result.toString()).toBe('0')
+    })
   })
 })
