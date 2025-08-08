@@ -19,6 +19,7 @@ import {
 import { WarpFactory } from './WarpFactory'
 import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
+import { WarpSerializer } from './WarpSerializer'
 
 export type ExecutionHandlers = {
   onExecuted?: (result: WarpExecution) => void
@@ -27,14 +28,16 @@ export type ExecutionHandlers = {
 
 export class WarpExecutor {
   private factory: WarpFactory
+  private serializer: WarpSerializer
 
   constructor(
     private config: WarpClientConfig,
     private adapters: Adapter[],
     private handlers?: ExecutionHandlers
   ) {
-    this.factory = new WarpFactory(config, adapters)
     this.handlers = handlers
+    this.factory = new WarpFactory(config, adapters)
+    this.serializer = new WarpSerializer()
   }
 
   async execute(warp: Warp, inputs: string[]): Promise<{ tx: WarpAdapterGenericTransaction | null; chain: WarpChainInfo | null }> {
@@ -71,11 +74,10 @@ export class WarpExecutor {
     const preparedWarp = await new WarpInterpolator(this.config, adapter).apply(this.config, warp)
     const resolvedInputs = await this.factory.getResolvedInputs(chain, collectAction, inputs)
     const modifiedInputs = this.factory.getModifiedInputs(resolvedInputs)
-    const serializer = this.factory['serializer']
 
     const toInputPayloadValue = (resolvedInput: any) => {
       if (!resolvedInput.value) return null
-      const value = serializer.stringToNative(resolvedInput.value)[1]
+      const value = this.serializer.stringToNative(resolvedInput.value)[1]
       if (resolvedInput.input.type === 'biguint') {
         return (value as bigint).toString()
       } else if (resolvedInput.input.type === 'esdt') {
