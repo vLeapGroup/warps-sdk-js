@@ -1,6 +1,6 @@
 {
   "name": "@vleap/warps-adapter-fastset",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "description": "Fastset adapter for Warps SDK",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -30,6 +30,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@vleap/warps": "^3.0.0-alpha.58"
+    "@vleap/warps": "^3.0.0-alpha.60"
   }
 }

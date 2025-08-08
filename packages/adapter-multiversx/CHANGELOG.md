@@ -1,5 +1,17 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.19
+
+### Minor Changes
+
+- dfaea22: add request signing
+
+### Patch Changes
+
+- Updated dependencies [dfaea22]
+- Updated dependencies [2c038bf]
+  - @vleap/warps@3.0.0-alpha.60
+
 ## 0.2.0-alpha.18
 
 ### Patch Changes

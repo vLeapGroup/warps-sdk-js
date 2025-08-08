@@ -10,7 +10,9 @@
     "@vleap/warps-adapter-multiversx": "0.1.0",
     "@vleap/warps-adapter-sui": "0.2.0-alpha.0",
     "@vleap/warps-vm-browser": "0.0.0",
-    "@vleap/warps-vm-node": "0.0.0"
+    "@vleap/warps-vm-node": "0.0.0",
+    "@vleap/warps-adapter-evm": "0.2.0-alpha.1",
+    "@vleap/warps-adapter-fastset": "0.1.0-alpha.1"
   },
   "changesets": [
     "breezy-women-brush",
@@ -43,6 +45,7 @@
     "gold-camels-study",
     "happy-keys-divide",
     "large-rivers-cut",
+    "long-laws-stay",
     "long-ravens-wink",
     "lucky-lamps-change",
     "mean-views-strive",
@@ -75,6 +78,7 @@
     "social-rats-happen",
     "solid-ants-live",
     "some-yaks-lie",
+    "strong-readers-shout",
     "sweet-carpets-cheat",
     "swift-days-cry",
     "swift-taxis-teach",
@@ -89,6 +93,7 @@
     "violet-turkeys-lay",
     "weak-coats-tickle",
     "weak-lands-sit",
+    "witty-steaks-lick",
     "young-peaches-visit"
   ]
 }

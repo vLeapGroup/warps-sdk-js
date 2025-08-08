@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.60
+
+### Minor Changes
+
+- dfaea22: add request signing
+
+### Patch Changes
+
+- 2c038bf: add fallback adapters
+
 ## 3.0.0-alpha.59
 
 ### Patch Changes
