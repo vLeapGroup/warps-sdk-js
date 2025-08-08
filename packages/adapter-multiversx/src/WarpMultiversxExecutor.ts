@@ -12,6 +12,8 @@ import {
   Transaction,
   TransactionsFactoryConfig,
   TransferTransactionsFactory,
+  UserSecretKey,
+  UserSigner,
 } from '@multiversx/sdk-core'
 import {
   AdapterWarpExecutor,
@@ -160,5 +162,12 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
     if (env === 'devnet') return new DevnetEntrypoint({ url: chainInfo.apiUrl, kind, clientName })
     if (env === 'testnet') return new TestnetEntrypoint({ url: chainInfo.apiUrl, kind, clientName })
     return new MainnetEntrypoint({ url: chainInfo.apiUrl, kind, clientName })
+  }
+
+  async signMessage(message: string, privateKey: string): Promise<string> {
+    const secretKey = UserSecretKey.fromString(privateKey)
+    const signer = new UserSigner(secretKey)
+    const signature = await signer.sign(new Uint8Array(Buffer.from(message, 'utf-8')))
+    return signature.toString()
   }
 }

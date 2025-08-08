@@ -96,6 +96,7 @@ export interface AdapterWarpBrandBuilder {
 export interface AdapterWarpExecutor {
   createTransaction(executable: WarpExecutable): Promise<WarpAdapterGenericTransaction>
   preprocessInput(chain: WarpChainInfo, input: string, type: WarpActionInputType, value: string): Promise<string>
+  signMessage(message: string, privateKey: string): Promise<string>
 }
 
 export interface AdapterWarpResults {

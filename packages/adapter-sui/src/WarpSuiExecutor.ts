@@ -94,4 +94,8 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
   async preprocessInput(chain: WarpChainInfo, input: string, type: WarpActionInputType, value: string): Promise<string> {
     return input
   }
+
+  async signMessage(message: string, privateKey: string): Promise<string> {
+    throw new Error('Not implemented')
+  }
 }

@@ -89,6 +89,14 @@ export class WarpClient {
     return adapter.builder().createFromTransactionHash(hash, cache)
   }
 
+  async signMessage(chain: WarpChain, message: string, privateKey: string): Promise<string> {
+    const walletAddress = this.config.user?.wallets?.[chain]
+    if (!walletAddress) throw new Error(`No wallet configured for chain ${chain}`)
+
+    const adapter = findWarpAdapterForChain(chain, this.adapters)
+    return adapter.executor.signMessage(message, privateKey)
+  }
+
   getExplorer(chain: WarpChainInfo): AdapterWarpExplorer {
     return findWarpAdapterForChain(chain.name, this.adapters).explorer(chain)
   }

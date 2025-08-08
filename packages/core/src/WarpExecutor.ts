@@ -6,6 +6,7 @@ import {
   getNextInfo,
   getWarpActionByIndex,
 } from './helpers'
+import { createAuthHeaders, createAuthMessage } from './helpers/signing'
 import {
   Adapter,
   Warp,
@@ -24,6 +25,7 @@ import { WarpSerializer } from './WarpSerializer'
 export type ExecutionHandlers = {
   onExecuted?: (result: WarpExecution) => void
   onError?: (params: { message: string }) => void
+  onSignRequest?: (params: { message: string; chain: WarpChainInfo }) => Promise<string>
 }
 
 export class WarpExecutor {
@@ -92,6 +94,16 @@ export class WarpExecutor {
     const headers = new Headers()
     headers.set('Content-Type', 'application/json')
     headers.set('Accept', 'application/json')
+
+    if (this.handlers?.onSignRequest) {
+      const walletAddress = this.config.user?.wallets?.[chain.name]
+      if (!walletAddress) throw new Error(`No wallet configured for chain ${chain.name}`)
+      const { message, nonce, expiresAt } = createAuthMessage(walletAddress, `${chain.name}-adapter`)
+      const signature = await this.handlers.onSignRequest({ message, chain })
+      const authHeaders = createAuthHeaders(walletAddress, signature, nonce, expiresAt)
+      Object.entries(authHeaders).forEach(([key, value]) => headers.set(key, value))
+    }
+
     Object.entries(collectAction.destination.headers || {}).forEach(([key, value]) => {
       headers.set(key, value as string)
     })

@@ -257,24 +257,6 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
   }
 
   async signMessage(message: string, privateKey: string): Promise<string> {
-    // EVM-specific ECDSA signing
-    const { createSign } = await import('crypto')
-    const sign = createSign('SHA256')
-    sign.update(message)
-    return sign.sign(privateKey, 'base64')
-  }
-
-  async createHttpAuthHeaders(walletAddress: string, privateKey: string, config: WarpClientConfig): Promise<Record<string, string>> {
-    const { createAuthMessage, createAuthHeaders } = await import('@vleap/warps')
-
-    const { message, nonce, expiresAt } = createAuthMessage(walletAddress, 'evm-adapter')
-
-    // EVM-specific ECDSA signing
-    const { createSign } = await import('crypto')
-    const sign = createSign('SHA256')
-    sign.update(message)
-    const signature = sign.sign(privateKey, 'base64')
-
-    return createAuthHeaders(walletAddress, signature, nonce, expiresAt)
+    throw new Error('Not implemented')
   }
 }
