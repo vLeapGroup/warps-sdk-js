@@ -43,6 +43,8 @@ export type WarpCacheConfig = {
   ttl?: number
 }
 
+export type AdapterFactory = (config: WarpClientConfig, fallback?: Adapter) => Adapter
+
 export type Adapter = {
   chain: WarpChain
   prefix: string

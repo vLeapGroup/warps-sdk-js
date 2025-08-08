@@ -1,4 +1,4 @@
-import { Adapter, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { AdapterFactory, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 import { WarpSuiAbiBuilder } from './WarpSuiAbiBuilder'
 import { WarpSuiBrandBuilder } from './WarpSuiBrandBuilder'
 import { WarpSuiBuilder } from './WarpSuiBuilder'
@@ -9,7 +9,7 @@ import { WarpSuiResults } from './WarpSuiResults'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
 import { WarpSuiConstants } from './constants'
 
-export const getSuiAdapter = (config: WarpClientConfig): Adapter => {
+export const getSuiAdapter: AdapterFactory = (config: WarpClientConfig) => {
   return {
     chain: WarpSuiConstants.ChainName,
     prefix: WarpSuiConstants.ChainPrefix,

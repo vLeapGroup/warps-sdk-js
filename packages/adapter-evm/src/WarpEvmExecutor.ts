@@ -21,16 +21,11 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
   private readonly serializer: WarpEvmSerializer
   private readonly provider: ethers.JsonRpcProvider
   private readonly results: WarpEvmResults
-  private readonly chainName: string
 
-  constructor(
-    private readonly config: WarpClientConfig,
-    chainName: string = 'ethereum'
-  ) {
+  constructor(private readonly config: WarpClientConfig) {
     this.serializer = new WarpEvmSerializer()
-    this.provider = new ethers.JsonRpcProvider(getEvmApiUrl(config.env, chainName))
+    this.provider = new ethers.JsonRpcProvider(getEvmApiUrl(config.env))
     this.results = new WarpEvmResults(config)
-    this.chainName = chainName
   }
 
   async createTransaction(executable: WarpExecutable): Promise<ethers.TransactionRequest> {

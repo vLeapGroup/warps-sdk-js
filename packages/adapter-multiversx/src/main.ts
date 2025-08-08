@@ -1,4 +1,4 @@
-import { Adapter, WarpClientConfig } from '@vleap/warps'
+import { AdapterFactory, WarpClientConfig } from '@vleap/warps'
 import { WarpChainInfo } from '@vleap/warps/src/types'
 import { WarpMultiversxAbiBuilder } from './WarpMultiversxAbiBuilder'
 import { WarpMultiversxBrandBuilder } from './WarpMultiversxBrandBuilder'
@@ -10,7 +10,7 @@ import { WarpMultiversxResults } from './WarpMultiversxResults'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
 import { WarpMultiversxConstants } from './constants'
 
-export const getMultiversxAdapter = (config: WarpClientConfig): Adapter => {
+export const getMultiversxAdapter: AdapterFactory = (config: WarpClientConfig) => {
   return {
     chain: WarpMultiversxConstants.ChainName,
     prefix: WarpMultiversxConstants.ChainPrefix,
