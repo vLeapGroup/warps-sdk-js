@@ -52,18 +52,13 @@ export class WarpExecutor {
     }
 
     const executable = await this.factory.createExecutable(warp, actionIndex, inputs)
-    const chainName = executable.chain.name.toLowerCase()
-    const adapterLoader = this.adapters.find((a) => a.chain.toLowerCase() === chainName)
-    if (!adapterLoader) throw new Error(`No adapter registered for chain: ${chainName}`)
-    const tx = await adapterLoader.executor.createTransaction(executable)
+    const tx = await findWarpAdapterForChain(executable.chain.name, this.adapters).executor.createTransaction(executable)
 
     return { tx, chain: executable.chain }
   }
 
   async evaluateResults(warp: Warp, chain: WarpChainInfo, tx: WarpAdapterGenericRemoteTransaction): Promise<void> {
-    const adapterLoader = this.adapters.find((a) => a.chain.toLowerCase() === chain.name.toLowerCase())
-    if (!adapterLoader) throw new Error(`No adapter registered for chain: ${chain.name}`)
-    const result = (await adapterLoader.results.getTransactionExecutionResults(warp, tx)) as WarpExecution
+    const result = await findWarpAdapterForChain(chain.name, this.adapters).results.getTransactionExecutionResults(warp, tx)
     this.handlers?.onExecuted?.(result)
   }
 
