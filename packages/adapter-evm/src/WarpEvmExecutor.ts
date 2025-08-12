@@ -13,7 +13,6 @@ import {
 import { ethers } from 'ethers'
 import { getEvmApiUrl } from './config'
 import { WarpEvmConstants } from './constants'
-import { getEvmAdapter } from './main'
 import { WarpEvmResults } from './WarpEvmResults'
 import { WarpEvmSerializer } from './WarpEvmSerializer'
 
@@ -138,8 +137,20 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         executable.resolvedInputs
       )
 
-      const adapter = getEvmAdapter(this.config)
-      const next = getNextInfo(this.config, adapter, executable.warp, executable.action, results)
+      // Create a mock adapter for getNextInfo (only needs prefix and chain)
+      const mockAdapter = {
+        chain: 'ethereum' as any,
+        prefix: 'eth',
+        builder: () => ({}) as any,
+        executor: {} as any,
+        results: {} as any,
+        serializer: {} as any,
+        registry: {} as any,
+        explorer: () => ({}) as any,
+        abiBuilder: () => ({}) as any,
+        brandBuilder: () => ({}) as any,
+      }
+      const next = getNextInfo(this.config, mockAdapter, executable.warp, executable.action, results)
 
       return {
         success: isSuccess,

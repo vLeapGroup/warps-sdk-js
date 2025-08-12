@@ -1,11 +1,12 @@
 export const WarpEvmConstants = {
-  ChainName: 'evm',
-  ChainPrefix: 'evm',
+  // Native token configuration
   Ether: {
     Identifier: 'ETH',
     DisplayName: 'Ether',
     Decimals: 18,
   },
+
+  // Gas configuration
   GasLimit: {
     Default: 21000,
     ContractCall: 100000,
@@ -14,13 +15,16 @@ export const WarpEvmConstants = {
     Approve: 46000,
     Swap: 200000,
   },
+
   GasPrice: {
     Default: '20000000000', // 20 gwei
     Low: '10000000000', // 10 gwei
     Medium: '20000000000', // 20 gwei
     High: '50000000000', // 50 gwei
   },
-  Network: {
+
+  // Supported networks
+  Networks: {
     Ethereum: {
       ChainId: '1',
       Name: 'Ethereum',
@@ -37,12 +41,16 @@ export const WarpEvmConstants = {
       BlockTime: 2,
     },
   },
+
+  // Validation rules
   Validation: {
     AddressLength: 42,
     HexPrefix: '0x',
     MinGasLimit: 21000,
     MaxGasLimit: 30000000,
   },
+
+  // Timeout configuration
   Timeouts: {
     DefaultRpcTimeout: 30000, // 30 seconds
     GasEstimationTimeout: 10000, // 10 seconds

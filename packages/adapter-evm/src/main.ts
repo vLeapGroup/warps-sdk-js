@@ -5,21 +5,32 @@ import { WarpEvmExecutor } from './WarpEvmExecutor'
 import { WarpEvmExplorer } from './WarpEvmExplorer'
 import { WarpEvmResults } from './WarpEvmResults'
 import { WarpEvmSerializer } from './WarpEvmSerializer'
-import { WarpEvmConstants } from './constants'
 
-export const getEvmAdapter: AdapterFactory = (config: WarpClientConfig, fallback?: Adapter) => {
-  if (!fallback) throw new Error('EVM adapter requires a fallback adapter')
+export const getEthereumAdapter: AdapterFactory = createEvmAdapter('ethereum', 'eth')
+export const getArbitrumAdapter: AdapterFactory = createEvmAdapter('arbitrum', 'arb')
+export const getBaseAdapter: AdapterFactory = createEvmAdapter('base', 'base')
 
-  return {
-    chain: WarpEvmConstants.ChainName,
-    prefix: WarpEvmConstants.ChainPrefix,
-    builder: () => new WarpEvmBuilder(config),
-    executor: new WarpEvmExecutor(config),
-    results: new WarpEvmResults(config),
-    serializer: new WarpEvmSerializer(),
-    registry: fallback.registry,
-    explorer: (chainInfo: WarpChainInfo) => new WarpEvmExplorer(chainInfo),
-    abiBuilder: () => fallback.abiBuilder(),
-    brandBuilder: () => fallback.brandBuilder(),
+export const getAllEvmAdapters = (config: WarpClientConfig, fallback?: Adapter): Adapter[] => [
+  getEthereumAdapter(config, fallback),
+  getArbitrumAdapter(config, fallback),
+  getBaseAdapter(config, fallback),
+]
+
+function createEvmAdapter(chainName: string, chainPrefix: string): AdapterFactory {
+  return (config: WarpClientConfig, fallback?: Adapter) => {
+    if (!fallback) throw new Error(`${chainName} adapter requires a fallback adapter`)
+
+    return {
+      chain: chainName,
+      prefix: chainPrefix,
+      builder: () => new WarpEvmBuilder(config),
+      executor: new WarpEvmExecutor(config),
+      results: new WarpEvmResults(config),
+      serializer: new WarpEvmSerializer(),
+      registry: fallback.registry,
+      explorer: (chainInfo: WarpChainInfo) => new WarpEvmExplorer(chainInfo),
+      abiBuilder: () => fallback.abiBuilder(),
+      brandBuilder: () => fallback.brandBuilder(),
+    }
   }
 }
