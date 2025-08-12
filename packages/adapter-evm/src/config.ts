@@ -1,6 +1,6 @@
 import { WarpChainEnv } from '@vleap/warps'
+import { EvmExplorers, ExplorerName, ExplorerUrls } from './constants'
 
-// EVM Chain configurations
 export interface EvmChainConfig {
   apiUrl: string
   explorerUrl: string
@@ -10,7 +10,6 @@ export interface EvmChainConfig {
   blockTime?: number
 }
 
-// Predefined chain configurations
 export const EVM_CHAIN_CONFIGS: Record<string, Record<WarpChainEnv, EvmChainConfig>> = {
   ethereum: {
     mainnet: {
@@ -92,7 +91,6 @@ export const EVM_CHAIN_CONFIGS: Record<string, Record<WarpChainEnv, EvmChainConf
   },
 }
 
-// Default chain (Ethereum)
 const DEFAULT_CHAIN = 'ethereum'
 
 export const getEvmChainConfig = (chain: string = DEFAULT_CHAIN, env: WarpChainEnv): EvmChainConfig => {
@@ -117,32 +115,34 @@ export const getEvmExplorerUrl = (env: WarpChainEnv, chain: string = DEFAULT_CHA
   return getEvmChainConfig(chain, env).explorerUrl
 }
 
-export const getEvmChainId = (env: WarpChainEnv, chain: string = DEFAULT_CHAIN): string => {
-  return getEvmChainConfig(chain, env).chainId
-}
-
-export const getEvmRegistryAddress = (env: WarpChainEnv, chain: string = DEFAULT_CHAIN): string => {
-  return getEvmChainConfig(chain, env).registryAddress
-}
-
-export const getEvmNativeToken = (env: WarpChainEnv, chain: string = DEFAULT_CHAIN): string => {
-  return getEvmChainConfig(chain, env).nativeToken
-}
-
-export const getEvmBlockTime = (env: WarpChainEnv, chain: string = DEFAULT_CHAIN): number => {
-  return getEvmChainConfig(chain, env).blockTime || 12
-}
-
-// Helper function to get all supported chains
-export const getSupportedEvmChains = (): string[] => {
-  return Object.keys(EVM_CHAIN_CONFIGS)
-}
-
-// Helper function to get all supported environments for a chain
-export const getSupportedEnvironments = (chain: string): WarpChainEnv[] => {
-  const chainConfigs = EVM_CHAIN_CONFIGS[chain]
-  if (!chainConfigs) {
-    return []
+export const getEvmExplorers = (chain: string = DEFAULT_CHAIN, env: WarpChainEnv): readonly ExplorerName[] => {
+  const chainExplorers = EvmExplorers[chain as keyof typeof EvmExplorers]
+  if (!chainExplorers) {
+    throw new Error(`Unsupported EVM chain: ${chain}`)
   }
-  return Object.keys(chainConfigs) as WarpChainEnv[]
+
+  const explorers = chainExplorers[env]
+  if (!explorers) {
+    throw new Error(`Unsupported environment ${env} for chain ${chain}`)
+  }
+
+  return explorers
+}
+
+export const getPrimaryEvmExplorer = (chain: string = DEFAULT_CHAIN, env: WarpChainEnv): ExplorerName => {
+  const explorers = getEvmExplorers(chain, env)
+  return explorers[0]
+}
+
+export const getEvmExplorerUrlByName = (explorerName: ExplorerName): string => {
+  const url = ExplorerUrls[explorerName]
+  if (!url) {
+    throw new Error(`Unsupported explorer: ${explorerName}`)
+  }
+  return url
+}
+
+export const getEvmExplorerByName = (chain: string = DEFAULT_CHAIN, env: WarpChainEnv, name: string): ExplorerName | undefined => {
+  const explorers = getEvmExplorers(chain, env)
+  return explorers.find((explorer) => explorer.toLowerCase() === name.toLowerCase())
 }

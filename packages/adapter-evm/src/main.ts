@@ -28,7 +28,7 @@ function createEvmAdapter(chainName: string, chainPrefix: string): AdapterFactor
       results: new WarpEvmResults(config),
       serializer: new WarpEvmSerializer(),
       registry: fallback.registry,
-      explorer: (chainInfo: WarpChainInfo) => new WarpEvmExplorer(chainInfo),
+      explorer: (chainInfo: WarpChainInfo) => new WarpEvmExplorer(chainInfo, config),
       abiBuilder: () => fallback.abiBuilder(),
       brandBuilder: () => fallback.brandBuilder(),
     }

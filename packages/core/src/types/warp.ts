@@ -1,5 +1,7 @@
 export type WarpChain = string
 
+export type WarpExplorerName = string
+
 export type WarpChainInfo = {
   name: WarpChain
   displayName: string
@@ -9,6 +11,9 @@ export type WarpChainInfo = {
   apiUrl: string
   explorerUrl: string
   nativeToken: string
+  preferences?: {
+    explorers?: Record<WarpChain, WarpExplorerName>
+  }
 }
 
 export type WarpIdType = 'hash' | 'alias'

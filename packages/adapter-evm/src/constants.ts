@@ -1,12 +1,6 @@
-export const WarpEvmConstants = {
-  // Native token configuration
-  Ether: {
-    Identifier: 'ETH',
-    DisplayName: 'Ether',
-    Decimals: 18,
-  },
+import { WarpExplorerName } from '@vleap/warps'
 
-  // Gas configuration
+export const WarpEvmConstants = {
   GasLimit: {
     Default: 21000,
     ContractCall: 100000,
@@ -15,45 +9,77 @@ export const WarpEvmConstants = {
     Approve: 46000,
     Swap: 200000,
   },
-
   GasPrice: {
-    Default: '20000000000', // 20 gwei
-    Low: '10000000000', // 10 gwei
-    Medium: '20000000000', // 20 gwei
-    High: '50000000000', // 50 gwei
+    Default: '20000000000',
   },
-
-  // Supported networks
-  Networks: {
-    Ethereum: {
-      ChainId: '1',
-      Name: 'Ethereum',
-      BlockTime: 12,
-    },
-    Arbitrum: {
-      ChainId: '42161',
-      Name: 'Arbitrum',
-      BlockTime: 1,
-    },
-    Base: {
-      ChainId: '8453',
-      Name: 'Base',
-      BlockTime: 2,
-    },
-  },
-
-  // Validation rules
   Validation: {
-    AddressLength: 42,
-    HexPrefix: '0x',
     MinGasLimit: 21000,
     MaxGasLimit: 30000000,
   },
+}
 
-  // Timeout configuration
-  Timeouts: {
-    DefaultRpcTimeout: 30000, // 30 seconds
-    GasEstimationTimeout: 10000, // 10 seconds
-    QueryTimeout: 15000, // 15 seconds
+export enum EthereumExplorers {
+  Etherscan = 'etherscan',
+  EtherscanSepolia = 'etherscan_sepolia',
+  Ethplorer = 'ethplorer',
+  Blockscout = 'blockscout',
+  BlockscoutSepolia = 'blockscout_sepolia',
+}
+
+export enum ArbitrumExplorers {
+  Arbiscan = 'arbiscan',
+  ArbiscanSepolia = 'arbiscan_sepolia',
+  BlockscoutArbitrum = 'blockscout_arbitrum',
+  BlockscoutArbitrumSepolia = 'blockscout_arbitrum_sepolia',
+}
+
+export enum BaseExplorers {
+  Basescan = 'basescan',
+  BasescanSepolia = 'basescan_sepolia',
+  BlockscoutBase = 'blockscout_base',
+  BlockscoutBaseSepolia = 'blockscout_base_sepolia',
+}
+
+export enum LocalExplorers {
+  LocalBlockscout = 'local_blockscout',
+}
+
+export type ExplorerName = EthereumExplorers | ArbitrumExplorers | BaseExplorers | (LocalExplorers & WarpExplorerName)
+
+export const EvmExplorers = {
+  ethereum: {
+    mainnet: [EthereumExplorers.Etherscan, EthereumExplorers.Ethplorer, EthereumExplorers.Blockscout] as const,
+    testnet: [EthereumExplorers.EtherscanSepolia, EthereumExplorers.BlockscoutSepolia] as const,
+    devnet: [LocalExplorers.LocalBlockscout] as const,
   },
+  arbitrum: {
+    mainnet: [ArbitrumExplorers.Arbiscan, ArbitrumExplorers.BlockscoutArbitrum] as const,
+    testnet: [ArbitrumExplorers.ArbiscanSepolia, ArbitrumExplorers.BlockscoutArbitrumSepolia] as const,
+    devnet: [LocalExplorers.LocalBlockscout] as const,
+  },
+  base: {
+    mainnet: [BaseExplorers.Basescan, BaseExplorers.BlockscoutBase] as const,
+    testnet: [BaseExplorers.BasescanSepolia, BaseExplorers.BlockscoutBaseSepolia] as const,
+    devnet: [LocalExplorers.LocalBlockscout] as const,
+  },
+} as const
+
+export const ExplorerUrls: Record<ExplorerName, string> = {
+  [EthereumExplorers.Etherscan]: 'https://etherscan.io',
+  [EthereumExplorers.EtherscanSepolia]: 'https://sepolia.etherscan.io',
+  [EthereumExplorers.Ethplorer]: 'https://ethplorer.io',
+  [EthereumExplorers.Blockscout]: 'https://eth.blockscout.com',
+  [EthereumExplorers.BlockscoutSepolia]: 'https://sepolia.blockscout.com',
+
+  [ArbitrumExplorers.Arbiscan]: 'https://arbiscan.io',
+  [ArbitrumExplorers.ArbiscanSepolia]: 'https://sepolia.arbiscan.io',
+  [ArbitrumExplorers.BlockscoutArbitrum]: 'https://arbitrum.blockscout.com',
+  [ArbitrumExplorers.BlockscoutArbitrumSepolia]: 'https://sepolia.blockscout.com',
+
+  [BaseExplorers.Basescan]: 'https://basescan.org',
+  [BaseExplorers.BasescanSepolia]: 'https://sepolia.basescan.org',
+  [BaseExplorers.BlockscoutBase]: 'https://base.blockscout.com',
+  [BaseExplorers.BlockscoutBaseSepolia]: 'https://sepolia.blockscout.com',
+
+  [LocalExplorers.LocalBlockscout]: 'http://localhost:4000',
 }
