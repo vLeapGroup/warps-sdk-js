@@ -94,7 +94,7 @@ const getMultiversxWallet = async (): Promise<{ address: string; signer: UserSig
 
 const signAndSendWithMultiversX = async (tx: MultiversxTransaction): Promise<TransactionOnNetwork> => {
   const { address, signer } = await getMultiversxWallet()
-  const entrypoint = new DevnetEntrypoint(undefined, 'api', 'warp-test-playground')
+  const entrypoint = new DevnetEntrypoint({ kind: 'api', clientName: 'warp-test-playground' })
   const provider = entrypoint.createNetworkProvider()
   const account = await provider.getAccount(Address.newFromBech32(address))
   tx.nonce = account.nonce
