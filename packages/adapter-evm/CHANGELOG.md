@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-alpha.4
+
+### Minor Changes
+
+- 32ccfa5: add evm multi-explorer support
+
 ## 0.2.0-alpha.3
 
 ### Patch Changes
