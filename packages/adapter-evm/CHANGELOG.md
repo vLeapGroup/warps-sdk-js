@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-alpha.3
+
+### Patch Changes
+
+- df43165: update evm chain adapters
+
 ## 0.2.0-alpha.2
 
 ### Minor Changes
