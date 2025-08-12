@@ -13,13 +13,16 @@ import { getFaucetHost, requestSuiFromFaucetV2 } from '@mysten/sui/faucet'
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519'
 import { SerialTransactionExecutor, Transaction as SuiTransaction } from '@mysten/sui/transactions'
 import { WarpClient, WarpClientConfig } from '@vleap/warps'
+import { getArbitrumAdapter, getBaseAdapter, getEthereumAdapter } from '@vleap/warps-adapter-evm'
 import { getMultiversxAdapter } from '@vleap/warps-adapter-multiversx'
 import { getSuiAdapter } from '@vleap/warps-adapter-sui'
+import { ethers } from 'ethers'
 import * as fs from 'fs'
 import * as path from 'path'
 
 const walletMultiversxFileName = 'mvx.pem'
 const walletSuiFileName = 'sui.mnemonic'
+const walletEvmFileName = 'evm.mnemonic'
 const warpInputs: string[] = []
 
 const suiNetwork = 'testnet'
@@ -42,7 +45,14 @@ const runWarp = async (warpFile: string) => {
     user: {},
   }
 
-  const client = new WarpClient(config, [getMultiversxAdapter(config), getSuiAdapter(config)])
+  const multiversxAdapter = getMultiversxAdapter(config)
+  const client = new WarpClient(config, [
+    multiversxAdapter,
+    getSuiAdapter(config),
+    getEthereumAdapter(config, multiversxAdapter),
+    getArbitrumAdapter(config, multiversxAdapter),
+    getBaseAdapter(config, multiversxAdapter),
+  ])
 
   const warp = await client.createBuilder(Chain).createFromRaw(warpRaw)
 
@@ -52,6 +62,9 @@ const runWarp = async (warpFile: string) => {
   config.user.wallets = {
     multiversx: (await getMultiversxWallet()).address,
     sui: (await getSuiWallet()).address,
+    ethereum: (await getEvmWallet()).address,
+    arbitrum: (await getEvmWallet()).address,
+    base: (await getEvmWallet()).address,
   }
 
   const executor = client.createExecutor({
@@ -68,7 +81,10 @@ const runWarp = async (warpFile: string) => {
     executor.evaluateResults(warp, chain, txOnNetwork)
   } else if (chain.name === 'sui') {
     const txOnNetwork = await signAndSendWithSui(tx)
-    // executor.evaluateResults(txOnNetwork)
+    executor.evaluateResults(warp, chain, txOnNetwork)
+  } else if (chain.name === 'ethereum' || chain.name === 'arbitrum' || chain.name === 'base') {
+    const txOnNetwork = await signAndSendWithEvm(tx, chain)
+    executor.evaluateResults(warp, chain, txOnNetwork)
   } else {
     throw new Error(`Unsupported chain: ${chain}`)
   }
@@ -129,4 +145,80 @@ const signAndSendWithSui = async (tx: SuiTransaction): Promise<any> => {
   console.log('Sent transaction on Sui:', result.digest)
   console.log('--------------------------------')
   return result
+}
+
+const getEvmWallet = async (): Promise<{ address: string; wallet: ethers.HDNodeWallet }> => {
+  const mnemonicPath = path.join(__dirname, 'wallets', walletEvmFileName)
+  const mnemonic = await fs.promises.readFile(mnemonicPath, { encoding: 'utf8' })
+  const wallet = ethers.Wallet.fromPhrase(mnemonic.trim())
+  return { address: wallet.address, wallet }
+}
+
+const signAndSendWithEvm = async (tx: any, chain: any): Promise<any> => {
+  const { address, wallet } = await getEvmWallet()
+  let rpcUrl: string
+  switch (chain.name) {
+    case 'ethereum':
+      rpcUrl = 'https://rpc.sepolia.org' // Sepolia testnet
+      break
+    case 'arbitrum':
+      rpcUrl = 'https://sepolia-rollup.arbitrum.io/rpc' // Arbitrum Sepolia testnet
+      break
+    case 'base':
+      rpcUrl = 'https://sepolia.base.org' // Base Sepolia testnet
+      break
+    default:
+      rpcUrl = 'https://eth-sepolia.g.alchemy.com/v2/demo'
+  }
+
+  const provider = new ethers.JsonRpcProvider(rpcUrl)
+  const connectedWallet = wallet.connect(provider)
+  const nonce = await provider.getTransactionCount(address)
+  const feeData = await provider.getFeeData()
+
+  const gasLimit =
+    tx.gasLimit ||
+    (await provider.estimateGas({
+      to: tx.to,
+      data: tx.data,
+      value: tx.value || 0,
+      from: address,
+    }))
+
+  // Get the correct chain ID for each network
+  let chainId: number
+  switch (chain.name) {
+    case 'ethereum':
+      chainId = 11155111 // Sepolia
+      break
+    case 'arbitrum':
+      chainId = 421614 // Arbitrum Sepolia
+      break
+    case 'base':
+      chainId = 84532 // Base Sepolia
+      break
+    default:
+      chainId = 11155111 // Sepolia
+  }
+
+  const txRequest = {
+    to: tx.to,
+    data: tx.data,
+    value: tx.value || 0,
+    gasLimit: gasLimit,
+    maxFeePerGas: tx.maxFeePerGas || feeData.maxFeePerGas,
+    maxPriorityFeePerGas: tx.maxPriorityFeePerGas || feeData.maxPriorityFeePerGas,
+    nonce: nonce,
+    chainId: chainId,
+  }
+
+  const signedTx = await connectedWallet.signTransaction(txRequest)
+  const txResponse = await provider.broadcastTransaction(signedTx)
+  const receipt = await txResponse.wait()
+
+  console.log('--------------------------------')
+  console.log(`Sent transaction on ${chain.name}:`, receipt.hash)
+  console.log('--------------------------------')
+
+  return receipt
 }

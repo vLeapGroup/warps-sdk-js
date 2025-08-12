@@ -13,6 +13,7 @@
     "@vleap/warps-adapter-evm": "^0.2.0-alpha.3",
     "@vleap/warps-adapter-fastset": "^0.1.0-alpha.2",
     "@vleap/warps-adapter-multiversx": "^0.2.0-alpha.10",
-    "@vleap/warps-adapter-sui": "^0.2.0-alpha.17"
+    "@vleap/warps-adapter-sui": "^0.2.0-alpha.17",
+    "ethers": "^6.15.0"
   }
 }
