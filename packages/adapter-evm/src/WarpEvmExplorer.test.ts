@@ -240,7 +240,7 @@ describe('WarpEvmExplorer', () => {
       const devnetConfig = { ...mockConfig, env: 'devnet' as const }
       const explorer = new WarpEvmExplorer(mockChainInfo, devnetConfig)
       const url = explorer.getAccountUrl('0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6')
-      expect(url).toContain('localhost:4000')
+      expect(url).toContain('sepolia.etherscan.io')
     })
   })
 

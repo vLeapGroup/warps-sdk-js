@@ -1,5 +1,3 @@
-import { WarpExplorerName } from '@vleap/warps'
-
 export const WarpEvmConstants = {
   GasLimit: {
     Default: 21000,
@@ -40,27 +38,23 @@ export enum BaseExplorers {
   BlockscoutBaseSepolia = 'blockscout_base_sepolia',
 }
 
-export enum LocalExplorers {
-  LocalBlockscout = 'local_blockscout',
-}
-
-export type ExplorerName = EthereumExplorers | ArbitrumExplorers | BaseExplorers | (LocalExplorers & WarpExplorerName)
+export type ExplorerName = EthereumExplorers | ArbitrumExplorers | BaseExplorers
 
 export const EvmExplorers = {
   ethereum: {
     mainnet: [EthereumExplorers.Etherscan, EthereumExplorers.Ethplorer, EthereumExplorers.Blockscout] as const,
     testnet: [EthereumExplorers.EtherscanSepolia, EthereumExplorers.BlockscoutSepolia] as const,
-    devnet: [LocalExplorers.LocalBlockscout] as const,
+    devnet: [EthereumExplorers.EtherscanSepolia, EthereumExplorers.BlockscoutSepolia] as const,
   },
   arbitrum: {
     mainnet: [ArbitrumExplorers.Arbiscan, ArbitrumExplorers.BlockscoutArbitrum] as const,
     testnet: [ArbitrumExplorers.ArbiscanSepolia, ArbitrumExplorers.BlockscoutArbitrumSepolia] as const,
-    devnet: [LocalExplorers.LocalBlockscout] as const,
+    devnet: [ArbitrumExplorers.ArbiscanSepolia, ArbitrumExplorers.BlockscoutArbitrumSepolia] as const,
   },
   base: {
     mainnet: [BaseExplorers.Basescan, BaseExplorers.BlockscoutBase] as const,
     testnet: [BaseExplorers.BasescanSepolia, BaseExplorers.BlockscoutBaseSepolia] as const,
-    devnet: [LocalExplorers.LocalBlockscout] as const,
+    devnet: [BaseExplorers.BasescanSepolia, BaseExplorers.BlockscoutBaseSepolia] as const,
   },
 } as const
 
@@ -80,6 +74,4 @@ export const ExplorerUrls: Record<ExplorerName, string> = {
   [BaseExplorers.BasescanSepolia]: 'https://sepolia.basescan.org',
   [BaseExplorers.BlockscoutBase]: 'https://base.blockscout.com',
   [BaseExplorers.BlockscoutBaseSepolia]: 'https://sepolia.blockscout.com',
-
-  [LocalExplorers.LocalBlockscout]: 'http://localhost:4000',
 }
