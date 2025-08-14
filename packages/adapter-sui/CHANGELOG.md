@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.19
+
+### Patch Changes
+
+- 47a02a1: add name to chain configs
+- Updated dependencies [47a02a1]
+  - @vleap/warps@3.0.0-alpha.62
+
 ## 0.2.0-alpha.18
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.62
+
+### Patch Changes
+
+- 47a02a1: add name to chain configs
+
 ## 3.0.0-alpha.61
 
 ### Minor Changes

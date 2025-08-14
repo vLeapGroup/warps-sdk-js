@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-alpha.4
+
+### Patch Changes
+
+- 47a02a1: add name to chain configs
+- Updated dependencies [47a02a1]
+  - @vleap/warps@3.0.0-alpha.62
+
 ## 0.1.0-alpha.3
 
 ### Minor Changes
