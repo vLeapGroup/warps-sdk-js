@@ -32,6 +32,27 @@ export const createMockAdapter = () => ({
     createFromTransactionHash() {
       return Promise.resolve(null)
     },
+    createFromRaw() {
+      return Promise.resolve({ protocol: '', name: '', title: '', description: '', actions: [] })
+    },
+    setTitle() {
+      return this
+    },
+    setDescription() {
+      return this
+    },
+    setPreview() {
+      return this
+    },
+    setActions() {
+      return this
+    },
+    addAction() {
+      return this
+    },
+    build() {
+      return Promise.resolve({ protocol: '', name: '', title: '', description: '', actions: [] })
+    },
   }),
   abiBuilder: () => ({
     createFromRaw: async () => ({}),

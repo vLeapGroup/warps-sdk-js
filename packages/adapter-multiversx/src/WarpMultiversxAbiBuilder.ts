@@ -1,35 +1,30 @@
 import { AbiRegistry, TransactionOnNetwork } from '@multiversx/sdk-core'
 import {
-  Adapter,
-  AdapterWarpAbiBuilder,
-  WarpAbi,
-  WarpCache,
-  WarpCacheConfig,
-  WarpCacheKey,
-  WarpChain,
-  WarpClientConfig,
-  WarpConstants,
-  WarpContractAction,
-  WarpLogger,
-  WarpQueryAction,
+    AdapterWarpAbiBuilder,
+    WarpAbi,
+    WarpCache,
+    WarpCacheConfig,
+    WarpCacheKey,
+    WarpChain,
+    WarpChainInfo,
+    WarpClientConfig,
+    WarpConstants,
+    WarpContractAction,
+    WarpLogger,
+    WarpQueryAction,
 } from '@vleap/warps'
 import { WarpMultiversxContractLoader } from './WarpMultiversxContractLoader'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
-import { getAllMultiversxAdapters } from './chains/combined'
 
 export class WarpMultiversxAbiBuilder implements AdapterWarpAbiBuilder {
   private readonly contractLoader: WarpMultiversxContractLoader
   private readonly cache: WarpCache
-  private readonly adapter: Adapter
 
   constructor(
     private readonly config: WarpClientConfig,
-    private readonly chain: WarpChain
+    private readonly chain: WarpChain,
+    private readonly chainInfo: WarpChainInfo
   ) {
-    const adapter = getAllMultiversxAdapters(config).find((a) => a.chain === chain)
-    if (!adapter) throw new Error(`WarpAbiBuilder: adapter not found for chain ${chain}`)
-    this.adapter = adapter
-
     this.contractLoader = new WarpMultiversxContractLoader(this.config)
     this.cache = new WarpCache(this.config.cache?.type)
   }
@@ -62,7 +57,7 @@ export class WarpMultiversxAbiBuilder implements AdapterWarpAbiBuilder {
       }
     }
 
-    const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(this.adapter.chainInfo, this.config.env)
+    const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(this.chainInfo, this.config.env)
     const chainProvider = chainEntry.createNetworkProvider()
 
     try {
@@ -85,7 +80,7 @@ export class WarpMultiversxAbiBuilder implements AdapterWarpAbiBuilder {
       return await this.fetchAbi(action)
     }
     if (!action.address) throw new Error('WarpActionExecutor: Address not found')
-    const verification = await this.contractLoader.getVerificationInfo(action.address, this.adapter.chainInfo)
+    const verification = await this.contractLoader.getVerificationInfo(action.address, this.chainInfo)
     if (!verification) throw new Error('WarpActionExecutor: Verification info not found')
 
     return AbiRegistry.create(verification.abi)

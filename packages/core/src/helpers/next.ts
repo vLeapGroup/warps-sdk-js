@@ -1,15 +1,16 @@
+import { WarpConfig } from '../config'
 import { Adapter, WarpClientConfig } from '../types'
 import { WarpExecutionNextInfo, WarpExecutionResults } from '../types/results'
 import { Warp } from '../types/warp'
 import { WarpLinkBuilder } from '../WarpLinkBuilder'
-import { replacePlaceholders } from './general'
+import { findWarpAdapterByPrefix, replacePlaceholders } from './general'
 import { getWarpInfoFromIdentifier } from './identifier'
 
 const URL_PREFIX = 'https://'
 
 export const getNextInfo = (
   config: WarpClientConfig,
-  adapter: Adapter,
+  adapters: Adapter[],
   warp: Warp,
   actionIndex: number,
   results: WarpExecutionResults
@@ -20,7 +21,7 @@ export const getNextInfo = (
 
   const [baseIdentifier, queryWithPlaceholders] = next.split('?')
   if (!queryWithPlaceholders) {
-    return [{ identifier: baseIdentifier, url: buildNextUrl(adapter, baseIdentifier, config) }]
+    return [{ identifier: baseIdentifier, url: buildNextUrl(adapters, baseIdentifier, config) }]
   }
 
   // Find all array placeholders like {{DELEGATIONS[].contract}}
@@ -28,7 +29,7 @@ export const getNextInfo = (
   if (arrayPlaceholders.length === 0) {
     const query = replacePlaceholders(queryWithPlaceholders, { ...warp.vars, ...results })
     const identifier = query ? `${baseIdentifier}?${query}` : baseIdentifier
-    return [{ identifier, url: buildNextUrl(adapter, identifier, config) }]
+    return [{ identifier, url: buildNextUrl(adapters, identifier, config) }]
   }
 
   // Support multiple array placeholders that reference the same array
@@ -67,17 +68,24 @@ export const getNextInfo = (
 
       if (replacedQuery.includes('{{') || replacedQuery.includes('}}')) return null
       const identifier = replacedQuery ? `${baseIdentifier}?${replacedQuery}` : baseIdentifier
-      return { identifier, url: buildNextUrl(adapter, identifier, config) }
+      return { identifier, url: buildNextUrl(adapters, identifier, config) }
     })
     .filter((link): link is NonNullable<typeof link> => link !== null)
 
   return nextLinks
 }
 
-const buildNextUrl = (adapter: Adapter, identifier: string, config: WarpClientConfig): string => {
+const buildNextUrl = (adapters: Adapter[], identifier: string, config: WarpClientConfig): string => {
   const [rawId, queryString] = identifier.split('?')
-  const info = getWarpInfoFromIdentifier(rawId) || { type: 'alias', identifier: rawId, identifierBase: rawId }
-  const baseUrl = new WarpLinkBuilder(config, [adapter]).build(adapter.chain, info.type, info.identifierBase)
+  const info = getWarpInfoFromIdentifier(rawId) || {
+    chainPrefix: WarpConfig.DefaultChainPrefix,
+    type: 'alias',
+    identifier: rawId,
+    identifierBase: rawId,
+  }
+  const adapter = findWarpAdapterByPrefix(info.chainPrefix, adapters)
+  if (!adapter) throw new Error(`Adapter not found for chain ${info.chainPrefix}`)
+  const baseUrl = new WarpLinkBuilder(config, adapters).build(adapter.chain, info.type, info.identifierBase)
   if (!queryString) return baseUrl
 
   const url = new URL(baseUrl)

@@ -16,7 +16,6 @@ import {
   UserSigner,
 } from '@multiversx/sdk-core'
 import {
-  Adapter,
   AdapterWarpExecutor,
   applyResultsToMessages,
   findKnownTokenById,
@@ -36,26 +35,21 @@ import {
 import { WarpMultiversxAbiBuilder } from './WarpMultiversxAbiBuilder'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
-import { getAllMultiversxAdapters } from './chains/combined'
 import { esdt_value } from './utils.codec'
 
 export class WarpMultiversxExecutor implements AdapterWarpExecutor {
   private readonly serializer: WarpMultiversxSerializer
   private readonly abi: WarpMultiversxAbiBuilder
   private readonly results: WarpMultiversxResults
-  private readonly adapter: Adapter
 
   constructor(
     private readonly config: WarpClientConfig,
-    private readonly chain: WarpChain
+    private readonly chain: WarpChain,
+    private readonly chainInfo: WarpChainInfo
   ) {
-    const adapter = getAllMultiversxAdapters(config).find((a) => a.chain === chain)
-    if (!adapter) throw new Error(`WarpExecutor: adapter not found for chain ${chain}`)
-    this.adapter = adapter
-
     this.serializer = new WarpMultiversxSerializer()
-    this.abi = new WarpMultiversxAbiBuilder(this.config, this.chain)
-    this.results = new WarpMultiversxResults(this.config, this.chain)
+    this.abi = new WarpMultiversxAbiBuilder(this.config, this.chain, this.chainInfo)
+    this.results = new WarpMultiversxResults(this.config, this.chain, this.chainInfo)
   }
 
   async createTransaction(executable: WarpExecutable): Promise<Transaction> {
@@ -129,7 +123,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
       executable.action,
       executable.resolvedInputs
     )
-    const next = getNextInfo(this.config, this.adapter, executable.warp, executable.action, results)
+    const next = getNextInfo(this.config, [], executable.warp, executable.action, results)
 
     return {
       success: isSuccess,

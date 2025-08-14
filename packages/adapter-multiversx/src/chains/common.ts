@@ -19,14 +19,14 @@ export const createMultiversxAdapter = (
       chain: chainName,
       chainInfo,
       prefix: chainPrefix,
-      builder: () => new WarpMultiversxBuilder(config, chainName),
-      executor: new WarpMultiversxExecutor(config, chainName),
-      results: new WarpMultiversxResults(config),
+      builder: () => new WarpMultiversxBuilder(config, chainName, chainInfo),
+      executor: new WarpMultiversxExecutor(config, chainName, chainInfo),
+      results: new WarpMultiversxResults(config, chainName),
       serializer: new WarpMultiversxSerializer(),
       registry: new WarpMultiversxRegistry(config),
       explorer: new WarpMultiversxExplorer(chainName, config),
-      abiBuilder: () => new WarpMultiversxAbiBuilder(config, chainName),
-      brandBuilder: () => new WarpMultiversxBrandBuilder(config, chainName),
+      abiBuilder: () => new WarpMultiversxAbiBuilder(config, chainName, chainInfo),
+      brandBuilder: () => new WarpMultiversxBrandBuilder(config, chainName, chainInfo),
     }
   }
 }

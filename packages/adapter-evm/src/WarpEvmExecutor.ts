@@ -1,5 +1,4 @@
 import {
-  Adapter,
   AdapterWarpExecutor,
   applyResultsToMessages,
   getNextInfo,
@@ -22,10 +21,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
   private readonly provider: ethers.JsonRpcProvider
   private readonly results: WarpEvmResults
 
-  constructor(
-    private readonly config: WarpClientConfig,
-    private readonly adapter: Adapter
-  ) {
+  constructor(private readonly config: WarpClientConfig) {
     this.serializer = new WarpEvmSerializer()
     this.provider = new ethers.JsonRpcProvider(getEvmApiUrl(config.env))
     this.results = new WarpEvmResults(config)
@@ -141,7 +137,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         executable.resolvedInputs
       )
 
-      const next = getNextInfo(this.config, this.adapter, executable.warp, executable.action, results)
+      const next = getNextInfo(this.config, [], executable.warp, executable.action, results)
 
       return {
         success: isSuccess,

@@ -18,7 +18,6 @@ import {
 } from '@vleap/warps'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
 import { getSuiApiUrl } from './config'
-import { getSuiAdapter } from './main'
 
 export class WarpSuiResults implements AdapterWarpResults {
   private readonly serializer: WarpSuiSerializer
@@ -36,8 +35,7 @@ export class WarpSuiResults implements AdapterWarpResults {
     const { action, actionIndex } = findWarpExecutableAction(warp) as { action: WarpContractAction; actionIndex: WarpActionIndex }
     // SUI: tx is a TransactionBlockResponse
     const results = await this.extractContractResults(warp, actionIndex, tx, [])
-    const adapter = getSuiAdapter(this.config)
-    const next = getNextInfo(this.config, adapter, warp, actionIndex, results)
+    const next = getNextInfo(this.config, [], warp, actionIndex, results)
     const messages = applyResultsToMessages(warp, results.results)
     return {
       success: tx.effects?.status?.status === 'success',
