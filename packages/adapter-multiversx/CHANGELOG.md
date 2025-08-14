@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.21
+
+### Patch Changes
+
+- a919434: add missing mvx exports
+
 ## 0.2.0-alpha.20
 
 ### Minor Changes
