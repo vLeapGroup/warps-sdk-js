@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-alpha.3
+
+### Minor Changes
+
+- 9b46d12: add local chain infos
+
+### Patch Changes
+
+- Updated dependencies [9b46d12]
+  - @vleap/warps@3.0.0-alpha.61
+
 ## 0.1.0-alpha.2
 
 ### Minor Changes

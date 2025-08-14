@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.18
+
+### Minor Changes
+
+- 9b46d12: add local chain infos
+
+### Patch Changes
+
+- Updated dependencies [9b46d12]
+  - @vleap/warps@3.0.0-alpha.61
+
 ## 0.2.0-alpha.17
 
 ### Minor Changes

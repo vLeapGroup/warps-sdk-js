@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.20
+
+### Minor Changes
+
+- 9b46d12: add local chain infos
+
+### Patch Changes
+
+- Updated dependencies [9b46d12]
+  - @vleap/warps@3.0.0-alpha.61
+
 ## 0.2.0-alpha.19
 
 ### Minor Changes

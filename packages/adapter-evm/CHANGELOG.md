@@ -1,5 +1,17 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-alpha.5
+
+### Minor Changes
+
+- 9b46d12: add local chain infos
+
+### Patch Changes
+
+- d8789dd: update evm explorers
+- Updated dependencies [9b46d12]
+  - @vleap/warps@3.0.0-alpha.61
+
 ## 0.2.0-alpha.4
 
 ### Minor Changes

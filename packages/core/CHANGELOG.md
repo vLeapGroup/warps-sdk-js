@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.61
+
+### Minor Changes
+
+- 9b46d12: add local chain infos
+
 ## 3.0.0-alpha.60
 
 ### Minor Changes
