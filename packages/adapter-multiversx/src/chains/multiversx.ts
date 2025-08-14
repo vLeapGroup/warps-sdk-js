@@ -1,7 +1,11 @@
+import { WarpChain } from '@vleap/warps'
 import { createMultiversxAdapter } from './common'
 
-export const getMultiversxAdapter = createMultiversxAdapter('multiversx', 'mvx', {
+const ChainName: WarpChain = 'multiversx'
+
+export const getMultiversxAdapter = createMultiversxAdapter(ChainName, 'mvx', {
   mainnet: {
+    name: ChainName,
     displayName: 'MultiversX',
     chainId: '1',
     blockTime: 6000,
@@ -10,6 +14,7 @@ export const getMultiversxAdapter = createMultiversxAdapter('multiversx', 'mvx',
     nativeToken: 'EGLD',
   },
   testnet: {
+    name: ChainName,
     displayName: 'MultiversX Testnet',
     chainId: 'T',
     blockTime: 6000,
@@ -18,6 +23,7 @@ export const getMultiversxAdapter = createMultiversxAdapter('multiversx', 'mvx',
     nativeToken: 'EGLD',
   },
   devnet: {
+    name: ChainName,
     displayName: 'MultiversX Devnet',
     chainId: 'D',
     blockTime: 6000,

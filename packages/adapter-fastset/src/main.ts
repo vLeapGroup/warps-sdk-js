@@ -1,14 +1,17 @@
-import { Adapter, AdapterFactory, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { Adapter, AdapterFactory, WarpChain, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 import { WarpFastsetBuilder } from './WarpFastsetBuilder'
 import { WarpFastsetExecutor } from './WarpFastsetExecutor'
 import { WarpFastsetExplorer } from './WarpFastsetExplorer'
 import { WarpFastsetResults } from './WarpFastsetResults'
 import { WarpFastsetSerializer } from './WarpFastsetSerializer'
 
+const ChainName: WarpChain = 'fastset'
+
 export const getFastsetAdapter: AdapterFactory = (config: WarpClientConfig, fallback?: Adapter) => {
   if (!fallback) throw new Error('Fastset adapter requires a fallback adapter')
 
   const chainInfo: WarpChainInfo = {
+    name: ChainName,
     displayName: 'FastSet',
     chainId: '1',
     blockTime: 100,
@@ -18,7 +21,7 @@ export const getFastsetAdapter: AdapterFactory = (config: WarpClientConfig, fall
   }
 
   return {
-    chain: 'fastset',
+    chain: ChainName,
     chainInfo,
     prefix: 'fastset',
     builder: () => new WarpFastsetBuilder(config),

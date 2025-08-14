@@ -3,6 +3,7 @@ export type WarpChain = string
 export type WarpExplorerName = string
 
 export type WarpChainInfo = {
+  name: string
   displayName: string
   chainId: string
   blockTime: number
