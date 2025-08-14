@@ -1,8 +1,7 @@
 import { SuiClient } from '@mysten/sui/client'
 import { Transaction } from '@mysten/sui/transactions'
-import { AdapterWarpBuilder, Warp, WarpBuilder, WarpCache, WarpCacheConfig, WarpClientConfig } from '@vleap/warps'
+import { AdapterWarpBuilder, Warp, WarpBuilder, WarpCache, WarpCacheConfig, WarpChain, WarpClientConfig } from '@vleap/warps'
 import { getSuiApiUrl } from './config'
-import { WarpSuiConstants } from './constants'
 import { toRegistryMoveTarget } from './helpers/registry'
 
 export class WarpSuiBuilder extends WarpBuilder implements AdapterWarpBuilder {
@@ -10,11 +9,14 @@ export class WarpSuiBuilder extends WarpBuilder implements AdapterWarpBuilder {
   private client: SuiClient
   private userWallet: string | null
 
-  constructor(protected readonly config: WarpClientConfig) {
+  constructor(
+    protected readonly config: WarpClientConfig,
+    private readonly chain: WarpChain
+  ) {
     super(config)
     this.cache = new WarpCache(config.cache?.type)
     this.client = new SuiClient({ url: getSuiApiUrl(config.env) })
-    this.userWallet = this.config.user?.wallets?.[WarpSuiConstants.ChainName] || null
+    this.userWallet = this.config.user?.wallets?.[this.chain] || null
   }
 
   createInscriptionTransaction(warp: Warp, registryObjectId?: string): Transaction {
@@ -47,7 +49,7 @@ export class WarpSuiBuilder extends WarpBuilder implements AdapterWarpBuilder {
     const createdAt = info.created_at ? new Date(Number(info.created_at)).toISOString() : ''
     const warp: Warp = {
       meta: {
-        chain: WarpSuiConstants.ChainName,
+        chain: this.chain,
         hash,
         alias,
         creator,

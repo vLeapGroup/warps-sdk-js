@@ -19,33 +19,6 @@ export const WarpConfig = {
 
   SuperClientUrls: ['https://usewarp.to', 'https://testnet.usewarp.to', 'https://devnet.usewarp.to'],
 
-  MainChain: {
-    Name: 'multiversx',
-    DisplayName: 'MultiversX',
-    ApiUrl: (env: WarpChainEnv) => {
-      if (env === 'devnet') return 'https://devnet-api.multiversx.com'
-      if (env === 'testnet') return 'https://testnet-api.multiversx.com'
-      return 'https://api.multiversx.com'
-    },
-    ExplorerUrl: (env: WarpChainEnv) => {
-      if (env === 'devnet') return 'https://devnet-explorer.multiversx.com'
-      if (env === 'testnet') return 'https://testnet-explorer.multiversx.com'
-      return 'https://explorer.multiversx.com'
-    },
-    BlockTime: (env: WarpChainEnv) => {
-      if (env === 'devnet') return 6000
-      if (env === 'testnet') return 6000
-      return 6000
-    },
-    AddressHrp: 'erd',
-    ChainId: (env: WarpChainEnv) => {
-      if (env === 'devnet') return 'D'
-      if (env === 'testnet') return 'T'
-      return '1'
-    },
-    NativeToken: 'EGLD',
-  },
-
   AvailableActionInputSources: ['field', 'query', WarpConstants.Source.UserWallet] as WarpActionInputSource[],
 
   AvailableActionInputTypes: ['string', 'uint8', 'uint16', 'uint32', 'uint64', 'biguint', 'boolean', 'address'] as WarpActionInputType[],

@@ -1,20 +1,28 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
-import { getMainChainInfo, WarpBrand, WarpBrandBuilder, WarpClientConfig, WarpLogger } from '@vleap/warps'
+import { Adapter, WarpBrand, WarpBrandBuilder, WarpChain, WarpClientConfig, WarpLogger } from '@vleap/warps'
 import { Buffer } from 'buffer'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
+import { getAllMultiversxAdapters } from './chains/combined'
 
 export class WarpMultiversxBrandBuilder {
-  private core: WarpBrandBuilder
+  private readonly core: WarpBrandBuilder
+  private readonly adapter: Adapter
 
-  constructor(private config: WarpClientConfig) {
+  constructor(
+    private readonly config: WarpClientConfig,
+    private readonly chain: WarpChain
+  ) {
+    const adapter = getAllMultiversxAdapters(config).find((a) => a.chain === chain)
+    if (!adapter) throw new Error(`WarpBrandBuilder: adapter not found for chain ${chain}`)
+    this.adapter = adapter
+
     this.core = new WarpBrandBuilder(config)
   }
 
   async createInscriptionTransaction(brand: WarpBrand): Promise<Transaction> {
-    const chain = getMainChainInfo(this.config)
-    const userWallet = this.config.user?.wallets?.[chain.name]
+    const userWallet = this.config.user?.wallets?.[this.chain]
     if (!userWallet) throw new Error('BrandBuilder: user address not set')
-    const factoryConfig = new TransactionsFactoryConfig({ chainID: chain.chainId })
+    const factoryConfig = new TransactionsFactoryConfig({ chainID: this.adapter.chainInfo.chainId })
     const factory = new TransferTransactionsFactory({ config: factoryConfig })
     const sender = Address.newFromBech32(userWallet)
     const serialized = JSON.stringify(brand)
@@ -31,8 +39,7 @@ export class WarpMultiversxBrandBuilder {
   }
 
   async createFromTransactionHash(hash: string): Promise<WarpBrand | null> {
-    const chainInfo = getMainChainInfo(this.config)
-    const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(chainInfo, this.config.env)
+    const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(this.adapter.chainInfo, this.config.env)
     const chainProvider = chainEntry.createNetworkProvider()
 
     try {

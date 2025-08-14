@@ -1,6 +1,6 @@
+export * from './chains'
 export * from './config'
 export * from './constants'
-export * from './main'
 export * from './WarpEvmBuilder'
 export * from './WarpEvmExecutor'
 export * from './WarpEvmExplorer'

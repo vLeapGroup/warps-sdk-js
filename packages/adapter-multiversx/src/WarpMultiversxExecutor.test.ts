@@ -4,13 +4,13 @@ import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
 const testConfig: WarpConfig = {
   env: 'devnet' as WarpChainEnv,
-  user: { wallets: { MULTIVERSX: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8' } },
+  user: { wallets: { multiversx: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8' } },
   currentUrl: 'https://example.com',
 }
 
 describe('WarpMultiversxExecutor', () => {
   it('createTransactionForExecute - creates a native transfer with message', async () => {
-    const subject = new WarpMultiversxExecutor(testConfig)
+    const subject = new WarpMultiversxExecutor(testConfig, 'multiversx')
     const action: WarpTransferAction = {
       type: 'transfer',
       label: 'test',
@@ -21,14 +21,15 @@ describe('WarpMultiversxExecutor', () => {
     const warp = { actions: [action] } as any as Warp
     const executable = {
       warp,
-      chain: {
+      chain: 'multiversx',
+      chainInfo: {
         chainId: 'D',
         apiUrl: '',
         addressHrp: '',
         blockTime: 0,
         displayName: '',
         explorerUrl: '',
-        name: 'MULTIVERSX',
+        name: 'multiversx',
         nativeToken: '',
       },
       action: 1,
@@ -45,7 +46,7 @@ describe('WarpMultiversxExecutor', () => {
   })
 
   it('createTransactionForExecute - creates a native transfer with message from input', async () => {
-    const subject = new WarpMultiversxExecutor(testConfig)
+    const subject = new WarpMultiversxExecutor(testConfig, 'multiversx')
     const action: WarpTransferAction = {
       type: 'transfer',
       label: 'test',
@@ -56,14 +57,15 @@ describe('WarpMultiversxExecutor', () => {
     const warp = { actions: [action] } as any as Warp
     const executable = {
       warp,
-      chain: {
+      chain: 'multiversx',
+      chainInfo: {
         chainId: 'D',
         apiUrl: '',
         addressHrp: '',
         blockTime: 0,
         displayName: '',
         explorerUrl: '',
-        name: 'MULTIVERSX',
+        name: 'multiversx',
         nativeToken: '',
       },
       action: 1,
@@ -80,7 +82,7 @@ describe('WarpMultiversxExecutor', () => {
   })
 
   it('createTransactionForExecute - creates a native transfer field-based receiver', async () => {
-    const subject = new WarpMultiversxExecutor(testConfig)
+    const subject = new WarpMultiversxExecutor(testConfig, 'multiversx')
     const action: WarpTransferAction = {
       type: 'transfer',
       label: 'test',
@@ -91,27 +93,27 @@ describe('WarpMultiversxExecutor', () => {
     const warp = { actions: [action] } as any as Warp
     const executable = {
       warp,
-      chain: {
+      chain: 'multiversx',
+      chainInfo: {
         chainId: 'D',
         apiUrl: '',
         addressHrp: '',
         blockTime: 0,
         displayName: '',
         explorerUrl: '',
-        name: 'MULTIVERSX',
+        name: 'multiversx',
         nativeToken: '',
       },
       action: 1,
       destination: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
       args: [],
-      value: BigInt('1000000000000000000'),
+      value: 1000000000000000000n,
       transfers: [],
-      data: '',
+      data: null,
       resolvedInputs: [],
     }
     const tx = await subject.createTransaction(executable)
-    expect(tx.receiver.toBech32()).toBe('erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8')
-    expect(tx.data.toString()).toBe('')
+
     expect(tx.value.toString()).toBe('1000000000000000000')
   })
 

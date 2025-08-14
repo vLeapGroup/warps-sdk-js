@@ -21,333 +21,55 @@ describe('WarpFastsetExecutor', () => {
       name: 'fastset',
       displayName: 'Fastset',
       chainId: '1',
-      blockTime: 12,
+      blockTime: 12000,
       addressHrp: 'fs',
       apiUrl: 'https://api.fastset.xyz',
       explorerUrl: 'https://explorer.fastset.xyz',
       nativeToken: 'FS',
     }
-    executor = new WarpFastsetExecutor(mockConfig, 'fastset')
+    executor = new WarpFastsetExecutor(mockConfig)
     ;(fetch as jest.Mock).mockClear()
   })
 
   describe('preprocessInput', () => {
-    it('should preprocess address input', async () => {
-      const result = await executor.preprocessInput(mockChainInfo, 'input', 'address', 'fs1testaddress123456789')
-      expect(result).toBe('fs1testaddress123456789')
+    it('should validate and format addresses', async () => {
+      const address = 'fs1testaddress123456789'
+      const result = await executor.preprocessInput({} as any, 'address', 'address', address)
+      expect(result).toBe(address)
     })
 
-    it('should preprocess number input', async () => {
-      const result = await executor.preprocessInput(mockChainInfo, 'input', 'number', '123')
-      expect(result).toBe('123')
+    it('should validate and format hex strings', async () => {
+      const hex = '0x1234567890abcdef'
+      const result = await executor.preprocessInput({} as any, 'hex', 'hex', hex)
+      expect(result).toBe(hex)
     })
 
-    it('should preprocess bigint input', async () => {
-      const result = await executor.preprocessInput(mockChainInfo, 'input', 'bigint', '1000000000000000000')
-      expect(result).toBe('1000000000000000000')
+    it('should validate and format bigint values', async () => {
+      const result = await executor.preprocessInput({} as any, 'biguint', 'biguint', '123456789')
+      expect(result).toBe('123456789')
     })
 
-    it('should handle string input', async () => {
-      const result = await executor.preprocessInput(mockChainInfo, 'input', 'string', 'hello')
-      expect(result).toBe('hello')
+    it('should throw error for invalid addresses', async () => {
+      await expect(executor.preprocessInput({} as any, 'address', 'address', 'invalid-address')).rejects.toThrow('Invalid Fastset address format: invalid-address')
     })
 
-    it('should throw error for invalid number', async () => {
-      await expect(executor.preprocessInput(mockChainInfo, 'input', 'number', 'invalid')).rejects.toThrow('Invalid number format')
+    it('should throw error for invalid hex strings', async () => {
+      await expect(executor.preprocessInput({} as any, 'hex', 'hex', 'invalid-hex')).rejects.toThrow('Invalid hex format')
     })
 
-    it('should throw error for negative bigint', async () => {
-      await expect(executor.preprocessInput(mockChainInfo, 'input', 'bigint', '-100')).rejects.toThrow(
-        'Negative value not allowed for type bigint'
-      )
+    it('should throw error for negative bigint values', async () => {
+      await expect(executor.preprocessInput({} as any, 'biguint', 'biguint', '-123')).rejects.toThrow('Negative value not allowed')
     })
   })
 
   describe('createTransferTransaction', () => {
-    it('should create transfer transaction', async () => {
+    it('should create a transfer transaction', async () => {
       const executable = {
-        chain: mockChainInfo,
-        destination: 'fs1destination123456789',
-        value: BigInt(1000000),
-        data: 'string:hello',
-        warp: {
-          protocol: 'warp',
-          name: 'test-warp',
-          title: 'Test Warp',
-          description: 'A test warp',
-          actions: [
-            {
-              type: 'transfer' as const,
-              label: 'Send FS',
-            },
-          ],
-        },
-        action: 1,
-        args: [],
-        transfers: [],
-        resolvedInputs: [],
-      }
-
-      const tx = await executor.createTransferTransaction(executable)
-
-      expect(tx).toEqual({
-        type: 'fastset-transfer',
-        from: 'fs1testaddress123456789',
-        to: 'fs1destination123456789',
-        value: BigInt(1000000),
-        data: 'hello',
-      })
-    })
-
-    it('should throw error when user wallet not set', async () => {
-      const executorWithoutWallet = new WarpFastsetExecutor({ env: 'testnet', user: { wallets: {} } }, 'fastset')
-
-      const executable = {
-        chain: mockChainInfo,
-        destination: 'fs1destination123456789',
-        value: BigInt(1000000),
+        destination: 'fs1testaddress123456789',
+        value: BigInt(1000000000000000000),
         data: null,
+        chain: 'fastset',
         warp: {
-          protocol: 'warp',
-          name: 'test-warp',
-          title: 'Test Warp',
-          description: 'A test warp',
-          actions: [
-            {
-              type: 'transfer' as const,
-              label: 'Send FS',
-            },
-          ],
-        },
-        action: 1,
-        args: [],
-        transfers: [],
-        resolvedInputs: [],
-      }
-
-      await expect(executorWithoutWallet.createTransferTransaction(executable)).rejects.toThrow(
-        'WarpFastsetExecutor: createTransfer - user address not set'
-      )
-    })
-
-    it('should throw error for negative value', async () => {
-      const executable = {
-        chain: mockChainInfo,
-        destination: 'fs1destination123456789',
-        value: BigInt(-1000000),
-        data: null,
-        warp: {
-          protocol: 'warp',
-          name: 'test-warp',
-          title: 'Test Warp',
-          description: 'A test warp',
-          actions: [
-            {
-              type: 'transfer' as const,
-              label: 'Send FS',
-            },
-          ],
-        },
-        action: 1,
-        args: [],
-        transfers: [],
-        resolvedInputs: [],
-      }
-
-      await expect(executor.createTransferTransaction(executable)).rejects.toThrow('WarpFastsetExecutor: Transfer value cannot be negative')
-    })
-  })
-
-  describe('createContractCallTransaction', () => {
-    it('should create contract call transaction', async () => {
-      const executable = {
-        chain: mockChainInfo,
-        destination: 'fs1contract123456789',
-        value: BigInt(0),
-        data: null,
-        args: ['fs1destination123456789', '1000000'], // Changed BigInt to string
-        warp: {
-          protocol: 'warp',
-          name: 'test-warp',
-          title: 'Test Warp',
-          description: 'A test warp',
-          actions: [
-            {
-              type: 'contract' as const,
-              label: 'Transfer',
-              func: 'transfer(address,uint256)',
-            },
-          ],
-        },
-        action: 1,
-        transfers: [],
-        resolvedInputs: [],
-      }
-
-      const tx = await executor.createContractCallTransaction(executable)
-
-      expect(tx).toEqual({
-        type: 'fastset-contract-call',
-        from: 'fs1testaddress123456789',
-        to: 'fs1contract123456789',
-        value: BigInt(0),
-        data: '{"function":"transfer(address,uint256)","arguments":["fs1destination123456789","1000000"]}',
-        function: 'transfer(address,uint256)',
-      })
-    })
-
-    it('should throw error when user wallet not set', async () => {
-      const executorWithoutWallet = new WarpFastsetExecutor({ env: 'testnet', user: { wallets: {} } }, 'fastset')
-
-      const executable = {
-        chain: mockChainInfo,
-        destination: 'pi1contract123456789',
-        value: BigInt(0),
-        data: null,
-        args: [],
-        warp: {
-          protocol: 'warp',
-          name: 'test-warp',
-          title: 'Test Warp',
-          description: 'A test warp',
-          actions: [
-            {
-              type: 'contract' as const,
-              label: 'Transfer',
-              func: 'transfer(address,uint256)',
-            },
-          ],
-        },
-        action: 1,
-        transfers: [],
-        resolvedInputs: [],
-      }
-
-      await expect(executorWithoutWallet.createContractCallTransaction(executable)).rejects.toThrow(
-        'WarpFastsetExecutor: createContractCall - user address not set'
-      )
-    })
-
-    it('should throw error for negative value', async () => {
-      const executable = {
-        chain: mockChainInfo,
-        destination: 'pi1contract123456789',
-        value: BigInt(-1000000),
-        data: null,
-        args: [],
-        warp: {
-          protocol: 'warp',
-          name: 'test-warp',
-          title: 'Test Warp',
-          description: 'A test warp',
-          actions: [
-            {
-              type: 'contract' as const,
-              label: 'Transfer',
-              func: 'transfer(address,uint256)',
-            },
-          ],
-        },
-        action: 1,
-        transfers: [],
-        resolvedInputs: [],
-      }
-
-      await expect(executor.createContractCallTransaction(executable)).rejects.toThrow(
-        'WarpFastsetExecutor: Contract call value cannot be negative'
-      )
-    })
-  })
-
-  describe('executeQuery', () => {
-    it('should execute query successfully', async () => {
-      const mockResponse = { result: 'success' }
-      ;(fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      })
-
-      const executable = {
-        chain: mockChainInfo,
-        destination: 'pi1contract123456789',
-        data: null,
-        args: [],
-        warp: {
-          protocol: 'warp',
-          name: 'test-warp',
-          title: 'Test Warp',
-          description: 'A test warp',
-          actions: [
-            {
-              type: 'query' as const,
-              label: 'Balance Check',
-              func: 'balanceOf(address)',
-            },
-          ],
-        },
-        action: 1,
-        value: BigInt(0),
-        transfers: [],
-        resolvedInputs: [],
-      }
-
-      const result = await executor.executeQuery(executable)
-
-      expect(result).toEqual({
-        success: true,
-        result: mockResponse,
-      })
-    })
-
-    it('should handle query failure', async () => {
-      ;(fetch as jest.Mock).mockResolvedValueOnce({
-        ok: false,
-        statusText: 'Not Found',
-      })
-
-      const executable = {
-        chain: mockChainInfo,
-        destination: 'pi1contract123456789',
-        data: null,
-        args: [],
-        warp: {
-          protocol: 'warp',
-          name: 'test-warp',
-          title: 'Test Warp',
-          description: 'A test warp',
-          actions: [
-            {
-              type: 'query' as const,
-              label: 'Balance Check',
-              func: 'balanceOf(address)',
-            },
-          ],
-        },
-        action: 1,
-        value: BigInt(0),
-        transfers: [],
-        resolvedInputs: [],
-      }
-
-      const result = await executor.executeQuery(executable)
-
-      expect(result).toEqual({
-        success: false,
-        error: 'Fastset query failed: Not Found',
-      })
-    })
-
-    it('should throw error for invalid action type', async () => {
-      const executable = {
-        chain: mockChainInfo,
-        destination: 'pi1contract123456789',
-        data: null,
-        args: [],
-        warp: {
-          protocol: 'warp',
-          name: 'test-warp',
-          title: 'Test Warp',
-          description: 'A test warp',
           actions: [
             {
               type: 'transfer',
@@ -355,135 +77,265 @@ describe('WarpFastsetExecutor', () => {
           ],
         },
         action: 1,
-        value: BigInt(0),
+        args: [],
         transfers: [],
         resolvedInputs: [],
-      }
+      } as any
 
-      await expect(executor.executeQuery(executable)).rejects.toThrow('WarpFastsetExecutor: Invalid action type for executeQuery')
+      const tx = await executor.createTransferTransaction(executable)
+
+      expect(tx).toEqual({
+        type: 'fastset-transfer',
+        recipient: expect.any(Uint8Array),
+        amount: 'de0b6b3a7640000',
+        userData: undefined,
+        chain: 'fastset',
+      })
+    })
+
+    it('should throw error for invalid destination address', async () => {
+      const executable = {
+        destination: 'invalid-address',
+        value: BigInt(1000000000000000000),
+        data: null,
+        chain: 'fastset',
+        warp: {
+          actions: [
+            {
+              type: 'transfer',
+            },
+          ],
+        },
+        action: 1,
+        args: [],
+        transfers: [],
+        resolvedInputs: [],
+      } as any
+
+      await expect(executor.createTransferTransaction(executable)).rejects.toThrow('WarpFastsetExecutor: Invalid destination address')
     })
   })
 
-  describe('createTransaction', () => {
-    it('should create transfer transaction', async () => {
-      const executable = {
-        chain: mockChainInfo,
-        destination: 'pi1destination123456789',
-        value: BigInt(1000000),
-        data: null,
-        warp: {
-          protocol: 'warp',
-          name: 'test-warp',
-          title: 'Test Warp',
-          description: 'A test warp',
-          actions: [
-            {
-              type: 'transfer' as const,
-              label: 'Send PI',
-            },
-          ],
-        },
-        action: 1,
-        args: [],
-        transfers: [],
-        resolvedInputs: [],
-      }
-
-      const tx = await executor.createTransaction(executable)
-
-      expect(tx.type).toBe('fastset-transfer')
-    })
-
+  describe('createContractCallTransaction', () => {
     it('should create contract call transaction', async () => {
       const executable = {
-        chain: mockChainInfo,
-        destination: 'pi1contract123456789',
+        destination: 'fs1testaddress123456789',
         value: BigInt(0),
         data: null,
-        args: [],
+        chain: 'fastset',
         warp: {
-          protocol: 'warp',
-          name: 'test-warp',
-          title: 'Test Warp',
-          description: 'A test warp',
           actions: [
             {
-              type: 'contract' as const,
-              label: 'Transfer',
-              func: 'transfer(address,uint256)',
+              type: 'contract',
+              func: 'testFunction',
             },
           ],
         },
         action: 1,
+        args: ['string:hello', 'number:42'],
         transfers: [],
         resolvedInputs: [],
-      }
+      } as any
 
-      const tx = await executor.createTransaction(executable)
+      const tx = await executor.createContractCallTransaction(executable)
 
-      expect(tx.type).toBe('fastset-contract-call')
+      expect(tx).toEqual({
+        type: 'fastset-contract-call',
+        contract: expect.any(Uint8Array),
+        function: 'testFunction',
+        data: expect.any(String),
+        value: BigInt(0),
+        chain: 'fastset',
+      })
     })
 
-    it('should throw error for query action type', async () => {
+    it('should throw error for invalid contract address', async () => {
       const executable = {
-        chain: mockChainInfo,
-        destination: 'pi1contract123456789',
+        destination: 'invalid-address',
+        value: BigInt(0),
         data: null,
-        args: [],
+        chain: 'fastset',
         warp: {
-          protocol: 'warp',
-          name: 'test-warp',
-          title: 'Test Warp',
-          description: 'A test warp',
           actions: [
             {
-              type: 'query' as const,
-              label: 'Balance Check',
+              type: 'contract',
+              func: 'testFunction',
+            },
+          ],
+        },
+        action: 1,
+        args: ['string:hello', 'number:42'],
+        transfers: [],
+        resolvedInputs: [],
+      } as any
+
+      await expect(executor.createContractCallTransaction(executable)).rejects.toThrow('WarpFastsetExecutor: Invalid contract address')
+    })
+  })
+
+  describe('executeQuery', () => {
+    it('should execute a query successfully', async () => {
+      const executable = {
+        destination: 'fs1testaddress123456789',
+        value: BigInt(0),
+        data: null,
+        chain: 'fastset',
+        warp: {
+          actions: [
+            {
+              type: 'query',
               func: 'balanceOf(address)',
             },
           ],
         },
         action: 1,
-        value: BigInt(0),
+        args: ['fs1testaddress123456789'],
         transfers: [],
         resolvedInputs: [],
-      }
+      } as any
 
-      await expect(executor.createTransaction(executable)).rejects.toThrow(
-        'WarpFastsetExecutor: Invalid action type for createTransaction; Use executeQuery instead'
-      )
+      ;(fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ result: 'success', data: '1000000000000000000' }),
+      })
+
+      const result = await executor.executeQuery(executable)
+
+      expect(result).toEqual({
+        success: true,
+        result: {
+          result: 'success',
+          data: '1000000000000000000',
+        },
+        chain: 'fastset',
+      })
     })
 
-    it('should throw error for collect action type', async () => {
+    it('should handle query failure', async () => {
       const executable = {
-        chain: mockChainInfo,
-        destination: 'pi1contract123456789',
+        destination: 'fs1testaddress123456789',
+        value: BigInt(0),
         data: null,
-        args: [],
+        chain: 'fastset',
         warp: {
-          protocol: 'warp',
-          name: 'test-warp',
-          title: 'Test Warp',
-          description: 'A test warp',
           actions: [
             {
-              type: 'collect' as const,
-              label: 'Collect Data',
-              destination: {
-                url: 'https://example.com',
-              },
+              type: 'query',
+              func: 'balanceOf(address)',
             },
           ],
         },
         action: 1,
-        value: BigInt(0),
+        args: ['fs1testaddress123456789'],
         transfers: [],
         resolvedInputs: [],
-      }
+      } as any
 
-      await expect(executor.createTransaction(executable)).rejects.toThrow(
-        'WarpFastsetExecutor: Invalid action type for createTransaction; Use executeCollect instead'
-      )
+      ;(fetch as jest.Mock).mockRejectedValueOnce(new Error('Not Found'))
+
+      const result = await executor.executeQuery(executable)
+
+      expect(result).toEqual({
+        success: false,
+        error: 'Fastset query failed: Not Found',
+        chain: 'fastset',
+      })
+    })
+  })
+
+  describe('createTransaction', () => {
+    it('should create a transfer transaction', async () => {
+      const executable = {
+        destination: 'fs1testaddress123456789',
+        value: BigInt(1000000000000000000),
+        data: null,
+        chain: 'fastset',
+        warp: {
+          actions: [
+            {
+              type: 'transfer',
+            },
+          ],
+        },
+        action: 1,
+        args: [],
+        transfers: [],
+        resolvedInputs: [],
+      } as any
+
+      const tx = await executor.createTransaction(executable)
+
+      expect(tx).toEqual({
+        type: 'fastset-transfer',
+        recipient: expect.any(Uint8Array),
+        amount: 'de0b6b3a7640000',
+        userData: undefined,
+        chain: 'fastset',
+      })
+    })
+
+    it('should create contract call transaction', async () => {
+      const executable = {
+        destination: 'fs1testaddress123456789',
+        value: BigInt(0),
+        data: null,
+        chain: 'fastset',
+        warp: {
+          actions: [
+            {
+              type: 'contract',
+              func: 'testFunction',
+            },
+          ],
+        },
+        action: 1,
+        args: ['string:hello', 'number:42'],
+        transfers: [],
+        resolvedInputs: [],
+      } as any
+
+      const tx = await executor.createTransaction(executable)
+
+      expect(tx).toEqual({
+        type: 'fastset-contract-call',
+        contract: expect.any(Uint8Array),
+        function: 'testFunction',
+        data: expect.any(String),
+        value: BigInt(0),
+        chain: 'fastset',
+      })
+    })
+
+    it('should throw error for unsupported action type', async () => {
+      const executable = {
+        destination: 'fs1testaddress123456789',
+        value: BigInt(0),
+        data: null,
+        chain: 'fastset',
+        warp: {
+          actions: [
+            {
+              type: 'query',
+              func: 'balanceOf(address)',
+            },
+          ],
+        },
+        action: 1,
+        args: [],
+        transfers: [],
+        resolvedInputs: [],
+      } as any
+
+      await expect(executor.createTransaction(executable)).rejects.toThrow('WarpFastsetExecutor: Invalid action type for createTransaction; Use executeQuery instead')
+    })
+  })
+
+  describe('signMessage', () => {
+    it('should sign a message', async () => {
+      const message = 'test message'
+      const privateKey = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+
+      await expect(executor.signMessage(message, privateKey)).rejects.toThrow('Not implemented')
     })
   })
 })

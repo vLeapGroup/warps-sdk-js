@@ -1,19 +1,13 @@
 import { AdapterWarpExplorer, WarpChainInfo } from '@vleap/warps'
 
 export class WarpFastsetExplorer implements AdapterWarpExplorer {
-  private readonly chainInfo: WarpChainInfo
-  private readonly chainName: string
-
-  constructor(chainInfo: WarpChainInfo, chainName: string = 'fastset') {
-    this.chainInfo = chainInfo
-    this.chainName = chainName
-  }
+  constructor(private readonly chainInfo: WarpChainInfo) {}
 
   getAccountUrl(address: string): string {
     // TODO: Implement Fastset-specific account URL generation
     // This should generate a URL to view an account on Fastset explorer
 
-    const baseUrl = this.chainInfo.explorerUrl || this.getDefaultExplorerUrl()
+    const baseUrl = this.getDefaultExplorerUrl()
     return `${baseUrl}/address/${address}`
   }
 
@@ -21,7 +15,7 @@ export class WarpFastsetExplorer implements AdapterWarpExplorer {
     // TODO: Implement Fastset-specific transaction URL generation
     // This should generate a URL to view a transaction on Fastset explorer
 
-    const baseUrl = this.chainInfo.explorerUrl || this.getDefaultExplorerUrl()
+    const baseUrl = this.getDefaultExplorerUrl()
     return `${baseUrl}/tx/${hash}`
   }
 
@@ -29,7 +23,7 @@ export class WarpFastsetExplorer implements AdapterWarpExplorer {
     // TODO: Implement Fastset-specific block URL generation
     // This should generate a URL to view a block on Fastset explorer
 
-    const baseUrl = this.chainInfo.explorerUrl || this.getDefaultExplorerUrl()
+    const baseUrl = this.getDefaultExplorerUrl()
     return `${baseUrl}/block/${blockNumber}`
   }
 
@@ -37,7 +31,7 @@ export class WarpFastsetExplorer implements AdapterWarpExplorer {
     // TODO: Implement Fastset-specific contract URL generation
     // This should generate a URL to view a contract on Fastset explorer
 
-    const baseUrl = this.chainInfo.explorerUrl || this.getDefaultExplorerUrl()
+    const baseUrl = this.getDefaultExplorerUrl()
     return `${baseUrl}/contract/${address}`
   }
 
@@ -45,7 +39,7 @@ export class WarpFastsetExplorer implements AdapterWarpExplorer {
     // TODO: Implement Fastset-specific token URL generation
     // This should generate a URL to view a token on Fastset explorer
 
-    const baseUrl = this.chainInfo.explorerUrl || this.getDefaultExplorerUrl()
+    const baseUrl = this.getDefaultExplorerUrl()
     return `${baseUrl}/token/${address}`
   }
 

@@ -4,7 +4,7 @@ export const createMockChainInfo = (chainName: string = 'multiversx') => ({
   name: chainName,
   displayName: chainName === 'multiversx' ? 'MultiversX' : chainName,
   chainId: chainName === 'multiversx' ? 'D' : chainName,
-  blockTime: 6,
+  blockTime: 6000,
   addressHrp: 'erd',
   apiUrl: `https://${chainName === 'multiversx' ? 'devnet-api.multiversx' : chainName}.com`,
   explorerUrl: `https://${chainName === 'multiversx' ? 'devnet-explorer.multiversx' : chainName}.com`,
@@ -13,6 +13,7 @@ export const createMockChainInfo = (chainName: string = 'multiversx') => ({
 
 export const createMockAdapter = () => ({
   chain: 'multiversx',
+  chainInfo: createMockChainInfo('multiversx'),
   prefix: 'mvx',
   explorer: () => ({
     getTransactionUrl: () => '',

@@ -8,6 +8,7 @@ describe('WarpEvmExecutor', () => {
   let executor: WarpEvmExecutor
   let mockConfig: WarpClientConfig
   let mockProvider: any
+  let mockAdapter: any
 
   beforeEach(() => {
     mockConfig = {
@@ -18,6 +19,17 @@ describe('WarpEvmExecutor', () => {
         },
       },
     } as WarpClientConfig
+
+    mockAdapter = {
+      name: 'evm',
+      displayName: 'EVM',
+      chainId: '1',
+      blockTime: 12000,
+      addressHrp: '0x',
+      apiUrl: 'https://api.evm.com',
+      explorerUrl: 'https://explorer.evm.com',
+      nativeToken: 'ETH',
+    }
 
     // Mock ethers functions
     ;(ethers.isAddress as unknown as jest.Mock).mockImplementation((address: string) => {
@@ -45,7 +57,7 @@ describe('WarpEvmExecutor', () => {
     }
     ;(ethers.JsonRpcProvider as unknown as jest.Mock).mockImplementation(() => mockProvider)
 
-    executor = new WarpEvmExecutor(mockConfig)
+    executor = new WarpEvmExecutor(mockConfig, mockAdapter)
   })
 
   describe('preprocessInput', () => {
@@ -85,7 +97,7 @@ describe('WarpEvmExecutor', () => {
         destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
         value: BigInt(1000000000000000000), // 1 ETH
         data: null,
-        chain: { name: 'evm' },
+        chain: 'evm',
         warp: {
           actions: [
             {
@@ -99,11 +111,38 @@ describe('WarpEvmExecutor', () => {
         resolvedInputs: [],
       } as any
 
-      const result = await executor.createTransferTransaction(executable)
+      const tx = await executor.createTransferTransaction(executable)
 
-      expect(result.to).toBe(executable.destination)
-      expect(result.value).toBe(executable.value)
-      expect(result.data).toBe('0x')
+      expect(tx).toEqual({
+        to: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+        value: BigInt(1000000000000000000),
+        data: '0x',
+        gasLimit: BigInt(21000),
+        maxFeePerGas: ethers.parseUnits('20', 'gwei'),
+        maxPriorityFeePerGas: ethers.parseUnits('1.5', 'gwei'),
+      })
+    })
+
+    it('should throw error for invalid destination address', async () => {
+      const executable = {
+        destination: 'invalid-address',
+        value: BigInt(1000000000000000000),
+        data: null,
+        chain: 'evm',
+        warp: {
+          actions: [
+            {
+              type: 'transfer',
+            },
+          ],
+        },
+        action: 1,
+        args: [],
+        transfers: [],
+        resolvedInputs: [],
+      } as any
+
+      await expect(executor.createTransferTransaction(executable)).rejects.toThrow('WarpEvmExecutor: Invalid destination address')
     })
   })
 
@@ -113,7 +152,7 @@ describe('WarpEvmExecutor', () => {
         destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
         value: BigInt(0),
         data: null,
-        chain: { name: 'evm' },
+        chain: 'evm',
         warp: {
           actions: [
             {
@@ -128,15 +167,210 @@ describe('WarpEvmExecutor', () => {
         resolvedInputs: [],
       } as any
 
-      ;(ethers.Interface as unknown as jest.Mock).mockImplementation(() => ({
-        encodeFunctionData: jest.fn().mockReturnValue('0x1234567890abcdef'),
-      }))
+      const tx = await executor.createContractCallTransaction(executable)
 
-      const result = await executor.createContractCallTransaction(executable)
+      expect(tx).toEqual({
+        to: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+        value: BigInt(0),
+        data: undefined,
+        gasLimit: BigInt(21000),
+        maxFeePerGas: ethers.parseUnits('20', 'gwei'),
+        maxPriorityFeePerGas: ethers.parseUnits('1.5', 'gwei'),
+      })
+    })
 
-      expect(result.to).toBe(executable.destination)
-      expect(result.value).toBe(executable.value)
-      expect(result.data).toBe('0x1234567890abcdef')
+    it('should throw error for invalid contract address', async () => {
+      const executable = {
+        destination: 'invalid-address',
+        value: BigInt(0),
+        data: null,
+        chain: 'evm',
+        warp: {
+          actions: [
+            {
+              type: 'contract',
+              func: 'transfer(address,uint256)',
+            },
+          ],
+        },
+        action: 1,
+        args: ['0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6', '1000000000000000000'],
+        transfers: [],
+        resolvedInputs: [],
+      } as any
+
+      await expect(executor.createContractCallTransaction(executable)).rejects.toThrow('WarpEvmExecutor: Invalid contract address')
+    })
+  })
+
+  describe('executeQuery', () => {
+    it('should execute a query successfully', async () => {
+      const executable = {
+        destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+        value: BigInt(0),
+        data: null,
+        chain: 'evm',
+        warp: {
+          actions: [
+            {
+              type: 'query',
+              func: 'balanceOf(address)',
+            },
+          ],
+        },
+        action: 1,
+        args: ['0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6'],
+        transfers: [],
+        resolvedInputs: [],
+      } as any
+
+      const result = await executor.executeQuery(executable)
+
+      expect(result).toEqual({
+        success: false,
+        warp: executable.warp,
+        action: 1,
+        user: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+        txHash: null,
+        next: null,
+        values: [],
+        results: {},
+        messages: {},
+      })
+    })
+
+    it('should handle query failure', async () => {
+      const executable = {
+        destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+        value: BigInt(0),
+        data: null,
+        chain: 'evm',
+        warp: {
+          actions: [
+            {
+              type: 'query',
+              func: 'balanceOf(address)',
+            },
+          ],
+        },
+        action: 1,
+        args: ['0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6'],
+        transfers: [],
+        resolvedInputs: [],
+      } as any
+
+      const result = await executor.executeQuery(executable)
+
+      expect(result).toEqual({
+        success: false,
+        warp: executable.warp,
+        action: 1,
+        user: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+        txHash: null,
+        next: null,
+        values: [],
+        results: {},
+        messages: {},
+      })
+    })
+  })
+
+  describe('createTransaction', () => {
+    it('should create a transfer transaction', async () => {
+      const executable = {
+        destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+        value: BigInt(1000000000000000000),
+        data: null,
+        chain: 'evm',
+        warp: {
+          actions: [
+            {
+              type: 'transfer',
+            },
+          ],
+        },
+        action: 1,
+        args: [],
+        transfers: [],
+        resolvedInputs: [],
+      } as any
+
+      const tx = await executor.createTransaction(executable)
+
+      expect(tx).toEqual({
+        to: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+        value: BigInt(1000000000000000000),
+        data: '0x',
+        gasLimit: BigInt(21000),
+        maxFeePerGas: ethers.parseUnits('20', 'gwei'),
+        maxPriorityFeePerGas: ethers.parseUnits('1.5', 'gwei'),
+      })
+    })
+
+    it('should create a contract call transaction', async () => {
+      const executable = {
+        destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+        value: BigInt(0),
+        data: null,
+        chain: 'evm',
+        warp: {
+          actions: [
+            {
+              type: 'contract',
+              func: 'transfer(address,uint256)',
+            },
+          ],
+        },
+        action: 1,
+        args: ['0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6', '1000000000000000000'],
+        transfers: [],
+        resolvedInputs: [],
+      } as any
+
+      const tx = await executor.createTransaction(executable)
+
+      expect(tx).toEqual({
+        to: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+        value: BigInt(0),
+        data: undefined,
+        gasLimit: BigInt(21000),
+        maxFeePerGas: ethers.parseUnits('20', 'gwei'),
+        maxPriorityFeePerGas: ethers.parseUnits('1.5', 'gwei'),
+      })
+    })
+
+    it('should throw error for unsupported action type', async () => {
+      const executable = {
+        destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+        value: BigInt(0),
+        data: null,
+        chain: 'evm',
+        warp: {
+          actions: [
+            {
+              type: 'query',
+              func: 'balanceOf(address)',
+            },
+          ],
+        },
+        action: 1,
+        args: [],
+        transfers: [],
+        resolvedInputs: [],
+      } as any
+
+      await expect(executor.createTransaction(executable)).rejects.toThrow('WarpEvmExecutor: Invalid action type for createTransaction; Use executeQuery instead')
+    })
+  })
+
+  describe('signMessage', () => {
+    it('should sign a message', async () => {
+      const message = 'test message'
+      const privateKey = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+
+      const signature = await executor.signMessage(message, privateKey)
+
+      expect(signature).toBe('test-signature')
     })
   })
 })

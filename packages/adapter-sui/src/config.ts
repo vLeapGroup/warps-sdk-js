@@ -1,4 +1,5 @@
 import { WarpChainEnv } from '@vleap/warps'
+import { ExplorerName, ExplorerUrls, SuiExplorersConfig } from './constants'
 
 export const getSuiRegistryPackageId = (env: WarpChainEnv): string => {
   if (env === 'devnet') throw new Error('Sui registry package id is not available for devnet')
@@ -16,4 +17,33 @@ export const getSuiApiUrl = (env: WarpChainEnv): string => {
   if (env === 'devnet') return 'https://fullnode.devnet.sui.io'
   if (env === 'testnet') return 'https://fullnode.testnet.sui.io'
   return 'https://fullnode.mainnet.sui.io'
+}
+
+export const getSuiExplorers = (chain: string = 'sui', env: WarpChainEnv): readonly ExplorerName[] => {
+  const chainExplorers = SuiExplorersConfig[chain as keyof typeof SuiExplorersConfig]
+  if (!chainExplorers) {
+    throw new Error(`Unsupported Sui chain: ${chain}`)
+  }
+
+  const explorers = chainExplorers[env as keyof typeof chainExplorers]
+  if (!explorers) {
+    throw new Error(`Unsupported environment ${env} for chain ${chain}`)
+  }
+
+  return explorers
+}
+
+export const getPrimarySuiExplorer = (chain: string = 'sui', env: WarpChainEnv): ExplorerName => {
+  const explorers = getSuiExplorers(chain, env)
+  return explorers[0]
+}
+
+export const getSuiExplorerUrl = (env: WarpChainEnv, chain: string = 'sui'): string => {
+  const primaryExplorer = getPrimarySuiExplorer(chain, env)
+  return ExplorerUrls[primaryExplorer]
+}
+
+export const getSuiExplorerByName = (chain: string = 'sui', env: WarpChainEnv, name: string): ExplorerName | undefined => {
+  const explorers = getSuiExplorers(chain, env)
+  return explorers.find((explorer) => explorer.toLowerCase() === name.toLowerCase())
 }

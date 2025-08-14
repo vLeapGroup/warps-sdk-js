@@ -41,7 +41,7 @@ const mockAdapter = {
       name: 'multiversx',
       displayName: 'MultiversX',
       chainId: 'D',
-      blockTime: 6,
+      blockTime: 6000,
       addressHrp: 'erd',
       apiUrl: 'https://devnet-api.multiversx.com',
       explorerUrl: 'https://devnet-explorer.multiversx.com',

@@ -13,6 +13,7 @@ import {
   WarpActionIndex,
   WarpAdapterGenericRemoteTransaction,
   WarpAdapterGenericTransaction,
+  WarpChain,
   WarpChainInfo,
   WarpClientConfig,
   WarpExecution,
@@ -42,23 +43,26 @@ export class WarpExecutor {
     this.serializer = new WarpSerializer()
   }
 
-  async execute(warp: Warp, inputs: string[]): Promise<{ tx: WarpAdapterGenericTransaction | null; chain: WarpChainInfo | null }> {
+  async execute(
+    warp: Warp,
+    inputs: string[]
+  ): Promise<{ tx: WarpAdapterGenericTransaction | null; chain: WarpChain | null; chainInfo: WarpChainInfo | null }> {
     const { action, actionIndex } = findWarpExecutableAction(warp)
 
     if (action.type === 'collect') {
       const result = await this.executeCollect(warp, actionIndex, inputs)
       result.success ? this.handlers?.onExecuted?.(result) : this.handlers?.onError?.({ message: JSON.stringify(result.values) })
-      return { tx: null, chain: null }
+      return { tx: null, chain: null, chainInfo: null }
     }
 
     const executable = await this.factory.createExecutable(warp, actionIndex, inputs)
-    const tx = await findWarpAdapterForChain(executable.chain.name, this.adapters).executor.createTransaction(executable)
+    const tx = await findWarpAdapterForChain(executable.chain, this.adapters).executor.createTransaction(executable)
 
-    return { tx, chain: executable.chain }
+    return { tx, chain: executable.chain, chainInfo: executable.chainInfo }
   }
 
-  async evaluateResults(warp: Warp, chain: WarpChainInfo, tx: WarpAdapterGenericRemoteTransaction): Promise<void> {
-    const result = await findWarpAdapterForChain(chain.name, this.adapters).results.getTransactionExecutionResults(warp, tx)
+  async evaluateResults(warp: Warp, chain: WarpChain, tx: WarpAdapterGenericRemoteTransaction): Promise<void> {
+    const result = await findWarpAdapterForChain(chain, this.adapters).results.getTransactionExecutionResults(warp, tx)
     this.handlers?.onExecuted?.(result)
   }
 
@@ -66,8 +70,8 @@ export class WarpExecutor {
     const collectAction = getWarpActionByIndex(warp, action) as any | null
     if (!collectAction) throw new Error('WarpActionExecutor: Action not found')
 
-    const chain = await this.factory.getChainInfoForAction(collectAction)
-    const adapter = findWarpAdapterForChain(chain.name, this.adapters)
+    const { chain, chainInfo } = await this.factory.getChainInfoForAction(collectAction)
+    const adapter = findWarpAdapterForChain(chain, this.adapters)
     const preparedWarp = await new WarpInterpolator(this.config, adapter).apply(this.config, warp)
     const resolvedInputs = await this.factory.getResolvedInputs(chain, collectAction, inputs)
     const modifiedInputs = this.factory.getModifiedInputs(resolvedInputs)
@@ -91,10 +95,10 @@ export class WarpExecutor {
     headers.set('Accept', 'application/json')
 
     if (this.handlers?.onSignRequest) {
-      const walletAddress = this.config.user?.wallets?.[chain.name]
-      if (!walletAddress) throw new Error(`No wallet configured for chain ${chain.name}`)
-      const { message, nonce, expiresAt } = createAuthMessage(walletAddress, `${chain.name}-adapter`)
-      const signature = await this.handlers.onSignRequest({ message, chain })
+      const walletAddress = this.config.user?.wallets?.[chain]
+      if (!walletAddress) throw new Error(`No wallet configured for chain ${chain}`)
+      const { message, nonce, expiresAt } = createAuthMessage(walletAddress, `${chain}-adapter`)
+      const signature = await this.handlers.onSignRequest({ message, chain: chainInfo })
       const authHeaders = createAuthHeaders(walletAddress, signature, nonce, expiresAt)
       Object.entries(authHeaders).forEach(([key, value]) => headers.set(key, value))
     }
@@ -124,7 +128,7 @@ export class WarpExecutor {
         success: response.ok,
         warp: preparedWarp,
         action: action,
-        user: this.config.user?.wallets?.[chain.name] || null,
+        user: this.config.user?.wallets?.[chain] || null,
         txHash: null,
         next,
         values,
@@ -137,7 +141,7 @@ export class WarpExecutor {
         success: false,
         warp: preparedWarp,
         action: action,
-        user: this.config.user?.wallets?.[chain.name] || null,
+        user: this.config.user?.wallets?.[chain] || null,
         txHash: null,
         next: null,
         values: [],

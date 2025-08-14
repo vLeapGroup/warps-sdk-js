@@ -18,7 +18,7 @@ export const EVM_CHAIN_CONFIGS: Record<string, Record<WarpChainEnv, EvmChainConf
       chainId: '1',
       registryAddress: '0x0000000000000000000000000000000000000000',
       nativeToken: 'ETH',
-      blockTime: 12,
+      blockTime: 12000,
     },
     testnet: {
       apiUrl: 'https://eth-sepolia.g.alchemy.com/v2/demo',
@@ -26,7 +26,7 @@ export const EVM_CHAIN_CONFIGS: Record<string, Record<WarpChainEnv, EvmChainConf
       chainId: '11155111',
       registryAddress: '0x0000000000000000000000000000000000000000',
       nativeToken: 'ETH',
-      blockTime: 12,
+      blockTime: 12000,
     },
     devnet: {
       apiUrl: 'http://localhost:8545',
@@ -34,7 +34,7 @@ export const EVM_CHAIN_CONFIGS: Record<string, Record<WarpChainEnv, EvmChainConf
       chainId: '1337',
       registryAddress: '0x0000000000000000000000000000000000000000',
       nativeToken: 'ETH',
-      blockTime: 12,
+      blockTime: 12000,
     },
   },
   arbitrum: {
@@ -44,7 +44,7 @@ export const EVM_CHAIN_CONFIGS: Record<string, Record<WarpChainEnv, EvmChainConf
       chainId: '42161',
       registryAddress: '0x0000000000000000000000000000000000000000',
       nativeToken: 'ETH',
-      blockTime: 1,
+      blockTime: 1000,
     },
     testnet: {
       apiUrl: 'https://arb-sepolia.g.alchemy.com/v2/demo',
@@ -52,7 +52,7 @@ export const EVM_CHAIN_CONFIGS: Record<string, Record<WarpChainEnv, EvmChainConf
       chainId: '421614',
       registryAddress: '0x0000000000000000000000000000000000000000',
       nativeToken: 'ETH',
-      blockTime: 1,
+      blockTime: 1000,
     },
     devnet: {
       apiUrl: 'http://localhost:8545',
@@ -60,7 +60,7 @@ export const EVM_CHAIN_CONFIGS: Record<string, Record<WarpChainEnv, EvmChainConf
       chainId: '1337',
       registryAddress: '0x0000000000000000000000000000000000000000',
       nativeToken: 'ETH',
-      blockTime: 1,
+      blockTime: 1000,
     },
   },
   base: {
@@ -70,7 +70,7 @@ export const EVM_CHAIN_CONFIGS: Record<string, Record<WarpChainEnv, EvmChainConf
       chainId: '8453',
       registryAddress: '0x0000000000000000000000000000000000000000',
       nativeToken: 'ETH',
-      blockTime: 2,
+      blockTime: 2000,
     },
     testnet: {
       apiUrl: 'https://sepolia.base.org',
@@ -78,7 +78,7 @@ export const EVM_CHAIN_CONFIGS: Record<string, Record<WarpChainEnv, EvmChainConf
       chainId: '84532',
       registryAddress: '0x0000000000000000000000000000000000000000',
       nativeToken: 'ETH',
-      blockTime: 2,
+      blockTime: 2000,
     },
     devnet: {
       apiUrl: 'http://localhost:8545',
@@ -86,7 +86,7 @@ export const EVM_CHAIN_CONFIGS: Record<string, Record<WarpChainEnv, EvmChainConf
       chainId: '1337',
       registryAddress: '0x0000000000000000000000000000000000000000',
       nativeToken: 'ETH',
-      blockTime: 2,
+      blockTime: 2000,
     },
   },
 }

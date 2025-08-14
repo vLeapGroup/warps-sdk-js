@@ -1,7 +1,7 @@
 import { CacheStrategy } from './cache/CacheStrategy'
 import { LocalStorageCacheStrategy } from './cache/LocalStorageCacheStrategy'
 import { MemoryCacheStrategy } from './cache/MemoryCacheStrategy'
-import { WarpChain, WarpChainEnv } from './types'
+import { WarpChainEnv } from './types'
 import { WarpCacheType } from './types/cache'
 
 export const CacheTtl = {
@@ -19,8 +19,6 @@ export const WarpCacheKey = {
   WarpExecutable: (env: WarpChainEnv, id: string, action: number) => `warp-exec:${env}:${id}:${action}`,
   RegistryInfo: (env: WarpChainEnv, id: string) => `registry-info:${env}:${id}`,
   Brand: (env: WarpChainEnv, hash: string) => `brand:${env}:${hash}`,
-  ChainInfo: (env: WarpChainEnv, chain: WarpChain) => `chain:${env}:${chain}`,
-  ChainInfos: (env: WarpChainEnv) => `chains:${env}`,
 }
 
 export class WarpCache {

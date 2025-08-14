@@ -1,33 +1,42 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
 import {
+  Adapter,
   AdapterWarpBuilder,
-  getMainChainInfo,
   Warp,
   WarpBuilder,
   WarpCache,
   WarpCacheConfig,
   WarpCacheKey,
+  WarpChain,
   WarpClientConfig,
   WarpLogger,
 } from '@vleap/warps'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
-import { WarpMultiversxConstants } from './constants'
+import { getAllMultiversxAdapters } from './chains/combined'
 
 export class WarpMultiversxBuilder extends WarpBuilder implements AdapterWarpBuilder {
-  private cache: WarpCache
-  private core: WarpBuilder
+  private readonly cache: WarpCache
+  private readonly core: WarpBuilder
+  private readonly adapter: Adapter
 
-  constructor(protected readonly config: WarpClientConfig) {
+  constructor(
+    protected readonly config: WarpClientConfig,
+    private readonly chain: WarpChain
+  ) {
     super(config)
+
+    const adapter = getAllMultiversxAdapters(config).find((a) => a.chain === chain)
+    if (!adapter) throw new Error(`WarpBuilder: adapter not found for chain ${chain}`)
+    this.adapter = adapter
+
     this.cache = new WarpCache(config.cache?.type)
     this.core = new WarpBuilder(config)
   }
 
   async createInscriptionTransaction(warp: Warp): Promise<Transaction> {
-    const chain = getMainChainInfo(this.config)
-    const userWallet = this.config.user?.wallets?.[chain.name]
+    const userWallet = this.config.user?.wallets?.[this.chain]
     if (!userWallet) throw new Error('WarpBuilder: user address not set')
-    const factoryConfig = new TransactionsFactoryConfig({ chainID: chain.chainId })
+    const factoryConfig = new TransactionsFactoryConfig({ chainID: this.adapter.chainInfo.chainId })
     const factory = new TransferTransactionsFactory({ config: factoryConfig })
     const sender = Address.newFromBech32(userWallet)
     const serialized = JSON.stringify(warp)
@@ -47,7 +56,7 @@ export class WarpMultiversxBuilder extends WarpBuilder implements AdapterWarpBui
     const warp = await this.core.createFromRaw(tx.data.toString(), validate)
 
     warp.meta = {
-      chain: WarpMultiversxConstants.ChainName,
+      chain: this.chain,
       hash: tx.hash,
       creator: tx.sender.toBech32(),
       createdAt: new Date(tx.timestamp * 1000).toISOString(),
@@ -67,8 +76,7 @@ export class WarpMultiversxBuilder extends WarpBuilder implements AdapterWarpBui
       }
     }
 
-    const chainInfo = getMainChainInfo(this.config)
-    const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(chainInfo, this.config.env)
+    const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(this.adapter.chainInfo, this.config.env)
     const chainProvider = chainEntry.createNetworkProvider()
 
     try {

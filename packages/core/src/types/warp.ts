@@ -3,17 +3,12 @@ export type WarpChain = string
 export type WarpExplorerName = string
 
 export type WarpChainInfo = {
-  name: WarpChain
   displayName: string
   chainId: string
   blockTime: number
   addressHrp: string
   apiUrl: string
-  explorerUrl: string
   nativeToken: string
-  preferences?: {
-    explorers?: Record<WarpChain, WarpExplorerName>
-  }
 }
 
 export type WarpIdType = 'hash' | 'alias'
@@ -166,7 +161,8 @@ export type WarpContractVerification = {
 }
 
 export type WarpExecutable = {
-  chain: WarpChainInfo
+  chain: WarpChain
+  chainInfo: WarpChainInfo
   warp: Warp
   action: number
   destination: string

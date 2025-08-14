@@ -1,5 +1,4 @@
-import { WarpConstants } from './constants'
-import { getMainChainInfo } from './helpers'
+import { WarpChainName, WarpConstants } from './constants'
 import { Adapter, InterpolationBag, Warp, WarpAction, WarpClientConfig } from './types'
 
 export class WarpInterpolator {
@@ -55,7 +54,12 @@ export class WarpInterpolator {
 
   private async applyRootGlobals(warp: Warp, config: WarpClientConfig): Promise<Warp> {
     let modifiable = JSON.stringify(warp)
-    const rootBag: InterpolationBag = { config, chain: getMainChainInfo(config) }
+
+    const rootBag: InterpolationBag = {
+      config,
+      chain: this.adapter.chain as WarpChainName,
+      chainInfo: this.adapter.chainInfo,
+    }
 
     Object.values(WarpConstants.Globals).forEach((global) => {
       const value = global.Accessor(rootBag)
@@ -68,10 +72,15 @@ export class WarpInterpolator {
   }
 
   private async applyActionGlobals(action: WarpAction): Promise<WarpAction> {
-    const chain = action.chain ? await this.adapter.registry.getChainInfo(action.chain) : getMainChainInfo(this.config)
+    const chain = action.chain ? this.adapter.chainInfo : this.adapter.chainInfo
     if (!chain) throw new Error(`Chain info not found for ${action.chain}`)
     let modifiable = JSON.stringify(action)
-    const bag: InterpolationBag = { config: this.config, chain }
+
+    const bag: InterpolationBag = {
+      config: this.config,
+      chain: this.adapter.chain as WarpChainName,
+      chainInfo: chain,
+    }
 
     Object.values(WarpConstants.Globals).forEach((global) => {
       const value = global.Accessor(bag)

@@ -1,5 +1,5 @@
 import { WarpConstants } from './constants'
-import { findWarpAdapterForChain, findWarpDefaultAdapter, getMainChainInfo, getWarpActionByIndex, shiftBigintBy } from './helpers'
+import { findWarpAdapterForChain, getWarpActionByIndex, shiftBigintBy } from './helpers'
 import {
   Adapter,
   ResolvedInput,
@@ -35,7 +35,7 @@ export class WarpFactory {
   async createExecutable(warp: Warp, actionIndex: number, inputs: string[]): Promise<WarpExecutable> {
     const action = getWarpActionByIndex(warp, actionIndex) as WarpTransferAction | WarpContractAction
     if (!action) throw new Error('WarpFactory: Action not found')
-    const chain = await this.getChainInfoForAction(action, inputs)
+    const { chain, chainInfo } = await this.getChainInfoForAction(action, inputs)
 
     const resolvedInputs = await this.getResolvedInputs(chain, action, inputs)
     const modifiedInputs = this.getModifiedInputs(resolvedInputs)
@@ -72,6 +72,7 @@ export class WarpFactory {
     const executable: WarpExecutable = {
       warp,
       chain,
+      chainInfo,
       action: actionIndex,
       destination,
       args,
@@ -90,15 +91,18 @@ export class WarpFactory {
     return executable
   }
 
-  async getChainInfoForAction(action: WarpAction, inputs?: string[]): Promise<WarpChainInfo> {
+  async getChainInfoForAction(action: WarpAction, inputs?: string[]): Promise<{ chain: WarpChain; chainInfo: WarpChainInfo }> {
     if (inputs) {
       const chainFromInputs = await this.tryGetChainFromInputs(action, inputs)
       if (chainFromInputs) return chainFromInputs
     }
-    return this.getDefaultChainInfo(action)
+
+    const defaultAdapter = this.adapters[0]
+
+    return { chain: defaultAdapter.chain, chainInfo: defaultAdapter.chainInfo }
   }
 
-  public async getResolvedInputs(chain: WarpChainInfo, action: WarpAction, inputArgs: string[]): Promise<ResolvedInput[]> {
+  public async getResolvedInputs(chain: WarpChain, action: WarpAction, inputArgs: string[]): Promise<ResolvedInput[]> {
     const argInputs = action.inputs || []
     const preprocessed = await Promise.all(inputArgs.map((arg) => this.preprocessInput(chain, arg)))
 
@@ -108,8 +112,8 @@ export class WarpFactory {
         if (!value) return null
         return this.serializer.nativeToString(input.type, value)
       } else if (input.source === WarpConstants.Source.UserWallet) {
-        if (!this.config.user?.wallets?.[chain.name]) return null
-        return this.serializer.nativeToString('address', this.config.user.wallets[chain.name])
+        if (!this.config.user?.wallets?.[chain]) return null
+        return this.serializer.nativeToString('address', this.config.user.wallets[chain])
       } else {
         return preprocessed[index] || null
       }
@@ -155,11 +159,11 @@ export class WarpFactory {
     })
   }
 
-  public async preprocessInput(chain: WarpChainInfo, input: string): Promise<string> {
+  public async preprocessInput(chain: WarpChain, input: string): Promise<string> {
     try {
       const [type, value] = input.split(WarpConstants.ArgParamsSeparator, 2) as [WarpActionInputType, string]
-      const adapter = findWarpAdapterForChain(chain.name, this.adapters)
-      return adapter.executor.preprocessInput(chain, input, type, value)
+      const adapter = findWarpAdapterForChain(chain, this.adapters)
+      return adapter.executor.preprocessInput(adapter.chainInfo, input, type, value)
     } catch (e) {
       return input
     }
@@ -177,7 +181,10 @@ export class WarpFactory {
     return args
   }
 
-  private async tryGetChainFromInputs(action: WarpAction, inputs: string[]): Promise<WarpChainInfo | null> {
+  private async tryGetChainFromInputs(
+    action: WarpAction,
+    inputs: string[]
+  ): Promise<{ chain: WarpChain; chainInfo: WarpChainInfo } | null> {
     const chainPositionIndex = action.inputs?.findIndex((i) => i.position === 'chain')
     if (chainPositionIndex === -1 || chainPositionIndex === undefined) return null
 
@@ -188,19 +195,7 @@ export class WarpFactory {
     const chainValue = serializer.stringToNative(chainInput)[1] as WarpChain
 
     const adapter = findWarpAdapterForChain(chainValue, this.adapters)
-    const chainInfo = await adapter.registry.getChainInfo(chainValue)
-    if (!chainInfo) throw new Error(`WarpUtils: Chain info not found for ${chainValue}`)
 
-    return chainInfo
-  }
-
-  private async getDefaultChainInfo(action: WarpAction): Promise<WarpChainInfo> {
-    if (!action.chain) return getMainChainInfo(this.config)
-
-    const adapter = findWarpDefaultAdapter(this.adapters)
-    const chainInfo = await adapter.registry.getChainInfo(action.chain, { ttl: CacheTtl.OneWeek })
-    if (!chainInfo) throw new Error(`WarpUtils: Chain info not found for ${action.chain}`)
-
-    return chainInfo
+    return { chain: chainValue, chainInfo: adapter.chainInfo }
   }
 }

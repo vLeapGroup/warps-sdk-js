@@ -11,6 +11,7 @@ import {
   WarpChain,
   WarpChainInfo,
   WarpExecutable,
+  WarpExplorerName,
   WarpNativeValue,
 } from './warp'
 
@@ -23,6 +24,9 @@ export type WarpClientConfig = {
   vars?: Record<string, string | number>
   user?: {
     wallets?: WarpUserWallets
+  }
+  preferences?: {
+    explorers?: Record<WarpChain, WarpExplorerName>
   }
   schema?: {
     warp?: string
@@ -47,13 +51,14 @@ export type AdapterFactory = (config: WarpClientConfig, fallback?: Adapter) => A
 
 export type Adapter = {
   chain: WarpChain
+  chainInfo: WarpChainInfo
   prefix: string
   builder: () => CombinedWarpBuilder
   executor: AdapterWarpExecutor
   results: AdapterWarpResults
   serializer: AdapterWarpSerializer
   registry: AdapterWarpRegistry
-  explorer: (chainInfo: WarpChainInfo) => AdapterWarpExplorer
+  explorer: AdapterWarpExplorer
   abiBuilder: () => AdapterWarpAbiBuilder
   brandBuilder: () => AdapterWarpBrandBuilder
 }
@@ -126,10 +131,6 @@ export interface AdapterWarpRegistry {
   getInfoByHash(hash: string, cache?: WarpCacheConfig): Promise<{ registryInfo: WarpRegistryInfo | null; brand: WarpBrand | null }>
   getUserWarpRegistryInfos(user?: string): Promise<WarpRegistryInfo[]>
   getUserBrands(user?: string): Promise<WarpBrand[]>
-  getChainInfos(cache?: WarpCacheConfig): Promise<WarpChainInfo[]>
-  getChainInfo(chain: WarpChain, cache?: WarpCacheConfig): Promise<WarpChainInfo | null>
-  setChain(info: WarpChainInfo): Promise<WarpAdapterGenericTransaction>
-  removeChain(chain: WarpChain): Promise<WarpAdapterGenericTransaction>
   fetchBrand(hash: string, cache?: WarpCacheConfig): Promise<WarpBrand | null>
 }
 

@@ -9,6 +9,7 @@ import {
   ResolvedInput,
   Warp,
   WarpActionIndex,
+  WarpChain,
   WarpClientConfig,
   WarpConstants,
   WarpContractAction,
@@ -17,14 +18,16 @@ import {
 } from '@vleap/warps'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
 import { getSuiApiUrl } from './config'
-import { WarpSuiConstants } from './constants'
 import { getSuiAdapter } from './main'
 
 export class WarpSuiResults implements AdapterWarpResults {
   private readonly serializer: WarpSuiSerializer
   private readonly client: SuiClient
 
-  constructor(private readonly config: WarpClientConfig) {
+  constructor(
+    private readonly config: WarpClientConfig,
+    private readonly chain: WarpChain
+  ) {
     this.serializer = new WarpSuiSerializer()
     this.client = new SuiClient({ url: getSuiApiUrl(config.env) })
   }
@@ -40,7 +43,7 @@ export class WarpSuiResults implements AdapterWarpResults {
       success: tx.effects?.status?.status === 'success',
       warp,
       action: actionIndex,
-      user: this.config.user?.wallets?.[WarpSuiConstants.ChainName] || null,
+      user: this.config.user?.wallets?.[this.chain] || null,
       txHash: tx.digest,
       next,
       values: results.values,

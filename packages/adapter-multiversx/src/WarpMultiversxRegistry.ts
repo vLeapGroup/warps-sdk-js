@@ -10,13 +10,10 @@ import {
 } from '@multiversx/sdk-core'
 import {
   AdapterWarpRegistry,
-  getMainChainInfo,
-  toTypedChainInfo,
   WarpBrand,
   WarpCache,
   WarpCacheConfig,
   WarpCacheKey,
-  WarpChain,
   WarpChainInfo,
   WarpClientConfig,
   WarpLogger,
@@ -24,24 +21,27 @@ import {
   WarpRegistryInfo,
 } from '@vleap/warps'
 import RegistryAbi from './abis/registry.abi.json'
+import { getMultiversxAdapter } from './chains/multiversx'
 import { getMultiversxRegistryAddress } from './config'
-import { WarpMultiversxConstants } from './constants'
 import { toTypedConfigInfo, toTypedRegistryInfo } from './helpers/registry'
-import { string_value, u32_value } from './utils.codec'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
 export class WarpMultiversxRegistry implements AdapterWarpRegistry {
   private cache: WarpCache
   private userWallet: string | null
+  private chainInfo: WarpChainInfo
   public registryConfig: WarpRegistryConfigInfo
 
   constructor(private config: WarpClientConfig) {
+    const defaultAdapter = getMultiversxAdapter(config)
+
+    this.chainInfo = defaultAdapter.chainInfo
     this.cache = new WarpCache(config.cache?.type)
     this.registryConfig = {
       unitPrice: BigInt(0),
       admins: [],
     }
-    this.userWallet = this.config.user?.wallets?.[WarpMultiversxConstants.ChainName] || null
+    this.userWallet = this.config.user?.wallets?.[defaultAdapter.chain] || null
   }
 
   async init(): Promise<void> {
@@ -261,94 +261,6 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
     }
   }
 
-  async getChainInfos(cache?: WarpCacheConfig): Promise<WarpChainInfo[]> {
-    const cacheListKey = WarpCacheKey.ChainInfos(this.config.env)
-    if (cache && cache.ttl) {
-      const cachedList = this.cache.get<WarpChainInfo[]>(cacheListKey)
-      if (cachedList) {
-        WarpLogger.info('WarpRegistry (getChainInfos): ChainInfos found in cache')
-        return cachedList
-      }
-    }
-
-    const contract = Address.newFromBech32(getMultiversxRegistryAddress(this.config.env))
-    const controller = this.getController()
-    const query = controller.createQuery({ contract, function: 'getChains', arguments: [] })
-    const res = await controller.runQuery(query)
-    const [chainInfosRaw] = controller.parseQueryResponse(res)
-    const chainInfos = chainInfosRaw.map(toTypedChainInfo)
-
-    if (cache && cache.ttl) {
-      // Cache each individually for efficient reuse in getChainInfo
-      for (const chainInfo of chainInfos) {
-        this.cache.set(WarpCacheKey.ChainInfo(this.config.env, chainInfo.chain), chainInfo, cache.ttl)
-      }
-      // Cache the full list
-      this.cache.set(cacheListKey, chainInfos, cache.ttl)
-    }
-
-    return chainInfos
-  }
-
-  async getChainInfo(chain: WarpChain, cache?: WarpCacheConfig): Promise<WarpChainInfo | null> {
-    try {
-      const cacheKey = WarpCacheKey.ChainInfo(this.config.env, chain)
-      const cached = cache ? this.cache.get<WarpChainInfo>(cacheKey) : null
-      if (cached) {
-        WarpLogger.info(`WarpRegistry (getChainInfo): ChainInfo found in cache: ${chain}`)
-        return cached
-      }
-
-      const contract = Address.newFromBech32(getMultiversxRegistryAddress(this.config.env))
-      const controller = this.getController()
-      const query = controller.createQuery({ contract, function: 'getChain', arguments: [BytesValue.fromUTF8(chain)] })
-      const res = await controller.runQuery(query)
-      const [chainInfoRaw] = controller.parseQueryResponse(res)
-      const chainInfo = chainInfoRaw ? toTypedChainInfo(chainInfoRaw) : null
-
-      if (cache && cache.ttl && chainInfo) {
-        this.cache.set(cacheKey, chainInfo, cache.ttl)
-      }
-
-      return chainInfo
-    } catch (error) {
-      return null
-    }
-  }
-
-  async setChain(info: WarpChainInfo): Promise<Transaction> {
-    if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.userWallet)
-
-    return this.getFactory().createTransactionForExecute(sender, {
-      contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
-      function: 'setChain',
-      gasLimit: BigInt(10_000_000),
-      arguments: [
-        string_value(info.name),
-        string_value(info.displayName),
-        string_value(info.chainId),
-        u32_value(info.blockTime),
-        string_value(info.addressHrp),
-        string_value(info.apiUrl),
-        string_value(info.explorerUrl),
-        string_value(info.nativeToken),
-      ],
-    })
-  }
-
-  async removeChain(chain: WarpChain): Promise<Transaction> {
-    if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
-    const sender = Address.newFromBech32(this.userWallet)
-
-    return this.getFactory().createTransactionForExecute(sender, {
-      contract: Address.newFromBech32(getMultiversxRegistryAddress(this.config.env)),
-      function: 'removeChain',
-      gasLimit: BigInt(10_000_000),
-      arguments: [string_value(chain)],
-    })
-  }
-
   async fetchBrand(hash: string, cache?: WarpCacheConfig): Promise<WarpBrand | null> {
     const cacheKey = WarpCacheKey.Brand(this.config.env, hash)
     const cached = cache ? this.cache.get<WarpBrand>(cacheKey) : null
@@ -357,8 +269,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
       return cached
     }
 
-    const chainInfo = getMainChainInfo(this.config)
-    const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(chainInfo, this.config.env)
+    const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(this.chainInfo, this.config.env)
     const chainProvider = chainEntry.createNetworkProvider()
 
     try {
@@ -391,15 +302,13 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
   }
 
   private getFactory(): SmartContractTransactionsFactory {
-    const chain = getMainChainInfo(this.config)
-    const config = new TransactionsFactoryConfig({ chainID: chain.chainId })
+    const config = new TransactionsFactoryConfig({ chainID: this.chainInfo.chainId })
     const abi = AbiRegistry.create(RegistryAbi)
     return new SmartContractTransactionsFactory({ config, abi })
   }
 
   private getController(): SmartContractController {
-    const chainInfo = getMainChainInfo(this.config)
-    const entrypoint = WarpMultiversxExecutor.getChainEntrypoint(chainInfo, this.config.env)
+    const entrypoint = WarpMultiversxExecutor.getChainEntrypoint(this.chainInfo, this.config.env)
     const abi = AbiRegistry.create(RegistryAbi)
     return entrypoint.createSmartContractController(abi)
   }

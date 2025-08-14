@@ -1,4 +1,5 @@
 import {
+  Adapter,
   AdapterWarpExecutor,
   applyResultsToMessages,
   getNextInfo,
@@ -21,7 +22,10 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
   private readonly provider: ethers.JsonRpcProvider
   private readonly results: WarpEvmResults
 
-  constructor(private readonly config: WarpClientConfig) {
+  constructor(
+    private readonly config: WarpClientConfig,
+    private readonly adapter: Adapter
+  ) {
     this.serializer = new WarpEvmSerializer()
     this.provider = new ethers.JsonRpcProvider(getEvmApiUrl(config.env))
     this.results = new WarpEvmResults(config)
@@ -47,7 +51,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
   }
 
   async createTransferTransaction(executable: WarpExecutable): Promise<ethers.TransactionRequest> {
-    const userWallet = this.config.user?.wallets?.[executable.chain.name]
+    const userWallet = this.config.user?.wallets?.[executable.chain]
     if (!userWallet) throw new Error('WarpEvmExecutor: createTransfer - user address not set')
 
     // Validate destination address
@@ -70,7 +74,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
   }
 
   async createContractCallTransaction(executable: WarpExecutable): Promise<ethers.TransactionRequest> {
-    const userWallet = this.config.user?.wallets?.[executable.chain.name]
+    const userWallet = this.config.user?.wallets?.[executable.chain]
     if (!userWallet) throw new Error('WarpEvmExecutor: createContractCall - user address not set')
 
     const action = getWarpActionByIndex(executable.warp, executable.action)
@@ -137,26 +141,13 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         executable.resolvedInputs
       )
 
-      // Create a mock adapter for getNextInfo (only needs prefix and chain)
-      const mockAdapter = {
-        chain: 'ethereum' as any,
-        prefix: 'eth',
-        builder: () => ({}) as any,
-        executor: {} as any,
-        results: {} as any,
-        serializer: {} as any,
-        registry: {} as any,
-        explorer: () => ({}) as any,
-        abiBuilder: () => ({}) as any,
-        brandBuilder: () => ({}) as any,
-      }
-      const next = getNextInfo(this.config, mockAdapter, executable.warp, executable.action, results)
+      const next = getNextInfo(this.config, this.adapter, executable.warp, executable.action, results)
 
       return {
         success: isSuccess,
         warp: executable.warp,
         action: executable.action,
-        user: this.config.user?.wallets?.[executable.chain.name] || null,
+        user: this.config.user?.wallets?.[executable.chain] || null,
         txHash: null,
         next,
         values,
@@ -168,7 +159,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         success: false,
         warp: executable.warp,
         action: executable.action,
-        user: this.config.user?.wallets?.[executable.chain.name] || null,
+        user: this.config.user?.wallets?.[executable.chain] || null,
         txHash: null,
         next: null,
         values: [],

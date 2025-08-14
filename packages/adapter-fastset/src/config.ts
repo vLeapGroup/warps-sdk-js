@@ -3,6 +3,7 @@ import { WarpChainEnv } from '@vleap/warps'
 // Fastset Chain configurations
 export interface FastsetChainConfig {
   apiUrl: string
+  proxyUrl: string
   explorerUrl: string
   chainId: string
   registryAddress: string
@@ -14,28 +15,31 @@ export interface FastsetChainConfig {
 export const FASTSET_CHAIN_CONFIGS: Record<string, Record<WarpChainEnv, FastsetChainConfig>> = {
   fastset: {
     mainnet: {
-      apiUrl: 'https://mainnet.fastset.com/api',
+      apiUrl: 'http://157.90.201.117:8765',
+      proxyUrl: 'http://136.243.61.168:44444',
       explorerUrl: 'https://explorer.fastset.com',
       chainId: '1',
       registryAddress: '0x0000000000000000000000000000000000000000',
       nativeToken: 'PI',
-      blockTime: 12,
+      blockTime: 12000,
     },
     testnet: {
-      apiUrl: 'https://testnet.fastset.com/api',
+      apiUrl: 'http://157.90.201.117:8765',
+      proxyUrl: 'http://136.243.61.168:44444',
       explorerUrl: 'https://testnet-explorer.fastset.com',
       chainId: '11155111',
       registryAddress: '0x0000000000000000000000000000000000000000',
       nativeToken: 'PI',
-      blockTime: 12,
+      blockTime: 12000,
     },
     devnet: {
-      apiUrl: 'http://localhost:8545',
+      apiUrl: 'http://157.90.201.117:8765',
+      proxyUrl: 'http://136.243.61.168:44444',
       explorerUrl: 'http://localhost:4000',
       chainId: '1337',
       registryAddress: '0x0000000000000000000000000000000000000000',
       nativeToken: 'PI',
-      blockTime: 12,
+      blockTime: 12000,
     },
   },
 }
@@ -61,6 +65,10 @@ export const getFastsetApiUrl = (env: WarpChainEnv, chain: string = DEFAULT_CHAI
   return getFastsetChainConfig(chain, env).apiUrl
 }
 
+export const getFastsetProxyUrl = (env: WarpChainEnv, chain: string = DEFAULT_CHAIN): string => {
+  return getFastsetChainConfig(chain, env).proxyUrl
+}
+
 export const getFastsetExplorerUrl = (env: WarpChainEnv, chain: string = DEFAULT_CHAIN): string => {
   return getFastsetChainConfig(chain, env).explorerUrl
 }
@@ -78,7 +86,7 @@ export const getFastsetNativeToken = (env: WarpChainEnv, chain: string = DEFAULT
 }
 
 export const getFastsetBlockTime = (env: WarpChainEnv, chain: string = DEFAULT_CHAIN): number => {
-  return getFastsetChainConfig(chain, env).blockTime || 12
+  return getFastsetChainConfig(chain, env).blockTime || 12000
 }
 
 // Helper function to get all supported chains

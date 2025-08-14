@@ -58,20 +58,21 @@ export class WarpClient {
     options: { cache?: WarpCacheConfig } = {}
   ): Promise<{
     tx: WarpAdapterGenericTransaction | null
-    chain: WarpChainInfo | null
+    chain: WarpChain | null
+    chainInfo: WarpChainInfo | null
     evaluateResults: (remoteTx: WarpAdapterGenericRemoteTransaction) => Promise<void>
   }> {
     const detectionResult = await this.detectWarp(identifier, options.cache)
     if (!detectionResult.match || !detectionResult.warp) throw new Error('Warp not found')
     const executor = this.createExecutor(handlers)
-    const { tx, chain } = await executor.execute(detectionResult.warp, inputs)
+    const { tx, chain, chainInfo } = await executor.execute(detectionResult.warp, inputs)
 
     const evaluateResults = async (remoteTx: WarpAdapterGenericRemoteTransaction): Promise<void> => {
       if (!chain || !tx || !detectionResult.warp) throw new Error('Warp not found')
       await executor.evaluateResults(detectionResult.warp, chain, remoteTx)
     }
 
-    return { tx, chain, evaluateResults }
+    return { tx, chain, chainInfo, evaluateResults }
   }
 
   createInscriptionTransaction(chain: WarpChain, warp: Warp): WarpAdapterGenericTransaction {
@@ -97,12 +98,12 @@ export class WarpClient {
     return adapter.executor.signMessage(message, privateKey)
   }
 
-  getExplorer(chain: WarpChainInfo): AdapterWarpExplorer {
-    return findWarpAdapterForChain(chain.name, this.adapters).explorer(chain)
+  getExplorer(chain: WarpChain): AdapterWarpExplorer {
+    return findWarpAdapterForChain(chain, this.adapters).explorer
   }
 
-  getResults(chain: WarpChainInfo): AdapterWarpResults {
-    return findWarpAdapterForChain(chain.name, this.adapters).results
+  getResults(chain: WarpChain): AdapterWarpResults {
+    return findWarpAdapterForChain(chain, this.adapters).results
   }
 
   async getRegistry(chain: WarpChain): Promise<AdapterWarpRegistry> {

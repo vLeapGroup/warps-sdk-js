@@ -7,15 +7,13 @@ import {
   WarpCacheConfig,
   WarpCacheKey,
   WarpChain,
-  WarpChainInfo,
   WarpClientConfig,
   WarpLogger,
   WarpRegistryConfigInfo,
   WarpRegistryInfo,
 } from '@vleap/warps'
 import { getSuiApiUrl, getSuiRegistryPackageId } from './config'
-import { WarpSuiConstants } from './constants'
-import { toRegistryMoveTarget, toTypedChainInfo, toTypedRegistryInfo } from './helpers/registry'
+import { toRegistryMoveTarget, toTypedRegistryInfo } from './helpers/registry'
 
 export class WarpSuiRegistry implements AdapterWarpRegistry {
   private readonly client: SuiClient
@@ -23,10 +21,13 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
   public registryConfig: { unitPrice: bigint; admins: string[] } = { unitPrice: BigInt(0), admins: [] }
   private userWallet: string | null
 
-  constructor(private config: WarpClientConfig) {
+  constructor(
+    private config: WarpClientConfig,
+    private readonly chain: WarpChain
+  ) {
     this.client = new SuiClient({ url: getSuiApiUrl(config.env) })
     this.cache = new WarpCache(config.cache?.type)
-    this.userWallet = this.config.user?.wallets?.[WarpSuiConstants.ChainName] || null
+    this.userWallet = this.config.user?.wallets?.[this.chain] || null
   }
 
   async init(): Promise<void> {
@@ -252,46 +253,6 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
       WarpLogger.error('WarpSuiRegistry (getUserBrands):', error)
       return []
     }
-  }
-
-  async getChainInfos(cache?: WarpCacheConfig): Promise<WarpChainInfo[]> {
-    const cacheKey = WarpCacheKey.ChainInfos(this.config.env)
-    const cached = cache ? this.cache.get<WarpChainInfo[]>(cacheKey) : null
-    if (cached) {
-      WarpLogger.info(`WarpSuiRegistry (getChainInfos): Chains found in cache`)
-      return cached
-    }
-    try {
-      const res = await this.client.call(toRegistryMoveTarget(this.config.env, 'get_chains'), [])
-      const chainInfos = Array.isArray(res) ? res.map(toTypedChainInfo) : []
-      if (cache && cache.ttl) this.cache.set(cacheKey, chainInfos, cache.ttl)
-      return chainInfos
-    } catch (error) {
-      WarpLogger.error('WarpSuiRegistry (getChainInfos):', error)
-      return []
-    }
-  }
-
-  async getChainInfo(chain: WarpChain, _cache?: WarpCacheConfig): Promise<WarpChainInfo | null> {
-    if (chain !== 'sui') return null
-    return {
-      name: 'sui',
-      displayName: 'Sui',
-      chainId: 'sui',
-      blockTime: 0,
-      addressHrp: 'sui',
-      apiUrl: getSuiApiUrl(this.config.env),
-      explorerUrl: 'https://suivision.xyz',
-      nativeToken: 'SUI',
-    }
-  }
-
-  async setChain(info: WarpChainInfo): Promise<any> {
-    throw new Error('WarpSuiRegistry: setChain is not supported')
-  }
-
-  async removeChain(chain: WarpChain): Promise<any> {
-    throw new Error('WarpSuiRegistry: removeChain is not supported')
   }
 
   async fetchBrand(hash: string, cacheConfig?: WarpCacheConfig): Promise<WarpBrand | null> {

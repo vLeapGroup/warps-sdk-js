@@ -1,6 +1,5 @@
 export * from './config'
 export * from './constants'
-export * from './main'
 export * from './utils.codec'
 export * from './WarpMultiversxAbiBuilder'
 export * from './WarpMultiversxBrandBuilder'

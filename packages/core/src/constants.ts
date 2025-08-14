@@ -1,9 +1,15 @@
 import { InterpolationBag, WarpIdType } from './types'
 
 export enum WarpChainName {
+  // multiversx
   Multiversx = 'multiversx',
+  Vibechain = 'vibechain',
+  // sui
   Sui = 'sui',
-  Evm = 'evm',
+  // evm
+  Ethereum = 'ethereum',
+  Base = 'base',
+  Arbitrum = 'arbitrum',
 }
 
 export const WarpConstants = {
@@ -28,19 +34,15 @@ export const WarpConstants = {
   Globals: {
     UserWallet: {
       Placeholder: 'USER_WALLET',
-      Accessor: (bag: InterpolationBag) => bag.config.user?.wallets?.[bag.chain.name],
+      Accessor: (bag: InterpolationBag) => bag.config.user?.wallets?.[bag.chain],
     },
     ChainApiUrl: {
       Placeholder: 'CHAIN_API',
-      Accessor: (bag: InterpolationBag) => bag.chain.apiUrl,
-    },
-    ChainExplorerUrl: {
-      Placeholder: 'CHAIN_EXPLORER',
-      Accessor: (bag: InterpolationBag) => bag.chain.explorerUrl,
+      Accessor: (bag: InterpolationBag) => bag.chainInfo.apiUrl,
     },
     ChainAddressHrp: {
-      Placeholder: 'chain.addressHrp',
-      Accessor: (bag: InterpolationBag) => bag.chain.addressHrp,
+      Placeholder: 'CHAIN_ADDRESS_HRP',
+      Accessor: (bag: InterpolationBag) => bag.chainInfo.addressHrp,
     },
   },
 

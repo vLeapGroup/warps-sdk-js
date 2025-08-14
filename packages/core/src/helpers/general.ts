@@ -1,11 +1,5 @@
-import { WarpConfig, WarpProtocolVersions } from '../config'
-import { Adapter, ProtocolName, Warp, WarpAction, WarpActionIndex, WarpChain, WarpChainInfo, WarpClientConfig } from '../types'
-
-export const findWarpDefaultAdapter = (adapters: Adapter[]): Adapter => {
-  const adapter = adapters.find((a) => a.chain.toLowerCase() === WarpConfig.MainChain.Name.toLowerCase())
-  if (!adapter) throw new Error(`Adapter not found for chain: ${WarpConfig.MainChain.Name}`)
-  return adapter
-}
+import { WarpProtocolVersions } from '../config'
+import { Adapter, ProtocolName, Warp, WarpAction, WarpActionIndex, WarpChain } from '../types'
 
 export const findWarpAdapterForChain = (chain: WarpChain, adapters: Adapter[]): Adapter => {
   const adapter = adapters.find((a) => a.chain.toLowerCase() === chain.toLowerCase())
@@ -18,17 +12,6 @@ export const findWarpAdapterByPrefix = (prefix: string, adapters: Adapter[]): Ad
   if (!adapter) throw new Error(`Adapter not found for prefix: ${prefix}`)
   return adapter
 }
-
-export const getMainChainInfo = (config: WarpClientConfig): WarpChainInfo => ({
-  name: WarpConfig.MainChain.Name,
-  displayName: WarpConfig.MainChain.DisplayName,
-  chainId: WarpConfig.MainChain.ChainId(config.env),
-  blockTime: WarpConfig.MainChain.BlockTime(config.env),
-  addressHrp: WarpConfig.MainChain.AddressHrp,
-  apiUrl: WarpConfig.MainChain.ApiUrl(config.env),
-  explorerUrl: WarpConfig.MainChain.ExplorerUrl(config.env),
-  nativeToken: WarpConfig.MainChain.NativeToken,
-})
 
 export const getLatestProtocolIdentifier = (name: ProtocolName): string => {
   if (name === 'warp') return `warp:${WarpProtocolVersions.Warp}`
@@ -47,17 +30,6 @@ export const findWarpExecutableAction = (warp: Warp): { action: WarpAction; acti
 
   return { action: getWarpActionByIndex(warp, 1), actionIndex: 1 }
 }
-
-export const toTypedChainInfo = (chainInfo: any): WarpChainInfo => ({
-  name: chainInfo.name.toString(),
-  displayName: chainInfo.display_name.toString(),
-  chainId: chainInfo.chain_id.toString(),
-  blockTime: chainInfo.block_time.toNumber(),
-  addressHrp: chainInfo.address_hrp.toString(),
-  apiUrl: chainInfo.api_url.toString(),
-  explorerUrl: chainInfo.explorer_url.toString(),
-  nativeToken: chainInfo.native_token.toString(),
-})
 
 export const shiftBigintBy = (value: bigint | string | number, decimals: number): bigint => {
   const valueStr = value.toString()

@@ -6,6 +6,7 @@ import {
   TypedValue,
 } from '@multiversx/sdk-core'
 import {
+  Adapter,
   AdapterWarpResults,
   applyResultsToMessages,
   evaluateResultsCommon,
@@ -17,6 +18,7 @@ import {
   WarpActionIndex,
   WarpCache,
   WarpCacheKey,
+  WarpChain,
   WarpClientConfig,
   WarpConstants,
   WarpContractAction,
@@ -25,16 +27,23 @@ import {
 } from '@vleap/warps'
 import { WarpMultiversxAbiBuilder } from './WarpMultiversxAbiBuilder'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
-import { WarpMultiversxConstants } from './constants'
-import { getMultiversxAdapter } from './main'
+import { getAllMultiversxAdapters } from './chains/combined'
 
 export class WarpMultiversxResults implements AdapterWarpResults {
   private readonly abi: WarpMultiversxAbiBuilder
   private readonly serializer: WarpMultiversxSerializer
   private readonly cache: WarpCache
+  private readonly adapter: Adapter
 
-  constructor(private readonly config: WarpClientConfig) {
-    this.abi = new WarpMultiversxAbiBuilder(config)
+  constructor(
+    private readonly config: WarpClientConfig,
+    private readonly chain: WarpChain
+  ) {
+    const adapter = getAllMultiversxAdapters(config).find((a) => a.chain === chain)
+    if (!adapter) throw new Error(`WarpMultiversxResults: adapter not found for chain ${chain}`)
+    this.adapter = adapter
+
+    this.abi = new WarpMultiversxAbiBuilder(config, chain)
     this.serializer = new WarpMultiversxSerializer()
     this.cache = new WarpCache(config.cache?.type)
   }
@@ -45,16 +54,15 @@ export class WarpMultiversxResults implements AdapterWarpResults {
     // Restore inputs via cache as transactions are broadcasted and processed asynchronously
     const inputs: ResolvedInput[] = this.cache.get(WarpCacheKey.WarpExecutable(this.config.env, warp.meta?.hash || '', actionIndex)) ?? []
 
-    const adapter = getMultiversxAdapter(this.config)
     const results = await this.extractContractResults(warp, tx, inputs)
-    const next = getNextInfo(this.config, adapter, warp, actionIndex, results)
+    const next = getNextInfo(this.config, this.adapter, warp, actionIndex, results)
     const messages = applyResultsToMessages(warp, results.results)
 
     return {
       success: tx.status.isSuccessful(),
       warp,
       action: actionIndex,
-      user: this.config.user?.wallets?.[WarpMultiversxConstants.ChainName] || null,
+      user: this.config.user?.wallets?.[this.adapter.chain] || null,
       txHash: tx.hash,
       next,
       values: results.values,

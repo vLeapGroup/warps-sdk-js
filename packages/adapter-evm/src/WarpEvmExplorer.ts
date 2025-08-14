@@ -1,15 +1,15 @@
-import { AdapterWarpExplorer, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { AdapterWarpExplorer, WarpChain, WarpClientConfig } from '@vleap/warps'
 import { getEvmExplorerByName, getEvmExplorerUrl, getEvmExplorers, getPrimaryEvmExplorer } from './config'
 import { ExplorerName, ExplorerUrls } from './constants'
 
 export class WarpEvmExplorer implements AdapterWarpExplorer {
   constructor(
-    private readonly chain: WarpChainInfo,
+    private readonly chain: WarpChain,
     private readonly config: WarpClientConfig
   ) {}
 
   private getExplorerUrlByName(explorer?: ExplorerName): string {
-    const userPreference = this.chain.preferences?.explorers?.[this.chain.name]
+    const userPreference = this.config.preferences?.explorers?.[this.chain]
 
     if (userPreference && !explorer) {
       const url = ExplorerUrls[userPreference as ExplorerName]
@@ -21,9 +21,9 @@ export class WarpEvmExplorer implements AdapterWarpExplorer {
       if (url) return url
     }
 
-    const primaryExplorer = getPrimaryEvmExplorer(this.chain.name, this.config.env)
+    const primaryExplorer = getPrimaryEvmExplorer(this.chain, this.config.env)
     const url = ExplorerUrls[primaryExplorer]
-    return url || getEvmExplorerUrl(this.config.env, this.chain.name)
+    return url || getEvmExplorerUrl(this.config.env, this.chain)
   }
 
   getAccountUrl(address: string, explorer?: ExplorerName): string {
@@ -53,7 +53,7 @@ export class WarpEvmExplorer implements AdapterWarpExplorer {
 
   getAllExplorers(): readonly ExplorerName[] {
     try {
-      return getEvmExplorers(this.chain.name, this.config.env)
+      return getEvmExplorers(this.chain, this.config.env)
     } catch {
       return ['Default' as ExplorerName]
     }
@@ -61,7 +61,7 @@ export class WarpEvmExplorer implements AdapterWarpExplorer {
 
   getExplorerByName(name: string): ExplorerName | undefined {
     try {
-      return getEvmExplorerByName(this.chain.name, this.config.env, name)
+      return getEvmExplorerByName(this.chain, this.config.env, name)
     } catch {
       return undefined
     }

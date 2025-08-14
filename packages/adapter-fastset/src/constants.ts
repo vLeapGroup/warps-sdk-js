@@ -1,6 +1,4 @@
 export const WarpFastsetConstants = {
-  ChainName: 'fastset',
-  ChainPrefix: 'fastset',
   Pi: {
     Identifier: 'PI',
     DisplayName: 'Pi',
@@ -19,23 +17,6 @@ export const WarpFastsetConstants = {
     Low: '10000000000', // 10 gwei
     Medium: '20000000000', // 20 gwei
     High: '50000000000', // 50 gwei
-  },
-  Network: {
-    Mainnet: {
-      ChainId: '1',
-      Name: 'Fastset Mainnet',
-      BlockTime: 12,
-    },
-    Testnet: {
-      ChainId: '11155111',
-      Name: 'Fastset Testnet',
-      BlockTime: 12,
-    },
-    Devnet: {
-      ChainId: '1337',
-      Name: 'Fastset Devnet',
-      BlockTime: 12,
-    },
   },
   Validation: {
     AddressLength: 42,
