@@ -1,12 +1,30 @@
 import { AdapterWarpExplorer, WarpChain, WarpClientConfig } from '@vleap/warps'
-import { getPrimarySuiExplorer, getSuiExplorerByName, getSuiExplorerUrl, getSuiExplorers } from './config'
-import { ExplorerName, ExplorerUrls } from './constants'
+import { ExplorerName, ExplorerUrls, SuiExplorersConfig } from './constants'
 
 export class WarpSuiExplorer implements AdapterWarpExplorer {
   constructor(
     private readonly config: WarpClientConfig,
     private readonly chain: WarpChain
   ) {}
+
+  private getExplorers(): readonly ExplorerName[] {
+    const chainExplorers = SuiExplorersConfig[this.chain as keyof typeof SuiExplorersConfig]
+    if (!chainExplorers) {
+      return ['suivision' as ExplorerName]
+    }
+
+    const explorers = chainExplorers[this.config.env as keyof typeof chainExplorers]
+    if (!explorers) {
+      return ['suivision' as ExplorerName]
+    }
+
+    return explorers
+  }
+
+  private getPrimaryExplorer(): ExplorerName {
+    const explorers = this.getExplorers()
+    return explorers[0]
+  }
 
   private getExplorerUrlByName(explorer?: ExplorerName): string {
     const userPreference = this.config.preferences?.explorers?.[this.chain]
@@ -21,9 +39,9 @@ export class WarpSuiExplorer implements AdapterWarpExplorer {
       if (url) return url
     }
 
-    const primaryExplorer = getPrimarySuiExplorer(this.chain, this.config.env)
+    const primaryExplorer = this.getPrimaryExplorer()
     const url = ExplorerUrls[primaryExplorer]
-    return url || getSuiExplorerUrl(this.config.env, this.chain)
+    return url || ExplorerUrls[primaryExplorer]
   }
 
   getAccountUrl(address: string, explorer?: ExplorerName): string {
@@ -52,19 +70,12 @@ export class WarpSuiExplorer implements AdapterWarpExplorer {
   }
 
   getAllExplorers(): readonly ExplorerName[] {
-    try {
-      return getSuiExplorers(this.chain, this.config.env)
-    } catch {
-      return ['suivision' as ExplorerName]
-    }
+    return this.getExplorers()
   }
 
   getExplorerByName(name: string): ExplorerName | undefined {
-    try {
-      return getSuiExplorerByName(this.chain, this.config.env, name)
-    } catch {
-      return undefined
-    }
+    const explorers = this.getExplorers()
+    return explorers.find((explorer) => explorer.toLowerCase() === name.toLowerCase())
   }
 
   getAccountUrls(address: string): Record<ExplorerName, string> {

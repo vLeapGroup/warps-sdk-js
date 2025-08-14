@@ -92,13 +92,20 @@ export class WarpFactory {
   }
 
   async getChainInfoForAction(action: WarpAction, inputs?: string[]): Promise<{ chain: WarpChain; chainInfo: WarpChainInfo }> {
+    // First check if the action has a chain property
+    if (action.chain) {
+      const adapter = findWarpAdapterForChain(action.chain, this.adapters)
+      return { chain: action.chain, chainInfo: adapter.chainInfo }
+    }
+
+    // Then check inputs for chain position
     if (inputs) {
       const chainFromInputs = await this.tryGetChainFromInputs(action, inputs)
       if (chainFromInputs) return chainFromInputs
     }
 
+    // Finally use default adapter
     const defaultAdapter = this.adapters[0]
-
     return { chain: defaultAdapter.chain, chainInfo: defaultAdapter.chainInfo }
   }
 
@@ -189,7 +196,7 @@ export class WarpFactory {
     if (chainPositionIndex === -1 || chainPositionIndex === undefined) return null
 
     const chainInput = inputs[chainPositionIndex]
-    if (!chainInput) throw new Error('WarpUtils: Chain input not found')
+    if (!chainInput) throw new Error('Chain input not found')
 
     const serializer = new WarpSerializer()
     const chainValue = serializer.stringToNative(chainInput)[1] as WarpChain

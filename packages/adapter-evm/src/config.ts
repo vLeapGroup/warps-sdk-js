@@ -1,5 +1,4 @@
 import { WarpChainEnv } from '@vleap/warps'
-import { EvmExplorers, ExplorerName, ExplorerUrls } from './constants'
 
 export interface EvmChainConfig {
   apiUrl: string
@@ -113,36 +112,4 @@ export const getEvmApiUrl = (env: WarpChainEnv, chain: string = DEFAULT_CHAIN): 
 
 export const getEvmExplorerUrl = (env: WarpChainEnv, chain: string = DEFAULT_CHAIN): string => {
   return getEvmChainConfig(chain, env).explorerUrl
-}
-
-export const getEvmExplorers = (chain: string = DEFAULT_CHAIN, env: WarpChainEnv): readonly ExplorerName[] => {
-  const chainExplorers = EvmExplorers[chain as keyof typeof EvmExplorers]
-  if (!chainExplorers) {
-    throw new Error(`Unsupported EVM chain: ${chain}`)
-  }
-
-  const explorers = chainExplorers[env]
-  if (!explorers) {
-    throw new Error(`Unsupported environment ${env} for chain ${chain}`)
-  }
-
-  return explorers
-}
-
-export const getPrimaryEvmExplorer = (chain: string = DEFAULT_CHAIN, env: WarpChainEnv): ExplorerName => {
-  const explorers = getEvmExplorers(chain, env)
-  return explorers[0]
-}
-
-export const getEvmExplorerUrlByName = (explorerName: ExplorerName): string => {
-  const url = ExplorerUrls[explorerName]
-  if (!url) {
-    throw new Error(`Unsupported explorer: ${explorerName}`)
-  }
-  return url
-}
-
-export const getEvmExplorerByName = (chain: string = DEFAULT_CHAIN, env: WarpChainEnv, name: string): ExplorerName | undefined => {
-  const explorers = getEvmExplorers(chain, env)
-  return explorers.find((explorer) => explorer.toLowerCase() === name.toLowerCase())
 }

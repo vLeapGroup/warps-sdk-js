@@ -83,22 +83,19 @@ describe('WarpFactory', () => {
     currentUrl: 'https://example.com?foo=bar',
   })
   const chain: WarpChainInfo = {
-    name: 'multiversx',
     displayName: 'MultiversX',
     chainId: 'D',
     blockTime: 6000,
     addressHrp: 'erd',
     apiUrl: 'https://api',
-    explorerUrl: 'https://explorer',
     nativeToken: 'EGLD',
   }
 
-  let chainInfoMock: jest.SpyInstance
   beforeEach(() => {
-    chainInfoMock = jest.spyOn(WarpFactory.prototype, 'getChainInfoForAction').mockResolvedValue(chain)
+    // No mocking needed for these tests
   })
   afterEach(() => {
-    chainInfoMock.mockRestore()
+    // No cleanup needed
   })
 
   it('createExecutable returns expected structure', async () => {
@@ -139,7 +136,7 @@ describe('WarpFactory', () => {
         { name: 'wallet', type: 'address', source: WarpConstants.Source.UserWallet } as any,
       ],
     }
-    const result = await factory.getResolvedInputs(chain, action, ['string:ignored', 'address:ignored'])
+    const result = await factory.getResolvedInputs('multiversx', action, ['string:ignored', 'address:ignored'])
     expect(result[0].value).toBe('string:bar')
     expect(result[1].value).toBe('address:erd1testwallet')
   })
@@ -153,7 +150,7 @@ describe('WarpFactory', () => {
 
   it('preprocessInput returns input as-is for non-esdt', async () => {
     const factory = new WarpFactory(config, [createMockAdapter()])
-    const result = await factory.preprocessInput(chain, 'biguint:123')
+    const result = await factory.preprocessInput('multiversx', 'biguint:123')
     expect(result).toBe('biguint:123')
   })
 })
@@ -176,6 +173,14 @@ describe('getChainInfoForAction', () => {
     })
     const adapter = createMockAdapter()
     adapter.chain = 'mainnet'
+    adapter.chainInfo = {
+      displayName: 'Mainnet',
+      chainId: '1',
+      blockTime: 6000,
+      addressHrp: 'erd',
+      apiUrl: 'https://api.multiversx.com',
+      nativeToken: 'EGLD',
+    }
     adapter.registry.getChainInfo = mockGetChainInfo
     const factory = new WarpFactory(testConfig, [adapter])
     const action: WarpContractAction = {
@@ -191,9 +196,8 @@ describe('getChainInfoForAction', () => {
         { name: 'amount', type: 'biguint', position: 'value', source: 'field' },
       ],
     }
-    const chain = await factory.getChainInfoForAction(action, ['string:mainnet', 'biguint:1000000000000000000'])
-    expect(chain.name).toBe('mainnet')
-    expect(mockGetChainInfo).toHaveBeenCalledWith('mainnet')
+    const { chainInfo } = await factory.getChainInfoForAction(action, ['string:mainnet', 'biguint:1000000000000000000'])
+    expect(chainInfo.displayName).toBe('Mainnet')
   })
 
   it('uses default chain when no chain position is specified', async () => {
@@ -209,24 +213,30 @@ describe('getChainInfoForAction', () => {
     }
 
     const factory = new WarpFactory(testConfig, [createMockAdapter()])
-    const chain = await factory.getChainInfoForAction(action, ['biguint:1000000000000000000'])
+    const { chainInfo } = await factory.getChainInfoForAction(action, ['biguint:1000000000000000000'])
 
-    expect(chain.name).toBe('multiversx') // Default chain name from config
+    expect(chainInfo.displayName).toBe('MultiversX') // Default chain name from config
   })
 
   it('handles chain position at index 0 correctly (critical bug test)', async () => {
     const mockGetChainInfo = jest.fn().mockResolvedValue({
-      name: 'testnet',
       displayName: 'Testnet',
       chainId: 'T',
       blockTime: 6,
       addressHrp: 'erd',
       apiUrl: 'https://testnet-api.multiversx.com',
-      explorerUrl: 'https://testnet-explorer.multiversx.com',
       nativeToken: 'EGLD',
     })
     const adapter = createMockAdapter()
     adapter.chain = 'testnet'
+    adapter.chainInfo = {
+      displayName: 'Testnet',
+      chainId: 'T',
+      blockTime: 6,
+      addressHrp: 'erd',
+      apiUrl: 'https://testnet-api.multiversx.com',
+      nativeToken: 'EGLD',
+    }
     adapter.registry.getChainInfo = mockGetChainInfo
     const factory = new WarpFactory(testConfig, [adapter])
     const action: WarpContractAction = {
@@ -242,9 +252,8 @@ describe('getChainInfoForAction', () => {
         { name: 'amount', type: 'biguint', position: 'value', source: 'field' },
       ],
     }
-    const chain = await factory.getChainInfoForAction(action, ['string:testnet', 'biguint:500'])
-    expect(chain.name).toBe('testnet')
-    expect(mockGetChainInfo).toHaveBeenCalledWith('testnet')
+    const { chainInfo } = await factory.getChainInfoForAction(action, ['string:testnet', 'biguint:500'])
+    expect(chainInfo.displayName).toBe('Testnet')
   })
 
   it('throws error when chain input is not found at specified position', async () => {
@@ -276,8 +285,8 @@ describe('getChainInfoForAction', () => {
     }
 
     const factory = new WarpFactory(testConfig, [createMockAdapter()])
-    const chain = await factory.getChainInfoForAction(action)
+    const { chainInfo } = await factory.getChainInfoForAction(action)
 
-    expect(chain.name).toBe('multiversx') // Default chain name from config
+    expect(chainInfo.displayName).toBe('MultiversX') // Default chain name from config
   })
 })

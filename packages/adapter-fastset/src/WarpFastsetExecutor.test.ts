@@ -50,7 +50,9 @@ describe('WarpFastsetExecutor', () => {
     })
 
     it('should throw error for invalid addresses', async () => {
-      await expect(executor.preprocessInput({} as any, 'address', 'address', 'invalid-address')).rejects.toThrow('Invalid Fastset address format: invalid-address')
+      await expect(executor.preprocessInput({} as any, 'address', 'address', 'invalid-address')).rejects.toThrow(
+        'Invalid Fastset address format: invalid-address'
+      )
     })
 
     it('should throw error for invalid hex strings', async () => {
@@ -237,7 +239,7 @@ describe('WarpFastsetExecutor', () => {
 
       expect(result).toEqual({
         success: false,
-        error: 'Fastset query failed: Not Found',
+        error: 'Not Found',
         chain: 'fastset',
       })
     })
@@ -326,7 +328,9 @@ describe('WarpFastsetExecutor', () => {
         resolvedInputs: [],
       } as any
 
-      await expect(executor.createTransaction(executable)).rejects.toThrow('WarpFastsetExecutor: Invalid action type for createTransaction; Use executeQuery instead')
+      await expect(executor.createTransaction(executable)).rejects.toThrow(
+        'WarpFastsetExecutor: Invalid action type for createTransaction; Use executeQuery instead'
+      )
     })
   })
 

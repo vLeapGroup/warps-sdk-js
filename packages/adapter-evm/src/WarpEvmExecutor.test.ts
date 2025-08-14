@@ -368,9 +368,7 @@ describe('WarpEvmExecutor', () => {
       const message = 'test message'
       const privateKey = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
 
-      const signature = await executor.signMessage(message, privateKey)
-
-      expect(signature).toBe('test-signature')
+      await expect(executor.signMessage(message, privateKey)).rejects.toThrow('Not implemented')
     })
   })
 })

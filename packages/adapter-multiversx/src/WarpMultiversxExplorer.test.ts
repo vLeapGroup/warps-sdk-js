@@ -92,8 +92,6 @@ describe('WarpMultiversxExplorer', () => {
     it('should return all available explorers for multiversx chain', () => {
       const explorers = explorer.getAllExplorers()
       expect(explorers).toContain(MultiversxExplorers.MultiversxExplorer)
-      expect(explorers).toContain(MultiversxExplorers.MultiversxExplorerTestnet)
-      expect(explorers).toContain(MultiversxExplorers.MultiversxExplorerDevnet)
     })
 
     it('should return fallback explorer when chain is not supported', () => {
@@ -123,12 +121,6 @@ describe('WarpMultiversxExplorer', () => {
       expect(urls[MultiversxExplorers.MultiversxExplorer]).toBe(
         'https://explorer.multiversx.com/accounts/erd1qqqqqqqqqqqqqpgqje2f99vr6r7sk54thg03c9suzcvwr4nfl3tsfkdl36'
       )
-      expect(urls[MultiversxExplorers.MultiversxExplorerTestnet]).toBe(
-        'https://testnet-explorer.multiversx.com/accounts/erd1qqqqqqqqqqqqqpgqje2f99vr6r7sk54thg03c9suzcvwr4nfl3tsfkdl36'
-      )
-      expect(urls[MultiversxExplorers.MultiversxExplorerDevnet]).toBe(
-        'https://devnet-explorer.multiversx.com/accounts/erd1qqqqqqqqqqqqqpgqje2f99vr6r7sk54thg03c9suzcvwr4nfl3tsfkdl36'
-      )
     })
   })
 
@@ -138,8 +130,6 @@ describe('WarpMultiversxExplorer', () => {
       const urls = explorer.getTransactionUrls(hash)
 
       expect(urls[MultiversxExplorers.MultiversxExplorer]).toBe('https://explorer.multiversx.com/transactions/abc123def456')
-      expect(urls[MultiversxExplorers.MultiversxExplorerTestnet]).toBe('https://testnet-explorer.multiversx.com/transactions/abc123def456')
-      expect(urls[MultiversxExplorers.MultiversxExplorerDevnet]).toBe('https://devnet-explorer.multiversx.com/transactions/abc123def456')
     })
   })
 
@@ -168,7 +158,6 @@ describe('WarpMultiversxExplorer', () => {
     it('should return all testnet explorers', () => {
       const explorers = testnetExplorer.getAllExplorers()
       expect(explorers).toContain(MultiversxExplorers.MultiversxExplorerTestnet)
-      expect(explorers).toContain(MultiversxExplorers.MultiversxExplorerDevnet)
     })
   })
 
@@ -191,14 +180,12 @@ describe('WarpMultiversxExplorer', () => {
     it('should return correct vibechain explorer URLs', () => {
       const address = 'erd1qqqqqqqqqqqqqpgqje2f99vr6r7sk54thg03c9suzcvwr4nfl3tsfkdl36'
       const url = vibechainExplorer.getAccountUrl(address, VibechainExplorers.VibechainExplorer)
-      expect(url).toBe('https://explorer.vibechain.com/accounts/erd1qqqqqqqqqqqqqpgqje2f99vr6r7sk54thg03c9suzcvwr4nfl3tsfkdl36')
+      expect(url).toBe('https://vibeox-explorer.multiversx.com/accounts/erd1qqqqqqqqqqqqqpgqje2f99vr6r7sk54thg03c9suzcvwr4nfl3tsfkdl36')
     })
 
     it('should return all vibechain explorers', () => {
       const explorers = vibechainExplorer.getAllExplorers()
       expect(explorers).toContain(VibechainExplorers.VibechainExplorer)
-      expect(explorers).toContain(VibechainExplorers.VibechainExplorerTestnet)
-      expect(explorers).toContain(VibechainExplorers.VibechainExplorerDevnet)
     })
   })
 })

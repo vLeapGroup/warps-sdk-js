@@ -1,12 +1,30 @@
 import { AdapterWarpExplorer, WarpChain, WarpClientConfig } from '@vleap/warps'
-import { getMultiversxExplorerByName, getMultiversxExplorerUrl, getMultiversxExplorers, getPrimaryMultiversxExplorer } from './config'
-import { ExplorerName, ExplorerUrls } from './constants'
+import { ExplorerName, ExplorerUrls, MultiversxExplorersConfig } from './constants'
 
 export class WarpMultiversxExplorer implements AdapterWarpExplorer {
   constructor(
     private readonly chain: WarpChain,
     private readonly config: WarpClientConfig
   ) {}
+
+  private getExplorers(): readonly ExplorerName[] {
+    const chainExplorers = MultiversxExplorersConfig[this.chain as keyof typeof MultiversxExplorersConfig]
+    if (!chainExplorers) {
+      return ['multiversx_explorer' as ExplorerName]
+    }
+
+    const explorers = chainExplorers[this.config.env as keyof typeof chainExplorers]
+    if (!explorers) {
+      return ['multiversx_explorer' as ExplorerName]
+    }
+
+    return explorers
+  }
+
+  private getPrimaryExplorer(): ExplorerName {
+    const explorers = this.getExplorers()
+    return explorers[0]
+  }
 
   private getExplorerUrlByName(explorer?: ExplorerName): string {
     const userPreference = this.config.preferences?.explorers?.[this.chain]
@@ -21,9 +39,9 @@ export class WarpMultiversxExplorer implements AdapterWarpExplorer {
       if (url) return url
     }
 
-    const primaryExplorer = getPrimaryMultiversxExplorer(this.chain, this.config.env)
+    const primaryExplorer = this.getPrimaryExplorer()
     const url = ExplorerUrls[primaryExplorer]
-    return url || getMultiversxExplorerUrl(this.config.env, this.chain)
+    return url || ExplorerUrls[primaryExplorer]
   }
 
   getAccountUrl(address: string, explorer?: ExplorerName): string {
@@ -52,19 +70,12 @@ export class WarpMultiversxExplorer implements AdapterWarpExplorer {
   }
 
   getAllExplorers(): readonly ExplorerName[] {
-    try {
-      return getMultiversxExplorers(this.chain, this.config.env)
-    } catch {
-      return ['multiversx_explorer' as ExplorerName]
-    }
+    return this.getExplorers()
   }
 
   getExplorerByName(name: string): ExplorerName | undefined {
-    try {
-      return getMultiversxExplorerByName(this.chain, this.config.env, name)
-    } catch {
-      return undefined
-    }
+    const explorers = this.getExplorers()
+    return explorers.find((explorer) => explorer.toLowerCase() === name.toLowerCase())
   }
 
   getAccountUrls(address: string): Record<ExplorerName, string> {

@@ -60,7 +60,7 @@ describe('WarpExecutor', () => {
           },
         ],
       }
-      await expect(executor.execute(errorWarp, [])).rejects.toThrow('WarpUtils: Chain info not found for invalid-chain')
+      await expect(executor.execute(errorWarp, [])).rejects.toThrow('Adapter not found for chain: invalid-chain')
     })
   })
 
