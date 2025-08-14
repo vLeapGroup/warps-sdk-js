@@ -21,7 +21,7 @@ export const createMultiversxAdapter = (
       prefix: chainPrefix,
       builder: () => new WarpMultiversxBuilder(config, chainName, chainInfo),
       executor: new WarpMultiversxExecutor(config, chainName, chainInfo),
-      results: new WarpMultiversxResults(config, chainName),
+      results: new WarpMultiversxResults(config, chainName, chainInfo),
       serializer: new WarpMultiversxSerializer(),
       registry: new WarpMultiversxRegistry(config),
       explorer: new WarpMultiversxExplorer(chainName, config),
