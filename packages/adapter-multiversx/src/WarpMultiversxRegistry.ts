@@ -21,7 +21,6 @@ import {
   WarpRegistryInfo,
 } from '@vleap/warps'
 import RegistryAbi from './abis/registry.abi.json'
-import { getMultiversxAdapter } from './chains/multiversx'
 import { getMultiversxRegistryAddress } from './config'
 import { toTypedConfigInfo, toTypedRegistryInfo } from './helpers/registry'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
@@ -29,19 +28,18 @@ import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 export class WarpMultiversxRegistry implements AdapterWarpRegistry {
   private cache: WarpCache
   private userWallet: string | null
-  private chainInfo: WarpChainInfo
   public registryConfig: WarpRegistryConfigInfo
 
-  constructor(private config: WarpClientConfig) {
-    const defaultAdapter = getMultiversxAdapter(config)
-
-    this.chainInfo = defaultAdapter.chainInfo
+  constructor(
+    private config: WarpClientConfig,
+    private chainInfo: WarpChainInfo
+  ) {
     this.cache = new WarpCache(config.cache?.type)
     this.registryConfig = {
       unitPrice: BigInt(0),
       admins: [],
     }
-    this.userWallet = this.config.user?.wallets?.[defaultAdapter.chain] || null
+    this.userWallet = this.config.user?.wallets?.[this.chainInfo.name] || null
   }
 
   async init(): Promise<void> {
