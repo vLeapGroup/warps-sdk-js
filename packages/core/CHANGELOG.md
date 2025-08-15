@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.63
+
+### Patch Changes
+
+- 440b74e: update chain infos
+
 ## 3.0.0-alpha.62
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.20
+
+### Patch Changes
+
+- 440b74e: update chain infos
+- Updated dependencies [440b74e]
+  - @vleap/warps@3.0.0-alpha.63
+
 ## 0.2.0-alpha.19
 
 ### Patch Changes

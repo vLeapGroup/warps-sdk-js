@@ -1,5 +1,14 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.23
+
+### Patch Changes
+
+- 440b74e: update chain infos
+- 2ed4c75: fix circular dep
+- Updated dependencies [440b74e]
+  - @vleap/warps@3.0.0-alpha.63
+
 ## 0.2.0-alpha.22
 
 ### Patch Changes
