@@ -31,7 +31,7 @@ describe('WarpSuiExecutor', () => {
       data: null,
       resolvedInputs: [],
     }
-    const executor = new WarpSuiExecutor(config, 'sui')
+    const executor = new WarpSuiExecutor(config, chain)
     const tx = await executor.createTransaction(executable)
     expect(tx).toBeDefined()
     expect(typeof tx.transferObjects).toBe('function')
@@ -51,7 +51,7 @@ describe('WarpSuiExecutor', () => {
       data: null,
       resolvedInputs: [],
     }
-    const executor = new WarpSuiExecutor(config, 'sui')
+    const executor = new WarpSuiExecutor(config, chain)
     const tx = await executor.createTransaction(executable)
     expect(tx).toBeDefined()
     expect(typeof tx.moveCall).toBe('function')
@@ -71,7 +71,7 @@ describe('WarpSuiExecutor', () => {
       data: null,
       resolvedInputs: [],
     }
-    const executor = new WarpSuiExecutor(config, 'sui')
+    const executor = new WarpSuiExecutor(config, chain)
     const tx = await executor.createContractCallTransaction(executable)
 
     expect(tx).toBeDefined()

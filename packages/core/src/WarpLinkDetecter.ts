@@ -81,7 +81,7 @@ export class WarpLinkDetecter {
 
       const preparedWarp = warp ? await new WarpInterpolator(this.config, adapter).apply(this.config, warp) : null
 
-      return preparedWarp ? { match: true, url, warp: preparedWarp, chain: adapter.chain, registryInfo, brand } : emptyResult
+      return preparedWarp ? { match: true, url, warp: preparedWarp, chain: adapter.chainInfo.name, registryInfo, brand } : emptyResult
     } catch (e) {
       WarpLogger.error('Error detecting warp link', e)
       return emptyResult

@@ -37,7 +37,7 @@ export class WarpLinkBuilder {
     if (!idResult) return null
     const adapter = findWarpAdapterByPrefix(idResult.chainPrefix, this.adapters)
     if (!adapter) return null
-    return this.build(adapter.chain, idResult.type, idResult.identifierBase)
+    return this.build(adapter.chainInfo.name, idResult.type, idResult.identifierBase)
   }
 
   generateQrCode(
@@ -50,7 +50,7 @@ export class WarpLinkBuilder {
     logoColor = '#23F7DD'
   ): QRCodeStyling {
     const adapter = findWarpAdapterForChain(chain, this.adapters)
-    const url = this.build(adapter.chain, type, id)
+    const url = this.build(adapter.chainInfo.name, type, id)
 
     return new QRCodeStyling({
       type: 'svg',

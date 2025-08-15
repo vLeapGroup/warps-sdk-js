@@ -1,14 +1,14 @@
-import { AdapterWarpExplorer, WarpChain, WarpClientConfig } from '@vleap/warps'
+import { AdapterWarpExplorer, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 import { ExplorerName, ExplorerUrls, SuiExplorersConfig } from './constants'
 
 export class WarpSuiExplorer implements AdapterWarpExplorer {
   constructor(
     private readonly config: WarpClientConfig,
-    private readonly chain: WarpChain
+    private readonly chain: WarpChainInfo
   ) {}
 
   private getExplorers(): readonly ExplorerName[] {
-    const chainExplorers = SuiExplorersConfig[this.chain as keyof typeof SuiExplorersConfig]
+    const chainExplorers = SuiExplorersConfig[this.chain.name as keyof typeof SuiExplorersConfig]
     if (!chainExplorers) {
       return ['suivision' as ExplorerName]
     }
@@ -27,7 +27,7 @@ export class WarpSuiExplorer implements AdapterWarpExplorer {
   }
 
   private getExplorerUrlByName(explorer?: ExplorerName): string {
-    const userPreference = this.config.preferences?.explorers?.[this.chain]
+    const userPreference = this.config.preferences?.explorers?.[this.chain.name]
 
     if (userPreference && !explorer) {
       const url = ExplorerUrls[userPreference as ExplorerName]

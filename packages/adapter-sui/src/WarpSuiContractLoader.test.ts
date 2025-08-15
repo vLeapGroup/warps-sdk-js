@@ -1,8 +1,8 @@
 import { WarpSuiContractLoader } from './WarpSuiContractLoader'
 
 describe('WarpSuiContractLoader', () => {
-  const url = 'https://fullnode.devnet.sui.io'
-  const loader = new WarpSuiContractLoader(url)
+  const config = { env: 'devnet' as const }
+  const loader = new WarpSuiContractLoader(config)
 
   it('should instantiate WarpSuiContractLoader', () => {
     expect(loader).toBeInstanceOf(WarpSuiContractLoader)

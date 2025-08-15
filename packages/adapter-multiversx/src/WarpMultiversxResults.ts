@@ -17,7 +17,6 @@ import {
   WarpActionIndex,
   WarpCache,
   WarpCacheKey,
-  WarpChain,
   WarpChainInfo,
   WarpClientConfig,
   WarpConstants,
@@ -35,10 +34,9 @@ export class WarpMultiversxResults implements AdapterWarpResults {
 
   constructor(
     private readonly config: WarpClientConfig,
-    private readonly chain: WarpChain,
-    private readonly chainInfo: WarpChainInfo
+    private readonly chain: WarpChainInfo
   ) {
-    this.abi = new WarpMultiversxAbiBuilder(config, chain, chainInfo)
+    this.abi = new WarpMultiversxAbiBuilder(config, chain)
     this.serializer = new WarpMultiversxSerializer()
     this.cache = new WarpCache(config.cache?.type)
   }
@@ -57,7 +55,7 @@ export class WarpMultiversxResults implements AdapterWarpResults {
       success: tx.status.isSuccessful(),
       warp,
       action: actionIndex,
-      user: this.config.user?.wallets?.[this.chain] || null,
+      user: this.config.user?.wallets?.[this.chain.name] || null,
       txHash: tx.hash,
       next,
       values: results.values,

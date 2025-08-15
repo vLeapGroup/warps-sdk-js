@@ -6,7 +6,7 @@ import {
   WarpCache,
   WarpCacheConfig,
   WarpCacheKey,
-  WarpChain,
+  WarpChainInfo,
   WarpClientConfig,
   WarpLogger,
   WarpRegistryConfigInfo,
@@ -16,18 +16,21 @@ import { getSuiApiUrl, getSuiRegistryPackageId } from './config'
 import { toRegistryMoveTarget, toTypedRegistryInfo } from './helpers/registry'
 
 export class WarpSuiRegistry implements AdapterWarpRegistry {
-  private readonly client: SuiClient
-  private readonly cache: WarpCache
-  public registryConfig: { unitPrice: bigint; admins: string[] } = { unitPrice: BigInt(0), admins: [] }
+  private client: SuiClient
+  private cache: WarpCache
   private userWallet: string | null
+  public registryConfig: WarpRegistryConfigInfo = {
+    unitPrice: BigInt(0),
+    admins: [],
+  }
 
   constructor(
     private config: WarpClientConfig,
-    private readonly chain: WarpChain
+    private readonly chain: WarpChainInfo
   ) {
     this.client = new SuiClient({ url: getSuiApiUrl(config.env) })
     this.cache = new WarpCache(config.cache?.type)
-    this.userWallet = this.config.user?.wallets?.[this.chain] || null
+    this.userWallet = this.config.user?.wallets?.[this.chain.name] || null
   }
 
   async init(): Promise<void> {

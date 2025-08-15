@@ -27,6 +27,5 @@ export const toTypedChainInfo = (chainView: any): WarpChainInfo => ({
   blockTime: Number(chainView.block_time),
   addressHrp: Buffer.from(chainView.address_hrp).toString(),
   apiUrl: Buffer.from(chainView.api_url).toString(),
-  explorerUrl: Buffer.from(chainView.explorer_url).toString(),
   nativeToken: Buffer.from(chainView.native_token).toString(),
 })

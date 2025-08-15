@@ -6,7 +6,6 @@ import {
   WarpCache,
   WarpCacheConfig,
   WarpCacheKey,
-  WarpChain,
   WarpChainInfo,
   WarpClientConfig,
   WarpLogger,
@@ -19,8 +18,7 @@ export class WarpMultiversxBuilder extends WarpBuilder implements AdapterWarpBui
 
   constructor(
     protected readonly config: WarpClientConfig,
-    private readonly chain: WarpChain,
-    private readonly chainInfo: WarpChainInfo
+    private readonly chain: WarpChainInfo
   ) {
     super(config)
     this.cache = new WarpCache(config.cache?.type)
@@ -28,9 +26,9 @@ export class WarpMultiversxBuilder extends WarpBuilder implements AdapterWarpBui
   }
 
   async createInscriptionTransaction(warp: Warp): Promise<Transaction> {
-    const userWallet = this.config.user?.wallets?.[this.chain]
+    const userWallet = this.config.user?.wallets?.[this.chain.name]
     if (!userWallet) throw new Error('WarpBuilder: user address not set')
-    const factoryConfig = new TransactionsFactoryConfig({ chainID: this.chainInfo.chainId })
+    const factoryConfig = new TransactionsFactoryConfig({ chainID: this.chain.chainId })
     const factory = new TransferTransactionsFactory({ config: factoryConfig })
     const sender = Address.newFromBech32(userWallet)
     const serialized = JSON.stringify(warp)
@@ -50,7 +48,7 @@ export class WarpMultiversxBuilder extends WarpBuilder implements AdapterWarpBui
     const warp = await this.core.createFromRaw(tx.data.toString(), validate)
 
     warp.meta = {
-      chain: this.chain,
+      chain: this.chain.name,
       hash: tx.hash,
       creator: tx.sender.toBech32(),
       createdAt: new Date(tx.timestamp * 1000).toISOString(),
@@ -70,7 +68,7 @@ export class WarpMultiversxBuilder extends WarpBuilder implements AdapterWarpBui
       }
     }
 
-    const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(this.chainInfo, this.config.env)
+    const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env)
     const chainProvider = chainEntry.createNetworkProvider()
 
     try {

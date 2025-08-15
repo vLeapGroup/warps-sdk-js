@@ -21,15 +21,14 @@ describe('WarpMultiversxExecutor', () => {
     const warp = { actions: [action] } as any as Warp
     const executable = {
       warp,
-      chain: 'multiversx',
-      chainInfo: {
+      chain: {
+        name: 'multiversx',
         chainId: 'D',
         apiUrl: '',
         addressHrp: '',
         blockTime: 0,
         displayName: '',
         explorerUrl: '',
-        name: 'multiversx',
         nativeToken: '',
       },
       action: 1,
@@ -57,15 +56,14 @@ describe('WarpMultiversxExecutor', () => {
     const warp = { actions: [action] } as any as Warp
     const executable = {
       warp,
-      chain: 'multiversx',
-      chainInfo: {
+      chain: {
+        name: 'multiversx',
         chainId: 'D',
         apiUrl: '',
         addressHrp: '',
         blockTime: 0,
         displayName: '',
         explorerUrl: '',
-        name: 'multiversx',
         nativeToken: '',
       },
       action: 1,
@@ -93,15 +91,14 @@ describe('WarpMultiversxExecutor', () => {
     const warp = { actions: [action] } as any as Warp
     const executable = {
       warp,
-      chain: 'multiversx',
-      chainInfo: {
+      chain: {
+        name: 'multiversx',
         chainId: 'D',
         apiUrl: '',
         addressHrp: '',
         blockTime: 0,
         displayName: '',
         explorerUrl: '',
-        name: 'multiversx',
         nativeToken: '',
       },
       action: 1,

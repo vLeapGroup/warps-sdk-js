@@ -32,14 +32,14 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
 
   constructor(
     private config: WarpClientConfig,
-    private chainInfo: WarpChainInfo
+    private chain: WarpChainInfo
   ) {
     this.cache = new WarpCache(config.cache?.type)
     this.registryConfig = {
       unitPrice: BigInt(0),
       admins: [],
     }
-    this.userWallet = this.config.user?.wallets?.[this.chainInfo.name] || null
+    this.userWallet = this.config.user?.wallets?.[this.chain.name] || null
   }
 
   async init(): Promise<void> {
@@ -267,7 +267,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
       return cached
     }
 
-    const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(this.chainInfo, this.config.env)
+    const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env)
     const chainProvider = chainEntry.createNetworkProvider()
 
     try {
@@ -300,13 +300,13 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
   }
 
   private getFactory(): SmartContractTransactionsFactory {
-    const config = new TransactionsFactoryConfig({ chainID: this.chainInfo.chainId })
+    const config = new TransactionsFactoryConfig({ chainID: this.chain.chainId })
     const abi = AbiRegistry.create(RegistryAbi)
     return new SmartContractTransactionsFactory({ config, abi })
   }
 
   private getController(): SmartContractController {
-    const entrypoint = WarpMultiversxExecutor.getChainEntrypoint(this.chainInfo, this.config.env)
+    const entrypoint = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env)
     const abi = AbiRegistry.create(RegistryAbi)
     return entrypoint.createSmartContractController(abi)
   }

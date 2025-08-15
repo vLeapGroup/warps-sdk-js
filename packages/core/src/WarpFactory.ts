@@ -35,9 +35,9 @@ export class WarpFactory {
   async createExecutable(warp: Warp, actionIndex: number, inputs: string[]): Promise<WarpExecutable> {
     const action = getWarpActionByIndex(warp, actionIndex) as WarpTransferAction | WarpContractAction
     if (!action) throw new Error('WarpFactory: Action not found')
-    const { chain, chainInfo } = await this.getChainInfoForAction(action, inputs)
+    const chain = await this.getChainInfoForAction(action, inputs)
 
-    const resolvedInputs = await this.getResolvedInputs(chain, action, inputs)
+    const resolvedInputs = await this.getResolvedInputs(chain.name, action, inputs)
     const modifiedInputs = this.getModifiedInputs(resolvedInputs)
 
     const destinationInput = modifiedInputs.find((i) => i.input.position === 'receiver')?.value
@@ -72,7 +72,6 @@ export class WarpFactory {
     const executable: WarpExecutable = {
       warp,
       chain,
-      chainInfo,
       action: actionIndex,
       destination,
       args,
@@ -91,14 +90,12 @@ export class WarpFactory {
     return executable
   }
 
-  async getChainInfoForAction(action: WarpAction, inputs?: string[]): Promise<{ chain: WarpChain; chainInfo: WarpChainInfo }> {
-    // First check if the action has a chain property
+  async getChainInfoForAction(action: WarpAction, inputs?: string[]): Promise<WarpChainInfo> {
     if (action.chain) {
       const adapter = findWarpAdapterForChain(action.chain, this.adapters)
-      return { chain: action.chain, chainInfo: adapter.chainInfo }
+      return adapter.chainInfo
     }
 
-    // Then check inputs for chain position
     if (inputs) {
       const chainFromInputs = await this.tryGetChainFromInputs(action, inputs)
       if (chainFromInputs) return chainFromInputs
@@ -106,7 +103,7 @@ export class WarpFactory {
 
     // Finally use default adapter
     const defaultAdapter = this.adapters[0]
-    return { chain: defaultAdapter.chain, chainInfo: defaultAdapter.chainInfo }
+    return defaultAdapter.chainInfo
   }
 
   public async getResolvedInputs(chain: WarpChain, action: WarpAction, inputArgs: string[]): Promise<ResolvedInput[]> {
@@ -188,10 +185,7 @@ export class WarpFactory {
     return args
   }
 
-  private async tryGetChainFromInputs(
-    action: WarpAction,
-    inputs: string[]
-  ): Promise<{ chain: WarpChain; chainInfo: WarpChainInfo } | null> {
+  private async tryGetChainFromInputs(action: WarpAction, inputs: string[]): Promise<WarpChainInfo | null> {
     const chainPositionIndex = action.inputs?.findIndex((i) => i.position === 'chain')
     if (chainPositionIndex === -1 || chainPositionIndex === undefined) return null
 
@@ -203,6 +197,6 @@ export class WarpFactory {
 
     const adapter = findWarpAdapterForChain(chainValue, this.adapters)
 
-    return { chain: chainValue, chainInfo: adapter.chainInfo }
+    return adapter.chainInfo
   }
 }

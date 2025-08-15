@@ -162,8 +162,7 @@ export type WarpContractVerification = {
 }
 
 export type WarpExecutable = {
-  chain: WarpChain
-  chainInfo: WarpChainInfo
+  chain: WarpChainInfo
   warp: Warp
   action: number
   destination: string

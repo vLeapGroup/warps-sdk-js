@@ -5,7 +5,6 @@ import {
     WarpCache,
     WarpCacheConfig,
     WarpCacheKey,
-    WarpChain,
     WarpChainInfo,
     WarpClientConfig,
     WarpConstants,
@@ -22,8 +21,7 @@ export class WarpMultiversxAbiBuilder implements AdapterWarpAbiBuilder {
 
   constructor(
     private readonly config: WarpClientConfig,
-    private readonly chain: WarpChain,
-    private readonly chainInfo: WarpChainInfo
+    private readonly chain: WarpChainInfo
   ) {
     this.contractLoader = new WarpMultiversxContractLoader(this.config)
     this.cache = new WarpCache(this.config.cache?.type)
@@ -37,7 +35,7 @@ export class WarpMultiversxAbiBuilder implements AdapterWarpAbiBuilder {
     const abi = await this.createFromRaw(tx.data.toString())
 
     abi.meta = {
-      chain: this.chain,
+      chain: this.chain.name,
       hash: tx.hash,
       creator: tx.sender.toBech32(),
       createdAt: new Date(tx.timestamp * 1000).toISOString(),
@@ -57,7 +55,7 @@ export class WarpMultiversxAbiBuilder implements AdapterWarpAbiBuilder {
       }
     }
 
-    const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(this.chainInfo, this.config.env)
+    const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env)
     const chainProvider = chainEntry.createNetworkProvider()
 
     try {
@@ -80,7 +78,7 @@ export class WarpMultiversxAbiBuilder implements AdapterWarpAbiBuilder {
       return await this.fetchAbi(action)
     }
     if (!action.address) throw new Error('WarpActionExecutor: Address not found')
-    const verification = await this.contractLoader.getVerificationInfo(action.address, this.chainInfo)
+    const verification = await this.contractLoader.getVerificationInfo(action.address, this.chain)
     if (!verification) throw new Error('WarpActionExecutor: Verification info not found')
 
     return AbiRegistry.create(verification.abi)

@@ -1,8 +1,17 @@
 import { WarpSuiResults } from './WarpSuiResults'
 
 describe('WarpSuiResults', () => {
-  const config = { currentUrl: 'https://fullnode.devnet.sui.io' } as any
-  const results = new WarpSuiResults(config)
+  const config = { env: 'devnet' as const }
+  const chain = {
+    name: 'sui',
+    displayName: 'Sui',
+    chainId: '1',
+    blockTime: 3000,
+    addressHrp: '0x',
+    apiUrl: 'https://fullnode.devnet.sui.io',
+    nativeToken: 'SUI',
+  }
+  const results = new WarpSuiResults(config, chain)
 
   it('should extract contract results', async () => {
     const warp = { results: { foo: 'out.foo' }, actions: [{ inputs: [] }] } as any

@@ -1,5 +1,5 @@
 import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
-import { WarpBrand, WarpBrandBuilder, WarpChain, WarpChainInfo, WarpClientConfig, WarpLogger } from '@vleap/warps'
+import { WarpBrand, WarpBrandBuilder, WarpChainInfo, WarpClientConfig, WarpLogger } from '@vleap/warps'
 import { Buffer } from 'buffer'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
@@ -8,16 +8,15 @@ export class WarpMultiversxBrandBuilder {
 
   constructor(
     private readonly config: WarpClientConfig,
-    private readonly chain: WarpChain,
-    private readonly chainInfo: WarpChainInfo
+    private readonly chain: WarpChainInfo
   ) {
     this.core = new WarpBrandBuilder(config)
   }
 
   async createInscriptionTransaction(brand: WarpBrand): Promise<Transaction> {
-    const userWallet = this.config.user?.wallets?.[this.chain]
+    const userWallet = this.config.user?.wallets?.[this.chain.name]
     if (!userWallet) throw new Error('BrandBuilder: user address not set')
-    const factoryConfig = new TransactionsFactoryConfig({ chainID: this.chainInfo.chainId })
+    const factoryConfig = new TransactionsFactoryConfig({ chainID: this.chain.chainId })
     const factory = new TransferTransactionsFactory({ config: factoryConfig })
     const sender = Address.newFromBech32(userWallet)
     const serialized = JSON.stringify(brand)
@@ -34,7 +33,7 @@ export class WarpMultiversxBrandBuilder {
   }
 
   async createFromTransactionHash(hash: string): Promise<WarpBrand | null> {
-    const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(this.chainInfo, this.config.env)
+    const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env)
     const chainProvider = chainEntry.createNetworkProvider()
 
     try {

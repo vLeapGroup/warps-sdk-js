@@ -12,10 +12,21 @@ describe('WarpSuiExplorer', () => {
     },
   }
 
+  const mockChainInfo = {
+    name: 'sui',
+    displayName: 'Sui',
+    chainId: 'sui-mainnet',
+    blockTime: 1000,
+    addressHrp: '0x',
+    apiUrl: 'https://fullnode.mainnet.sui.io',
+    explorerUrl: 'https://explorer.sui.io',
+    nativeToken: 'SUI',
+  }
+
   let explorer: WarpSuiExplorer
 
   beforeEach(() => {
-    explorer = new WarpSuiExplorer(mockConfig, 'sui')
+    explorer = new WarpSuiExplorer(mockConfig, mockChainInfo)
   })
 
   describe('getAccountUrl', () => {
@@ -96,7 +107,8 @@ describe('WarpSuiExplorer', () => {
     })
 
     it('should return fallback explorer when chain is not supported', () => {
-      const unsupportedExplorer = new WarpSuiExplorer(mockConfig, 'unsupported-chain')
+      const unsupportedChainInfo = { ...mockChainInfo, name: 'unsupported-chain' }
+      const unsupportedExplorer = new WarpSuiExplorer(mockConfig, unsupportedChainInfo)
       const explorers = unsupportedExplorer.getAllExplorers()
       expect(explorers).toEqual(['suivision'])
     })
@@ -144,10 +156,21 @@ describe('WarpSuiExplorer', () => {
       },
     }
 
+    const testnetChainInfo = {
+      name: 'sui',
+      displayName: 'Sui',
+      chainId: 'sui-testnet',
+      blockTime: 1000,
+      addressHrp: '0x',
+      apiUrl: 'https://fullnode.testnet.sui.io',
+      explorerUrl: 'https://explorer.sui.io',
+      nativeToken: 'SUI',
+    }
+
     let testnetExplorer: WarpSuiExplorer
 
     beforeEach(() => {
-      testnetExplorer = new WarpSuiExplorer(testnetConfig, 'sui')
+      testnetExplorer = new WarpSuiExplorer(testnetConfig, testnetChainInfo)
     })
 
     it('should return correct testnet explorer URLs', () => {

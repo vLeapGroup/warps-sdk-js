@@ -41,7 +41,7 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
   }
 
   async createTransferTransaction(executable: WarpExecutable): Promise<any> {
-    const userWallet = this.config.user?.wallets?.[executable.chain]
+    const userWallet = this.config.user?.wallets?.[executable.chain.name]
     if (!userWallet) throw new Error('WarpFastsetExecutor: createTransfer - user address not set')
 
     if (!isValidFastsetAddress(executable.destination)) {
@@ -66,7 +66,7 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
   }
 
   async createContractCallTransaction(executable: WarpExecutable): Promise<any> {
-    const userWallet = this.config.user?.wallets?.[executable.chain]
+    const userWallet = this.config.user?.wallets?.[executable.chain.name]
     if (!userWallet) throw new Error('WarpFastsetExecutor: createContractCall - user address not set')
 
     const action = getWarpActionByIndex(executable.warp, executable.action)
@@ -195,7 +195,7 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
   }
 
   async executeTransfer(executable: WarpExecutable): Promise<any> {
-    const userWallet = this.config.user?.wallets?.[executable.chain]
+    const userWallet = this.config.user?.wallets?.[executable.chain.name]
     if (!userWallet) throw new Error('WarpFastsetExecutor: executeTransfer - user wallet not set')
 
     const transaction = await this.createTransferTransaction(executable)
@@ -203,13 +203,13 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
     return {
       success: true,
       transaction,
-      chain: executable.chain,
+      chain: executable.chain.name,
       message: 'Transaction created successfully. Use executeTransferWithKey to execute with private key.',
     }
   }
 
   async executeTransferWithKey(executable: WarpExecutable, privateKey: string): Promise<any> {
-    const userWallet = this.config.user?.wallets?.[executable.chain]
+    const userWallet = this.config.user?.wallets?.[executable.chain.name]
     if (!userWallet) throw new Error('WarpFastsetExecutor: executeTransfer - user wallet not set')
 
     const transaction = await this.createTransferTransaction(executable)
@@ -224,7 +224,7 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
     return {
       success: true,
       transactionHash: Array.from(transactionHash),
-      chain: executable.chain,
+      chain: executable.chain.name,
     }
   }
 }

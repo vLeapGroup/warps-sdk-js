@@ -58,21 +58,20 @@ export class WarpClient {
     options: { cache?: WarpCacheConfig } = {}
   ): Promise<{
     tx: WarpAdapterGenericTransaction | null
-    chain: WarpChain | null
-    chainInfo: WarpChainInfo | null
+    chain: WarpChainInfo | null
     evaluateResults: (remoteTx: WarpAdapterGenericRemoteTransaction) => Promise<void>
   }> {
     const detectionResult = await this.detectWarp(identifier, options.cache)
     if (!detectionResult.match || !detectionResult.warp) throw new Error('Warp not found')
     const executor = this.createExecutor(handlers)
-    const { tx, chain, chainInfo } = await executor.execute(detectionResult.warp, inputs)
+    const { tx, chain } = await executor.execute(detectionResult.warp, inputs)
 
     const evaluateResults = async (remoteTx: WarpAdapterGenericRemoteTransaction): Promise<void> => {
       if (!chain || !tx || !detectionResult.warp) throw new Error('Warp not found')
-      await executor.evaluateResults(detectionResult.warp, chain, remoteTx)
+      await executor.evaluateResults(detectionResult.warp, chain.name, remoteTx)
     }
 
-    return { tx, chain, chainInfo, evaluateResults }
+    return { tx, chain, evaluateResults }
   }
 
   createInscriptionTransaction(chain: WarpChain, warp: Warp): WarpAdapterGenericTransaction {

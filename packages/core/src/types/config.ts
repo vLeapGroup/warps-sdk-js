@@ -50,7 +50,6 @@ export type WarpCacheConfig = {
 export type AdapterFactory = (config: WarpClientConfig, fallback?: Adapter) => Adapter
 
 export type Adapter = {
-  chain: WarpChain
   chainInfo: WarpChainInfo
   prefix: string
   builder: () => CombinedWarpBuilder

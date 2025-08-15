@@ -57,7 +57,7 @@ describe('WarpEvmExecutor', () => {
     }
     ;(ethers.JsonRpcProvider as unknown as jest.Mock).mockImplementation(() => mockProvider)
 
-    executor = new WarpEvmExecutor(mockConfig, mockAdapter)
+    executor = new WarpEvmExecutor(mockConfig)
   })
 
   describe('preprocessInput', () => {
@@ -97,7 +97,15 @@ describe('WarpEvmExecutor', () => {
         destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
         value: BigInt(1000000000000000000), // 1 ETH
         data: null,
-        chain: 'evm',
+        chain: {
+          name: 'evm',
+          displayName: 'EVM',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: '0x',
+          apiUrl: 'https://api.evm.com',
+          nativeToken: 'ETH',
+        },
         warp: {
           actions: [
             {
@@ -128,7 +136,15 @@ describe('WarpEvmExecutor', () => {
         destination: 'invalid-address',
         value: BigInt(1000000000000000000),
         data: null,
-        chain: 'evm',
+        chain: {
+          name: 'evm',
+          displayName: 'EVM',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: '0x',
+          apiUrl: 'https://api.evm.com',
+          nativeToken: 'ETH',
+        },
         warp: {
           actions: [
             {
@@ -152,7 +168,15 @@ describe('WarpEvmExecutor', () => {
         destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
         value: BigInt(0),
         data: null,
-        chain: 'evm',
+        chain: {
+          name: 'evm',
+          displayName: 'EVM',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: '0x',
+          apiUrl: 'https://api.evm.com',
+          nativeToken: 'ETH',
+        },
         warp: {
           actions: [
             {
@@ -184,7 +208,15 @@ describe('WarpEvmExecutor', () => {
         destination: 'invalid-address',
         value: BigInt(0),
         data: null,
-        chain: 'evm',
+        chain: {
+          name: 'evm',
+          displayName: 'EVM',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: '0x',
+          apiUrl: 'https://api.evm.com',
+          nativeToken: 'ETH',
+        },
         warp: {
           actions: [
             {
@@ -209,7 +241,15 @@ describe('WarpEvmExecutor', () => {
         destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
         value: BigInt(0),
         data: null,
-        chain: 'evm',
+        chain: {
+          name: 'evm',
+          displayName: 'EVM',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: '0x',
+          apiUrl: 'https://api.evm.com',
+          nativeToken: 'ETH',
+        },
         warp: {
           actions: [
             {
@@ -244,7 +284,15 @@ describe('WarpEvmExecutor', () => {
         destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
         value: BigInt(0),
         data: null,
-        chain: 'evm',
+        chain: {
+          name: 'evm',
+          displayName: 'EVM',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: '0x',
+          apiUrl: 'https://api.evm.com',
+          nativeToken: 'ETH',
+        },
         warp: {
           actions: [
             {
@@ -281,7 +329,15 @@ describe('WarpEvmExecutor', () => {
         destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
         value: BigInt(1000000000000000000),
         data: null,
-        chain: 'evm',
+        chain: {
+          name: 'evm',
+          displayName: 'EVM',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: '0x',
+          apiUrl: 'https://api.evm.com',
+          nativeToken: 'ETH',
+        },
         warp: {
           actions: [
             {
@@ -312,7 +368,15 @@ describe('WarpEvmExecutor', () => {
         destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
         value: BigInt(0),
         data: null,
-        chain: 'evm',
+        chain: {
+          name: 'evm',
+          displayName: 'EVM',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: '0x',
+          apiUrl: 'https://api.evm.com',
+          nativeToken: 'ETH',
+        },
         warp: {
           actions: [
             {
@@ -344,7 +408,15 @@ describe('WarpEvmExecutor', () => {
         destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
         value: BigInt(0),
         data: null,
-        chain: 'evm',
+        chain: {
+          name: 'evm',
+          displayName: 'EVM',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: '0x',
+          apiUrl: 'https://api.evm.com',
+          nativeToken: 'ETH',
+        },
         warp: {
           actions: [
             {
@@ -359,7 +431,9 @@ describe('WarpEvmExecutor', () => {
         resolvedInputs: [],
       } as any
 
-      await expect(executor.createTransaction(executable)).rejects.toThrow('WarpEvmExecutor: Invalid action type for createTransaction; Use executeQuery instead')
+      await expect(executor.createTransaction(executable)).rejects.toThrow(
+        'WarpEvmExecutor: Invalid action type for createTransaction; Use executeQuery instead'
+      )
     })
   })
 

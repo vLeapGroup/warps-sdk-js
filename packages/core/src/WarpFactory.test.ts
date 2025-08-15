@@ -174,6 +174,7 @@ describe('getChainInfoForAction', () => {
     const adapter = createMockAdapter()
     adapter.chain = 'mainnet'
     adapter.chainInfo = {
+      name: 'mainnet',
       displayName: 'Mainnet',
       chainId: '1',
       blockTime: 6000,
@@ -196,8 +197,8 @@ describe('getChainInfoForAction', () => {
         { name: 'amount', type: 'biguint', position: 'value', source: 'field' },
       ],
     }
-    const { chainInfo } = await factory.getChainInfoForAction(action, ['string:mainnet', 'biguint:1000000000000000000'])
-    expect(chainInfo.displayName).toBe('Mainnet')
+    const chainInfo = await factory.getChainInfoForAction(action, ['string:mainnet', 'biguint:1000000000000000000'])
+    expect(chainInfo.name).toBe('mainnet')
   })
 
   it('uses default chain when no chain position is specified', async () => {
@@ -213,7 +214,7 @@ describe('getChainInfoForAction', () => {
     }
 
     const factory = new WarpFactory(testConfig, [createMockAdapter()])
-    const { chainInfo } = await factory.getChainInfoForAction(action, ['biguint:1000000000000000000'])
+    const chainInfo = await factory.getChainInfoForAction(action, ['biguint:1000000000000000000'])
 
     expect(chainInfo.displayName).toBe('MultiversX') // Default chain name from config
   })
@@ -230,6 +231,7 @@ describe('getChainInfoForAction', () => {
     const adapter = createMockAdapter()
     adapter.chain = 'testnet'
     adapter.chainInfo = {
+      name: 'testnet',
       displayName: 'Testnet',
       chainId: 'T',
       blockTime: 6,
@@ -252,7 +254,7 @@ describe('getChainInfoForAction', () => {
         { name: 'amount', type: 'biguint', position: 'value', source: 'field' },
       ],
     }
-    const { chainInfo } = await factory.getChainInfoForAction(action, ['string:testnet', 'biguint:500'])
+    const chainInfo = await factory.getChainInfoForAction(action, ['string:testnet', 'biguint:500'])
     expect(chainInfo.displayName).toBe('Testnet')
   })
 
@@ -285,7 +287,7 @@ describe('getChainInfoForAction', () => {
     }
 
     const factory = new WarpFactory(testConfig, [createMockAdapter()])
-    const { chainInfo } = await factory.getChainInfoForAction(action)
+    const chainInfo = await factory.getChainInfoForAction(action)
 
     expect(chainInfo.displayName).toBe('MultiversX') // Default chain name from config
   })

@@ -9,7 +9,7 @@ import {
   ResolvedInput,
   Warp,
   WarpActionIndex,
-  WarpChain,
+  WarpChainInfo,
   WarpClientConfig,
   WarpConstants,
   WarpContractAction,
@@ -25,7 +25,7 @@ export class WarpSuiResults implements AdapterWarpResults {
 
   constructor(
     private readonly config: WarpClientConfig,
-    private readonly chain: WarpChain
+    private readonly chain: WarpChainInfo
   ) {
     this.serializer = new WarpSuiSerializer()
     this.client = new SuiClient({ url: getSuiApiUrl(config.env) })
@@ -41,7 +41,7 @@ export class WarpSuiResults implements AdapterWarpResults {
       success: tx.effects?.status?.status === 'success',
       warp,
       action: actionIndex,
-      user: this.config.user?.wallets?.[this.chain] || null,
+      user: this.config.user?.wallets?.[this.chain.name] || null,
       txHash: tx.digest,
       next,
       values: results.values,

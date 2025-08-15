@@ -70,7 +70,15 @@ describe('WarpFastsetExecutor', () => {
         destination: 'fs1testaddress123456789',
         value: BigInt(1000000000000000000),
         data: null,
-        chain: 'fastset',
+        chain: {
+          name: 'fastset',
+          displayName: 'Fastset',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: 'fs',
+          apiUrl: 'https://api.fastset.xyz',
+          nativeToken: 'FS',
+        },
         warp: {
           actions: [
             {
@@ -91,7 +99,15 @@ describe('WarpFastsetExecutor', () => {
         recipient: expect.any(Uint8Array),
         amount: 'de0b6b3a7640000',
         userData: undefined,
-        chain: 'fastset',
+        chain: {
+          name: 'fastset',
+          displayName: 'Fastset',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: 'fs',
+          apiUrl: 'https://api.fastset.xyz',
+          nativeToken: 'FS',
+        },
       })
     })
 
@@ -100,7 +116,15 @@ describe('WarpFastsetExecutor', () => {
         destination: 'invalid-address',
         value: BigInt(1000000000000000000),
         data: null,
-        chain: 'fastset',
+        chain: {
+          name: 'fastset',
+          displayName: 'Fastset',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: 'fs',
+          apiUrl: 'https://api.fastset.xyz',
+          nativeToken: 'FS',
+        },
         warp: {
           actions: [
             {
@@ -124,7 +148,15 @@ describe('WarpFastsetExecutor', () => {
         destination: 'fs1testaddress123456789',
         value: BigInt(0),
         data: null,
-        chain: 'fastset',
+        chain: {
+          name: 'fastset',
+          displayName: 'Fastset',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: 'fs',
+          apiUrl: 'https://api.fastset.xyz',
+          nativeToken: 'FS',
+        },
         warp: {
           actions: [
             {
@@ -147,7 +179,15 @@ describe('WarpFastsetExecutor', () => {
         function: 'testFunction',
         data: expect.any(String),
         value: BigInt(0),
-        chain: 'fastset',
+        chain: {
+          name: 'fastset',
+          displayName: 'Fastset',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: 'fs',
+          apiUrl: 'https://api.fastset.xyz',
+          nativeToken: 'FS',
+        },
       })
     })
 
@@ -156,7 +196,15 @@ describe('WarpFastsetExecutor', () => {
         destination: 'invalid-address',
         value: BigInt(0),
         data: null,
-        chain: 'fastset',
+        chain: {
+          name: 'fastset',
+          displayName: 'Fastset',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: 'fs',
+          apiUrl: 'https://api.fastset.xyz',
+          nativeToken: 'FS',
+        },
         warp: {
           actions: [
             {
@@ -181,7 +229,15 @@ describe('WarpFastsetExecutor', () => {
         destination: 'fs1testaddress123456789',
         value: BigInt(0),
         data: null,
-        chain: 'fastset',
+        chain: {
+          name: 'fastset',
+          displayName: 'Fastset',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: 'fs',
+          apiUrl: 'https://api.fastset.xyz',
+          nativeToken: 'FS',
+        },
         warp: {
           actions: [
             {
@@ -209,7 +265,15 @@ describe('WarpFastsetExecutor', () => {
           result: 'success',
           data: '1000000000000000000',
         },
-        chain: 'fastset',
+        chain: {
+          name: 'fastset',
+          displayName: 'Fastset',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: 'fs',
+          apiUrl: 'https://api.fastset.xyz',
+          nativeToken: 'FS',
+        },
       })
     })
 
@@ -218,7 +282,15 @@ describe('WarpFastsetExecutor', () => {
         destination: 'fs1testaddress123456789',
         value: BigInt(0),
         data: null,
-        chain: 'fastset',
+        chain: {
+          name: 'fastset',
+          displayName: 'Fastset',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: 'fs',
+          apiUrl: 'https://api.fastset.xyz',
+          nativeToken: 'FS',
+        },
         warp: {
           actions: [
             {
@@ -240,7 +312,15 @@ describe('WarpFastsetExecutor', () => {
       expect(result).toEqual({
         success: false,
         error: 'Not Found',
-        chain: 'fastset',
+        chain: {
+          name: 'fastset',
+          displayName: 'Fastset',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: 'fs',
+          apiUrl: 'https://api.fastset.xyz',
+          nativeToken: 'FS',
+        },
       })
     })
   })
@@ -251,7 +331,15 @@ describe('WarpFastsetExecutor', () => {
         destination: 'fs1testaddress123456789',
         value: BigInt(1000000000000000000),
         data: null,
-        chain: 'fastset',
+        chain: {
+          name: 'fastset',
+          displayName: 'Fastset',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: 'fs',
+          apiUrl: 'https://api.fastset.xyz',
+          nativeToken: 'FS',
+        },
         warp: {
           actions: [
             {
@@ -272,7 +360,15 @@ describe('WarpFastsetExecutor', () => {
         recipient: expect.any(Uint8Array),
         amount: 'de0b6b3a7640000',
         userData: undefined,
-        chain: 'fastset',
+        chain: {
+          name: 'fastset',
+          displayName: 'Fastset',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: 'fs',
+          apiUrl: 'https://api.fastset.xyz',
+          nativeToken: 'FS',
+        },
       })
     })
 
@@ -281,7 +377,15 @@ describe('WarpFastsetExecutor', () => {
         destination: 'fs1testaddress123456789',
         value: BigInt(0),
         data: null,
-        chain: 'fastset',
+        chain: {
+          name: 'fastset',
+          displayName: 'Fastset',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: 'fs',
+          apiUrl: 'https://api.fastset.xyz',
+          nativeToken: 'FS',
+        },
         warp: {
           actions: [
             {
@@ -304,7 +408,15 @@ describe('WarpFastsetExecutor', () => {
         function: 'testFunction',
         data: expect.any(String),
         value: BigInt(0),
-        chain: 'fastset',
+        chain: {
+          name: 'fastset',
+          displayName: 'Fastset',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: 'fs',
+          apiUrl: 'https://api.fastset.xyz',
+          nativeToken: 'FS',
+        },
       })
     })
 
@@ -313,7 +425,15 @@ describe('WarpFastsetExecutor', () => {
         destination: 'fs1testaddress123456789',
         value: BigInt(0),
         data: null,
-        chain: 'fastset',
+        chain: {
+          name: 'fastset',
+          displayName: 'Fastset',
+          chainId: '1',
+          blockTime: 12000,
+          addressHrp: 'fs',
+          apiUrl: 'https://api.fastset.xyz',
+          nativeToken: 'FS',
+        },
         warp: {
           actions: [
             {

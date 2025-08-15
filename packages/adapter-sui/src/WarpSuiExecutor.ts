@@ -6,7 +6,6 @@ import {
   getNextInfo,
   getWarpActionByIndex,
   WarpActionInputType,
-  WarpChain,
   WarpChainInfo,
   WarpClientConfig,
   WarpContractAction,
@@ -26,12 +25,12 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
 
   constructor(
     private readonly config: WarpClientConfig,
-    private readonly chain: WarpChain
+    private readonly chain: WarpChainInfo
   ) {
     this.serializer = new WarpSuiSerializer()
     this.results = new WarpSuiResults(this.config, this.chain)
     this.client = new SuiClient({ url: getSuiApiUrl(config.env) })
-    this.userWallet = this.config.user?.wallets?.[this.chain] || null
+    this.userWallet = this.config.user?.wallets?.[this.chain.name] || null
   }
 
   async createTransaction(executable: WarpExecutable): Promise<Transaction> {

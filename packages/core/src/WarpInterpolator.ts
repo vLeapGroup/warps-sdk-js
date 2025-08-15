@@ -41,8 +41,8 @@ export class WarpInterpolator {
         const envVarName = value.split(`${WarpConstants.Vars.Env}:`)[1]
         const envVarValue = config.vars?.[envVarName]
         if (envVarValue) modify(placeholder, envVarValue)
-      } else if (value === WarpConstants.Source.UserWallet && config.user?.wallets?.[this.adapter.chain]) {
-        const wallet = config.user.wallets[this.adapter.chain]
+      } else if (value === WarpConstants.Source.UserWallet && config.user?.wallets?.[this.adapter.chainInfo.name]) {
+        const wallet = config.user.wallets[this.adapter.chainInfo.name]
         if (wallet) modify(placeholder, wallet)
       } else {
         modify(placeholder, value)
@@ -57,7 +57,7 @@ export class WarpInterpolator {
 
     const rootBag: InterpolationBag = {
       config,
-      chain: this.adapter.chain as WarpChainName,
+      chain: this.adapter.chainInfo.name as WarpChainName,
       chainInfo: this.adapter.chainInfo,
     }
 
@@ -78,7 +78,7 @@ export class WarpInterpolator {
 
     const bag: InterpolationBag = {
       config: this.config,
-      chain: this.adapter.chain as WarpChainName,
+      chain: this.adapter.chainInfo.name as WarpChainName,
       chainInfo: chain,
     }
 

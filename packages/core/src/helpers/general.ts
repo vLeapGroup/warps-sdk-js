@@ -2,7 +2,7 @@ import { WarpProtocolVersions } from '../config'
 import { Adapter, ProtocolName, Warp, WarpAction, WarpActionIndex, WarpChain } from '../types'
 
 export const findWarpAdapterForChain = (chain: WarpChain, adapters: Adapter[]): Adapter => {
-  const adapter = adapters.find((a) => a.chain.toLowerCase() === chain.toLowerCase())
+  const adapter = adapters.find((a) => a.chainInfo.name.toLowerCase() === chain.toLowerCase())
   if (!adapter) throw new Error(`Adapter not found for chain: ${chain}`)
   return adapter
 }

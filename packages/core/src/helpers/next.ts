@@ -85,7 +85,7 @@ const buildNextUrl = (adapters: Adapter[], identifier: string, config: WarpClien
   }
   const adapter = findWarpAdapterByPrefix(info.chainPrefix, adapters)
   if (!adapter) throw new Error(`Adapter not found for chain ${info.chainPrefix}`)
-  const baseUrl = new WarpLinkBuilder(config, adapters).build(adapter.chain, info.type, info.identifierBase)
+  const baseUrl = new WarpLinkBuilder(config, adapters).build(adapter.chainInfo.name, info.type, info.identifierBase)
   if (!queryString) return baseUrl
 
   const url = new URL(baseUrl)

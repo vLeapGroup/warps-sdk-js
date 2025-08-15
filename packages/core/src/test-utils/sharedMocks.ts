@@ -7,7 +7,6 @@ export const createMockChainInfo = (chainName: string = 'multiversx') => ({
   blockTime: 6000,
   addressHrp: 'erd',
   apiUrl: `https://${chainName === 'multiversx' ? 'devnet-api.multiversx' : chainName}.com`,
-  explorerUrl: `https://${chainName === 'multiversx' ? 'devnet-explorer.multiversx' : chainName}.com`,
   nativeToken: 'EGLD',
 })
 
@@ -15,13 +14,13 @@ export const createMockAdapter = () => ({
   chain: 'multiversx',
   chainInfo: createMockChainInfo('multiversx'),
   prefix: 'mvx',
-  explorer: () => ({
+  explorer: {
     getTransactionUrl: () => '',
     getAddressUrl: () => '',
     getTokenUrl: () => '',
     getBlockUrl: () => '',
     getAccountUrl: () => '',
-  }),
+  },
   builder: () => ({
     createInscriptionTransaction() {
       return {}
@@ -71,6 +70,9 @@ export const createMockAdapter = () => ({
     preprocessInput(chain: any, input: string, type: string, value: string) {
       return Promise.resolve(input)
     },
+    signMessage(message: string, privateKey: string) {
+      return Promise.resolve('mock-signature')
+    },
   },
   results: {
     getTransactionExecutionResults() {
@@ -108,28 +110,28 @@ export const createMockAdapter = () => ({
     init: async () => {},
     getRegistryConfig: () => ({ unitPrice: 0n, admins: [] }),
     createWarpRegisterTransaction() {
-      return {}
+      return Promise.resolve({})
     },
     createWarpUnregisterTransaction() {
-      return {}
+      return Promise.resolve({})
     },
     createWarpUpgradeTransaction() {
-      return {}
+      return Promise.resolve({})
     },
     createWarpAliasSetTransaction() {
-      return {}
+      return Promise.resolve({})
     },
     createWarpVerifyTransaction() {
-      return {}
+      return Promise.resolve({})
     },
     createWarpTransferOwnershipTransaction() {
-      return {}
+      return Promise.resolve({})
     },
     createBrandRegisterTransaction() {
-      return {}
+      return Promise.resolve({})
     },
     createWarpBrandingTransaction() {
-      return {}
+      return Promise.resolve({})
     },
     getInfoByAlias() {
       return Promise.resolve({ registryInfo: null, brand: null })

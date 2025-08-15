@@ -1,3 +1,4 @@
+import { WarpTransferAction } from '@vleap/warps'
 import { WarpFastsetBuilder } from './WarpFastsetBuilder'
 
 // Mock fetch globally
@@ -28,7 +29,7 @@ describe('WarpFastsetBuilder', () => {
         actions: [
           {
             type: 'transfer',
-            title: 'Send PI',
+            label: 'Send PI',
           },
         ],
       })
@@ -71,10 +72,10 @@ describe('WarpFastsetBuilder', () => {
 
   describe('setActions', () => {
     it('should set warp actions', () => {
-      const actions = [
+      const actions: WarpTransferAction[] = [
         {
           type: 'transfer',
-          title: 'Send PI',
+          label: 'Send PI',
         },
       ]
       const result = builder.setActions(actions)
@@ -84,9 +85,9 @@ describe('WarpFastsetBuilder', () => {
 
   describe('addAction', () => {
     it('should add action to warp', () => {
-      const action = {
+      const action: WarpTransferAction = {
         type: 'transfer',
-        title: 'Send PI',
+        label: 'Send PI',
       }
       const result = builder.addAction(action)
       expect(result).toBe(builder)
@@ -97,7 +98,7 @@ describe('WarpFastsetBuilder', () => {
     it('should build complete warp', async () => {
       builder.setTitle('Test Warp').setDescription('A test warp').setPreview('preview-url').addAction({
         type: 'transfer',
-        title: 'Send FS',
+        label: 'Send FS',
       })
 
       const warp = await builder.build()
@@ -111,7 +112,7 @@ describe('WarpFastsetBuilder', () => {
         actions: [
           {
             type: 'transfer',
-            title: 'Send FS',
+            label: 'Send FS',
           },
         ],
         meta: {
@@ -171,7 +172,7 @@ describe('WarpFastsetBuilder', () => {
           actions: [
             {
               type: 'transfer',
-              title: 'Send FS',
+              label: 'Send FS',
             },
           ],
         }),
