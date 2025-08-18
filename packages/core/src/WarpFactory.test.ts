@@ -83,6 +83,7 @@ describe('WarpFactory', () => {
     currentUrl: 'https://example.com?foo=bar',
   })
   const chain: WarpChainInfo = {
+    name: 'multiversx',
     displayName: 'MultiversX',
     chainId: 'D',
     blockTime: 6000,

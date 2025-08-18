@@ -60,7 +60,12 @@ export const createMockAdapter = () => ({
   }),
   brandBuilder: () => ({
     createInscriptionTransaction: () => ({}),
-    createFromTransaction: async () => ({}),
+    createFromTransaction: async () => ({
+      protocol: 'warp',
+      name: 'test-brand',
+      description: 'Test Brand',
+      logo: 'test-logo.png',
+    }),
     createFromTransactionHash: async () => null,
   }),
   executor: {
