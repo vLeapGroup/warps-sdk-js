@@ -1,3 +1,4 @@
+import { createHmacSignature } from './crypto'
 import {
   createAuthHeaders,
   createAuthMessage,
@@ -9,11 +10,11 @@ import {
 
 describe('Signing Utilities', () => {
   describe('createSignableMessage', () => {
-    it('should create a valid signable message with default expiration', () => {
+    it('should create a valid signable message with default expiration', async () => {
       const walletAddress = '0x1234567890abcdef'
       const purpose = 'test-purpose'
 
-      const { message, nonce, expiresAt } = createSignableMessage(walletAddress, purpose)
+      const { message, nonce, expiresAt } = await createSignableMessage(walletAddress, purpose)
 
       expect(nonce).toMatch(/^[a-f0-9]{64}$/)
       expect(expiresAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
@@ -25,12 +26,12 @@ describe('Signing Utilities', () => {
       expect(parsed.purpose).toBe(purpose)
     })
 
-    it('should create a valid signable message with custom expiration', () => {
+    it('should create a valid signable message with custom expiration', async () => {
       const walletAddress = '0x1234567890abcdef'
       const purpose = 'test-purpose'
       const expiresInMinutes = 10
 
-      const { message, nonce, expiresAt } = createSignableMessage(walletAddress, purpose, expiresInMinutes)
+      const { message, nonce, expiresAt } = await createSignableMessage(walletAddress, purpose, expiresInMinutes)
 
       const parsed = JSON.parse(message)
       const expirationTime = new Date(expiresAt).getTime()
@@ -43,11 +44,11 @@ describe('Signing Utilities', () => {
   })
 
   describe('createAuthMessage', () => {
-    it('should create a valid auth message with default purpose', () => {
+    it('should create a valid auth message with default purpose', async () => {
       const walletAddress = '0x1234567890abcdef'
       const appName = 'test-adapter'
 
-      const { message, nonce, expiresAt } = createAuthMessage(walletAddress, appName)
+      const { message, nonce, expiresAt } = await createAuthMessage(walletAddress, appName)
 
       expect(nonce).toMatch(/^[a-f0-9]{64}$/)
       expect(expiresAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
@@ -59,12 +60,12 @@ describe('Signing Utilities', () => {
       expect(parsed.purpose).toBe(`prove-wallet-ownership for app "${appName}"`)
     })
 
-    it('should create a valid auth message with custom purpose', () => {
+    it('should create a valid auth message with custom purpose', async () => {
       const walletAddress = '0x1234567890abcdef'
       const appName = 'test-adapter'
       const customPurpose = 'custom-purpose'
 
-      const { message, nonce, expiresAt } = createAuthMessage(walletAddress, appName, customPurpose)
+      const { message, nonce, expiresAt } = await createAuthMessage(walletAddress, appName, customPurpose)
 
       const parsed = JSON.parse(message)
       expect(parsed.purpose).toBe(customPurpose)
@@ -153,11 +154,10 @@ describe('Signing Utilities', () => {
       const appName = 'test-adapter'
       const privateKey = 'test-secret-key'
 
-      const { message, nonce, expiresAt } = createAuthMessage(walletAddress, appName)
+      const { message, nonce, expiresAt } = await createAuthMessage(walletAddress, appName)
 
       // Manual HMAC signing (simulating adapter-specific logic)
-      const { createHmac } = await import('crypto')
-      const signature = createHmac('sha256', privateKey).update(message).digest('base64')
+      const signature = await createHmacSignature('sha256', privateKey, message, 'base64')
 
       const headers = createAuthHeaders(walletAddress, signature, nonce, expiresAt)
 
@@ -172,11 +172,10 @@ describe('Signing Utilities', () => {
       const purpose = 'arbitrary-proof'
       const privateKey = 'test-secret-key'
 
-      const { message, nonce, expiresAt } = createSignableMessage(walletAddress, purpose, 10)
+      const { message, nonce, expiresAt } = await createSignableMessage(walletAddress, purpose, 10)
 
       // Manual HMAC signing (simulating adapter-specific logic)
-      const { createHmac } = await import('crypto')
-      const signature = createHmac('sha256', privateKey).update(message).digest('base64')
+      const signature = await createHmacSignature('sha256', privateKey, message, 'base64')
 
       // Parse and validate
       const parsed = parseSignedMessage(message)

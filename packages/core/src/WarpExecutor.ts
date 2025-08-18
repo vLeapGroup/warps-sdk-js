@@ -97,7 +97,7 @@ export class WarpExecutor {
     if (this.handlers?.onSignRequest) {
       const walletAddress = this.config.user?.wallets?.[chainInfo.name]
       if (!walletAddress) throw new Error(`No wallet configured for chain ${chainInfo.name}`)
-      const { message, nonce, expiresAt } = createAuthMessage(walletAddress, `${chainInfo.name}-adapter`)
+      const { message, nonce, expiresAt } = await createAuthMessage(walletAddress, `${chainInfo.name}-adapter`)
       const signature = await this.handlers.onSignRequest({ message, chain: chainInfo })
       const authHeaders = createAuthHeaders(walletAddress, signature, nonce, expiresAt)
       Object.entries(authHeaders).forEach(([key, value]) => headers.set(key, value))

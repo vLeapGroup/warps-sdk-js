@@ -1,4 +1,4 @@
-import { randomBytes } from 'crypto'
+import { getRandomHex } from './crypto'
 
 export interface SignableMessage {
   wallet: string
@@ -18,12 +18,12 @@ export type HttpAuthHeaders = Record<string, string> & {
  * Creates a signable message with standard security fields
  * This can be used for any type of proof or authentication
  */
-export function createSignableMessage(
+export async function createSignableMessage(
   walletAddress: string,
   purpose: string,
   expiresInMinutes: number = 5
-): { message: string; nonce: string; expiresAt: string } {
-  const nonce = randomBytes(32).toString('hex')
+): Promise<{ message: string; nonce: string; expiresAt: string }> {
+  const nonce = await getRandomHex(64)
   const expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000).toISOString()
 
   const signableMessage: SignableMessage = {
@@ -41,11 +41,11 @@ export function createSignableMessage(
  * Creates a signable message for HTTP authentication
  * This is a convenience function that uses the standard format
  */
-export function createAuthMessage(
+export async function createAuthMessage(
   walletAddress: string,
   appName: string,
   purpose?: string
-): { message: string; nonce: string; expiresAt: string } {
+): Promise<{ message: string; nonce: string; expiresAt: string }> {
   const messagePurpose = purpose || `prove-wallet-ownership for app "${appName}"`
   return createSignableMessage(walletAddress, messagePurpose, 5)
 }
@@ -71,7 +71,7 @@ export async function createHttpAuthHeaders(
   appName: string
 ): Promise<HttpAuthHeaders> {
   const { createAuthMessage } = await import('./signing')
-  const { message, nonce, expiresAt } = createAuthMessage(walletAddress, appName)
+  const { message, nonce, expiresAt } = await createAuthMessage(walletAddress, appName)
   const signature = await signMessage(message)
 
   return createAuthHeaders(walletAddress, signature, nonce, expiresAt)
