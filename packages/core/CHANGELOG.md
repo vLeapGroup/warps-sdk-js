@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.65
+
+### Patch Changes
+
+- cef7d58: fix crypto usage errors
+
 ## 3.0.0-alpha.64
 
 ### Patch Changes
