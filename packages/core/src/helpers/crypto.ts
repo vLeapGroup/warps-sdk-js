@@ -1,6 +1,6 @@
 /**
- * Browser-compatible crypto utilities
- * Provides consistent crypto functions that work in both Node.js and browser environments
+ * Modern, dual-environment crypto utilities
+ * Works in both Node.js and browser environments
  */
 
 // Supported algorithms mapping
@@ -13,11 +13,10 @@ const ALGORITHM_MAP = {
 type SupportedAlgorithm = keyof typeof ALGORITHM_MAP
 
 /**
- * Check if we're in a browser environment
+ * Environment detection
  */
-function isBrowser(): boolean {
-  return typeof window !== 'undefined' && typeof window.crypto !== 'undefined'
-}
+const isBrowser = typeof window !== 'undefined' && typeof window.crypto !== 'undefined'
+const isNode = typeof process !== 'undefined' && process.versions && typeof process.versions.node === 'string'
 
 /**
  * Validate input parameters for random bytes generation
@@ -52,16 +51,17 @@ export async function getRandomBytes(size: number): Promise<Uint8Array> {
   validateRandomBytesInput(size)
 
   try {
-    if (isBrowser()) {
-      // Browser environment
+    if (isBrowser) {
       const array = new Uint8Array(size)
       window.crypto.getRandomValues(array)
       return array
-    } else {
-      // Node.js environment
+    } else if (isNode) {
+      // Use dynamic import to avoid bundler issues
       const { randomBytes } = await import('crypto')
       const buffer = randomBytes(size)
       return new Uint8Array(buffer)
+    } else {
+      throw new Error('Crypto not available in this environment')
     }
   } catch (error) {
     throw new Error(`Failed to generate random bytes: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -87,12 +87,12 @@ export function bytesToBase64(bytes: Uint8Array): string {
     throw new Error('Input must be a Uint8Array')
   }
 
-  if (typeof btoa !== 'undefined') {
-    // Browser environment
+  if (isBrowser && typeof btoa !== 'undefined') {
     return btoa(String.fromCharCode(...bytes))
-  } else {
-    // Node.js environment
+  } else if (isNode) {
     return Buffer.from(bytes).toString('base64')
+  } else {
+    throw new Error('Base64 encoding not available in this environment')
   }
 }
 
@@ -109,7 +109,7 @@ export async function getRandomHex(length: number): Promise<string> {
 }
 
 /**
- * Create HMAC signature with consistent API across environments
+ * Create HMAC signature
  */
 export async function createHmacSignature(
   algorithm: string,
@@ -126,8 +126,7 @@ export async function createHmacSignature(
   }
 
   try {
-    if (isBrowser()) {
-      // Browser environment using Web Crypto API
+    if (isBrowser) {
       const encoder = new TextEncoder()
       const keyData = encoder.encode(key)
       const messageData = encoder.encode(data)
@@ -143,11 +142,17 @@ export async function createHmacSignature(
       const signature = await window.crypto.subtle.sign('HMAC', cryptoKey, messageData)
       const signatureArray = new Uint8Array(signature)
 
-      return encoding === 'base64' ? bytesToBase64(signatureArray) : bytesToHex(signatureArray)
-    } else {
-      // Node.js environment
+      if (encoding === 'base64') {
+        return bytesToBase64(signatureArray)
+      } else {
+        return bytesToHex(signatureArray)
+      }
+    } else if (isNode) {
+      // Use dynamic import to avoid bundler issues
       const { createHmac } = await import('crypto')
       return createHmac(algorithm, key).update(data).digest(encoding)
+    } else {
+      throw new Error('Crypto not available in this environment')
     }
   } catch (error) {
     throw new Error(`Failed to create HMAC signature: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -180,6 +185,12 @@ export async function testCryptoAvailability(): Promise<{
   }
 
   try {
+    if (isBrowser) {
+      result.environment = 'browser'
+    } else if (isNode) {
+      result.environment = 'nodejs'
+    }
+
     // Test random bytes
     await getRandomBytes(16)
     result.randomBytes = true
@@ -187,8 +198,6 @@ export async function testCryptoAvailability(): Promise<{
     // Test HMAC
     await createHmacSignature('sha256', 'test', 'test')
     result.hmac = true
-
-    result.environment = isBrowser() ? 'browser' : 'nodejs'
   } catch (error) {
     // Functions failed, result remains false
   }
