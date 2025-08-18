@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.64
+
+### Patch Changes
+
+- 522ea70: fix auth signing
+
 ## 3.0.0-alpha.63
 
 ### Patch Changes
