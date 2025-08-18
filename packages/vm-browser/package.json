@@ -6,6 +6,9 @@
   "files": [
     "dist"
   ],
+  "dependencies": {
+    "@vleap/warps": "^3.0.0-alpha.65"
+  },
   "license": "MIT",
   "scripts": {
     "build": "tsup",

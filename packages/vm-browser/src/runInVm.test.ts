@@ -1,51 +1,229 @@
-import { runInVm } from './runInVm'
+import { createBrowserTransformRunner, runInVm } from './runInVm'
 
-global.URL.createObjectURL = jest.fn(() => 'blob:url')
-global.URL.revokeObjectURL = jest.fn()
+// Mock Web Worker for testing
+const mockWorker = {
+  onmessage: null as any,
+  onerror: null as any,
+  postMessage: jest.fn(),
+  terminate: jest.fn(),
+}
 
-let workerCallCount = 0
-global.Worker = class {
-  onmessage: ((event: any) => void) | null = null
-  onerror: ((event: any) => void) | null = null
-  constructor() {
-    // nothing
-  }
-  postMessage() {
-    workerCallCount++
+const mockBlob = {
+  type: 'application/javascript',
+}
+
+const mockURL = {
+  createObjectURL: jest.fn(() => 'mock-url'),
+  revokeObjectURL: jest.fn(),
+}
+
+// Mock global objects
+global.Worker = jest.fn(() => mockWorker) as any
+global.Blob = jest.fn(() => mockBlob) as any
+global.URL.createObjectURL = mockURL.createObjectURL
+global.URL.revokeObjectURL = mockURL.revokeObjectURL
+
+describe('runInVm', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockWorker.onmessage = null
+    mockWorker.onerror = null
+  })
+
+  it('should execute arrow function with context', async () => {
+    const code = '(context) => context.value * 2'
+    const context = { value: 5 }
+
+    const promise = runInVm(code, context)
+
+    // Simulate worker response
     setTimeout(() => {
-      if (this.onmessage) {
-        if (workerCallCount === 1) {
-          this.onmessage({ data: { result: 42 } })
-        } else if (workerCallCount === 2) {
-          if (this.onerror) {
-            this.onerror({ message: 'SyntaxError' })
-          } else {
-            this.onmessage({ data: { error: 'SyntaxError' } })
-          }
-        } else if (workerCallCount === 3) {
-          this.onmessage({ data: { result: true } })
-        }
-      }
+      mockWorker.onmessage({ data: { result: 10 } })
     }, 0)
-  }
-  terminate() {}
-} as any
 
-describe('runInVm (Browser)', () => {
-  it('executes a simple function and returns the result', async () => {
-    const code = '() => { return result.x + 1 }'
-    const result = await runInVm(code, { x: 41 })
-    expect(result).toBe(42)
+    const result = await promise
+    expect(result).toBe(10)
   })
 
-  it('throws on syntax error', async () => {
-    const code = '() => { return result.x + }'
-    await expect(runInVm(code, { x: 1 })).rejects.toThrow()
+  it('should execute regular function with context', async () => {
+    const code = 'function(context) { return context.value + 3 }'
+    const context = { value: 7 }
+
+    const promise = runInVm(code, context)
+
+    setTimeout(() => {
+      mockWorker.onmessage({ data: { result: 10 } })
+    }, 0)
+
+    const result = await promise
+    expect(result).toBe(10)
   })
 
-  it('does not allow access to window or globalThis', async () => {
-    const code = '() => { return typeof window === "undefined" && typeof globalThis === "undefined" }'
-    const result = await runInVm(code, {})
-    expect(result).toBe(true)
+  it('should execute direct expression', async () => {
+    const code = 'return context.value * 3'
+    const context = { value: 4 }
+
+    const promise = runInVm(code, context)
+
+    setTimeout(() => {
+      mockWorker.onmessage({ data: { result: 12 } })
+    }, 0)
+
+    const result = await promise
+    expect(result).toBe(12)
+  })
+
+  it('should handle complex context objects', async () => {
+    const code = '(context) => context.user.name + " is " + context.user.age + " years old"'
+    const context = { user: { name: 'John', age: 30 } }
+
+    const promise = runInVm(code, context)
+
+    setTimeout(() => {
+      mockWorker.onmessage({ data: { result: 'John is 30 years old' } })
+    }, 0)
+
+    const result = await promise
+    expect(result).toBe('John is 30 years old')
+  })
+
+  it('should handle array operations', async () => {
+    const code = '(context) => context.numbers.reduce((sum, num) => sum + num, 0)'
+    const context = { numbers: [1, 2, 3, 4, 5] }
+
+    const promise = runInVm(code, context)
+
+    setTimeout(() => {
+      mockWorker.onmessage({ data: { result: 15 } })
+    }, 0)
+
+    const result = await promise
+    expect(result).toBe(15)
+  })
+
+  it('should handle conditional logic', async () => {
+    const code = '(context) => context.value > 10 ? "high" : "low"'
+    const context = { value: 15 }
+
+    const promise = runInVm(code, context)
+
+    setTimeout(() => {
+      mockWorker.onmessage({ data: { result: 'high' } })
+    }, 0)
+
+    const result = await promise
+    expect(result).toBe('high')
+  })
+
+  it('should handle worker errors', async () => {
+    const code = '(context) => invalidFunction()'
+    const context = { value: 5 }
+
+    const promise = runInVm(code, context)
+
+    setTimeout(() => {
+      mockWorker.onmessage({ data: { error: 'ReferenceError: invalidFunction is not defined' } })
+    }, 0)
+
+    await expect(promise).rejects.toThrow('ReferenceError: invalidFunction is not defined')
+  })
+
+  it('should handle worker onerror', async () => {
+    const code = '(context) => context.value * 2'
+    const context = { value: 5 }
+
+    const promise = runInVm(code, context)
+
+    setTimeout(() => {
+      mockWorker.onerror({ message: 'Worker error' })
+    }, 0)
+
+    await expect(promise).rejects.toThrow('Error in transform: Worker error')
+  })
+
+  it('should create blob with correct content', async () => {
+    const code = '(context) => context.value * 2'
+    const context = { value: 5 }
+
+    const promise = runInVm(code, context)
+
+    setTimeout(() => {
+      mockWorker.onmessage({ data: { result: 10 } })
+    }, 0)
+
+    await promise
+
+    expect(global.Blob).toHaveBeenCalledWith(expect.arrayContaining([expect.stringContaining('self.onmessage')]), {
+      type: 'application/javascript',
+    })
+  })
+
+  it('should post message with context', async () => {
+    const code = '(context) => context.value * 2'
+    const context = { value: 5 }
+
+    const promise = runInVm(code, context)
+
+    setTimeout(() => {
+      mockWorker.onmessage({ data: { result: 10 } })
+    }, 0)
+
+    await promise
+
+    expect(mockWorker.postMessage).toHaveBeenCalledWith(context)
+  })
+
+  it('should clean up resources', async () => {
+    const code = '(context) => context.value * 2'
+    const context = { value: 5 }
+
+    const promise = runInVm(code, context)
+
+    setTimeout(() => {
+      mockWorker.onmessage({ data: { result: 10 } })
+    }, 0)
+
+    await promise
+
+    expect(mockWorker.terminate).toHaveBeenCalled()
+    expect(mockURL.revokeObjectURL).toHaveBeenCalledWith('mock-url')
+  })
+})
+
+describe('createBrowserTransformRunner', () => {
+  it('should create a valid TransformRunner', () => {
+    const runner = createBrowserTransformRunner()
+
+    expect(runner).toBeDefined()
+    expect(typeof runner.run).toBe('function')
+  })
+
+  it('should execute transform through runner interface', async () => {
+    const runner = createBrowserTransformRunner()
+    const code = '(context) => context.value * 2'
+    const context = { value: 8 }
+
+    const promise = runner.run(code, context)
+
+    setTimeout(() => {
+      mockWorker.onmessage({ data: { result: 16 } })
+    }, 0)
+
+    const result = await promise
+    expect(result).toBe(16)
+  })
+
+  it('should handle multiple transformations', async () => {
+    const runner = createBrowserTransformRunner()
+    const context = { value: 3 }
+
+    const promise = runner.run('(context) => context.value + 1', context)
+
+    setTimeout(() => {
+      mockWorker.onmessage({ data: { result: 4 } })
+    }, 0)
+
+    const result = await promise
+    expect(result).toBe(4)
   })
 })

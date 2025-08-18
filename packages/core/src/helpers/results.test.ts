@@ -1,6 +1,8 @@
 import { createMockConfig } from '../test-utils/mockConfig'
+import { createMockWarp } from '../test-utils/sharedMocks'
+import type { TransformRunner } from '../types'
 import { Warp } from '../types'
-import { extractCollectResults } from './results'
+import { evaluateResultsCommon, extractCollectResults } from './results'
 
 const testConfig = createMockConfig()
 
@@ -175,10 +177,9 @@ describe('extractCollectResults', () => {
       value: 10,
     }
 
-    const { values, results } = await extractCollectResults(warp, response, 1, [])
-
-    expect(results.BASE).toBe(10)
-    expect(results.DOUBLED).toBe(20)
+    await expect(extractCollectResults(warp, response, 1, [])).rejects.toThrow(
+      'Transform results are defined but no transform runner is configured'
+    )
   })
 
   describe('extractCollectResults with array notation', () => {
@@ -201,5 +202,145 @@ describe('extractCollectResults', () => {
       expect(results.BALANCE_FROM_ACTION2).toBeNull()
       expect(results.CURRENT_ACTION_DATA).toBe('current-action-data')
     })
+  })
+})
+
+// Simple mock transformers using eval for testing
+const createMockNodeTransformRunner = (): TransformRunner => ({
+  run: async (code: string, context: any) => {
+    const fn = eval(code)
+    return typeof fn === 'function' ? fn(context) : fn
+  },
+})
+
+const createMockBrowserTransformRunner = (): TransformRunner => ({
+  run: async (code: string, context: any) => {
+    const fn = eval(code)
+    return typeof fn === 'function' ? fn(context) : fn
+  },
+})
+
+describe('evaluateResultsCommon with Transform Runners', () => {
+  it('should evaluate transforms with Node.js runner', async () => {
+    const warp = {
+      ...createMockWarp(),
+      results: {
+        DOUBLED: 'transform: (context) => context.value * 2',
+        ADDED: 'transform: (context) => context.value + 10',
+        GREETING: 'transform: (context) => `Hello ${context.user.name}`',
+        STATIC: 'out.value',
+      },
+    }
+
+    const baseResults = {
+      STATIC: 'test-value',
+      value: 5,
+      user: { name: 'John' },
+    }
+
+    const nodeRunner = createMockNodeTransformRunner()
+    const result = await evaluateResultsCommon(warp, baseResults, 0, [], nodeRunner)
+
+    expect(result.DOUBLED).toBe(10)
+    expect(result.ADDED).toBe(15)
+    expect(result.GREETING).toBe('Hello John')
+    expect(result.STATIC).toBe('test-value')
+  })
+
+  it('should evaluate transforms with browser runner', async () => {
+    const warp = {
+      ...createMockWarp(),
+      results: {
+        TRIPLED: 'transform: (context) => context.value * 3',
+        SUBTRACTED: 'transform: (context) => context.value - 5',
+        AGE_INFO: 'transform: (context) => `Age: ${context.user.age}`',
+        STATIC: 'out.value',
+      },
+    }
+
+    const baseResults = {
+      STATIC: 'test-value',
+      value: 15,
+      user: { age: 30 },
+    }
+
+    const browserRunner = createMockBrowserTransformRunner()
+    const result = await evaluateResultsCommon(warp, baseResults, 0, [], browserRunner)
+
+    expect(result.TRIPLED).toBe(45)
+    expect(result.SUBTRACTED).toBe(10)
+    expect(result.AGE_INFO).toBe('Age: 30')
+    expect(result.STATIC).toBe('test-value')
+  })
+
+  it('should throw when transforms present and no runner provided', async () => {
+    const warp = {
+      ...createMockWarp(),
+      results: {
+        TRANSFORMED: 'transform: (context) => context.value * 2',
+        STATIC: 'out.value',
+      },
+    }
+
+    const baseResults = {
+      STATIC: 'test-value',
+      value: 5,
+    }
+
+    await expect(evaluateResultsCommon(warp, baseResults, 0, [], null)).rejects.toThrow(
+      'Transform results are defined but no transform runner is configured'
+    )
+  })
+
+  it('should handle transform errors gracefully', async () => {
+    const warp = {
+      ...createMockWarp(),
+      results: {
+        ERROR_TRANSFORM: 'transform: (context) => invalidFunction()',
+        STATIC: 'out.value',
+      },
+    }
+
+    const baseResults = {
+      STATIC: 'test-value',
+      value: 5,
+    }
+
+    const errorRunner: TransformRunner = {
+      run: async () => {
+        throw new Error('Transform execution failed')
+      },
+    }
+
+    const result = await evaluateResultsCommon(warp, baseResults, 0, [], errorRunner)
+
+    expect(result.ERROR_TRANSFORM).toBeNull()
+    expect(result.STATIC).toBe('test-value')
+  })
+
+  // Removed mixed transform/static extraction test as redundant
+
+  it('should work with empty results', async () => {
+    const warp = {
+      ...createMockWarp(),
+      results: {},
+    }
+
+    const baseResults = {}
+    const nodeRunner = createMockNodeTransformRunner()
+
+    const result = await evaluateResultsCommon(warp, baseResults, 0, [], nodeRunner)
+
+    expect(result).toEqual({})
+  })
+
+  it('should work with warp without results', async () => {
+    const warp = createMockWarp()
+    const baseResults = { value: 5 }
+    const nodeRunner = createMockNodeTransformRunner()
+
+    const result = await evaluateResultsCommon(warp, baseResults, 0, [], nodeRunner)
+
+    expect(result).toEqual({ value: 5 })
   })
 })

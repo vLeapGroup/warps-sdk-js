@@ -3,6 +3,7 @@ import { WarpCacheType } from './cache'
 import { WarpChainEnv } from './general'
 import { WarpRegistryConfigInfo, WarpRegistryInfo } from './registry'
 import { WarpExecution } from './results'
+import { TransformConfig } from './transform'
 import {
   BaseWarpActionInputType,
   Warp,
@@ -36,6 +37,7 @@ export type WarpClientConfig = {
     ttl?: number
     type?: WarpCacheType
   }
+  transform?: TransformConfig
   index?: {
     url?: string
     apiKey?: string

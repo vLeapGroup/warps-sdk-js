@@ -1,4 +1,6 @@
-export const runInVm = async (code: string, result: any): Promise<any> => {
+import type { TransformRunner } from '@vleap/warps'
+
+export const runInVm = async (code: string, context: any): Promise<any> => {
   // Handle browser environment by creating a Web Worker
   return new Promise((resolve, reject) => {
     try {
@@ -7,8 +9,22 @@ export const runInVm = async (code: string, result: any): Promise<any> => {
           `
             self.onmessage = function(e) {
               try {
-                const result = e.data;
-                const output = (${code})(result);
+                const context = e.data;
+                let output;
+
+                // Handle arrow function syntax: () => { return ... }
+                if (${JSON.stringify(code.trim())}.startsWith('(') && ${JSON.stringify(code)}.includes('=>')) {
+                  output = (${code})(context);
+                }
+                // Handle regular function syntax: function() { return ... }
+                else if (${JSON.stringify(code.trim())}.startsWith('function')) {
+                  output = (${code})(context);
+                }
+                // Handle direct expression: return context.value * 2
+                else {
+                  output = eval(${JSON.stringify(code)});
+                }
+
                 self.postMessage({ result: output });
               } catch (error) {
                 self.postMessage({ error: error.toString() });
@@ -34,9 +50,15 @@ export const runInVm = async (code: string, result: any): Promise<any> => {
         worker.terminate()
         URL.revokeObjectURL(url)
       }
-      worker.postMessage(result)
+      worker.postMessage(context)
     } catch (err) {
       return reject(err)
     }
   })
 }
+
+export const createBrowserTransformRunner = (): TransformRunner => ({
+  run: runInVm,
+})
+
+export default createBrowserTransformRunner

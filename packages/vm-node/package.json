@@ -7,6 +7,7 @@
     "dist"
   ],
   "dependencies": {
+    "@vleap/warps": "^3.0.0-alpha.65",
     "vm2": "^3.9.19"
   },
   "devDependencies": {

@@ -14,7 +14,7 @@ const mockAdapter = {
   ...baseMockAdapter,
   chain: 'multiversx',
   prefix: 'mvx',
-  builder: () => baseMockAdapter.builder,
+  builder: () => baseMockAdapter.builder(),
   abiBuilder: () => baseMockAdapter.abiBuilder(),
   brandBuilder: () => ({
     createInscriptionTransaction: () => ({}),

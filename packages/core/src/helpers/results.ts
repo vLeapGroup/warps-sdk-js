@@ -1,5 +1,5 @@
 import { WarpConstants } from '../constants'
-import { ResolvedInput, Warp } from '../types'
+import { ResolvedInput, TransformRunner, Warp } from '../types'
 import { WarpExecutionResults } from '../types/results'
 import { WarpLogger } from '../WarpLogger'
 import { WarpSerializer } from '../WarpSerializer'
@@ -9,7 +9,8 @@ export const extractCollectResults = async (
   warp: Warp,
   response: any,
   actionIndex: number,
-  inputs: ResolvedInput[]
+  inputs: ResolvedInput[],
+  transformRunner?: TransformRunner | null
 ): Promise<{ values: any[]; results: WarpExecutionResults }> => {
   const values: any[] = []
   let results: WarpExecutionResults = {}
@@ -33,7 +34,7 @@ export const extractCollectResults = async (
       results[resultName] = resultPath
     }
   }
-  return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
+  return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, transformRunner) }
 }
 
 // Processes and finalizes the results of a Warp action, supporting result definitions like:
@@ -44,12 +45,13 @@ export const evaluateResultsCommon = async (
   warp: Warp,
   baseResults: WarpExecutionResults,
   actionIndex: number,
-  inputs: ResolvedInput[]
+  inputs: ResolvedInput[],
+  transformRunner?: TransformRunner | null
 ): Promise<WarpExecutionResults> => {
   if (!warp.results) return baseResults
   let results = { ...baseResults }
   results = evaluateInputResults(results, warp, actionIndex, inputs)
-  results = await evaluateTransformResults(warp, results)
+  results = await evaluateTransformResults(warp, results, transformRunner)
   return results
 }
 
@@ -78,7 +80,11 @@ const evaluateInputResults = (
 // Supports result fields starting with 'transform:', e.g., 'transform: return out.value * 2',
 // which run user-defined code to compute the result value based on other results.
 // Enables advanced, programmable result shaping using custom JavaScript logic in the result definition.
-const evaluateTransformResults = async (warp: Warp, baseResults: WarpExecutionResults): Promise<WarpExecutionResults> => {
+const evaluateTransformResults = async (
+  warp: Warp,
+  baseResults: WarpExecutionResults,
+  transformRunner?: TransformRunner | null
+): Promise<WarpExecutionResults> => {
   if (!warp.results) return baseResults
   const modifiable = { ...baseResults }
 
@@ -86,17 +92,13 @@ const evaluateTransformResults = async (warp: Warp, baseResults: WarpExecutionRe
     .filter(([, path]) => path.startsWith(WarpConstants.Transform.Prefix))
     .map(([key, path]) => ({ key, code: path.substring(WarpConstants.Transform.Prefix.length) }))
 
+  if (transforms.length > 0 && (!transformRunner || typeof transformRunner.run !== 'function')) {
+    throw new Error('Transform results are defined but no transform runner is configured. Provide a runner via config.transform.runner.')
+  }
+
   for (const { key, code } of transforms) {
     try {
-      let runInVm: any
-      if (typeof window === 'undefined') {
-        // @ts-ignore
-        runInVm = (await import('@vleap/warps-vm-node')).runInVm
-      } else {
-        // @ts-ignore
-        runInVm = (await import('@vleap/warps-vm-browser')).runInVm
-      }
-      modifiable[key] = await runInVm(code, modifiable)
+      modifiable[key] = await transformRunner!.run(code, modifiable)
     } catch (err) {
       WarpLogger.error(`Transform error for result '${key}':`, err)
       modifiable[key] = null
