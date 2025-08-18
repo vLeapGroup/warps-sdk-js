@@ -1,5 +1,16 @@
 # @vleap/warps-vm-node
 
+## 0.1.0-alpha.2
+
+### Minor Changes
+
+- fc92560: update transformations
+
+### Patch Changes
+
+- Updated dependencies [fc92560]
+  - @vleap/warps@3.0.0-alpha.66
+
 ## 0.1.0-alpha.1
 
 ### Patch Changes

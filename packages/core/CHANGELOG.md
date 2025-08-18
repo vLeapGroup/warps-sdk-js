@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.66
+
+### Minor Changes
+
+- fc92560: update transformations
+
 ## 3.0.0-alpha.65
 
 ### Patch Changes
