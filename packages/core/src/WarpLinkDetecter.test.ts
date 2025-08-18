@@ -77,9 +77,6 @@ const Config: WarpClientConfig = createMockConfig({
     warp: 'https://schema.warp.to/warp.json',
     brand: 'https://schema.warp.to/brand.json',
   },
-  registry: {
-    contract: 'erd1qqqqqqqqqqqqqpgqhe8t5jewej70zupmh44jurgn29psua5l2jps3ntjj3',
-  },
 })
 
 describe('WarpLinkDetecter', () => {
