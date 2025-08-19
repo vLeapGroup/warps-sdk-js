@@ -2,6 +2,7 @@
   "name": "@warps/playground",
   "version": "0.2.0-alpha.0",
   "description": "Playground for testing Warps SDK",
+  "private": true,
   "main": "playground.ts",
   "scripts": {
     "start": "ts-node playground.ts",
