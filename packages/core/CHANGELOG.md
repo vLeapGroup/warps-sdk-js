@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.69
+
+### Patch Changes
+
+- ffb78b9: expose client data loader
+
 ## 3.0.0-alpha.68
 
 ### Minor Changes
