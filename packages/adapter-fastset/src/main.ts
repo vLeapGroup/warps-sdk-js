@@ -1,5 +1,6 @@
 import { Adapter, AdapterFactory, WarpChain, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 import { WarpFastsetBuilder } from './WarpFastsetBuilder'
+import { WarpFastsetDataLoader } from './WarpFastsetDataLoader'
 import { WarpFastsetExecutor } from './WarpFastsetExecutor'
 import { WarpFastsetExplorer } from './WarpFastsetExplorer'
 import { WarpFastsetResults } from './WarpFastsetResults'
@@ -32,5 +33,6 @@ export const getFastsetAdapter: AdapterFactory = (config: WarpClientConfig, fall
     explorer: new WarpFastsetExplorer(chainInfo),
     abiBuilder: () => fallback.abiBuilder(),
     brandBuilder: () => fallback.brandBuilder(),
+    dataLoader: new WarpFastsetDataLoader(config, chainInfo),
   }
 }

@@ -57,6 +57,7 @@ export type Adapter = {
   explorer: AdapterWarpExplorer
   abiBuilder: () => AdapterWarpAbiBuilder
   brandBuilder: () => AdapterWarpBrandBuilder
+  dataLoader: AdapterWarpDataLoader
 }
 
 export type WarpAdapterGenericTransaction = any

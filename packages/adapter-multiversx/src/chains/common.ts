@@ -2,6 +2,7 @@ import { Adapter, AdapterFactory, WarpChainEnv, WarpChainInfo, WarpClientConfig 
 import { WarpMultiversxAbiBuilder } from '../WarpMultiversxAbiBuilder'
 import { WarpMultiversxBrandBuilder } from '../WarpMultiversxBrandBuilder'
 import { WarpMultiversxBuilder } from '../WarpMultiversxBuilder'
+import { WarpMultiversxDataLoader } from '../WarpMultiversxDataLoader'
 import { WarpMultiversxExecutor } from '../WarpMultiversxExecutor'
 import { WarpMultiversxExplorer } from '../WarpMultiversxExplorer'
 import { WarpMultiversxRegistry } from '../WarpMultiversxRegistry'
@@ -27,6 +28,7 @@ export const createMultiversxAdapter = (
       explorer: new WarpMultiversxExplorer(chainName, config),
       abiBuilder: () => new WarpMultiversxAbiBuilder(config, chainInfo),
       brandBuilder: () => new WarpMultiversxBrandBuilder(config, chainInfo),
+      dataLoader: new WarpMultiversxDataLoader(config, chainInfo),
     }
   }
 }

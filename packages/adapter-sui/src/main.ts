@@ -2,6 +2,7 @@ import { Adapter, AdapterFactory, WarpChain, WarpChainEnv, WarpChainInfo, WarpCl
 import { WarpSuiAbiBuilder } from './WarpSuiAbiBuilder'
 import { WarpSuiBrandBuilder } from './WarpSuiBrandBuilder'
 import { WarpSuiBuilder } from './WarpSuiBuilder'
+import { WarpSuiDataLoader } from './WarpSuiDataLoader'
 import { WarpSuiExecutor } from './WarpSuiExecutor'
 import { WarpSuiExplorer } from './WarpSuiExplorer'
 import { WarpSuiRegistry } from './WarpSuiRegistry'
@@ -27,6 +28,7 @@ function createSuiAdapter(chainName: string, chainPrefix: string, chainInfos: Re
       explorer: new WarpSuiExplorer(config, chainInfo),
       abiBuilder: () => new WarpSuiAbiBuilder(config),
       brandBuilder: () => new WarpSuiBrandBuilder(config),
+      dataLoader: new WarpSuiDataLoader(config, chainInfo),
     }
   }
 }

@@ -1,5 +1,6 @@
 import { Adapter, AdapterFactory, WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 import { WarpEvmBuilder } from '../WarpEvmBuilder'
+import { WarpEvmDataLoader } from '../WarpEvmDataLoader'
 import { WarpEvmExecutor } from '../WarpEvmExecutor'
 import { WarpEvmExplorer } from '../WarpEvmExplorer'
 import { WarpEvmResults } from '../WarpEvmResults'
@@ -25,6 +26,7 @@ export const createEvmAdapter = (
       explorer: new WarpEvmExplorer(chainInfos[config.env], config),
       abiBuilder: () => fallback.abiBuilder(),
       brandBuilder: () => fallback.brandBuilder(),
+      dataLoader: new WarpEvmDataLoader(config, chainInfos[config.env]),
     }
   }
 }
