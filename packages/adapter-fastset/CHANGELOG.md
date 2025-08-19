@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-alpha.5
+
+### Minor Changes
+
+- 73c3a6e: add adapter data loaders
+
+### Patch Changes
+
+- Updated dependencies [73c3a6e]
+  - @vleap/warps@3.0.0-alpha.68
+
 ## 0.1.0-alpha.4
 
 ### Patch Changes

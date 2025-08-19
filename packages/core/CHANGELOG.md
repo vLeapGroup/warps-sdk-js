@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.68
+
+### Minor Changes
+
+- 73c3a6e: add adapter data loaders
+
 ## 3.0.0-alpha.67
 
 ### Patch Changes

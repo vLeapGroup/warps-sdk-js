@@ -1,5 +1,20 @@
 # @warps/playground
 
+## 0.2.0-alpha.0
+
+### Minor Changes
+
+- 73c3a6e: add adapter data loaders
+
+### Patch Changes
+
+- Updated dependencies [73c3a6e]
+  - @vleap/warps-adapter-multiversx@0.2.0-alpha.24
+  - @vleap/warps-adapter-fastset@0.1.0-alpha.5
+  - @vleap/warps-adapter-evm@0.2.0-alpha.7
+  - @vleap/warps-adapter-sui@0.2.0-alpha.21
+  - @vleap/warps@3.0.0-alpha.68
+
 ## 0.2.0-alpha.29
 
 ### Minor Changes
