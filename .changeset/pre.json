@@ -15,6 +15,7 @@
     "@vleap/warps-adapter-fastset": "0.1.0-alpha.1"
   },
   "changesets": [
+    "breezy-roses-greet",
     "breezy-women-brush",
     "bright-buses-appear",
     "bright-tables-jog",

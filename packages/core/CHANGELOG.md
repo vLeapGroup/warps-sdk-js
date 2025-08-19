@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.67
+
+### Patch Changes
+
+- 2422598: update crypto signing
+
 ## 3.0.0-alpha.66
 
 ### Minor Changes
