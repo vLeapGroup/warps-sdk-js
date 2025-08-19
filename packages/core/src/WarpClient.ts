@@ -2,6 +2,7 @@ import { findWarpAdapterByPrefix, findWarpAdapterForChain, getWarpInfoFromIdenti
 
 import {
   Adapter,
+  AdapterWarpDataLoader,
   AdapterWarpExplorer,
   AdapterWarpRegistry,
   AdapterWarpResults,
@@ -110,6 +111,10 @@ export class WarpClient {
     const registry = findWarpAdapterForChain(chain, this.adapters).registry
     await registry.init()
     return registry
+  }
+
+  getDataLoader(chain: WarpChain): AdapterWarpDataLoader {
+    return findWarpAdapterForChain(chain, this.adapters).dataLoader
   }
 
   get factory(): WarpFactory {
