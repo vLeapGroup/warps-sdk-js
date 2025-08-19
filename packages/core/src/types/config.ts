@@ -1,9 +1,10 @@
 import { WarpBrand } from './brand'
-import { WarpCacheType } from './cache'
+import { ClientCacheConfig } from './cache'
 import { WarpChainEnv } from './general'
 import { WarpRegistryConfigInfo, WarpRegistryInfo } from './registry'
 import { WarpExecution } from './results'
-import { TransformConfig } from './transform'
+import { ClientIndexConfig } from './search'
+import { ClientTransformConfig } from './transform'
 import {
   BaseWarpActionInputType,
   Warp,
@@ -33,16 +34,9 @@ export type WarpClientConfig = {
     warp?: string
     brand?: string
   }
-  cache?: {
-    ttl?: number
-    type?: WarpCacheType
-  }
-  transform?: TransformConfig
-  index?: {
-    url?: string
-    apiKey?: string
-    searchParamName?: string
-  }
+  cache?: ClientCacheConfig
+  transform?: ClientTransformConfig
+  index?: ClientIndexConfig
 }
 
 export type WarpCacheConfig = {

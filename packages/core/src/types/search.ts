@@ -1,3 +1,9 @@
+export type ClientIndexConfig = {
+  url?: string
+  apiKey?: string
+  searchParamName?: string
+}
+
 export type WarpSearchResult = {
   hits: WarpSearchHit[]
 }
