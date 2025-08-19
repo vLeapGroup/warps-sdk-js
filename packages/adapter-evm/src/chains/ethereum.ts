@@ -1,11 +1,11 @@
 import { AdapterFactory, WarpChain } from '@vleap/warps'
 import { createEvmAdapter } from './common'
 
-const ChainName: WarpChain = 'ethereum'
+export const ChainNameEthereum: WarpChain = 'ethereum'
 
-export const getEthereumAdapter: AdapterFactory = createEvmAdapter(ChainName, 'eth', {
+export const getEthereumAdapter: AdapterFactory = createEvmAdapter(ChainNameEthereum, 'eth', {
   devnet: {
-    name: ChainName,
+    name: ChainNameEthereum,
     displayName: 'Ethereum Devnet',
     chainId: '11155111',
     blockTime: 12000,
@@ -14,7 +14,7 @@ export const getEthereumAdapter: AdapterFactory = createEvmAdapter(ChainName, 'e
     nativeToken: 'ETH',
   },
   testnet: {
-    name: ChainName,
+    name: ChainNameEthereum,
     displayName: 'Ethereum Testnet',
     chainId: '5',
     blockTime: 12000,
@@ -23,7 +23,7 @@ export const getEthereumAdapter: AdapterFactory = createEvmAdapter(ChainName, 'e
     nativeToken: 'ETH',
   },
   mainnet: {
-    name: ChainName,
+    name: ChainNameEthereum,
     displayName: 'Ethereum Mainnet',
     chainId: '1',
     blockTime: 12000,

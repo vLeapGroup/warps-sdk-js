@@ -1,11 +1,11 @@
 import { AdapterFactory, WarpChain } from '@vleap/warps'
 import { createEvmAdapter } from './common'
 
-const ChainName: WarpChain = 'base'
+export const ChainNameBase: WarpChain = 'base'
 
-export const getBaseAdapter: AdapterFactory = createEvmAdapter(ChainName, 'base', {
+export const getBaseAdapter: AdapterFactory = createEvmAdapter(ChainNameBase, 'base', {
   mainnet: {
-    name: ChainName,
+    name: ChainNameBase,
     displayName: 'Base',
     chainId: '8453',
     blockTime: 2000,
@@ -14,8 +14,8 @@ export const getBaseAdapter: AdapterFactory = createEvmAdapter(ChainName, 'base'
     nativeToken: 'ETH',
   },
   testnet: {
-    name: ChainName,
-    displayName: 'Base',
+    name: ChainNameBase,
+    displayName: 'Base Testnet',
     chainId: '84531',
     blockTime: 2000,
     addressHrp: '0x',
@@ -23,8 +23,8 @@ export const getBaseAdapter: AdapterFactory = createEvmAdapter(ChainName, 'base'
     nativeToken: 'ETH',
   },
   devnet: {
-    name: ChainName,
-    displayName: 'Base',
+    name: ChainNameBase,
+    displayName: 'Base Devnet',
     chainId: '84532',
     blockTime: 2000,
     addressHrp: '0x',
