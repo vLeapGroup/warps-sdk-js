@@ -1,4 +1,9 @@
-import { getRandomHex } from './crypto'
+/**
+ * Signing utilities for creating and validating signed messages
+ * Works with any crypto provider or uses automatic detection
+ */
+
+import { CryptoProvider, getRandomHex } from './crypto'
 
 export interface SignableMessage {
   wallet: string
@@ -21,9 +26,10 @@ export type HttpAuthHeaders = Record<string, string> & {
 export async function createSignableMessage(
   walletAddress: string,
   purpose: string,
+  cryptoProvider?: CryptoProvider,
   expiresInMinutes: number = 5
 ): Promise<{ message: string; nonce: string; expiresAt: string }> {
-  const nonce = await getRandomHex(64)
+  const nonce = await getRandomHex(64, cryptoProvider)
   const expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000).toISOString()
 
   const signableMessage: SignableMessage = {
@@ -44,10 +50,11 @@ export async function createSignableMessage(
 export async function createAuthMessage(
   walletAddress: string,
   appName: string,
+  cryptoProvider?: CryptoProvider,
   purpose?: string
 ): Promise<{ message: string; nonce: string; expiresAt: string }> {
   const messagePurpose = purpose || `prove-wallet-ownership for app "${appName}"`
-  return createSignableMessage(walletAddress, messagePurpose, 5)
+  return createSignableMessage(walletAddress, messagePurpose, cryptoProvider, 5)
 }
 
 /**
@@ -68,10 +75,10 @@ export function createAuthHeaders(walletAddress: string, signature: string, nonc
 export async function createHttpAuthHeaders(
   walletAddress: string,
   signMessage: (message: string) => Promise<string>,
-  appName: string
+  appName: string,
+  cryptoProvider?: CryptoProvider
 ): Promise<HttpAuthHeaders> {
-  const { createAuthMessage } = await import('./signing')
-  const { message, nonce, expiresAt } = await createAuthMessage(walletAddress, appName)
+  const { message, nonce, expiresAt } = await createAuthMessage(walletAddress, appName, cryptoProvider)
   const signature = await signMessage(message)
 
   return createAuthHeaders(walletAddress, signature, nonce, expiresAt)

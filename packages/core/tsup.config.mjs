@@ -6,6 +6,6 @@ export default defineConfig({
   format: ['cjs', 'esm'],
   minify: true,
   clean: true,
-  external: [],
+  external: ['crypto', 'node:crypto'],
   target: 'es2020',
 })

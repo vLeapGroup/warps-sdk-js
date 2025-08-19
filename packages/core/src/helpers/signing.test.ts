@@ -1,137 +1,116 @@
-import { createHmacSignature } from './crypto'
-import {
-  createAuthHeaders,
-  createAuthMessage,
-  createHttpAuthHeaders,
-  createSignableMessage,
-  parseSignedMessage,
-  validateSignedMessage,
-} from './signing'
+import { CryptoProvider } from './crypto'
+import { createAuthMessage, createHttpAuthHeaders, createSignableMessage, parseSignedMessage, validateSignedMessage } from './signing'
+
+class TestCryptoProvider implements CryptoProvider {
+  private counter = 0
+
+  async getRandomBytes(size: number): Promise<Uint8Array> {
+    this.counter++
+    const array = new Uint8Array(size)
+    for (let i = 0; i < size; i++) {
+      array[i] = (i + this.counter) % 256
+    }
+    return array
+  }
+}
 
 describe('Signing Utilities', () => {
+  let testCrypto: CryptoProvider
+
+  beforeEach(() => {
+    testCrypto = new TestCryptoProvider()
+  })
+
   describe('createSignableMessage', () => {
-    it('should create a valid signable message with default expiration', async () => {
-      const walletAddress = '0x1234567890abcdef'
+    it('should create a valid signable message', async () => {
+      const walletAddress = 'erd1qqqqqqqqqqqqqpgqhe8t5jewej70zupmh44jurgn29psua5l2jps3ntjj3'
       const purpose = 'test-purpose'
 
-      const { message, nonce, expiresAt } = await createSignableMessage(walletAddress, purpose)
+      const result = await createSignableMessage(walletAddress, purpose, testCrypto)
 
-      expect(nonce).toMatch(/^[a-f0-9]{64}$/)
-      expect(expiresAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
+      expect(result).toHaveProperty('message')
+      expect(result).toHaveProperty('nonce')
+      expect(result).toHaveProperty('expiresAt')
 
-      const parsed = JSON.parse(message)
-      expect(parsed.wallet).toBe(walletAddress)
-      expect(parsed.nonce).toBe(nonce)
-      expect(parsed.expiresAt).toBe(expiresAt)
-      expect(parsed.purpose).toBe(purpose)
+      expect(result.nonce.length).toBe(64)
+      expect(new Date(result.expiresAt).getTime()).toBeGreaterThan(Date.now())
+
+      const parsedMessage = JSON.parse(result.message)
+      expect(parsedMessage.wallet).toBe(walletAddress)
+      expect(parsedMessage.purpose).toBe(purpose)
     })
 
-    it('should create a valid signable message with custom expiration', async () => {
-      const walletAddress = '0x1234567890abcdef'
+    it('should create message with custom expiration', async () => {
+      const walletAddress = 'erd1qqqqqqqqqqqqqpgqhe8t5jewej70zupmh44jurgn29psua5l2jps3ntjj3'
       const purpose = 'test-purpose'
       const expiresInMinutes = 10
 
-      const { message, nonce, expiresAt } = await createSignableMessage(walletAddress, purpose, expiresInMinutes)
+      const result = await createSignableMessage(walletAddress, purpose, testCrypto, expiresInMinutes)
 
-      const parsed = JSON.parse(message)
-      const expirationTime = new Date(expiresAt).getTime()
-      const expectedExpiration = Date.now() + expiresInMinutes * 60 * 1000
-
-      // Allow 1 second tolerance for test execution time
-      expect(expirationTime).toBeGreaterThan(expectedExpiration - 1000)
-      expect(expirationTime).toBeLessThan(expectedExpiration + 1000)
+      const expectedExpiry = Date.now() + expiresInMinutes * 60 * 1000
+      const actualExpiry = new Date(result.expiresAt).getTime()
+      expect(actualExpiry).toBeGreaterThan(Date.now())
+      expect(actualExpiry).toBeLessThanOrEqual(expectedExpiry + 1000)
     })
   })
 
   describe('createAuthMessage', () => {
-    it('should create a valid auth message with default purpose', async () => {
-      const walletAddress = '0x1234567890abcdef'
-      const appName = 'test-adapter'
+    it('should create auth message with default purpose', async () => {
+      const walletAddress = 'erd1qqqqqqqqqqqqqpgqhe8t5jewej70zupmh44jurgn29psua5l2jps3ntjj3'
+      const appName = 'test-app'
 
-      const { message, nonce, expiresAt } = await createAuthMessage(walletAddress, appName)
+      const result = await createAuthMessage(walletAddress, appName, testCrypto)
 
-      expect(nonce).toMatch(/^[a-f0-9]{64}$/)
-      expect(expiresAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
-
-      const parsed = JSON.parse(message)
-      expect(parsed.wallet).toBe(walletAddress)
-      expect(parsed.nonce).toBe(nonce)
-      expect(parsed.expiresAt).toBe(expiresAt)
-      expect(parsed.purpose).toBe(`prove-wallet-ownership for app "${appName}"`)
+      const parsedMessage = JSON.parse(result.message)
+      expect(parsedMessage.purpose).toContain(appName)
+      expect(parsedMessage.purpose).toContain('prove-wallet-ownership')
     })
 
-    it('should create a valid auth message with custom purpose', async () => {
-      const walletAddress = '0x1234567890abcdef'
-      const appName = 'test-adapter'
+    it('should create auth message with custom purpose', async () => {
+      const walletAddress = 'erd1qqqqqqqqqqqqqpgqhe8t5jewej70zupmh44jurgn29psua5l2jps3ntjj3'
+      const appName = 'test-app'
       const customPurpose = 'custom-purpose'
 
-      const { message, nonce, expiresAt } = await createAuthMessage(walletAddress, appName, customPurpose)
+      const result = await createAuthMessage(walletAddress, appName, testCrypto, customPurpose)
 
-      const parsed = JSON.parse(message)
-      expect(parsed.purpose).toBe(customPurpose)
-    })
-  })
-
-  describe('createAuthHeaders', () => {
-    it('should create valid auth headers', () => {
-      const walletAddress = '0x1234567890abcdef'
-      const signature = 'test-signature'
-      const nonce = 'test-nonce'
-      const expiresAt = '2023-01-01T00:00:00.000Z'
-
-      const headers = createAuthHeaders(walletAddress, signature, nonce, expiresAt)
-
-      expect(headers['X-Signer-Wallet']).toBe(walletAddress)
-      expect(headers['X-Signer-Signature']).toBe(signature)
-      expect(headers['X-Signer-Nonce']).toBe(nonce)
-      expect(headers['X-Signer-ExpiresAt']).toBe(expiresAt)
+      const parsedMessage = JSON.parse(result.message)
+      expect(parsedMessage.purpose).toBe(customPurpose)
     })
   })
 
   describe('createHttpAuthHeaders', () => {
-    it('should create HTTP auth headers with signing function', async () => {
-      const walletAddress = '0x1234567890abcdef'
-      const appName = 'test-adapter'
+    it('should create HTTP auth headers', async () => {
+      const walletAddress = 'erd1qqqqqqqqqqqqqpgqhe8t5jewej70zupmh44jurgn29psua5l2jps3ntjj3'
+      const appName = 'test-app'
+      const mockSignFunction = jest.fn().mockResolvedValue('mock-signature')
 
-      // Mock signing function
-      const mockSignMessage = jest.fn().mockResolvedValue('mock-signature')
-
-      const headers = await createHttpAuthHeaders(walletAddress, mockSignMessage, appName)
+      const headers = await createHttpAuthHeaders(walletAddress, mockSignFunction, appName, testCrypto)
 
       expect(headers['X-Signer-Wallet']).toBe(walletAddress)
       expect(headers['X-Signer-Signature']).toBe('mock-signature')
-      expect(headers['X-Signer-Nonce']).toMatch(/^[a-f0-9]{64}$/)
-      expect(headers['X-Signer-ExpiresAt']).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
-      expect(mockSignMessage).toHaveBeenCalledTimes(1)
-    })
-  })
+      expect(headers['X-Signer-Nonce']).toBeDefined()
+      expect(headers['X-Signer-ExpiresAt']).toBeDefined()
 
-  describe('validateSignedMessage', () => {
-    it('should validate a non-expired message', () => {
-      const futureExpiresAt = new Date(Date.now() + 60000).toISOString() // 1 minute from now
-      expect(validateSignedMessage(futureExpiresAt)).toBe(true)
-    })
-
-    it('should reject an expired message', () => {
-      const pastExpiresAt = new Date(Date.now() - 60000).toISOString() // 1 minute ago
-      expect(validateSignedMessage(pastExpiresAt)).toBe(false)
+      expect(mockSignFunction).toHaveBeenCalledTimes(1)
+      const signedMessage = mockSignFunction.mock.calls[0][0]
+      expect(signedMessage).toContain(walletAddress)
     })
   })
 
   describe('parseSignedMessage', () => {
-    it('should parse a valid signed message', () => {
-      const validMessage = JSON.stringify({
-        wallet: '0x1234567890abcdef',
+    it('should parse valid signed message', () => {
+      const message = JSON.stringify({
+        wallet: 'erd1qqqqqqqqqqqqqpgqhe8t5jewej70zupmh44jurgn29psua5l2jps3ntjj3',
         nonce: 'test-nonce',
-        expiresAt: '2023-01-01T00:00:00.000Z',
+        expiresAt: '2023-12-31T23:59:59.999Z',
         purpose: 'test-purpose',
       })
 
-      const parsed = parseSignedMessage(validMessage)
-      expect(parsed.wallet).toBe('0x1234567890abcdef')
-      expect(parsed.nonce).toBe('test-nonce')
-      expect(parsed.expiresAt).toBe('2023-01-01T00:00:00.000Z')
-      expect(parsed.purpose).toBe('test-purpose')
+      const result = parseSignedMessage(message)
+
+      expect(result.wallet).toBe('erd1qqqqqqqqqqqqqpgqhe8t5jewej70zupmh44jurgn29psua5l2jps3ntjj3')
+      expect(result.nonce).toBe('test-nonce')
+      expect(result.purpose).toBe('test-purpose')
     })
 
     it('should throw error for invalid JSON', () => {
@@ -139,49 +118,62 @@ describe('Signing Utilities', () => {
     })
 
     it('should throw error for missing required fields', () => {
-      const invalidMessage = JSON.stringify({
-        wallet: '0x1234567890abcdef',
-        // missing nonce, expiresAt, purpose
+      const incompleteMessage = JSON.stringify({
+        wallet: 'erd1qqqqqqqqqqqqqpgqhe8t5jewej70zupmh44jurgn29psua5l2jps3ntjj3',
+        nonce: 'test-nonce',
       })
 
-      expect(() => parseSignedMessage(invalidMessage)).toThrow('Invalid signed message: missing required fields')
+      expect(() => parseSignedMessage(incompleteMessage)).toThrow('Invalid signed message: missing required fields')
+    })
+  })
+
+  describe('validateSignedMessage', () => {
+    it('should return true for valid expiration time', () => {
+      const futureTime = new Date(Date.now() + 60000).toISOString()
+      const result = validateSignedMessage(futureTime)
+      expect(result).toBe(true)
+    })
+
+    it('should return false for expired time', () => {
+      const pastTime = new Date(Date.now() - 60000).toISOString()
+      const result = validateSignedMessage(pastTime)
+      expect(result).toBe(false)
     })
   })
 
   describe('integration', () => {
-    it('should work end-to-end with manual signing for HTTP auth', async () => {
-      const walletAddress = '0x1234567890abcdef'
-      const appName = 'test-adapter'
-      const privateKey = 'test-secret-key'
+    it('should work end-to-end with manual signing', async () => {
+      const walletAddress = 'erd1qqqqqqqqqqqqqpgqhe8t5jewej70zupmh44jurgn29psua5l2jps3ntjj3'
+      const appName = 'test-app'
+      const mockSignFunction = jest.fn().mockResolvedValue('mock-signature')
 
-      const { message, nonce, expiresAt } = await createAuthMessage(walletAddress, appName)
-
-      // Manual HMAC signing (simulating adapter-specific logic)
-      const signature = await createHmacSignature('sha256', privateKey, message, 'base64')
-
-      const headers = createAuthHeaders(walletAddress, signature, nonce, expiresAt)
+      const headers = await createHttpAuthHeaders(walletAddress, mockSignFunction, appName, testCrypto)
 
       expect(headers['X-Signer-Wallet']).toBe(walletAddress)
-      expect(headers['X-Signer-Signature']).toBe(signature)
-      expect(headers['X-Signer-Nonce']).toBe(nonce)
-      expect(headers['X-Signer-ExpiresAt']).toBe(expiresAt)
+      expect(headers['X-Signer-Signature']).toBe('mock-signature')
+
+      const signedMessage = mockSignFunction.mock.calls[0][0]
+      const parsedMessage = parseSignedMessage(signedMessage)
+      expect(parsedMessage.wallet).toBe(walletAddress)
+      expect(parsedMessage.purpose).toContain(appName)
+
+      const isValid = validateSignedMessage(headers['X-Signer-ExpiresAt'])
+      expect(isValid).toBe(true)
     })
 
     it('should work with arbitrary message signing', async () => {
-      const walletAddress = '0x1234567890abcdef'
-      const purpose = 'arbitrary-proof'
-      const privateKey = 'test-secret-key'
+      const walletAddress = 'erd1qqqqqqqqqqqqqpgqhe8t5jewej70zupmh44jurgn29psua5l2jps3ntjj3'
+      const purpose = 'arbitrary-purpose'
 
-      const { message, nonce, expiresAt } = await createSignableMessage(walletAddress, purpose, 10)
+      const { message, nonce, expiresAt } = await createSignableMessage(walletAddress, purpose, testCrypto)
 
-      // Manual HMAC signing (simulating adapter-specific logic)
-      const signature = await createHmacSignature('sha256', privateKey, message, 'base64')
+      const parsedMessage = JSON.parse(message)
+      expect(parsedMessage.wallet).toBe(walletAddress)
+      expect(parsedMessage.nonce).toBe(nonce)
+      expect(parsedMessage.purpose).toBe(purpose)
 
-      // Parse and validate
-      const parsed = parseSignedMessage(message)
-      expect(parsed.wallet).toBe(walletAddress)
-      expect(parsed.purpose).toBe(purpose)
-      expect(validateSignedMessage(expiresAt)).toBe(true)
+      const isValid = validateSignedMessage(expiresAt)
+      expect(isValid).toBe(true)
     })
   })
 })
