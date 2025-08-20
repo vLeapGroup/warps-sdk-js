@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-alpha.8
+
+### Patch Changes
+
+- cff4951: upgrade deps
+- Updated dependencies [cff4951]
+  - @vleap/warps@3.0.0-alpha.72
+
 ## 0.1.0-alpha.7
 
 ### Patch Changes

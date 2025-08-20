@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.72
+
+### Patch Changes
+
+- cff4951: upgrade deps
+
 ## 3.0.0-alpha.71
 
 ### Patch Changes

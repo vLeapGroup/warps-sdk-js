@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.23
+
+### Patch Changes
+
+- cff4951: upgrade deps
+- Updated dependencies [cff4951]
+  - @vleap/warps@3.0.0-alpha.72
+
 ## 0.2.0-alpha.22
 
 ### Patch Changes

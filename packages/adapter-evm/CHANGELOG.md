@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-alpha.10
+
+### Patch Changes
+
+- cff4951: upgrade deps
+- Updated dependencies [cff4951]
+  - @vleap/warps@3.0.0-alpha.72
+
 ## 0.2.0-alpha.9
 
 ### Patch Changes
