@@ -1,10 +1,10 @@
 import { WarpChain, WarpChainInfo } from '@vleap/warps'
 import { createMultiversxAdapter } from './common'
 
-const ChainName: WarpChain = 'vibechain'
+export const ChainNameVibechain: WarpChain = 'vibechain'
 
 const chainInfo: WarpChainInfo = {
-  name: ChainName,
+  name: ChainNameVibechain,
   displayName: 'VibeChain',
   chainId: 'V',
   blockTime: 600,
@@ -13,7 +13,7 @@ const chainInfo: WarpChainInfo = {
   nativeToken: 'VIBE',
 }
 
-export const getVibechainAdapter = createMultiversxAdapter(ChainName, 'vibe', {
+export const getVibechainAdapter = createMultiversxAdapter(ChainNameVibechain, 'vibe', {
   mainnet: chainInfo,
   testnet: chainInfo,
   devnet: chainInfo,
