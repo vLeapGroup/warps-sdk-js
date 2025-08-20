@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.71
+
+### Patch Changes
+
+- 1de97fd: update warp builders
+
 ## 3.0.0-alpha.70
 
 ### Patch Changes
