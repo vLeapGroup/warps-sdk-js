@@ -30,7 +30,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@mysten/sui": "^1.37.1",
+    "@mysten/sui": "^1.37.3",
     "@vleap/warps": "^3.0.0-alpha.70"
   }
 }

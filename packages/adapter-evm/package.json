@@ -30,7 +30,7 @@
     "access": "public"
   },
   "dependencies": {
-    "ethers": "^6.11.1",
+    "ethers": "^6.15.0",
     "@vleap/warps": "^3.0.0-alpha.71"
   }
 }

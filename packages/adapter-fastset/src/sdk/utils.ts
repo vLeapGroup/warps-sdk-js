@@ -1,4 +1,4 @@
-import { toBase64, toHex } from '@mysten/bcs'
+import { toB64, toHEX } from '@mysten/bcs'
 
 export function isValidFastsetAddress(address: string): boolean {
   if (typeof address !== 'string' || address.length === 0) {
@@ -24,11 +24,11 @@ export function fromBase64(base64: string): Uint8Array {
 }
 
 export function toBase64String(bytes: Uint8Array): string {
-  return toBase64(bytes)
+  return toB64(bytes)
 }
 
 export function toHexString(bytes: Uint8Array): string {
-  return toHex(bytes)
+  return toHEX(bytes)
 }
 
 export function hexToDecimal(hex: string): string {

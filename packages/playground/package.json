@@ -11,11 +11,11 @@
     "fetchtokens": "ts-node fetch-tokens.ts"
   },
   "dependencies": {
-    "@vleap/warps": "workspace:*",
-    "@vleap/warps-adapter-evm": "workspace:*",
-    "@vleap/warps-adapter-multiversx": "workspace:*",
-    "@vleap/warps-adapter-sui": "workspace:*",
-    "@vleap/warps-adapter-fastset": "workspace:*"
+    "@vleap/warps": "3.0.0-alpha.71",
+    "@vleap/warps-adapter-evm": "0.2.0-alpha.9",
+    "@vleap/warps-adapter-multiversx": "0.2.0-alpha.26",
+    "@vleap/warps-adapter-sui": "0.2.0-alpha.22",
+    "@vleap/warps-adapter-fastset": "0.1.0-alpha.7"
   },
   "devDependencies": {
     "ts-node": "^10.9.1",

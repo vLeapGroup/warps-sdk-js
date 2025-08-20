@@ -30,7 +30,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@multiversx/sdk-core": "^15.0.0",
+    "@multiversx/sdk-core": "^15.0.1",
     "@vleap/warps": "^3.0.0-alpha.70"
   }
 }
