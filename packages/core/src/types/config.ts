@@ -67,6 +67,8 @@ export type WarpAdapterGenericType = any
 
 export interface BaseWarpBuilder {
   createFromRaw(encoded: string): Promise<Warp>
+  createFromUrl(url: string): Promise<Warp>
+  setName(name: string): BaseWarpBuilder
   setTitle(title: string): BaseWarpBuilder
   setDescription(description: string): BaseWarpBuilder
   setPreview(preview: string): BaseWarpBuilder

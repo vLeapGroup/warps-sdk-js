@@ -24,6 +24,12 @@ export class WarpBuilder implements BaseWarpBuilder {
     return warp
   }
 
+  async createFromUrl(url: string): Promise<Warp> {
+    const response = await fetch(url)
+    const encoded = await response.json()
+    return encoded as Warp
+  }
+
   setName(name: string): WarpBuilder {
     this.pendingWarp.name = name
     return this

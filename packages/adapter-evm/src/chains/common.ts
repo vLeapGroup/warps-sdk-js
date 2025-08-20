@@ -1,5 +1,4 @@
 import { Adapter, AdapterFactory, WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
-import { WarpEvmBuilder } from '../WarpEvmBuilder'
 import { WarpEvmDataLoader } from '../WarpEvmDataLoader'
 import { WarpEvmExecutor } from '../WarpEvmExecutor'
 import { WarpEvmExplorer } from '../WarpEvmExplorer'
@@ -18,7 +17,7 @@ export const createEvmAdapter = (
       chain: chainName,
       chainInfo: chainInfos[config.env],
       prefix: chainPrefix,
-      builder: () => new WarpEvmBuilder(config),
+      builder: () => fallback.builder(),
       executor: new WarpEvmExecutor(config),
       results: new WarpEvmResults(config),
       serializer: new WarpEvmSerializer(),

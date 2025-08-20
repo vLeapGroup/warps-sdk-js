@@ -1,5 +1,4 @@
 import { Adapter, AdapterFactory, WarpChain, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
-import { WarpFastsetBuilder } from './WarpFastsetBuilder'
 import { WarpFastsetDataLoader } from './WarpFastsetDataLoader'
 import { WarpFastsetExecutor } from './WarpFastsetExecutor'
 import { WarpFastsetExplorer } from './WarpFastsetExplorer'
@@ -25,7 +24,7 @@ export const getFastsetAdapter: AdapterFactory = (config: WarpClientConfig, fall
     chain: ChainName,
     chainInfo,
     prefix: 'fastset',
-    builder: () => new WarpFastsetBuilder(config),
+    builder: () => fallback.builder(),
     executor: new WarpFastsetExecutor(config),
     results: new WarpFastsetResults(config),
     serializer: new WarpFastsetSerializer(),
