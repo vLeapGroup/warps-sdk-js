@@ -1,5 +1,18 @@
 # @vleap/warps-vm-browser
 
+## 0.1.0-alpha.3
+
+### Minor Changes
+
+- 02ac2c7: update browser vm
+- 19db0e8: fix tests + move to esm
+
+### Patch Changes
+
+- 02ac2c7: update browser vm
+- Updated dependencies [19db0e8]
+  - @vleap/warps@3.0.0-alpha.73
+
 ## 0.1.0-alpha.2
 
 ### Minor Changes

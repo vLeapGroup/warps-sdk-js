@@ -1,5 +1,20 @@
 # @warps/playground
 
+## 0.2.0-alpha.6
+
+### Minor Changes
+
+- 19db0e8: fix tests + move to esm
+
+### Patch Changes
+
+- Updated dependencies [19db0e8]
+  - @vleap/warps-adapter-multiversx@0.2.0-alpha.28
+  - @vleap/warps-adapter-fastset@0.1.0-alpha.9
+  - @vleap/warps-adapter-evm@0.2.0-alpha.11
+  - @vleap/warps-adapter-sui@0.2.0-alpha.24
+  - @vleap/warps@3.0.0-alpha.73
+
 ## 0.2.0-alpha.5
 
 ### Patch Changes

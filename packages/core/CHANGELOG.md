@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.73
+
+### Minor Changes
+
+- 19db0e8: fix tests + move to esm
+
 ## 3.0.0-alpha.72
 
 ### Patch Changes
