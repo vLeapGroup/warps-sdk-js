@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.26
+
+### Patch Changes
+
+- 071b45a: expose mvx chain names
+
 ## 0.2.0-alpha.25
 
 ### Patch Changes
