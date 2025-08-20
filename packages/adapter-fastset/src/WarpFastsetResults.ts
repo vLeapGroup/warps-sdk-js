@@ -86,7 +86,7 @@ export class WarpFastsetResults implements AdapterWarpResults {
       }
     }
 
-    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
+    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.config.transform?.runner) }
   }
 
   private isTransactionSuccessful(tx: any): boolean {

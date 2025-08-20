@@ -8,11 +8,11 @@ describe('WarpEvmSerializer', () => {
 
   beforeEach(() => {
     // Mock ethers functions
-    ;(ethers.isAddress as unknown as jest.Mock).mockImplementation((address: string) => {
-      return address.startsWith('0x') && address.length === 42
+    ;(ethers.isAddress as unknown as jest.Mock).mockImplementation((address: unknown) => {
+      return typeof address === 'string' && address.startsWith('0x') && address.length === 42
     })
-    ;(ethers.isHexString as unknown as jest.Mock).mockImplementation((hex: string) => {
-      return hex.startsWith('0x') && /^[0-9a-fA-F]+$/.test(hex.slice(2)) && hex.length > 2
+    ;(ethers.isHexString as unknown as jest.Mock).mockImplementation((hex: unknown) => {
+      return typeof hex === 'string' && hex.startsWith('0x') && /^[0-9a-fA-F]+$/.test(hex.slice(2)) && hex.length > 2
     })
 
     serializer = new WarpEvmSerializer()

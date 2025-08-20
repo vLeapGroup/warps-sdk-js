@@ -2,7 +2,10 @@ import { defineConfig } from 'tsup'
 
 export default defineConfig({
   entry: ['src/index.ts'],
-  format: ['cjs', 'esm'],
+  format: ['esm'],
+  outExtension: ({ format }) => ({
+    js: '.mjs',
+  }),
   dts: true,
   splitting: false,
   sourcemap: true,

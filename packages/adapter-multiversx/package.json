@@ -2,12 +2,18 @@
   "name": "@vleap/warps-adapter-multiversx",
   "version": "0.2.0-alpha.27",
   "description": "",
-  "main": "./dist/index.js",
+  "type": "module",
   "types": "./dist/index.d.ts",
-  "module": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.mjs"
+    }
+  },
   "scripts": {
     "build": "tsup",
-    "test": "jest --config jest.config.js",
+    "test": "jest --config jest.config.mjs",
     "lint": "tsc --noEmit",
     "prepare": "npm run build",
     "preversion": "npm run lint && npm run build"

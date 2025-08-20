@@ -1,7 +1,10 @@
 export default {
   entry: ['src/runInVm.ts'],
   dts: true,
-  format: ['cjs', 'esm'],
+  format: ['esm'],
+  outExtension: ({ format }) => ({
+    js: '.mjs',
+  }),
   minify: true,
   clean: true,
 }

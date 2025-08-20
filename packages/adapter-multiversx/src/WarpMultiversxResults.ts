@@ -80,7 +80,7 @@ export class WarpMultiversxResults implements AdapterWarpResults {
       for (const [resultName, resultPath] of Object.entries(warp.results)) {
         results[resultName] = resultPath
       }
-      return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
+      return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.config.transform?.runner) }
     }
     const abi = await this.abi.getAbiForAction(action)
     const eventParser = new TransactionEventsParser({ abi })
@@ -220,7 +220,7 @@ export class WarpMultiversxResults implements AdapterWarpResults {
         }
       }
     }
-    const finalResults = await evaluateResultsCommon(warp, combinedResults, entryActionIndex, inputs)
+    const finalResults = await evaluateResultsCommon(warp, combinedResults, entryActionIndex, inputs, this.config.transform?.runner)
     const entryExecution = resultsCache.get(entryActionIndex)
     return {
       ...entryExecution,

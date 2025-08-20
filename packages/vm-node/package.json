@@ -1,7 +1,7 @@
 {
   "name": "@vleap/warps-vm-node",
   "version": "0.1.0-alpha.2",
-  "main": "dist/runInVm.js",
+  "type": "module",
   "types": "dist/runInVm.d.ts",
   "files": [
     "dist"
@@ -21,8 +21,9 @@
   },
   "exports": {
     ".": {
+      "types": "dist/runInVm.d.ts",
       "import": "./dist/runInVm.mjs",
-      "require": "./dist/runInVm.js"
+      "default": "./dist/runInVm.mjs"
     }
   },
   "publishConfig": {

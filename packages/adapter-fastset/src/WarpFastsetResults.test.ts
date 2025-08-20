@@ -12,6 +12,11 @@ describe('WarpFastsetResults', () => {
           fastset: 'fs1testaddress123456789',
         },
       },
+      transform: {
+        runner: {
+          run: jest.fn().mockResolvedValue('formatted_value'),
+        },
+      },
     }
     results = new WarpFastsetResults(mockConfig)
   })
@@ -260,11 +265,10 @@ describe('WarpFastsetResults', () => {
 
       const result = await results.extractQueryResults(warp, typedValues, actionIndex, inputs)
 
-      // The current implementation doesn't handle transform prefixes correctly
-      // This is expected behavior for the scaffold
+      // Now that we have a transform runner configured, it should handle transforms
       expect(result.results).toEqual({
         balance: BigInt(1000000),
-        formattedBalance: null,
+        formattedBalance: 'formatted_value',
       })
     })
   })

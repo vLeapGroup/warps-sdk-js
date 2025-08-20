@@ -1,11 +1,18 @@
 {
   "name": "@vleap/warps-react",
   "version": "0.1.0-alpha.69",
-  "main": "./src/index.tsx",
+  "type": "module",
   "types": "./src/index.tsx",
+  "exports": {
+    ".": {
+      "types": "./src/index.tsx",
+      "import": "./src/index.tsx",
+      "default": "./src/index.tsx"
+    }
+  },
   "license": "MIT",
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts --minify",
+    "build": "tsup src/index.ts --format esm --dts --minify",
     "lint": "eslint \"./src/**/*.ts*\"",
     "test": "npm run lint"
   },

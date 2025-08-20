@@ -32,20 +32,20 @@ describe('WarpEvmExecutor', () => {
     }
 
     // Mock ethers functions
-    ;(ethers.isAddress as unknown as jest.Mock).mockImplementation((address: string) => {
-      return address.startsWith('0x') && address.length === 42
+    ;(ethers.isAddress as unknown as jest.Mock).mockImplementation((address: unknown) => {
+      return typeof address === 'string' && address.startsWith('0x') && address.length === 42
     })
-    ;(ethers.isHexString as unknown as jest.Mock).mockImplementation((hex: string) => {
-      return hex.startsWith('0x') && /^[0-9a-fA-F]+$/.test(hex.slice(2))
+    ;(ethers.isHexString as unknown as jest.Mock).mockImplementation((hex: unknown) => {
+      return typeof hex === 'string' && hex.startsWith('0x') && /^[0-9a-fA-F]+$/.test(hex.slice(2))
     })
-    ;(ethers.getAddress as unknown as jest.Mock).mockImplementation((address: string) => {
-      return address.toLowerCase()
+    ;(ethers.getAddress as unknown as jest.Mock).mockImplementation((address: unknown) => {
+      return typeof address === 'string' ? address.toLowerCase() : address
     })
-    ;(ethers.parseUnits as unknown as jest.Mock).mockImplementation((value: string, unit: string) => {
-      if (unit === 'gwei') {
+    ;(ethers.parseUnits as unknown as jest.Mock).mockImplementation((value: unknown, unit: unknown) => {
+      if (typeof value === 'string' && typeof unit === 'string' && unit === 'gwei') {
         return BigInt(parseInt(value) * 1000000000)
       }
-      return BigInt(value)
+      return typeof value === 'string' ? BigInt(value) : BigInt(0)
     })
 
     mockProvider = {
@@ -54,7 +54,7 @@ describe('WarpEvmExecutor', () => {
         maxFeePerGas: ethers.parseUnits('20', 'gwei'),
         maxPriorityFeePerGas: ethers.parseUnits('1.5', 'gwei'),
       }),
-    }
+    } as any
     ;(ethers.JsonRpcProvider as unknown as jest.Mock).mockImplementation(() => mockProvider)
 
     executor = new WarpEvmExecutor(mockConfig)

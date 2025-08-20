@@ -3,6 +3,7 @@
   "version": "0.2.0-alpha.5",
   "description": "Playground for testing Warps SDK",
   "private": true,
+  "type": "module",
   "main": "playground.ts",
   "scripts": {
     "start": "ts-node playground.ts",

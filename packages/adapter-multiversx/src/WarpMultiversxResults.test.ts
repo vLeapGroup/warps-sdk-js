@@ -3,10 +3,10 @@ import { SmartContractResult, TransactionEvent, TransactionLogs, TransactionOnNe
 import { extractCollectResults, Warp, WarpClientConfig, WarpContractAction } from '@vleap/warps'
 import { promises as fs, PathLike } from 'fs'
 import fetchMock from 'jest-fetch-mock'
+import path from 'path'
 import { evaluateResultsCommon } from '../../core/src/helpers/results'
 import { setupHttpMock } from './test-utils/mockHttp'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
-const path = require('path')
 
 const testConfig: WarpClientConfig = {
   env: 'devnet',
@@ -16,6 +16,18 @@ const testConfig: WarpClientConfig = {
     },
   },
   currentUrl: 'https://example.com',
+  transform: {
+    runner: {
+      run: jest.fn().mockImplementation(async (code: string, context: any) => {
+        // Simple mock transform runner for testing
+        const codeStr = code.startsWith('transform:') ? code.slice('transform:'.length) : code
+        // Create function with 'result' available in scope (matching the transform code)
+        // eslint-disable-next-line no-new-func
+        const fn = new Function('result', `const transform = ${codeStr}; return transform()`)
+        return fn(context)
+      }),
+    },
+  },
 }
 
 // Patch global fetch for ABI requests to use the mock server
@@ -540,7 +552,7 @@ describe('Result Helpers', () => {
       })
 
       // Patch: evaluate transforms directly if missing
-      const finalResults = await evaluateResultsCommon(warp, result.results, 1, [])
+      const finalResults = await evaluateResultsCommon(warp, result.results, 1, [], testConfig.transform?.runner)
 
       // The result should be from the entry action (1)
       expect(result.success).toBe(true)
@@ -659,7 +671,7 @@ describe('Result Helpers', () => {
       })
 
       // Patch: evaluate transforms directly if missing
-      const finalResults = await evaluateResultsCommon(warp, result.results, 1, [])
+      const finalResults = await evaluateResultsCommon(warp, result.results, 1, [], testConfig.transform?.runner)
 
       // The result should be from the entry action (1)
       expect(result.success).toBe(true)
