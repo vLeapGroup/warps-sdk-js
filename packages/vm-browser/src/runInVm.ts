@@ -12,19 +12,26 @@ export const runInVm = async (code: string, context: any): Promise<any> => {
                 const context = e.data;
                 let output;
 
+                // Create a safe function from the code without using eval
+                let transformFunction;
+
                 // Handle arrow function syntax: () => { return ... }
                 if (${JSON.stringify(code.trim())}.startsWith('(') && ${JSON.stringify(code)}.includes('=>')) {
-                  output = (${code})(context);
+                  // For arrow functions, we need to create a function that returns the result
+                  transformFunction = new Function('context', \`return (\${${JSON.stringify(code)}})(context);\`);
                 }
                 // Handle regular function syntax: function() { return ... }
                 else if (${JSON.stringify(code.trim())}.startsWith('function')) {
-                  output = (${code})(context);
+                  // For regular functions, we need to create a function that returns the result
+                  transformFunction = new Function('context', \`return (\${${JSON.stringify(code)}})(context);\`);
                 }
-                // Handle direct expression: return context.value * 2
+                // Handle direct expression: context.value * 2
                 else {
-                  output = eval(${JSON.stringify(code)});
+                  // For direct expressions, create a function that returns the expression result
+                  transformFunction = new Function('context', \`return \${${JSON.stringify(code)}};\`);
                 }
 
+                output = transformFunction(context);
                 self.postMessage({ result: output });
               } catch (error) {
                 self.postMessage({ error: error.toString() });
