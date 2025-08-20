@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.22
+
+### Patch Changes
+
+- d139b82: add further explorer endpoints
+- Updated dependencies [d139b82]
+  - @vleap/warps@3.0.0-alpha.70
+
 ## 0.2.0-alpha.21
 
 ### Minor Changes

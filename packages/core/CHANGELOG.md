@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.70
+
+### Patch Changes
+
+- d139b82: add further explorer endpoints
+
 ## 3.0.0-alpha.69
 
 ### Patch Changes

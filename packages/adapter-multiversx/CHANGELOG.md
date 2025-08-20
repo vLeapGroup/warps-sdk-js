@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.25
+
+### Patch Changes
+
+- d139b82: add further explorer endpoints
+- Updated dependencies [d139b82]
+  - @vleap/warps@3.0.0-alpha.70
+
 ## 0.2.0-alpha.24
 
 ### Minor Changes
