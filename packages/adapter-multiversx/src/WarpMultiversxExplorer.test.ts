@@ -60,16 +60,16 @@ describe('WarpMultiversxExplorer', () => {
     })
   })
 
-  describe('getTokenUrl', () => {
-    it('should return correct token URL with default explorer', () => {
-      const tokenAddress = 'erd1qqqqqqqqqqqqqpgqje2f99vr6r7sk54thg03c9suzcvwr4nfl3tsfkdl36'
-      const url = explorer.getTokenUrl(tokenAddress)
+  describe('getAssetUrl', () => {
+    it('should return correct asset URL with default explorer', () => {
+      const identifier = 'erd1qqqqqqqqqqqqqpgqje2f99vr6r7sk54thg03c9suzcvwr4nfl3tsfkdl36'
+      const url = explorer.getAssetUrl(identifier)
       expect(url).toBe('https://explorer.multiversx.com/tokens/erd1qqqqqqqqqqqqqpgqje2f99vr6r7sk54thg03c9suzcvwr4nfl3tsfkdl36')
     })
 
-    it('should return correct token URL with specific explorer', () => {
-      const tokenAddress = 'erd1qqqqqqqqqqqqqpgqje2f99vr6r7sk54thg03c9suzcvwr4nfl3tsfkdl36'
-      const url = explorer.getTokenUrl(tokenAddress, MultiversxExplorers.MultiversxExplorerTestnet)
+    it('should return correct asset URL with specific explorer', () => {
+      const identifier = 'erd1qqqqqqqqqqqqqpgqje2f99vr6r7sk54thg03c9suzcvwr4nfl3tsfkdl36'
+      const url = explorer.getAssetUrl(identifier, MultiversxExplorers.MultiversxExplorerTestnet)
       expect(url).toBe('https://testnet-explorer.multiversx.com/tokens/erd1qqqqqqqqqqqqqpgqje2f99vr6r7sk54thg03c9suzcvwr4nfl3tsfkdl36')
     })
   })

@@ -59,14 +59,14 @@ export class WarpEvmExplorer implements AdapterWarpExplorer {
     return `${baseUrl}/block/${blockNumber}`
   }
 
-  getTokenUrl(tokenAddress: string, explorer?: ExplorerName): string {
+  getAssetUrl(identifier: string, explorer?: ExplorerName): string {
     const baseUrl = this.getExplorerUrlByName(explorer)
-    return `${baseUrl}/token/${tokenAddress}`
+    return `${baseUrl}/token/${identifier}`
   }
 
-  getContractUrl(contractAddress: string, explorer?: ExplorerName): string {
+  getContractUrl(address: string, explorer?: ExplorerName): string {
     const baseUrl = this.getExplorerUrlByName(explorer)
-    return `${baseUrl}/address/${contractAddress}`
+    return `${baseUrl}/address/${address}`
   }
 
   getAllExplorers(): readonly ExplorerName[] {

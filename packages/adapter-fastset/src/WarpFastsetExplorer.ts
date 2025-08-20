@@ -35,12 +35,12 @@ export class WarpFastsetExplorer implements AdapterWarpExplorer {
     return `${baseUrl}/contract/${address}`
   }
 
-  getTokenUrl(address: string): string {
-    // TODO: Implement Fastset-specific token URL generation
-    // This should generate a URL to view a token on Fastset explorer
+  getAssetUrl(identifier: string): string {
+    // TODO: Implement Fastset-specific asset URL generation
+    // This should generate a URL to view an asset on Fastset explorer
 
     const baseUrl = this.getDefaultExplorerUrl()
-    return `${baseUrl}/token/${address}`
+    return `${baseUrl}/token/${identifier}`
   }
 
   private getDefaultExplorerUrl(): string {

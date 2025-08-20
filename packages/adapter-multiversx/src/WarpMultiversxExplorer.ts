@@ -59,14 +59,14 @@ export class WarpMultiversxExplorer implements AdapterWarpExplorer {
     return `${baseUrl}/blocks/${blockNumber}`
   }
 
-  getTokenUrl(tokenAddress: string, explorer?: ExplorerName): string {
+  getAssetUrl(identifier: string, explorer?: ExplorerName): string {
     const baseUrl = this.getExplorerUrlByName(explorer)
-    return `${baseUrl}/tokens/${tokenAddress}`
+    return `${baseUrl}/tokens/${identifier}`
   }
 
-  getContractUrl(contractAddress: string, explorer?: ExplorerName): string {
+  getContractUrl(address: string, explorer?: ExplorerName): string {
     const baseUrl = this.getExplorerUrlByName(explorer)
-    return `${baseUrl}/accounts/${contractAddress}`
+    return `${baseUrl}/accounts/${address}`
   }
 
   getAllExplorers(): readonly ExplorerName[] {

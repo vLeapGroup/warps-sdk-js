@@ -127,17 +127,17 @@ describe('WarpEvmExplorer', () => {
     })
   })
 
-  describe('getTokenUrl', () => {
-    it('should return token URL with primary explorer', () => {
+  describe('getAssetUrl', () => {
+    it('should return asset URL with primary explorer', () => {
       const explorer = new WarpEvmExplorer(mockChainInfo, mockConfig)
-      const url = explorer.getTokenUrl('0x1234567890abcdef')
+      const url = explorer.getAssetUrl('0x1234567890abcdef')
       expect(url).toContain('/token/0x1234567890abcdef')
       expect(url).toContain('etherscan.io')
     })
 
-    it('should return token URL with specific explorer', () => {
+    it('should return asset URL with specific explorer', () => {
       const explorer = new WarpEvmExplorer(mockChainInfo, mockConfig)
-      const url = explorer.getTokenUrl('0x1234567890abcdef', EthereumExplorers.Ethplorer)
+      const url = explorer.getAssetUrl('0x1234567890abcdef', EthereumExplorers.Ethplorer)
       expect(url).toContain('/token/0x1234567890abcdef')
       expect(url).toContain('ethplorer.io')
     })

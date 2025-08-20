@@ -71,17 +71,17 @@ describe('WarpSuiExplorer', () => {
     })
   })
 
-  describe('getTokenUrl', () => {
-    it('should return correct token URL with default explorer', () => {
-      const tokenAddress = '0x1234567890abcdef'
-      const url = explorer.getTokenUrl(tokenAddress)
-      expect(url).toBe('https://suivision.xyz/token/0x1234567890abcdef')
+  describe('getAssetUrl', () => {
+    it('should return correct asset URL with default explorer', () => {
+      const identifier = '0x1234567890abcdef'
+      const url = explorer.getAssetUrl(identifier)
+      expect(url).toBe('https://suivision.xyz/coin/0x1234567890abcdef')
     })
 
-    it('should return correct token URL with specific explorer', () => {
-      const tokenAddress = '0x1234567890abcdef'
-      const url = explorer.getTokenUrl(tokenAddress, SuiExplorers.SuiScanTestnet)
-      expect(url).toBe('https://testnet.suiscan.xyz/token/0x1234567890abcdef')
+    it('should return correct asset URL with specific explorer', () => {
+      const identifier = '0x1234567890abcdef'
+      const url = explorer.getAssetUrl(identifier, SuiExplorers.SuiScanTestnet)
+      expect(url).toBe('https://testnet.suiscan.xyz/coin/0x1234567890abcdef')
     })
   })
 

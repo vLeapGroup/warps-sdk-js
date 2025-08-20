@@ -134,6 +134,8 @@ export interface AdapterWarpRegistry {
 export interface AdapterWarpExplorer {
   getAccountUrl(address: string): string
   getTransactionUrl(hash: string): string
+  getAssetUrl(identifier: string): string
+  getContractUrl(address: string): string
 }
 
 export interface AdapterWarpDataLoader {

@@ -59,14 +59,15 @@ export class WarpSuiExplorer implements AdapterWarpExplorer {
     return `${baseUrl}/block/${blockNumber}`
   }
 
-  getTokenUrl(tokenAddress: string, explorer?: ExplorerName): string {
+  getAssetUrl(identifier: string, explorer?: ExplorerName): string {
     const baseUrl = this.getExplorerUrlByName(explorer)
-    return `${baseUrl}/token/${tokenAddress}`
+    // Sui explorers use /coin/ for assets
+    return `${baseUrl}/coin/${identifier}`
   }
 
-  getContractUrl(contractAddress: string, explorer?: ExplorerName): string {
+  getContractUrl(address: string, explorer?: ExplorerName): string {
     const baseUrl = this.getExplorerUrlByName(explorer)
-    return `${baseUrl}/object/${contractAddress}`
+    return `${baseUrl}/object/${address}`
   }
 
   getAllExplorers(): readonly ExplorerName[] {
