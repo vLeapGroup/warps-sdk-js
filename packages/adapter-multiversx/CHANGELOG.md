@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.30
+
+### Minor Changes
+
+- b8988d5: add custom provider configs
+
+### Patch Changes
+
+- Updated dependencies [b8988d5]
+  - @vleap/warps@3.0.0-alpha.76
+
 ## 0.2.0-alpha.29
 
 ### Minor Changes

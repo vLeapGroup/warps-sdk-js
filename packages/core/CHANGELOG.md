@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.76
+
+### Minor Changes
+
+- b8988d5: add custom provider configs
+
 ## 3.0.0-alpha.75
 
 ### Minor Changes
