@@ -141,7 +141,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
     if (type === 'asset') {
       const [tokenId, nonce, amount, existingDecimals] = value.split(WarpConstants.ArgCompositeSeparator)
       if (existingDecimals) return input
-      const token = new Token({ identifier: tokenId, nonce: BigInt(nonce) })
+      const token = new Token({ identifier: tokenId, nonce: BigInt(nonce || 0) })
       const isFungible = new TokenComputer().isFungible(token)
       if (!isFungible) return input // TODO: handle non-fungible tokens like meta-esdts
       const knownToken = findKnownTokenById(tokenId)
