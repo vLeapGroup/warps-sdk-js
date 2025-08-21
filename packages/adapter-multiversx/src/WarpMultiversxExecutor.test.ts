@@ -8,9 +8,20 @@ const testConfig: WarpConfig = {
   currentUrl: 'https://example.com',
 }
 
+const testChainInfo = {
+  name: 'multiversx',
+  chainId: 'D',
+  defaultApiUrl: '',
+  addressHrp: '',
+  blockTime: 0,
+  displayName: '',
+  explorerUrl: '',
+  nativeToken: '',
+}
+
 describe('WarpMultiversxExecutor', () => {
   it('createTransactionForExecute - creates a native transfer with message', async () => {
-    const subject = new WarpMultiversxExecutor(testConfig, 'multiversx')
+    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo)
     const action: WarpTransferAction = {
       type: 'transfer',
       label: 'test',
@@ -45,7 +56,7 @@ describe('WarpMultiversxExecutor', () => {
   })
 
   it('createTransactionForExecute - creates a native transfer with message from input', async () => {
-    const subject = new WarpMultiversxExecutor(testConfig, 'multiversx')
+    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo)
     const action: WarpTransferAction = {
       type: 'transfer',
       label: 'test',
@@ -80,7 +91,7 @@ describe('WarpMultiversxExecutor', () => {
   })
 
   it('createTransactionForExecute - creates a native transfer field-based receiver', async () => {
-    const subject = new WarpMultiversxExecutor(testConfig, 'multiversx')
+    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo)
     const action: WarpTransferAction = {
       type: 'transfer',
       label: 'test',
@@ -120,18 +131,18 @@ describe('WarpMultiversxExecutor', () => {
   })
 
   it('createTransactionForExecute - creates a contract call with esdt transfer from field', async () => {
-    const subject = new WarpMultiversxExecutor(testConfig)
+    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo)
     // ... test logic for contract call with esdt transfer ...
   })
 
   it('createTransactionForExecute - creates a contract call with scaled value from field', async () => {
-    const subject = new WarpMultiversxExecutor(testConfig)
+    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo)
     // ... test logic for contract call with scaled value ...
   })
 
   it('createTransactionForExecute - creates a contract call with modified values from url', async () => {
     testConfig.currentUrl = 'https://example.com/issue?name=WarpToken&ticker=WAPT&supply=1000&decimals=18'
-    const subject = new WarpMultiversxExecutor(testConfig)
+    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo)
     // ... test logic for contract call with modified values from url ...
   })
 
