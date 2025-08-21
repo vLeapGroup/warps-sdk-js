@@ -79,7 +79,9 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
     return new TransferTransactionsFactory({ config }).createTransactionForTransfer(sender, {
       receiver: Address.newFromBech32(executable.destination),
       nativeAmount: executable.value,
-      //   tokenTransfers: executable.transfers, // TODO
+      tokenTransfers: executable.transfers.map(
+        (t) => new TokenTransfer({ token: new Token({ identifier: t.identifier, nonce: BigInt(t.nonce) }), amount: t.amount })
+      ),
       data: data ? new Uint8Array(data) : undefined,
     })
   }
