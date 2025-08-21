@@ -20,6 +20,8 @@ import {
 
 export type WarpUserWallets = Record<WarpChain, string | null>
 
+export type WarpProviderConfig = Record<WarpChainEnv, string>
+
 export type WarpClientConfig = {
   env: WarpChainEnv
   clientUrl?: string
@@ -31,6 +33,7 @@ export type WarpClientConfig = {
   preferences?: {
     explorers?: Record<WarpChain, WarpExplorerName>
   }
+  providers?: Record<WarpChain, WarpProviderConfig>
   schema?: {
     warp?: string
     brand?: string

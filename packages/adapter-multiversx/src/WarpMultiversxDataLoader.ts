@@ -9,7 +9,7 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
   ) {}
 
   async getAccount(address: string): Promise<WarpChainAccount> {
-    const provider = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env).createNetworkProvider()
+    const provider = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env, this.config).createNetworkProvider()
     const accountReq = await provider.getAccount(Address.newFromBech32(address))
 
     return {
@@ -19,7 +19,7 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
   }
 
   async getAccountAssets(address: string): Promise<WarpChainAsset[]> {
-    const provider = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env).createNetworkProvider()
+    const provider = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env, this.config).createNetworkProvider()
     const tokensReq = await provider.getFungibleTokensOfAccount(Address.newFromBech32(address))
 
     return tokensReq.map((token) => ({

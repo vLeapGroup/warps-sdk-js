@@ -10,7 +10,7 @@ export const getBaseAdapter: AdapterFactory = createEvmAdapter(ChainNameBase, 'b
     chainId: '8453',
     blockTime: 2000,
     addressHrp: '0x',
-    apiUrl: 'https://mainnet.base.org',
+    defaultApiUrl: 'https://mainnet.base.org',
     nativeToken: 'ETH',
   },
   testnet: {
@@ -19,7 +19,7 @@ export const getBaseAdapter: AdapterFactory = createEvmAdapter(ChainNameBase, 'b
     chainId: '84531',
     blockTime: 2000,
     addressHrp: '0x',
-    apiUrl: 'https://goerli.base.org',
+    defaultApiUrl: 'https://goerli.base.org',
     nativeToken: 'ETH',
   },
   devnet: {
@@ -28,7 +28,7 @@ export const getBaseAdapter: AdapterFactory = createEvmAdapter(ChainNameBase, 'b
     chainId: '84532',
     blockTime: 2000,
     addressHrp: '0x',
-    apiUrl: 'https://sepolia.base.org',
+    defaultApiUrl: 'https://sepolia.base.org',
     nativeToken: 'ETH',
   },
 })

@@ -4,6 +4,7 @@ import {
   AdapterWarpExecutor,
   applyResultsToMessages,
   getNextInfo,
+  getProviderUrl,
   getWarpActionByIndex,
   WarpActionInputType,
   WarpChainInfo,
@@ -15,7 +16,6 @@ import {
 } from '@vleap/warps'
 import { WarpSuiResults } from './WarpSuiResults'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
-import { getSuiApiUrl } from './config'
 
 export class WarpSuiExecutor implements AdapterWarpExecutor {
   private readonly serializer: WarpSuiSerializer
@@ -29,7 +29,8 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
   ) {
     this.serializer = new WarpSuiSerializer()
     this.results = new WarpSuiResults(this.config, this.chain)
-    this.client = new SuiClient({ url: getSuiApiUrl(config.env) })
+    const apiUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
+    this.client = new SuiClient({ url: apiUrl })
     this.userWallet = this.config.user?.wallets?.[this.chain.name] || null
   }
 

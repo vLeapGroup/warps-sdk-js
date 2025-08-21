@@ -1,11 +1,11 @@
-import { WarpClientConfig } from '@vleap/warps'
+import { WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 import { WarpSuiAbiBuilder } from './WarpSuiAbiBuilder'
 
 export class WarpSuiContractLoader {
   private readonly abi: WarpSuiAbiBuilder
 
-  constructor(config: WarpClientConfig) {
-    this.abi = new WarpSuiAbiBuilder(config)
+  constructor(config: WarpClientConfig, chain: WarpChainInfo) {
+    this.abi = new WarpSuiAbiBuilder(config, chain)
   }
 
   async loadModuleAbi(packageId: string, moduleName: string) {

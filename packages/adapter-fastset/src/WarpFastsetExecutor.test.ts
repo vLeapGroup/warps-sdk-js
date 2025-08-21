@@ -23,11 +23,11 @@ describe('WarpFastsetExecutor', () => {
       chainId: '1',
       blockTime: 12000,
       addressHrp: 'fs',
-      apiUrl: 'https://api.fastset.xyz',
+      defaultApiUrl: 'https://api.fastset.xyz',
       explorerUrl: 'https://explorer.fastset.xyz',
       nativeToken: 'FS',
     }
-    executor = new WarpFastsetExecutor(mockConfig)
+    executor = new WarpFastsetExecutor(mockConfig, mockChainInfo)
     ;(fetch as jest.Mock).mockClear()
   })
 
@@ -76,7 +76,7 @@ describe('WarpFastsetExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: 'fs',
-          apiUrl: 'https://api.fastset.xyz',
+          defaultApiUrl: 'https://api.fastset.xyz',
           nativeToken: 'FS',
         },
         warp: {
@@ -105,7 +105,7 @@ describe('WarpFastsetExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: 'fs',
-          apiUrl: 'https://api.fastset.xyz',
+          defaultApiUrl: 'https://api.fastset.xyz',
           nativeToken: 'FS',
         },
       })
@@ -122,7 +122,7 @@ describe('WarpFastsetExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: 'fs',
-          apiUrl: 'https://api.fastset.xyz',
+          defaultApiUrl: 'https://api.fastset.xyz',
           nativeToken: 'FS',
         },
         warp: {
@@ -154,7 +154,7 @@ describe('WarpFastsetExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: 'fs',
-          apiUrl: 'https://api.fastset.xyz',
+          defaultApiUrl: 'https://api.fastset.xyz',
           nativeToken: 'FS',
         },
         warp: {
@@ -185,7 +185,7 @@ describe('WarpFastsetExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: 'fs',
-          apiUrl: 'https://api.fastset.xyz',
+          defaultApiUrl: 'https://api.fastset.xyz',
           nativeToken: 'FS',
         },
       })
@@ -202,7 +202,7 @@ describe('WarpFastsetExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: 'fs',
-          apiUrl: 'https://api.fastset.xyz',
+          defaultApiUrl: 'https://api.fastset.xyz',
           nativeToken: 'FS',
         },
         warp: {
@@ -235,7 +235,7 @@ describe('WarpFastsetExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: 'fs',
-          apiUrl: 'https://api.fastset.xyz',
+          defaultApiUrl: 'https://api.fastset.xyz',
           nativeToken: 'FS',
         },
         warp: {
@@ -271,7 +271,7 @@ describe('WarpFastsetExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: 'fs',
-          apiUrl: 'https://api.fastset.xyz',
+          defaultApiUrl: 'https://api.fastset.xyz',
           nativeToken: 'FS',
         },
       })
@@ -288,7 +288,7 @@ describe('WarpFastsetExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: 'fs',
-          apiUrl: 'https://api.fastset.xyz',
+          defaultApiUrl: 'https://api.fastset.xyz',
           nativeToken: 'FS',
         },
         warp: {
@@ -318,7 +318,7 @@ describe('WarpFastsetExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: 'fs',
-          apiUrl: 'https://api.fastset.xyz',
+          defaultApiUrl: 'https://api.fastset.xyz',
           nativeToken: 'FS',
         },
       })
@@ -337,7 +337,7 @@ describe('WarpFastsetExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: 'fs',
-          apiUrl: 'https://api.fastset.xyz',
+          defaultApiUrl: 'https://api.fastset.xyz',
           nativeToken: 'FS',
         },
         warp: {
@@ -366,7 +366,7 @@ describe('WarpFastsetExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: 'fs',
-          apiUrl: 'https://api.fastset.xyz',
+          defaultApiUrl: 'https://api.fastset.xyz',
           nativeToken: 'FS',
         },
       })
@@ -383,7 +383,7 @@ describe('WarpFastsetExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: 'fs',
-          apiUrl: 'https://api.fastset.xyz',
+          defaultApiUrl: 'https://api.fastset.xyz',
           nativeToken: 'FS',
         },
         warp: {
@@ -414,7 +414,7 @@ describe('WarpFastsetExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: 'fs',
-          apiUrl: 'https://api.fastset.xyz',
+          defaultApiUrl: 'https://api.fastset.xyz',
           nativeToken: 'FS',
         },
       })
@@ -431,7 +431,7 @@ describe('WarpFastsetExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: 'fs',
-          apiUrl: 'https://api.fastset.xyz',
+          defaultApiUrl: 'https://api.fastset.xyz',
           nativeToken: 'FS',
         },
         warp: {

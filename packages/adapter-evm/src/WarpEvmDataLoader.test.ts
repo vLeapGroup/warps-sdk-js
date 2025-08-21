@@ -17,7 +17,7 @@ describe('WarpEvmDataLoader', () => {
     chainId: '1',
     blockTime: 12000,
     addressHrp: '',
-    apiUrl: 'https://mainnet.infura.io/v3/your-project-id',
+    defaultApiUrl: 'https://mainnet.infura.io/v3/your-project-id',
     nativeToken: 'ETH',
   }
 

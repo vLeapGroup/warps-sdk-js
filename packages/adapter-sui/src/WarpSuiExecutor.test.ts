@@ -12,7 +12,7 @@ describe('WarpSuiExecutor', () => {
     chainId: 'sui-mainnet',
     blockTime: 1000,
     addressHrp: '0x',
-    apiUrl: 'https://fullnode.devnet.sui.io',
+    defaultApiUrl: 'https://fullnode.devnet.sui.io',
     explorerUrl: 'https://explorer.sui.io',
     nativeToken: 'SUI',
   }

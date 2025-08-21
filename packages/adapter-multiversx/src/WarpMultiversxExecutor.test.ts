@@ -24,7 +24,7 @@ describe('WarpMultiversxExecutor', () => {
       chain: {
         name: 'multiversx',
         chainId: 'D',
-        apiUrl: '',
+        defaultApiUrl: '',
         addressHrp: '',
         blockTime: 0,
         displayName: '',
@@ -59,7 +59,7 @@ describe('WarpMultiversxExecutor', () => {
       chain: {
         name: 'multiversx',
         chainId: 'D',
-        apiUrl: '',
+        defaultApiUrl: '',
         addressHrp: '',
         blockTime: 0,
         displayName: '',
@@ -94,7 +94,7 @@ describe('WarpMultiversxExecutor', () => {
       chain: {
         name: 'multiversx',
         chainId: 'D',
-        apiUrl: '',
+        defaultApiUrl: '',
         addressHrp: '',
         blockTime: 0,
         displayName: '',

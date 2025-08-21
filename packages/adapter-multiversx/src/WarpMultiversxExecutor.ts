@@ -20,6 +20,7 @@ import {
   applyResultsToMessages,
   findKnownTokenById,
   getNextInfo,
+  getProviderUrl,
   getWarpActionByIndex,
   shiftBigintBy,
   WarpActionInputType,
@@ -105,7 +106,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
     if (action.type !== 'query') throw new Error(`WarpMultiversxExecutor: Invalid action type for executeQuery: ${action.type}`)
     const abi = await this.abi.getAbiForAction(action)
     const typedArgs = executable.args.map((arg) => this.serializer.stringToTyped(arg))
-    const entrypoint = WarpMultiversxExecutor.getChainEntrypoint(executable.chain, this.config.env)
+    const entrypoint = WarpMultiversxExecutor.getChainEntrypoint(executable.chain, this.config.env, this.config)
     const contractAddress = Address.newFromBech32(executable.destination)
     const controller = entrypoint.createSmartContractController(abi)
     const query = controller.createQuery({ contract: contractAddress, function: action.func || '', arguments: typedArgs })
@@ -146,7 +147,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
       const knownToken = findKnownTokenById(tokenId)
       let decimals = knownToken?.decimals
       if (!decimals) {
-        const definitionRes = await fetch(`${chain.apiUrl}/tokens/${tokenId}`) // TODO: use chainApi directly; currently causes circular reference for whatever reason
+        const definitionRes = await fetch(`${chain.defaultApiUrl}/tokens/${tokenId}`) // TODO: use chainApi directly; currently causes circular reference for whatever reason
         const definition = await definitionRes.json()
         decimals = definition.decimals
       }
@@ -157,12 +158,13 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
     return input
   }
 
-  static getChainEntrypoint(chainInfo: WarpChainInfo, env: WarpChainEnv): NetworkEntrypoint {
+  static getChainEntrypoint(chainInfo: WarpChainInfo, env: WarpChainEnv, config?: WarpClientConfig): NetworkEntrypoint {
     const clientName = 'warp-sdk'
     const kind = 'api'
-    if (env === 'devnet') return new DevnetEntrypoint({ url: chainInfo.apiUrl, kind, clientName })
-    if (env === 'testnet') return new TestnetEntrypoint({ url: chainInfo.apiUrl, kind, clientName })
-    return new MainnetEntrypoint({ url: chainInfo.apiUrl, kind, clientName })
+    const apiUrl = config ? getProviderUrl(config, chainInfo.name, env, chainInfo.defaultApiUrl) : chainInfo.defaultApiUrl
+    if (env === 'devnet') return new DevnetEntrypoint({ url: apiUrl, kind, clientName })
+    if (env === 'testnet') return new TestnetEntrypoint({ url: apiUrl, kind, clientName })
+    return new MainnetEntrypoint({ url: apiUrl, kind, clientName })
   }
 
   async signMessage(message: string, privateKey: string): Promise<string> {

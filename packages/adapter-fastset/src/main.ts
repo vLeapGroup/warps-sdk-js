@@ -16,7 +16,7 @@ export const getFastsetAdapter: AdapterFactory = (config: WarpClientConfig, fall
     chainId: '1',
     blockTime: 100,
     addressHrp: 'set',
-    apiUrl: 'TODO',
+    defaultApiUrl: 'TODO',
     nativeToken: 'SET',
   }
 
@@ -25,7 +25,7 @@ export const getFastsetAdapter: AdapterFactory = (config: WarpClientConfig, fall
     chainInfo,
     prefix: 'fastset',
     builder: () => fallback.builder(),
-    executor: new WarpFastsetExecutor(config),
+    executor: new WarpFastsetExecutor(config, chainInfo),
     results: new WarpFastsetResults(config),
     serializer: new WarpFastsetSerializer(),
     registry: fallback.registry,

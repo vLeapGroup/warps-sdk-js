@@ -1,6 +1,5 @@
-import { AdapterWarpDataLoader, WarpChainAccount, WarpChainAsset, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { AdapterWarpDataLoader, getProviderUrl, WarpChainAccount, WarpChainAsset, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 import { ethers } from 'ethers'
-import { getEvmApiUrl, getEvmChainConfig } from './config'
 
 // ERC20 ABI for token interactions
 const ERC20_ABI = [
@@ -99,14 +98,13 @@ interface TokenBalance {
 
 export class WarpEvmDataLoader implements AdapterWarpDataLoader {
   private provider: ethers.JsonRpcProvider
-  private chainConfig: any
 
   constructor(
     private readonly config: WarpClientConfig,
     private readonly chain: WarpChainInfo
   ) {
-    this.provider = new ethers.JsonRpcProvider(getEvmApiUrl(this.config.env, this.chain.name))
-    this.chainConfig = getEvmChainConfig(this.chain.name, this.config.env)
+    const apiUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
+    this.provider = new ethers.JsonRpcProvider(apiUrl)
   }
 
   async getAccount(address: string): Promise<WarpChainAccount> {

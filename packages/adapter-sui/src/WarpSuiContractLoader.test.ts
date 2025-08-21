@@ -2,7 +2,16 @@ import { WarpSuiContractLoader } from './WarpSuiContractLoader'
 
 describe('WarpSuiContractLoader', () => {
   const config = { env: 'devnet' as const }
-  const loader = new WarpSuiContractLoader(config)
+  const chain = {
+    name: 'sui',
+    displayName: 'Sui Devnet',
+    chainId: 'devnet',
+    blockTime: 3000,
+    addressHrp: 'sui',
+    defaultApiUrl: 'https://fullnode.devnet.sui.io',
+    nativeToken: 'SUI',
+  }
+  const loader = new WarpSuiContractLoader(config, chain)
 
   it('should instantiate WarpSuiContractLoader', () => {
     expect(loader).toBeInstanceOf(WarpSuiContractLoader)

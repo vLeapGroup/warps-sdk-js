@@ -18,7 +18,7 @@ export const createEvmAdapter = (
       chainInfo: chainInfos[config.env],
       prefix: chainPrefix,
       builder: () => fallback.builder(),
-      executor: new WarpEvmExecutor(config),
+      executor: new WarpEvmExecutor(config, chainInfos[config.env]),
       results: new WarpEvmResults(config),
       serializer: new WarpEvmSerializer(),
       registry: fallback.registry,

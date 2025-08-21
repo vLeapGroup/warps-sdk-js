@@ -6,7 +6,7 @@ export const createMockChainInfo = (chainName: string = 'multiversx') => ({
   chainId: chainName === 'multiversx' ? 'D' : chainName,
   blockTime: 6000,
   addressHrp: 'erd',
-  apiUrl: `https://${chainName === 'multiversx' ? 'devnet-api.multiversx' : chainName}.com`,
+  defaultApiUrl: `https://${chainName === 'multiversx' ? 'devnet-api.multiversx' : chainName}.com`,
   nativeToken: 'EGLD',
 })
 

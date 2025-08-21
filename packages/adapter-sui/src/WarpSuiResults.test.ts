@@ -8,7 +8,7 @@ describe('WarpSuiResults', () => {
     chainId: '1',
     blockTime: 3000,
     addressHrp: '0x',
-    apiUrl: 'https://fullnode.devnet.sui.io',
+    defaultApiUrl: 'https://fullnode.devnet.sui.io',
     nativeToken: 'SUI',
   }
   const results = new WarpSuiResults(config, chain)

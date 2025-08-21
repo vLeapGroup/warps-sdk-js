@@ -1,5 +1,6 @@
 import {
   AdapterWarpExecutor,
+  getProviderUrl,
   getWarpActionByIndex,
   WarpActionInputType,
   WarpChainInfo,
@@ -7,7 +8,7 @@ import {
   WarpExecutable,
   WarpQueryAction,
 } from '@vleap/warps'
-import { getFastsetApiUrl, getFastsetProxyUrl } from './config'
+import { getFastsetApiUrl } from './config'
 import { FastsetClient, fromBase64, isValidFastsetAddress, normalizeAmount } from './sdk'
 import { WarpFastsetSerializer } from './WarpFastsetSerializer'
 
@@ -15,11 +16,16 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
   private readonly serializer: WarpFastsetSerializer
   private readonly fastsetClient: FastsetClient
 
-  constructor(private readonly config: WarpClientConfig) {
+  constructor(
+    private readonly config: WarpClientConfig,
+    private readonly chain: WarpChainInfo
+  ) {
     this.serializer = new WarpFastsetSerializer()
+    const apiUrl = getProviderUrl(this.config, chain.name, this.config.env, this.chain.defaultApiUrl)
+    const proxyUrl = getProviderUrl(this.config, chain.name, this.config.env, this.chain.defaultApiUrl)
     this.fastsetClient = new FastsetClient({
-      validatorUrl: getFastsetApiUrl(this.config.env, 'fastset'),
-      proxyUrl: getFastsetProxyUrl(this.config.env, 'fastset'),
+      validatorUrl: apiUrl,
+      proxyUrl: proxyUrl,
     })
   }
 

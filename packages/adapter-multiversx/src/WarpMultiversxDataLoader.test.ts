@@ -13,7 +13,7 @@ describe('WarpMultiversxDataLoader', () => {
     chainId: 'D',
     blockTime: 6000,
     addressHrp: 'erd',
-    apiUrl: 'https://devnet-api.multiversx.com',
+    defaultApiUrl: 'https://devnet-api.multiversx.com',
     nativeToken: 'EGLD',
   }
 

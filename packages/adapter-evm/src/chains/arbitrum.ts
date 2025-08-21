@@ -10,7 +10,7 @@ export const getArbitrumAdapter: AdapterFactory = createEvmAdapter(ChainNameArbi
     chainId: '421614',
     blockTime: 1000,
     addressHrp: '0x',
-    apiUrl: 'https://sepolia-rollup.arbitrum.io/rpc',
+    defaultApiUrl: 'https://sepolia-rollup.arbitrum.io/rpc',
     nativeToken: 'ETH',
   },
   testnet: {
@@ -19,7 +19,7 @@ export const getArbitrumAdapter: AdapterFactory = createEvmAdapter(ChainNameArbi
     chainId: '421613',
     blockTime: 1000,
     addressHrp: '0x',
-    apiUrl: 'https://goerli-rollup.arbitrum.io/rpc',
+    defaultApiUrl: 'https://goerli-rollup.arbitrum.io/rpc',
     nativeToken: 'ETH',
   },
   mainnet: {
@@ -28,7 +28,7 @@ export const getArbitrumAdapter: AdapterFactory = createEvmAdapter(ChainNameArbi
     chainId: '42161',
     blockTime: 1000,
     addressHrp: '0x',
-    apiUrl: 'https://arb1.arbitrum.io/rpc',
+    defaultApiUrl: 'https://arb1.arbitrum.io/rpc',
     nativeToken: 'ETH',
   },
 })

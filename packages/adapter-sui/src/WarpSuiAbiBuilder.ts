@@ -1,12 +1,15 @@
 import { SuiClient } from '@mysten/sui/client'
-import { AdapterWarpAbiBuilder, WarpCacheConfig, WarpClientConfig } from '@vleap/warps'
-import { getSuiApiUrl } from './config'
+import { AdapterWarpAbiBuilder, getProviderUrl, WarpCacheConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 
 export class WarpSuiAbiBuilder implements AdapterWarpAbiBuilder {
   private readonly client: SuiClient
 
-  constructor(private config: WarpClientConfig) {
-    this.client = new SuiClient({ url: getSuiApiUrl(config.env) })
+  constructor(
+    private readonly config: WarpClientConfig,
+    private readonly chain: WarpChainInfo
+  ) {
+    const apiUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
+    this.client = new SuiClient({ url: apiUrl })
   }
 
   async createFromRaw(encoded: string): Promise<any> {

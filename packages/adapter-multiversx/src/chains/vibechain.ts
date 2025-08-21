@@ -9,7 +9,7 @@ const chainInfo: WarpChainInfo = {
   chainId: 'V',
   blockTime: 600,
   addressHrp: 'vibe',
-  apiUrl: 'https://vibeox-api.multiversx.com',
+  defaultApiUrl: 'https://vibeox-api.multiversx.com',
   nativeToken: 'VIBE',
 }
 

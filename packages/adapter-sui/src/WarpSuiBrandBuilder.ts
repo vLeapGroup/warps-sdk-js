@@ -1,13 +1,16 @@
 import { SuiClient } from '@mysten/sui/client'
 import { Transaction } from '@mysten/sui/transactions'
-import { AdapterWarpBrandBuilder, WarpBrand, WarpCacheConfig, WarpClientConfig } from '@vleap/warps'
-import { getSuiApiUrl } from './config'
+import { AdapterWarpBrandBuilder, getProviderUrl, WarpBrand, WarpCacheConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 
 export class WarpSuiBrandBuilder implements AdapterWarpBrandBuilder {
   private readonly client: SuiClient
 
-  constructor(private config: WarpClientConfig) {
-    this.client = new SuiClient({ url: getSuiApiUrl(config.env) })
+  constructor(
+    private readonly config: WarpClientConfig,
+    private readonly chain: WarpChainInfo
+  ) {
+    const apiUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
+    this.client = new SuiClient({ url: apiUrl })
   }
 
   createInscriptionTransaction(brand: WarpBrand): Transaction {

@@ -18,7 +18,7 @@ describe('WarpSuiExplorer', () => {
     chainId: 'sui-mainnet',
     blockTime: 1000,
     addressHrp: '0x',
-    apiUrl: 'https://fullnode.mainnet.sui.io',
+    defaultApiUrl: 'https://fullnode.mainnet.sui.io',
     explorerUrl: 'https://explorer.sui.io',
     nativeToken: 'SUI',
   }
@@ -162,7 +162,7 @@ describe('WarpSuiExplorer', () => {
       chainId: 'sui-testnet',
       blockTime: 1000,
       addressHrp: '0x',
-      apiUrl: 'https://fullnode.testnet.sui.io',
+      defaultApiUrl: 'https://fullnode.testnet.sui.io',
       explorerUrl: 'https://explorer.sui.io',
       nativeToken: 'SUI',
     }

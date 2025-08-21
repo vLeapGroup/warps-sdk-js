@@ -43,7 +43,7 @@ const mockAdapter = {
       chainId: 'D',
       blockTime: 6000,
       addressHrp: 'erd',
-      apiUrl: 'https://devnet-api.multiversx.com',
+      defaultApiUrl: 'https://devnet-api.multiversx.com',
       explorerUrl: 'https://devnet-explorer.multiversx.com',
       nativeToken: 'EGLD',
     }),

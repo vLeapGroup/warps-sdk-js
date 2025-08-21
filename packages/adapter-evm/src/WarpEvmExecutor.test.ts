@@ -26,7 +26,7 @@ describe('WarpEvmExecutor', () => {
       chainId: '1',
       blockTime: 12000,
       addressHrp: '0x',
-      apiUrl: 'https://api.evm.com',
+      defaultApiUrl: 'https://api.evm.com',
       explorerUrl: 'https://explorer.evm.com',
       nativeToken: 'ETH',
     }
@@ -57,7 +57,15 @@ describe('WarpEvmExecutor', () => {
     } as any
     ;(ethers.JsonRpcProvider as unknown as jest.Mock).mockImplementation(() => mockProvider)
 
-    executor = new WarpEvmExecutor(mockConfig)
+    executor = new WarpEvmExecutor(mockConfig, {
+      name: 'ethereum',
+      displayName: 'Ethereum',
+      chainId: '1',
+      blockTime: 12000,
+      addressHrp: '0x',
+      defaultApiUrl: 'https://api.ethereum.com',
+      nativeToken: 'ETH',
+    })
   })
 
   describe('preprocessInput', () => {
@@ -103,7 +111,7 @@ describe('WarpEvmExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: '0x',
-          apiUrl: 'https://api.evm.com',
+          defaultApiUrl: 'https://api.evm.com',
           nativeToken: 'ETH',
         },
         warp: {
@@ -142,7 +150,7 @@ describe('WarpEvmExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: '0x',
-          apiUrl: 'https://api.evm.com',
+          defaultApiUrl: 'https://api.evm.com',
           nativeToken: 'ETH',
         },
         warp: {
@@ -174,7 +182,7 @@ describe('WarpEvmExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: '0x',
-          apiUrl: 'https://api.evm.com',
+          defaultApiUrl: 'https://api.evm.com',
           nativeToken: 'ETH',
         },
         warp: {
@@ -214,7 +222,7 @@ describe('WarpEvmExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: '0x',
-          apiUrl: 'https://api.evm.com',
+          defaultApiUrl: 'https://api.evm.com',
           nativeToken: 'ETH',
         },
         warp: {
@@ -247,7 +255,7 @@ describe('WarpEvmExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: '0x',
-          apiUrl: 'https://api.evm.com',
+          defaultApiUrl: 'https://api.evm.com',
           nativeToken: 'ETH',
         },
         warp: {
@@ -290,7 +298,7 @@ describe('WarpEvmExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: '0x',
-          apiUrl: 'https://api.evm.com',
+          defaultApiUrl: 'https://api.evm.com',
           nativeToken: 'ETH',
         },
         warp: {
@@ -335,7 +343,7 @@ describe('WarpEvmExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: '0x',
-          apiUrl: 'https://api.evm.com',
+          defaultApiUrl: 'https://api.evm.com',
           nativeToken: 'ETH',
         },
         warp: {
@@ -374,7 +382,7 @@ describe('WarpEvmExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: '0x',
-          apiUrl: 'https://api.evm.com',
+          defaultApiUrl: 'https://api.evm.com',
           nativeToken: 'ETH',
         },
         warp: {
@@ -414,7 +422,7 @@ describe('WarpEvmExecutor', () => {
           chainId: '1',
           blockTime: 12000,
           addressHrp: '0x',
-          apiUrl: 'https://api.evm.com',
+          defaultApiUrl: 'https://api.evm.com',
           nativeToken: 'ETH',
         },
         warp: {

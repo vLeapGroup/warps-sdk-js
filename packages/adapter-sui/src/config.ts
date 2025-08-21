@@ -11,9 +11,3 @@ export const getSuiRegistryObjectId = (env: WarpChainEnv): string => {
   if (env === 'testnet') return ''
   throw new Error('Sui registry object id is not available for mainnet')
 }
-
-export const getSuiApiUrl = (env: WarpChainEnv): string => {
-  if (env === 'devnet') return 'https://fullnode.devnet.sui.io'
-  if (env === 'testnet') return 'https://fullnode.testnet.sui.io'
-  return 'https://fullnode.mainnet.sui.io'
-}

@@ -8,7 +8,7 @@ export type WarpChainInfo = {
   chainId: string
   blockTime: number
   addressHrp: string
-  apiUrl: string
+  defaultApiUrl: string
   nativeToken: string
 }
 

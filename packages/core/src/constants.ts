@@ -38,7 +38,7 @@ export const WarpConstants = {
     },
     ChainApiUrl: {
       Placeholder: 'CHAIN_API',
-      Accessor: (bag: InterpolationBag) => bag.chainInfo.apiUrl,
+      Accessor: (bag: InterpolationBag) => bag.chainInfo.defaultApiUrl,
     },
     ChainAddressHrp: {
       Placeholder: 'CHAIN_ADDRESS_HRP',

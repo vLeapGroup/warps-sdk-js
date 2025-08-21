@@ -1,6 +1,5 @@
 import { SuiClient } from '@mysten/sui/client'
-import { AdapterWarpDataLoader, WarpChainAccount, WarpChainAsset, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
-import { getSuiApiUrl } from './config'
+import { AdapterWarpDataLoader, getProviderUrl, WarpChainAccount, WarpChainAsset, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 
 export class WarpSuiDataLoader implements AdapterWarpDataLoader {
   private client: SuiClient
@@ -9,7 +8,8 @@ export class WarpSuiDataLoader implements AdapterWarpDataLoader {
     private readonly config: WarpClientConfig,
     private readonly chain: WarpChainInfo
   ) {
-    this.client = new SuiClient({ url: getSuiApiUrl(this.config.env) })
+    const apiUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
+    this.client = new SuiClient({ url: apiUrl })
   }
 
   async getAccount(address: string): Promise<WarpChainAccount> {

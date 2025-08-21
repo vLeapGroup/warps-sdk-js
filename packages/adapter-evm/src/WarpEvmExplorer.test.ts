@@ -9,7 +9,7 @@ describe('WarpEvmExplorer', () => {
     displayName: 'Ethereum',
     blockTime: 12000,
     addressHrp: '0x',
-    apiUrl: 'https://api.example.com',
+    defaultApiUrl: 'https://api.example.com',
     nativeToken: 'ETH',
   }
 
@@ -19,7 +19,7 @@ describe('WarpEvmExplorer', () => {
     displayName: 'Arbitrum',
     blockTime: 12000,
     addressHrp: '0x',
-    apiUrl: 'https://api.arbitrum.com',
+    defaultApiUrl: 'https://api.arbitrum.com',
     nativeToken: 'ARB',
   }
 
@@ -29,7 +29,7 @@ describe('WarpEvmExplorer', () => {
     displayName: 'Base',
     blockTime: 12000,
     addressHrp: '0x',
-    apiUrl: 'https://api.base.com',
+    defaultApiUrl: 'https://api.base.com',
     nativeToken: 'ETH',
   }
 

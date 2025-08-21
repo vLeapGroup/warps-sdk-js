@@ -2,6 +2,7 @@ import { SuiClient } from '@mysten/sui/client'
 import { Transaction } from '@mysten/sui/transactions'
 import {
   AdapterWarpRegistry,
+  getProviderUrl,
   WarpBrand,
   WarpCache,
   WarpCacheConfig,
@@ -12,7 +13,7 @@ import {
   WarpRegistryConfigInfo,
   WarpRegistryInfo,
 } from '@vleap/warps'
-import { getSuiApiUrl, getSuiRegistryPackageId } from './config'
+import { getSuiRegistryPackageId } from './config'
 import { toRegistryMoveTarget, toTypedRegistryInfo } from './helpers/registry'
 
 export class WarpSuiRegistry implements AdapterWarpRegistry {
@@ -28,7 +29,8 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
     private config: WarpClientConfig,
     private readonly chain: WarpChainInfo
   ) {
-    this.client = new SuiClient({ url: getSuiApiUrl(config.env) })
+    const apiUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
+    this.client = new SuiClient({ url: apiUrl })
     this.cache = new WarpCache(config.cache?.type)
     this.userWallet = this.config.user?.wallets?.[this.chain.name] || null
   }

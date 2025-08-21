@@ -2,6 +2,7 @@ import {
   AdapterWarpExecutor,
   applyResultsToMessages,
   getNextInfo,
+  getProviderUrl,
   getWarpActionByIndex,
   WarpActionInputType,
   WarpChainInfo,
@@ -11,7 +12,6 @@ import {
   WarpQueryAction,
 } from '@vleap/warps'
 import { ethers } from 'ethers'
-import { getEvmApiUrl } from './config'
 import { WarpEvmConstants } from './constants'
 import { WarpEvmResults } from './WarpEvmResults'
 import { WarpEvmSerializer } from './WarpEvmSerializer'
@@ -21,9 +21,13 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
   private readonly provider: ethers.JsonRpcProvider
   private readonly results: WarpEvmResults
 
-  constructor(private readonly config: WarpClientConfig) {
+  constructor(
+    private readonly config: WarpClientConfig,
+    private readonly chain: WarpChainInfo
+  ) {
     this.serializer = new WarpEvmSerializer()
-    this.provider = new ethers.JsonRpcProvider(getEvmApiUrl(config.env))
+    const apiUrl = getProviderUrl(this.config, chain.name, this.config.env, this.chain.defaultApiUrl)
+    this.provider = new ethers.JsonRpcProvider(apiUrl)
     this.results = new WarpEvmResults(config)
   }
 

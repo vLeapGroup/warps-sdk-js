@@ -5,6 +5,7 @@ import {
   evaluateResultsCommon,
   findWarpExecutableAction,
   getNextInfo,
+  getProviderUrl,
   parseResultsOutIndex,
   ResolvedInput,
   Warp,
@@ -17,7 +18,6 @@ import {
   WarpExecutionResults,
 } from '@vleap/warps'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
-import { getSuiApiUrl } from './config'
 
 export class WarpSuiResults implements AdapterWarpResults {
   private readonly serializer: WarpSuiSerializer
@@ -28,7 +28,8 @@ export class WarpSuiResults implements AdapterWarpResults {
     private readonly chain: WarpChainInfo
   ) {
     this.serializer = new WarpSuiSerializer()
-    this.client = new SuiClient({ url: getSuiApiUrl(config.env) })
+    const apiUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
+    this.client = new SuiClient({ url: apiUrl })
   }
 
   async getTransactionExecutionResults(warp: Warp, tx: any): Promise<WarpExecution> {

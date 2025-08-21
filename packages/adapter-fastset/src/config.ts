@@ -2,7 +2,7 @@ import { WarpChainEnv } from '@vleap/warps'
 
 // Fastset Chain configurations
 export interface FastsetChainConfig {
-  apiUrl: string
+  defaultApiUrl: string
   proxyUrl: string
   explorerUrl: string
   chainId: string
@@ -15,7 +15,7 @@ export interface FastsetChainConfig {
 export const FASTSET_CHAIN_CONFIGS: Record<string, Record<WarpChainEnv, FastsetChainConfig>> = {
   fastset: {
     mainnet: {
-      apiUrl: 'http://157.90.201.117:8765',
+      defaultApiUrl: 'http://157.90.201.117:8765',
       proxyUrl: 'http://136.243.61.168:44444',
       explorerUrl: 'https://explorer.fastset.com',
       chainId: '1',
@@ -24,7 +24,7 @@ export const FASTSET_CHAIN_CONFIGS: Record<string, Record<WarpChainEnv, FastsetC
       blockTime: 12000,
     },
     testnet: {
-      apiUrl: 'http://157.90.201.117:8765',
+      defaultApiUrl: 'http://157.90.201.117:8765',
       proxyUrl: 'http://136.243.61.168:44444',
       explorerUrl: 'https://testnet-explorer.fastset.com',
       chainId: '11155111',
@@ -33,7 +33,7 @@ export const FASTSET_CHAIN_CONFIGS: Record<string, Record<WarpChainEnv, FastsetC
       blockTime: 12000,
     },
     devnet: {
-      apiUrl: 'http://157.90.201.117:8765',
+      defaultApiUrl: 'http://157.90.201.117:8765',
       proxyUrl: 'http://136.243.61.168:44444',
       explorerUrl: 'http://localhost:4000',
       chainId: '1337',

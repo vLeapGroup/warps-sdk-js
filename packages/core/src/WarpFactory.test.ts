@@ -88,7 +88,7 @@ describe('WarpFactory', () => {
     chainId: 'D',
     blockTime: 6000,
     addressHrp: 'erd',
-    apiUrl: 'https://api',
+    defaultApiUrl: 'https://api',
     nativeToken: 'EGLD',
   }
 
@@ -168,7 +168,7 @@ describe('getChainInfoForAction', () => {
       chainId: '1',
       blockTime: 6000,
       addressHrp: 'erd',
-      apiUrl: 'https://api.multiversx.com',
+      defaultApiUrl: 'https://api.multiversx.com',
       explorerUrl: 'https://explorer.multiversx.com',
       nativeToken: 'EGLD',
     })
@@ -180,7 +180,7 @@ describe('getChainInfoForAction', () => {
       chainId: '1',
       blockTime: 6000,
       addressHrp: 'erd',
-      apiUrl: 'https://api.multiversx.com',
+      defaultApiUrl: 'https://api.multiversx.com',
       nativeToken: 'EGLD',
     }
     adapter.registry.getChainInfo = mockGetChainInfo
@@ -226,7 +226,7 @@ describe('getChainInfoForAction', () => {
       chainId: 'T',
       blockTime: 6,
       addressHrp: 'erd',
-      apiUrl: 'https://testnet-api.multiversx.com',
+      defaultApiUrl: 'https://testnet-api.multiversx.com',
       nativeToken: 'EGLD',
     })
     const adapter = createMockAdapter()
@@ -237,7 +237,7 @@ describe('getChainInfoForAction', () => {
       chainId: 'T',
       blockTime: 6,
       addressHrp: 'erd',
-      apiUrl: 'https://testnet-api.multiversx.com',
+      defaultApiUrl: 'https://testnet-api.multiversx.com',
       nativeToken: 'EGLD',
     }
     adapter.registry.getChainInfo = mockGetChainInfo
