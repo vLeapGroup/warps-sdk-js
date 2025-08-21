@@ -7,4 +7,5 @@ export default {
   }),
   minify: true,
   clean: true,
+  skipNodeModulesBundle: true,
 }

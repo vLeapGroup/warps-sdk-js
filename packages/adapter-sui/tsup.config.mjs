@@ -9,5 +9,5 @@ export default defineConfig({
   }),
   minify: true,
   clean: true,
-  external: ['@vleap/warps', '@mysten/sui'],
+  skipNodeModulesBundle: true,
 })

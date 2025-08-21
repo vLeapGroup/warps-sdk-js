@@ -9,6 +9,6 @@ export default defineConfig({
   }),
   minify: true,
   clean: true,
-  external: ['crypto', 'node:crypto'],
+  skipNodeModulesBundle: true,
   target: 'es2020',
 })
