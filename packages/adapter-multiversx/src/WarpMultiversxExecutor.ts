@@ -24,6 +24,7 @@ import {
   getWarpActionByIndex,
   shiftBigintBy,
   WarpActionInputType,
+  WarpChainAssetValue,
   WarpChainEnv,
   WarpChainInfo,
   WarpClientConfig,
@@ -79,9 +80,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
     return new TransferTransactionsFactory({ config }).createTransactionForTransfer(sender, {
       receiver: Address.newFromBech32(executable.destination),
       nativeAmount: executable.value,
-      tokenTransfers: executable.transfers.map(
-        (t) => new TokenTransfer({ token: new Token({ identifier: t.identifier, nonce: BigInt(t.nonce) }), amount: t.amount })
-      ),
+      tokenTransfers: this.toTokenTransfers(executable.transfers),
       data: data ? new Uint8Array(data) : undefined,
     })
   }
@@ -98,7 +97,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
       function: 'func' in action ? action.func || '' : '',
       gasLimit: 'gasLimit' in action ? BigInt(action.gasLimit || 0) : 0n,
       arguments: typedArgs,
-      //   tokenTransfers: executable.transfers, // TODO
+      tokenTransfers: this.toTokenTransfers(executable.transfers),
       nativeTransferAmount: executable.value,
     })
   }
@@ -175,5 +174,9 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
     const signer = new UserSigner(secretKey)
     const signature = await signer.sign(new Uint8Array(Buffer.from(message, 'utf-8')))
     return signature.toString()
+  }
+
+  private toTokenTransfers(transfers: WarpChainAssetValue[]): TokenTransfer[] {
+    return transfers.map((t) => new TokenTransfer({ token: new Token({ identifier: t.identifier, nonce: t.nonce }), amount: t.amount }))
   }
 }
