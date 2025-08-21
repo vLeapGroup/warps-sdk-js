@@ -1,5 +1,17 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.34
+
+### Minor Changes
+
+- 9a37aca: implement mvx transfers
+
+### Patch Changes
+
+- bcce744: update executable transfers type
+- Updated dependencies [bcce744]
+  - @vleap/warps@3.0.0-alpha.83
+
 ## 0.2.0-alpha.33
 
 ### Patch Changes
