@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.79
+
+### Patch Changes
+
+- 62a9872: add client execute from url support
+
 ## 3.0.0-alpha.78
 
 ### Patch Changes
