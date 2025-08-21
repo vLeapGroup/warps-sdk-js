@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.75
+
+### Minor Changes
+
+- 06ad967: update builds
+
 ## 3.0.0-alpha.74
 
 ### Patch Changes
