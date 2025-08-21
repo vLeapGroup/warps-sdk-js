@@ -1,5 +1,18 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.31
+
+### Minor Changes
+
+- 02ce817: add custom types
+- 7299456: add asset type
+
+### Patch Changes
+
+- Updated dependencies [02ce817]
+- Updated dependencies [7299456]
+  - @vleap/warps@3.0.0-alpha.77
+
 ## 0.2.0-alpha.30
 
 ### Minor Changes

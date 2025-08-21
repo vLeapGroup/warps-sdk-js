@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.77
+
+### Minor Changes
+
+- 02ce817: add custom types
+- 7299456: add asset type
+
 ## 3.0.0-alpha.76
 
 ### Minor Changes
