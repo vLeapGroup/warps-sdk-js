@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.74
+
+### Patch Changes
+
+- 7445aa3: exclude test files from builds
+
 ## 3.0.0-alpha.73
 
 ### Minor Changes

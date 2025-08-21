@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-alpha.12
+
+### Patch Changes
+
+- 7445aa3: exclude test files from builds
+- Updated dependencies [7445aa3]
+  - @vleap/warps@3.0.0-alpha.74
+
 ## 0.2.0-alpha.11
 
 ### Minor Changes

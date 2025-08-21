@@ -1,5 +1,13 @@
 # @vleap/warps-vm-browser
 
+## 0.1.0-alpha.4
+
+### Patch Changes
+
+- 7445aa3: exclude test files from builds
+- Updated dependencies [7445aa3]
+  - @vleap/warps@3.0.0-alpha.74
+
 ## 0.1.0-alpha.3
 
 ### Minor Changes

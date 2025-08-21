@@ -1,13 +1,13 @@
 {
   "name": "@vleap/warps-vm-node",
-  "version": "0.1.0-alpha.3",
+  "version": "0.1.0-alpha.4",
   "type": "module",
   "types": "dist/runInVm.d.ts",
   "files": [
     "dist"
   ],
   "dependencies": {
-    "@vleap/warps": "^3.0.0-alpha.73",
+    "@vleap/warps": "^3.0.0-alpha.74",
     "vm2": "^3.9.19"
   },
   "devDependencies": {
