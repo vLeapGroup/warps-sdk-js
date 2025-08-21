@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.27
+
+### Patch Changes
+
+- dd226b9: add generic tx to warp executions
+- Updated dependencies [dd226b9]
+  - @vleap/warps@3.0.0-alpha.84
+
 ## 0.2.0-alpha.26
 
 ### Minor Changes

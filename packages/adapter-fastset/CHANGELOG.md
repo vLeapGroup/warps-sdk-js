@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-alpha.12
+
+### Patch Changes
+
+- dd226b9: add generic tx to warp executions
+- Updated dependencies [dd226b9]
+  - @vleap/warps@3.0.0-alpha.84
+
 ## 0.1.0-alpha.11
 
 ### Minor Changes

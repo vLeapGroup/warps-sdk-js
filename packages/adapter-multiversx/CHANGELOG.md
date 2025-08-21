@@ -1,5 +1,14 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.35
+
+### Patch Changes
+
+- dd226b9: add generic tx to warp executions
+- 6d787ae: add further mvx token transfer support
+- Updated dependencies [dd226b9]
+  - @vleap/warps@3.0.0-alpha.84
+
 ## 0.2.0-alpha.34
 
 ### Minor Changes

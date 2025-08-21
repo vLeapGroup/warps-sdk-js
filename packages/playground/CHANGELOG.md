@@ -1,5 +1,17 @@
 # @warps/playground
 
+## 0.2.0-alpha.18
+
+### Patch Changes
+
+- Updated dependencies [dd226b9]
+- Updated dependencies [6d787ae]
+  - @vleap/warps-adapter-multiversx@0.2.0-alpha.35
+  - @vleap/warps-adapter-fastset@0.1.0-alpha.12
+  - @vleap/warps-adapter-evm@0.2.0-alpha.16
+  - @vleap/warps-adapter-sui@0.2.0-alpha.27
+  - @vleap/warps@3.0.0-alpha.84
+
 ## 0.2.0-alpha.17
 
 ### Patch Changes

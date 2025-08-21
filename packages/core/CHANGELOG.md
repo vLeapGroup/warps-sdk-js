@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.84
+
+### Patch Changes
+
+- dd226b9: add generic tx to warp executions
+
 ## 3.0.0-alpha.83
 
 ### Patch Changes
