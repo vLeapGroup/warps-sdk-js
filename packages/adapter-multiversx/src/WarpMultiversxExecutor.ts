@@ -138,7 +138,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
   }
 
   async preprocessInput(chain: WarpChainInfo, input: string, type: WarpActionInputType, value: string): Promise<string> {
-    if (type === 'esdt') {
+    if (type === 'asset') {
       const [tokenId, nonce, amount, existingDecimals] = value.split(WarpConstants.ArgCompositeSeparator)
       if (existingDecimals) return input
       const token = new Token({ identifier: tokenId, nonce: BigInt(nonce) })

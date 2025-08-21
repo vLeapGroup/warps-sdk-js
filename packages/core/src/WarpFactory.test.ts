@@ -149,7 +149,7 @@ describe('WarpFactory', () => {
     expect(result[0].value).toBe('biguint:500')
   })
 
-  it('preprocessInput returns input as-is for non-esdt', async () => {
+  it('preprocessInput returns input as-is for non-asset', async () => {
     const factory = new WarpFactory(config, [createMockAdapter()])
     const result = await factory.preprocessInput('multiversx', 'biguint:123')
     expect(result).toBe('biguint:123')

@@ -128,11 +128,11 @@ describe('WarpMultiversxSerializer', () => {
       expect(result).toBe('codemeta:0106')
     })
 
-    it('converts EsdtTokenPayment Struct to esdt', () => {
+    it('converts EsdtTokenPayment Struct to asset', () => {
       const token = new Token({ identifier: 'AAA-123456', nonce: BigInt(5) })
       const transfer = new TokenTransfer({ token, amount: BigInt(100) })
       const result = serializer.typedToString(esdt_value(transfer))
-      expect(result).toBe('esdt:AAA-123456|5|100')
+      expect(result).toBe('asset:AAA-123456|5|100')
     })
 
     it('converts a composite value', () => {
@@ -292,8 +292,8 @@ describe('WarpMultiversxSerializer', () => {
       expect(result.valueOf().toString()).toBe('0106')
     })
 
-    it('converts esdt to EsdtTokenPayment Struct', () => {
-      const result = serializer.nativeToTyped('esdt', 'AAA-123456|5|100') as Struct
+    it('converts asset to EsdtTokenPayment Struct', () => {
+      const result = serializer.nativeToTyped('asset', 'AAA-123456|5|100') as Struct
       expect(result).toBeInstanceOf(Struct)
       expect(result.getFieldValue('token_identifier').valueOf()).toBe('AAA-123456')
       expect(result.getFieldValue('token_nonce').toString()).toBe('5')

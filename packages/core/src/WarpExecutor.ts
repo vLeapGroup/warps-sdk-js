@@ -14,6 +14,7 @@ import {
   WarpAdapterGenericRemoteTransaction,
   WarpAdapterGenericTransaction,
   WarpChain,
+  WarpChainAssetValue,
   WarpChainInfo,
   WarpClientConfig,
   WarpExecution,
@@ -78,13 +79,9 @@ export class WarpExecutor {
       const value = this.serializer.stringToNative(resolvedInput.value)[1]
       if (resolvedInput.input.type === 'biguint') {
         return (value as bigint).toString()
-      } else if (resolvedInput.input.type === 'esdt') {
-        const [identifier, nonce, amount] = (value as string).split('|')
-        return {
-          token_identifier: identifier,
-          token_nonce: parseInt(nonce),
-          amount: amount,
-        }
+      } else if (resolvedInput.input.type === 'asset') {
+        const { identifier, nonce, amount } = value as WarpChainAssetValue
+        return { identifier, nonce: nonce.toString(), amount: amount.toString() }
       } else {
         return value
       }

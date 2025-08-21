@@ -1,4 +1,5 @@
 import { WarpInputTypes } from './constants'
+import { WarpChainAsset } from './types'
 
 // TODO: implement below
 // export const option = (value: TypedValue | null, type?: Type): string => {
@@ -43,5 +44,7 @@ export const biguint = (value: bigint | string | number): string => `${WarpInput
 export const boolean = (value: boolean): string => `${WarpInputTypes.Boolean}:${value}`
 
 export const address = (value: string): string => `${WarpInputTypes.Address}:${value}`
+
+export const asset = (value: WarpChainAsset): string => `${WarpInputTypes.Asset}:${value}`
 
 export const hex = (value: string): string => `${WarpInputTypes.Hex}:${value}`

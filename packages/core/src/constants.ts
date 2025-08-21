@@ -73,5 +73,6 @@ export const WarpInputTypes = {
   Biguint: 'biguint',
   Boolean: 'boolean',
   Address: 'address',
+  Asset: 'asset',
   Hex: 'hex',
 }

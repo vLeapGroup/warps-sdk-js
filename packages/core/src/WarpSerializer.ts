@@ -1,12 +1,11 @@
 import { WarpConstants } from './constants'
-import { BaseWarpActionInputType, WarpActionInputType, WarpNativeValue } from './types'
+import { BaseWarpActionInputType, WarpActionInputType, WarpChainAssetValue, WarpNativeValue } from './types'
 
 export class WarpSerializer {
   nativeToString(type: WarpActionInputType, value: WarpNativeValue): string {
-    // TODO: esdt type should technically not be in core since it's mvx specific. call it token instead?
-    // if (type === 'esdt' && value instanceof TokenTransfer) {
-    //   return `esdt:${value.token.identifier}|${value.token.nonce.toString()}|${value.amount.toString()}`
-    // }
+    if (type === 'asset' && typeof value === 'object' && value && 'identifier' in value && 'nonce' in value && 'amount' in value) {
+      return `${type}:${value.identifier}|${value.nonce.toString()}|${value.amount.toString()}`
+    }
     return `${type}:${value?.toString() ?? ''}`
   }
 
@@ -51,10 +50,10 @@ export class WarpSerializer {
     else if (baseType === 'token') return [baseType, val]
     else if (baseType === 'hex') return [baseType, val]
     else if (baseType === 'codemeta') return [baseType, val]
-    else if (baseType === 'esdt') {
+    else if (baseType === 'asset') {
       const [identifier, nonce, amount] = (val as string).split(WarpConstants.ArgCompositeSeparator)
-      return [baseType, `${identifier}|${nonce}|${amount}`]
-      //   return [baseType, new TokenTransfer({ token: new Token({ identifier, nonce: BigInt(nonce) }), amount: BigInt(amount) })]
+      const value: WarpChainAssetValue = { identifier, nonce: BigInt(nonce), amount: BigInt(amount) }
+      return [baseType, value]
     }
     throw new Error(`WarpArgSerializer (stringToNative): Unsupported input type: ${baseType}`)
   }

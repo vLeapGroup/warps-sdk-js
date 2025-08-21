@@ -111,7 +111,7 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
       const identifier = (value as Struct).getFieldValue('token_identifier').valueOf()
       const nonce = (value as Struct).getFieldValue('token_nonce').valueOf()
       const amount = (value as Struct).getFieldValue('amount').valueOf()
-      return `esdt:${identifier}|${nonce}|${amount}`
+      return `asset:${identifier}|${nonce}|${amount}`
     }
     throw new Error(`WarpArgSerializer (typedToString): Unsupported input type: ${value.getClassName()}`)
   }
@@ -144,7 +144,7 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
     if (type === 'token') return new TokenIdentifierType()
     if (type === 'hex') return new BytesType()
     if (type === 'codemeta') return new CodeMetadataType()
-    if (type === 'esdt' || type === 'nft')
+    if (type === 'asset')
       return new StructType('EsdtTokenPayment', [
         new FieldDefinition('token_identifier', '', new TokenIdentifierType()),
         new FieldDefinition('token_nonce', '', new U64Type()),
@@ -198,9 +198,9 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
     if (type === 'token') return val ? new TokenIdentifierValue(val as string) : new NothingValue()
     if (type === 'hex') return val ? BytesValue.fromHex(val as string) : new NothingValue()
     if (type === 'codemeta') return new CodeMetadataValue(CodeMetadata.newFromBytes(Uint8Array.from(Buffer.from(val as string, 'hex'))))
-    if (type === 'esdt') {
+    if (type === 'asset') {
       const parts = val.split(WarpConstants.ArgCompositeSeparator)
-      return new Struct(this.nativeToType('esdt') as StructType, [
+      return new Struct(this.nativeToType('asset') as StructType, [
         new Field(new TokenIdentifierValue(parts[0]), 'token_identifier'),
         new Field(new U64Value(BigInt(parts[1])), 'token_nonce'),
         new Field(new BigUIntValue(BigInt(parts[2])), 'amount'),
@@ -226,7 +226,7 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
     if (type instanceof TokenIdentifierType) return 'token'
     if (type instanceof BytesType) return 'hex'
     if (type instanceof CodeMetadataType) return 'codemeta'
-    if (type instanceof StructType && type.getClassName() === 'EsdtTokenPayment') return 'esdt'
+    if (type instanceof StructType && type.getClassName() === 'EsdtTokenPayment') return 'asset'
     throw new Error(`WarpArgSerializer (typeToString): Unsupported input type: ${type.getClassName()}`)
   }
 }

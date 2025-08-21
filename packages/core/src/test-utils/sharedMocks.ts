@@ -169,6 +169,14 @@ export const createMockAdapter = () => ({
       return Promise.resolve(null)
     },
   },
+  dataLoader: {
+    getAccount(address: string) {
+      return Promise.resolve({ address, balance: BigInt(0) })
+    },
+    getAccountAssets(address: string) {
+      return Promise.resolve([])
+    },
+  },
 })
 
 export const createMockConfig = (overrides: Partial<WarpClientConfig> = {}): WarpClientConfig => ({
