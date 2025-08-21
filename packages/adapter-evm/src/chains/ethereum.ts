@@ -10,16 +10,16 @@ export const getEthereumAdapter: AdapterFactory = createEvmAdapter(ChainNameEthe
     chainId: '11155111',
     blockTime: 12000,
     addressHrp: '0x',
-    defaultApiUrl: 'https://eth-sepolia.g.alchemy.com/v2/YOUR_API_KEY',
+    defaultApiUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
     nativeToken: 'ETH',
   },
   testnet: {
     name: ChainNameEthereum,
     displayName: 'Ethereum Testnet',
-    chainId: '5',
+    chainId: '11155111',
     blockTime: 12000,
     addressHrp: '0x',
-    defaultApiUrl: 'https://eth-goerli.g.alchemy.com/v2/YOUR_API_KEY',
+    defaultApiUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
     nativeToken: 'ETH',
   },
   mainnet: {
@@ -28,7 +28,7 @@ export const getEthereumAdapter: AdapterFactory = createEvmAdapter(ChainNameEthe
     chainId: '1',
     blockTime: 12000,
     addressHrp: '0x',
-    defaultApiUrl: 'https://eth-mainnet.g.alchemy.com/v2/YOUR_API_KEY',
+    defaultApiUrl: 'https://ethereum-rpc.publicnode.com',
     nativeToken: 'ETH',
   },
 })
