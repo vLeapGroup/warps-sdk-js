@@ -11,4 +11,5 @@ export default defineConfig({
   clean: true,
   external: ['crypto', 'node:crypto'],
   target: 'es2020',
+  exclude: ['**/*.test.ts', '**/*.test.js', '**/__tests__/**', '**/test-utils/**'],
 })

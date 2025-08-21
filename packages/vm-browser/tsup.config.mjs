@@ -7,4 +7,5 @@ export default {
   }),
   minify: true,
   clean: true,
+  exclude: ['**/*.test.ts', '**/*.test.js', '**/__tests__/**', '**/test-utils/**'],
 }

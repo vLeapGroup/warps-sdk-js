@@ -5,5 +5,5 @@
     "module": "esnext"
   },
   "include": ["src"],
-  "exclude": ["dist", "build", "node_modules"]
+  "exclude": ["dist", "build", "node_modules", "**/*.test.ts", "**/*.test.js", "**/__tests__/**", "**/test-utils/**"]
 }

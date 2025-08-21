@@ -11,4 +11,5 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   external: ['@vleap/warps'],
+  exclude: ['**/*.test.ts', '**/*.test.js', '**/__tests__/**', '**/test-utils/**'],
 })
