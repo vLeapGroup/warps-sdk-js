@@ -57,6 +57,23 @@ describe('WarpFastsetResults', () => {
         action: 0,
         user: 'fs1testaddress123456789',
         txHash: '0x123456789abcdef',
+        tx: {
+          blockNumber: '12345',
+          gasPrice: '20000000000',
+          gasUsed: '21000',
+          hash: '0x123456789abcdef',
+          logs: [
+            {
+              address: 'fs1contract123456789',
+              blockNumber: '12345',
+              data: '0x',
+              index: '0',
+              topics: ['0x123456789abcdef'],
+              transactionHash: '0x123456789abcdef',
+            },
+          ],
+          status: 'success',
+        },
         next: null,
         values: [
           '0x123456789abcdef',
