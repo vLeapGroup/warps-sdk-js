@@ -1,4 +1,4 @@
-import { WarpInputTypes } from './constants'
+import { WarpConstants, WarpInputTypes } from './constants'
 import { WarpChainAsset } from './types'
 
 // TODO: implement below
@@ -29,22 +29,29 @@ import { WarpChainAsset } from './types'
 //   return `${WarpInputTypes.Composite}:${types.join(WarpConstants.ArgCompositeSeparator)}`
 // }
 
-export const string = (value: string): string => `${WarpInputTypes.String}:${value}`
+export const string = (value: string): string => WarpInputTypes.String + WarpConstants.ArgParamsSeparator + value
 
-export const u8 = (value: number): string => `${WarpInputTypes.U8}:${value}`
+export const u8 = (value: number): string => WarpInputTypes.U8 + WarpConstants.ArgParamsSeparator + value
 
-export const u16 = (value: number): string => `${WarpInputTypes.U16}:${value}`
+export const u16 = (value: number): string => WarpInputTypes.U16 + WarpConstants.ArgParamsSeparator + value
 
-export const u32 = (value: number): string => `${WarpInputTypes.U32}:${value}`
+export const u32 = (value: number): string => WarpInputTypes.U32 + WarpConstants.ArgParamsSeparator + value
 
-export const u64 = (value: bigint | number): string => `${WarpInputTypes.U64}:${value}`
+export const u64 = (value: bigint | number): string => WarpInputTypes.U64 + WarpConstants.ArgParamsSeparator + value
 
-export const biguint = (value: bigint | string | number): string => `${WarpInputTypes.Biguint}:${value}`
+export const biguint = (value: bigint | string | number): string => WarpInputTypes.Biguint + WarpConstants.ArgParamsSeparator + value
 
-export const boolean = (value: boolean): string => `${WarpInputTypes.Boolean}:${value}`
+export const boolean = (value: boolean): string => WarpInputTypes.Boolean + WarpConstants.ArgParamsSeparator + value
 
-export const address = (value: string): string => `${WarpInputTypes.Address}:${value}`
+export const address = (value: string): string => WarpInputTypes.Address + WarpConstants.ArgParamsSeparator + value
 
-export const asset = (value: WarpChainAsset): string => `${WarpInputTypes.Asset}:${value}`
+export const asset = (value: WarpChainAsset): string =>
+  WarpInputTypes.Asset +
+  WarpConstants.ArgParamsSeparator +
+  value.identifier +
+  WarpConstants.ArgCompositeSeparator +
+  value.nonce +
+  WarpConstants.ArgCompositeSeparator +
+  value.amount
 
-export const hex = (value: string): string => `${WarpInputTypes.Hex}:${value}`
+export const hex = (value: string): string => WarpInputTypes.Hex + WarpConstants.ArgParamsSeparator + value
