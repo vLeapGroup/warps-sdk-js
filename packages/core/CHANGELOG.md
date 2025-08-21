@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.81
+
+### Patch Changes
+
+- f2a9fa4: update utils
+
 ## 3.0.0-alpha.80
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.33
+
+### Patch Changes
+
+- 5b91c62: update mvx preprocessing
+- Updated dependencies [f2a9fa4]
+  - @vleap/warps@3.0.0-alpha.81
+
 ## 0.2.0-alpha.32
 
 ### Patch Changes
