@@ -50,7 +50,7 @@ export const asset = (value: WarpChainAsset): string =>
   WarpConstants.ArgParamsSeparator +
   value.identifier +
   WarpConstants.ArgCompositeSeparator +
-  value.nonce +
+  BigInt(value.nonce || 0).toString() +
   WarpConstants.ArgCompositeSeparator +
   value.amount
 

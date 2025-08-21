@@ -1,5 +1,5 @@
 import { WarpInputTypes } from './constants'
-import { address, biguint, boolean, hex, string, u16, u32, u64, u8 } from './utils.codec'
+import { address, asset, biguint, boolean, hex, string, u16, u32, u64, u8 } from './utils.codec'
 
 describe('utils.codec', () => {
   describe('string', () => {
@@ -62,6 +62,37 @@ describe('utils.codec', () => {
     it('encodes an address value', () => {
       expect(address('erd1...')).toBe(`${WarpInputTypes.Address}:erd1...`)
       expect(address('')).toBe(`${WarpInputTypes.Address}:`)
+    })
+  })
+
+  describe('asset', () => {
+    it('encodes an asset value with all properties', () => {
+      const assetValue = {
+        identifier: 'WEGLD-123456',
+        nonce: BigInt(5),
+        name: 'Wrapped EGLD',
+        amount: BigInt('1000000000000000000'),
+      }
+      expect(asset(assetValue)).toBe(`${WarpInputTypes.Asset}:WEGLD-123456|5|1000000000000000000`)
+    })
+
+    it('encodes an asset value with zero nonce', () => {
+      const assetValue = {
+        identifier: 'MEX-abcdef',
+        nonce: BigInt(0),
+        name: 'MEX Token',
+        amount: BigInt('500000000'),
+      }
+      expect(asset(assetValue)).toBe(`${WarpInputTypes.Asset}:MEX-abcdef|0|500000000`)
+    })
+
+    it('encodes an asset value without nonce', () => {
+      const assetValue = {
+        identifier: 'USDC-123456',
+        name: 'USD Coin',
+        amount: BigInt('1000000'),
+      }
+      expect(asset(assetValue)).toBe(`${WarpInputTypes.Asset}:USDC-123456|0|1000000`)
     })
   })
 
