@@ -61,12 +61,34 @@ export type Adapter = {
   abiBuilder: () => AdapterWarpAbiBuilder
   brandBuilder: () => AdapterWarpBrandBuilder
   dataLoader: AdapterWarpDataLoader
+  // Optional method for registering adapter-specific types
+  registerTypes?: (typeRegistry: WarpTypeRegistry) => void
 }
 
 export type WarpAdapterGenericTransaction = any
 export type WarpAdapterGenericRemoteTransaction = any
 export type WarpAdapterGenericValue = any
 export type WarpAdapterGenericType = any
+
+// Type handler for adapter-specific types
+export interface WarpTypeHandler {
+  // Convert string value to native value (e.g., "TOKEN-123456" -> "TOKEN-123456")
+  stringToNative(value: string): any
+  // Convert native value to string (e.g., "TOKEN-123456" -> "token:TOKEN-123456")
+  nativeToString(value: any): string
+}
+
+// Registry for adapter-specific types
+export interface WarpTypeRegistry {
+  // Register a custom type handler for a specific type
+  registerType(typeName: string, handler: WarpTypeHandler): void
+  // Check if a type is registered
+  hasType(typeName: string): boolean
+  // Get handler for a type
+  getHandler(typeName: string): WarpTypeHandler | undefined
+  // Get all registered type names
+  getRegisteredTypes(): string[]
+}
 
 export interface BaseWarpBuilder {
   createFromRaw(encoded: string): Promise<Warp>

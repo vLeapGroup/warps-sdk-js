@@ -1,4 +1,4 @@
-import { createMockAdapter, createMockChainInfo, createMockWarp } from './test-utils/sharedMocks'
+import { createMockAdapter, createMockWarp } from './test-utils/sharedMocks'
 import { Warp, WarpClientConfig, WarpCollectAction } from './types'
 import { WarpExecutor } from './WarpExecutor'
 
@@ -9,8 +9,6 @@ global.fetch = mockFetch as any
 describe('WarpExecutor', () => {
   const handlers = { onExecuted: jest.fn(), onError: jest.fn() }
   const warp: Warp = createMockWarp()
-
-  const mockChainInfo = createMockChainInfo('multiversx')
 
   const config: WarpClientConfig = {
     env: 'devnet',
@@ -100,8 +98,8 @@ describe('WarpExecutor', () => {
                 position: 'value' as const,
               },
               {
-                name: 'token',
-                type: 'string',
+                name: 'asset',
+                type: 'asset',
                 source: 'field' as const,
                 position: 'transfer' as const,
               },
@@ -116,7 +114,7 @@ describe('WarpExecutor', () => {
         ],
       }
       // Provide valid receiver input for the collect action
-      const inputs = ['address:erd1receiver', 'biguint:100', 'token:MYTOKEN', 'queryParam:foo']
+      const inputs = ['address:erd1receiver', 'biguint:100', 'asset:MYTOKEN|0|100', 'queryParam:foo']
       const result = await executor.execute(collectWarp, inputs)
       expect(result).toBeDefined()
       expect(handlers.onExecuted).toHaveBeenCalled()

@@ -1,4 +1,4 @@
-import { Adapter, AdapterFactory, WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { Adapter, AdapterFactory, WarpChainEnv, WarpChainInfo, WarpClientConfig, WarpTypeRegistry } from '@vleap/warps'
 import { WarpMultiversxAbiBuilder } from '../WarpMultiversxAbiBuilder'
 import { WarpMultiversxBrandBuilder } from '../WarpMultiversxBrandBuilder'
 import { WarpMultiversxBuilder } from '../WarpMultiversxBuilder'
@@ -29,6 +29,18 @@ export const createMultiversxAdapter = (
       abiBuilder: () => new WarpMultiversxAbiBuilder(config, chainInfo),
       brandBuilder: () => new WarpMultiversxBrandBuilder(config, chainInfo),
       dataLoader: new WarpMultiversxDataLoader(config, chainInfo),
+      registerTypes: (typeRegistry: WarpTypeRegistry) => {
+        // Register MultiversX-specific types
+        typeRegistry.registerType('token', {
+          stringToNative: (value: string) => value,
+          nativeToString: (value: any) => `token:${value}`,
+        })
+
+        typeRegistry.registerType('codemeta', {
+          stringToNative: (value: string) => value,
+          nativeToString: (value: any) => `codemeta:${value}`,
+        })
+      },
     }
   }
 }

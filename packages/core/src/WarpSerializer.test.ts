@@ -38,6 +38,21 @@ describe('WarpSerializer', () => {
       expect(serializer.nativeToString('hex', '0x1234')).toBe('hex:0x1234')
     })
 
+    it('serializes token values via type registry', () => {
+      // Mock type registry with token handler
+      const mockTypeRegistry = {
+        hasType: (type: string) => type === 'token',
+        getHandler: (type: string) => ({
+          stringToNative: (value: string) => value,
+          nativeToString: (value: any) => `token:${value}`,
+        }),
+        registerType: () => {},
+        getRegisteredTypes: () => ['token'],
+      }
+      serializer.setTypeRegistry(mockTypeRegistry as any)
+      expect(serializer.nativeToString('token', 'TOKEN-123456')).toBe('token:TOKEN-123456')
+    })
+
     // TODO: implement codemeta functionality
     // it('serializes codemeta values', () => {
     //   expect(serializer.nativeToString('codemeta', '0106')).toBe('codemeta:0106')
@@ -156,6 +171,21 @@ describe('WarpSerializer', () => {
 
     it('deserializes string values', () => {
       expect(serializer.stringToNative('string:hello')).toEqual(['string', 'hello'])
+    })
+
+    it('deserializes token values via type registry', () => {
+      // Mock type registry with token handler
+      const mockTypeRegistry = {
+        hasType: (type: string) => type === 'token',
+        getHandler: (type: string) => ({
+          stringToNative: (value: string) => value,
+          nativeToString: (value: any) => `token:${value}`,
+        }),
+        registerType: () => {},
+        getRegisteredTypes: () => ['token'],
+      }
+      serializer.setTypeRegistry(mockTypeRegistry as any)
+      expect(serializer.stringToNative('token:TOKEN-123456')).toEqual(['token', 'TOKEN-123456'])
     })
 
     it('deserializes uint values', () => {

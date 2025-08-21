@@ -16,6 +16,7 @@ import {
 } from './types'
 import { CacheTtl, WarpCache, WarpCacheKey } from './WarpCache'
 import { WarpSerializer } from './WarpSerializer'
+import { WarpTypeRegistryImpl } from './WarpTypeRegistry'
 
 export class WarpFactory {
   private url: URL
@@ -30,6 +31,17 @@ export class WarpFactory {
     this.url = new URL(config.currentUrl)
     this.serializer = new WarpSerializer()
     this.cache = new WarpCache(config.cache?.type)
+
+    // Initialize type registry with adapter-specific types
+    const typeRegistry = new WarpTypeRegistryImpl()
+    this.serializer.setTypeRegistry(typeRegistry)
+
+    // Register types from all adapters
+    for (const adapter of adapters) {
+      if (adapter.registerTypes) {
+        adapter.registerTypes(typeRegistry)
+      }
+    }
   }
 
   async createExecutable(warp: Warp, actionIndex: number, inputs: string[]): Promise<WarpExecutable> {

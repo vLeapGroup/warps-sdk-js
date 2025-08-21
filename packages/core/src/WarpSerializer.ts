@@ -1,11 +1,27 @@
 import { WarpConstants } from './constants'
-import { BaseWarpActionInputType, WarpActionInputType, WarpChainAssetValue, WarpNativeValue } from './types'
+import { BaseWarpActionInputType, WarpActionInputType, WarpChainAssetValue, WarpNativeValue, WarpTypeRegistry } from './types'
 
 export class WarpSerializer {
+  private typeRegistry: WarpTypeRegistry | undefined
+
+  setTypeRegistry(typeRegistry: WarpTypeRegistry): void {
+    this.typeRegistry = typeRegistry
+  }
   nativeToString(type: WarpActionInputType, value: WarpNativeValue): string {
+    // Check built-in types first
     if (type === 'asset' && typeof value === 'object' && value && 'identifier' in value && 'nonce' in value && 'amount' in value) {
       return `${type}:${value.identifier}|${value.nonce.toString()}|${value.amount.toString()}`
     }
+
+    // Check adapter-registered types
+    if (this.typeRegistry?.hasType(type)) {
+      const handler = this.typeRegistry.getHandler(type)
+      if (handler) {
+        return handler.nativeToString(value)
+      }
+    }
+
+    // Default behavior for standard types
     return `${type}:${value?.toString() ?? ''}`
   }
 
@@ -47,7 +63,6 @@ export class WarpSerializer {
     else if (baseType === 'uint64' || baseType === 'biguint') return [baseType, BigInt((val as string) || 0)]
     else if (baseType === 'bool') return [baseType, val === 'true']
     else if (baseType === 'address') return [baseType, val]
-    else if (baseType === 'token') return [baseType, val]
     else if (baseType === 'hex') return [baseType, val]
     else if (baseType === 'codemeta') return [baseType, val]
     else if (baseType === 'asset') {
@@ -55,6 +70,16 @@ export class WarpSerializer {
       const value: WarpChainAssetValue = { identifier, nonce: BigInt(nonce), amount: BigInt(amount) }
       return [baseType, value]
     }
+
+    // Check adapter-registered types before throwing error
+    if (this.typeRegistry?.hasType(baseType)) {
+      const handler = this.typeRegistry.getHandler(baseType)
+      if (handler) {
+        const nativeValue = handler.stringToNative(val)
+        return [baseType as WarpActionInputType, nativeValue]
+      }
+    }
+
     throw new Error(`WarpArgSerializer (stringToNative): Unsupported input type: ${baseType}`)
   }
 }
