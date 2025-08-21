@@ -53,10 +53,7 @@ describe('WarpSerializer', () => {
       expect(serializer.nativeToString('token', 'TOKEN-123456')).toBe('token:TOKEN-123456')
     })
 
-    // TODO: implement codemeta functionality
-    // it('serializes codemeta values', () => {
-    //   expect(serializer.nativeToString('codemeta', '0106')).toBe('codemeta:0106')
-    // })
+
 
     it('serializes asset values', () => {
       const assetValue = { identifier: 'AAA-123456', nonce: BigInt(5), amount: BigInt(100) }
@@ -221,10 +218,7 @@ describe('WarpSerializer', () => {
       expect(serializer.stringToNative('hex:0x1234')).toEqual(['hex', '0x1234'])
     })
 
-    // TODO: implement codemeta functionality
-    // it('deserializes codemeta values', () => {
-    //   expect(serializer.stringToNative('codemeta:0106')).toEqual(['codemeta', '0106'])
-    // })
+
 
     it('deserializes asset values', () => {
       const result = serializer.stringToNative('asset:AAA-123456|5|100')

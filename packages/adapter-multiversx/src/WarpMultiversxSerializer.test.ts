@@ -424,4 +424,46 @@ describe('WarpMultiversxSerializer', () => {
       expect(result).toBe('optional:string')
     })
   })
+
+  describe('codemeta handling', () => {
+    it('converts CodeMetadataValue to codemeta string', () => {
+      const codeMetadata = new CodeMetadataValue(new CodeMetadata(true, false, true, false))
+      const result = serializer.typedToString(codeMetadata)
+      expect(result).toBe('codemeta:0102')
+    })
+
+    it('converts codemeta string to CodeMetadataValue and asserts values', () => {
+      const result = serializer.stringToTyped('codemeta:0102')
+      expect(result).toBeInstanceOf(CodeMetadataValue)
+
+      const metadata = result.valueOf() as CodeMetadata
+      expect(metadata).toBeInstanceOf(CodeMetadata)
+      expect(metadata.toString()).toBe('0102')
+
+      // Test that the metadata can be recreated with the same values
+      const recreated = new CodeMetadataValue(new CodeMetadata(true, false, true, false))
+      expect(recreated.valueOf().toString()).toBe('0102')
+    })
+
+    it('converts specific CodeMetadata values correctly', () => {
+      // Test with all flags set to true
+      const allTrue = new CodeMetadataValue(new CodeMetadata(true, true, true, true))
+      const allTrueResult = serializer.typedToString(allTrue)
+      expect(allTrueResult).toBe('codemeta:0506')
+
+      // Test with all flags set to false
+      const allFalse = new CodeMetadataValue(new CodeMetadata(false, false, false, false))
+      const allFalseResult = serializer.typedToString(allFalse)
+      expect(allFalseResult).toBe('codemeta:0000')
+
+      // Test with specific pattern: upgradeable=true, readable=false, payable=true, payableBySc=false
+      const specific = new CodeMetadataValue(new CodeMetadata(true, false, true, false))
+      const specificResult = serializer.typedToString(specific)
+      expect(specificResult).toBe('codemeta:0102')
+    })
+
+    it('throws error for invalid codemeta format', () => {
+      expect(() => serializer.stringToTyped('codemeta:invalid')).toThrow()
+    })
+  })
 })
