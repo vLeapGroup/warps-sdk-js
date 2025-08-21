@@ -8,6 +8,7 @@ import {
   WarpActionInput,
   WarpActionInputType,
   WarpChain,
+  WarpChainAssetValue,
   WarpChainInfo,
   WarpClientConfig,
   WarpContractAction,
@@ -66,7 +67,8 @@ export class WarpFactory {
 
     const transferInputs = modifiedInputs.filter((i) => i.input.position === 'transfer' && i.value).map((i) => i.value) as string[]
     const transfersInAction = 'transfers' in action ? action.transfers : []
-    const transfers = [...(transfersInAction || []), ...(transferInputs || [])]
+    const transfersMerged = [...(transfersInAction || []), ...(transferInputs || [])]
+    const transfers = transfersMerged.map((t) => this.serializer.stringToNative(t)[1]) as WarpChainAssetValue[]
 
     // TODO: extract to multiversx adapter?
     // const isSingleTransfer = transfers.length === 1 && transferInputs.length === 1 && !transfersInAction?.length
