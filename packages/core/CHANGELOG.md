@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.80
+
+### Patch Changes
+
+- a37cb66: fix warp from url exec
+
 ## 3.0.0-alpha.79
 
 ### Patch Changes
