@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.82
+
+### Patch Changes
+
+- 7c563e5: fix util asset encoding
+
 ## 3.0.0-alpha.81
 
 ### Patch Changes
