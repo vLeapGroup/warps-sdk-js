@@ -4,9 +4,6 @@ export class WarpTypeRegistryImpl implements WarpTypeRegistry {
   private typeHandlers = new Map<string, WarpTypeHandler>()
 
   registerType(typeName: string, handler: WarpTypeHandler): void {
-    if (this.typeHandlers.has(typeName)) {
-      throw new Error(`Type '${typeName}' is already registered`)
-    }
     this.typeHandlers.set(typeName, handler)
   }
 

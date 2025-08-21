@@ -30,12 +30,10 @@ export const createMultiversxAdapter = (
       brandBuilder: () => new WarpMultiversxBrandBuilder(config, chainInfo),
       dataLoader: new WarpMultiversxDataLoader(config, chainInfo),
       registerTypes: (typeRegistry: WarpTypeRegistry) => {
-        // Register MultiversX-specific types
         typeRegistry.registerType('token', {
           stringToNative: (value: string) => value,
           nativeToString: (value: any) => `token:${value}`,
         })
-
         typeRegistry.registerType('codemeta', {
           stringToNative: (value: string) => value,
           nativeToString: (value: any) => `codemeta:${value}`,
