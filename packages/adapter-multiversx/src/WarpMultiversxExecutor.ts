@@ -132,6 +132,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
       action: executable.action,
       user: this.config.user?.wallets?.[executable.chain.name] || null,
       txHash: null,
+      tx: null,
       next,
       values,
       results,

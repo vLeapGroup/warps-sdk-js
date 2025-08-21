@@ -1,3 +1,4 @@
+import { WarpAdapterGenericTransaction } from './config'
 import { Warp, WarpMessageName, WarpResultName } from './warp'
 
 export type WarpExecution = {
@@ -6,6 +7,7 @@ export type WarpExecution = {
   action: number
   user: string | null
   txHash: string | null
+  tx: WarpAdapterGenericTransaction | null
   next: WarpExecutionNextInfo | null
   values: any[]
   results: WarpExecutionResults

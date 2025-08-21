@@ -36,6 +36,7 @@ export class WarpFastsetResults implements AdapterWarpResults {
       action: 0,
       user: this.config.user?.wallets?.fastset || null,
       txHash: transactionHash,
+      tx,
       next: null,
       values: [transactionHash, blockNumber, gasUsed, gasPrice, ...(logs.length > 0 ? logs : [])],
       results: {},

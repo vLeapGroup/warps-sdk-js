@@ -44,6 +44,7 @@ export class WarpSuiResults implements AdapterWarpResults {
       action: actionIndex,
       user: this.config.user?.wallets?.[this.chain.name] || null,
       txHash: tx.digest,
+      tx,
       next,
       values: results.values,
       results: results.results,

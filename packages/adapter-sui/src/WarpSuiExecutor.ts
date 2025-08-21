@@ -85,6 +85,7 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
       action: executable.action,
       user: this.userWallet,
       txHash: null,
+      tx: null,
       next,
       values: extractedValues,
       results,

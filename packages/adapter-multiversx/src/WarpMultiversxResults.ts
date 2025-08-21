@@ -57,6 +57,7 @@ export class WarpMultiversxResults implements AdapterWarpResults {
       action: actionIndex,
       user: this.config.user?.wallets?.[this.chain.name] || null,
       txHash: tx.hash,
+      tx,
       next,
       values: results.values,
       results: results.results,
