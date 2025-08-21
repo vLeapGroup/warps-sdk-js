@@ -65,7 +65,7 @@ export class WarpClient {
   }> {
     const warp =
       identifier.startsWith('http') && identifier.endsWith('.json')
-        ? ((await fetch(identifier)).json() as unknown as Warp)
+        ? ((await (await fetch(identifier)).json()) as Warp)
         : (await this.detectWarp(identifier, options.cache)).warp
 
     if (!warp) throw new Error('Warp not found')
