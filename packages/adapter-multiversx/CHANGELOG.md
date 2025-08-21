@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.32
+
+### Patch Changes
+
+- 836d6a8: update custom types
+- Updated dependencies [836d6a8]
+  - @vleap/warps@3.0.0-alpha.78
+
 ## 0.2.0-alpha.31
 
 ### Minor Changes

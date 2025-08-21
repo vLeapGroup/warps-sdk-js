@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.78
+
+### Patch Changes
+
+- 836d6a8: update custom types
+
 ## 3.0.0-alpha.77
 
 ### Minor Changes
