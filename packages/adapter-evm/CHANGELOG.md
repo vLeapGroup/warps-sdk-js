@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-alpha.15
+
+### Patch Changes
+
+- df9ef23: update eth default provider
+
 ## 0.2.0-alpha.14
 
 ### Minor Changes

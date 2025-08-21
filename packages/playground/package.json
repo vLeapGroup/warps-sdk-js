@@ -1,6 +1,6 @@
 {
   "name": "@warps/playground",
-  "version": "0.2.0-alpha.9",
+  "version": "0.2.0-alpha.10",
   "description": "Playground for testing Warps SDK",
   "private": true,
   "type": "module",
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@vleap/warps": "3.0.0-alpha.76",
-    "@vleap/warps-adapter-evm": "0.2.0-alpha.14",
+    "@vleap/warps-adapter-evm": "0.2.0-alpha.15",
     "@vleap/warps-adapter-multiversx": "0.2.0-alpha.30",
     "@vleap/warps-adapter-sui": "0.2.0-alpha.26",
     "@vleap/warps-adapter-fastset": "0.1.0-alpha.11"
