@@ -94,6 +94,14 @@ export const createMockAdapter = () => ({
       })
     },
   },
+  dataLoader: {
+    getAccountAssets() {
+      return Promise.resolve([])
+    },
+    getAccountInfo() {
+      return Promise.resolve({ address: 'erd1test', balance: 0n, nonce: 0 })
+    },
+  },
   serializer: {
     typedToString() {
       return ''
