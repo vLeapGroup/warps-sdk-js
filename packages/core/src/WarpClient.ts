@@ -63,14 +63,18 @@ export class WarpClient {
     chain: WarpChainInfo | null
     evaluateResults: (remoteTx: WarpAdapterGenericRemoteTransaction) => Promise<void>
   }> {
-    const detectionResult = await this.detectWarp(identifier, options.cache)
-    if (!detectionResult.match || !detectionResult.warp) throw new Error('Warp not found')
+    const warp =
+      identifier.startsWith('http') && identifier.endsWith('.json')
+        ? ((await fetch(identifier)).json() as unknown as Warp)
+        : (await this.detectWarp(identifier, options.cache)).warp
+
+    if (!warp) throw new Error('Warp not found')
     const executor = this.createExecutor(handlers)
-    const { tx, chain } = await executor.execute(detectionResult.warp, inputs)
+    const { tx, chain } = await executor.execute(warp, inputs)
 
     const evaluateResults = async (remoteTx: WarpAdapterGenericRemoteTransaction): Promise<void> => {
-      if (!chain || !tx || !detectionResult.warp) throw new Error('Warp not found')
-      await executor.evaluateResults(detectionResult.warp, chain.name, remoteTx)
+      if (!chain || !tx || !warp) throw new Error('Warp not found')
+      await executor.evaluateResults(warp, chain.name, remoteTx)
     }
 
     return { tx, chain, evaluateResults }
