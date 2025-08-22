@@ -51,19 +51,33 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
   async createTransferTransaction(executable: WarpExecutable): Promise<Transaction> {
     if (!this.userWallet) throw new Error('WarpSuiExecutor: createTransfer - user address not set')
 
-    // Validate destination address
     if (!executable.destination) {
       throw new Error('WarpSuiExecutor: Invalid destination address')
     }
 
-    // Validate value
     if (executable.value < 0) {
       throw new Error(`WarpSuiExecutor: Transfer value cannot be negative: ${executable.value}`)
     }
 
     const tx = new Transaction()
-    const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(Number(executable.value))])
-    tx.transferObjects([coin], tx.pure.address(executable.destination))
+    const transferObjects: any[] = []
+
+    // Handle native SUI transfer from executable.value
+    if (executable.value > 0) {
+      const suiCoin = await this.handleCoinTransfer(tx, '0x2::sui::SUI', executable.value)
+      transferObjects.push(suiCoin)
+    }
+
+    // Handle token transfers dynamically by querying coin objects
+    for (const transfer of executable.transfers) {
+      const tokenCoin = await this.handleCoinTransfer(tx, transfer.identifier, transfer.amount)
+      transferObjects.push(tokenCoin)
+    }
+
+    if (transferObjects.length > 0) {
+      tx.transferObjects(transferObjects, tx.pure.address(executable.destination))
+    }
+
     return tx
   }
 
@@ -84,11 +98,23 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
     }
 
     const tx = new Transaction()
+    const transferObjects: any[] = []
 
-    // If there's a value to send, split coins first
+    // Handle native SUI transfer from executable.value
     if (executable.value > 0) {
-      const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(Number(executable.value))])
-      tx.transferObjects([coin], tx.pure.address(executable.destination))
+      const suiCoin = await this.handleCoinTransfer(tx, '0x2::sui::SUI', executable.value)
+      transferObjects.push(suiCoin)
+    }
+
+    // Handle token transfers for contract calls
+    for (const transfer of executable.transfers) {
+      const tokenCoin = await this.handleCoinTransfer(tx, transfer.identifier, transfer.amount)
+      transferObjects.push(tokenCoin)
+    }
+
+    // Transfer all objects to destination if any
+    if (transferObjects.length > 0) {
+      tx.transferObjects(transferObjects, tx.pure.address(executable.destination))
     }
 
     const target = `${action.address}::${action.func}`
@@ -129,5 +155,93 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
 
   async signMessage(message: string, privateKey: string): Promise<string> {
     throw new Error('Not implemented')
+  }
+
+  private async handleCoinTransfer(tx: Transaction, coinType: string, amount: bigint): Promise<any> {
+    // For SUI transfers, try gas coin optimization first
+    if (coinType === '0x2::sui::SUI') {
+      const gasCoin = await this.tryGasCoinTransfer(tx, amount)
+      if (gasCoin) return gasCoin
+    }
+
+    // Fall back to coin objects for any coin type
+    return this.createCoinTransferFromObjects(tx, coinType, amount)
+  }
+
+  private async tryGasCoinTransfer(tx: Transaction, amount: bigint): Promise<any | null> {
+    try {
+      const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(amount.toString())])
+      return coin
+    } catch {
+      // Gas coin doesn't have sufficient balance, fall back to coin objects
+      return null
+    }
+  }
+
+  private async createCoinTransferFromObjects(tx: Transaction, coinType: string, amount: bigint): Promise<any> {
+    const coinObjects = await this.getCoinObjectsForTransfer(coinType, amount)
+
+    if (coinObjects.length === 0) {
+      throw new Error(`No coin objects found for ${coinType}`)
+    }
+
+    const firstCoin = coinObjects[0]
+    const coinBalance = BigInt(firstCoin.balance)
+
+    // Single coin has sufficient balance
+    if (coinBalance >= amount) {
+      const [coin] = tx.splitCoins(tx.object(firstCoin.coinObjectId), [tx.pure.u64(amount.toString())])
+      return coin
+    }
+
+    // Multiple coins needed - merge then split
+    const primaryCoin = tx.object(firstCoin.coinObjectId)
+    const additionalCoins = coinObjects.slice(1).map((c) => tx.object(c.coinObjectId))
+
+    if (additionalCoins.length > 0) {
+      tx.mergeCoins(primaryCoin, additionalCoins)
+    }
+
+    const [coin] = tx.splitCoins(primaryCoin, [tx.pure.u64(amount.toString())])
+    return coin
+  }
+
+  private async getCoinObjectsForTransfer(
+    coinType: string,
+    requiredAmount: bigint
+  ): Promise<Array<{ coinObjectId: string; balance: string }>> {
+    if (!this.userWallet) throw new Error('User wallet not set')
+
+    const response = await this.client.getCoins({
+      owner: this.userWallet,
+      coinType: coinType,
+    })
+
+    // Sort by balance descending (largest coins first for efficiency)
+    const sortedCoins = response.data
+      .map((coin) => ({
+        coinObjectId: coin.coinObjectId,
+        balance: coin.balance,
+      }))
+      .sort((a, b) => (BigInt(b.balance) > BigInt(a.balance) ? 1 : -1))
+
+    // Select minimum coins needed for the required amount
+    const selectedCoins: Array<{ coinObjectId: string; balance: string }> = []
+    let totalBalance = BigInt(0)
+
+    for (const coin of sortedCoins) {
+      selectedCoins.push(coin)
+      totalBalance += BigInt(coin.balance)
+
+      if (totalBalance >= requiredAmount) {
+        break
+      }
+    }
+
+    if (totalBalance < requiredAmount) {
+      throw new Error(`Insufficient ${coinType} balance. Required: ${requiredAmount}, Available: ${totalBalance}`)
+    }
+
+    return selectedCoins
   }
 }
