@@ -1,5 +1,17 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.36
+
+### Minor Changes
+
+- c680090: add native token info to chain info
+
+### Patch Changes
+
+- 42de588: add mvx egld multi-transfer support
+- Updated dependencies [c680090]
+  - @vleap/warps@3.0.0-alpha.85
+
 ## 0.2.0-alpha.35
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.85
+
+### Minor Changes
+
+- c680090: add native token info to chain info
+
 ## 3.0.0-alpha.84
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-alpha.13
+
+### Minor Changes
+
+- c680090: add native token info to chain info
+
+### Patch Changes
+
+- Updated dependencies [c680090]
+  - @vleap/warps@3.0.0-alpha.85
+
 ## 0.1.0-alpha.12
 
 ### Patch Changes

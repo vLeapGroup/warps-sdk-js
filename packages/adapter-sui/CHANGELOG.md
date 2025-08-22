@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.28
+
+### Minor Changes
+
+- c680090: add native token info to chain info
+
+### Patch Changes
+
+- Updated dependencies [c680090]
+  - @vleap/warps@3.0.0-alpha.85
+
 ## 0.2.0-alpha.27
 
 ### Patch Changes
