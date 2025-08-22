@@ -54,10 +54,9 @@ export class WarpFactory {
     const modifiedInputs = this.getModifiedInputs(resolvedInputs)
 
     const destinationInput = modifiedInputs.find((i) => i.input.position === 'receiver')?.value
-    const detinationInAction = 'address' in action ? action.address : null
-    const destinationRaw = destinationInput?.split(':')[1] || detinationInAction
-    if (!destinationRaw) throw new Error('WarpActionExecutor: Destination/Receiver not provided')
-    const destination = destinationRaw
+    const destinationInAction = 'address' in action ? action.address : null
+    const destination = destinationInput ? (this.serializer.stringToNative(destinationInput)[1] as string) : destinationInAction
+    if (!destination) throw new Error('WarpActionExecutor: Destination/Receiver not provided')
 
     const args = this.getPreparedArgs(action, modifiedInputs)
 
