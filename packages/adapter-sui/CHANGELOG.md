@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.29
+
+### Patch Changes
+
+- 9bcd1d2: set sui devnet to testnet
+
 ## 0.2.0-alpha.28
 
 ### Minor Changes

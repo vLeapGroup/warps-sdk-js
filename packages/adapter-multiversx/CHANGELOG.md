@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.37
+
+### Patch Changes
+
+- 7a84c89: update egld token name
+
 ## 0.2.0-alpha.36
 
 ### Minor Changes
