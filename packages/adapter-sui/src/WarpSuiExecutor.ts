@@ -50,6 +50,17 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
 
   async createTransferTransaction(executable: WarpExecutable): Promise<Transaction> {
     if (!this.userWallet) throw new Error('WarpSuiExecutor: createTransfer - user address not set')
+
+    // Validate destination address
+    if (!executable.destination || executable.destination.length === 0) {
+      throw new Error('WarpSuiExecutor: Invalid destination address')
+    }
+
+    // Validate value
+    if (executable.value < 0) {
+      throw new Error(`WarpSuiExecutor: Transfer value cannot be negative: ${executable.value}`)
+    }
+
     const tx = new Transaction()
     const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(Number(executable.value))])
     tx.transferObjects([coin], tx.pure.address(executable.destination))
@@ -58,9 +69,28 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
 
   async createContractCallTransaction(executable: WarpExecutable): Promise<Transaction> {
     if (!this.userWallet) throw new Error('WarpSuiExecutor: createContractCall - user address not set')
+
     const action = getWarpActionByIndex(executable.warp, executable.action) as WarpContractAction
     if (!action.func) throw new Error('WarpSuiExecutor: createContractCall - function not set')
+
+    // Validate destination address
+    if (!executable.destination || executable.destination.length === 0) {
+      throw new Error('WarpSuiExecutor: Invalid contract address')
+    }
+
+    // Validate value
+    if (executable.value < 0) {
+      throw new Error(`WarpSuiExecutor: Contract call value cannot be negative: ${executable.value}`)
+    }
+
     const tx = new Transaction()
+
+    // If there's a value to send, split coins first
+    if (executable.value > 0) {
+      const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(Number(executable.value))])
+      tx.transferObjects([coin], tx.pure.address(executable.destination))
+    }
+
     const target = `${action.address}::${action.func}`
     const pureArgs = executable.args.map((arg) => this.serializer.stringToTyped(arg, tx))
     tx.moveCall({ target, arguments: pureArgs })
