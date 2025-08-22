@@ -172,32 +172,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
   }
 
   async preprocessInput(chain: WarpChainInfo, input: string, type: WarpActionInputType, value: string): Promise<string> {
-    const typedValue = this.serializer.stringToTyped(value)
-
-    switch (type) {
-      case 'address':
-        if (!ethers.isAddress(typedValue)) {
-          throw new Error(`Invalid address format: ${typedValue}`)
-        }
-        return ethers.getAddress(typedValue)
-      case 'hex':
-        if (!ethers.isHexString(typedValue)) {
-          throw new Error(`Invalid hex format: ${typedValue}`)
-        }
-        return typedValue
-      case 'uint8':
-      case 'uint16':
-      case 'uint32':
-      case 'uint64':
-      case 'biguint':
-        const bigIntValue = BigInt(typedValue)
-        if (bigIntValue < 0) {
-          throw new Error(`Negative value not allowed for type ${type}: ${typedValue}`)
-        }
-        return bigIntValue.toString()
-      default:
-        return String(typedValue)
-    }
+    return input
   }
 
   private async estimateGasAndSetDefaults(tx: ethers.TransactionRequest, from: string): Promise<ethers.TransactionRequest> {

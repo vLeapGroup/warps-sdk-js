@@ -62,37 +62,6 @@ describe('WarpEvmExecutor', () => {
     executor = new WarpEvmExecutor(mockConfig, mockChainInfo)
   })
 
-  describe('preprocessInput', () => {
-    it('should validate and format addresses', async () => {
-      const address = '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6'
-      const result = await executor.preprocessInput({} as any, 'address', 'address', address)
-      expect(result).toBe(ethers.getAddress(address))
-    })
-
-    it('should validate and format hex strings', async () => {
-      const hex = '0x1234567890abcdef'
-      const result = await executor.preprocessInput({} as any, 'hex', 'hex', hex)
-      expect(result).toBe(hex)
-    })
-
-    it('should validate and format bigint values', async () => {
-      const result = await executor.preprocessInput({} as any, 'biguint', 'biguint', '123456789')
-      expect(result).toBe('123456789')
-    })
-
-    it('should throw error for invalid addresses', async () => {
-      await expect(executor.preprocessInput({} as any, 'address', 'address', 'invalid-address')).rejects.toThrow('Invalid address format')
-    })
-
-    it('should throw error for invalid hex strings', async () => {
-      await expect(executor.preprocessInput({} as any, 'hex', 'hex', 'invalid-hex')).rejects.toThrow('Invalid hex format')
-    })
-
-    it('should throw error for negative bigint values', async () => {
-      await expect(executor.preprocessInput({} as any, 'biguint', 'biguint', '-123')).rejects.toThrow('Negative value not allowed')
-    })
-  })
-
   describe('createTransferTransaction', () => {
     it('should create a transfer transaction', async () => {
       const executable = {
