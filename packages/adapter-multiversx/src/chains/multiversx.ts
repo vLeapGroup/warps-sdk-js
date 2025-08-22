@@ -5,7 +5,7 @@ export const ChainNameMultiversx: WarpChain = 'multiversx'
 
 export const NativeTokenEgld: WarpChainAsset = {
   identifier: 'EGLD',
-  name: 'EGLD',
+  name: 'eGold',
   decimals: 18,
   logoUrl: 'https://vleap.ai/images/tokens/egld.svg',
 }
