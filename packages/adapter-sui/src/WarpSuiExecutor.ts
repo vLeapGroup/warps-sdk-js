@@ -52,7 +52,7 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
     if (!this.userWallet) throw new Error('WarpSuiExecutor: createTransfer - user address not set')
 
     // Validate destination address
-    if (!executable.destination || executable.destination.length === 0) {
+    if (!executable.destination) {
       throw new Error('WarpSuiExecutor: Invalid destination address')
     }
 
