@@ -1,7 +1,14 @@
-import { AdapterFactory, WarpChain } from '@vleap/warps'
+import { AdapterFactory, WarpChain, WarpChainAsset } from '@vleap/warps'
 import { createEvmAdapter } from './common'
 
 export const ChainNameBase: WarpChain = 'base'
+
+export const NativeTokenBase: WarpChainAsset = {
+  identifier: 'ETH',
+  name: 'ETH',
+  decimals: 18,
+  logoUrl: 'https://vleap.ai/images/tokens/eth.svg',
+}
 
 export const getBaseAdapter: AdapterFactory = createEvmAdapter(ChainNameBase, 'base', {
   mainnet: {
@@ -11,7 +18,7 @@ export const getBaseAdapter: AdapterFactory = createEvmAdapter(ChainNameBase, 'b
     blockTime: 2000,
     addressHrp: '0x',
     defaultApiUrl: 'https://mainnet.base.org',
-    nativeToken: 'ETH',
+    nativeToken: NativeTokenBase,
   },
   testnet: {
     name: ChainNameBase,
@@ -20,7 +27,7 @@ export const getBaseAdapter: AdapterFactory = createEvmAdapter(ChainNameBase, 'b
     blockTime: 2000,
     addressHrp: '0x',
     defaultApiUrl: 'https://goerli.base.org',
-    nativeToken: 'ETH',
+    nativeToken: NativeTokenBase,
   },
   devnet: {
     name: ChainNameBase,
@@ -29,6 +36,6 @@ export const getBaseAdapter: AdapterFactory = createEvmAdapter(ChainNameBase, 'b
     blockTime: 2000,
     addressHrp: '0x',
     defaultApiUrl: 'https://sepolia.base.org',
-    nativeToken: 'ETH',
+    nativeToken: NativeTokenBase,
   },
 })

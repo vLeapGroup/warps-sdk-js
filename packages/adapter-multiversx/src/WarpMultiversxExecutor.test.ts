@@ -1,6 +1,7 @@
 import { Warp, WarpChainEnv, WarpClientConfig as WarpConfig, WarpTransferAction } from '@vleap/warps/src/types'
 import { promises as fs, PathLike } from 'fs'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
+import { getMultiversxAdapter } from './chains'
 
 const testConfig: WarpConfig = {
   env: 'devnet' as WarpChainEnv,
@@ -8,16 +9,7 @@ const testConfig: WarpConfig = {
   currentUrl: 'https://example.com',
 }
 
-const testChainInfo = {
-  name: 'multiversx',
-  chainId: 'D',
-  defaultApiUrl: '',
-  addressHrp: '',
-  blockTime: 0,
-  displayName: '',
-  explorerUrl: '',
-  nativeToken: '',
-}
+const testChainInfo = getMultiversxAdapter(testConfig).chainInfo
 
 describe('WarpMultiversxExecutor', () => {
   it('createTransactionForExecute - creates a native transfer with message', async () => {
@@ -32,16 +24,7 @@ describe('WarpMultiversxExecutor', () => {
     const warp = { actions: [action] } as any as Warp
     const executable = {
       warp,
-      chain: {
-        name: 'multiversx',
-        chainId: 'D',
-        defaultApiUrl: '',
-        addressHrp: '',
-        blockTime: 0,
-        displayName: '',
-        explorerUrl: '',
-        nativeToken: '',
-      },
+      chain: testChainInfo,
       action: 1,
       destination: action.address!,
       args: [],
@@ -67,16 +50,7 @@ describe('WarpMultiversxExecutor', () => {
     const warp = { actions: [action] } as any as Warp
     const executable = {
       warp,
-      chain: {
-        name: 'multiversx',
-        chainId: 'D',
-        defaultApiUrl: '',
-        addressHrp: '',
-        blockTime: 0,
-        displayName: '',
-        explorerUrl: '',
-        nativeToken: '',
-      },
+      chain: testChainInfo,
       action: 1,
       destination: action.address!,
       args: [],
@@ -102,16 +76,7 @@ describe('WarpMultiversxExecutor', () => {
     const warp = { actions: [action] } as any as Warp
     const executable = {
       warp,
-      chain: {
-        name: 'multiversx',
-        chainId: 'D',
-        defaultApiUrl: '',
-        addressHrp: '',
-        blockTime: 0,
-        displayName: '',
-        explorerUrl: '',
-        nativeToken: '',
-      },
+      chain: testChainInfo,
       action: 1,
       destination: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
       args: [],
@@ -126,7 +91,7 @@ describe('WarpMultiversxExecutor', () => {
   })
 
   it('createTransactionForExecute - creates a native transfer with esdt from field', async () => {
-    const subject = new WarpMultiversxExecutor(testConfig)
+    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo)
     // ... test logic for esdt from field ...
   })
 

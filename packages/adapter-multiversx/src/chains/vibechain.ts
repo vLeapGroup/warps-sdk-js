@@ -1,7 +1,14 @@
-import { WarpChain, WarpChainInfo } from '@vleap/warps'
+import { WarpChain, WarpChainAsset, WarpChainInfo } from '@vleap/warps'
 import { createMultiversxAdapter } from './common'
 
 export const ChainNameVibechain: WarpChain = 'vibechain'
+
+export const NativeTokenVibe: WarpChainAsset = {
+  identifier: 'VIBE',
+  name: 'VIBE',
+  decimals: 18,
+  logoUrl: 'https://vleap.ai/images/tokens/vibe.svg',
+}
 
 const chainInfo: WarpChainInfo = {
   name: ChainNameVibechain,
@@ -10,7 +17,7 @@ const chainInfo: WarpChainInfo = {
   blockTime: 600,
   addressHrp: 'vibe',
   defaultApiUrl: 'https://vibeox-api.multiversx.com',
-  nativeToken: 'VIBE',
+  nativeToken: NativeTokenVibe,
 }
 
 export const getVibechainAdapter = createMultiversxAdapter(ChainNameVibechain, 'vibe', {

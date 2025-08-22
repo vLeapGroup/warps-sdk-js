@@ -1,4 +1,4 @@
-import { Adapter, AdapterFactory, WarpChain, WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { Adapter, AdapterFactory, WarpChain, WarpChainAsset, WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 import { WarpSuiAbiBuilder } from './WarpSuiAbiBuilder'
 import { WarpSuiBrandBuilder } from './WarpSuiBrandBuilder'
 import { WarpSuiBuilder } from './WarpSuiBuilder'
@@ -10,6 +10,13 @@ import { WarpSuiResults } from './WarpSuiResults'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
 
 const ChainName: WarpChain = 'sui'
+
+export const NativeTokenSui: WarpChainAsset = {
+  identifier: '0x2::sui::SUI',
+  name: 'SUI',
+  decimals: 9,
+  logoUrl: 'https://vleap.ai/images/tokens/sui.svg',
+}
 
 function createSuiAdapter(chainName: string, chainPrefix: string, chainInfos: Record<WarpChainEnv, WarpChainInfo>): AdapterFactory {
   return (config: WarpClientConfig, fallback?: Adapter) => {
@@ -41,7 +48,7 @@ export const getSuiAdapter: AdapterFactory = createSuiAdapter(ChainName, 'sui', 
     blockTime: 3000,
     addressHrp: 'sui',
     defaultApiUrl: 'https://fullnode.mainnet.sui.io',
-    nativeToken: 'SUI',
+    nativeToken: NativeTokenSui,
   },
   testnet: {
     name: ChainName,
@@ -50,7 +57,7 @@ export const getSuiAdapter: AdapterFactory = createSuiAdapter(ChainName, 'sui', 
     blockTime: 3000,
     addressHrp: 'sui',
     defaultApiUrl: 'https://fullnode.testnet.sui.io',
-    nativeToken: 'SUI',
+    nativeToken: NativeTokenSui,
   },
   devnet: {
     name: ChainName,
@@ -59,6 +66,6 @@ export const getSuiAdapter: AdapterFactory = createSuiAdapter(ChainName, 'sui', 
     blockTime: 3000,
     addressHrp: 'sui',
     defaultApiUrl: 'https://fullnode.devnet.sui.io',
-    nativeToken: 'SUI',
+    nativeToken: NativeTokenSui,
   },
 })

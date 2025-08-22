@@ -1,4 +1,4 @@
-import { WarpChainAssetValue } from './chain'
+import { WarpChainAsset, WarpChainAssetValue } from './chain'
 
 export type WarpChain = string
 
@@ -11,7 +11,7 @@ export type WarpChainInfo = {
   blockTime: number
   addressHrp: string
   defaultApiUrl: string
-  nativeToken: string
+  nativeToken: WarpChainAsset
 }
 
 export type WarpIdType = 'hash' | 'alias'

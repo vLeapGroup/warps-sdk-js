@@ -1,6 +1,7 @@
-import { WarpClientConfig } from '@vleap/warps'
+import { WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 import { ethers } from 'ethers'
 import { WarpEvmExecutor } from './WarpEvmExecutor'
+import { NativeTokenEth } from './chains'
 
 jest.mock('ethers')
 
@@ -8,27 +9,28 @@ describe('WarpEvmExecutor', () => {
   let executor: WarpEvmExecutor
   let mockConfig: WarpClientConfig
   let mockProvider: any
-  let mockAdapter: any
+  let mockChainInfo: WarpChainInfo
+
+  const getTestChainInfo = () => mockChainInfo
 
   beforeEach(() => {
     mockConfig = {
       env: 'testnet',
       user: {
         wallets: {
-          evm: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+          ethereum: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
         },
       },
     } as WarpClientConfig
 
-    mockAdapter = {
-      name: 'evm',
-      displayName: 'EVM',
-      chainId: '1',
+    mockChainInfo = {
+      name: 'ethereum',
+      displayName: 'Ethereum Testnet',
+      chainId: '11155111',
       blockTime: 12000,
       addressHrp: '0x',
-      defaultApiUrl: 'https://api.evm.com',
-      explorerUrl: 'https://explorer.evm.com',
-      nativeToken: 'ETH',
+      defaultApiUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
+      nativeToken: NativeTokenEth,
     }
 
     // Mock ethers functions
@@ -57,15 +59,7 @@ describe('WarpEvmExecutor', () => {
     } as any
     ;(ethers.JsonRpcProvider as unknown as jest.Mock).mockImplementation(() => mockProvider)
 
-    executor = new WarpEvmExecutor(mockConfig, {
-      name: 'ethereum',
-      displayName: 'Ethereum',
-      chainId: '1',
-      blockTime: 12000,
-      addressHrp: '0x',
-      defaultApiUrl: 'https://api.ethereum.com',
-      nativeToken: 'ETH',
-    })
+    executor = new WarpEvmExecutor(mockConfig, mockChainInfo)
   })
 
   describe('preprocessInput', () => {
@@ -105,15 +99,7 @@ describe('WarpEvmExecutor', () => {
         destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
         value: BigInt(1000000000000000000), // 1 ETH
         data: null,
-        chain: {
-          name: 'evm',
-          displayName: 'EVM',
-          chainId: '1',
-          blockTime: 12000,
-          addressHrp: '0x',
-          defaultApiUrl: 'https://api.evm.com',
-          nativeToken: 'ETH',
-        },
+        chain: getTestChainInfo(),
         warp: {
           actions: [
             {
@@ -144,15 +130,7 @@ describe('WarpEvmExecutor', () => {
         destination: 'invalid-address',
         value: BigInt(1000000000000000000),
         data: null,
-        chain: {
-          name: 'evm',
-          displayName: 'EVM',
-          chainId: '1',
-          blockTime: 12000,
-          addressHrp: '0x',
-          defaultApiUrl: 'https://api.evm.com',
-          nativeToken: 'ETH',
-        },
+        chain: getTestChainInfo(),
         warp: {
           actions: [
             {
@@ -176,15 +154,7 @@ describe('WarpEvmExecutor', () => {
         destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
         value: BigInt(0),
         data: null,
-        chain: {
-          name: 'evm',
-          displayName: 'EVM',
-          chainId: '1',
-          blockTime: 12000,
-          addressHrp: '0x',
-          defaultApiUrl: 'https://api.evm.com',
-          nativeToken: 'ETH',
-        },
+        chain: getTestChainInfo(),
         warp: {
           actions: [
             {
@@ -216,15 +186,7 @@ describe('WarpEvmExecutor', () => {
         destination: 'invalid-address',
         value: BigInt(0),
         data: null,
-        chain: {
-          name: 'evm',
-          displayName: 'EVM',
-          chainId: '1',
-          blockTime: 12000,
-          addressHrp: '0x',
-          defaultApiUrl: 'https://api.evm.com',
-          nativeToken: 'ETH',
-        },
+        chain: getTestChainInfo(),
         warp: {
           actions: [
             {
@@ -249,15 +211,7 @@ describe('WarpEvmExecutor', () => {
         destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
         value: BigInt(0),
         data: null,
-        chain: {
-          name: 'evm',
-          displayName: 'EVM',
-          chainId: '1',
-          blockTime: 12000,
-          addressHrp: '0x',
-          defaultApiUrl: 'https://api.evm.com',
-          nativeToken: 'ETH',
-        },
+        chain: getTestChainInfo(),
         warp: {
           actions: [
             {
@@ -293,15 +247,7 @@ describe('WarpEvmExecutor', () => {
         destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
         value: BigInt(0),
         data: null,
-        chain: {
-          name: 'evm',
-          displayName: 'EVM',
-          chainId: '1',
-          blockTime: 12000,
-          addressHrp: '0x',
-          defaultApiUrl: 'https://api.evm.com',
-          nativeToken: 'ETH',
-        },
+        chain: getTestChainInfo(),
         warp: {
           actions: [
             {
@@ -339,15 +285,7 @@ describe('WarpEvmExecutor', () => {
         destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
         value: BigInt(1000000000000000000),
         data: null,
-        chain: {
-          name: 'evm',
-          displayName: 'EVM',
-          chainId: '1',
-          blockTime: 12000,
-          addressHrp: '0x',
-          defaultApiUrl: 'https://api.evm.com',
-          nativeToken: 'ETH',
-        },
+        chain: getTestChainInfo(),
         warp: {
           actions: [
             {
@@ -378,15 +316,7 @@ describe('WarpEvmExecutor', () => {
         destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
         value: BigInt(0),
         data: null,
-        chain: {
-          name: 'evm',
-          displayName: 'EVM',
-          chainId: '1',
-          blockTime: 12000,
-          addressHrp: '0x',
-          defaultApiUrl: 'https://api.evm.com',
-          nativeToken: 'ETH',
-        },
+        chain: getTestChainInfo(),
         warp: {
           actions: [
             {
@@ -418,15 +348,7 @@ describe('WarpEvmExecutor', () => {
         destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
         value: BigInt(0),
         data: null,
-        chain: {
-          name: 'evm',
-          displayName: 'EVM',
-          chainId: '1',
-          blockTime: 12000,
-          addressHrp: '0x',
-          defaultApiUrl: 'https://api.evm.com',
-          nativeToken: 'ETH',
-        },
+        chain: getTestChainInfo(),
         warp: {
           actions: [
             {
