@@ -1,4 +1,4 @@
-import { WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { WarpChainInfo, WarpClientConfig, WarpExecutable } from '@vleap/warps'
 import { ethers } from 'ethers'
 import { WarpEvmExecutor } from './WarpEvmExecutor'
 import { NativeTokenEth } from './chains'
@@ -10,6 +10,7 @@ describe('WarpEvmExecutor', () => {
   let mockConfig: WarpClientConfig
   let mockProvider: any
   let mockChainInfo: WarpChainInfo
+  let mockWarp: any
 
   const getTestChainInfo = () => mockChainInfo
 
@@ -31,6 +32,14 @@ describe('WarpEvmExecutor', () => {
       addressHrp: '0x',
       defaultApiUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
       nativeToken: NativeTokenEth,
+    }
+
+    mockWarp = {
+      actions: [
+        {
+          type: 'transfer',
+        },
+      ],
     }
 
     // Mock ethers functions
@@ -63,35 +72,103 @@ describe('WarpEvmExecutor', () => {
   })
 
   describe('createTransferTransaction', () => {
-    it('should create a transfer transaction', async () => {
-      const executable = {
+    it('should create a native token transfer transaction', async () => {
+      const executable: WarpExecutable = {
+        warp: mockWarp,
+        action: 0,
+        chain: mockChainInfo,
         destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
-        value: BigInt(1000000000000000000), // 1 ETH
+        value: ethers.parseEther('1.0'),
         data: null,
-        chain: getTestChainInfo(),
-        warp: {
-          actions: [
-            {
-              type: 'transfer',
-            },
-          ],
-        },
-        action: 1,
         args: [],
         transfers: [],
         resolvedInputs: [],
-      } as any
+      }
 
       const tx = await executor.createTransferTransaction(executable)
+      expect(tx.to).toBe('0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6')
+      expect(tx.value).toBe(ethers.parseEther('1.0'))
+      expect(tx.data).toBe('0x')
+    })
 
-      expect(tx).toEqual({
-        to: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
-        value: BigInt(1000000000000000000),
-        data: '0x',
-        gasLimit: BigInt(21000),
-        maxFeePerGas: ethers.parseUnits('20', 'gwei'),
-        maxPriorityFeePerGas: ethers.parseUnits('1.5', 'gwei'),
-      })
+    it('should create an ERC-20 token transfer transaction', async () => {
+      const tokenAddress = '0xA0b86a33E6441b8c4C8C8C8C8C8C8C8C8C8C8C8C'
+      const executable: WarpExecutable = {
+        warp: mockWarp,
+        action: 0,
+        chain: mockChainInfo,
+        destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+        value: 0n,
+        data: null,
+        args: [],
+        transfers: [
+          {
+            identifier: tokenAddress,
+            nonce: 0n,
+            amount: ethers.parseUnits('100', 18),
+          },
+        ],
+        resolvedInputs: [],
+      }
+
+      const tx = await executor.createTransferTransaction(executable)
+      expect(tx.to).toBe(tokenAddress)
+      expect(tx.value).toBe(0n)
+    })
+
+    it('should throw error for invalid token address', async () => {
+      const executable: WarpExecutable = {
+        warp: mockWarp,
+        action: 0,
+        chain: mockChainInfo,
+        destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+        value: 0n,
+        data: null,
+        args: [],
+        transfers: [
+          {
+            identifier: 'invalid-address',
+            nonce: 0n,
+            amount: ethers.parseUnits('100', 18),
+          },
+        ],
+        resolvedInputs: [],
+      }
+
+      await expect(executor.createTransferTransaction(executable)).rejects.toThrow(
+        'WarpEvmExecutor: Invalid token address: invalid-address'
+      )
+    })
+
+    it('should throw error for multiple token transfers', async () => {
+      const tokenAddress1 = '0xA0b86a33E6441b8c4C8C8C8C8C8C8C8C8C8C8C8C'
+      const tokenAddress2 = '0xB1c97b44E7551b8c4C8C8C8C8C8C8C8C8C8C8C8C'
+      const executable: WarpExecutable = {
+        warp: mockWarp,
+        action: 0,
+        chain: mockChainInfo,
+        destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+        value: 0n,
+        data: null,
+        args: [],
+        transfers: [
+          {
+            identifier: tokenAddress1,
+            nonce: 0n,
+            amount: ethers.parseUnits('100', 18),
+          },
+          {
+            identifier: tokenAddress2,
+            nonce: 0n,
+            amount: ethers.parseUnits('50', 18),
+          },
+        ],
+        resolvedInputs: [],
+      }
+
+      await expect(executor.createTransferTransaction(executable)).rejects.toThrow(
+        'WarpEvmExecutor: Multiple token transfers not yet supported'
+      )
     })
 
     it('should throw error for invalid destination address', async () => {

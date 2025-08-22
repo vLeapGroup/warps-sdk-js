@@ -5,6 +5,7 @@ import {
   getProviderUrl,
   getWarpActionByIndex,
   WarpActionInputType,
+  WarpChainAssetValue,
   WarpChainInfo,
   WarpClientConfig,
   WarpExecutable,
@@ -54,21 +55,23 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
     const userWallet = this.config.user?.wallets?.[executable.chain.name]
     if (!userWallet) throw new Error('WarpEvmExecutor: createTransfer - user address not set')
 
-    // Validate destination address
     if (!ethers.isAddress(executable.destination)) {
       throw new Error(`WarpEvmExecutor: Invalid destination address: ${executable.destination}`)
     }
 
-    // Validate value
-    if (executable.value < 0) {
-      throw new Error(`WarpEvmExecutor: Transfer value cannot be negative: ${executable.value}`)
+    // Handle token transfers
+    if (executable.transfers && executable.transfers.length > 0) {
+      return this.createTokenTransferTransaction(executable, userWallet)
     }
 
+    // Native token transfer
     const tx: ethers.TransactionRequest = {
       to: executable.destination,
       value: executable.value,
       data: executable.data ? this.serializer.stringToTyped(executable.data) : '0x',
     }
+
+    console.log('!! EVM tx', tx)
 
     return this.estimateGasAndSetDefaults(tx, userWallet)
   }
@@ -87,11 +90,6 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
       throw new Error(`WarpEvmExecutor: Invalid contract address: ${executable.destination}`)
     }
 
-    // Validate value
-    if (executable.value < 0) {
-      throw new Error(`WarpEvmExecutor: Contract call value cannot be negative: ${executable.value}`)
-    }
-
     try {
       const iface = new ethers.Interface([`function ${action.func}`])
       const encodedData = iface.encodeFunctionData(action.func, executable.args)
@@ -102,10 +100,44 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         data: encodedData,
       }
 
+      console.log('!! EVM contract call tx', tx)
+
       return this.estimateGasAndSetDefaults(tx, userWallet)
     } catch (error) {
       throw new Error(`WarpEvmExecutor: Failed to encode function data for ${action.func}: ${error}`)
     }
+  }
+
+  private async createTokenTransferTransaction(executable: WarpExecutable, userWallet: string): Promise<ethers.TransactionRequest> {
+    if (executable.transfers.length === 1) {
+      return this.createSingleTokenTransfer(executable, executable.transfers[0], userWallet)
+    } else {
+      // Multiple token transfers - use a batch transfer contract or multiple transactions
+      throw new Error('WarpEvmExecutor: Multiple token transfers not yet supported')
+    }
+  }
+
+  private async createSingleTokenTransfer(
+    executable: WarpExecutable,
+    transfer: WarpChainAssetValue,
+    userWallet: string
+  ): Promise<ethers.TransactionRequest> {
+    if (!ethers.isAddress(transfer.identifier)) {
+      throw new Error(`WarpEvmExecutor: Invalid token address: ${transfer.identifier}`)
+    }
+
+    // ERC-20 transfer function signature: transfer(address to, uint256 amount)
+    const transferInterface = new ethers.Interface(['function transfer(address to, uint256 amount) returns (bool)'])
+
+    const encodedData = transferInterface.encodeFunctionData('transfer', [executable.destination, transfer.amount])
+
+    const tx: ethers.TransactionRequest = {
+      to: transfer.identifier, // Token contract address
+      value: 0n, // No native token value for ERC-20 transfers
+      data: encodedData,
+    }
+
+    return this.estimateGasAndSetDefaults(tx, userWallet)
   }
 
   async executeQuery(executable: WarpExecutable): Promise<WarpExecution> {
@@ -222,7 +254,13 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
 
       // Determine gas limit based on transaction type
       if (tx.data && tx.data !== '0x') {
-        defaultGasLimit = BigInt(WarpEvmConstants.GasLimit.ContractCall)
+        // Check if this is a token transfer by looking for ERC-20 transfer function signature
+        if (tx.data.startsWith('0xa9059cbb')) {
+          // transfer(address,uint256) function signature
+          defaultGasLimit = BigInt(WarpEvmConstants.GasLimit.TokenTransfer)
+        } else {
+          defaultGasLimit = BigInt(WarpEvmConstants.GasLimit.ContractCall)
+        }
       } else {
         defaultGasLimit = BigInt(WarpEvmConstants.GasLimit.Transfer)
       }

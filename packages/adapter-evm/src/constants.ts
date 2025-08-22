@@ -4,6 +4,7 @@ export const WarpEvmConstants = {
     ContractCall: 100000,
     ContractDeploy: 500000,
     Transfer: 21000,
+    TokenTransfer: 65000, // ERC-20 transfer gas limit
     Approve: 46000,
     Swap: 200000,
   },
