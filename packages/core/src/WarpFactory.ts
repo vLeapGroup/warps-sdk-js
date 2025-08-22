@@ -69,15 +69,6 @@ export class WarpFactory {
     const transfersMerged = [...(transfersInAction || []), ...(transferInputs || [])]
     const transfers = transfersMerged.map((t) => this.serializer.stringToNative(t)[1]) as WarpChainAssetValue[]
 
-    // TODO: extract to multiversx adapter?
-    // const isSingleTransfer = transfers.length === 1 && transferInputs.length === 1 && !transfersInAction?.length
-    // const isNativeEsdt = transfers[0]?.token.identifier === `${chain.nativeToken}-000000`
-    // const hasNoOtherEsdtInputs = !modifiedInputs.some((i) => i.value && i.input.position !== 'transfer' && i.input.type === 'esdt')
-    // if (isSingleTransfer && isNativeEsdt && hasNoOtherEsdtInputs) {
-    //   value += transfers[0].amount
-    //   transfers = []
-    // }
-
     const dataInput = modifiedInputs.find((i) => i.input.position === 'data')?.value
     const dataInAction = 'data' in action ? action.data || '' : null
     const data = dataInput || dataInAction || null
