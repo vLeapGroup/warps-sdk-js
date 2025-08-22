@@ -1,5 +1,12 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.30
+
+### Patch Changes
+
+- 6fb0228: update adapter data loaders
+- eb95e86: update sui execution
+
 ## 0.2.0-alpha.29
 
 ### Patch Changes

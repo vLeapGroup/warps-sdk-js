@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-alpha.18
+
+### Patch Changes
+
+- 6fb0228: update adapter data loaders
+
 ## 0.2.0-alpha.17
 
 ### Minor Changes
