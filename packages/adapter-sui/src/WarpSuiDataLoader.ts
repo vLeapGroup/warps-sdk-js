@@ -1,5 +1,6 @@
 import { SuiClient } from '@mysten/sui/client'
 import { AdapterWarpDataLoader, getProviderUrl, WarpChainAccount, WarpChainAsset, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { SuiLogoService } from './LogoService'
 
 export class WarpSuiDataLoader implements AdapterWarpDataLoader {
   private client: SuiClient
@@ -25,44 +26,73 @@ export class WarpSuiDataLoader implements AdapterWarpDataLoader {
   }
 
   async getAccountAssets(address: string): Promise<WarpChainAsset[]> {
-    const coins = await this.client.getCoins({
+    // Get all balances (including non-SUI tokens)
+    const allBalances = await this.client.getAllBalances({
       owner: address,
-      coinType: '0x2::sui::SUI',
     })
 
     const assets: WarpChainAsset[] = []
 
-    // Group coins by type and sum amounts
-    const coinMap = new Map<string, { amount: bigint; decimals: number }>()
-
-    for (const coin of coins.data) {
-      const coinType = coin.coinType
-      const existing = coinMap.get(coinType)
-
-      if (existing) {
-        existing.amount += BigInt(coin.balance)
-      } else {
-        coinMap.set(coinType, {
-          amount: BigInt(coin.balance),
-          decimals: coin.coinObjectId ? 9 : 0, // SUI has 9 decimals, other tokens may vary
-        })
-      }
-    }
-
-    // Convert to WarpChainAsset format
-    for (const [identifier, { amount, decimals }] of coinMap) {
-      if (identifier !== '0x2::sui::SUI') {
+    // Process each balance
+    for (const balance of allBalances) {
+      if (balance.coinType !== '0x2::sui::SUI') {
         // Skip native SUI as it's handled by getAccount
-        assets.push({
-          identifier,
-          name: identifier.split('::').pop() || identifier,
-          amount,
-          decimals,
-          logoUrl: '',
-        })
+        try {
+          // Try to get token metadata
+          const tokenMetadata = await this.getTokenMetadata(balance.coinType)
+
+          // Get enhanced logo URL using SuiLogoService
+          const logoUrl = await SuiLogoService.getLogoUrl(balance.coinType)
+
+          assets.push({
+            identifier: balance.coinType,
+            name: tokenMetadata.name,
+            amount: BigInt(balance.totalBalance),
+            decimals: tokenMetadata.decimals,
+            logoUrl: logoUrl || tokenMetadata.logoUrl || '',
+          })
+        } catch (error) {
+          // Fallback to basic info if metadata fetch fails
+          const fallbackName = balance.coinType.split('::').pop() || balance.coinType
+          const logoUrl = await SuiLogoService.getLogoUrl(balance.coinType)
+
+          assets.push({
+            identifier: balance.coinType,
+            name: fallbackName,
+            amount: BigInt(balance.totalBalance),
+            decimals: 9, // Default to 9 decimals for Sui tokens
+            logoUrl: logoUrl || '',
+          })
+        }
       }
     }
 
     return assets
+  }
+
+  private async getTokenMetadata(identifier: string): Promise<{ name: string; decimals: number; logoUrl: string }> {
+    try {
+      // Try to get token metadata from Sui API
+      const apiUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
+      const response = await fetch(`${apiUrl}/objects/${identifier}`)
+      if (response.ok) {
+        const data = await response.json()
+        // Extract metadata from the object
+        return {
+          name: data.data?.display?.name || identifier.split('::').pop() || identifier,
+          decimals: data.data?.display?.decimals || 9,
+          logoUrl: data.data?.display?.icon_url || '',
+        }
+      }
+    } catch (error) {
+      // Ignore errors and return fallback
+    }
+
+    // Fallback metadata
+    return {
+      name: identifier.split('::').pop() || identifier,
+      decimals: 9,
+      logoUrl: '',
+    }
   }
 }

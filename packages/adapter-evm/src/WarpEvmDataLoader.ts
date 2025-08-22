@@ -1,5 +1,6 @@
 import { AdapterWarpDataLoader, getProviderUrl, WarpChainAccount, WarpChainAsset, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 import { ethers } from 'ethers'
+import { EvmLogoService } from './LogoService'
 
 // ERC20 ABI for token interactions
 const ERC20_ABI = [
@@ -46,6 +47,25 @@ const KNOWN_TOKENS: Record<string, Record<string, { name: string; symbol: string
       decimals: 18,
       logoUrl: 'https://assets.coingecko.com/coins/images/9956/small/4943.png',
     },
+    // Sepolia testnet tokens
+    '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238': {
+      name: 'USD Coin',
+      symbol: 'USDC',
+      decimals: 6,
+      logoUrl: 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png',
+    },
+    '0x7169D38820dfd117C3FA1f22a697dBA58d90BA06': {
+      name: 'Tether USD',
+      symbol: 'USDT',
+      decimals: 6,
+      logoUrl: 'https://assets.coingecko.com/coins/images/325/small/Tether.png',
+    },
+    '0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9': {
+      name: 'Wrapped Ether',
+      symbol: 'WETH',
+      decimals: 18,
+      logoUrl: 'https://assets.coingecko.com/coins/images/2518/small/weth.png',
+    },
   },
   arbitrum: {
     '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8': {
@@ -79,6 +99,24 @@ const KNOWN_TOKENS: Record<string, Record<string, { name: string; symbol: string
       symbol: 'WETH',
       decimals: 18,
       logoUrl: 'https://assets.coingecko.com/coins/images/2518/small/weth.png',
+    },
+    '0x036CbD53842c5426634e7929541eC2318f3dCF7e': {
+      name: 'USD Coin',
+      symbol: 'USDC',
+      decimals: 6,
+      logoUrl: 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png',
+    },
+    '0x808456652fdb597867f38412077A9182bf77359F': {
+      name: 'Euro Coin',
+      symbol: 'EURC',
+      decimals: 6,
+      logoUrl: 'https://assets.coingecko.com/coins/images/3318/small/euro-coin.png',
+    },
+    '0xcbB7C0006F23900c38EB856149F799620fcb8A4a': {
+      name: 'Coinbase Wrapped BTC',
+      symbol: 'CBETH',
+      decimals: 8,
+      logoUrl: 'https://assets.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png',
     },
   },
 }
@@ -129,12 +167,21 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
 
       for (const tokenBalance of tokenBalances) {
         if (tokenBalance.balance > 0n) {
+          const logoUrl =
+            tokenBalance.metadata.logoUrl ||
+            (await EvmLogoService.getLogoUrl(
+              this.chain.name,
+              tokenBalance.tokenAddress,
+              tokenBalance.metadata.name,
+              tokenBalance.metadata.symbol
+            ))
+
           assets.push({
             identifier: tokenBalance.tokenAddress,
             name: tokenBalance.metadata.name,
             amount: tokenBalance.balance,
             decimals: tokenBalance.metadata.decimals,
-            logoUrl: tokenBalance.metadata.logoUrl || '',
+            logoUrl: logoUrl || '',
           })
         }
       }
@@ -164,7 +211,6 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
         }
       } catch (error) {
         // Skip tokens that fail to load
-        console.warn(`Failed to get balance for token ${tokenAddress}: ${error}`)
       }
     }
 
@@ -184,7 +230,6 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
           }
         } catch (error) {
           // Skip tokens that fail to load
-          console.warn(`Failed to get metadata/balance for detected token ${tokenAddress}: ${error}`)
         }
       }
     }
@@ -204,14 +249,29 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
 
   private async getTokenMetadata(tokenAddress: string): Promise<TokenMetadata> {
     try {
-      const contract = new ethers.Contract(tokenAddress, ERC20_ABI, this.provider)
+      const tokenInfo = await EvmLogoService.getTokenInfo(this.chain.name, tokenAddress)
 
-      const [name, symbol, decimals] = await Promise.all([contract.name(), contract.symbol(), contract.decimals()])
+      if (tokenInfo.name && tokenInfo.symbol && tokenInfo.decimals !== undefined) {
+        return {
+          name: tokenInfo.name,
+          symbol: tokenInfo.symbol,
+          decimals: tokenInfo.decimals,
+          logoUrl: tokenInfo.logoURI,
+        }
+      }
+
+      const contract = new ethers.Contract(tokenAddress, ERC20_ABI, this.provider)
+      const [name, symbol, decimals] = await Promise.all([
+        contract.name().catch(() => tokenInfo.name || 'Unknown Token'),
+        contract.symbol().catch(() => tokenInfo.symbol || 'UNKNOWN'),
+        contract.decimals().catch(() => tokenInfo.decimals || 18),
+      ])
 
       return {
-        name: name || 'Unknown Token',
-        symbol: symbol || 'UNKNOWN',
-        decimals: decimals || 18,
+        name: name || tokenInfo.name || 'Unknown Token',
+        symbol: symbol || tokenInfo.symbol || 'UNKNOWN',
+        decimals: decimals || tokenInfo.decimals || 18,
+        logoUrl: tokenInfo.logoURI,
       }
     } catch (error) {
       throw new Error(`Failed to get token metadata: ${error}`)
@@ -245,7 +305,6 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
 
       return Array.from(tokenAddresses)
     } catch (error) {
-      console.warn(`Failed to detect tokens from events: ${error}`)
       return []
     }
   }
