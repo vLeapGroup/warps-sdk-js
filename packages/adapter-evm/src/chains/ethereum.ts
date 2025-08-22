@@ -11,24 +11,6 @@ export const NativeTokenEth: WarpChainAsset = {
 }
 
 export const getEthereumAdapter: AdapterFactory = createEvmAdapter(ChainNameEthereum, 'eth', {
-  devnet: {
-    name: ChainNameEthereum,
-    displayName: 'Ethereum Devnet',
-    chainId: '11155111',
-    blockTime: 12000,
-    addressHrp: '0x',
-    defaultApiUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
-    nativeToken: NativeTokenEth,
-  },
-  testnet: {
-    name: ChainNameEthereum,
-    displayName: 'Ethereum Testnet',
-    chainId: '11155111',
-    blockTime: 12000,
-    addressHrp: '0x',
-    defaultApiUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
-    nativeToken: NativeTokenEth,
-  },
   mainnet: {
     name: ChainNameEthereum,
     displayName: 'Ethereum Mainnet',
@@ -36,6 +18,24 @@ export const getEthereumAdapter: AdapterFactory = createEvmAdapter(ChainNameEthe
     blockTime: 12000,
     addressHrp: '0x',
     defaultApiUrl: 'https://ethereum-rpc.publicnode.com',
+    nativeToken: NativeTokenEth,
+  },
+  testnet: {
+    name: ChainNameEthereum,
+    displayName: 'Ethereum Sepolia',
+    chainId: '11155111',
+    blockTime: 12000,
+    addressHrp: '0x',
+    defaultApiUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
+    nativeToken: NativeTokenEth,
+  },
+  devnet: {
+    name: ChainNameEthereum,
+    displayName: 'Ethereum Sepolia',
+    chainId: '11155111',
+    blockTime: 12000,
+    addressHrp: '0x',
+    defaultApiUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
     nativeToken: NativeTokenEth,
   },
 })
