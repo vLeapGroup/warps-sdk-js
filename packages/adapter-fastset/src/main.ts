@@ -5,8 +5,6 @@ import { WarpFastsetExplorer } from './WarpFastsetExplorer'
 import { WarpFastsetResults } from './WarpFastsetResults'
 import { WarpFastsetSerializer } from './WarpFastsetSerializer'
 
-const ChainName: WarpChain = 'fastset'
-
 export const NativeTokenSet: WarpChainAsset = {
   identifier: 'SET',
   name: 'SET',
@@ -14,31 +12,36 @@ export const NativeTokenSet: WarpChainAsset = {
   logoUrl: 'https://vleap.ai/images/tokens/set.svg',
 }
 
-const ChainInfo: WarpChainInfo = {
-  name: ChainName,
-  displayName: 'FastSet',
-  chainId: '1',
-  blockTime: 100,
-  addressHrp: 'set',
-  defaultApiUrl: 'TODO',
-  nativeToken: NativeTokenSet,
+const createChainInfo = (env: WarpChainEnv): WarpChainInfo => {
+  const config = getFastsetChainConfig(WarpChainName.Fastset, env)
+  return {
+    name: WarpChainName.Fastset,
+    displayName: 'FastSet',
+    chainId: config.chainId,
+    blockTime: config.blockTime || 12000,
+    addressHrp: 'set',
+    defaultApiUrl: config.defaultApiUrl,
+    nativeToken: NativeTokenSet,
+  }
 }
 
 export const getFastsetAdapter: AdapterFactory = (config: WarpClientConfig, fallback?: Adapter) => {
   if (!fallback) throw new Error('Fastset adapter requires a fallback adapter')
 
+  const chainInfo = createChainInfo(config.env)
+
   return {
-    chain: ChainName,
-    chainInfo: ChainInfo,
+    chain: WarpChainName.Fastset,
+    chainInfo,
     prefix: 'fastset',
     builder: () => fallback.builder(),
-    executor: new WarpFastsetExecutor(config, ChainInfo),
-    results: new WarpFastsetResults(config),
+    executor: new WarpFastsetExecutor(config, chainInfo),
+    results: new WarpFastsetResults(config, chainInfo),
     serializer: new WarpFastsetSerializer(),
     registry: fallback.registry,
-    explorer: new WarpFastsetExplorer(ChainInfo),
+    explorer: new WarpFastsetExplorer(chainInfo, config),
     abiBuilder: () => fallback.abiBuilder(),
     brandBuilder: () => fallback.brandBuilder(),
-    dataLoader: new WarpFastsetDataLoader(config, ChainInfo),
+    dataLoader: new WarpFastsetDataLoader(config, chainInfo),
   }
 }

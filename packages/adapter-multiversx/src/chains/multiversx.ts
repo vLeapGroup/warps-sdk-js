@@ -1,7 +1,5 @@
-import { WarpChain, WarpChainAsset } from '@vleap/warps'
+import { WarpChainAsset, WarpChainName } from '@vleap/warps'
 import { createMultiversxAdapter } from './common'
-
-export const ChainNameMultiversx: WarpChain = 'multiversx'
 
 export const NativeTokenEgld: WarpChainAsset = {
   identifier: 'EGLD',
@@ -10,9 +8,9 @@ export const NativeTokenEgld: WarpChainAsset = {
   logoUrl: 'https://vleap.ai/images/tokens/egld.svg',
 }
 
-export const getMultiversxAdapter = createMultiversxAdapter(ChainNameMultiversx, 'mvx', {
+export const getMultiversxAdapter = createMultiversxAdapter(WarpChainName.Multiversx, 'mvx', {
   mainnet: {
-    name: ChainNameMultiversx,
+    name: WarpChainName.Multiversx,
     displayName: 'MultiversX',
     chainId: '1',
     blockTime: 6000,
@@ -21,7 +19,7 @@ export const getMultiversxAdapter = createMultiversxAdapter(ChainNameMultiversx,
     nativeToken: NativeTokenEgld,
   },
   testnet: {
-    name: ChainNameMultiversx,
+    name: WarpChainName.Multiversx,
     displayName: 'MultiversX Testnet',
     chainId: 'T',
     blockTime: 6000,
@@ -30,7 +28,7 @@ export const getMultiversxAdapter = createMultiversxAdapter(ChainNameMultiversx,
     nativeToken: NativeTokenEgld,
   },
   devnet: {
-    name: ChainNameMultiversx,
+    name: WarpChainName.Multiversx,
     displayName: 'MultiversX Devnet',
     chainId: 'D',
     blockTime: 6000,

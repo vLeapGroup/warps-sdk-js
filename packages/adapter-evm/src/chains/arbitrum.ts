@@ -1,7 +1,5 @@
-import { AdapterFactory, WarpChain, WarpChainAsset } from '@vleap/warps'
+import { AdapterFactory, WarpChainAsset, WarpChainName } from '@vleap/warps'
 import { createEvmAdapter } from './common'
-
-export const ChainNameArbitrum: WarpChain = 'arbitrum'
 
 export const NativeTokenArb: WarpChainAsset = {
   identifier: 'ARB',
@@ -10,9 +8,9 @@ export const NativeTokenArb: WarpChainAsset = {
   logoUrl: 'https://vleap.ai/images/tokens/arb.svg',
 }
 
-export const getArbitrumAdapter: AdapterFactory = createEvmAdapter(ChainNameArbitrum, 'arb', {
+export const getArbitrumAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Arbitrum, 'arb', {
   mainnet: {
-    name: ChainNameArbitrum,
+    name: WarpChainName.Arbitrum,
     displayName: 'Arbitrum',
     chainId: '42161',
     blockTime: 1000,
@@ -21,16 +19,16 @@ export const getArbitrumAdapter: AdapterFactory = createEvmAdapter(ChainNameArbi
     nativeToken: NativeTokenArb,
   },
   testnet: {
-    name: ChainNameArbitrum,
+    name: WarpChainName.Arbitrum,
     displayName: 'Arbitrum Sepolia',
-    chainId: '421613',
+    chainId: '421614',
     blockTime: 1000,
     addressHrp: '0x',
     defaultApiUrl: 'https://sepolia-rollup.arbitrum.io/rpc',
     nativeToken: NativeTokenArb,
   },
   devnet: {
-    name: ChainNameArbitrum,
+    name: WarpChainName.Arbitrum,
     displayName: 'Arbitrum Sepolia',
     chainId: '421614',
     blockTime: 1000,

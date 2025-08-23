@@ -1,7 +1,5 @@
-import { AdapterFactory, WarpChain, WarpChainAsset } from '@vleap/warps'
+import { AdapterFactory, WarpChainAsset, WarpChainName } from '@vleap/warps'
 import { createEvmAdapter } from './common'
-
-export const ChainNameEthereum: WarpChain = 'ethereum'
 
 export const NativeTokenEth: WarpChainAsset = {
   identifier: 'ETH',
@@ -10,9 +8,9 @@ export const NativeTokenEth: WarpChainAsset = {
   logoUrl: 'https://vleap.ai/images/tokens/eth.svg',
 }
 
-export const getEthereumAdapter: AdapterFactory = createEvmAdapter(ChainNameEthereum, 'eth', {
+export const getEthereumAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Ethereum, 'eth', {
   mainnet: {
-    name: ChainNameEthereum,
+    name: WarpChainName.Ethereum,
     displayName: 'Ethereum Mainnet',
     chainId: '1',
     blockTime: 12000,
@@ -21,7 +19,7 @@ export const getEthereumAdapter: AdapterFactory = createEvmAdapter(ChainNameEthe
     nativeToken: NativeTokenEth,
   },
   testnet: {
-    name: ChainNameEthereum,
+    name: WarpChainName.Ethereum,
     displayName: 'Ethereum Sepolia',
     chainId: '11155111',
     blockTime: 12000,
@@ -30,7 +28,7 @@ export const getEthereumAdapter: AdapterFactory = createEvmAdapter(ChainNameEthe
     nativeToken: NativeTokenEth,
   },
   devnet: {
-    name: ChainNameEthereum,
+    name: WarpChainName.Ethereum,
     displayName: 'Ethereum Sepolia',
     chainId: '11155111',
     blockTime: 12000,
