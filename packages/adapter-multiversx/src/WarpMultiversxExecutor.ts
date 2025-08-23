@@ -15,7 +15,6 @@ import {
   UserSecretKey,
   UserSigner,
 } from '@multiversx/sdk-core'
-import { EGLD_IDENTIFIER_FOR_MULTI_ESDTNFT_TRANSFER } from '@multiversx/sdk-core/out/core/constants'
 import {
   AdapterWarpExecutor,
   applyResultsToMessages,
@@ -38,6 +37,8 @@ import { WarpMultiversxAbiBuilder } from './WarpMultiversxAbiBuilder'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
 import { esdt_value } from './utils.codec'
+
+const EgldIdentifierMultiTransfer = 'EGLD-000000'
 
 export class WarpMultiversxExecutor implements AdapterWarpExecutor {
   private readonly serializer: WarpMultiversxSerializer
@@ -181,7 +182,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
     return transfers
       .map((asset) => {
         if (asset.identifier === this.chain.nativeToken.identifier) {
-          return { ...asset, identifier: EGLD_IDENTIFIER_FOR_MULTI_ESDTNFT_TRANSFER }
+          return { ...asset, identifier: EgldIdentifierMultiTransfer }
         }
         return asset
       })
