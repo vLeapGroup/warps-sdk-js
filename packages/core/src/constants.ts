@@ -1,15 +1,13 @@
 import { InterpolationBag, WarpIdType } from './types'
 
 export enum WarpChainName {
-  // multiversx
   Multiversx = 'multiversx',
   Vibechain = 'vibechain',
-  // sui
   Sui = 'sui',
-  // evm
   Ethereum = 'ethereum',
   Base = 'base',
   Arbitrum = 'arbitrum',
+  Fastset = 'fastset',
 }
 
 export const WarpConstants = {

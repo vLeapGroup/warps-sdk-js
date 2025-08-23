@@ -1,4 +1,4 @@
-import { Adapter, AdapterFactory, WarpChain, WarpChainAsset, WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { Adapter, AdapterFactory, WarpChainAsset, WarpChainEnv, WarpChainInfo, WarpChainName, WarpClientConfig } from '@vleap/warps'
 import { WarpSuiAbiBuilder } from './WarpSuiAbiBuilder'
 import { WarpSuiBrandBuilder } from './WarpSuiBrandBuilder'
 import { WarpSuiBuilder } from './WarpSuiBuilder'
@@ -8,8 +8,6 @@ import { WarpSuiExplorer } from './WarpSuiExplorer'
 import { WarpSuiRegistry } from './WarpSuiRegistry'
 import { WarpSuiResults } from './WarpSuiResults'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
-
-const ChainName: WarpChain = 'sui'
 
 export const NativeTokenSui: WarpChainAsset = {
   identifier: '0x2::sui::SUI',
@@ -40,9 +38,9 @@ function createSuiAdapter(chainName: string, chainPrefix: string, chainInfos: Re
   }
 }
 
-export const getSuiAdapter: AdapterFactory = createSuiAdapter(ChainName, 'sui', {
+export const getSuiAdapter: AdapterFactory = createSuiAdapter(WarpChainName.Sui, 'sui', {
   mainnet: {
-    name: ChainName,
+    name: WarpChainName.Sui,
     displayName: 'Sui',
     chainId: '1',
     blockTime: 3000,
@@ -51,7 +49,7 @@ export const getSuiAdapter: AdapterFactory = createSuiAdapter(ChainName, 'sui', 
     nativeToken: NativeTokenSui,
   },
   testnet: {
-    name: ChainName,
+    name: WarpChainName.Sui,
     displayName: 'Sui Testnet',
     chainId: 'testnet',
     blockTime: 3000,
@@ -60,7 +58,7 @@ export const getSuiAdapter: AdapterFactory = createSuiAdapter(ChainName, 'sui', 
     nativeToken: NativeTokenSui,
   },
   devnet: {
-    name: ChainName,
+    name: WarpChainName.Sui,
     displayName: 'Sui Devnet',
     chainId: 'devnet',
     blockTime: 3000,
