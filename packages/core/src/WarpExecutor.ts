@@ -54,7 +54,15 @@ export class WarpExecutor {
     }
 
     const executable = await this.factory.createExecutable(warp, actionIndex, inputs)
-    const tx = await findWarpAdapterForChain(executable.chain.name, this.adapters).executor.createTransaction(executable)
+    const adapter = findWarpAdapterForChain(executable.chain.name, this.adapters)
+
+    if (action.type === 'query') {
+      const result = await adapter.executor.executeQuery(executable)
+      result.success ? this.handlers?.onExecuted?.(result) : this.handlers?.onError?.({ message: JSON.stringify(result.values) })
+      return { tx: null, chain: executable.chain }
+    }
+
+    const tx = await adapter.executor.createTransaction(executable)
 
     return { tx, chain: executable.chain }
   }
