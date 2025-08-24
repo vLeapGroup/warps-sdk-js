@@ -65,15 +65,15 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
 
     const transactions = await provider.doGetGeneric(url)
 
-    return transactions.map((transaction: any) => ({
+    return transactions.map((tx: any) => ({
       chain: this.chain.name,
-      id: transaction.hash,
-      receiver: transaction.receiver,
-      sender: transaction.sender,
-      value: transaction.value,
-      function: transaction.function,
-      status: transaction.status,
-      createdAt: new Date(transaction.timestampMs).toISOString(),
+      id: tx.txHash,
+      receiver: tx.receiver,
+      sender: tx.sender,
+      value: tx.value,
+      function: tx.function,
+      status: tx.status,
+      createdAt: new Date(tx.timestampMs || tx.timestamp * 1000).toISOString(),
     }))
   }
 }
