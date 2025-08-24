@@ -5,6 +5,7 @@ import {
   parseResultsOutIndex,
   ResolvedInput,
   Warp,
+  WarpChainInfo,
   WarpClientConfig,
   WarpConstants,
   WarpExecution,
@@ -17,10 +18,22 @@ export class WarpEvmResults implements AdapterWarpResults {
   private readonly serializer: WarpEvmSerializer
   private readonly provider: ethers.JsonRpcProvider
 
-  constructor(private readonly config: WarpClientConfig) {
+  constructor(
+    private readonly config: WarpClientConfig,
+    private readonly chain?: WarpChainInfo
+  ) {
     this.serializer = new WarpEvmSerializer()
-    const apiUrl = getProviderUrl(this.config, 'ethereum', this.config.env, 'https://ethereum-rpc.publicnode.com')
-    this.provider = new ethers.JsonRpcProvider(apiUrl)
+    // Use chain-specific provider if available, otherwise fallback to ethereum
+    if (this.chain) {
+      const apiUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
+      const network = new ethers.Network(this.chain.name, parseInt(this.chain.chainId))
+      this.provider = new ethers.JsonRpcProvider(apiUrl, network)
+    } else {
+      // Fallback for backward compatibility
+      const apiUrl = getProviderUrl(this.config, 'ethereum', this.config.env, 'https://ethereum-rpc.publicnode.com')
+      const network = new ethers.Network('ethereum', 1)
+      this.provider = new ethers.JsonRpcProvider(apiUrl, network)
+    }
   }
 
   async getTransactionExecutionResults(warp: Warp, tx: ethers.TransactionReceipt): Promise<WarpExecution> {

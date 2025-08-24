@@ -151,7 +151,9 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
     private readonly chain: WarpChainInfo
   ) {
     const apiUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
-    this.provider = new ethers.JsonRpcProvider(apiUrl)
+    // Create provider with explicit network configuration using ethers.Network
+    const network = new ethers.Network(this.chain.name, parseInt(this.chain.chainId))
+    this.provider = new ethers.JsonRpcProvider(apiUrl, network)
   }
 
   async getAccount(address: string): Promise<WarpChainAccount> {

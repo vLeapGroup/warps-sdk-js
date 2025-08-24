@@ -15,7 +15,7 @@ describe('WarpEvmResults', () => {
       },
     } as WarpClientConfig
 
-    results = new WarpEvmResults(mockConfig)
+    results = new WarpEvmResults(mockConfig, undefined)
   })
 
   describe('getTransactionExecutionResults', () => {

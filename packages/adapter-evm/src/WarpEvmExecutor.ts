@@ -28,8 +28,10 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
   ) {
     this.serializer = new WarpEvmSerializer()
     const apiUrl = getProviderUrl(this.config, chain.name, this.config.env, this.chain.defaultApiUrl)
-    this.provider = new ethers.JsonRpcProvider(apiUrl)
-    this.results = new WarpEvmResults(config)
+    // Create provider with explicit network configuration using ethers.Network
+    const network = new ethers.Network(this.chain.name, parseInt(this.chain.chainId))
+    this.provider = new ethers.JsonRpcProvider(apiUrl, network)
+    this.results = new WarpEvmResults(config, this.chain)
   }
 
   async createTransaction(executable: WarpExecutable): Promise<ethers.TransactionRequest> {
@@ -264,6 +266,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         // EIP-1559 pricing
         return {
           ...tx,
+          chainId: BigInt(this.chain.chainId),
           gasLimit: gasEstimate,
           maxFeePerGas: feeData.maxFeePerGas,
           maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
@@ -272,6 +275,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         // Legacy pricing
         return {
           ...tx,
+          chainId: BigInt(this.chain.chainId),
           gasLimit: gasEstimate,
           gasPrice: feeData.gasPrice,
         }
@@ -279,6 +283,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         // Fallback to default values
         return {
           ...tx,
+          chainId: BigInt(this.chain.chainId),
           gasLimit: gasEstimate,
           gasPrice: ethers.parseUnits(WarpEvmConstants.GasPrice.Default, 'wei'),
         }
@@ -302,6 +307,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
 
       return {
         ...tx,
+        chainId: BigInt(this.chain.chainId),
         gasLimit: defaultGasLimit,
         gasPrice: ethers.parseUnits(WarpEvmConstants.GasPrice.Default, 'wei'),
       }

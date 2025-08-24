@@ -10,7 +10,12 @@ describe('WarpEvmExplorer', () => {
     blockTime: 12000,
     addressHrp: '0x',
     defaultApiUrl: 'https://api.example.com',
-    nativeToken: 'ETH',
+    nativeToken: {
+      chain: 'ethereum',
+      identifier: 'ETH',
+      name: 'Ethereum',
+      decimals: 18,
+    },
   }
 
   const arbitrumChainInfo: WarpChainInfo = {
@@ -20,7 +25,12 @@ describe('WarpEvmExplorer', () => {
     blockTime: 12000,
     addressHrp: '0x',
     defaultApiUrl: 'https://api.arbitrum.com',
-    nativeToken: 'ARB',
+    nativeToken: {
+      chain: 'arbitrum',
+      identifier: 'ARB',
+      name: 'Arbitrum',
+      decimals: 18,
+    },
   }
 
   const baseChainInfo: WarpChainInfo = {

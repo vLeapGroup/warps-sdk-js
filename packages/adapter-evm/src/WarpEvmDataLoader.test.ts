@@ -18,7 +18,12 @@ describe('WarpEvmDataLoader', () => {
     blockTime: 12000,
     addressHrp: '',
     defaultApiUrl: 'https://mainnet.infura.io/v3/your-project-id',
-    nativeToken: 'ETH',
+    nativeToken: {
+      chain: 'ethereum',
+      identifier: 'ETH',
+      name: 'Ethereum',
+      decimals: 18,
+    },
   }
 
   let dataLoader: WarpEvmDataLoader
