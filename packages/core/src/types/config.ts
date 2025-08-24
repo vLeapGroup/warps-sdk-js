@@ -1,6 +1,6 @@
 import { WarpBrand } from './brand'
 import { ClientCacheConfig } from './cache'
-import { WarpChainAccount, WarpChainAsset } from './chain'
+import { WarpChainAccount, WarpChainAction, WarpChainAsset } from './chain'
 import { WarpChainEnv } from './general'
 import { WarpRegistryConfigInfo, WarpRegistryInfo } from './registry'
 import { WarpExecution } from './results'
@@ -166,7 +166,13 @@ export interface AdapterWarpExplorer {
   getContractUrl(address: string): string
 }
 
+export interface WarpDataLoaderOptions {
+  page?: number
+  size?: number
+}
+
 export interface AdapterWarpDataLoader {
   getAccount(address: string): Promise<WarpChainAccount>
   getAccountAssets(address: string): Promise<WarpChainAsset[]>
+  getAccountActions(address: string, options?: WarpDataLoaderOptions): Promise<WarpChainAction[]>
 }

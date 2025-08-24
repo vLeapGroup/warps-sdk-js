@@ -1,4 +1,13 @@
-import { AdapterWarpDataLoader, getProviderUrl, WarpChainAccount, WarpChainAsset, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import {
+  AdapterWarpDataLoader,
+  getProviderUrl,
+  WarpChainAccount,
+  WarpChainAction,
+  WarpChainAsset,
+  WarpChainInfo,
+  WarpClientConfig,
+  WarpDataLoaderOptions,
+} from '@vleap/warps'
 import { ethers } from 'ethers'
 import { EvmLogoService } from './LogoService'
 
@@ -150,6 +159,7 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
       const balance = await this.provider.getBalance(address)
 
       return {
+        chain: this.chain.name,
         address,
         balance,
       }
@@ -177,6 +187,7 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
             ))
 
           assets.push({
+            chain: this.chain.name,
             identifier: tokenBalance.tokenAddress,
             name: tokenBalance.metadata.name,
             amount: tokenBalance.balance,
@@ -190,6 +201,10 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
     } catch (error) {
       throw new Error(`Failed to get account assets for ${address}: ${error}`)
     }
+  }
+
+  async getAccountActions(address: string, options?: WarpDataLoaderOptions): Promise<WarpChainAction[]> {
+    return []
   }
 
   private async getERC20TokenBalances(address: string): Promise<TokenBalance[]> {
@@ -314,7 +329,7 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
     try {
       return await this.getTokenMetadata(tokenAddress)
     } catch (error) {
-      console.warn(`Failed to get token info for ${tokenAddress}: ${error}`)
+      // Silently fail for invalid addresses or network issues
       return null
     }
   }
@@ -336,12 +351,38 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
           const balance = await this.getTokenBalance(address, tokenAddress)
           balances.set(tokenAddress, balance)
         } catch (error) {
-          console.warn(`Failed to get balance for token ${tokenAddress}: ${error}`)
+          // Silently fail for invalid addresses or network issues
           balances.set(tokenAddress, 0n)
         }
       })
     )
 
     return balances
+  }
+
+  async getAccountTokens(address: string): Promise<WarpChainAsset[]> {
+    return this.getAccountAssets(address)
+  }
+
+  async getTokenMetadataPublic(tokenAddress: string): Promise<TokenMetadata | null> {
+    try {
+      return await this.getTokenMetadata(tokenAddress)
+    } catch (error) {
+      return null
+    }
+  }
+
+  async getChainInfo(): Promise<{ chainId: string; blockTime: number }> {
+    try {
+      const network = await this.provider.getNetwork()
+      const latestBlock = await this.provider.getBlock('latest')
+
+      return {
+        chainId: network.chainId.toString(),
+        blockTime: latestBlock?.timestamp ? Date.now() / 1000 - latestBlock.timestamp : 12,
+      }
+    } catch (error) {
+      throw new Error(`Failed to get chain info: ${error}`)
+    }
   }
 }

@@ -1,5 +1,13 @@
 import { Address } from '@multiversx/sdk-core'
-import { AdapterWarpDataLoader, WarpChainAccount, WarpChainAsset, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import {
+  AdapterWarpDataLoader,
+  WarpChainAccount,
+  WarpChainAction,
+  WarpChainAsset,
+  WarpChainInfo,
+  WarpClientConfig,
+  WarpDataLoaderOptions,
+} from '@vleap/warps'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
 export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
@@ -13,6 +21,7 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
     const accountReq = await provider.getAccount(Address.newFromBech32(address))
 
     return {
+      chain: this.chain.name,
       address: accountReq.address.toBech32(),
       balance: accountReq.balance,
     }
@@ -23,11 +32,48 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
     const tokensReq = await provider.getFungibleTokensOfAccount(Address.newFromBech32(address))
 
     return tokensReq.map((token) => ({
+      chain: this.chain.name,
       identifier: token.token.identifier,
       name: token.raw.name,
       amount: token.amount,
       decimals: token.raw.decimals,
       logoUrl: token.raw.assets?.pngUrl || '',
+    }))
+  }
+
+  async getAccountActions(address: string, options?: WarpDataLoaderOptions): Promise<WarpChainAction[]> {
+    const provider = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env, this.config).createNetworkProvider()
+
+    let url = `accounts/${address}/transactions`
+    const params = new URLSearchParams()
+
+    const size = options?.size || 25
+    const page = options?.page || 0
+
+    if (page > 0) {
+      const from = page * size
+      params.append('from', from.toString())
+    }
+
+    if (size !== 25) {
+      params.append('size', size.toString())
+    }
+
+    if (params.toString()) {
+      url += `?${params.toString()}`
+    }
+
+    const transactions = await provider.doGetGeneric(url)
+
+    return transactions.map((transaction: any) => ({
+      chain: this.chain.name,
+      id: transaction.hash,
+      receiver: transaction.receiver,
+      sender: transaction.sender,
+      value: transaction.value,
+      function: transaction.function,
+      status: transaction.status,
+      createdAt: new Date(transaction.timestampMs).toISOString(),
     }))
   }
 }

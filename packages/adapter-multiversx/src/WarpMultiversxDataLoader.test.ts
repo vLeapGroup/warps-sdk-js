@@ -1,5 +1,6 @@
 import { WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 import { WarpMultiversxDataLoader } from './WarpMultiversxDataLoader'
+import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
 describe('WarpMultiversxDataLoader', () => {
   const mockConfig: WarpClientConfig = {
@@ -38,6 +39,95 @@ describe('WarpMultiversxDataLoader', () => {
   describe('getAccountAssets', () => {
     it('should have getAccountAssets method', () => {
       expect(typeof dataLoader.getAccountAssets).toBe('function')
+    })
+  })
+
+  describe('getAccountActions', () => {
+    it('should fetch account actions without pagination', async () => {
+      const mockProvider = {
+        doGetGeneric: jest.fn().mockResolvedValue([
+          {
+            hash: 'tx1',
+            receiver: 'receiver1',
+            sender: 'sender1',
+            value: '1000000000000000000',
+            function: 'transfer',
+            status: 'success',
+            timestampMs: 1640995200000,
+          },
+        ]),
+      }
+
+      jest.spyOn(WarpMultiversxExecutor, 'getChainEntrypoint').mockReturnValue({
+        createNetworkProvider: () => mockProvider,
+      } as any)
+
+      const dataLoader = new WarpMultiversxDataLoader(mockConfig, mockChainInfo)
+      const result = await dataLoader.getAccountActions('erd1test')
+
+      expect(mockProvider.doGetGeneric).toHaveBeenCalledWith('accounts/erd1test/transactions')
+      expect(result).toHaveLength(1)
+      expect(result[0]).toEqual({
+        chain: 'multiversx',
+        id: 'tx1',
+        receiver: 'receiver1',
+        sender: 'sender1',
+        value: '1000000000000000000',
+        function: 'transfer',
+        status: 'success',
+        createdAt: '2022-01-01T00:00:00.000Z',
+      })
+    })
+
+    it('should fetch account actions with pagination', async () => {
+      const mockProvider = {
+        doGetGeneric: jest.fn().mockResolvedValue([
+          {
+            hash: 'tx2',
+            receiver: 'receiver2',
+            sender: 'sender2',
+            value: '2000000000000000000',
+            function: 'transfer',
+            status: 'success',
+            timestampMs: 1640995200000,
+          },
+        ]),
+      }
+
+      jest.spyOn(WarpMultiversxExecutor, 'getChainEntrypoint').mockReturnValue({
+        createNetworkProvider: () => mockProvider,
+      } as any)
+
+      const dataLoader = new WarpMultiversxDataLoader(mockConfig, mockChainInfo)
+      const result = await dataLoader.getAccountActions('erd1test', { page: 1, size: 10 })
+
+      expect(mockProvider.doGetGeneric).toHaveBeenCalledWith('accounts/erd1test/transactions?from=10&size=10')
+      expect(result).toHaveLength(1)
+      expect(result[0]).toEqual({
+        chain: 'multiversx',
+        id: 'tx2',
+        receiver: 'receiver2',
+        sender: 'sender2',
+        value: '2000000000000000000',
+        function: 'transfer',
+        status: 'success',
+        createdAt: '2022-01-01T00:00:00.000Z',
+      })
+    })
+
+    it('should use default pagination values when not provided', async () => {
+      const mockProvider = {
+        doGetGeneric: jest.fn().mockResolvedValue([]),
+      }
+
+      jest.spyOn(WarpMultiversxExecutor, 'getChainEntrypoint').mockReturnValue({
+        createNetworkProvider: () => mockProvider,
+      } as any)
+
+      const dataLoader = new WarpMultiversxDataLoader(mockConfig, mockChainInfo)
+      await dataLoader.getAccountActions('erd1test', {})
+
+      expect(mockProvider.doGetGeneric).toHaveBeenCalledWith('accounts/erd1test/transactions')
     })
   })
 })

@@ -21,3 +21,16 @@ export type WarpChainAsset = {
   decimals?: number
   logoUrl?: string
 }
+
+export type WarpChainAction = {
+  chain: WarpChain
+  id: string
+  sender: string
+  receiver: string
+  value: bigint
+  function: string
+  status: WarpChainActionStatus
+  createdAt: string
+}
+
+export type WarpChainActionStatus = 'pending' | 'success' | 'failed'

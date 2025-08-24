@@ -1,5 +1,14 @@
 import { SuiClient } from '@mysten/sui/client'
-import { AdapterWarpDataLoader, getProviderUrl, WarpChainAccount, WarpChainAsset, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import {
+  AdapterWarpDataLoader,
+  getProviderUrl,
+  WarpChainAccount,
+  WarpChainAction,
+  WarpChainAsset,
+  WarpChainInfo,
+  WarpClientConfig,
+  WarpDataLoaderOptions,
+} from '@vleap/warps'
 import { SuiLogoService } from './LogoService'
 
 export class WarpSuiDataLoader implements AdapterWarpDataLoader {
@@ -71,6 +80,10 @@ export class WarpSuiDataLoader implements AdapterWarpDataLoader {
     }
 
     return assets
+  }
+
+  async getAccountActions(address: string, options?: WarpDataLoaderOptions): Promise<WarpChainAction[]> {
+    return []
   }
 
   private async getTokenMetadata(identifier: string): Promise<{ name: string; decimals: number; logoUrl: string }> {
