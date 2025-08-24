@@ -71,8 +71,6 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
       data: executable.data ? this.serializer.stringToTyped(executable.data) : '0x',
     }
 
-    console.log('!! EVM tx', tx)
-
     return this.estimateGasAndSetDefaults(tx, userWallet)
   }
 
@@ -100,8 +98,6 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         data: encodedData,
       }
 
-      console.log('!! EVM contract call tx', tx)
-
       return this.estimateGasAndSetDefaults(tx, userWallet)
     } catch (error) {
       throw new Error(`WarpEvmExecutor: Failed to encode function data for ${action.func}: ${error}`)
@@ -109,12 +105,49 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
   }
 
   private async createTokenTransferTransaction(executable: WarpExecutable, userWallet: string): Promise<ethers.TransactionRequest> {
-    if (executable.transfers.length === 1) {
-      return this.createSingleTokenTransfer(executable, executable.transfers[0], userWallet)
-    } else {
-      // Multiple token transfers - use a batch transfer contract or multiple transactions
+    if (executable.transfers.length === 0) {
+      throw new Error('WarpEvmExecutor: No transfers provided')
+    }
+
+    // Check if we have a native token defined for this chain
+    if (!this.chain.nativeToken?.identifier) {
+      throw new Error('WarpEvmExecutor: No native token defined for this chain')
+    }
+
+    // Separate native token transfers from ERC-20 token transfers
+    const nativeTokenTransfers = executable.transfers.filter((transfer) => transfer.identifier === this.chain.nativeToken!.identifier)
+    const erc20Transfers = executable.transfers.filter((transfer) => transfer.identifier !== this.chain.nativeToken!.identifier)
+
+    // Handle single native token transfer
+    if (nativeTokenTransfers.length === 1 && erc20Transfers.length === 0) {
+      const transfer = nativeTokenTransfers[0]
+
+      // Validate native token amount
+      if (transfer.amount <= 0n) {
+        throw new Error('WarpEvmExecutor: Native token transfer amount must be positive')
+      }
+
+      const tx: ethers.TransactionRequest = {
+        to: executable.destination,
+        value: transfer.amount,
+        data: '0x',
+      }
+
+      return this.estimateGasAndSetDefaults(tx, userWallet)
+    }
+
+    // Handle single ERC-20 token transfer
+    if (nativeTokenTransfers.length === 0 && erc20Transfers.length === 1) {
+      return this.createSingleTokenTransfer(executable, erc20Transfers[0], userWallet)
+    }
+
+    // Handle multiple transfers (not yet supported)
+    if (executable.transfers.length > 1) {
       throw new Error('WarpEvmExecutor: Multiple token transfers not yet supported')
     }
+
+    // This should never happen, but just in case
+    throw new Error('WarpEvmExecutor: Invalid transfer configuration')
   }
 
   private async createSingleTokenTransfer(
@@ -166,7 +199,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
       const decodedResult = iface.decodeFunctionResult(action.func, result)
       const isSuccess = true
 
-      const { values, results } = await this.results.extractQueryResults(
+      const { values, valuesRaw, results } = await this.results.extractQueryResults(
         executable.warp,
         decodedResult,
         executable.action,
@@ -184,6 +217,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         tx: null,
         next,
         values,
+        valuesRaw,
         results,
         messages: applyResultsToMessages(executable.warp, results),
       }
@@ -197,6 +231,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         tx: null,
         next: null,
         values: [],
+        valuesRaw: [],
         results: {},
         messages: {},
       }
@@ -274,6 +309,21 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
   }
 
   async signMessage(message: string, privateKey: string): Promise<string> {
-    throw new Error('Not implemented')
+    try {
+      const wallet = new ethers.Wallet(privateKey)
+      const signature = await wallet.signMessage(message)
+      return signature
+    } catch (error) {
+      throw new Error(`Failed to sign message: ${error}`)
+    }
+  }
+
+  async verifyMessage(message: string, signature: string): Promise<string> {
+    try {
+      const recoveredAddress = ethers.verifyMessage(message, signature)
+      return recoveredAddress
+    } catch (error) {
+      throw new Error(`Failed to verify message: ${error}`)
+    }
   }
 }

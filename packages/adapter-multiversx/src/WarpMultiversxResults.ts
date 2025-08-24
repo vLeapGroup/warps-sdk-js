@@ -60,6 +60,7 @@ export class WarpMultiversxResults implements AdapterWarpResults {
       tx,
       next,
       values: results.values,
+      valuesRaw: [],
       results: results.results,
       messages,
     }
@@ -131,11 +132,11 @@ export class WarpMultiversxResults implements AdapterWarpResults {
     typedValues: TypedValue[],
     actionIndex: number,
     inputs: ResolvedInput[]
-  ): Promise<{ values: any[]; results: WarpExecutionResults }> {
+  ): Promise<{ values: any[]; valuesRaw: any[]; results: WarpExecutionResults }> {
     const values = typedValues.map((t) => this.serializer.typedToString(t))
     const valuesRaw = typedValues.map((t) => this.serializer.typedToNative(t)[1])
     let results: WarpExecutionResults = {}
-    if (!warp.results) return { values, results }
+    if (!warp.results) return { values, valuesRaw, results }
     const getNestedValue = (path: string): unknown => {
       const indices = path
         .split('.')
@@ -162,7 +163,7 @@ export class WarpMultiversxResults implements AdapterWarpResults {
         results[key] = path
       }
     }
-    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
+    return { values, valuesRaw, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
   }
 
   async resolveWarpResultsRecursively(props: {

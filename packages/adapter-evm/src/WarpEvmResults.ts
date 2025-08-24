@@ -1,6 +1,7 @@
 import {
   AdapterWarpResults,
   evaluateResultsCommon,
+  getProviderUrl,
   parseResultsOutIndex,
   ResolvedInput,
   Warp,
@@ -14,9 +15,12 @@ import { WarpEvmSerializer } from './WarpEvmSerializer'
 
 export class WarpEvmResults implements AdapterWarpResults {
   private readonly serializer: WarpEvmSerializer
+  private readonly provider: ethers.JsonRpcProvider
 
   constructor(private readonly config: WarpClientConfig) {
     this.serializer = new WarpEvmSerializer()
+    const apiUrl = getProviderUrl(this.config, 'ethereum', this.config.env, 'https://ethereum-rpc.publicnode.com')
+    this.provider = new ethers.JsonRpcProvider(apiUrl)
   }
 
   async getTransactionExecutionResults(warp: Warp, tx: ethers.TransactionReceipt): Promise<WarpExecution> {
@@ -44,6 +48,7 @@ export class WarpEvmResults implements AdapterWarpResults {
       tx,
       next: null,
       values: [transactionHash, blockNumber, gasUsed, gasPrice, ...(logs.length > 0 ? logs : [])],
+      valuesRaw: [transactionHash, blockNumber, gasUsed, gasPrice, ...(logs.length > 0 ? logs : [])],
       results: {},
       messages: {},
     }
@@ -54,12 +59,12 @@ export class WarpEvmResults implements AdapterWarpResults {
     typedValues: any[],
     actionIndex: number,
     inputs: ResolvedInput[]
-  ): Promise<{ values: any[]; results: WarpExecutionResults }> {
+  ): Promise<{ values: any[]; valuesRaw: any[]; results: WarpExecutionResults }> {
     const values = typedValues.map((t) => this.serializer.typedToString(t))
     const valuesRaw = typedValues.map((t) => this.serializer.typedToNative(t)[1])
     let results: WarpExecutionResults = {}
 
-    if (!warp.results) return { values, results }
+    if (!warp.results) return { values, valuesRaw, results }
 
     const getNestedValue = (path: string): unknown => {
       const indices = path
@@ -89,6 +94,34 @@ export class WarpEvmResults implements AdapterWarpResults {
       }
     }
 
-    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
+    return { values, valuesRaw, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
+  }
+
+  async getTransactionStatus(
+    txHash: string
+  ): Promise<{ status: 'pending' | 'confirmed' | 'failed'; blockNumber?: number; gasUsed?: bigint }> {
+    try {
+      const receipt = await this.provider.getTransactionReceipt(txHash)
+
+      if (!receipt) {
+        return { status: 'pending' }
+      }
+
+      return {
+        status: receipt.status === 1 ? 'confirmed' : 'failed',
+        blockNumber: receipt.blockNumber,
+        gasUsed: receipt.gasUsed,
+      }
+    } catch (error) {
+      throw new Error(`Failed to get transaction status: ${error}`)
+    }
+  }
+
+  async getTransactionReceipt(txHash: string): Promise<ethers.TransactionReceipt | null> {
+    try {
+      return await this.provider.getTransactionReceipt(txHash)
+    } catch (error) {
+      return null
+    }
   }
 }

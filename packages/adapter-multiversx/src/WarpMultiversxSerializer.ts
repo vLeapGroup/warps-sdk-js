@@ -61,31 +61,32 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
   }
 
   typedToString(value: TypedValue): string {
-    if (value.hasClassOrSuperclass(OptionValue.ClassName)) {
+    const type = value.getType()
+    if (type.hasExactClass(OptionType.ClassName) || value.hasClassOrSuperclass(OptionValue.ClassName)) {
       if (!(value as OptionValue).isSet()) return 'option:null'
       const result = this.typedToString((value as OptionValue).getTypedValue())
       return `option:${result}`
     }
-    if (value.hasClassOrSuperclass(OptionalValue.ClassName)) {
+    if (type.hasExactClass(OptionalType.ClassName) || value.hasClassOrSuperclass(OptionalValue.ClassName)) {
       if (!(value as OptionalValue).isSet()) return 'optional:null'
       const result = this.typedToString((value as OptionalValue).getTypedValue())
       return `optional:${result}`
     }
-    if (value.hasClassOrSuperclass(List.ClassName)) {
+    if (type.hasExactClass(ListType.ClassName) || value.hasClassOrSuperclass(List.ClassName)) {
       const items = (value as List).getItems()
       const types = items.map((item) => this.typedToString(item).split(WarpConstants.ArgParamsSeparator)[0]) as BaseWarpActionInputType[]
       const type = types[0] as BaseWarpActionInputType
       const values = items.map((item) => this.typedToString(item).split(WarpConstants.ArgParamsSeparator)[1]) as WarpNativeValue[]
       return `list:${type}:${values.join(',')}`
     }
-    if (value.hasClassOrSuperclass(VariadicValue.ClassName)) {
+    if (type.hasExactClass(VariadicType.ClassName) || value.hasClassOrSuperclass(VariadicValue.ClassName)) {
       const items = (value as VariadicValue).getItems()
       const types = items.map((item) => this.typedToString(item).split(WarpConstants.ArgParamsSeparator)[0]) as BaseWarpActionInputType[]
       const type = types[0] as BaseWarpActionInputType
       const values = items.map((item) => this.typedToString(item).split(WarpConstants.ArgParamsSeparator)[1]) as WarpNativeValue[]
       return `variadic:${type}:${values.join(',')}`
     }
-    if (value.hasClassOrSuperclass(CompositeValue.ClassName)) {
+    if (type.hasExactClass(CompositeType.ClassName) || value.hasClassOrSuperclass(CompositeValue.ClassName)) {
       const items = (value as CompositeValue).getItems()
       const types = items.map((item) => this.typedToString(item).split(WarpConstants.ArgParamsSeparator)[0]) as BaseWarpActionInputType[]
       const values = items.map((item) => this.typedToString(item).split(WarpConstants.ArgParamsSeparator)[1]) as WarpNativeValue[]
@@ -93,21 +94,34 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
       const rawValues = values.join(WarpConstants.ArgCompositeSeparator)
       return `composite(${rawTypes}):${rawValues}`
     }
-    if (value.hasClassOrSuperclass(BigUIntValue.ClassName) || value.getType().getName() === 'BigUint' /* ABI handling */)
+    if (
+      type.hasExactClass(BigUIntType.ClassName) ||
+      value.hasClassOrSuperclass(BigUIntValue.ClassName) ||
+      type.getName() === 'BigUint' /* ABI handling */
+    )
       return `biguint:${BigInt((value as BigUIntValue).valueOf().toFixed())}`
-    if (value.hasClassOrSuperclass(U8Value.ClassName)) return `uint8:${(value as U8Value).valueOf().toNumber()}`
-    if (value.hasClassOrSuperclass(U16Value.ClassName)) return `uint16:${(value as U16Value).valueOf().toNumber()}`
-    if (value.hasClassOrSuperclass(U32Value.ClassName)) return `uint32:${(value as U32Value).valueOf().toNumber()}`
-    if (value.hasClassOrSuperclass(U64Value.ClassName)) return `uint64:${BigInt((value as U64Value).valueOf().toFixed())}`
-    if (value.hasClassOrSuperclass(StringValue.ClassName)) return `string:${(value as StringValue).valueOf()}`
-    if (value.hasClassOrSuperclass(BooleanValue.ClassName)) return `bool:${(value as BooleanValue).valueOf()}`
-    if (value.hasClassOrSuperclass(AddressValue.ClassName)) return `address:${(value as AddressValue).valueOf().toBech32()}`
-    if (value.hasClassOrSuperclass(TokenIdentifierValue.ClassName)) return `token:${(value as TokenIdentifierValue).valueOf()}`
-    if (value.hasClassOrSuperclass(BytesValue.ClassName)) return `hex:${(value as BytesValue).valueOf().toString('hex')}`
-    if (value.hasClassOrSuperclass(CodeMetadataValue.ClassName)) {
+    if (type.hasExactClass(U8Type.ClassName) || value.hasClassOrSuperclass(U8Value.ClassName))
+      return `uint8:${(value as U8Value).valueOf().toNumber()}`
+    if (type.hasExactClass(U16Type.ClassName) || value.hasClassOrSuperclass(U16Value.ClassName))
+      return `uint16:${(value as U16Value).valueOf().toNumber()}`
+    if (type.hasExactClass(U32Type.ClassName) || value.hasClassOrSuperclass(U32Value.ClassName))
+      return `uint32:${(value as U32Value).valueOf().toNumber()}`
+    if (type.hasExactClass(U64Type.ClassName) || value.hasClassOrSuperclass(U64Value.ClassName))
+      return `uint64:${BigInt((value as U64Value).valueOf().toFixed())}`
+    if (type.hasExactClass(StringType.ClassName) || value.hasClassOrSuperclass(StringValue.ClassName))
+      return `string:${(value as StringValue).valueOf()}`
+    if (type.hasExactClass(BooleanType.ClassName) || value.hasClassOrSuperclass(BooleanValue.ClassName))
+      return `bool:${(value as BooleanValue).valueOf()}`
+    if (type.hasExactClass(AddressType.ClassName) || value.hasClassOrSuperclass(AddressValue.ClassName))
+      return `address:${(value as AddressValue).valueOf().toBech32()}`
+    if (type.hasExactClass(TokenIdentifierType.ClassName) || value.hasClassOrSuperclass(TokenIdentifierValue.ClassName))
+      return `token:${(value as TokenIdentifierValue).valueOf()}`
+    if (type.hasExactClass(BytesType.ClassName) || value.hasClassOrSuperclass(BytesValue.ClassName))
+      return `hex:${(value as BytesValue).valueOf().toString('hex')}`
+    if (type.hasExactClass(CodeMetadataType.ClassName) || value.hasClassOrSuperclass(CodeMetadataValue.ClassName)) {
       return `codemeta:${(value as CodeMetadataValue).valueOf().toString()}`
     }
-    if (value.getType().getName() === 'EsdtTokenPayment') {
+    if (type.getName() === 'EsdtTokenPayment') {
       const identifier = (value as Struct).getFieldValue('token_identifier').valueOf()
       const nonce = (value as Struct).getFieldValue('token_nonce').valueOf()
       const amount = (value as Struct).getFieldValue('amount').valueOf()
@@ -211,22 +225,22 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
   }
 
   typeToString(type: Type): WarpActionInputType {
-    if (type instanceof OptionType) return 'option:' + this.typeToString(type.getFirstTypeParameter())
-    if (type instanceof OptionalType) return 'optional:' + this.typeToString(type.getFirstTypeParameter())
-    if (type instanceof ListType) return 'list:' + this.typeToString(type.getFirstTypeParameter())
-    if (type instanceof VariadicType) return 'variadic:' + this.typeToString(type.getFirstTypeParameter())
-    if (type instanceof StringType) return 'string'
-    if (type instanceof U8Type) return 'uint8'
-    if (type instanceof U16Type) return 'uint16'
-    if (type instanceof U32Type) return 'uint32'
-    if (type instanceof U64Type) return 'uint64'
-    if (type instanceof BigUIntType) return 'biguint'
-    if (type instanceof BooleanType) return 'bool'
-    if (type instanceof AddressType) return 'address'
-    if (type instanceof TokenIdentifierType) return 'token'
-    if (type instanceof BytesType) return 'hex'
-    if (type instanceof CodeMetadataType) return 'codemeta'
-    if (type instanceof StructType && type.getClassName() === 'EsdtTokenPayment') return 'asset'
+    if (type.hasExactClass(OptionType.ClassName)) return 'option:' + this.typeToString(type.getFirstTypeParameter())
+    if (type.hasExactClass(OptionalType.ClassName)) return 'optional:' + this.typeToString(type.getFirstTypeParameter())
+    if (type.hasExactClass(ListType.ClassName)) return 'list:' + this.typeToString(type.getFirstTypeParameter())
+    if (type.hasExactClass(VariadicType.ClassName)) return 'variadic:' + this.typeToString(type.getFirstTypeParameter())
+    if (type.hasExactClass(StringType.ClassName)) return 'string'
+    if (type.hasExactClass(U8Type.ClassName)) return 'uint8'
+    if (type.hasExactClass(U16Type.ClassName)) return 'uint16'
+    if (type.hasExactClass(U32Type.ClassName)) return 'uint32'
+    if (type.hasExactClass(U64Type.ClassName)) return 'uint64'
+    if (type.hasExactClass(BigUIntType.ClassName)) return 'biguint'
+    if (type.hasExactClass(BooleanType.ClassName)) return 'bool'
+    if (type.hasExactClass(AddressType.ClassName)) return 'address'
+    if (type.hasExactClass(TokenIdentifierType.ClassName)) return 'token'
+    if (type.hasExactClass(BytesType.ClassName)) return 'hex'
+    if (type.hasExactClass(CodeMetadataType.ClassName)) return 'codemeta'
+    if (type.hasExactClass(StructType.ClassName) && type.getClassName() === 'EsdtTokenPayment') return 'asset'
     throw new Error(`WarpArgSerializer (typeToString): Unsupported input type: ${type.getClassName()}`)
   }
 }

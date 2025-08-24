@@ -15,11 +15,7 @@ export class WarpFastsetSerializer implements AdapterWarpSerializer {
   }
 
   typedToString(value: any): string {
-    // TODO: Implement Fastset-specific serialization logic
-    // This should handle Fastset-specific data types and formats
-
     if (typeof value === 'string') {
-      // TODO: Add Fastset address validation if needed
       return `string:${value}`
     }
 
@@ -32,7 +28,7 @@ export class WarpFastsetSerializer implements AdapterWarpSerializer {
     }
 
     if (typeof value === 'bigint') {
-      return `bigint:${value.toString()}`
+      return `biguint:${value.toString()}`
     }
 
     if (Array.isArray(value)) {
@@ -48,14 +44,10 @@ export class WarpFastsetSerializer implements AdapterWarpSerializer {
       return 'undefined:undefined'
     }
 
-    // Default to string representation
     return `string:${String(value)}`
   }
 
   typedToNative(value: any): [WarpActionInputType, WarpNativeValue] {
-    // TODO: Implement Fastset-specific type conversion
-    // This should convert Fastset-specific types to native types
-
     if (typeof value === 'string') {
       return ['string', value]
     }
@@ -69,17 +61,13 @@ export class WarpFastsetSerializer implements AdapterWarpSerializer {
     }
 
     if (typeof value === 'bigint') {
-      return ['bigint', value]
+      return ['biguint', value.toString()]
     }
 
-    // Default to string
     return ['string', String(value)]
   }
 
   nativeToTyped(type: WarpActionInputType, value: WarpNativeValue): any {
-    // TODO: Implement Fastset-specific type conversion
-    // This should convert native types to Fastset-specific types
-
     switch (type) {
       case 'string':
         return String(value)
@@ -87,15 +75,18 @@ export class WarpFastsetSerializer implements AdapterWarpSerializer {
         return Number(value)
       case 'boolean':
         return Boolean(value)
-      case 'bigint':
+      case 'biguint':
         return BigInt(value as string | number)
+      case 'address':
+        return String(value)
+      case 'hex':
+        return String(value)
       default:
         return String(value)
     }
   }
 
   nativeToType(type: BaseWarpActionInputType): WarpAdapterGenericType {
-    // TODO: Implement Fastset-specific type mapping
     switch (type) {
       case 'string':
         return 'string'
@@ -103,17 +94,18 @@ export class WarpFastsetSerializer implements AdapterWarpSerializer {
         return 'number'
       case 'boolean':
         return 'boolean'
-      case 'bigint':
-        return 'bigint'
+      case 'biguint':
+        return 'biguint'
+      case 'address':
+        return 'address'
+      case 'hex':
+        return 'hex'
       default:
         return 'string'
     }
   }
 
   stringToTyped(value: string): any {
-    // TODO: Implement Fastset-specific string parsing
-    // This should parse Fastset-specific string formats
-
     const colonIndex = value.indexOf(':')
     if (colonIndex === -1) {
       return value
@@ -129,7 +121,7 @@ export class WarpFastsetSerializer implements AdapterWarpSerializer {
         return Number(stringValue)
       case 'boolean':
         return stringValue === 'true'
-      case 'bigint':
+      case 'biguint':
         return BigInt(stringValue)
       case 'array':
         return stringValue.split(',').map((item) => this.stringToTyped(item))

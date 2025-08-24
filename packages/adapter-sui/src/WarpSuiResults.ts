@@ -47,6 +47,7 @@ export class WarpSuiResults implements AdapterWarpResults {
       tx,
       next,
       values: results.values,
+      valuesRaw: [],
       results: results.results,
       messages,
     }

@@ -12,6 +12,12 @@ import {
   Transaction,
 } from './types'
 
+// Configure ed25519 library
+// @ts-ignore
+BigInt.prototype.toJSON = function () {
+  return Number(this)
+}
+
 export interface FastsetClientConfig {
   validatorUrl: string
   proxyUrl: string
@@ -135,6 +141,40 @@ export class FastsetClient {
     dataToSign.set(msgBytes, prefix.length)
 
     return sign(dataToSign, privateKey)
+  }
+
+  async createTransaction(sender: Uint8Array, recipient: Uint8Array, amount: string, userData?: Uint8Array): Promise<FastsetTransaction> {
+    const nonce = await this.getNextNonce(sender)
+
+    return {
+      sender,
+      nonce,
+      timestamp_nanos: BigInt(Date.now()) * 1_000_000n,
+      claim: {
+        Transfer: {
+          recipient: { FastSet: recipient },
+          amount,
+          user_data: userData ?? null,
+        },
+      },
+    }
+  }
+
+  async executeTransaction(transaction: FastsetTransaction, privateKey: Uint8Array): Promise<Uint8Array> {
+    const signature = await this.signTransaction(transaction, privateKey)
+
+    const submitResponse = await this.submitTransaction({
+      transaction,
+      signature,
+    })
+
+    await this.submitCertificate({
+      transaction,
+      signature,
+      validator_signatures: [[submitResponse.validator, submitResponse.signature]],
+    })
+
+    return submitResponse.transaction_hash
   }
 
   private serializeTransaction(transaction: FastsetTransaction): unknown {

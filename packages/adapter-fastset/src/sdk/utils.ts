@@ -1,24 +1,5 @@
 import { toB64, toHEX } from '@mysten/bcs'
 
-export function isValidFastsetAddress(address: string): boolean {
-  if (typeof address !== 'string' || address.length === 0) {
-    return false
-  }
-
-  // For testing purposes, allow addresses that start with 'fs' or 'pi'
-  if (address.startsWith('fs') || address.startsWith('pi')) {
-    return true
-  }
-
-  try {
-    // Try to decode as base64 (FastSet addresses are typically base64 encoded)
-    const decoded = fromBase64(address)
-    return decoded.length === 32 // FastSet addresses are 32 bytes
-  } catch {
-    return false
-  }
-}
-
 export function fromBase64(base64: string): Uint8Array {
   return new Uint8Array(Buffer.from(base64, 'base64'))
 }
@@ -45,16 +26,6 @@ export function validateAmount(amount: string): boolean {
     return bigInt >= 0
   } catch {
     return false
-  }
-}
-
-export function normalizeAmount(amount: string): string {
-  // Ensure amount is in hex format for FastSet
-  try {
-    const bigInt = BigInt(amount)
-    return bigInt.toString(16)
-  } catch {
-    throw new Error(`Invalid amount format: ${amount}`)
   }
 }
 

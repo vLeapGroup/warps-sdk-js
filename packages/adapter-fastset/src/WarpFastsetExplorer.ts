@@ -1,50 +1,34 @@
-import { AdapterWarpExplorer, WarpChainInfo } from '@vleap/warps'
+import { AdapterWarpExplorer, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { getFastsetChainConfig } from './config'
 
 export class WarpFastsetExplorer implements AdapterWarpExplorer {
-  constructor(private readonly chainInfo: WarpChainInfo) {}
+  private readonly explorerUrl: string
+
+  constructor(
+    private readonly chainInfo: WarpChainInfo,
+    private readonly config?: WarpClientConfig
+  ) {
+    const chainConfig = getFastsetChainConfig('fastset', config?.env || 'mainnet')
+    this.explorerUrl = chainConfig.explorerUrl
+  }
 
   getAccountUrl(address: string): string {
-    // TODO: Implement Fastset-specific account URL generation
-    // This should generate a URL to view an account on Fastset explorer
-
-    const baseUrl = this.getDefaultExplorerUrl()
-    return `${baseUrl}/address/${address}`
+    return `${this.explorerUrl}/address/${address}`
   }
 
   getTransactionUrl(hash: string): string {
-    // TODO: Implement Fastset-specific transaction URL generation
-    // This should generate a URL to view a transaction on Fastset explorer
-
-    const baseUrl = this.getDefaultExplorerUrl()
-    return `${baseUrl}/tx/${hash}`
+    return `${this.explorerUrl}/tx/${hash}`
   }
 
   getBlockUrl(blockNumber: string | number): string {
-    // TODO: Implement Fastset-specific block URL generation
-    // This should generate a URL to view a block on Fastset explorer
-
-    const baseUrl = this.getDefaultExplorerUrl()
-    return `${baseUrl}/block/${blockNumber}`
+    return `${this.explorerUrl}/block/${blockNumber}`
   }
 
   getContractUrl(address: string): string {
-    // TODO: Implement Fastset-specific contract URL generation
-    // This should generate a URL to view a contract on Fastset explorer
-
-    const baseUrl = this.getDefaultExplorerUrl()
-    return `${baseUrl}/contract/${address}`
+    return `${this.explorerUrl}/contract/${address}`
   }
 
   getAssetUrl(identifier: string): string {
-    // TODO: Implement Fastset-specific asset URL generation
-    // This should generate a URL to view an asset on Fastset explorer
-
-    const baseUrl = this.getDefaultExplorerUrl()
-    return `${baseUrl}/token/${identifier}`
-  }
-
-  private getDefaultExplorerUrl(): string {
-    // TODO: Replace with actual Fastset explorer URL when available
-    return `https://explorer.fastset.xyz`
+    return `${this.explorerUrl}/token/${identifier}`
   }
 }

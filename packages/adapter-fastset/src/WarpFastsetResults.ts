@@ -4,6 +4,7 @@ import {
   parseResultsOutIndex,
   ResolvedInput,
   Warp,
+  WarpChainInfo,
   WarpClientConfig,
   WarpConstants,
   WarpExecution,
@@ -14,31 +15,29 @@ import { WarpFastsetSerializer } from './WarpFastsetSerializer'
 export class WarpFastsetResults implements AdapterWarpResults {
   private readonly serializer: WarpFastsetSerializer
 
-  constructor(private readonly config: WarpClientConfig) {
+  constructor(
+    private readonly config: WarpClientConfig,
+    private readonly chain: WarpChainInfo
+  ) {
     this.serializer = new WarpFastsetSerializer()
   }
 
   async getTransactionExecutionResults(warp: Warp, tx: any): Promise<WarpExecution> {
-    // TODO: Implement Fastset-specific transaction result processing
-    // This should process Fastset transaction results into WarpExecution format
-
     const success = this.isTransactionSuccessful(tx)
-    const gasUsed = this.extractGasUsed(tx)
-    const gasPrice = this.extractGasPrice(tx)
-    const blockNumber = this.extractBlockNumber(tx)
     const transactionHash = this.extractTransactionHash(tx)
-
-    const logs = this.extractLogs(tx)
+    const blockNumber = this.extractBlockNumber(tx)
+    const timestamp = this.extractTimestamp(tx)
 
     return {
       success,
       warp,
       action: 0,
-      user: this.config.user?.wallets?.fastset || null,
+      user: this.config.user?.wallets?.[this.chain.name] || null,
       txHash: transactionHash,
       tx,
       next: null,
-      values: [transactionHash, blockNumber, gasUsed, gasPrice, ...(logs.length > 0 ? logs : [])],
+      values: [transactionHash, blockNumber, timestamp],
+      valuesRaw: [transactionHash, blockNumber, timestamp],
       results: {},
       messages: {},
     }
@@ -50,9 +49,6 @@ export class WarpFastsetResults implements AdapterWarpResults {
     actionIndex: number,
     inputs: ResolvedInput[]
   ): Promise<{ values: any[]; results: WarpExecutionResults }> {
-    // TODO: Implement Fastset-specific query result extraction
-    // This should extract and process query results according to Fastset format
-
     const values = typedValues.map((t) => this.serializer.typedToString(t))
     const valuesRaw = typedValues.map((t) => this.serializer.typedToNative(t)[1])
     let results: WarpExecutionResults = {}
@@ -60,6 +56,12 @@ export class WarpFastsetResults implements AdapterWarpResults {
     if (!warp.results) return { values, results }
 
     const getNestedValue = (path: string): unknown => {
+      const match = path.match(/^out\[(\d+)\]$/)
+      if (match) {
+        const index = parseInt(match[1]) - 1
+        return valuesRaw[index]
+      }
+
       const indices = path
         .split('.')
         .slice(1)
@@ -81,7 +83,8 @@ export class WarpFastsetResults implements AdapterWarpResults {
         continue
       }
       if (path.startsWith('out.') || path === 'out' || path.startsWith('out[')) {
-        results[key] = getNestedValue(path) || null
+        const value = getNestedValue(path)
+        results[key] = value || null
       } else {
         results[key] = path
       }
@@ -91,59 +94,34 @@ export class WarpFastsetResults implements AdapterWarpResults {
   }
 
   private isTransactionSuccessful(tx: any): boolean {
-    // TODO: Implement Fastset-specific transaction success detection
-    // This should determine if a Fastset transaction was successful
+    if (!tx) return false
 
-    // Placeholder implementation - replace with Fastset-specific logic
-    return tx.status === 'success' || tx.status === 1 || tx.success === true
-  }
+    if (tx.success === false) return false
+    if (tx.success === true) return true
+    if (tx.status === 'success') return true
+    if (tx.status === 1) return true
+    if (tx.result && tx.result.success === true) return true
 
-  private extractGasUsed(tx: any): string {
-    // TODO: Implement Fastset-specific gas used extraction
-    // This should extract gas used from Fastset transaction
-
-    // Placeholder implementation - replace with Fastset-specific logic
-    return tx.gasUsed?.toString() || tx.gas_used?.toString() || '0'
-  }
-
-  private extractGasPrice(tx: any): string {
-    // TODO: Implement Fastset-specific gas price extraction
-    // This should extract gas price from Fastset transaction
-
-    // Placeholder implementation - replace with Fastset-specific logic
-    return tx.gasPrice?.toString() || tx.gas_price?.toString() || '0'
-  }
-
-  private extractBlockNumber(tx: any): string {
-    // TODO: Implement Fastset-specific block number extraction
-    // This should extract block number from Fastset transaction
-
-    // Placeholder implementation - replace with Fastset-specific logic
-    return tx.blockNumber?.toString() || tx.block_number?.toString() || '0'
+    return false
   }
 
   private extractTransactionHash(tx: any): string {
-    // TODO: Implement Fastset-specific transaction hash extraction
-    // This should extract transaction hash from Fastset transaction
+    if (!tx) return ''
 
-    // Placeholder implementation - replace with Fastset-specific logic
-    return tx.hash || tx.transactionHash || tx.transaction_hash || ''
+    return tx.transaction_hash || tx.transactionHash || tx.hash || (tx.result && tx.result.transaction_hash) || ''
   }
 
-  private extractLogs(tx: any): any[] {
-    // TODO: Implement Fastset-specific log extraction
-    // This should extract logs from Fastset transaction
+  private extractBlockNumber(tx: any): string {
+    if (!tx) return '0'
 
-    // Placeholder implementation - replace with Fastset-specific logic
-    const logs = tx.logs || tx.events || []
+    return tx.block_number?.toString() || tx.blockNumber?.toString() || (tx.result && tx.result.block_number?.toString()) || '0'
+  }
 
-    return logs.map((log: any) => ({
-      address: log.address || log.contract,
-      topics: log.topics || log.topics || [],
-      data: log.data || log.payload || '',
-      blockNumber: log.blockNumber?.toString() || log.block_number?.toString() || '0',
-      transactionHash: log.transactionHash || log.transaction_hash || '',
-      index: log.index?.toString() || '0',
-    }))
+  private extractTimestamp(tx: any): string {
+    if (!tx) return '0'
+
+    return (
+      tx.timestamp?.toString() || tx.timestamp_nanos?.toString() || (tx.result && tx.result.timestamp?.toString()) || Date.now().toString()
+    )
   }
 }

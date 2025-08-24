@@ -68,6 +68,21 @@ describe('WarpEvmExecutor', () => {
     } as any
     ;(ethers.JsonRpcProvider as unknown as jest.Mock).mockImplementation(() => mockProvider)
 
+    // Mock Wallet class
+    ;(ethers.Wallet as unknown as jest.Mock).mockImplementation((privateKey: string) => ({
+      signMessage: jest
+        .fn()
+        .mockResolvedValue(
+          '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+        ),
+      address: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+    }))
+
+    // Mock verifyMessage function
+    ;(ethers.verifyMessage as unknown as jest.Mock).mockImplementation((message: string, signature: string) => {
+      return '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6'
+    })
+
     executor = new WarpEvmExecutor(mockConfig, mockChainInfo)
   })
 
@@ -114,6 +129,31 @@ describe('WarpEvmExecutor', () => {
       const tx = await executor.createTransferTransaction(executable)
       expect(tx.to).toBe(tokenAddress)
       expect(tx.value).toBe(0n)
+    })
+
+    it('should create a native token transfer transaction through transfers array', async () => {
+      const executable: WarpExecutable = {
+        warp: mockWarp,
+        action: 0,
+        chain: mockChainInfo,
+        destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+        value: 0n,
+        data: null,
+        args: [],
+        transfers: [
+          {
+            identifier: 'ETH',
+            nonce: 0n,
+            amount: ethers.parseEther('1.5'),
+          },
+        ],
+        resolvedInputs: [],
+      }
+
+      const tx = await executor.createTransferTransaction(executable)
+      expect(tx.to).toBe('0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6')
+      expect(tx.value).toBe(ethers.parseEther('1.5'))
+      expect(tx.data).toBe('0x')
     })
 
     it('should throw error for invalid token address', async () => {
@@ -168,6 +208,54 @@ describe('WarpEvmExecutor', () => {
 
       await expect(executor.createTransferTransaction(executable)).rejects.toThrow(
         'WarpEvmExecutor: Multiple token transfers not yet supported'
+      )
+    })
+
+    it('should throw error for negative native token amount', async () => {
+      const executable: WarpExecutable = {
+        warp: mockWarp,
+        action: 0,
+        chain: mockChainInfo,
+        destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+        value: 0n,
+        data: null,
+        args: [],
+        transfers: [
+          {
+            identifier: 'ETH',
+            nonce: 0n,
+            amount: -1n,
+          },
+        ],
+        resolvedInputs: [],
+      }
+
+      await expect(executor.createTransferTransaction(executable)).rejects.toThrow(
+        'WarpEvmExecutor: Native token transfer amount must be positive'
+      )
+    })
+
+    it('should throw error for zero native token amount', async () => {
+      const executable: WarpExecutable = {
+        warp: mockWarp,
+        action: 0,
+        chain: mockChainInfo,
+        destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+        value: 0n,
+        data: null,
+        args: [],
+        transfers: [
+          {
+            identifier: 'ETH',
+            nonce: 0n,
+            amount: 0n,
+          },
+        ],
+        resolvedInputs: [],
+      }
+
+      await expect(executor.createTransferTransaction(executable)).rejects.toThrow(
+        'WarpEvmExecutor: Native token transfer amount must be positive'
       )
     })
 
@@ -283,6 +371,7 @@ describe('WarpEvmExecutor', () => {
         tx: null,
         next: null,
         values: [],
+        valuesRaw: [],
         results: {},
         messages: {},
       })
@@ -319,6 +408,7 @@ describe('WarpEvmExecutor', () => {
         tx: null,
         next: null,
         values: [],
+        valuesRaw: [],
         results: {},
         messages: {},
       })
@@ -420,7 +510,21 @@ describe('WarpEvmExecutor', () => {
       const message = 'test message'
       const privateKey = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
 
-      await expect(executor.signMessage(message, privateKey)).rejects.toThrow('Not implemented')
+      const signature = await executor.signMessage(message, privateKey)
+      expect(signature).toBeDefined()
+      expect(typeof signature).toBe('string')
+      expect(signature.length).toBeGreaterThan(0)
+    })
+
+    it('should verify a message signature', async () => {
+      const message = 'test message'
+      const privateKey = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+      const wallet = new ethers.Wallet(privateKey)
+
+      const signature = await executor.signMessage(message, privateKey)
+      const recoveredAddress = await executor.verifyMessage(message, signature)
+
+      expect(recoveredAddress).toBe(wallet.address)
     })
   })
 })

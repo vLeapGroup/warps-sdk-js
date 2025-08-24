@@ -105,4 +105,46 @@ export class WarpEvmExplorer implements AdapterWarpExplorer {
 
     return urls
   }
+
+  getAssetUrls(identifier: string): Record<ExplorerName, string> {
+    const explorers = this.getAllExplorers()
+    const urls: Record<ExplorerName, string> = {} as Record<ExplorerName, string>
+
+    explorers.forEach((explorer) => {
+      const url = ExplorerUrls[explorer]
+      if (url) {
+        urls[explorer] = `${url}/token/${identifier}`
+      }
+    })
+
+    return urls
+  }
+
+  getContractUrls(address: string): Record<ExplorerName, string> {
+    const explorers = this.getAllExplorers()
+    const urls: Record<ExplorerName, string> = {} as Record<ExplorerName, string>
+
+    explorers.forEach((explorer) => {
+      const url = ExplorerUrls[explorer]
+      if (url) {
+        urls[explorer] = `${url}/address/${address}`
+      }
+    })
+
+    return urls
+  }
+
+  getBlockUrls(blockNumber: string | number): Record<ExplorerName, string> {
+    const explorers = this.getAllExplorers()
+    const urls: Record<ExplorerName, string> = {} as Record<ExplorerName, string>
+
+    explorers.forEach((explorer) => {
+      const url = ExplorerUrls[explorer]
+      if (url) {
+        urls[explorer] = `${url}/block/${blockNumber}`
+      }
+    })
+
+    return urls
+  }
 }

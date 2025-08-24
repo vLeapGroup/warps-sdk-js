@@ -9,7 +9,7 @@ describe('WarpFastsetSerializer', () => {
 
   describe('typedToString', () => {
     it('should serialize string values', () => {
-      expect(serializer.typedToString('hello')).toBe('string:hello')
+      expect(serializer.typedToString('test')).toBe('string:test')
       expect(serializer.typedToString('')).toBe('string:')
     })
 
@@ -25,8 +25,8 @@ describe('WarpFastsetSerializer', () => {
     })
 
     it('should serialize bigint values', () => {
-      expect(serializer.typedToString(BigInt(123))).toBe('bigint:123')
-      expect(serializer.typedToString(BigInt(0))).toBe('bigint:0')
+      expect(serializer.typedToString(BigInt(123))).toBe('biguint:123')
+      expect(serializer.typedToString(BigInt(0))).toBe('biguint:0')
     })
 
     it('should serialize array values', () => {
@@ -40,14 +40,14 @@ describe('WarpFastsetSerializer', () => {
     })
 
     it('should handle complex objects', () => {
-      const obj = { key: 'value' }
+      const obj = { test: 'value' }
       expect(serializer.typedToString(obj)).toBe('string:[object Object]')
     })
   })
 
   describe('stringToTyped', () => {
     it('should deserialize string values', () => {
-      expect(serializer.stringToTyped('string:hello')).toBe('hello')
+      expect(serializer.stringToTyped('string:test')).toBe('test')
       expect(serializer.stringToTyped('string:')).toBe('')
     })
 
@@ -63,8 +63,8 @@ describe('WarpFastsetSerializer', () => {
     })
 
     it('should deserialize bigint values', () => {
-      expect(serializer.stringToTyped('bigint:123')).toBe(BigInt(123))
-      expect(serializer.stringToTyped('bigint:0')).toBe(BigInt(0))
+      expect(serializer.stringToTyped('biguint:123')).toBe(BigInt(123))
+      expect(serializer.stringToTyped('biguint:0')).toBe(BigInt(0))
     })
 
     it('should deserialize array values', () => {
@@ -78,16 +78,16 @@ describe('WarpFastsetSerializer', () => {
     })
 
     it('should handle values without type prefix', () => {
-      expect(serializer.stringToTyped('hello')).toBe('hello')
+      expect(serializer.stringToTyped('test')).toBe('test')
       expect(serializer.stringToTyped('123')).toBe('123')
     })
   })
 
   describe('typedToNative', () => {
     it('should convert string to native', () => {
-      const [type, value] = serializer.typedToNative('hello')
+      const [type, value] = serializer.typedToNative('test')
       expect(type).toBe('string')
-      expect(value).toBe('hello')
+      expect(value).toBe('test')
     })
 
     it('should convert number to native', () => {
@@ -104,12 +104,13 @@ describe('WarpFastsetSerializer', () => {
 
     it('should convert bigint to native', () => {
       const [type, value] = serializer.typedToNative(BigInt(123))
-      expect(type).toBe('bigint')
-      expect(value).toBe(BigInt(123))
+      expect(type).toBe('biguint')
+      expect(value).toBe('123')
     })
 
-    it('should handle unknown types', () => {
-      const [type, value] = serializer.typedToNative({ key: 'value' })
+    it('should handle complex objects', () => {
+      const obj = { test: 'value' }
+      const [type, value] = serializer.typedToNative(obj)
       expect(type).toBe('string')
       expect(value).toBe('[object Object]')
     })
@@ -117,7 +118,8 @@ describe('WarpFastsetSerializer', () => {
 
   describe('nativeToTyped', () => {
     it('should convert string type', () => {
-      expect(serializer.nativeToTyped('string', 'hello')).toBe('hello')
+      expect(serializer.nativeToTyped('string', 'test')).toBe('test')
+      expect(serializer.nativeToTyped('string', 123)).toBe('123')
     })
 
     it('should convert number type', () => {
@@ -131,12 +133,22 @@ describe('WarpFastsetSerializer', () => {
     })
 
     it('should convert bigint type', () => {
-      expect(serializer.nativeToTyped('bigint', BigInt(123))).toBe(BigInt(123))
-      expect(serializer.nativeToTyped('bigint', '123')).toBe(BigInt(123))
+      expect(serializer.nativeToTyped('biguint', BigInt(123))).toBe(BigInt(123))
+      expect(serializer.nativeToTyped('biguint', '123')).toBe(BigInt(123))
+    })
+
+    it('should convert address type', () => {
+      expect(serializer.nativeToTyped('address', 'fs1test')).toBe('fs1test')
+      expect(serializer.nativeToTyped('address', 123)).toBe('123')
+    })
+
+    it('should convert hex type', () => {
+      expect(serializer.nativeToTyped('hex', '0x123')).toBe('0x123')
+      expect(serializer.nativeToTyped('hex', 123)).toBe('123')
     })
 
     it('should handle unknown types', () => {
-      expect(serializer.nativeToTyped('unknown', 'value')).toBe('value')
+      expect(serializer.nativeToTyped('unknown' as any, 'test')).toBe('test')
     })
   })
 
@@ -154,11 +166,19 @@ describe('WarpFastsetSerializer', () => {
     })
 
     it('should map bigint type', () => {
-      expect(serializer.nativeToType('bigint')).toBe('bigint')
+      expect(serializer.nativeToType('biguint')).toBe('biguint')
+    })
+
+    it('should map address type', () => {
+      expect(serializer.nativeToType('address')).toBe('address')
+    })
+
+    it('should map hex type', () => {
+      expect(serializer.nativeToType('hex')).toBe('hex')
     })
 
     it('should handle unknown types', () => {
-      expect(serializer.nativeToType('unknown')).toBe('string')
+      expect(serializer.nativeToType('unknown' as any)).toBe('string')
     })
   })
 })

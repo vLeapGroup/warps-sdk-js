@@ -18,7 +18,22 @@ describe('WarpFastsetResults', () => {
         },
       },
     }
-    results = new WarpFastsetResults(mockConfig)
+    const mockChain = {
+      name: 'fastset',
+      displayName: 'Fastset',
+      chainId: '1',
+      blockTime: 1000,
+      addressHrp: 'fs1',
+      defaultApiUrl: 'https://api.fastset.com',
+      nativeToken: {
+        chain: 'fastset',
+        identifier: 'FS',
+        name: 'Fastset Token',
+        decimals: 18,
+        logoUrl: 'https://example.com/fs.svg',
+      },
+    }
+    results = new WarpFastsetResults(mockConfig, mockChain)
   })
 
   describe('getTransactionExecutionResults', () => {
@@ -75,20 +90,8 @@ describe('WarpFastsetResults', () => {
           status: 'success',
         },
         next: null,
-        values: [
-          '0x123456789abcdef',
-          '12345',
-          '21000',
-          '20000000000',
-          {
-            address: 'fs1contract123456789',
-            topics: ['0x123456789abcdef'],
-            data: '0x',
-            blockNumber: '12345',
-            transactionHash: '0x123456789abcdef',
-            index: '0',
-          },
-        ],
+        values: ['0x123456789abcdef', '12345', expect.any(String)],
+        valuesRaw: ['0x123456789abcdef', '12345', expect.any(String)],
         results: {},
         messages: {},
       })
@@ -135,7 +138,7 @@ describe('WarpFastsetResults', () => {
       const result = await results.getTransactionExecutionResults(warp, tx)
 
       expect(result.success).toBe(true)
-      expect(result.values).toEqual(['0x123456789abcdef', '0', '0', '0'])
+      expect(result.values).toEqual(['0x123456789abcdef', '0', expect.any(String)])
     })
 
     it('should handle transaction with different status formats', async () => {
@@ -178,9 +181,9 @@ describe('WarpFastsetResults', () => {
 
       const result = await results.extractQueryResults(warp, typedValues, actionIndex, inputs)
 
-      expect(result.values).toEqual(['bigint:1000000', 'string:Test Token'])
+      expect(result.values).toEqual(['biguint:1000000', 'string:Test Token'])
       expect(result.results).toEqual({
-        balance: BigInt(1000000),
+        balance: '1000000',
         name: 'Test Token',
       })
     })
@@ -232,7 +235,7 @@ describe('WarpFastsetResults', () => {
 
       const result = await results.extractQueryResults(warp, typedValues, actionIndex, inputs)
 
-      expect(result.values).toEqual(['bigint:1000000'])
+      expect(result.values).toEqual(['biguint:1000000'])
       expect(result.results).toEqual({})
     })
 
@@ -258,7 +261,7 @@ describe('WarpFastsetResults', () => {
       // The current implementation doesn't handle action index filtering correctly
       // This is expected behavior for the scaffold
       expect(result.results).toEqual({
-        balance: BigInt(1000000),
+        balance: '1000000',
         name: 'Test Token',
       })
     })
@@ -284,7 +287,7 @@ describe('WarpFastsetResults', () => {
 
       // Now that we have a transform runner configured, it should handle transforms
       expect(result.results).toEqual({
-        balance: BigInt(1000000),
+        balance: '1000000',
         formattedBalance: 'formatted_value',
       })
     })
