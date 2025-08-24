@@ -47,7 +47,7 @@ describe('WarpMultiversxDataLoader', () => {
       const mockProvider = {
         doGetGeneric: jest.fn().mockResolvedValue([
           {
-            hash: 'tx1',
+            txHash: 'tx1',
             receiver: 'receiver1',
             sender: 'sender1',
             value: '1000000000000000000',
@@ -83,7 +83,7 @@ describe('WarpMultiversxDataLoader', () => {
       const mockProvider = {
         doGetGeneric: jest.fn().mockResolvedValue([
           {
-            hash: 'tx2',
+            txHash: 'tx2',
             receiver: 'receiver2',
             sender: 'sender2',
             value: '2000000000000000000',
