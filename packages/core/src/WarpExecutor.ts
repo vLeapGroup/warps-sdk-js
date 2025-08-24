@@ -138,6 +138,7 @@ export class WarpExecutor {
         tx: null,
         next,
         values,
+        valuesRaw: values.map((value) => this.serializer.stringToNative(value)[1]),
         results: { ...results, _DATA: content },
         messages: applyResultsToMessages(preparedWarp, results),
       }
@@ -152,6 +153,7 @@ export class WarpExecutor {
         tx: null,
         next: null,
         values: [],
+        valuesRaw: [],
         results: { _DATA: error },
         messages: {},
       }

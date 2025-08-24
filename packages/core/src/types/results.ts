@@ -10,6 +10,7 @@ export type WarpExecution = {
   tx: WarpAdapterGenericTransaction | null
   next: WarpExecutionNextInfo | null
   values: any[]
+  valuesRaw: any[]
   results: WarpExecutionResults
   messages: WarpExecutionMessages
 }
