@@ -63,6 +63,7 @@ export class WarpSerializer {
     else if (baseType === 'uint64' || baseType === 'biguint') return [baseType, BigInt((val as string) || 0)]
     else if (baseType === 'bool') return [baseType, val === 'true']
     else if (baseType === 'address') return [baseType, val]
+    else if (baseType === 'token') return [baseType, val]
     else if (baseType === 'hex') return [baseType, val]
     else if (baseType === 'codemeta') return [baseType, val]
     else if (baseType === 'asset') {
