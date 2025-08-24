@@ -7,6 +7,7 @@ import { WarpFastsetResults } from './WarpFastsetResults'
 import { WarpFastsetSerializer } from './WarpFastsetSerializer'
 
 export const NativeTokenSet: WarpChainAsset = {
+  chain: WarpChainName.Fastset,
   identifier: 'SET',
   name: 'SET',
   decimals: 18,

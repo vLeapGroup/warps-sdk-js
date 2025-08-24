@@ -2,6 +2,7 @@ import { WarpChainAsset, WarpChainName } from '@vleap/warps'
 import { createMultiversxAdapter } from './common'
 
 export const NativeTokenEgld: WarpChainAsset = {
+  chain: WarpChainName.Multiversx,
   identifier: 'EGLD',
   name: 'eGold',
   decimals: 18,

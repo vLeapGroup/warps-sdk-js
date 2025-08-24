@@ -2,6 +2,7 @@ import { AdapterFactory, WarpChainAsset, WarpChainName } from '@vleap/warps'
 import { createEvmAdapter } from './common'
 
 export const NativeTokenArb: WarpChainAsset = {
+  chain: WarpChainName.Arbitrum,
   identifier: 'ARB',
   name: 'ARB',
   decimals: 18,

@@ -1,4 +1,7 @@
+import { WarpChain } from './warp'
+
 export type WarpChainAccount = {
+  chain: WarpChain
   address: string
   balance: bigint
 }
@@ -10,6 +13,7 @@ export type WarpChainAssetValue = {
 }
 
 export type WarpChainAsset = {
+  chain: WarpChain
   identifier: string
   name: string
   nonce?: bigint

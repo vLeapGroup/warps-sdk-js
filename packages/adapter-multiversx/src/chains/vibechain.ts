@@ -2,6 +2,7 @@ import { WarpChainAsset, WarpChainInfo, WarpChainName } from '@vleap/warps'
 import { createMultiversxAdapter } from './common'
 
 export const NativeTokenVibe: WarpChainAsset = {
+  chain: WarpChainName.Vibechain,
   identifier: 'VIBE',
   name: 'VIBE',
   decimals: 18,

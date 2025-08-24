@@ -20,6 +20,7 @@ export class WarpSuiDataLoader implements AdapterWarpDataLoader {
     })
 
     return {
+      chain: this.chain.name,
       address,
       balance: BigInt(balance.totalBalance),
     }
@@ -45,6 +46,7 @@ export class WarpSuiDataLoader implements AdapterWarpDataLoader {
           const logoUrl = await SuiLogoService.getLogoUrl(balance.coinType)
 
           assets.push({
+            chain: this.chain.name,
             identifier: balance.coinType,
             name: tokenMetadata.name,
             amount: BigInt(balance.totalBalance),
@@ -57,6 +59,7 @@ export class WarpSuiDataLoader implements AdapterWarpDataLoader {
           const logoUrl = await SuiLogoService.getLogoUrl(balance.coinType)
 
           assets.push({
+            chain: this.chain.name,
             identifier: balance.coinType,
             name: fallbackName,
             amount: BigInt(balance.totalBalance),

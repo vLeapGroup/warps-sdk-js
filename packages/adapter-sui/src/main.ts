@@ -10,6 +10,7 @@ import { WarpSuiResults } from './WarpSuiResults'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
 
 export const NativeTokenSui: WarpChainAsset = {
+  chain: WarpChainName.Sui,
   identifier: '0x2::sui::SUI',
   name: 'SUI',
   decimals: 9,

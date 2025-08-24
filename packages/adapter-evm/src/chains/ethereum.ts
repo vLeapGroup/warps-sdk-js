@@ -2,6 +2,7 @@ import { AdapterFactory, WarpChainAsset, WarpChainName } from '@vleap/warps'
 import { createEvmAdapter } from './common'
 
 export const NativeTokenEth: WarpChainAsset = {
+  chain: WarpChainName.Ethereum,
   identifier: 'ETH',
   name: 'ETH',
   decimals: 18,
