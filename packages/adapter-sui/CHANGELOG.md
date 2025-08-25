@@ -1,5 +1,17 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.31
+
+### Minor Changes
+
+- ed15620: update adapters
+
+### Patch Changes
+
+- c053dca: update sui exec
+- Updated dependencies [eff7bda]
+  - @vleap/warps@3.0.0-alpha.86
+
 ## 0.2.0-alpha.30
 
 ### Patch Changes

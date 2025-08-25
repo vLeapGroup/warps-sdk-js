@@ -1,5 +1,18 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-alpha.19
+
+### Minor Changes
+
+- ed15620: update adapters
+
+### Patch Changes
+
+- a49c244: update evm exec
+- c9eb27c: update adapter chain configs
+- Updated dependencies [eff7bda]
+  - @vleap/warps@3.0.0-alpha.86
+
 ## 0.2.0-alpha.18
 
 ### Patch Changes

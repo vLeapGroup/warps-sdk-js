@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.86
+
+### Patch Changes
+
+- eff7bda: fix factory
+
 ## 3.0.0-alpha.85
 
 ### Minor Changes

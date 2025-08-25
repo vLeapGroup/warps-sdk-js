@@ -1,5 +1,19 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.38
+
+### Minor Changes
+
+- ed15620: update adapters
+
+### Patch Changes
+
+- df142e1: fix invalid import
+- c9eb27c: update adapter chain configs
+- abf215f: fix mvx queries
+- Updated dependencies [eff7bda]
+  - @vleap/warps@3.0.0-alpha.86
+
 ## 0.2.0-alpha.37
 
 ### Patch Changes

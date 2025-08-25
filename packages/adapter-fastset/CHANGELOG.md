@@ -1,5 +1,18 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-alpha.14
+
+### Minor Changes
+
+- 12624ae: further fastset implementations
+- ed15620: update adapters
+
+### Patch Changes
+
+- c9eb27c: update adapter chain configs
+- Updated dependencies [eff7bda]
+  - @vleap/warps@3.0.0-alpha.86
+
 ## 0.1.0-alpha.13
 
 ### Minor Changes
