@@ -1,7 +1,7 @@
-import { getPublicKey, sign } from '@noble/ed25519'
+import { getPublicKey } from '@noble/ed25519'
+import { TransactionSigner } from './TransactionSigner'
 import {
   FastsetAccountInfo,
-  FastsetFaucetRequest,
   FastsetFaucetResponse,
   FastsetJsonRpcRequest,
   FastsetJsonRpcResponse,
@@ -9,10 +9,10 @@ import {
   FastsetSubmitTransactionRequest,
   FastsetSubmitTransactionResponse,
   FastsetTransaction,
-  Transaction,
 } from './types'
+import { Wallet } from './Wallet'
 
-// Configure ed25519 library
+// Configure ed25519 library for Node.js environment
 // @ts-ignore
 BigInt.prototype.toJSON = function () {
   return Number(this)
@@ -30,10 +30,11 @@ export class FastsetClient {
     this.config = config
   }
 
-  async getAccountInfo(address: Uint8Array): Promise<FastsetAccountInfo | null> {
+  async getAccountInfo(address: string): Promise<FastsetAccountInfo | null> {
     try {
+      const addressBytes = Wallet.decodeBech32Address(address)
       const response = await this.requestValidator('set_getAccountInfo', {
-        address: Array.from(address),
+        address: Array.from(addressBytes),
       })
 
       if (response.error) {
@@ -46,15 +47,16 @@ export class FastsetClient {
     }
   }
 
-  async getNextNonce(senderAddress: Uint8Array): Promise<number> {
+  async getNextNonce(senderAddress: string): Promise<number> {
     const accountInfo = await this.getAccountInfo(senderAddress)
     return accountInfo?.next_nonce ?? 0
   }
 
-  async fundFromFaucet(request: FastsetFaucetRequest): Promise<FastsetFaucetResponse> {
+  async fundFromFaucet(recipientAddress: string, amount: string): Promise<FastsetFaucetResponse> {
+    const recipientBytes = Wallet.decodeBech32Address(recipientAddress)
     const response = await this.requestProxy('faucetDrip', {
-      recipient: Array.from(request.recipient),
-      amount: request.amount,
+      recipient: Array.from(recipientBytes),
+      amount,
     })
 
     if (response.error) {
@@ -66,7 +68,7 @@ export class FastsetClient {
 
   async submitTransaction(request: FastsetSubmitTransactionRequest): Promise<FastsetSubmitTransactionResponse> {
     const response = await this.requestValidator('set_submitTransaction', {
-      transaction: this.serializeTransaction(request.transaction),
+      transaction: request.transaction,
       signature: Array.from(request.signature),
     })
 
@@ -88,7 +90,7 @@ export class FastsetClient {
 
   async submitCertificate(request: FastsetSubmitCertificateRequest): Promise<void> {
     const response = await this.requestValidator('set_submitTransactionCertificate', {
-      transaction: this.serializeTransaction(request.transaction),
+      transaction: request.transaction,
       signature: Array.from(request.signature),
       validator_signatures: request.validator_signatures.map(([validator, signature]) => [Array.from(validator), Array.from(signature)]),
     })
@@ -98,9 +100,11 @@ export class FastsetClient {
     }
   }
 
-  async executeTransfer(senderPrivateKey: Uint8Array, recipient: Uint8Array, amount: string, userData?: Uint8Array): Promise<Uint8Array> {
+  async executeTransfer(senderPrivateKey: Uint8Array, recipient: string, amount: string, userData?: Uint8Array): Promise<Uint8Array> {
     const senderPublicKey = await getPublicKey(senderPrivateKey)
-    const nonce = await this.getNextNonce(senderPublicKey)
+    const senderAddress = Wallet.encodeBech32Address(senderPublicKey)
+    const nonce = await this.getNextNonce(senderAddress)
+    const recipientBytes = Wallet.decodeBech32Address(recipient)
 
     const transaction: FastsetTransaction = {
       sender: senderPublicKey,
@@ -108,7 +112,7 @@ export class FastsetClient {
       timestamp_nanos: BigInt(Date.now()) * 1_000_000n,
       claim: {
         Transfer: {
-          recipient: { FastSet: recipient },
+          recipient: { FastSet: recipientBytes },
           amount,
           user_data: userData ?? null,
         },
@@ -131,37 +135,19 @@ export class FastsetClient {
     return submitResponse.transaction_hash
   }
 
-  async signTransaction(transaction: FastsetTransaction, privateKey: Uint8Array): Promise<Uint8Array> {
-    const msg = Transaction.serialize(transaction)
-    const msgBytes = msg.toBytes()
+  async submitClaim(senderPrivateKey: Uint8Array, claim: any): Promise<Uint8Array> {
+    const senderPublicKey = await getPublicKey(senderPrivateKey)
+    const senderAddress = Wallet.encodeBech32Address(senderPublicKey)
+    const nonce = await this.getNextNonce(senderAddress)
 
-    const prefix = new TextEncoder().encode('Transaction::')
-    const dataToSign = new Uint8Array(prefix.length + msgBytes.length)
-    dataToSign.set(prefix, 0)
-    dataToSign.set(msgBytes, prefix.length)
-
-    return sign(dataToSign, privateKey)
-  }
-
-  async createTransaction(sender: Uint8Array, recipient: Uint8Array, amount: string, userData?: Uint8Array): Promise<FastsetTransaction> {
-    const nonce = await this.getNextNonce(sender)
-
-    return {
-      sender,
+    const transaction: FastsetTransaction = {
+      sender: senderPublicKey,
       nonce,
       timestamp_nanos: BigInt(Date.now()) * 1_000_000n,
-      claim: {
-        Transfer: {
-          recipient: { FastSet: recipient },
-          amount,
-          user_data: userData ?? null,
-        },
-      },
+      claim,
     }
-  }
 
-  async executeTransaction(transaction: FastsetTransaction, privateKey: Uint8Array): Promise<Uint8Array> {
-    const signature = await this.signTransaction(transaction, privateKey)
+    const signature = await this.signTransaction(transaction, senderPrivateKey)
 
     const submitResponse = await this.submitTransaction({
       transaction,
@@ -177,8 +163,54 @@ export class FastsetClient {
     return submitResponse.transaction_hash
   }
 
-  private serializeTransaction(transaction: FastsetTransaction): unknown {
-    return JSON.stringify(transaction, this.jsonReplacer)
+  async signTransaction(transaction: FastsetTransaction, privateKey: Uint8Array): Promise<Uint8Array> {
+    return await TransactionSigner.signTransaction(transaction, privateKey)
+  }
+
+  async getTransactionStatus(txHash: string): Promise<any> {
+    try {
+      const response = await this.requestValidator('set_getTransactionStatus', {
+        hash: txHash,
+      })
+
+      if (response.error) {
+        return null
+      }
+
+      return response.result
+    } catch (error) {
+      return null
+    }
+  }
+
+  async getTransactionInfo(txHash: string): Promise<any> {
+    try {
+      const response = await this.requestValidator('set_getTransactionInfo', {
+        hash: txHash,
+      })
+
+      if (response.error) {
+        return null
+      }
+
+      return response.result
+    } catch (error) {
+      return null
+    }
+  }
+
+  async getNetworkInfo(): Promise<any> {
+    try {
+      const response = await this.requestValidator('set_getNetworkInfo', {})
+
+      if (response.error) {
+        return null
+      }
+
+      return response.result
+    } catch (error) {
+      return null
+    }
   }
 
   private async requestValidator(method: string, params: unknown): Promise<FastsetJsonRpcResponse> {

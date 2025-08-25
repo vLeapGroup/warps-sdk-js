@@ -1,3 +1,5 @@
+export * from './Claim'
 export * from './FastsetClient'
+export * from './Transaction'
 export * from './types'
-export * from './utils'
+export * from './Wallet'

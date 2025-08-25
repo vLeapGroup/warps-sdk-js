@@ -33,7 +33,7 @@ export const ClaimType = bcs.enum('ClaimType', {
   Transfer: Transfer,
 })
 
-export const Transaction = bcs.struct('Transaction', {
+export const BcsTransaction = bcs.struct('Transaction', {
   sender: PublicKey,
   nonce: Nonce,
   timestamp_nanos: bcs.u128(),

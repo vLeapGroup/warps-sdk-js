@@ -36,9 +36,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@vleap/warps": "^3.0.0-alpha.85",
     "@mysten/bcs": "^0.8.0",
     "@noble/ed25519": "^2.1.0",
-    "@noble/hashes": "^1.4.0"
+    "@noble/hashes": "^1.4.0",
+    "@vleap/warps": "^3.0.0-alpha.85",
+    "bech32": "^2.0.0"
   }
 }

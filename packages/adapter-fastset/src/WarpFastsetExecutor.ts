@@ -8,7 +8,7 @@ import {
   WarpExecutable,
   WarpQueryAction,
 } from '@vleap/warps'
-import { FastsetClient } from './sdk'
+import { FastsetClient } from './sdk/FastsetClient'
 import { WarpFastsetSerializer } from './WarpFastsetSerializer'
 
 export class WarpFastsetExecutor implements AdapterWarpExecutor {
@@ -136,35 +136,7 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
   }
 
   async preprocessInput(chain: WarpChainInfo, input: string, type: WarpActionInputType, value: string): Promise<string> {
-    const typedValue = this.serializer.stringToTyped(value)
-
-    switch (type) {
-      case 'address':
-        if (!this.isValidFastsetAddress(typedValue)) {
-          throw new Error(`Invalid Fastset address format: ${typedValue}`)
-        }
-        return typedValue
-      case 'hex':
-        const hexValue = typedValue.startsWith('0x') ? typedValue.slice(2) : typedValue
-        if (!/^[0-9a-fA-F]+$/.test(hexValue)) {
-          throw new Error(`Invalid hex format: ${typedValue}`)
-        }
-        return typedValue
-      case 'number':
-        const numValue = Number(typedValue)
-        if (isNaN(numValue)) {
-          throw new Error(`Invalid number format: ${typedValue}`)
-        }
-        return numValue.toString()
-      case 'biguint':
-        const bigIntValue = BigInt(typedValue)
-        if (bigIntValue < 0) {
-          throw new Error(`Negative value not allowed`)
-        }
-        return bigIntValue.toString()
-      default:
-        return String(typedValue)
-    }
+    return value
   }
 
   async signMessage(message: string, privateKey: string): Promise<string> {

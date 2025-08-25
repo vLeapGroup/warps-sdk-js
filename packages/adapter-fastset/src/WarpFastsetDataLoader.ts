@@ -7,10 +7,25 @@ import {
   WarpClientConfig,
   WarpDataLoaderOptions,
 } from '@vleap/warps'
-import { FastsetClient } from './sdk'
+import { FastsetClient } from './sdk/FastsetClient'
+
+export interface FastsetAccountData {
+  address: string
+  balance: string
+  balanceDecimal: number
+  nextNonce: number
+  sequenceNumber: number
+}
+
+export interface FastsetTransactionData {
+  hash: string
+  hashHex: string
+  status: string
+  details: any
+}
 
 export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
-  private readonly fastsetClient: FastsetClient
+  private client: FastsetClient
 
   constructor(
     private readonly config: WarpClientConfig,
@@ -18,7 +33,7 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
   ) {
     const validatorUrl = this.chain.defaultApiUrl
     const proxyUrl = this.chain.defaultApiUrl
-    this.fastsetClient = new FastsetClient({
+    this.client = new FastsetClient({
       validatorUrl,
       proxyUrl,
     })
@@ -26,8 +41,7 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
 
   async getAccount(address: string): Promise<WarpChainAccount> {
     try {
-      const addressBytes = this.fromBase64(address)
-      const accountInfo = await this.fastsetClient.getAccountInfo(addressBytes)
+      const accountInfo = await this.client.getAccountInfo(address)
 
       if (!accountInfo) {
         return {
@@ -40,7 +54,7 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
       return {
         chain: this.chain.name,
         address,
-        balance: BigInt(accountInfo.balance || '0'),
+        balance: BigInt(parseInt(accountInfo.balance, 16)),
       }
     } catch (error) {
       return {
@@ -61,7 +75,7 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
             chain: this.chain.name,
             identifier: this.chain.nativeToken?.identifier || 'SET',
             name: this.chain.nativeToken?.name || 'SET',
-            decimals: this.chain.nativeToken?.decimals || 18,
+            decimals: this.chain.nativeToken?.decimals || 6,
             amount: account.balance,
             logoUrl: this.chain.nativeToken?.logoUrl,
           },
@@ -78,7 +92,74 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
     return []
   }
 
-  private fromBase64(base64: string): Uint8Array {
-    return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))
+  async getAccountInfo(address: string): Promise<FastsetAccountData | null> {
+    try {
+      const accountInfo = await this.client.getAccountInfo(address)
+
+      if (!accountInfo) {
+        return null
+      }
+
+      const balanceDecimal = parseInt(accountInfo.balance, 16)
+
+      return {
+        address,
+        balance: accountInfo.balance,
+        balanceDecimal,
+        nextNonce: accountInfo.next_nonce,
+        sequenceNumber: accountInfo.sequence_number,
+      }
+    } catch (error) {
+      console.error('Error getting account info:', error)
+      return null
+    }
+  }
+
+  async getTransactionInfo(txHash: string): Promise<FastsetTransactionData | null> {
+    try {
+      return {
+        hash: txHash,
+        hashHex: txHash.startsWith('0x') ? txHash.slice(2) : txHash,
+        status: 'submitted',
+        details: {
+          hash: txHash,
+          timestamp: new Date().toISOString(),
+        },
+      }
+    } catch (error) {
+      console.error('Error getting transaction info:', error)
+      return null
+    }
+  }
+
+  async checkTransferStatus(fromAddress: string, toAddress: string, amount: string): Promise<boolean> {
+    try {
+      const fromAccount = await this.getAccountInfo(fromAddress)
+      const toAccount = await this.getAccountInfo(toAddress)
+
+      if (!fromAccount || !toAccount) {
+        return false
+      }
+
+      const transferAmount = parseInt(amount)
+      const fromBalance = fromAccount.balanceDecimal
+
+      return fromBalance < transferAmount
+    } catch (error) {
+      console.error('Error checking transfer status:', error)
+      return false
+    }
+  }
+
+  async getAccountBalance(address: string): Promise<{ balance: string; balanceDecimal: number } | null> {
+    const accountInfo = await this.getAccountInfo(address)
+    if (!accountInfo) {
+      return null
+    }
+
+    return {
+      balance: accountInfo.balance,
+      balanceDecimal: accountInfo.balanceDecimal,
+    }
   }
 }

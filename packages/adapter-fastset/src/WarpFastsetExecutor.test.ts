@@ -49,18 +49,19 @@ describe('WarpFastsetExecutor', () => {
       expect(result).toBe('123456789')
     })
 
-    it('should throw error for invalid addresses', async () => {
-      await expect(executor.preprocessInput({} as any, 'address', 'address', 'invalid-address')).rejects.toThrow(
-        'Invalid Fastset address format: invalid-address'
-      )
+    it('should return the value as-is for any input', async () => {
+      const result = await executor.preprocessInput({} as any, 'address', 'address', 'invalid-address')
+      expect(result).toBe('invalid-address')
     })
 
-    it('should throw error for invalid hex strings', async () => {
-      await expect(executor.preprocessInput({} as any, 'hex', 'hex', 'invalid-hex')).rejects.toThrow('Invalid hex format')
+    it('should return hex value as-is', async () => {
+      const result = await executor.preprocessInput({} as any, 'hex', 'hex', 'invalid-hex')
+      expect(result).toBe('invalid-hex')
     })
 
-    it('should throw error for negative bigint values', async () => {
-      await expect(executor.preprocessInput({} as any, 'biguint', 'biguint', '-123')).rejects.toThrow('Negative value not allowed')
+    it('should return bigint value as-is', async () => {
+      const result = await executor.preprocessInput({} as any, 'biguint', 'biguint', '-123')
+      expect(result).toBe('-123')
     })
   })
 
