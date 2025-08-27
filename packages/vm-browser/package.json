@@ -7,7 +7,7 @@
     "dist"
   ],
   "dependencies": {
-    "@vleap/warps": "^3.0.0-alpha.75"
+    "@vleap/warps": "^3.0.0-alpha.86"
   },
   "license": "MIT",
   "scripts": {
@@ -22,6 +22,7 @@
     ".": {
       "types": "dist/runInVm.d.ts",
       "import": "./dist/runInVm.mjs",
+      "require": "./dist/runInVm.js",
       "default": "./dist/runInVm.mjs"
     }
   },
