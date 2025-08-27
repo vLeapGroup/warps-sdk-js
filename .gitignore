@@ -21,3 +21,6 @@ yarn-error.log*
 
 # turbo
 .turbo
+
+# generated files
+warp-schema.json
