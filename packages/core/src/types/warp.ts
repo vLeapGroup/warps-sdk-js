@@ -119,7 +119,19 @@ export type WarpLinkAction = {
 
 export type WarpActionInputSource = 'field' | 'query' | 'user:wallet'
 
-export type BaseWarpActionInputType = 'string' | 'uint8' | 'uint16' | 'uint32' | 'uint64' | 'biguint' | 'bool' | 'address' | 'hex' | string
+export type BaseWarpActionInputType =
+  | 'string'
+  | 'uint8'
+  | 'uint16'
+  | 'uint32'
+  | 'uint64'
+  | 'uint128'
+  | 'uint256'
+  | 'biguint'
+  | 'bool'
+  | 'address'
+  | 'hex'
+  | string
 
 export type WarpActionInputType = string
 
