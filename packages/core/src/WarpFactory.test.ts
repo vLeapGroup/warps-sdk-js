@@ -89,7 +89,13 @@ describe('WarpFactory', () => {
     blockTime: 6000,
     addressHrp: 'erd',
     defaultApiUrl: 'https://api',
-    nativeToken: 'EGLD',
+    nativeToken: {
+      chain: 'multiversx',
+      identifier: 'EGLD',
+      name: 'MultiversX',
+      decimals: 18,
+      logoUrl: 'https://example.com/egld-logo.png',
+    },
   }
 
   beforeEach(() => {
@@ -170,7 +176,13 @@ describe('getChainInfoForAction', () => {
       addressHrp: 'erd',
       defaultApiUrl: 'https://api.multiversx.com',
       explorerUrl: 'https://explorer.multiversx.com',
-      nativeToken: 'EGLD',
+      nativeToken: {
+        chain: 'multiversx',
+        identifier: 'EGLD',
+        name: 'MultiversX',
+        decimals: 18,
+        logoUrl: 'https://example.com/egld-logo.png',
+      },
     })
     const adapter = createMockAdapter()
     adapter.chain = 'mainnet'
@@ -181,7 +193,13 @@ describe('getChainInfoForAction', () => {
       blockTime: 6000,
       addressHrp: 'erd',
       defaultApiUrl: 'https://api.multiversx.com',
-      nativeToken: 'EGLD',
+      nativeToken: {
+        chain: 'multiversx',
+        identifier: 'EGLD',
+        name: 'MultiversX',
+        decimals: 18,
+        logoUrl: 'https://example.com/egld-logo.png',
+      },
     }
     adapter.registry.getChainInfo = mockGetChainInfo
     const factory = new WarpFactory(testConfig, [adapter])
@@ -227,7 +245,13 @@ describe('getChainInfoForAction', () => {
       blockTime: 6,
       addressHrp: 'erd',
       defaultApiUrl: 'https://testnet-api.multiversx.com',
-      nativeToken: 'EGLD',
+      nativeToken: {
+        chain: 'multiversx',
+        identifier: 'EGLD',
+        name: 'MultiversX',
+        decimals: 18,
+        logoUrl: 'https://example.com/egld-logo.png',
+      },
     })
     const adapter = createMockAdapter()
     adapter.chain = 'testnet'
@@ -238,7 +262,13 @@ describe('getChainInfoForAction', () => {
       blockTime: 6,
       addressHrp: 'erd',
       defaultApiUrl: 'https://testnet-api.multiversx.com',
-      nativeToken: 'EGLD',
+      nativeToken: {
+        chain: 'multiversx',
+        identifier: 'EGLD',
+        name: 'MultiversX',
+        decimals: 18,
+        logoUrl: 'https://example.com/egld-logo.png',
+      },
     }
     adapter.registry.getChainInfo = mockGetChainInfo
     const factory = new WarpFactory(testConfig, [adapter])

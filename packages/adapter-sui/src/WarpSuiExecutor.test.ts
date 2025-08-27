@@ -14,7 +14,13 @@ describe('WarpSuiExecutor', () => {
     addressHrp: '0x',
     defaultApiUrl: 'https://fullnode.devnet.sui.io',
     explorerUrl: 'https://explorer.sui.io',
-    nativeToken: 'SUI',
+    nativeToken: {
+      chain: 'sui',
+      identifier: 'SUI',
+      name: 'Sui',
+      decimals: 9,
+      logoUrl: 'https://example.com/sui-logo.png',
+    },
   }
 
   it('createTransaction - creates a transfer transaction', async () => {

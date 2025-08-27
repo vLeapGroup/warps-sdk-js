@@ -1,6 +1,6 @@
 // Tests for the MultiversxResults class. All tests focus on the MultiversxResults class directly.
 import { SmartContractResult, TransactionEvent, TransactionLogs, TransactionOnNetwork, TypedValue } from '@multiversx/sdk-core/out'
-import { extractCollectResults, Warp, WarpClientConfig, WarpContractAction } from '@vleap/warps'
+import { extractCollectResults, Warp, WarpChainInfo, WarpClientConfig, WarpContractAction } from '@vleap/warps'
 import { promises as fs, PathLike } from 'fs'
 import fetchMock from 'jest-fetch-mock'
 import path from 'path'
@@ -27,6 +27,22 @@ const testConfig: WarpClientConfig = {
         return fn(context)
       }),
     },
+  },
+}
+
+const mockChainInfo: WarpChainInfo = {
+  name: 'multiversx',
+  displayName: 'MultiversX',
+  chainId: '1',
+  blockTime: 6000,
+  addressHrp: 'erd',
+  defaultApiUrl: 'https://devnet-api.multiversx.com',
+  nativeToken: {
+    chain: 'multiversx',
+    identifier: 'EGLD',
+    name: 'MultiversX',
+    decimals: 18,
+    logoUrl: 'https://example.com/egld-logo.png',
   },
 }
 
@@ -58,7 +74,7 @@ jest.mock('@vleap/warps-vm-node', () => ({
 describe('Result Helpers', () => {
   let subject: WarpMultiversxResults
   beforeEach(() => {
-    subject = new WarpMultiversxResults(testConfig)
+    subject = new WarpMultiversxResults(testConfig, mockChainInfo)
   })
 
   describe('input-based results', () => {
@@ -509,7 +525,7 @@ describe('Result Helpers', () => {
       }
 
       // Create subject after mock server is started
-      const subject = new WarpMultiversxResults(testConfig)
+      const subject = new WarpMultiversxResults(testConfig, mockChainInfo)
       // Patch executeCollect and executeQuery to always return a full WarpExecution object
       const mockExecutor = {
         executeCollect: async (warpArg: any, actionIndex: any, actionInputs: any, meta: any) => ({
@@ -628,7 +644,7 @@ describe('Result Helpers', () => {
       }
 
       // Create subject after mock server is started
-      const subject = new WarpMultiversxResults(testConfig)
+      const subject = new WarpMultiversxResults(testConfig, mockChainInfo)
       // Patch executeCollect and executeQuery to always return a full WarpExecution object
       const mockExecutor = {
         executeCollect: async (warpArg: any, actionIndex: any, actionInputs: any, meta: any) => ({

@@ -15,7 +15,13 @@ describe('WarpMultiversxDataLoader', () => {
     blockTime: 6000,
     addressHrp: 'erd',
     defaultApiUrl: 'https://devnet-api.multiversx.com',
-    nativeToken: 'EGLD',
+    nativeToken: {
+      chain: 'multiversx',
+      identifier: 'EGLD',
+      name: 'MultiversX',
+      decimals: 18,
+      logoUrl: 'https://example.com/egld-logo.png',
+    },
   }
 
   let dataLoader: WarpMultiversxDataLoader

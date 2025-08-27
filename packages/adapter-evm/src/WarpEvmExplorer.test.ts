@@ -40,7 +40,13 @@ describe('WarpEvmExplorer', () => {
     blockTime: 12000,
     addressHrp: '0x',
     defaultApiUrl: 'https://api.base.com',
-    nativeToken: 'ETH',
+    nativeToken: {
+      chain: 'ethereum',
+      identifier: 'ETH',
+      name: 'Ethereum',
+      decimals: 18,
+      logoUrl: 'https://example.com/eth-logo.png',
+    },
   }
 
   const mockConfig: WarpClientConfig = {

@@ -7,7 +7,13 @@ export const createMockChainInfo = (chainName: string = 'multiversx') => ({
   blockTime: 6000,
   addressHrp: 'erd',
   defaultApiUrl: `https://${chainName === 'multiversx' ? 'devnet-api.multiversx' : chainName}.com`,
-  nativeToken: 'EGLD',
+  nativeToken: {
+    chain: chainName,
+    identifier: 'EGLD',
+    name: 'MultiversX',
+    decimals: 18,
+    logoUrl: 'https://example.com/egld-logo.png',
+  },
 })
 
 export const createMockAdapter = () => ({
@@ -20,6 +26,8 @@ export const createMockAdapter = () => ({
     getTokenUrl: () => '',
     getBlockUrl: () => '',
     getAccountUrl: () => '',
+    getAssetUrl: () => '',
+    getContractUrl: () => '',
   },
   builder: () => ({
     createInscriptionTransaction() {
@@ -33,6 +41,12 @@ export const createMockAdapter = () => ({
     },
     createFromRaw() {
       return Promise.resolve({ protocol: '', name: '', title: '', description: '', actions: [] })
+    },
+    createFromUrl() {
+      return Promise.resolve({ protocol: '', name: '', title: '', description: '', actions: [] })
+    },
+    setName() {
+      return this
     },
     setTitle() {
       return this
@@ -78,6 +92,21 @@ export const createMockAdapter = () => ({
     signMessage(message: string, privateKey: string) {
       return Promise.resolve('mock-signature')
     },
+    executeQuery(executable: any) {
+      return Promise.resolve({
+        success: true,
+        warp: { protocol: '', name: '', title: '', description: '', actions: [] },
+        action: 0,
+        user: null,
+        txHash: null,
+        next: null,
+        values: [],
+        results: {},
+        messages: {},
+        tx: null,
+        valuesRaw: [],
+      })
+    },
   },
   results: {
     getTransactionExecutionResults() {
@@ -91,15 +120,23 @@ export const createMockAdapter = () => ({
         values: [],
         results: {},
         messages: {},
+        tx: null,
+        valuesRaw: [],
       })
     },
   },
   dataLoader: {
+    getAccount(address: string) {
+      return Promise.resolve({ chain: 'multiversx', address, balance: BigInt(0) })
+    },
     getAccountAssets() {
       return Promise.resolve([])
     },
     getAccountInfo() {
       return Promise.resolve({ address: 'erd1test', balance: 0n, nonce: 0 })
+    },
+    getAccountActions(address: string, options?: any) {
+      return Promise.resolve([])
     },
   },
   serializer: {
@@ -175,14 +212,6 @@ export const createMockAdapter = () => ({
     },
     fetchBrand() {
       return Promise.resolve(null)
-    },
-  },
-  dataLoader: {
-    getAccount(address: string) {
-      return Promise.resolve({ address, balance: BigInt(0) })
-    },
-    getAccountAssets(address: string) {
-      return Promise.resolve([])
     },
   },
 })

@@ -15,6 +15,7 @@ describe('WarpFastsetDataLoader', () => {
     addressHrp: 'set',
     defaultApiUrl: 'https://rpc.fastset.xyz',
     nativeToken: {
+      chain: 'fastset',
       identifier: 'SET',
       name: 'SET',
       decimals: 6,

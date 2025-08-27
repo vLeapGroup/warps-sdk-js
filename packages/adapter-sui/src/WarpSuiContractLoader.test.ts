@@ -9,7 +9,13 @@ describe('WarpSuiContractLoader', () => {
     blockTime: 3000,
     addressHrp: 'sui',
     defaultApiUrl: 'https://fullnode.devnet.sui.io',
-    nativeToken: 'SUI',
+    nativeToken: {
+      chain: 'sui',
+      identifier: 'SUI',
+      name: 'Sui',
+      decimals: 9,
+      logoUrl: 'https://example.com/sui-logo.png',
+    },
   }
   const loader = new WarpSuiContractLoader(config, chain)
 

@@ -1,4 +1,4 @@
-import { FastsetClient } from './FastsetClient'
+import { FastsetClient } from './sdk/FastsetClient'
 
 async function example() {
   console.log('🚀 FastSet Client Example')

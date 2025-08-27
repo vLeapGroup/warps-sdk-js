@@ -68,6 +68,7 @@ describe('utils.codec', () => {
   describe('asset', () => {
     it('encodes an asset value with all properties', () => {
       const assetValue = {
+        chain: 'multiversx',
         identifier: 'WEGLD-123456',
         nonce: BigInt(5),
         name: 'Wrapped EGLD',
@@ -78,6 +79,7 @@ describe('utils.codec', () => {
 
     it('encodes an asset value with zero nonce', () => {
       const assetValue = {
+        chain: 'multiversx',
         identifier: 'MEX-abcdef',
         nonce: BigInt(0),
         name: 'MEX Token',
@@ -88,6 +90,7 @@ describe('utils.codec', () => {
 
     it('encodes an asset value without nonce', () => {
       const assetValue = {
+        chain: 'multiversx',
         identifier: 'USDC-123456',
         name: 'USD Coin',
         amount: BigInt('1000000'),

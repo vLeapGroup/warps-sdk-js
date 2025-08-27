@@ -20,7 +20,13 @@ describe('WarpSuiExplorer', () => {
     addressHrp: '0x',
     defaultApiUrl: 'https://fullnode.mainnet.sui.io',
     explorerUrl: 'https://explorer.sui.io',
-    nativeToken: 'SUI',
+    nativeToken: {
+      chain: 'sui',
+      identifier: 'SUI',
+      name: 'Sui',
+      decimals: 9,
+      logoUrl: 'https://example.com/sui-logo.png',
+    },
   }
 
   let explorer: WarpSuiExplorer
@@ -164,7 +170,13 @@ describe('WarpSuiExplorer', () => {
       addressHrp: '0x',
       defaultApiUrl: 'https://fullnode.testnet.sui.io',
       explorerUrl: 'https://explorer.sui.io',
-      nativeToken: 'SUI',
+      nativeToken: {
+        chain: 'sui',
+        identifier: 'SUI',
+        name: 'Sui',
+        decimals: 9,
+        logoUrl: 'https://example.com/sui-logo.png',
+      },
     }
 
     let testnetExplorer: WarpSuiExplorer
