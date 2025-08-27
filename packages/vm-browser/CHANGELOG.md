@@ -1,5 +1,17 @@
 # @vleap/warps-vm-browser
 
+## 0.1.0-alpha.6
+
+### Minor Changes
+
+- 455faa2: update builds
+
+### Patch Changes
+
+- Updated dependencies [8c61537]
+- Updated dependencies [455faa2]
+  - @vleap/warps@3.0.0-alpha.87
+
 ## 0.1.0-alpha.5
 
 ### Minor Changes

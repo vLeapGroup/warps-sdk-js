@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.87
+
+### Minor Changes
+
+- 455faa2: update builds
+
+### Patch Changes
+
+- 8c61537: add further integer types
+
 ## 3.0.0-alpha.86
 
 ### Patch Changes
