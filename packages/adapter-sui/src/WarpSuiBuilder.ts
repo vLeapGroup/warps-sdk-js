@@ -1,14 +1,14 @@
 import { SuiClient } from '@mysten/sui/client'
 import { Transaction } from '@mysten/sui/transactions'
 import {
-  AdapterWarpBuilder,
-  getProviderUrl,
-  Warp,
-  WarpBuilder,
-  WarpCache,
-  WarpCacheConfig,
-  WarpChainInfo,
-  WarpClientConfig,
+    AdapterWarpBuilder,
+    getProviderUrl,
+    Warp,
+    WarpBuilder,
+    WarpCache,
+    WarpCacheConfig,
+    WarpChainInfo,
+    WarpClientConfig,
 } from '@vleap/warps'
 import { toRegistryMoveTarget } from './helpers/registry'
 
@@ -48,26 +48,6 @@ export class WarpSuiBuilder extends WarpBuilder implements AdapterWarpBuilder {
       ],
     })
     return tx
-  }
-
-  async createFromRaw(info: any): Promise<Warp> {
-    const hash = info.hash ? (Buffer.isBuffer(info.hash) ? info.hash.toString('hex') : Buffer.from(info.hash).toString('hex')) : ''
-    const alias = info.alias ? (Buffer.isBuffer(info.alias) ? info.alias.toString() : Buffer.from(info.alias).toString()) : null
-    const brand = info.brand ? (Buffer.isBuffer(info.brand) ? info.brand.toString('hex') : Buffer.from(info.brand).toString('hex')) : null
-    const creator = info.owner ?? ''
-    const createdAt = info.created_at ? new Date(Number(info.created_at)).toISOString() : ''
-    const warp: Warp = {
-      meta: {
-        chain: this.chain.name,
-        hash,
-        alias,
-        creator,
-        createdAt,
-        brand,
-      },
-      ...info,
-    }
-    return warp
   }
 
   async createFromNetwork(id: string, cache?: WarpCacheConfig): Promise<Warp | null> {
