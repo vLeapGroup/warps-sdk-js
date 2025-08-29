@@ -1,23 +1,23 @@
 import {
-  applyResultsToMessages,
-  extractCollectResults,
-  findWarpAdapterForChain,
-  findWarpExecutableAction,
-  getNextInfo,
-  getWarpActionByIndex,
+    applyResultsToMessages,
+    extractCollectResults,
+    findWarpAdapterForChain,
+    findWarpExecutableAction,
+    getNextInfo,
+    getWarpActionByIndex,
 } from './helpers'
 import { createAuthHeaders, createAuthMessage } from './helpers/signing'
 import {
-  Adapter,
-  Warp,
-  WarpActionIndex,
-  WarpAdapterGenericRemoteTransaction,
-  WarpAdapterGenericTransaction,
-  WarpChain,
-  WarpChainAssetValue,
-  WarpChainInfo,
-  WarpClientConfig,
-  WarpExecution,
+    Adapter,
+    Warp,
+    WarpActionIndex,
+    WarpAdapterGenericRemoteTransaction,
+    WarpAdapterGenericTransaction,
+    WarpChain,
+    WarpChainAssetValue,
+    WarpChainInfo,
+    WarpClientConfig,
+    WarpExecution,
 } from './types'
 import { WarpFactory } from './WarpFactory'
 import { WarpInterpolator } from './WarpInterpolator'
@@ -88,8 +88,8 @@ export class WarpExecutor {
       if (resolvedInput.input.type === 'biguint') {
         return (value as bigint).toString()
       } else if (resolvedInput.input.type === 'asset') {
-        const { identifier, nonce, amount } = value as WarpChainAssetValue
-        return { identifier, nonce: nonce.toString(), amount: amount.toString() }
+        const { identifier, amount } = value as WarpChainAssetValue
+        return { identifier, amount: amount.toString() }
       } else {
         return value
       }

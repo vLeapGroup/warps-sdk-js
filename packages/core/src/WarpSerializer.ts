@@ -9,8 +9,8 @@ export class WarpSerializer {
   }
   nativeToString(type: WarpActionInputType, value: WarpNativeValue): string {
     // Check built-in types first
-    if (type === 'asset' && typeof value === 'object' && value && 'identifier' in value && 'nonce' in value && 'amount' in value) {
-      return `${type}:${value.identifier}|${value.nonce.toString()}|${value.amount.toString()}`
+    if (type === 'asset' && typeof value === 'object' && value && 'identifier' in value && 'amount' in value) {
+      return `${type}:${value.identifier}|${value.amount.toString()}`
     }
 
     // Check adapter-registered types
@@ -67,8 +67,8 @@ export class WarpSerializer {
     else if (baseType === 'hex') return [baseType, val]
     else if (baseType === 'codemeta') return [baseType, val]
     else if (baseType === 'asset') {
-      const [identifier, nonce, amount] = (val as string).split(WarpConstants.ArgCompositeSeparator)
-      const value: WarpChainAssetValue = { identifier, nonce: BigInt(nonce), amount: BigInt(amount) }
+      const [identifier, amount] = (val as string).split(WarpConstants.ArgCompositeSeparator)
+      const value: WarpChainAssetValue = { identifier, amount: BigInt(amount) }
       return [baseType, value]
     }
 

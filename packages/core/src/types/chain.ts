@@ -8,7 +8,6 @@ export type WarpChainAccount = {
 
 export type WarpChainAssetValue = {
   identifier: string
-  nonce: bigint
   amount: bigint
 }
 

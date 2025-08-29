@@ -1,37 +1,37 @@
 import {
-  Address,
-  ArgSerializer,
-  DevnetEntrypoint,
-  MainnetEntrypoint,
-  NetworkEntrypoint,
-  SmartContractTransactionsFactory,
-  TestnetEntrypoint,
-  Token,
-  TokenComputer,
-  TokenTransfer,
-  Transaction,
-  TransactionsFactoryConfig,
-  TransferTransactionsFactory,
-  UserSecretKey,
-  UserSigner,
+    Address,
+    ArgSerializer,
+    DevnetEntrypoint,
+    MainnetEntrypoint,
+    NetworkEntrypoint,
+    SmartContractTransactionsFactory,
+    TestnetEntrypoint,
+    Token,
+    TokenComputer,
+    TokenTransfer,
+    Transaction,
+    TransactionsFactoryConfig,
+    TransferTransactionsFactory,
+    UserSecretKey,
+    UserSigner,
 } from '@multiversx/sdk-core'
 import {
-  AdapterWarpExecutor,
-  applyResultsToMessages,
-  findKnownTokenById,
-  getNextInfo,
-  getProviderUrl,
-  getWarpActionByIndex,
-  shiftBigintBy,
-  WarpActionInputType,
-  WarpChainAssetValue,
-  WarpChainEnv,
-  WarpChainInfo,
-  WarpClientConfig,
-  WarpConstants,
-  WarpExecutable,
-  WarpExecution,
-  WarpQueryAction,
+    AdapterWarpExecutor,
+    applyResultsToMessages,
+    findKnownTokenById,
+    getNextInfo,
+    getProviderUrl,
+    getWarpActionByIndex,
+    shiftBigintBy,
+    WarpActionInputType,
+    WarpChainAssetValue,
+    WarpChainEnv,
+    WarpChainInfo,
+    WarpClientConfig,
+    WarpConstants,
+    WarpExecutable,
+    WarpExecution,
+    WarpQueryAction,
 } from '@vleap/warps'
 import { WarpMultiversxAbiBuilder } from './WarpMultiversxAbiBuilder'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
@@ -144,10 +144,12 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
 
   async preprocessInput(chain: WarpChainInfo, input: string, type: WarpActionInputType, value: string): Promise<string> {
     if (type === 'asset') {
-      const [tokenId, nonce, amount, existingDecimals] = value.split(WarpConstants.ArgCompositeSeparator)
+      const [tokenId, amount, existingDecimals] = value.split(WarpConstants.ArgCompositeSeparator)
       if (existingDecimals) return input
+      const tokenComputer = new TokenComputer()
+      const nonce = tokenComputer.extractNonceFromExtendedIdentifier(tokenId)
       const token = new Token({ identifier: tokenId, nonce: BigInt(nonce || 0) })
-      const isFungible = new TokenComputer().isFungible(token)
+      const isFungible = tokenComputer.isFungible(token)
       if (!isFungible) return input // TODO: handle non-fungible tokens like meta-esdts
       const knownToken = findKnownTokenById(tokenId)
       let decimals = knownToken?.decimals
@@ -187,6 +189,10 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
         }
         return asset
       })
-      .map((t) => new TokenTransfer({ token: new Token({ identifier: t.identifier, nonce: t.nonce }), amount: t.amount }))
+      .map((t) => {
+        const tokenComputer = new TokenComputer()
+        const nonce = tokenComputer.extractNonceFromExtendedIdentifier(t.identifier)
+        return new TokenTransfer({ token: new Token({ identifier: t.identifier, nonce: BigInt(nonce || 0) }), amount: t.amount })
+      })
   }
 }
