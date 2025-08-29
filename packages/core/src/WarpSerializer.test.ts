@@ -56,8 +56,8 @@ describe('WarpSerializer', () => {
 
 
     it('serializes asset values', () => {
-      const assetValue = { identifier: 'AAA-123456', nonce: BigInt(5), amount: BigInt(100) }
-      expect(serializer.nativeToString('asset', assetValue)).toBe('asset:AAA-123456|5|100')
+      const assetValue = { identifier: 'AAA-123456-05', amount: BigInt(100) }
+      expect(serializer.nativeToString('asset', assetValue)).toBe('asset:AAA-123456-05|100')
     })
   })
 
@@ -221,9 +221,9 @@ describe('WarpSerializer', () => {
 
 
     it('deserializes asset values', () => {
-      const result = serializer.stringToNative('asset:AAA-123456|5|100')
+      const result = serializer.stringToNative('asset:AAA-123456-05|100')
       expect(result[0]).toBe('asset')
-      expect(result[1]).toEqual({ identifier: 'AAA-123456', nonce: BigInt(5), amount: BigInt(100) })
+      expect(result[1]).toEqual({ identifier: 'AAA-123456-05', amount: BigInt(100) })
     })
   })
 })
