@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.40
+
+### Minor Changes
+
+- 13b6127: update assets
+
+### Patch Changes
+
+- Updated dependencies [13b6127]
+  - @vleap/warps@3.0.0-alpha.88
+
 ## 0.2.0-alpha.39
 
 ### Minor Changes

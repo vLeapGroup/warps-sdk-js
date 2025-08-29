@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.88
+
+### Minor Changes
+
+- 13b6127: update assets
+
 ## 3.0.0-alpha.87
 
 ### Minor Changes
