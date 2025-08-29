@@ -1,14 +1,16 @@
 import { getPublicKey } from '@noble/ed25519'
 import { TransactionSigner } from './TransactionSigner'
 import {
-  FastsetAccountInfo,
-  FastsetFaucetResponse,
-  FastsetJsonRpcRequest,
-  FastsetJsonRpcResponse,
-  FastsetSubmitCertificateRequest,
-  FastsetSubmitTransactionRequest,
-  FastsetSubmitTransactionResponse,
-  FastsetTransaction,
+    FastsetAccountInfo,
+    FastsetAssetBalance,
+    FastsetAssetBalances,
+    FastsetFaucetResponse,
+    FastsetJsonRpcRequest,
+    FastsetJsonRpcResponse,
+    FastsetSubmitCertificateRequest,
+    FastsetSubmitTransactionRequest,
+    FastsetSubmitTransactionResponse,
+    FastsetTransaction,
 } from './types'
 import { Wallet } from './Wallet'
 
@@ -23,11 +25,18 @@ export interface FastsetClientConfig {
   proxyUrl: string
 }
 
+// Fastset RPC endpoints
+const FASTSET_VALIDATOR_URL = 'http://157.90.201.117:8765'
+const FASTSET_PROXY_URL = 'http://136.243.61.168:44444'
+
 export class FastsetClient {
   private config: FastsetClientConfig
 
-  constructor(config: FastsetClientConfig) {
-    this.config = config
+  constructor(config?: FastsetClientConfig) {
+    this.config = config || {
+      validatorUrl: FASTSET_VALIDATOR_URL,
+      proxyUrl: FASTSET_PROXY_URL,
+    }
   }
 
   async getAccountInfo(address: string): Promise<FastsetAccountInfo | null> {
@@ -36,11 +45,6 @@ export class FastsetClient {
       const response = await this.requestValidator('set_getAccountInfo', {
         address: Array.from(addressBytes),
       })
-
-      if (response.error) {
-        return null
-      }
-
       return response.result as FastsetAccountInfo
     } catch (error) {
       return null
@@ -52,17 +56,35 @@ export class FastsetClient {
     return accountInfo?.next_nonce ?? 0
   }
 
+  async getAssetBalance(accountId: string, assetId: string): Promise<FastsetAssetBalance | null> {
+    try {
+      const response = await this.requestValidator('vsl_getAssetBalance', {
+        account_id: accountId,
+        assert_id: assetId,
+      })
+      return response.result as FastsetAssetBalance
+    } catch (error) {
+      return null
+    }
+  }
+
+  async getAssetBalances(accountId: string): Promise<FastsetAssetBalances | null> {
+    try {
+      const response = await this.requestValidator('vsl_getAssetBalances', {
+        account_id: accountId,
+      })
+      return response.result as FastsetAssetBalances
+    } catch (error) {
+      return null
+    }
+  }
+
   async fundFromFaucet(recipientAddress: string, amount: string): Promise<FastsetFaucetResponse> {
     const recipientBytes = Wallet.decodeBech32Address(recipientAddress)
     const response = await this.requestProxy('faucetDrip', {
       recipient: Array.from(recipientBytes),
       amount,
     })
-
-    if (response.error) {
-      throw new Error(`Faucet request failed: ${response.error.message}`)
-    }
-
     return response.result as FastsetFaucetResponse
   }
 
@@ -71,10 +93,6 @@ export class FastsetClient {
       transaction: request.transaction,
       signature: Array.from(request.signature),
     })
-
-    if (response.error) {
-      throw new Error(`Transaction submission failed: ${response.error.message}`)
-    }
 
     const result = response.result as {
       transaction_hash: number[]
@@ -89,15 +107,11 @@ export class FastsetClient {
   }
 
   async submitCertificate(request: FastsetSubmitCertificateRequest): Promise<void> {
-    const response = await this.requestValidator('set_submitTransactionCertificate', {
+    await this.requestValidator('set_submitTransactionCertificate', {
       transaction: request.transaction,
       signature: Array.from(request.signature),
       validator_signatures: request.validator_signatures.map(([validator, signature]) => [Array.from(validator), Array.from(signature)]),
     })
-
-    if (response.error) {
-      throw new Error(`Certificate submission failed: ${response.error.message}`)
-    }
   }
 
   async executeTransfer(senderPrivateKey: Uint8Array, recipient: string, amount: string, userData?: Uint8Array): Promise<Uint8Array> {
@@ -172,11 +186,6 @@ export class FastsetClient {
       const response = await this.requestValidator('set_getTransactionStatus', {
         hash: txHash,
       })
-
-      if (response.error) {
-        return null
-      }
-
       return response.result
     } catch (error) {
       return null
@@ -188,11 +197,6 @@ export class FastsetClient {
       const response = await this.requestValidator('set_getTransactionInfo', {
         hash: txHash,
       })
-
-      if (response.error) {
-        return null
-      }
-
       return response.result
     } catch (error) {
       return null
@@ -202,11 +206,6 @@ export class FastsetClient {
   async getNetworkInfo(): Promise<any> {
     try {
       const response = await this.requestValidator('set_getNetworkInfo', {})
-
-      if (response.error) {
-        return null
-      }
-
       return response.result
     } catch (error) {
       return null
@@ -222,24 +221,35 @@ export class FastsetClient {
   }
 
   private async request(url: string, method: string, params: unknown): Promise<FastsetJsonRpcResponse> {
-    const request: FastsetJsonRpcRequest = {
-      jsonrpc: '2.0',
-      id: 1,
-      method,
-      params: params as Record<string, unknown>,
+    try {
+      const request: FastsetJsonRpcRequest = {
+        jsonrpc: '2.0',
+        id: 1,
+        method,
+        params: params as Record<string, unknown>,
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(request, this.jsonReplacer),
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP request failed: ${response.statusText}`)
+      }
+
+      const jsonResponse = await response.json()
+
+      if (jsonResponse.error) {
+        throw new Error(`RPC error: ${jsonResponse.error.message}`)
+      }
+
+      return jsonResponse
+    } catch (error) {
+      console.error(`Fastset RPC request failed: ${error}`)
+      throw error
     }
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(request, this.jsonReplacer),
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP request failed: ${response.statusText}`)
-    }
-
-    return response.json()
   }
 
   private jsonReplacer(key: string, value: unknown): unknown {

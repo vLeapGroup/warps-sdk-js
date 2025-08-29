@@ -110,6 +110,18 @@ export interface FastsetJsonRpcResponse<T = unknown> {
   }
 }
 
+export interface FastsetAssetBalance {
+  asset_id: string
+  balance: string
+  name?: string
+  decimals?: number
+  logo_url?: string
+}
+
+export interface FastsetAssetBalances {
+  [assetId: string]: FastsetAssetBalance
+}
+
 // Helper function
 function hexToDecimal(hex: string): string {
   return BigInt(`0x${hex}`).toString()
