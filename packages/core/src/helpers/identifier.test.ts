@@ -306,6 +306,83 @@ describe('identifier', () => {
     })
   })
 
+  it('correctly identifies hash in chain.identifier format with dot separator (64 chars > 32)', () => {
+    const hash = 'f200f3c68fe7cc471c25eda05409664d5e55ecf795cd02a000bbe7fae9ac3e92'
+    const result = getWarpInfoFromIdentifier(`mvx.${hash}`)
+    expect(result).toEqual({
+      chainPrefix: 'mvx',
+      type: 'hash',
+      identifier: hash,
+      identifierBase: hash,
+    })
+  })
+
+  it('correctly identifies hash in chain.identifier format with colon separator (64 chars > 32)', () => {
+    const hash = 'f200f3c68fe7cc471c25eda05409664d5e55ecf795cd02a000bbe7fae9ac3e92'
+    const result = getWarpInfoFromIdentifier(`mvx:${hash}`)
+    expect(result).toEqual({
+      chainPrefix: 'mvx',
+      type: 'hash',
+      identifier: hash,
+      identifierBase: hash,
+    })
+  })
+
+  it('correctly identifies 32-char hex string as alias (aliases cannot exceed 32 chars)', () => {
+    const identifier = '1234567890abcdef1234567890abcdef'
+    const result = getWarpInfoFromIdentifier(`sui.${identifier}`)
+    expect(result).toEqual({
+      chainPrefix: 'sui',
+      type: 'alias',
+      identifier: identifier,
+      identifierBase: identifier,
+    })
+  })
+
+  it('correctly identifies 33-char hex string as hash (exceeds 32 char alias limit)', () => {
+    const hash = '1234567890abcdef1234567890abcdef1' // 33 characters
+    const result = getWarpInfoFromIdentifier(`sui.${hash}`)
+    expect(result).toEqual({
+      chainPrefix: 'sui',
+      type: 'hash',
+      identifier: hash,
+      identifierBase: hash,
+    })
+  })
+
+  it('correctly identifies 40-char hex string as hash (exceeds 32 char alias limit)', () => {
+    const hash = '1234567890abcdef1234567890abcdef12345678' // 40 characters
+    const result = getWarpInfoFromIdentifier(`eth.${hash}`)
+    expect(result).toEqual({
+      chainPrefix: 'eth',
+      type: 'hash',
+      identifier: hash,
+      identifierBase: hash,
+    })
+  })
+
+  it('correctly identifies the user-provided hash example (64 chars > 32)', () => {
+    const hash = 'f200f3c68fe7cc471c25eda05409664d5e55ecf795cd02a000bbe7fae9ac3e92'
+    const result = getWarpInfoFromIdentifier(`mvx.${hash}`)
+    expect(result).toEqual({
+      chainPrefix: 'mvx',
+      type: 'hash',
+      identifier: hash,
+      identifierBase: hash,
+    })
+  })
+
+  it('still treats non-hex identifiers as aliases in chain.identifier format', () => {
+    const alias = 'my-awesome-warp'
+    const result = getWarpInfoFromIdentifier(`mvx.${alias}`)
+    expect(result).toEqual({
+      chainPrefix: 'mvx',
+      type: 'alias',
+      identifier: alias,
+      identifierBase: alias,
+    })
+  })
+
   // Add tests for extractIdentifierInfoFromUrl
   it('extractIdentifierInfoFromUrl returns null if no identifier', () => {
     const url = 'https://example.com/'

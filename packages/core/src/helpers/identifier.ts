@@ -1,6 +1,15 @@
 import { WarpConstants } from '../constants'
 import { WarpIdType } from '../types'
 
+const isHash = (identifier: string, chainPrefix?: string): boolean => {
+  // If it's a hex string longer than 32 characters, it's a hash
+  // (since aliases cannot exceed 32 characters)
+  const hexRegex = /^[a-fA-F0-9]+$/
+  const MAX_ALIAS_LENGTH = 32
+
+  return hexRegex.test(identifier) && identifier.length > MAX_ALIAS_LENGTH
+}
+
 const findFirstSeparator = (str: string): { separator: string; index: number } | null => {
   const separators = WarpConstants.IdentifierParamSeparator
   let firstIndex = -1
@@ -85,9 +94,15 @@ export const getWarpInfoFromIdentifier = (
     const [chainPrefix, identifier] = parts
     if (chainPrefix !== WarpConstants.IdentifierType.Alias && chainPrefix !== WarpConstants.IdentifierType.Hash) {
       const identifierWithQuery = decoded.includes('?') ? identifier + decoded.substring(decoded.indexOf('?')) : identifier
+
+      // Determine if identifier is a hash (hex string > 32 chars)
+      const identifierType = isHash(identifier, chainPrefix)
+        ? WarpConstants.IdentifierType.Hash
+        : WarpConstants.IdentifierType.Alias
+
       return {
         chainPrefix,
-        type: WarpConstants.IdentifierType.Alias,
+        type: identifierType,
         identifier: identifierWithQuery,
         identifierBase: identifier,
       }
