@@ -18,7 +18,6 @@ import {
 import {
     AdapterWarpExecutor,
     applyResultsToMessages,
-    findKnownTokenById,
     getNextInfo,
     getProviderUrl,
     getWarpActionByIndex,
@@ -36,6 +35,7 @@ import {
 import { WarpMultiversxAbiBuilder } from './WarpMultiversxAbiBuilder'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
+import { findKnownTokenById } from './tokens'
 import { esdt_value } from './utils.codec'
 
 const EgldIdentifierMultiTransfer = 'EGLD-000000'
