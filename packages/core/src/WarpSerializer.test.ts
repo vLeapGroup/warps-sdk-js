@@ -53,8 +53,6 @@ describe('WarpSerializer', () => {
       expect(serializer.nativeToString('token', 'TOKEN-123456')).toBe('token:TOKEN-123456')
     })
 
-
-
     it('serializes asset values', () => {
       const assetValue = { identifier: 'AAA-123456-05', amount: BigInt(100) }
       expect(serializer.nativeToString('asset', assetValue)).toBe('asset:AAA-123456-05|100')
