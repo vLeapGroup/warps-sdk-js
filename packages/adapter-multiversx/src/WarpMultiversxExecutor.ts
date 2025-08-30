@@ -35,6 +35,7 @@ import {
 import { WarpMultiversxAbiBuilder } from './WarpMultiversxAbiBuilder'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
+import { WarpMultiversxConstants } from './constants'
 import { findKnownTokenById } from './tokens'
 import { esdt_value } from './utils.codec'
 
@@ -74,6 +75,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
   }
 
   async createTransferTransaction(executable: WarpExecutable): Promise<Transaction> {
+    console.log('createTransferTransaction user wallets', this.config.user?.wallets)
     const userWallet = this.config.user?.wallets?.[executable.chain.name]
     if (!userWallet) throw new Error('WarpMultiversxExecutor: createTransfer - user address not set')
     const sender = Address.newFromBech32(userWallet)
@@ -147,7 +149,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
       const [tokenId, amount, existingDecimals] = value.split(WarpConstants.ArgCompositeSeparator)
       if (existingDecimals) return input
       const tokenComputer = new TokenComputer()
-      const nonce = tokenComputer.extractNonceFromExtendedIdentifier(tokenId)
+      const nonce = tokenId === WarpMultiversxConstants.Egld.Identifier ? 0 : tokenComputer.extractNonceFromExtendedIdentifier(tokenId)
       const token = new Token({ identifier: tokenId, nonce: BigInt(nonce || 0) })
       const isFungible = tokenComputer.isFungible(token)
       if (!isFungible) return input // TODO: handle non-fungible tokens like meta-esdts
@@ -158,7 +160,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
         const definition = await definitionRes.json()
         decimals = definition.decimals
       }
-      if (!decimals) throw new Error(`WarpActionExecutor: Decimals not found for token ${tokenId}`)
+      if (!decimals) throw new Error(`WarpMultiversxExecutor: Decimals not found for token ${tokenId}`)
       const processed = esdt_value(new TokenTransfer({ token, amount: shiftBigintBy(amount, decimals) }))
       return this.serializer.typedToString(processed) + WarpConstants.ArgCompositeSeparator + decimals
     }
