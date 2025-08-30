@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-alpha.16
+
+### Patch Changes
+
+- 7927cf3: unify native token with assets
+
 ## 0.1.0-alpha.15
 
 ### Minor Changes

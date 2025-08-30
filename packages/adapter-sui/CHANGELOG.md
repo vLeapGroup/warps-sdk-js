@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.33
+
+### Patch Changes
+
+- 7927cf3: unify native token with assets
+
 ## 0.2.0-alpha.32
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.41
+
+### Patch Changes
+
+- 7927cf3: unify native token with assets
+
 ## 0.2.0-alpha.40
 
 ### Minor Changes

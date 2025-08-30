@@ -1,6 +1,6 @@
 {
   "name": "@vleap/warps-adapter-sui",
-  "version": "0.2.0-alpha.32",
+  "version": "0.2.0-alpha.33",
   "description": "",
   "type": "module",
   "types": "./dist/index.d.ts",

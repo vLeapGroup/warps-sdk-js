@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-alpha.21
+
+### Patch Changes
+
+- 7927cf3: unify native token with assets
+
 ## 0.2.0-alpha.20
 
 ### Minor Changes
