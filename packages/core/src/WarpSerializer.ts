@@ -7,6 +7,7 @@ export class WarpSerializer {
   setTypeRegistry(typeRegistry: WarpTypeRegistry): void {
     this.typeRegistry = typeRegistry
   }
+
   nativeToString(type: WarpActionInputType, value: WarpNativeValue): string {
     // Check built-in types first
     if (type === 'asset' && typeof value === 'object' && value && 'identifier' in value && 'amount' in value) {
