@@ -218,10 +218,13 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
     if (type === 'codemeta') return new CodeMetadataValue(CodeMetadata.newFromBytes(Uint8Array.from(Buffer.from(val as string, 'hex'))))
     if (type === 'asset') {
       const parts = val.split(WarpConstants.ArgCompositeSeparator)
+      const tokenComputer = new TokenComputer()
+      const tokenIdentifier = tokenComputer.extractIdentifierFromExtendedIdentifier(parts[0])
+      const nonce = tokenComputer.extractNonceFromExtendedIdentifier(parts[0])
       return new Struct(this.nativeToType('asset') as StructType, [
-        new Field(new TokenIdentifierValue(parts[0]), 'token_identifier'),
-        new Field(new U64Value(BigInt(parts[1])), 'token_nonce'),
-        new Field(new BigUIntValue(BigInt(parts[2])), 'amount'),
+        new Field(new TokenIdentifierValue(tokenIdentifier), 'token_identifier'),
+        new Field(new U64Value(BigInt(nonce)), 'token_nonce'),
+        new Field(new BigUIntValue(BigInt(parts[1])), 'amount'),
       ])
     }
 

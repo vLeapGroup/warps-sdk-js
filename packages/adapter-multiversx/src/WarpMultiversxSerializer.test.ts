@@ -293,7 +293,7 @@ describe('WarpMultiversxSerializer', () => {
     })
 
     it('converts asset to EsdtTokenPayment Struct', () => {
-      const result = serializer.nativeToTyped('asset', 'AAA-123456|5|100') as Struct
+      const result = serializer.nativeToTyped('asset', 'AAA-123456-05|100') as Struct
       expect(result).toBeInstanceOf(Struct)
       expect(result.getFieldValue('token_identifier').valueOf()).toBe('AAA-123456')
       expect(result.getFieldValue('token_nonce').toString()).toBe('5')
