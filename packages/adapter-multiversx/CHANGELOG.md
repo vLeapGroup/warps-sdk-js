@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.42
+
+### Minor Changes
+
+- bf84508: update asset encoding
+
+### Patch Changes
+
+- Updated dependencies [bf84508]
+  - @vleap/warps@3.0.0-alpha.89
+
 ## 0.2.0-alpha.41
 
 ### Patch Changes

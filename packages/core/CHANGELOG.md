@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.89
+
+### Minor Changes
+
+- bf84508: update asset encoding
+
 ## 3.0.0-alpha.88
 
 ### Minor Changes
