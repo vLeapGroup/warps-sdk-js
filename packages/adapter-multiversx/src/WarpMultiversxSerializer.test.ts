@@ -1,33 +1,33 @@
 import {
-  Address,
-  AddressValue,
-  BigUIntValue,
-  BooleanValue,
-  BytesValue,
-  CodeMetadata,
-  CodeMetadataValue,
-  CompositeType,
-  CompositeValue,
-  List,
-  ListType,
-  NothingValue,
-  OptionalType,
-  OptionalValue,
-  OptionType,
-  OptionValue,
-  StringType,
-  StringValue,
-  Struct,
-  Token,
-  TokenIdentifierValue,
-  TokenTransfer,
-  U16Value,
-  U32Value,
-  U64Type,
-  U64Value,
-  U8Value,
-  VariadicType,
-  VariadicValue,
+    Address,
+    AddressValue,
+    BigUIntValue,
+    BooleanValue,
+    BytesValue,
+    CodeMetadata,
+    CodeMetadataValue,
+    CompositeType,
+    CompositeValue,
+    List,
+    ListType,
+    NothingValue,
+    OptionalType,
+    OptionalValue,
+    OptionType,
+    OptionValue,
+    StringType,
+    StringValue,
+    Struct,
+    Token,
+    TokenIdentifierValue,
+    TokenTransfer,
+    U16Value,
+    U32Value,
+    U64Type,
+    U64Value,
+    U8Value,
+    VariadicType,
+    VariadicValue,
 } from '@multiversx/sdk-core/out'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
 import { esdt_value } from './utils.codec'
@@ -132,7 +132,7 @@ describe('WarpMultiversxSerializer', () => {
       const token = new Token({ identifier: 'AAA-123456', nonce: BigInt(5) })
       const transfer = new TokenTransfer({ token, amount: BigInt(100) })
       const result = serializer.typedToString(esdt_value(transfer))
-      expect(result).toBe('asset:AAA-123456|5|100')
+      expect(result).toBe('asset:AAA-123456-05|100')
     })
 
     it('converts a composite value', () => {
