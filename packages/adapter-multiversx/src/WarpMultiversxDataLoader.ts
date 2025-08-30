@@ -1,12 +1,12 @@
 import { Address } from '@multiversx/sdk-core'
 import {
-  AdapterWarpDataLoader,
-  WarpChainAccount,
-  WarpChainAction,
-  WarpChainAsset,
-  WarpChainInfo,
-  WarpClientConfig,
-  WarpDataLoaderOptions,
+    AdapterWarpDataLoader,
+    WarpChainAccount,
+    WarpChainAction,
+    WarpChainAsset,
+    WarpChainInfo,
+    WarpClientConfig,
+    WarpDataLoaderOptions,
 } from '@vleap/warps'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
@@ -29,16 +29,22 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
 
   async getAccountAssets(address: string): Promise<WarpChainAsset[]> {
     const provider = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env, this.config).createNetworkProvider()
-    const tokensReq = await provider.getFungibleTokensOfAccount(Address.newFromBech32(address))
+    const accountReq = provider.getAccount(Address.newFromBech32(address))
+    const tokensReq = provider.getFungibleTokensOfAccount(Address.newFromBech32(address))
+    const [account, tokens] = await Promise.all([accountReq, tokensReq])
 
-    return tokensReq.map((token) => ({
+    let assets: WarpChainAsset[] = account.balance > 0 ? [{ ...this.chain.nativeToken, amount: account.balance }] : []
+
+    assets.push(...tokens.map((token) => ({
       chain: this.chain.name,
       identifier: token.token.identifier,
       name: token.raw.name,
       amount: token.amount,
       decimals: token.raw.decimals,
       logoUrl: token.raw.assets?.pngUrl || '',
-    }))
+    })))
+
+    return assets
   }
 
   async getAccountActions(address: string, options?: WarpDataLoaderOptions): Promise<WarpChainAction[]> {

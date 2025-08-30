@@ -1,12 +1,12 @@
 import {
-  AdapterWarpDataLoader,
-  getProviderUrl,
-  WarpChainAccount,
-  WarpChainAction,
-  WarpChainAsset,
-  WarpChainInfo,
-  WarpClientConfig,
-  WarpDataLoaderOptions,
+    AdapterWarpDataLoader,
+    getProviderUrl,
+    WarpChainAccount,
+    WarpChainAction,
+    WarpChainAsset,
+    WarpChainInfo,
+    WarpClientConfig,
+    WarpDataLoaderOptions,
 } from '@vleap/warps'
 import { ethers } from 'ethers'
 import { EvmLogoService } from './LogoService'
@@ -172,11 +172,19 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
 
   async getAccountAssets(address: string): Promise<WarpChainAsset[]> {
     try {
+      // Get native token balance and ERC20 token balances in parallel
+      const accountReq = this.getAccount(address)
+      const tokenBalancesReq = this.getERC20TokenBalances(address)
+      const [account, tokenBalances] = await Promise.all([accountReq, tokenBalancesReq])
+
       const assets: WarpChainAsset[] = []
 
-      // Get ERC20 token balances
-      const tokenBalances = await this.getERC20TokenBalances(address)
+      // Add native token balance
+      if (account.balance > 0n) {
+        assets.push({ ...this.chain.nativeToken, amount: account.balance })
+      }
 
+      // Add ERC20 token balances
       for (const tokenBalance of tokenBalances) {
         if (tokenBalance.balance > 0n) {
           const logoUrl =

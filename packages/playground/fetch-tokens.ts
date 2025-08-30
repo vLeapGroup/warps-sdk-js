@@ -1,6 +1,7 @@
 #!/usr/bin/env ts-node
 
-import { WarpClient, WarpClientConfig } from '@vleap/warps'
+import type { WarpClientConfig } from '@vleap/warps'
+import { WarpClient } from '@vleap/warps'
 import { getArbitrumAdapter, getBaseAdapter, getEthereumAdapter } from '@vleap/warps-adapter-evm'
 import { getFastsetAdapter } from '@vleap/warps-adapter-fastset'
 import { getMultiversxAdapter } from '@vleap/warps-adapter-multiversx'
@@ -35,7 +36,7 @@ async function fetchTokens(chainName: string, address: string) {
 
     // Initialize config
     const config: WarpClientConfig = {
-      env: 'mainnet',
+      env: 'testnet',
       cache: { type: 'memory' },
     }
 

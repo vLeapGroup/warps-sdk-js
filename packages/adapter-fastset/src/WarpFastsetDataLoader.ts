@@ -53,10 +53,14 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
   }
 
   async getAccountAssets(address: string): Promise<WarpChainAsset[]> {
+    // Get native token balance and asset balances in parallel
+    const accountReq = this.getAccount(address)
+    const assetBalancesReq = this.client.getAssetBalances(address)
+    const [account, assetBalances] = await Promise.all([accountReq, assetBalancesReq])
+
     const assets: WarpChainAsset[] = []
 
-    // Get native token balance
-    const account = await this.getAccount(address)
+    // Add native token balance
     if (account.balance > 0) {
       assets.push({
         chain: this.chain.name,
@@ -68,8 +72,7 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
       })
     }
 
-    // Get all asset balances for the account
-    const assetBalances = await this.client.getAssetBalances(address)
+    // Add other asset balances
     if (assetBalances) {
       for (const [assetId, assetBalance] of Object.entries(assetBalances)) {
         if (assetBalance.balance) {

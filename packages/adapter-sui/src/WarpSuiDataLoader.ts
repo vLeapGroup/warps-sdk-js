@@ -1,13 +1,13 @@
 import { SuiClient } from '@mysten/sui/client'
 import {
-  AdapterWarpDataLoader,
-  getProviderUrl,
-  WarpChainAccount,
-  WarpChainAction,
-  WarpChainAsset,
-  WarpChainInfo,
-  WarpClientConfig,
-  WarpDataLoaderOptions,
+    AdapterWarpDataLoader,
+    getProviderUrl,
+    WarpChainAccount,
+    WarpChainAction,
+    WarpChainAsset,
+    WarpChainInfo,
+    WarpClientConfig,
+    WarpDataLoaderOptions,
 } from '@vleap/warps'
 import { SuiLogoService } from './LogoService'
 
@@ -36,7 +36,7 @@ export class WarpSuiDataLoader implements AdapterWarpDataLoader {
   }
 
   async getAccountAssets(address: string): Promise<WarpChainAsset[]> {
-    // Get all balances (including non-SUI tokens)
+    // Get all balances (including SUI and other tokens)
     const allBalances = await this.client.getAllBalances({
       owner: address,
     })
@@ -45,8 +45,13 @@ export class WarpSuiDataLoader implements AdapterWarpDataLoader {
 
     // Process each balance
     for (const balance of allBalances) {
-      if (balance.coinType !== '0x2::sui::SUI') {
-        // Skip native SUI as it's handled by getAccount
+      if (balance.coinType === '0x2::sui::SUI') {
+        // Handle native SUI token
+        if (BigInt(balance.totalBalance) > 0n) {
+          assets.push({ ...this.chain.nativeToken, amount: BigInt(balance.totalBalance) })
+        }
+      } else {
+        // Handle other tokens
         try {
           // Try to get token metadata
           const tokenMetadata = await this.getTokenMetadata(balance.coinType)
