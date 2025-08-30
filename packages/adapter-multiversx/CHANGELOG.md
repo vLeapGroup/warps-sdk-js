@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.43
+
+### Patch Changes
+
+- 7591091: add mvx egld preprocessing support
+
 ## 0.2.0-alpha.42
 
 ### Minor Changes
