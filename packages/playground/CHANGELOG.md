@@ -1,5 +1,12 @@
 # @warps/playground
 
+## 0.2.0-alpha.28
+
+### Patch Changes
+
+- Updated dependencies [373292e]
+  - @vleap/warps-adapter-multiversx@0.2.0-alpha.44
+
 ## 0.2.0-alpha.27
 
 ### Patch Changes

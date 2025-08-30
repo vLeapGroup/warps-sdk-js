@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.44
+
+### Patch Changes
+
+- 373292e: fix mvx egld asset serialization
+
 ## 0.2.0-alpha.43
 
 ### Patch Changes
