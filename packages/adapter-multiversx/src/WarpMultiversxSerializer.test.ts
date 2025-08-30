@@ -300,6 +300,14 @@ describe('WarpMultiversxSerializer', () => {
       expect(result.getFieldValue('amount').toString()).toBe('100')
     })
 
+    it('converts EGLD asset to EsdtTokenPayment Struct', () => {
+      const result = serializer.nativeToTyped('asset', 'EGLD|10') as Struct
+      expect(result).toBeInstanceOf(Struct)
+      expect(result.getFieldValue('token_identifier').valueOf()).toBe('EGLD-000000')
+      expect(result.getFieldValue('token_nonce').toString()).toBe('0')
+      expect(result.getFieldValue('amount').toString()).toBe('10')
+    })
+
     it('throws error for unsupported type', () => {
       expect(() => serializer.nativeToTyped('unsupported' as any, 'value')).toThrow('Unsupported input type')
     })

@@ -52,6 +52,7 @@ import {
     WarpNativeValue,
     WarpSerializer,
 } from '@vleap/warps'
+import { WarpMultiversxConstants } from './constants'
 
 const SplitParamsRegex = new RegExp(`${WarpConstants.ArgParamsSeparator}(.*)`)
 
@@ -219,8 +220,8 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
     if (type === 'asset') {
       const parts = val.split(WarpConstants.ArgCompositeSeparator)
       const tokenComputer = new TokenComputer()
-      const tokenIdentifier = tokenComputer.extractIdentifierFromExtendedIdentifier(parts[0])
-      const nonce = tokenComputer.extractNonceFromExtendedIdentifier(parts[0])
+      const tokenIdentifier = parts[0] === WarpMultiversxConstants.Egld.Identifier ? WarpMultiversxConstants.Egld.EsdtIdentifier : tokenComputer.extractIdentifierFromExtendedIdentifier(parts[0])
+      const nonce = parts[0] === WarpMultiversxConstants.Egld.Identifier ? 0 : tokenComputer.extractNonceFromExtendedIdentifier(parts[0])
       return new Struct(this.nativeToType('asset') as StructType, [
         new Field(new TokenIdentifierValue(tokenIdentifier), 'token_identifier'),
         new Field(new U64Value(BigInt(nonce)), 'token_nonce'),
