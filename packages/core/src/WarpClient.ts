@@ -22,17 +22,12 @@ import { DetectionResult, WarpLinkDetecter } from './WarpLinkDetecter'
 
 export class WarpClient {
   constructor(
-    private config: WarpClientConfig,
+    private readonly config: WarpClientConfig,
     private adapters: Adapter[]
   ) {}
 
   getConfig(): WarpClientConfig {
     return this.config
-  }
-
-  setConfig(config: WarpClientConfig): WarpClient {
-    this.config = config
-    return this
   }
 
   getAdapters(): Adapter[] {
