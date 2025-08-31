@@ -30,7 +30,7 @@ import {
     VariadicValue,
 } from '@multiversx/sdk-core/out'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
-import { esdt_value } from './utils.codec'
+import { asset_value } from './utils.codec'
 
 describe('WarpMultiversxSerializer', () => {
   let serializer: WarpMultiversxSerializer
@@ -131,7 +131,7 @@ describe('WarpMultiversxSerializer', () => {
     it('converts EsdtTokenPayment Struct to asset', () => {
       const token = new Token({ identifier: 'AAA-123456', nonce: BigInt(5) })
       const transfer = new TokenTransfer({ token, amount: BigInt(100) })
-      const result = serializer.typedToString(esdt_value(transfer))
+      const result = serializer.typedToString(asset_value(transfer))
       expect(result).toBe('asset:AAA-123456-05|100')
     })
 

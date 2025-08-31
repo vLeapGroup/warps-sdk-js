@@ -1,43 +1,43 @@
 import {
-    Address,
-    ArgSerializer,
-    DevnetEntrypoint,
-    MainnetEntrypoint,
-    NetworkEntrypoint,
-    SmartContractTransactionsFactory,
-    TestnetEntrypoint,
-    Token,
-    TokenComputer,
-    TokenTransfer,
-    Transaction,
-    TransactionsFactoryConfig,
-    TransferTransactionsFactory,
-    UserSecretKey,
-    UserSigner,
+  Address,
+  ArgSerializer,
+  DevnetEntrypoint,
+  MainnetEntrypoint,
+  NetworkEntrypoint,
+  SmartContractTransactionsFactory,
+  TestnetEntrypoint,
+  Token,
+  TokenComputer,
+  TokenTransfer,
+  Transaction,
+  TransactionsFactoryConfig,
+  TransferTransactionsFactory,
+  UserSecretKey,
+  UserSigner,
 } from '@multiversx/sdk-core'
 import {
-    AdapterWarpExecutor,
-    applyResultsToMessages,
-    getNextInfo,
-    getProviderUrl,
-    getWarpActionByIndex,
-    shiftBigintBy,
-    WarpActionInputType,
-    WarpChainAssetValue,
-    WarpChainEnv,
-    WarpChainInfo,
-    WarpClientConfig,
-    WarpConstants,
-    WarpExecutable,
-    WarpExecution,
-    WarpQueryAction,
+  AdapterWarpExecutor,
+  applyResultsToMessages,
+  asset,
+  getNextInfo,
+  getProviderUrl,
+  getWarpActionByIndex,
+  shiftBigintBy,
+  WarpActionInputType,
+  WarpChainAssetValue,
+  WarpChainEnv,
+  WarpChainInfo,
+  WarpClientConfig,
+  WarpConstants,
+  WarpExecutable,
+  WarpExecution,
+  WarpQueryAction,
 } from '@vleap/warps'
 import { WarpMultiversxAbiBuilder } from './WarpMultiversxAbiBuilder'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
 import { WarpMultiversxConstants } from './constants'
 import { findKnownTokenById } from './tokens'
-import { esdt_value } from './utils.codec'
 
 const EgldIdentifierMultiTransfer = 'EGLD-000000'
 
@@ -161,8 +161,9 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
         decimals = definition.decimals
       }
       if (!decimals) throw new Error(`WarpMultiversxExecutor: Decimals not found for token ${tokenId}`)
-      const processed = esdt_value(new TokenTransfer({ token, amount: shiftBigintBy(amount, decimals) }))
-      return this.serializer.typedToString(processed) + WarpConstants.ArgCompositeSeparator + decimals
+      const amountBig = shiftBigintBy(amount, decimals)
+      const tokenName = knownToken?.name || tokenId
+      return asset({ chain: chain.name, identifier: tokenId, name: tokenName, amount: amountBig, decimals })
     }
     return input
   }

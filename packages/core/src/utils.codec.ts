@@ -45,13 +45,15 @@ export const boolean = (value: boolean): string => WarpInputTypes.Boolean + Warp
 
 export const address = (value: string): string => WarpInputTypes.Address + WarpConstants.ArgParamsSeparator + value
 
-export const asset = (value: WarpChainAsset): string =>
-  WarpInputTypes.Asset +
-  WarpConstants.ArgParamsSeparator +
-  value.identifier +
-  WarpConstants.ArgCompositeSeparator +
-  BigInt(value.nonce || 0).toString() +
-  WarpConstants.ArgCompositeSeparator +
-  value.amount
+export const asset = (value: WarpChainAsset): string => {
+  const separator = WarpConstants.ArgParamsSeparator
+  const baseValue = WarpInputTypes.Asset + separator + value.identifier + separator + value.amount
+
+  if (value.decimals) {
+    return baseValue + separator + value.decimals
+  }
+
+  return baseValue
+}
 
 export const hex = (value: string): string => WarpInputTypes.Hex + WarpConstants.ArgParamsSeparator + value

@@ -66,36 +66,25 @@ describe('utils.codec', () => {
   })
 
   describe('asset', () => {
-    it('encodes an asset value with all properties', () => {
+    it('encodes an asset value', () => {
       const assetValue = {
         chain: 'multiversx',
         identifier: 'WEGLD-123456',
-        nonce: BigInt(5),
         name: 'Wrapped EGLD',
         amount: BigInt('1000000000000000000'),
       }
-      expect(asset(assetValue)).toBe(`${WarpInputTypes.Asset}:WEGLD-123456|5|1000000000000000000`)
+      expect(asset(assetValue)).toBe(`${WarpInputTypes.Asset}:WEGLD-123456|1000000000000000000`)
     })
 
-    it('encodes an asset value with zero nonce', () => {
-      const assetValue = {
-        chain: 'multiversx',
-        identifier: 'MEX-abcdef',
-        nonce: BigInt(0),
-        name: 'MEX Token',
-        amount: BigInt('500000000'),
-      }
-      expect(asset(assetValue)).toBe(`${WarpInputTypes.Asset}:MEX-abcdef|0|500000000`)
-    })
-
-    it('encodes an asset value without nonce', () => {
+    it('encodes an asset value with decimals', () => {
       const assetValue = {
         chain: 'multiversx',
         identifier: 'USDC-123456',
         name: 'USD Coin',
         amount: BigInt('1000000'),
+        decimals: 6,
       }
-      expect(asset(assetValue)).toBe(`${WarpInputTypes.Asset}:USDC-123456|0|1000000`)
+      expect(asset(assetValue)).toBe(`${WarpInputTypes.Asset}:USDC-123456|1000000|6`)
     })
   })
 
