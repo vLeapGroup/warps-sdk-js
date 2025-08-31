@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.90
+
+### Patch Changes
+
+- af8225c: update assets
+
 ## 3.0.0-alpha.89
 
 ### Minor Changes

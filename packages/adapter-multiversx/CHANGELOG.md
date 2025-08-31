@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.45
+
+### Patch Changes
+
+- af8225c: update assets
+- Updated dependencies [af8225c]
+  - @vleap/warps@3.0.0-alpha.90
+
 ## 0.2.0-alpha.44
 
 ### Patch Changes
