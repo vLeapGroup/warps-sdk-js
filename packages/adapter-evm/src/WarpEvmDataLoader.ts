@@ -1,12 +1,12 @@
 import {
-    AdapterWarpDataLoader,
-    getProviderUrl,
-    WarpChainAccount,
-    WarpChainAction,
-    WarpChainAsset,
-    WarpChainInfo,
-    WarpClientConfig,
-    WarpDataLoaderOptions,
+  AdapterWarpDataLoader,
+  getProviderUrl,
+  WarpChainAccount,
+  WarpChainAction,
+  WarpChainAsset,
+  WarpChainInfo,
+  WarpClientConfig,
+  WarpDataLoaderOptions,
 } from '@vleap/warps'
 import { ethers } from 'ethers'
 import { EvmLogoService } from './LogoService'
@@ -394,5 +394,9 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
     } catch (error) {
       throw new Error(`Failed to get chain info: ${error}`)
     }
+  }
+
+  async getAction(identifier: string, awaitCompleted = false): Promise<WarpChainAction | null> {
+    return null
   }
 }

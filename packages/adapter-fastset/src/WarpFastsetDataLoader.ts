@@ -1,11 +1,11 @@
 import {
-    AdapterWarpDataLoader,
-    WarpChainAccount,
-    WarpChainAction,
-    WarpChainAsset,
-    WarpChainInfo,
-    WarpClientConfig,
-    WarpDataLoaderOptions,
+  AdapterWarpDataLoader,
+  WarpChainAccount,
+  WarpChainAction,
+  WarpChainAsset,
+  WarpChainInfo,
+  WarpClientConfig,
+  WarpDataLoaderOptions,
 } from '@vleap/warps'
 import { FastsetClient } from './sdk/FastsetClient'
 
@@ -92,6 +92,10 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
     }
 
     return assets
+  }
+
+  async getAction(identifier: string, awaitCompleted = false): Promise<WarpChainAction | null> {
+    return null
   }
 
   async getAccountActions(address: string, options?: WarpDataLoaderOptions): Promise<WarpChainAction[]> {
