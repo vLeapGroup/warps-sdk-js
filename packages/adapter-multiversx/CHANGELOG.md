@@ -1,5 +1,20 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.46
+
+### Minor Changes
+
+- 29b84b6: add data loader get-action
+- 4d143d7: add data loader get-asset
+
+### Patch Changes
+
+- cf8f0b1: further mvx sov chain support
+- Updated dependencies [29b84b6]
+- Updated dependencies [7a96317]
+- Updated dependencies [4d143d7]
+  - @vleap/warps@3.0.0-alpha.91
+
 ## 0.2.0-alpha.45
 
 ### Patch Changes

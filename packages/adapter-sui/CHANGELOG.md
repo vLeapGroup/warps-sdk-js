@@ -1,5 +1,19 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.34
+
+### Minor Changes
+
+- 29b84b6: add data loader get-action
+- 4d143d7: add data loader get-asset
+
+### Patch Changes
+
+- Updated dependencies [29b84b6]
+- Updated dependencies [7a96317]
+- Updated dependencies [4d143d7]
+  - @vleap/warps@3.0.0-alpha.91
+
 ## 0.2.0-alpha.33
 
 ### Patch Changes

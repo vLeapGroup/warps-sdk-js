@@ -1,5 +1,16 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.91
+
+### Minor Changes
+
+- 29b84b6: add data loader get-action
+- 4d143d7: add data loader get-asset
+
+### Patch Changes
+
+- 7a96317: fix asset serialization
+
 ## 3.0.0-alpha.90
 
 ### Patch Changes
