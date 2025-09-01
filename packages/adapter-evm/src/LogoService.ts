@@ -39,7 +39,7 @@ const FALLBACK_LOGOS: Record<string, Record<string, string>> = {
     '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913': 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png',
     '0x4200000000000000000000000000000000000006': 'https://assets.coingecko.com/coins/images/2518/small/weth.png',
     '0x036CbD53842c5426634e7929541eC2318f3dCF7e': 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png',
-    '0x808456652fdb597867f38412077A9182bf77359F': 'https://assets.coingecko.com/coins/images/3318/small/euro-coin.png',
+    '0x808456652fdb597867f38412077A9182bf77359F': 'https://assets.coingecko.com/coins/images/26045/standard/euro.png',
     '0xcbB7C0006F23900c38EB856149F799620fcb8A4a': 'https://assets.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png',
   },
 }

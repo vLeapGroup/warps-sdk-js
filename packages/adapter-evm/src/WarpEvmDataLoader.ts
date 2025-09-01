@@ -119,7 +119,7 @@ const KNOWN_TOKENS: Record<string, Record<string, { name: string; symbol: string
       name: 'Euro Coin',
       symbol: 'EURC',
       decimals: 6,
-      logoUrl: 'https://assets.coingecko.com/coins/images/3318/small/euro-coin.png',
+      logoUrl: 'https://assets.coingecko.com/coins/images/26045/standard/euro.png',
     },
     '0xcbB7C0006F23900c38EB856149F799620fcb8A4a': {
       name: 'Coinbase Wrapped BTC',
