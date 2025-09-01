@@ -52,7 +52,7 @@ import {
   WarpNativeValue,
   WarpSerializer,
 } from '@vleap/warps'
-import { isNativeToken } from './helpers/general'
+import { getNormalizedTokenIdentifier, isNativeToken } from './helpers/general'
 
 const SplitParamsRegex = new RegExp(`${WarpConstants.ArgParamsSeparator}(.*)`)
 
@@ -221,7 +221,7 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
       const [identifier, amount] = val.split(WarpConstants.ArgCompositeSeparator)
       const tokenComputer = new TokenComputer()
       const tokenIdentifier = isNativeToken(identifier)
-        ? `${identifier}-000000`
+        ? getNormalizedTokenIdentifier(identifier)
         : tokenComputer.extractIdentifierFromExtendedIdentifier(identifier)
       const nonce = isNativeToken(identifier) ? 0n : tokenComputer.extractNonceFromExtendedIdentifier(identifier)
       return new Struct(this.nativeToType('asset') as StructType, [

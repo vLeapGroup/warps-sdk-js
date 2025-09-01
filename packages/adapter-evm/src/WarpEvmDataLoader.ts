@@ -396,6 +396,10 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
     }
   }
 
+  async getAsset(identifier: string): Promise<WarpChainAsset | null> {
+    return null
+  }
+
   async getAction(identifier: string, awaitCompleted = false): Promise<WarpChainAction | null> {
     return null
   }

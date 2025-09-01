@@ -87,6 +87,10 @@ export class WarpSuiDataLoader implements AdapterWarpDataLoader {
     return assets
   }
 
+  async getAsset(identifier: string): Promise<WarpChainAsset | null> {
+    return null
+  }
+
   async getAction(identifier: string, awaitCompleted = false): Promise<WarpChainAction | null> {
     return null
   }

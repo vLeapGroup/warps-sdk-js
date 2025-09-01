@@ -10,6 +10,7 @@ import {
   WarpDataLoaderOptions,
 } from '@vleap/warps'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
+import { getNormalizedTokenIdentifier } from './helpers/general'
 
 export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
   constructor(
@@ -48,6 +49,21 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
     )
 
     return assets
+  }
+
+  async getAsset(identifier: string): Promise<WarpChainAsset | null> {
+    const provider = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env, this.config).createNetworkProvider()
+    const normalizedIdentifier = getNormalizedTokenIdentifier(identifier)
+    const token = await provider.doGetGeneric(`tokens/${normalizedIdentifier}`)
+
+    return {
+      chain: this.chain.name,
+      identifier: token.identifier,
+      name: token.name,
+      amount: token.amount,
+      decimals: token.decimals,
+      logoUrl: token.assets?.pngUrl || '',
+    }
   }
 
   async getAction(identifier: string, awaitCompleted = false): Promise<WarpChainAction | null> {
