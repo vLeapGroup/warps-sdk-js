@@ -36,7 +36,7 @@ import {
 import { WarpMultiversxAbiBuilder } from './WarpMultiversxAbiBuilder'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
-import { WarpMultiversxConstants } from './constants'
+import { isNativeToken } from './helpers/general'
 import { findKnownTokenById } from './tokens'
 
 const EgldIdentifierMultiTransfer = 'EGLD-000000'
@@ -149,7 +149,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
       const [tokenId, amount, existingDecimals] = value.split(WarpConstants.ArgCompositeSeparator)
       if (existingDecimals) return input
       const tokenComputer = new TokenComputer()
-      const nonce = tokenId === WarpMultiversxConstants.Egld.Identifier ? 0 : tokenComputer.extractNonceFromExtendedIdentifier(tokenId)
+      const nonce = isNativeToken(tokenId) ? 0n : tokenComputer.extractNonceFromExtendedIdentifier(tokenId)
       const token = new Token({ identifier: tokenId, nonce: BigInt(nonce || 0) })
       const isFungible = tokenComputer.isFungible(token)
       if (!isFungible) return input // TODO: handle non-fungible tokens like meta-esdts

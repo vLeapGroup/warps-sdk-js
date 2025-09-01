@@ -1,57 +1,58 @@
 import {
-    Address,
-    AddressType,
-    AddressValue,
-    BigUIntType,
-    BigUIntValue,
-    BooleanType,
-    BooleanValue,
-    BytesType,
-    BytesValue,
-    CodeMetadata,
-    CodeMetadataType,
-    CodeMetadataValue,
-    CompositeType,
-    CompositeValue,
-    Field,
-    FieldDefinition,
-    List,
-    ListType,
-    NothingValue,
-    OptionalType,
-    OptionalValue,
-    OptionType,
-    OptionValue,
-    StringType,
-    StringValue,
-    Struct,
-    StructType,
-    Token,
-    TokenComputer,
-    TokenIdentifierType,
-    TokenIdentifierValue,
-    Type,
-    TypedValue,
-    U16Type,
-    U16Value,
-    U32Type,
-    U32Value,
-    U64Type,
-    U64Value,
-    U8Type,
-    U8Value,
-    VariadicType,
-    VariadicValue,
+  Address,
+  AddressType,
+  AddressValue,
+  BigUIntType,
+  BigUIntValue,
+  BooleanType,
+  BooleanValue,
+  BytesType,
+  BytesValue,
+  CodeMetadata,
+  CodeMetadataType,
+  CodeMetadataValue,
+  CompositeType,
+  CompositeValue,
+  Field,
+  FieldDefinition,
+  List,
+  ListType,
+  NothingValue,
+  OptionalType,
+  OptionalValue,
+  OptionType,
+  OptionValue,
+  StringType,
+  StringValue,
+  Struct,
+  StructType,
+  Token,
+  TokenComputer,
+  TokenIdentifierType,
+  TokenIdentifierValue,
+  Type,
+  TypedValue,
+  U16Type,
+  U16Value,
+  U32Type,
+  U32Value,
+  U64Type,
+  U64Value,
+  U8Type,
+  U8Value,
+  VariadicType,
+  VariadicValue,
 } from '@multiversx/sdk-core'
 import {
-    AdapterWarpSerializer,
-    BaseWarpActionInputType,
-    WarpActionInputType,
-    WarpAdapterGenericType,
-    WarpConstants,
-    WarpNativeValue,
-    WarpSerializer,
+  AdapterWarpSerializer,
+  BaseWarpActionInputType,
+  WarpActionInputType,
+  WarpAdapterGenericType,
+  WarpConstants,
+  WarpNativeValue,
+  WarpSerializer,
 } from '@vleap/warps'
+import { isNativeToken } from './helpers/general'
 
 const SplitParamsRegex = new RegExp(`${WarpConstants.ArgParamsSeparator}(.*)`)
 
@@ -217,15 +218,16 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
     if (type === 'hex') return val ? BytesValue.fromHex(val as string) : new NothingValue()
     if (type === 'codemeta') return new CodeMetadataValue(CodeMetadata.newFromBytes(Uint8Array.from(Buffer.from(val as string, 'hex'))))
     if (type === 'asset') {
-      const parts = val.split(WarpConstants.ArgCompositeSeparator)
-      const isNativeToken = !parts[0].includes('-') // e.g. EGLD, VIBE
+      const [identifier, amount] = val.split(WarpConstants.ArgCompositeSeparator)
       const tokenComputer = new TokenComputer()
-      const tokenIdentifier = isNativeToken ? `${parts[0]}-000000` : tokenComputer.extractIdentifierFromExtendedIdentifier(parts[0])
-      const nonce = isNativeToken ? 0 : tokenComputer.extractNonceFromExtendedIdentifier(parts[0])
+      const tokenIdentifier = isNativeToken(identifier)
+        ? `${identifier}-000000`
+        : tokenComputer.extractIdentifierFromExtendedIdentifier(identifier)
+      const nonce = isNativeToken(identifier) ? 0n : tokenComputer.extractNonceFromExtendedIdentifier(identifier)
       return new Struct(this.nativeToType('asset') as StructType, [
         new Field(new TokenIdentifierValue(tokenIdentifier), 'token_identifier'),
         new Field(new U64Value(BigInt(nonce)), 'token_nonce'),
-        new Field(new BigUIntValue(BigInt(parts[1])), 'amount'),
+        new Field(new BigUIntValue(BigInt(amount)), 'amount'),
       ])
     }
 
