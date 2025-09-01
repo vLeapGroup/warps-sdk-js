@@ -75,7 +75,6 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
   }
 
   async createTransferTransaction(executable: WarpExecutable): Promise<Transaction> {
-    console.log('createTransferTransaction user wallets', this.config.user?.wallets)
     const userWallet = this.config.user?.wallets?.[executable.chain.name]
     if (!userWallet) throw new Error('WarpMultiversxExecutor: createTransfer - user address not set')
     const sender = Address.newFromBech32(userWallet)
