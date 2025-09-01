@@ -1,3 +1,4 @@
+import { WarpAdapterGenericRemoteTransaction } from './config'
 import { WarpChain } from './warp'
 
 export type WarpChainAccount = {
@@ -29,6 +30,8 @@ export type WarpChainAction = {
   function: string
   status: WarpChainActionStatus
   createdAt: string
+  error?: string | null
+  tx?: WarpAdapterGenericRemoteTransaction | null
 }
 
 export type WarpChainActionStatus = 'pending' | 'success' | 'failed'
