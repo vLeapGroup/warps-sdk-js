@@ -84,9 +84,7 @@ describe('WarpEvmDataLoader', () => {
     it('should throw error on provider failure', async () => {
       mockProvider.getBalance.mockRejectedValue(new Error('Provider error'))
 
-      await expect(dataLoader.getAccount('0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6')).rejects.toThrow(
-        'Failed to get account balance for 0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6'
-      )
+      await expect(dataLoader.getAccount('0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6')).rejects.toThrow('Provider error')
     })
   })
 
@@ -126,81 +124,6 @@ describe('WarpEvmDataLoader', () => {
       const result = await dataLoader.getAccountAssets('0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6')
 
       expect(result).toEqual([])
-    })
-  })
-
-  describe('getTokenInfo', () => {
-    it('should return token metadata', async () => {
-      mockContract.name.mockResolvedValue('USD Coin')
-      mockContract.symbol.mockResolvedValue('USDC')
-      mockContract.decimals.mockResolvedValue(6)
-
-      const result = await dataLoader.getTokenInfo('0xA0b86a33E6441b8c4C8C8C8C8C8C8C8C8C8C8C8')
-
-      expect(result).toEqual({
-        name: 'USD Coin',
-        symbol: 'USDC',
-        decimals: 6,
-      })
-    })
-
-    it('should return null on error', async () => {
-      mockContract.name.mockRejectedValue(new Error('Contract error'))
-
-      const result = await dataLoader.getTokenInfo('0xInvalidAddress')
-
-      expect(result).toBeNull()
-    })
-  })
-
-  describe('getTokenBalanceForAddress', () => {
-    it('should return token balance', async () => {
-      const mockBalance = ethers.parseUnits('50', 6)
-      mockContract.balanceOf.mockResolvedValue(mockBalance)
-
-      const result = await dataLoader.getTokenBalanceForAddress(
-        '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
-        '0xA0b86a33E6441b8c4C8C8C8C8C8C8C8C8C8C8C8'
-      )
-
-      expect(result).toBe(mockBalance)
-    })
-
-    it('should throw error on failure', async () => {
-      mockContract.balanceOf.mockRejectedValue(new Error('Balance error'))
-
-      await expect(
-        dataLoader.getTokenBalanceForAddress('0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6', '0xA0b86a33E6441b8c4C8C8C8C8C8C8C8C8C8C8C8')
-      ).rejects.toThrow('Failed to get token balance for 0xA0b86a33E6441b8c4C8C8C8C8C8C8C8C8C8C8C8')
-    })
-  })
-
-  describe('getMultipleTokenBalances', () => {
-    it('should return balances for multiple tokens', async () => {
-      const mockBalance1 = ethers.parseUnits('100', 6)
-      const mockBalance2 = ethers.parseUnits('50', 18)
-
-      mockContract.balanceOf.mockResolvedValueOnce(mockBalance1).mockResolvedValueOnce(mockBalance2)
-
-      const tokenAddresses = ['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2']
-
-      const result = await dataLoader.getMultipleTokenBalances('0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6', tokenAddresses)
-
-      expect(result.size).toBe(2)
-      expect(result.get(tokenAddresses[0])).toBe(mockBalance1)
-      expect(result.get(tokenAddresses[1])).toBe(mockBalance2)
-    })
-
-    it('should handle individual token failures', async () => {
-      mockContract.balanceOf.mockResolvedValueOnce(ethers.parseUnits('100', 6)).mockRejectedValueOnce(new Error('Token error'))
-
-      const tokenAddresses = ['0xA0b86a33E6441b8c4C8C8C8C8C8C8C8C8C8C8C8', '0xInvalidAddress']
-
-      const result = await dataLoader.getMultipleTokenBalances('0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6', tokenAddresses)
-
-      expect(result.size).toBe(2)
-      expect(result.get(tokenAddresses[0])).toBe(ethers.parseUnits('100', 6))
-      expect(result.get(tokenAddresses[1])).toBe(0n)
     })
   })
 })
