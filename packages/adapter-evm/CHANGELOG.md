@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-alpha.24
+
+### Patch Changes
+
+- 04dad1c: add missing tokens export
+
 ## 0.2.0-alpha.23
 
 ### Patch Changes
