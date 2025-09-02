@@ -1,6 +1,7 @@
 export * from './chains'
 export * from './constants'
 export * from './LogoService'
+export * from './tokens'
 export * from './types'
 export * from './WarpEvmDataLoader'
 export * from './WarpEvmExecutor'
