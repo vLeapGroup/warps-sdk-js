@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-alpha.18
+
+### Patch Changes
+
+- 76b0148: update fastset client
+
 ## 0.1.0-alpha.17
 
 ### Minor Changes

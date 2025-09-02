@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-alpha.23
+
+### Patch Changes
+
+- e1963c2: update evm adapter
+
 ## 0.2.0-alpha.22
 
 ### Minor Changes
