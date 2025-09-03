@@ -1,6 +1,9 @@
 import { Address, TransactionOnNetwork } from '@multiversx/sdk-core'
 import {
   AdapterWarpDataLoader,
+  CacheTtl,
+  WarpCache,
+  WarpCacheKey,
   WarpChainAccount,
   WarpChainAction,
   WarpChainActionStatus,
@@ -11,12 +14,17 @@ import {
 } from '@vleap/warps'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 import { getNormalizedTokenIdentifier } from './helpers/general'
+import { findKnownTokenById } from './tokens'
 
 export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
+  private cache: WarpCache
+
   constructor(
     private readonly config: WarpClientConfig,
     private readonly chain: WarpChainInfo
-  ) {}
+  ) {
+    this.cache = new WarpCache(config.cache?.type)
+  }
 
   async getAccount(address: string): Promise<WarpChainAccount> {
     const provider = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env, this.config).createNetworkProvider()
@@ -52,17 +60,43 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
   }
 
   async getAsset(identifier: string): Promise<WarpChainAsset | null> {
-    const provider = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env, this.config).createNetworkProvider()
-    const normalizedIdentifier = getNormalizedTokenIdentifier(identifier)
-    const token = await provider.doGetGeneric(`tokens/${normalizedIdentifier}`)
+    const cacheKey = WarpCacheKey.Asset(this.config.env, this.chain.name, identifier)
+    const cachedAsset = this.cache.get<WarpChainAsset>(cacheKey)
+    if (cachedAsset) {
+      return cachedAsset
+    }
 
-    return {
-      chain: this.chain.name,
-      identifier: token.identifier,
-      name: token.name,
-      amount: token.amount,
-      decimals: token.decimals,
-      logoUrl: token.assets?.pngUrl || '',
+    try {
+      const knownToken = findKnownTokenById(identifier)
+      if (knownToken) {
+        return {
+          chain: this.chain.name,
+          identifier,
+          name: knownToken.name,
+          amount: 0n,
+          decimals: knownToken.decimals,
+          logoUrl: knownToken.logoUrl,
+        }
+      }
+
+      const provider = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env, this.config).createNetworkProvider()
+      const normalizedIdentifier = getNormalizedTokenIdentifier(identifier)
+      const token = await provider.doGetGeneric(`tokens/${normalizedIdentifier}`)
+
+      const asset: WarpChainAsset = {
+        chain: this.chain.name,
+        identifier: token.identifier,
+        name: token.name,
+        amount: 0n,
+        decimals: token.decimals,
+        logoUrl: token.assets?.pngUrl || '',
+      }
+
+      this.cache.set(cacheKey, asset, CacheTtl.OneHour)
+
+      return asset
+    } catch (error) {
+      return null
     }
   }
 
