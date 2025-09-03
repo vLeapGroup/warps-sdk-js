@@ -216,8 +216,6 @@ describe('WarpFactory', () => {
       const result = await factory.preprocessInput('multiversx', 'asset:TOKEN-123|1.50')
       expect(result).toBe('asset:TOKEN-123|150|2')
     })
-
-
   })
 })
 
