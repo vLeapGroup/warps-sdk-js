@@ -1,12 +1,11 @@
 import { WarpConstants } from './constants'
-import { findWarpAdapterForChain, getWarpActionByIndex, shiftBigintBy } from './helpers'
+import { findWarpAdapterForChain, getWarpActionByIndex, shiftBigintBy, splitInput } from './helpers'
 import {
   Adapter,
   ResolvedInput,
   Warp,
   WarpAction,
   WarpActionInput,
-  WarpActionInputType,
   WarpChain,
   WarpChainAssetValue,
   WarpChainInfo,
@@ -171,7 +170,7 @@ export class WarpFactory {
 
   public async preprocessInput(chain: WarpChain, input: string): Promise<string> {
     try {
-      const [type, value] = input.split(WarpConstants.ArgParamsSeparator, 2) as [WarpActionInputType, string]
+      const [type, value] = splitInput(input)
       const adapter = findWarpAdapterForChain(chain, this.adapters)
 
       if (type === 'asset') {

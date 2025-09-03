@@ -1,6 +1,7 @@
 export * from './crypto'
 export * from './general'
 export * from './identifier'
+export * from './input'
 export * from './next'
 export * from './providers'
 export * from './results'
