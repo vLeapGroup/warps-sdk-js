@@ -170,7 +170,7 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
     const balanceReqs = tokens.map((token) => this.getTokenBalance(address, token.id).catch(() => 0n))
     const balances = await Promise.all(balanceReqs)
 
-    const tokenBalances = balances
+    return balances
       .map((balance, index) => ({ balance, token: tokens[index] }))
       .filter(({ balance }) => balance > 0n)
       .map(({ balance, token }) => ({
@@ -181,9 +181,6 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
         decimals: token.decimals,
         logoUrl: token.logoUrl || '',
       }))
-
-    console.log('EVM ' + this.chain.name + ' ' + env + ' tokenBalances', tokenBalances)
-    return tokenBalances
   }
 
   private async getTokenBalance(address: string, tokenAddress: string): Promise<bigint> {
