@@ -16,6 +16,7 @@ export type WarpChainAsset = {
   chain: WarpChain
   identifier: string
   name: string
+  symbol: string
   amount?: bigint
   decimals?: number
   logoUrl?: string

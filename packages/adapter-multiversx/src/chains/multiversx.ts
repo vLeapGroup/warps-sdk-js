@@ -5,6 +5,7 @@ export const NativeTokenEgld: WarpChainAsset = {
   chain: WarpChainName.Multiversx,
   identifier: 'EGLD',
   name: 'eGold',
+  symbol: 'EGLD',
   decimals: 18,
   logoUrl: 'https://vleap.ai/images/tokens/egld.svg',
 }

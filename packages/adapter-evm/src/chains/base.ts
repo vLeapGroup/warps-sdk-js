@@ -4,7 +4,8 @@ import { createEvmAdapter } from './common'
 export const NativeTokenBase: WarpChainAsset = {
   chain: WarpChainName.Base,
   identifier: 'ETH',
-  name: 'ETH',
+  name: 'Ether',
+  symbol: 'ETH',
   decimals: 18,
   logoUrl: 'https://vleap.ai/images/tokens/eth.svg',
 }

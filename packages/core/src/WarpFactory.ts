@@ -181,7 +181,7 @@ export class WarpFactory {
         if (!chainAsset) throw new Error(`WarpFactory: Asset not found for asset ${assetId}`)
         if (typeof chainAsset.decimals !== 'number') throw new Error(`WarpFactory: Decimals not found for asset ${assetId}`)
         const amountBig = shiftBigintBy(amount, chainAsset.decimals)
-        return asset({ chain, identifier: assetId, name: chainAsset.name, amount: amountBig, decimals: chainAsset.decimals })
+        return asset({ ...chainAsset, amount: amountBig })
       } else {
         return input
       }

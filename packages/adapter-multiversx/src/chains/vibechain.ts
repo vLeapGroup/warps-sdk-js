@@ -5,6 +5,7 @@ export const NativeTokenVibe: WarpChainAsset = {
   chain: WarpChainName.Vibechain,
   identifier: 'VIBE',
   name: 'VIBE',
+  symbol: 'VIBE',
   decimals: 18,
   logoUrl: 'https://vleap.ai/images/tokens/vibe.svg',
 }

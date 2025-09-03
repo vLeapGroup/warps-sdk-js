@@ -70,6 +70,7 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
           chain: this.chain.name,
           identifier: tokenBalance.tokenAddress,
           name: tokenBalance.name,
+          symbol: tokenBalance.symbol,
           amount: tokenBalance.balance,
           decimals: tokenBalance.decimals,
           logoUrl: tokenBalance.logoUrl || '',
@@ -99,6 +100,7 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
           chain: this.chain.name,
           identifier,
           name: knownToken.name,
+          symbol: knownToken.symbol,
           amount: 0n,
           decimals: knownToken.decimals,
           logoUrl: knownToken.logoUrl,
@@ -111,6 +113,7 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
         chain: this.chain.name,
         identifier,
         name: metadata.name,
+        symbol: metadata.symbol,
         amount: 0n,
         decimals: metadata.decimals,
         logoUrl: metadata.logoUrl || '',
@@ -167,18 +170,18 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
   private async getERC20TokenBalances(address: string): Promise<TokenBalance[]> {
     const env = this.config.env === 'mainnet' ? 'mainnet' : 'testnet'
     const tokens = getKnownTokensForChain(this.chain.name, env)
-    const balanceReqs = tokens.map((token) => this.getTokenBalance(address, token.id).catch(() => 0n))
+    const balanceReqs = tokens.map((token) => this.getTokenBalance(address, token.identifier).catch(() => 0n))
     const balances = await Promise.all(balanceReqs)
 
     return balances
       .map((balance, index) => ({ balance, token: tokens[index] }))
       .filter(({ balance }) => balance > 0n)
       .map(({ balance, token }) => ({
-        tokenAddress: token.id,
+        tokenAddress: token.identifier,
         balance,
         name: token.name,
         symbol: token.symbol,
-        decimals: token.decimals,
+        decimals: token.decimals || 18,
         logoUrl: token.logoUrl || '',
       }))
   }

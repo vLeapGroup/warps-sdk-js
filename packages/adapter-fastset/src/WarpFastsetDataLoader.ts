@@ -62,14 +62,7 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
 
     // Add native token balance
     if (account.balance > 0) {
-      assets.push({
-        chain: this.chain.name,
-        identifier: this.chain.nativeToken?.identifier || 'SET',
-        name: this.chain.nativeToken?.name || 'SET',
-        decimals: this.chain.nativeToken?.decimals || 6,
-        amount: account.balance,
-        logoUrl: this.chain.nativeToken?.logoUrl,
-      })
+      assets.push({ ...this.chain.nativeToken, amount: account.balance })
     }
 
     // Add other asset balances
@@ -81,10 +74,11 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
             assets.push({
               chain: this.chain.name,
               identifier: assetId,
+              symbol: 'TODO: SYMBOL',
               name: assetBalance.name || assetId,
               decimals: assetBalance.decimals || 6,
-              amount,
               logoUrl: assetBalance.logo_url,
+              amount,
             })
           }
         }
@@ -177,10 +171,11 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
     return {
       chain: this.chain.name,
       identifier: assetId,
+      symbol: 'TODO: SYMBOL',
       name: assetBalance.name || assetId,
       decimals: assetBalance.decimals || 6,
-      amount,
       logoUrl: assetBalance.logo_url,
+      amount,
     }
   }
 }

@@ -50,6 +50,7 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
         chain: this.chain.name,
         identifier: token.token.identifier,
         name: token.raw.name,
+        symbol: token.raw.ticker,
         amount: token.amount,
         decimals: token.raw.decimals,
         logoUrl: token.raw.assets?.pngUrl || '',
@@ -65,7 +66,16 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
     if (cachedAsset) return cachedAsset
 
     const local = findKnownTokenById(identifier)
-    if (local) return { chain: this.chain.name, identifier, name: local.name, amount: 0n, decimals: local.decimals, logoUrl: local.logoUrl }
+    if (local)
+      return {
+        chain: this.chain.name,
+        identifier,
+        name: local.name,
+        symbol: local.symbol,
+        amount: 0n,
+        decimals: local.decimals,
+        logoUrl: local.logoUrl,
+      }
 
     const tokenComputer = new TokenComputer()
     const nonce = isNativeToken(identifier) ? 0n : tokenComputer.extractNonceFromExtendedIdentifier(identifier)
@@ -82,6 +92,7 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
       chain: this.chain.name,
       identifier: token.identifier,
       name: tokenData.name,
+      symbol: tokenData.ticker,
       amount: 0n,
       decimals: tokenData.decimals,
       logoUrl: tokenData.assets?.pngUrl || '#',

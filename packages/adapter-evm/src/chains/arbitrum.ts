@@ -4,7 +4,8 @@ import { createEvmAdapter } from './common'
 export const NativeTokenArb: WarpChainAsset = {
   chain: WarpChainName.Arbitrum,
   identifier: 'ARB',
-  name: 'ARB',
+  symbol: 'ARB',
+  name: 'Arbitrum',
   decimals: 18,
   logoUrl: 'https://vleap.ai/images/tokens/arb.svg',
 }

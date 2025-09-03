@@ -10,6 +10,7 @@ import {
   WarpDataLoaderOptions,
 } from '@vleap/warps'
 import { SuiLogoService } from './LogoService'
+import { getKnownTokensForChain } from './tokens'
 
 export class WarpSuiDataLoader implements AdapterWarpDataLoader {
   private client: SuiClient
@@ -28,60 +29,73 @@ export class WarpSuiDataLoader implements AdapterWarpDataLoader {
       coinType: '0x2::sui::SUI',
     })
 
-    return {
-      chain: this.chain.name,
-      address,
-      balance: BigInt(balance.totalBalance),
-    }
+    return { chain: this.chain.name, address, balance: BigInt(balance.totalBalance) }
   }
 
   async getAccountAssets(address: string): Promise<WarpChainAsset[]> {
-    // Get all balances (including SUI and other tokens)
-    const allBalances = await this.client.getAllBalances({
-      owner: address,
-    })
+    const allBalances = await this.client.getAllBalances({ owner: address })
+
+    const knownTokens = getKnownTokensForChain(this.chain.name, this.config.env)
+
+    const suiBalance = allBalances.find((balance) => balance.coinType === '0x2::sui::SUI')
+    const tokenBalances = allBalances.filter((balance) => balance.coinType !== '0x2::sui::SUI' && BigInt(balance.totalBalance) > 0n)
 
     const assets: WarpChainAsset[] = []
+    if (suiBalance && BigInt(suiBalance.totalBalance) > 0n) {
+      assets.push({ ...this.chain.nativeToken, amount: BigInt(suiBalance.totalBalance) })
+    }
 
-    // Process each balance
-    for (const balance of allBalances) {
-      if (balance.coinType === '0x2::sui::SUI') {
-        // Handle native SUI token
-        if (BigInt(balance.totalBalance) > 0n) {
-          assets.push({ ...this.chain.nativeToken, amount: BigInt(balance.totalBalance) })
-        }
-      } else {
-        // Handle other tokens
-        try {
-          // Try to get token metadata
-          const tokenMetadata = await this.getTokenMetadata(balance.coinType)
+    // Process other tokens concurrently
+    if (tokenBalances.length > 0) {
+      // Create concurrent requests for metadata and logos
+      const tokenProcessingPromises = tokenBalances.map(async (balance) => {
+        // Check if token is in known tokens first
+        const knownToken = knownTokens.find((token) => token.id === balance.coinType)
 
-          // Get enhanced logo URL using SuiLogoService
-          const logoUrl = await SuiLogoService.getLogoUrl(balance.coinType)
-
-          assets.push({
+        if (knownToken) {
+          // Use known token metadata - much faster!
+          return {
             chain: this.chain.name,
             identifier: balance.coinType,
-            name: tokenMetadata.name,
+            name: knownToken.name,
             amount: BigInt(balance.totalBalance),
-            decimals: tokenMetadata.decimals,
-            logoUrl: logoUrl || tokenMetadata.logoUrl || '',
-          })
-        } catch (error) {
-          // Fallback to basic info if metadata fetch fails
-          const fallbackName = balance.coinType.split('::').pop() || balance.coinType
-          const logoUrl = await SuiLogoService.getLogoUrl(balance.coinType)
+            decimals: knownToken.decimals,
+            logoUrl: knownToken.logoUrl,
+          }
+        } else {
+          // Fallback to API metadata for unknown tokens
+          try {
+            const metadata = await this.getTokenMetadata(balance.coinType)
+            const logoUrl = await SuiLogoService.getLogoUrl(balance.coinType)
 
-          assets.push({
-            chain: this.chain.name,
-            identifier: balance.coinType,
-            name: fallbackName,
-            amount: BigInt(balance.totalBalance),
-            decimals: 9, // Default to 9 decimals for Sui tokens
-            logoUrl: logoUrl || '',
-          })
+            return {
+              chain: this.chain.name,
+              identifier: balance.coinType,
+              name: metadata.name,
+              amount: BigInt(balance.totalBalance),
+              decimals: metadata.decimals,
+              logoUrl: logoUrl || metadata.logoUrl || '',
+            }
+          } catch (error) {
+            // Final fallback
+            const fallbackName = balance.coinType.split('::').pop() || balance.coinType
+            const logoUrl = await SuiLogoService.getLogoUrl(balance.coinType).catch(() => '')
+
+            return {
+              chain: this.chain.name,
+              identifier: balance.coinType,
+              name: fallbackName,
+              amount: BigInt(balance.totalBalance),
+              decimals: 9, // Default to 9 decimals for Sui tokens
+              logoUrl: logoUrl || '',
+            }
+          }
         }
-      }
+      })
+
+      // Wait for ALL concurrent requests to complete
+      const tokenAssets = await Promise.all(tokenProcessingPromises)
+      assets.push(...tokenAssets)
     }
 
     return assets
