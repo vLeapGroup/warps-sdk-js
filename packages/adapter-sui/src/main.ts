@@ -13,6 +13,7 @@ export const NativeTokenSui: WarpChainAsset = {
   chain: WarpChainName.Sui,
   identifier: '0x2::sui::SUI',
   name: 'SUI',
+  symbol: 'SUI',
   decimals: 9,
   logoUrl: 'https://vleap.ai/images/tokens/sui.svg',
 }
