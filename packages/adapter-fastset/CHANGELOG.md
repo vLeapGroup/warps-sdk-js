@@ -1,5 +1,19 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-alpha.19
+
+### Minor Changes
+
+- d48e19b: update input preprocessing
+- 588aaf3: update adapter data loaders
+
+### Patch Changes
+
+- Updated dependencies [cf418e1]
+- Updated dependencies [d48e19b]
+- Updated dependencies [588aaf3]
+  - @vleap/warps@3.0.0-alpha.92
+
 ## 0.1.0-alpha.18
 
 ### Patch Changes

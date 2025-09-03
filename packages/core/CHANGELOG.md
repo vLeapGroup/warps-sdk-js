@@ -1,5 +1,16 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.92
+
+### Minor Changes
+
+- d48e19b: update input preprocessing
+- 588aaf3: update adapter data loaders
+
+### Patch Changes
+
+- cf418e1: fix input handling
+
 ## 3.0.0-alpha.91
 
 ### Minor Changes
