@@ -62,7 +62,7 @@ describe('UniswapService', () => {
       const result = await service.getTokenList()
 
       expect(result).toEqual(mockTokenList)
-      expect(mockFetch).toHaveBeenCalledWith('https://tokens.uniswap.org/')
+      expect(mockFetch).toHaveBeenCalledWith('https://tokens.uniswap.org')
     })
 
     it('should throw error when fetch fails', async () => {

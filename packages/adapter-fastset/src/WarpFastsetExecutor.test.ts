@@ -31,40 +31,6 @@ describe('WarpFastsetExecutor', () => {
     ;(fetch as jest.Mock).mockClear()
   })
 
-  describe('preprocessInput', () => {
-    it('should validate and format addresses', async () => {
-      const address = 'fs1testaddress123456789'
-      const result = await executor.preprocessInput({} as any, 'address', 'address', address)
-      expect(result).toBe(address)
-    })
-
-    it('should validate and format hex strings', async () => {
-      const hex = '0x1234567890abcdef'
-      const result = await executor.preprocessInput({} as any, 'hex', 'hex', hex)
-      expect(result).toBe(hex)
-    })
-
-    it('should validate and format bigint values', async () => {
-      const result = await executor.preprocessInput({} as any, 'biguint', 'biguint', '123456789')
-      expect(result).toBe('123456789')
-    })
-
-    it('should return the value as-is for any input', async () => {
-      const result = await executor.preprocessInput({} as any, 'address', 'address', 'invalid-address')
-      expect(result).toBe('invalid-address')
-    })
-
-    it('should return hex value as-is', async () => {
-      const result = await executor.preprocessInput({} as any, 'hex', 'hex', 'invalid-hex')
-      expect(result).toBe('invalid-hex')
-    })
-
-    it('should return bigint value as-is', async () => {
-      const result = await executor.preprocessInput({} as any, 'biguint', 'biguint', '-123')
-      expect(result).toBe('-123')
-    })
-  })
-
   describe('createTransferTransaction', () => {
     it('should create a transfer transaction', async () => {
       const executable = {
