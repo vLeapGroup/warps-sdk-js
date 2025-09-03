@@ -6,7 +6,6 @@ import {
   getNextInfo,
   getProviderUrl,
   getWarpActionByIndex,
-  WarpActionInputType,
   WarpChainInfo,
   WarpClientConfig,
   WarpContractAction,
@@ -148,10 +147,6 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
       results,
       messages: applyResultsToMessages(executable.warp, results),
     }
-  }
-
-  async preprocessInput(chain: WarpChainInfo, input: string, type: WarpActionInputType, value: string): Promise<string> {
-    return input
   }
 
   async signMessage(message: string, privateKey: string): Promise<string> {

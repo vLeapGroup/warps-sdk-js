@@ -160,6 +160,65 @@ describe('WarpFactory', () => {
     const result = await factory.preprocessInput('multiversx', 'biguint:123')
     expect(result).toBe('biguint:123')
   })
+
+  describe('preprocessInput for assets', () => {
+    it('should return input as-is when existing decimals are provided', async () => {
+      const factory = new WarpFactory(config, [createMockAdapter()])
+      const input = 'asset:TOKEN-123|100|18'
+      const result = await factory.preprocessInput('multiversx', input)
+      expect(result).toBe(input)
+    })
+
+    it('should fetch asset decimals and scale amount when no existing decimals', async () => {
+      const mockAdapter = createMockAdapter()
+      mockAdapter.dataLoader.getAsset = jest.fn().mockResolvedValue({
+        chain: 'multiversx',
+        identifier: 'TOKEN-123',
+        name: 'Test Token',
+        amount: 0n,
+        decimals: 6, // USDC-like token with 6 decimals
+        logoUrl: 'https://example.com/token.png',
+      })
+      const factory = new WarpFactory(config, [mockAdapter])
+
+      const result = await factory.preprocessInput('multiversx', 'asset:TOKEN-123|100')
+      expect(result).toBe('asset:TOKEN-123|100000000|6')
+    })
+
+    it('should handle zero amount correctly', async () => {
+      const mockAdapter = createMockAdapter()
+      mockAdapter.dataLoader.getAsset = jest.fn().mockResolvedValue({
+        chain: 'multiversx',
+        identifier: 'TOKEN-123',
+        name: 'Test Token',
+        amount: 0n,
+        decimals: 18,
+        logoUrl: 'https://example.com/token.png',
+      })
+      const factory = new WarpFactory(config, [mockAdapter])
+
+      const result = await factory.preprocessInput('multiversx', 'asset:TOKEN-123|0')
+      expect(result).toBe('asset:TOKEN-123|0|18')
+    })
+
+    it('should handle decimal amounts correctly', async () => {
+      const mockAdapter = createMockAdapter()
+      mockAdapter.dataLoader.getAsset = jest.fn().mockResolvedValue({
+        chain: 'multiversx',
+        identifier: 'TOKEN-123',
+        name: 'Test Token',
+        amount: 0n,
+        decimals: 2,
+        logoUrl: 'https://example.com/token.png',
+      })
+      const factory = new WarpFactory(config, [mockAdapter])
+
+      const result = await factory.preprocessInput('multiversx', 'asset:TOKEN-123|1.50')
+      expect(result).toBe('asset:TOKEN-123|150|2')
+    })
+
+
+  })
 })
 
 describe('getChainInfoForAction', () => {

@@ -1,4 +1,4 @@
-import { Address, TransactionOnNetwork } from '@multiversx/sdk-core'
+import { Address, Token, TokenComputer, TransactionOnNetwork } from '@multiversx/sdk-core'
 import {
   AdapterWarpDataLoader,
   CacheTtl,
@@ -13,7 +13,7 @@ import {
   WarpDataLoaderOptions,
 } from '@vleap/warps'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
-import { getNormalizedTokenIdentifier } from './helpers/general'
+import { getNormalizedTokenIdentifier, isNativeToken } from './helpers/general'
 import { findKnownTokenById } from './tokens'
 
 export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
@@ -62,42 +62,34 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
   async getAsset(identifier: string): Promise<WarpChainAsset | null> {
     const cacheKey = WarpCacheKey.Asset(this.config.env, this.chain.name, identifier)
     const cachedAsset = this.cache.get<WarpChainAsset>(cacheKey)
-    if (cachedAsset) {
-      return cachedAsset
+    if (cachedAsset) return cachedAsset
+
+    const local = findKnownTokenById(identifier)
+    if (local) return { chain: this.chain.name, identifier, name: local.name, amount: 0n, decimals: local.decimals, logoUrl: local.logoUrl }
+
+    const tokenComputer = new TokenComputer()
+    const nonce = isNativeToken(identifier) ? 0n : tokenComputer.extractNonceFromExtendedIdentifier(identifier)
+    const token = new Token({ identifier, nonce: BigInt(nonce || 0) })
+    const _isFungible = tokenComputer.isFungible(token)
+
+    const provider = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env, this.config).createNetworkProvider()
+    const normalizedIdentifier = getNormalizedTokenIdentifier(identifier)
+
+    // TODO: add handling for non-fungible tokens like meta-esdts
+    const tokenData = await provider.doGetGeneric(`tokens/${normalizedIdentifier}`)
+
+    const asset: WarpChainAsset = {
+      chain: this.chain.name,
+      identifier: token.identifier,
+      name: tokenData.name,
+      amount: 0n,
+      decimals: tokenData.decimals,
+      logoUrl: tokenData.assets?.pngUrl || '#',
     }
 
-    try {
-      const knownToken = findKnownTokenById(identifier)
-      if (knownToken) {
-        return {
-          chain: this.chain.name,
-          identifier,
-          name: knownToken.name,
-          amount: 0n,
-          decimals: knownToken.decimals,
-          logoUrl: knownToken.logoUrl,
-        }
-      }
+    this.cache.set(cacheKey, asset, CacheTtl.OneHour)
 
-      const provider = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env, this.config).createNetworkProvider()
-      const normalizedIdentifier = getNormalizedTokenIdentifier(identifier)
-      const token = await provider.doGetGeneric(`tokens/${normalizedIdentifier}`)
-
-      const asset: WarpChainAsset = {
-        chain: this.chain.name,
-        identifier: token.identifier,
-        name: token.name,
-        amount: 0n,
-        decimals: token.decimals,
-        logoUrl: token.assets?.pngUrl || '',
-      }
-
-      this.cache.set(cacheKey, asset, CacheTtl.OneHour)
-
-      return asset
-    } catch (error) {
-      return null
-    }
+    return asset
   }
 
   async getAction(identifier: string, awaitCompleted = false): Promise<WarpChainAction | null> {

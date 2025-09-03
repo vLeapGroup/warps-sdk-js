@@ -4,7 +4,6 @@ import {
   getNextInfo,
   getProviderUrl,
   getWarpActionByIndex,
-  WarpActionInputType,
   WarpChainAssetValue,
   WarpChainInfo,
   WarpClientConfig,
@@ -238,10 +237,6 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         messages: {},
       }
     }
-  }
-
-  async preprocessInput(chain: WarpChainInfo, input: string, type: WarpActionInputType, value: string): Promise<string> {
-    return input
   }
 
   private async estimateGasAndSetDefaults(tx: ethers.TransactionRequest, from: string): Promise<ethers.TransactionRequest> {

@@ -1,21 +1,23 @@
 import { WarpConstants } from './constants'
 import { findWarpAdapterForChain, getWarpActionByIndex, shiftBigintBy } from './helpers'
 import {
-    Adapter,
-    ResolvedInput,
-    Warp,
-    WarpAction,
-    WarpActionInput,
-    WarpActionInputType,
-    WarpChain,
-    WarpChainAssetValue,
-    WarpChainInfo,
-    WarpClientConfig,
-    WarpContractAction,
-    WarpExecutable,
-    WarpTransferAction,
+  Adapter,
+  ResolvedInput,
+  Warp,
+  WarpAction,
+  WarpActionInput,
+  WarpActionInputType,
+  WarpChain,
+  WarpChainAssetValue,
+  WarpChainInfo,
+  WarpClientConfig,
+  WarpContractAction,
+  WarpExecutable,
+  WarpTransferAction,
 } from './types'
+import { asset } from './utils.codec'
 import { CacheTtl, WarpCache, WarpCacheKey } from './WarpCache'
+import { WarpLogger } from './WarpLogger'
 import { WarpSerializer } from './WarpSerializer'
 import { WarpTypeRegistryImpl } from './WarpTypeRegistry'
 
@@ -171,9 +173,21 @@ export class WarpFactory {
     try {
       const [type, value] = input.split(WarpConstants.ArgParamsSeparator, 2) as [WarpActionInputType, string]
       const adapter = findWarpAdapterForChain(chain, this.adapters)
-      return adapter.executor.preprocessInput(adapter.chainInfo, input, type, value)
+
+      if (type === 'asset') {
+        const [assetId, amount, existingDecimals] = value.split(WarpConstants.ArgCompositeSeparator)
+        if (existingDecimals) return input
+        const chainAsset = await adapter.dataLoader.getAsset(assetId)
+        if (!chainAsset) throw new Error(`WarpFactory: Asset not found for asset ${assetId}`)
+        if (typeof chainAsset.decimals !== 'number') throw new Error(`WarpFactory: Decimals not found for asset ${assetId}`)
+        const amountBig = shiftBigintBy(amount, chainAsset.decimals)
+        return asset({ chain, identifier: assetId, name: chainAsset.name, amount: amountBig, decimals: chainAsset.decimals })
+      } else {
+        return input
+      }
     } catch (e) {
-      return input
+      WarpLogger.warn('WarpFactory: Preprocess input failed', e)
+      throw e
     }
   }
 

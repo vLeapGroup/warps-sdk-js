@@ -132,6 +132,17 @@ export const createMockAdapter = () => ({
     getAccountAssets() {
       return Promise.resolve([])
     },
+    getAsset(identifier: string) {
+      // Return a mock asset with 18 decimals by default
+      return Promise.resolve({
+        chain: 'multiversx',
+        identifier,
+        name: `Mock ${identifier}`,
+        amount: 0n,
+        decimals: 18,
+        logoUrl: 'https://example.com/token.png',
+      })
+    },
     getAccountInfo() {
       return Promise.resolve({ address: 'erd1test', balance: 0n, nonce: 0 })
     },

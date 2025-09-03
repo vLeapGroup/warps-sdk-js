@@ -18,17 +18,13 @@ import {
 import {
   AdapterWarpExecutor,
   applyResultsToMessages,
-  asset,
   getNextInfo,
   getProviderUrl,
   getWarpActionByIndex,
-  shiftBigintBy,
-  WarpActionInputType,
   WarpChainAssetValue,
   WarpChainEnv,
   WarpChainInfo,
   WarpClientConfig,
-  WarpConstants,
   WarpExecutable,
   WarpExecution,
   WarpQueryAction,
@@ -36,8 +32,6 @@ import {
 import { WarpMultiversxAbiBuilder } from './WarpMultiversxAbiBuilder'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
-import { isNativeToken } from './helpers/general'
-import { findKnownTokenById } from './tokens'
 
 const EgldIdentifierMultiTransfer = 'EGLD-000000'
 
@@ -141,35 +135,6 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
       results,
       messages: applyResultsToMessages(executable.warp, results),
     }
-  }
-
-  async preprocessInput(chain: WarpChainInfo, input: string, type: WarpActionInputType, value: string): Promise<string> {
-    if (type === 'asset') {
-      const [tokenId, amount, existingDecimals] = value.split(WarpConstants.ArgCompositeSeparator)
-      if (existingDecimals) return input
-      const tokenComputer = new TokenComputer()
-      const nonce = isNativeToken(tokenId) ? 0n : tokenComputer.extractNonceFromExtendedIdentifier(tokenId)
-      const token = new Token({ identifier: tokenId, nonce: BigInt(nonce || 0) })
-      const isFungible = tokenComputer.isFungible(token)
-      if (!isFungible) return input // TODO: handle non-fungible tokens like meta-esdts
-      // Check known tokens first (fast lookup)
-      const knownToken = findKnownTokenById(tokenId)
-      let decimals = knownToken?.decimals
-      let tokenName = knownToken?.name || tokenId
-
-      // Fall back to network call for unknown tokens
-      if (!decimals) {
-        const definitionRes = await fetch(`${chain.defaultApiUrl}/tokens/${tokenId}`)
-        const definition = await definitionRes.json()
-        decimals = definition.decimals
-        tokenName = definition.name || tokenId
-      }
-
-      if (!decimals) throw new Error(`WarpMultiversxExecutor: Decimals not found for token ${tokenId}`)
-      const amountBig = shiftBigintBy(amount, decimals)
-      return asset({ chain: chain.name, identifier: tokenId, name: tokenName, amount: amountBig, decimals })
-    }
-    return input
   }
 
   static getChainEntrypoint(chainInfo: WarpChainInfo, env: WarpChainEnv, config?: WarpClientConfig): NetworkEntrypoint {

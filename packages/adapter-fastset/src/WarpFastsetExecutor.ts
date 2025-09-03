@@ -2,7 +2,6 @@ import {
   AdapterWarpExecutor,
   getProviderUrl,
   getWarpActionByIndex,
-  WarpActionInputType,
   WarpChainInfo,
   WarpClientConfig,
   WarpExecutable,
@@ -133,10 +132,6 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
         chain: executable.chain,
       }
     }
-  }
-
-  async preprocessInput(chain: WarpChainInfo, input: string, type: WarpActionInputType, value: string): Promise<string> {
-    return value
   }
 
   async signMessage(message: string, privateKey: string): Promise<string> {

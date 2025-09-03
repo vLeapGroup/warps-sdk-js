@@ -58,8 +58,11 @@ describe('WarpMultiversxDataLoader', () => {
             sender: 'sender1',
             value: '1000000000000000000',
             function: 'transfer',
-            status: 'success',
-            timestampMs: 1640995200000,
+            status: {
+              isSuccessful: () => true,
+              isFailed: () => false,
+            },
+            timestamp: 1640995200000,
           },
         ]),
       }
@@ -94,8 +97,11 @@ describe('WarpMultiversxDataLoader', () => {
             sender: 'sender2',
             value: '2000000000000000000',
             function: 'transfer',
-            status: 'success',
-            timestampMs: 1640995200000,
+            status: {
+              isSuccessful: () => true,
+              isFailed: () => false,
+            },
+            timestamp: 1640995200000,
           },
         ]),
       }
