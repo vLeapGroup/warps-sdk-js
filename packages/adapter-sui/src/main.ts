@@ -15,7 +15,7 @@ export const NativeTokenSui: WarpChainAsset = {
   name: 'SUI',
   symbol: 'SUI',
   decimals: 9,
-  logoUrl: 'https://vleap.ai/images/tokens/sui.svg',
+  logoUrl: 'https://assets.coingecko.com/coins/images/26375/standard/sui-ocean-square.png?1727791290',
 }
 
 function createSuiAdapter(chainName: string, chainPrefix: string, chainInfos: Record<WarpChainEnv, WarpChainInfo>): AdapterFactory {
