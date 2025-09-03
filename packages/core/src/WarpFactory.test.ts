@@ -175,6 +175,7 @@ describe('WarpFactory', () => {
         chain: 'multiversx',
         identifier: 'TOKEN-123',
         name: 'Test Token',
+        symbol: 'TEST',
         amount: 0n,
         decimals: 6, // USDC-like token with 6 decimals
         logoUrl: 'https://example.com/token.png',
@@ -191,6 +192,7 @@ describe('WarpFactory', () => {
         chain: 'multiversx',
         identifier: 'TOKEN-123',
         name: 'Test Token',
+        symbol: 'TEST',
         amount: 0n,
         decimals: 18,
         logoUrl: 'https://example.com/token.png',
@@ -207,6 +209,7 @@ describe('WarpFactory', () => {
         chain: 'multiversx',
         identifier: 'TOKEN-123',
         name: 'Test Token',
+        symbol: 'TEST',
         amount: 0n,
         decimals: 2,
         logoUrl: 'https://example.com/token.png',

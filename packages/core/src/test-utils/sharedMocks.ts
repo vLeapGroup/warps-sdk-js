@@ -138,6 +138,7 @@ export const createMockAdapter = () => ({
         chain: 'multiversx',
         identifier,
         name: `Mock ${identifier}`,
+        symbol: 'MOCK',
         amount: 0n,
         decimals: 18,
         logoUrl: 'https://example.com/token.png',
