@@ -152,16 +152,21 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
       const token = new Token({ identifier: tokenId, nonce: BigInt(nonce || 0) })
       const isFungible = tokenComputer.isFungible(token)
       if (!isFungible) return input // TODO: handle non-fungible tokens like meta-esdts
+      // Check known tokens first (fast lookup)
       const knownToken = findKnownTokenById(tokenId)
       let decimals = knownToken?.decimals
+      let tokenName = knownToken?.name || tokenId
+
+      // Fall back to network call for unknown tokens
       if (!decimals) {
-        const definitionRes = await fetch(`${chain.defaultApiUrl}/tokens/${tokenId}`) // TODO: use chainApi directly; currently causes circular reference for whatever reason
+        const definitionRes = await fetch(`${chain.defaultApiUrl}/tokens/${tokenId}`)
         const definition = await definitionRes.json()
         decimals = definition.decimals
+        tokenName = definition.name || tokenId
       }
+
       if (!decimals) throw new Error(`WarpMultiversxExecutor: Decimals not found for token ${tokenId}`)
       const amountBig = shiftBigintBy(amount, decimals)
-      const tokenName = knownToken?.name || tokenId
       return asset({ chain: chain.name, identifier: tokenId, name: tokenName, amount: amountBig, decimals })
     }
     return input
