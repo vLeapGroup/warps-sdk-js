@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.93
+
+### Patch Changes
+
+- 54bed31: add input helper function
+
 ## 3.0.0-alpha.92
 
 ### Minor Changes
