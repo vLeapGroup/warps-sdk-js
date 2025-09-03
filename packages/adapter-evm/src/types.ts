@@ -18,6 +18,29 @@ export interface TokenInfo {
   decimals?: number
 }
 
+export interface UniswapToken {
+  chainId: number
+  address: string
+  name: string
+  symbol: string
+  decimals: number
+  logoURI: string
+  extensions?: {
+    bridgeInfo?: Record<string, { tokenAddress: string }>
+  }
+}
+
+export interface UniswapTokenList {
+  name: string
+  timestamp: string
+  version: {
+    major: number
+    minor: number
+    patch: number
+  }
+  tokens: UniswapToken[]
+}
+
 export interface TokenListResponse {
   tokens: Array<{
     chainId: number

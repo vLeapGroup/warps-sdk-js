@@ -19,6 +19,7 @@ export const WarpCacheKey = {
   WarpExecutable: (env: WarpChainEnv, id: string, action: number) => `warp-exec:${env}:${id}:${action}`,
   RegistryInfo: (env: WarpChainEnv, id: string) => `registry-info:${env}:${id}`,
   Brand: (env: WarpChainEnv, hash: string) => `brand:${env}:${hash}`,
+  Asset: (env: WarpChainEnv, chain: string, identifier: string) => `asset:${env}:${chain}:${identifier}`,
 }
 
 export class WarpCache {

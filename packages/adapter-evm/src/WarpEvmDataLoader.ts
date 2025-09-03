@@ -1,6 +1,9 @@
 import {
   AdapterWarpDataLoader,
+  CacheTtl,
   getProviderUrl,
+  WarpCache,
+  WarpCacheKey,
   WarpChainAccount,
   WarpChainAction,
   WarpChainAsset,
@@ -9,20 +12,16 @@ import {
   WarpDataLoaderOptions,
 } from '@vleap/warps'
 import { ethers } from 'ethers'
-import { EvmLogoService } from './LogoService'
+import { UniswapService } from './providers'
 import { findKnownTokenById, getKnownTokensForChain } from './tokens'
-
-interface TokenMetadata {
-  name: string
-  symbol: string
-  decimals: number
-  logoUrl?: string
-}
 
 interface TokenBalance {
   tokenAddress: string
   balance: bigint
-  metadata: TokenMetadata
+  name: string
+  symbol: string
+  decimals: number
+  logoUrl: string
 }
 
 const ERC20_ABI = [
@@ -33,10 +32,10 @@ const ERC20_ABI = [
   'function totalSupply() view returns (uint256)',
 ]
 
-const ERC20_TRANSFER_EVENT = 'event Transfer(address indexed from, address indexed to, uint256 value)'
-
 export class WarpEvmDataLoader implements AdapterWarpDataLoader {
   private provider: ethers.JsonRpcProvider
+  private cache: WarpCache
+  private uniswapService: UniswapService
 
   constructor(
     private readonly config: WarpClientConfig,
@@ -45,6 +44,8 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
     const apiUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
     const network = new ethers.Network(this.chain.name, parseInt(this.chain.chainId))
     this.provider = new ethers.JsonRpcProvider(apiUrl, network)
+    this.cache = new WarpCache(config.cache?.type)
+    this.uniswapService = new UniswapService(this.cache, parseInt(this.chain.chainId))
   }
 
   async getAccount(address: string): Promise<WarpChainAccount> {
@@ -65,15 +66,13 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
 
     for (const tokenBalance of tokenBalances) {
       if (tokenBalance.balance > 0n) {
-        const logoUrl = tokenBalance.metadata.logoUrl || (await this.getLogoUrl(tokenBalance))
-
         assets.push({
           chain: this.chain.name,
           identifier: tokenBalance.tokenAddress,
-          name: tokenBalance.metadata.name,
+          name: tokenBalance.name,
           amount: tokenBalance.balance,
-          decimals: tokenBalance.metadata.decimals,
-          logoUrl: logoUrl || '',
+          decimals: tokenBalance.decimals,
+          logoUrl: tokenBalance.logoUrl || '',
         })
       }
     }
@@ -83,11 +82,32 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
 
   async getAsset(identifier: string): Promise<WarpChainAsset | null> {
     try {
+      if (identifier === this.chain.nativeToken.identifier) {
+        return this.chain.nativeToken
+      }
+
+      const cacheKey = WarpCacheKey.Asset(this.config.env, this.chain.name, identifier)
+      const cachedAsset = this.cache.get<WarpChainAsset>(cacheKey)
+      if (cachedAsset) {
+        return cachedAsset
+      }
+
+      const knownToken = findKnownTokenById(this.chain.name, this.config.env, identifier)
+
+      if (knownToken) {
+        return {
+          chain: this.chain.name,
+          identifier,
+          name: knownToken.name,
+          amount: 0n,
+          decimals: knownToken.decimals,
+          logoUrl: knownToken.logoUrl,
+        }
+      }
+
       const metadata = await this.getTokenMetadata(identifier)
 
-      if (!metadata) return null
-
-      return {
+      const asset: WarpChainAsset = {
         chain: this.chain.name,
         identifier,
         name: metadata.name,
@@ -95,6 +115,10 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
         decimals: metadata.decimals,
         logoUrl: metadata.logoUrl || '',
       }
+
+      this.cache.set(cacheKey, asset, CacheTtl.OneHour)
+
+      return asset
     } catch (error) {
       return null
     }
@@ -141,40 +165,24 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
   }
 
   private async getERC20TokenBalances(address: string): Promise<TokenBalance[]> {
-    const tokenBalances: TokenBalance[] = []
-    const env = this.config.env === 'devnet' ? 'testnet' : this.config.env
-    const knownTokens = getKnownTokensForChain(this.chain.name, env)
+    const env = this.config.env === 'mainnet' ? 'mainnet' : 'testnet'
+    const tokens = getKnownTokensForChain(this.chain.name, env)
+    const balanceReqs = tokens.map((token) => this.getTokenBalance(address, token.id).catch(() => 0n))
+    const balances = await Promise.all(balanceReqs)
 
-    for (const token of knownTokens) {
-      try {
-        const balance = await this.getTokenBalance(address, token.id)
-        if (balance > 0n) {
-          tokenBalances.push({
-            tokenAddress: token.id,
-            balance,
-            metadata: token,
-          })
-        }
-      } catch (error) {}
-    }
+    const tokenBalances = balances
+      .map((balance, index) => ({ balance, token: tokens[index] }))
+      .filter(({ balance }) => balance > 0n)
+      .map(({ balance, token }) => ({
+        tokenAddress: token.id,
+        balance,
+        name: token.name,
+        symbol: token.symbol,
+        decimals: token.decimals,
+        logoUrl: token.logoUrl || '',
+      }))
 
-    const additionalTokens = await this.detectTokensFromEvents(address)
-    for (const tokenAddress of additionalTokens) {
-      if (!findKnownTokenById(this.chain.name, tokenAddress, env)) {
-        try {
-          const metadata = await this.getTokenMetadata(tokenAddress)
-          const balance = await this.getTokenBalance(address, tokenAddress)
-          if (balance > 0n) {
-            tokenBalances.push({
-              tokenAddress,
-              balance,
-              metadata,
-            })
-          }
-        } catch (error) {}
-      }
-    }
-
+    console.log('EVM ' + this.chain.name + ' ' + env + ' tokenBalances', tokenBalances)
     return tokenBalances
   }
 
@@ -184,63 +192,26 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
     return balance
   }
 
-  private async getTokenMetadata(tokenAddress: string): Promise<TokenMetadata> {
-    const tokenInfo = await EvmLogoService.getTokenInfo(this.chain.name, tokenAddress)
-
-    if (tokenInfo.name && tokenInfo.symbol && tokenInfo.decimals !== undefined) {
-      return {
-        name: tokenInfo.name,
-        symbol: tokenInfo.symbol,
-        decimals: tokenInfo.decimals,
-        logoUrl: tokenInfo.logoURI,
-      }
+  private async getTokenMetadata(tokenAddress: string): Promise<{ name: string; symbol: string; decimals: number; logoUrl: string }> {
+    // First try to get metadata from Uniswap token list
+    const uniswapMetadata = await this.uniswapService.getTokenMetadata(tokenAddress)
+    if (uniswapMetadata) {
+      return uniswapMetadata
     }
 
+    // Fallback to contract data
     const contract = new ethers.Contract(tokenAddress, ERC20_ABI, this.provider)
     const [name, symbol, decimals] = await Promise.all([
-      contract.name().catch(() => tokenInfo.name || 'Unknown Token'),
-      contract.symbol().catch(() => tokenInfo.symbol || 'UNKNOWN'),
-      contract.decimals().catch(() => tokenInfo.decimals || 18),
+      contract.name().catch(() => 'Unknown Token'),
+      contract.symbol().catch(() => 'UNKNOWN'),
+      contract.decimals().catch(() => 18),
     ])
 
     return {
-      name: name || tokenInfo.name || 'Unknown Token',
-      symbol: symbol || tokenInfo.symbol || 'UNKNOWN',
-      decimals: decimals || tokenInfo.decimals || 18,
-      logoUrl: tokenInfo.logoURI,
+      name: name || 'Unknown Token',
+      symbol: symbol || 'UNKNOWN',
+      decimals: decimals || 18,
+      logoUrl: '',
     }
-  }
-
-  private async detectTokensFromEvents(address: string): Promise<string[]> {
-    try {
-      const currentBlock = await this.provider.getBlockNumber()
-      const fromBlock = Math.max(0, currentBlock - 10000)
-
-      const filter = {
-        fromBlock,
-        toBlock: currentBlock,
-        topics: [ethers.id('Transfer(address,address,uint256)'), null, ethers.zeroPadValue(address, 32)],
-      }
-
-      const logs = await this.provider.getLogs(filter)
-
-      const tokenAddresses = new Set<string>()
-      for (const log of logs) {
-        tokenAddresses.add(log.address)
-      }
-
-      return Array.from(tokenAddresses)
-    } catch (error) {
-      return []
-    }
-  }
-
-  private async getLogoUrl(tokenBalance: TokenBalance): Promise<string> {
-    return await EvmLogoService.getLogoUrl(
-      this.chain.name,
-      tokenBalance.tokenAddress,
-      tokenBalance.metadata.name,
-      tokenBalance.metadata.symbol
-    )
   }
 }
