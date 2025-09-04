@@ -1,220 +1,422 @@
 import { getPublicKey } from '@noble/ed25519'
 import { TransactionSigner } from './TransactionSigner'
 import {
-  FastsetAccountInfo,
-  FastsetAssetBalance,
-  FastsetAssetBalances,
-  FastsetFaucetResponse,
+  AccountInfoResponse,
+  Amount,
+  FastSetAddress,
   FastsetJsonRpcRequest,
   FastsetJsonRpcResponse,
-  FastsetSubmitCertificateRequest,
-  FastsetSubmitTransactionRequest,
-  FastsetSubmitTransactionResponse,
   FastsetTransaction,
+  Page,
+  PageRequest,
+  Timed,
+  TokenId,
+  TokenInfoResponse,
+  TransactionWithHash,
+  isValidFastSetAddress,
 } from './types'
 import { Wallet } from './Wallet'
 
-// Configure ed25519 library for Node.js environment
 // @ts-ignore
-BigInt.prototype.toJSON = function () {
-  return Number(this)
-}
+BigInt.prototype.toJSON = () => Number(this)
 
 export interface FastsetClientConfig {
-  validatorUrl: string
   proxyUrl: string
 }
 
-const FASTSET_VALIDATOR_URL = 'https://rpc.fastset.xyz'
-const FASTSET_PROXY_URL = 'http://136.243.61.168:44444'
+const FASTSET_PROXY_URL = 'https://rpc.fastset.xyz'
 
 export class FastsetClient {
   private config: FastsetClientConfig
 
   constructor(config?: FastsetClientConfig) {
     this.config = config || {
-      validatorUrl: FASTSET_VALIDATOR_URL,
       proxyUrl: FASTSET_PROXY_URL,
     }
   }
 
-  // Generic error handling wrapper for RPC calls
-  private async handleRpcCall<T>(
-    method: string,
-    params: unknown,
-    errorMessage: string,
-    useProxy = false,
-    allowNull = true
-  ): Promise<T | null> {
-    try {
-      const response = useProxy ? await this.requestProxy(method, params) : await this.requestValidator(method, params)
-      console.log(`RPC call to ${method} successful:`, response.result)
-      return response.result as T
-    } catch (error) {
-      console.error(`${errorMessage}:`, error)
-      if (!allowNull) throw error
-      return null
-    }
+  async submitTransaction(transaction: FastsetTransaction, signature: Uint8Array): Promise<string> {
+    const result = await this.handleRpcCall<string>(
+      'set_proxy_submitTransaction',
+      [transaction, Array.from(signature)],
+      'Failed to submit transaction'
+    )
+    if (!result) throw new Error('Failed to submit transaction: no result returned')
+    return result
   }
 
-  async getAccountInfo(address: string): Promise<FastsetAccountInfo | null> {
+  async requestFaucetDrip(recipient: FastSetAddress, amount: Amount, tokenId?: TokenId): Promise<void> {
+    if (!isValidFastSetAddress(recipient)) {
+      throw new Error('Invalid FastSet address format')
+    }
+
+    const recipientBytes = Wallet.decodeBech32Address(recipient)
+    const params = [Array.from(recipientBytes), amount]
+
+    if (tokenId) {
+      const tokenIdBytes = tokenId.startsWith('0x')
+        ? new Uint8Array(Buffer.from(tokenId.slice(2), 'hex'))
+        : new Uint8Array(Buffer.from(tokenId, 'hex'))
+      params.push(Array.from(tokenIdBytes))
+    }
+
+    await this.handleRpcCall<void>('set_proxy_faucetDrip', params, 'Failed to request faucet drip', true)
+  }
+
+  async getAccountInfo(
+    address: Uint8Array,
+    options?: { tokenBalancesFilter?: Uint8Array[]; certificateByNonce?: number }
+  ): Promise<AccountInfoResponse> {
+    const params: unknown[] = [Array.from(address)]
+
+    if (options?.tokenBalancesFilter) {
+      params.push(options.tokenBalancesFilter.map((token) => Array.from(token)))
+    } else {
+      params.push(null)
+    }
+
+    if (options?.certificateByNonce !== undefined) {
+      params.push(options.certificateByNonce)
+    } else {
+      params.push(null)
+    }
+
+    // Try the prefixed method first, then fallback to non-prefixed
+    let result = await this.handleRpcCall<AccountInfoResponse>('set_proxy_getAccountInfo', params, 'Failed to get account info', true)
+
+    // If prefixed method fails, try the non-prefixed method
+    if (!result) {
+      result = await this.handleRpcCall<AccountInfoResponse>('getAccountInfo', params, 'Failed to get account info', true)
+    }
+
+    if (!result) {
+      // Return default account info when both RPC methods fail
+      return {
+        sender: address,
+        balance: '0',
+        next_nonce: 0,
+        pending_confirmation: undefined,
+        requested_certificate: undefined,
+        requested_validated_transaction: undefined,
+        requested_received_transfers: [],
+        token_balance: [],
+        requested_claim_by_id: undefined,
+        requested_claims: [],
+      } as unknown as AccountInfoResponse
+    }
+    return result
+  }
+
+  async getTokensOwned(address: FastSetAddress): Promise<{ tokenId: TokenId; balance: Amount }[]> {
+    if (!isValidFastSetAddress(address)) {
+      throw new Error('Invalid FastSet address format')
+    }
+
     const addressBytes = Wallet.decodeBech32Address(address)
-    return this.handleRpcCall('set_getAccountInfo', [Array.from(addressBytes)], `Failed to get account info for address ${address}`)
+    const accountInfo = await this.getAccountInfo(addressBytes)
+
+    if (!accountInfo?.token_balance) {
+      return []
+    }
+
+    return accountInfo.token_balance.map(([tokenId, balance]) => ({
+      tokenId: ('0x' + Buffer.from(tokenId).toString('hex')) as TokenId,
+      balance: balance as Amount,
+    }))
+  }
+
+  async getTokenInfo(tokenIds: Uint8Array[]): Promise<TokenInfoResponse> {
+    const result = await this.handleRpcCall<TokenInfoResponse>(
+      'set_proxy_getTokenInfo',
+      [tokenIds.map((token) => Array.from(token))],
+      'Failed to get token info'
+    )
+    if (!result) {
+      throw new Error('Failed to get token info: no result returned')
+    }
+    return result
+  }
+
+  async getTransfers(page: PageRequest): Promise<Page<Timed<any>>> {
+    const params: unknown[] = [
+      {
+        limit: page.limit,
+        token: page.token ? Array.from(page.token) : null,
+      },
+    ]
+
+    const result = await this.handleRpcCall<Page<Timed<any>>>('set_proxy_getTransfers', params, 'Failed to get transfers')
+    if (!result) {
+      throw new Error('Failed to get transfers: no result returned')
+    }
+    return result
+  }
+
+  async getClaims(confirmed: boolean, page: PageRequest): Promise<Page<Timed<any>>> {
+    const params: unknown[] = [
+      confirmed,
+      {
+        limit: page.limit,
+        token: page.token ? Array.from(page.token) : null,
+      },
+    ]
+
+    const result = await this.handleRpcCall<Page<Timed<any>>>('set_proxy_getClaims', params, 'Failed to get claims')
+    if (!result) {
+      throw new Error('Failed to get claims: no result returned')
+    }
+    return result
+  }
+
+  async getClaimsByAddress(address: Uint8Array, page: { limit?: number; offset: number }): Promise<TransactionWithHash[]> {
+    const params: unknown[] = [
+      Array.from(address),
+      {
+        limit: page.limit,
+        offset: page.offset,
+      },
+    ]
+
+    const result = await this.handleRpcCall<TransactionWithHash[]>(
+      'set_proxy_getClaimsByAddress',
+      params,
+      'Failed to get claims by address'
+    )
+    if (!result) {
+      throw new Error('Failed to get claims by address: no result returned')
+    }
+    return result
   }
 
   async getNextNonce(senderAddress: string): Promise<number> {
-    const accountInfo = await this.getAccountInfo(senderAddress)
-    return accountInfo?.next_nonce ?? 0
-  }
+    const addressBytes = Wallet.decodeBech32Address(senderAddress)
 
-  async getAssetBalance(accountId: string, assetId: string): Promise<FastsetAssetBalance | null> {
-    return this.handleRpcCall(
-      'vsl_getAssetBalance',
-      [accountId, assetId],
-      `Failed to get asset balance for account ${accountId}, asset ${assetId}`
-    )
-  }
-
-  async getAssetBalances(accountId: string): Promise<FastsetAssetBalances | null> {
-    return this.handleRpcCall('vsl_getAssetBalances', [accountId], `Failed to get asset balances for account ${accountId}`)
-  }
-
-  async fundFromFaucet(recipientAddress: string, amount: string): Promise<FastsetFaucetResponse> {
-    const recipientBytes = Wallet.decodeBech32Address(recipientAddress)
-    return this.handleRpcCall(
-      'faucetDrip',
-      [Array.from(recipientBytes), amount],
-      `Failed to fund from faucet for address ${recipientAddress}`,
-      true,
-      false
-    ) as Promise<FastsetFaucetResponse>
-  }
-
-  async submitTransaction(request: FastsetSubmitTransactionRequest): Promise<FastsetSubmitTransactionResponse> {
-    const response = await this.handleRpcCall(
-      'set_submitTransaction',
-      [request.transaction, Array.from(request.signature)],
-      'Failed to submit transaction',
-      false,
-      false
-    )
-
-    const result = response as {
-      transaction_hash: number[]
-      validator: number[]
-      signature: number[]
+    try {
+      const accountInfo = await this.getAccountInfo(addressBytes)
+      return accountInfo?.next_nonce ?? 0
+    } catch (error) {
+      return 0
     }
+  }
+
+  async createTransferTransaction(
+    sender: FastSetAddress,
+    recipient: FastSetAddress,
+    amount: Amount,
+    userData?: Uint8Array
+  ): Promise<FastsetTransaction> {
+    if (!isValidFastSetAddress(sender)) {
+      throw new Error('Invalid sender FastSet address format')
+    }
+    if (!isValidFastSetAddress(recipient)) {
+      throw new Error('Invalid recipient FastSet address format')
+    }
+
+    const senderBytes = Wallet.decodeBech32Address(sender)
+    const nonce = await this.getNextNonce(sender)
+    const recipientBytes = Wallet.decodeBech32Address(recipient)
+
     return {
-      transaction_hash: new Uint8Array(result.transaction_hash),
-      validator: new Uint8Array(result.validator),
-      signature: new Uint8Array(result.signature),
-    }
-  }
-
-  async submitCertificate(request: FastsetSubmitCertificateRequest): Promise<void> {
-    await this.handleRpcCall(
-      'set_submitTransactionCertificate',
-      [
-        request.transaction,
-        Array.from(request.signature),
-        request.validator_signatures.map(([validator, signature]) => [Array.from(validator), Array.from(signature)]),
-      ],
-      'Failed to submit certificate',
-      false,
-      false
-    )
-  }
-
-  async executeTransfer(senderPrivateKey: Uint8Array, recipient: string, amount: string, userData?: Uint8Array): Promise<Uint8Array> {
-    try {
-      console.log(`Executing transfer from sender to ${recipient} for amount ${amount}`)
-
-      const senderPublicKey = getPublicKey(senderPrivateKey)
-      const senderAddress = Wallet.encodeBech32Address(senderPublicKey)
-      console.log(`Sender address: ${senderAddress}`)
-
-      const nonce = await this.getNextNonce(senderAddress)
-      console.log(`Using nonce: ${nonce}`)
-
-      const recipientBytes = Wallet.decodeBech32Address(recipient)
-      console.log(`Recipient decoded successfully`)
-
-      const transaction: FastsetTransaction = {
-        sender: senderPublicKey,
-        nonce,
-        timestamp_nanos: BigInt(Date.now()) * 1_000_000n,
-        claim: {
-          Transfer: {
-            recipient: { FastSet: recipientBytes },
-            amount,
-            user_data: userData ?? null,
-          },
+      sender: senderBytes,
+      recipient: { FastSet: recipientBytes },
+      nonce,
+      timestamp_nanos: BigInt(Date.now()) * 1_000_000n,
+      claim: {
+        Transfer: {
+          recipient: { FastSet: recipientBytes },
+          amount,
+          user_data: userData ?? null,
         },
-      }
-
-      console.log('Signing transaction...')
-      const signature = await this.signTransaction(transaction, senderPrivateKey)
-
-      console.log('Submitting transaction...')
-      const submitResponse = await this.submitTransaction({
-        transaction,
-        signature,
-      })
-
-      console.log('Submitting certificate...')
-      await this.submitCertificate({
-        transaction,
-        signature,
-        validator_signatures: [[submitResponse.validator, submitResponse.signature]],
-      })
-
-      console.log(`Transfer executed successfully. Transaction hash: ${submitResponse.transaction_hash}`)
-      return submitResponse.transaction_hash
-    } catch (error) {
-      console.error(`Failed to execute transfer to ${recipient}:`, error)
-      throw error
+      },
     }
   }
 
-  async submitClaim(senderPrivateKey: Uint8Array, claim: any): Promise<Uint8Array> {
-    try {
-      console.log('Submitting claim...')
+  async createTokenTransferTransaction(
+    sender: FastSetAddress,
+    tokenId: TokenId,
+    recipient: FastSetAddress,
+    amount: Amount,
+    userData?: Uint8Array
+  ): Promise<FastsetTransaction> {
+    if (!isValidFastSetAddress(sender)) {
+      throw new Error('Invalid sender FastSet address format')
+    }
+    if (!isValidFastSetAddress(recipient)) {
+      throw new Error('Invalid recipient FastSet address format')
+    }
 
-      const senderPublicKey = await getPublicKey(senderPrivateKey)
-      const senderAddress = Wallet.encodeBech32Address(senderPublicKey)
-      console.log(`Claim sender address: ${senderAddress}`)
+    const senderBytes = Wallet.decodeBech32Address(sender)
+    const nonce = await this.getNextNonce(sender)
+    const recipientBytes = Wallet.decodeBech32Address(recipient)
+    const tokenIdBytes = tokenId.startsWith('0x')
+      ? new Uint8Array(Buffer.from(tokenId.slice(2), 'hex'))
+      : new Uint8Array(Buffer.from(tokenId, 'hex'))
 
-      const nonce = await this.getNextNonce(senderAddress)
-      console.log(`Using nonce: ${nonce}`)
+    return {
+      sender: senderBytes,
+      recipient: { FastSet: recipientBytes },
+      nonce,
+      timestamp_nanos: BigInt(Date.now()) * 1_000_000n,
+      claim: {
+        TokenTransfer: {
+          token_id: tokenIdBytes,
+          recipient: { FastSet: recipientBytes },
+          amount,
+          user_data: userData ?? null,
+        },
+      },
+    }
+  }
 
-      const transaction: FastsetTransaction = {
-        sender: senderPublicKey,
-        nonce,
-        timestamp_nanos: BigInt(Date.now()) * 1_000_000n,
-        claim,
+  async createTokenCreationTransaction(
+    sender: FastSetAddress,
+    tokenName: string,
+    decimals: number,
+    initialAmount: Amount,
+    mints: FastSetAddress[],
+    userData?: Uint8Array
+  ): Promise<FastsetTransaction> {
+    if (!isValidFastSetAddress(sender)) {
+      throw new Error('Invalid sender FastSet address format')
+    }
+
+    const senderBytes = Wallet.decodeBech32Address(sender)
+    const nonce = await this.getNextNonce(sender)
+    const mintAddresses = mints.map((addr) => {
+      if (!isValidFastSetAddress(addr)) {
+        throw new Error(`Invalid mint address: ${addr}`)
       }
+      return Wallet.decodeBech32Address(addr)
+    })
 
-      console.log('Signing claim transaction...')
-      const signature = await this.signTransaction(transaction, senderPrivateKey)
+    return {
+      sender: senderBytes,
+      recipient: { FastSet: senderBytes },
+      nonce,
+      timestamp_nanos: BigInt(Date.now()) * 1_000_000n,
+      claim: {
+        TokenCreation: {
+          token_name: tokenName,
+          decimals,
+          initial_amount: initialAmount,
+          mints: mintAddresses,
+          user_data: userData ?? null,
+        },
+      },
+    }
+  }
 
-      console.log('Submitting claim transaction...')
-      const submitResponse = await this.submitTransaction({
-        transaction,
-        signature,
-      })
+  async createTokenManagementTransaction(
+    sender: FastSetAddress,
+    tokenId: TokenId,
+    updateId: number,
+    newAdmin?: FastSetAddress,
+    mints?: Array<{ change: 'Add' | 'Remove'; address: FastSetAddress }>,
+    userData?: Uint8Array
+  ): Promise<FastsetTransaction> {
+    if (!isValidFastSetAddress(sender)) {
+      throw new Error('Invalid sender FastSet address format')
+    }
 
-      console.log('Submitting claim certificate...')
-      await this.submitCertificate({
-        transaction,
-        signature,
-        validator_signatures: [[submitResponse.validator, submitResponse.signature]],
-      })
+    const senderBytes = Wallet.decodeBech32Address(sender)
+    const nonce = await this.getNextNonce(sender)
+    const tokenIdBytes = tokenId.startsWith('0x')
+      ? new Uint8Array(Buffer.from(tokenId.slice(2), 'hex'))
+      : new Uint8Array(Buffer.from(tokenId, 'hex'))
 
-      console.log(`Claim submitted successfully. Transaction hash: ${submitResponse.transaction_hash}`)
-      return submitResponse.transaction_hash
-    } catch (error) {
-      console.error('Failed to submit claim:', error)
-      throw error
+    let newAdminBytes: Uint8Array | null = null
+    if (newAdmin) {
+      if (!isValidFastSetAddress(newAdmin)) {
+        throw new Error('Invalid new admin FastSet address format')
+      }
+      newAdminBytes = Wallet.decodeBech32Address(newAdmin)
+    }
+
+    const mintChanges = (mints || []).map((mint) => {
+      if (!isValidFastSetAddress(mint.address)) {
+        throw new Error(`Invalid mint address: ${mint.address}`)
+      }
+      const addressBytes = Wallet.decodeBech32Address(mint.address)
+      return [mint.change === 'Add' ? { Add: addressBytes } : { Remove: addressBytes }, addressBytes]
+    })
+
+    return {
+      sender: senderBytes,
+      recipient: { FastSet: senderBytes },
+      nonce,
+      timestamp_nanos: BigInt(Date.now()) * 1_000_000n,
+      claim: {
+        TokenManagement: {
+          token_id: tokenIdBytes,
+          update_id: updateId,
+          new_admin: newAdminBytes,
+          mints: mintChanges,
+          user_data: userData ?? null,
+        },
+      },
+    }
+  }
+
+  async createMintTransaction(sender: FastSetAddress, tokenId: TokenId, amount: Amount): Promise<FastsetTransaction> {
+    if (!isValidFastSetAddress(sender)) {
+      throw new Error('Invalid sender FastSet address format')
+    }
+
+    const senderBytes = Wallet.decodeBech32Address(sender)
+    const nonce = await this.getNextNonce(sender)
+    const tokenIdBytes = tokenId.startsWith('0x')
+      ? new Uint8Array(Buffer.from(tokenId.slice(2), 'hex'))
+      : new Uint8Array(Buffer.from(tokenId, 'hex'))
+
+    return {
+      sender: senderBytes,
+      recipient: { FastSet: senderBytes },
+      nonce,
+      timestamp_nanos: BigInt(Date.now()) * 1_000_000n,
+      claim: {
+        Mint: {
+          token_id: tokenIdBytes,
+          amount,
+        },
+      },
+    }
+  }
+
+  async createExternalClaimTransaction(
+    sender: FastSetAddress,
+    verifierCommittee: FastSetAddress[],
+    verifierQuorum: number,
+    claimData: Uint8Array,
+    signatures: Array<{ signer: Uint8Array; signature: Uint8Array }>
+  ): Promise<FastsetTransaction> {
+    if (!isValidFastSetAddress(sender)) {
+      throw new Error('Invalid sender FastSet address format')
+    }
+
+    const senderBytes = Wallet.decodeBech32Address(sender)
+    const nonce = await this.getNextNonce(sender)
+    const verifierCommitteeBytes = verifierCommittee.map((addr) => {
+      if (!isValidFastSetAddress(addr)) {
+        throw new Error(`Invalid verifier address: ${addr}`)
+      }
+      return Wallet.decodeBech32Address(addr)
+    })
+
+    return {
+      sender: senderBytes,
+      recipient: { FastSet: senderBytes },
+      nonce,
+      timestamp_nanos: BigInt(Date.now()) * 1_000_000n,
+      claim: {
+        ExternalClaim: {
+          claim: {
+            verifier_committee: verifierCommitteeBytes,
+            verifier_quorum: verifierQuorum,
+            claim_data: claimData,
+          },
+          signatures: signatures.map((sig) => [sig.signer, sig.signature]),
+        },
+      },
     }
   }
 
@@ -222,56 +424,75 @@ export class FastsetClient {
     return await TransactionSigner.signTransaction(transaction, privateKey)
   }
 
-  async getTransactionStatus(txHash: string): Promise<any> {
-    return this.handleRpcCall('set_getTransactionStatus', [txHash], `Failed to get transaction status for hash ${txHash}`)
+  async submitSignedTransaction(transaction: FastsetTransaction, signature: Uint8Array): Promise<string> {
+    return this.submitTransaction(transaction, signature)
   }
 
-  async getTransactionInfo(txHash: string): Promise<any> {
-    return this.handleRpcCall('set_getTransactionInfo', [txHash], `Failed to get transaction info for hash ${txHash}`)
+  async createAndSignTransfer(
+    senderPrivateKey: Uint8Array,
+    recipient: FastSetAddress,
+    amount: Amount,
+    userData?: Uint8Array
+  ): Promise<{ transaction: FastsetTransaction; signature: Uint8Array }> {
+    const transaction = await this.createTransferTransaction(
+      Wallet.encodeBech32Address(await getPublicKey(senderPrivateKey)),
+      recipient,
+      amount,
+      userData
+    )
+    const signature = await this.signTransaction(transaction, senderPrivateKey)
+    return { transaction, signature }
   }
 
-  async getNetworkInfo(): Promise<any> {
-    return this.handleRpcCall('set_getNetworkInfo', [], 'Failed to get network info')
+  async createAndSignTokenTransfer(
+    senderPrivateKey: Uint8Array,
+    tokenId: TokenId,
+    recipient: FastSetAddress,
+    amount: Amount,
+    userData?: Uint8Array
+  ): Promise<{ transaction: FastsetTransaction; signature: Uint8Array }> {
+    const senderAddress = Wallet.encodeBech32Address(await getPublicKey(senderPrivateKey))
+    const transaction = await this.createTokenTransferTransaction(senderAddress, tokenId, recipient, amount, userData)
+    const signature = await this.signTransaction(transaction, senderPrivateKey)
+    return { transaction, signature }
   }
 
-  private async requestValidator(method: string, params: unknown): Promise<FastsetJsonRpcResponse> {
-    return this.request(this.config.validatorUrl, method, params)
+  async createAndSignTokenCreation(
+    senderPrivateKey: Uint8Array,
+    tokenName: string,
+    decimals: number,
+    initialAmount: Amount,
+    mints: FastSetAddress[],
+    userData?: Uint8Array
+  ): Promise<{ transaction: FastsetTransaction; signature: Uint8Array }> {
+    const senderAddress = Wallet.encodeBech32Address(await getPublicKey(senderPrivateKey))
+    const transaction = await this.createTokenCreationTransaction(senderAddress, tokenName, decimals, initialAmount, mints, userData)
+    const signature = await this.signTransaction(transaction, senderPrivateKey)
+    return { transaction, signature }
   }
 
-  private async requestProxy(method: string, params: unknown): Promise<FastsetJsonRpcResponse> {
+  protected async handleRpcCall<T>(method: string, params: unknown[], errorMessage: string, allowNull = true): Promise<T | null> {
+    try {
+      const response = await this.requestProxy(method, params)
+      return response.result as T
+    } catch (error) {
+      if (!allowNull) throw error
+      return null
+    }
+  }
+
+  private async requestProxy(method: string, params: unknown[]): Promise<FastsetJsonRpcResponse> {
     return this.request(this.config.proxyUrl, method, params)
   }
 
-  private async request(url: string, method: string, params: unknown): Promise<FastsetJsonRpcResponse> {
+  private async request(url: string, method: string, params: unknown[]): Promise<FastsetJsonRpcResponse> {
     try {
-      // Validate parameters before making the request
-      if (params !== null && params !== undefined) {
-        if (Array.isArray(params)) {
-          // For array parameters, ensure all elements are valid
-          for (let i = 0; i < params.length; i++) {
-            if (params[i] === undefined) {
-              throw new Error(`Parameter at index ${i} is undefined`)
-            }
-          }
-        } else if (typeof params === 'object') {
-          // For object parameters, ensure no undefined values
-          const paramObj = params as Record<string, unknown>
-          for (const [key, value] of Object.entries(paramObj)) {
-            if (value === undefined) {
-              throw new Error(`Parameter '${key}' is undefined`)
-            }
-          }
-        }
-      }
-
       const request: FastsetJsonRpcRequest = {
         jsonrpc: '2.0',
         id: 1,
         method,
-        params: params as Record<string, unknown>,
+        params: params,
       }
-
-      console.log(`Making RPC request to ${method} with params:`, params)
 
       const response = await fetch(url, {
         method: 'POST',
@@ -289,10 +510,8 @@ export class FastsetClient {
         throw new Error(`RPC error: ${jsonResponse.error.message} (code: ${jsonResponse.error.code})`)
       }
 
-      console.log(`RPC request to ${method} successful:`, jsonResponse.result)
       return jsonResponse
     } catch (error) {
-      console.error(`Fastset RPC request failed for method ${method}:`, error)
       throw error
     }
   }

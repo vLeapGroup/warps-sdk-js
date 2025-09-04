@@ -1,4 +1,3 @@
-export * from './Claim'
 export * from './FastsetClient'
 export * from './Transaction'
 export * from './types'

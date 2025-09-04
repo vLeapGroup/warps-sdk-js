@@ -1,18 +1,26 @@
-import { Claim } from './Claim'
 import { FastsetTransaction } from './types'
 
 export interface TransactionOptions {
   timestamp?: bigint
+  recipient?: { FastSet: Uint8Array } | { External: Uint8Array }
 }
 
 export class Transaction {
   private sender: Uint8Array
+  private recipient: { FastSet: Uint8Array } | { External: Uint8Array }
   private nonce: number
-  private claim: Claim
+  private claim: any
   private timestamp: bigint
 
-  constructor(sender: Uint8Array, nonce: number, claim: Claim, options: TransactionOptions = {}) {
+  constructor(
+    sender: Uint8Array,
+    recipient: { FastSet: Uint8Array } | { External: Uint8Array },
+    nonce: number,
+    claim: any,
+    options: TransactionOptions = {}
+  ) {
     this.sender = sender
+    this.recipient = recipient
     this.nonce = nonce
     this.claim = claim
     this.timestamp = options.timestamp ?? BigInt(Date.now()) * 1_000_000n
@@ -21,9 +29,10 @@ export class Transaction {
   toTransaction(): FastsetTransaction {
     return {
       sender: this.sender,
+      recipient: this.recipient,
       nonce: this.nonce,
       timestamp_nanos: this.timestamp,
-      claim: this.claim.toTransactionData() as any,
+      claim: this.claim,
     }
   }
 
@@ -31,11 +40,15 @@ export class Transaction {
     return this.sender
   }
 
+  getRecipient(): { FastSet: Uint8Array } | { External: Uint8Array } {
+    return this.recipient
+  }
+
   getNonce(): number {
     return this.nonce
   }
 
-  getClaim(): Claim {
+  getClaim(): any {
     return this.claim
   }
 
@@ -44,7 +57,8 @@ export class Transaction {
   }
 
   static fromTransaction(transaction: FastsetTransaction): Transaction {
-    const claim = Claim.fromTransaction(transaction)
-    return new Transaction(transaction.sender, transaction.nonce, claim, { timestamp: transaction.timestamp_nanos })
+    return new Transaction(transaction.sender, transaction.recipient, transaction.nonce, transaction.claim, {
+      timestamp: transaction.timestamp_nanos,
+    })
   }
 }

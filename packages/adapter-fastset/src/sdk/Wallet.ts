@@ -1,5 +1,4 @@
 import * as bech32 from 'bech32'
-import { TransferClaim } from './Claim'
 import { ed } from './ed25519-setup'
 import { Transaction } from './Transaction'
 import { TransactionSigner } from './TransactionSigner'
@@ -39,18 +38,24 @@ export class Wallet {
     }
   }
 
-  createTransferClaim(recipientAddress: string, amount: bigint, assetType: 'native' | 'set' | 'usdc' | string): TransferClaim {
+  createTransferClaim(recipientAddress: string, amount: bigint, assetType: 'native' | 'set' | 'usdc' | string): any {
     const recipientBytes = Wallet.decodeBech32Address(recipientAddress)
 
     const assetTypeBytes = new TextEncoder().encode(assetType)
     const userData = new Uint8Array(32)
     userData.set(assetTypeBytes.slice(0, 32))
 
-    return new TransferClaim(recipientBytes, amount.toString(), userData)
+    return {
+      Transfer: {
+        recipient: { FastSet: recipientBytes },
+        amount: amount.toString(),
+        user_data: userData,
+      },
+    }
   }
 
-  createTransaction(nonce: number, claim: TransferClaim): Transaction {
-    return new Transaction(this.publicKey, nonce, claim)
+  createTransaction(nonce: number, recipient: { FastSet: Uint8Array } | { External: Uint8Array }, claim: any): Transaction {
+    return new Transaction(this.publicKey, recipient, nonce, claim)
   }
 
   async signTransaction(transaction: Transaction): Promise<Uint8Array> {

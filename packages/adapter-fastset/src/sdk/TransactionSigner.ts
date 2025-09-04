@@ -13,4 +13,14 @@ export class TransactionSigner {
 
     return sign(dataToSign, privateKey)
   }
+
+  // Helper method to create transaction hash (keccak256)
+  static async createTransactionHash(transaction: any): Promise<Uint8Array> {
+    const msg = BcsTransaction.serialize(transaction)
+    const msgBytes = msg.toBytes()
+
+    // Import keccak256 from a crypto library
+    const { keccak256 } = await import('@ethersproject/keccak256')
+    return new Uint8Array(Buffer.from(keccak256(msgBytes).slice(2), 'hex'))
+  }
 }

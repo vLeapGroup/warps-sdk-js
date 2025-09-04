@@ -19,10 +19,8 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
     private readonly chain: WarpChainInfo
   ) {
     this.serializer = new WarpFastsetSerializer()
-    const validatorUrl = getProviderUrl(this.config, chain.name, this.config.env, this.chain.defaultApiUrl)
     const proxyUrl = getProviderUrl(this.config, chain.name, this.config.env, this.chain.defaultApiUrl)
     this.fastsetClient = new FastsetClient({
-      validatorUrl,
       proxyUrl,
     })
   }
@@ -158,12 +156,13 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
 
     const transaction = await this.createTransferTransaction(executable)
     const privateKeyBytes = this.fromBase64(privateKey)
-    const transactionHash = await this.fastsetClient.executeTransfer(
+    const { transaction: signedTx, signature } = await this.fastsetClient.createAndSignTransfer(
       privateKeyBytes,
       transaction.recipient,
       transaction.amount,
       transaction.userData
     )
+    const transactionHash = await this.fastsetClient.submitSignedTransaction(signedTx, signature)
 
     return {
       success: true,
