@@ -10,12 +10,14 @@ import {
   WarpChainAssetValue,
   WarpChainInfo,
   WarpClientConfig,
+  WarpCollectAction,
   WarpContractAction,
   WarpExecutable,
   WarpTransferAction,
 } from './types'
 import { asset } from './utils.codec'
 import { CacheTtl, WarpCache, WarpCacheKey } from './WarpCache'
+import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
 import { WarpSerializer } from './WarpSerializer'
 import { WarpTypeRegistryImpl } from './WarpTypeRegistry'
@@ -47,35 +49,38 @@ export class WarpFactory {
   }
 
   async createExecutable(warp: Warp, actionIndex: number, inputs: string[]): Promise<WarpExecutable> {
-    const action = getWarpActionByIndex(warp, actionIndex) as WarpTransferAction | WarpContractAction
+    const action = getWarpActionByIndex(warp, actionIndex) as WarpTransferAction | WarpContractAction | WarpCollectAction
     if (!action) throw new Error('WarpFactory: Action not found')
     const chain = await this.getChainInfoForAction(action, inputs)
+    const adapter = findWarpAdapterForChain(chain.name, this.adapters)
+    const preparedWarp = await new WarpInterpolator(this.config, adapter).apply(this.config, warp)
+    const preparedAction = getWarpActionByIndex(preparedWarp, actionIndex) as WarpTransferAction | WarpContractAction | WarpCollectAction
 
-    const resolvedInputs = await this.getResolvedInputs(chain.name, action, inputs)
+    const resolvedInputs = await this.getResolvedInputs(chain.name, preparedAction, inputs)
     const modifiedInputs = this.getModifiedInputs(resolvedInputs)
 
     const destinationInput = modifiedInputs.find((i) => i.input.position === 'receiver')?.value
-    const destinationInAction = 'address' in action ? action.address : null
+    const destinationInAction = this.getDestinationFromAction(preparedAction)
     const destination = destinationInput ? (this.serializer.stringToNative(destinationInput)[1] as string) : destinationInAction
     if (!destination) throw new Error('WarpActionExecutor: Destination/Receiver not provided')
 
-    const args = this.getPreparedArgs(action, modifiedInputs)
+    const args = this.getPreparedArgs(preparedAction, modifiedInputs)
 
     const valueInput = modifiedInputs.find((i) => i.input.position === 'value')?.value || null
-    const valueInAction = 'value' in action ? action.value : null
+    const valueInAction = 'value' in preparedAction ? preparedAction.value : null
     let value = BigInt(valueInput?.split(':')[1] || valueInAction || 0)
 
     const transferInputs = modifiedInputs.filter((i) => i.input.position === 'transfer' && i.value).map((i) => i.value) as string[]
-    const transfersInAction = 'transfers' in action ? action.transfers : []
+    const transfersInAction = 'transfers' in preparedAction ? preparedAction.transfers : []
     const transfersMerged = [...(transfersInAction || []), ...(transferInputs || [])]
     const transfers = transfersMerged.map((t) => this.serializer.stringToNative(t)[1]) as WarpChainAssetValue[]
 
     const dataInput = modifiedInputs.find((i) => i.input.position === 'data')?.value
-    const dataInAction = 'data' in action ? action.data || '' : null
+    const dataInAction = 'data' in preparedAction ? preparedAction.data || '' : null
     const data = dataInput || dataInAction || null
 
     const executable: WarpExecutable = {
-      warp,
+      warp: preparedWarp,
       chain,
       action: actionIndex,
       destination,
@@ -87,7 +92,7 @@ export class WarpFactory {
     }
 
     this.cache.set(
-      WarpCacheKey.WarpExecutable(this.config.env, warp.meta?.hash || '', actionIndex),
+      WarpCacheKey.WarpExecutable(this.config.env, preparedWarp.meta?.hash || '', actionIndex),
       executable.resolvedInputs,
       CacheTtl.OneWeek
     )
@@ -188,6 +193,12 @@ export class WarpFactory {
       WarpLogger.warn('WarpFactory: Preprocess input failed', e)
       throw e
     }
+  }
+
+  private getDestinationFromAction(action: WarpAction): string | null {
+    if ('address' in action && action.address) return action.address
+    if ('destination' in action && action.destination?.url) return action.destination.url
+    return null
   }
 
   private getPreparedArgs(action: WarpAction, resolvedInputs: ResolvedInput[]): string[] {

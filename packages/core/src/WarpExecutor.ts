@@ -9,8 +9,8 @@ import {
 import { createAuthHeaders, createAuthMessage } from './helpers/signing'
 import {
   Adapter,
+  ResolvedInput,
   Warp,
-  WarpActionIndex,
   WarpAdapterGenericRemoteTransaction,
   WarpAdapterGenericTransaction,
   WarpChain,
@@ -18,10 +18,10 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpCollectAction,
+  WarpExecutable,
   WarpExecution,
 } from './types'
 import { WarpFactory } from './WarpFactory'
-import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
 import { WarpSerializer } from './WarpSerializer'
 
@@ -47,14 +47,14 @@ export class WarpExecutor {
 
   async execute(warp: Warp, inputs: string[]): Promise<{ tx: WarpAdapterGenericTransaction | null; chain: WarpChainInfo | null }> {
     const { action, actionIndex } = findWarpExecutableAction(warp)
+    const executable = await this.factory.createExecutable(warp, actionIndex, inputs)
 
     if (action.type === 'collect') {
-      const result = await this.executeCollect(warp, actionIndex, inputs)
+      const result = await this.executeCollect(executable)
       result.success ? this.handlers?.onExecuted?.(result) : this.handlers?.onError?.({ message: JSON.stringify(result.values) })
       return { tx: null, chain: null }
     }
 
-    const executable = await this.factory.createExecutable(warp, actionIndex, inputs)
     const adapter = findWarpAdapterForChain(executable.chain.name, this.adapters)
 
     if (action.type === 'query') {
@@ -73,17 +73,11 @@ export class WarpExecutor {
     this.handlers?.onExecuted?.(result)
   }
 
-  private async executeCollect(warp: Warp, action: WarpActionIndex, inputs: string[], extra?: Record<string, any>): Promise<WarpExecution> {
-    const collectAction = getWarpActionByIndex(warp, action) as WarpCollectAction | null
-    if (!collectAction) throw new Error('WarpActionExecutor: Action not found')
+  private async executeCollect(executable: WarpExecutable, extra?: Record<string, any>): Promise<WarpExecution> {
+    const wallet = this.config.user?.wallets?.[executable.chain.name] || null
+    const collectAction = getWarpActionByIndex(executable.warp, executable.action) as WarpCollectAction
 
-    const chainInfo = await this.factory.getChainInfoForAction(collectAction)
-    const adapter = findWarpAdapterForChain(chainInfo.name, this.adapters)
-    const preparedWarp = await new WarpInterpolator(this.config, adapter).apply(this.config, warp)
-    const resolvedInputs = await this.factory.getResolvedInputs(chainInfo.name, collectAction, inputs)
-    const modifiedInputs = this.factory.getModifiedInputs(resolvedInputs)
-
-    const toInputPayloadValue = (resolvedInput: any) => {
+    const toInputPayloadValue = (resolvedInput: ResolvedInput) => {
       if (!resolvedInput.value) return null
       const value = this.serializer.stringToNative(resolvedInput.value)[1]
       if (resolvedInput.input.type === 'biguint') {
@@ -101,11 +95,10 @@ export class WarpExecutor {
     headers.set('Accept', 'application/json')
 
     if (this.handlers?.onSignRequest) {
-      const walletAddress = this.config.user?.wallets?.[chainInfo.name]
-      if (!walletAddress) throw new Error(`No wallet configured for chain ${chainInfo.name}`)
-      const { message, nonce, expiresAt } = await createAuthMessage(walletAddress, `${chainInfo.name}-adapter`)
-      const signature = await this.handlers.onSignRequest({ message, chain: chainInfo })
-      const authHeaders = createAuthHeaders(walletAddress, signature, nonce, expiresAt)
+      if (!wallet) throw new Error(`No wallet configured for chain ${executable.chain.name}`)
+      const { message, nonce, expiresAt } = await createAuthMessage(wallet, `${executable.chain.name}-adapter`)
+      const signature = await this.handlers.onSignRequest({ message, chain: executable.chain })
+      const authHeaders = createAuthHeaders(wallet, signature, nonce, expiresAt)
       Object.entries(authHeaders).forEach(([key, value]) => headers.set(key, value))
     }
 
@@ -113,43 +106,44 @@ export class WarpExecutor {
       headers.set(key, value as string)
     })
 
-    const payload = Object.fromEntries(modifiedInputs.map((i: any) => [i.input.as || i.input.name, toInputPayloadValue(i)]))
+    const payload = Object.fromEntries(executable.resolvedInputs.map((i: any) => [i.input.as || i.input.name, toInputPayloadValue(i)]))
     const httpMethod = collectAction.destination.method || 'GET'
     const body = httpMethod === 'GET' ? undefined : JSON.stringify({ ...payload, ...extra })
 
-    WarpLogger.info('Executing collect', {
-      url: collectAction.destination.url,
-      method: httpMethod,
-      headers,
-      body,
-    })
+    WarpLogger.info('Executing collect', { url: collectAction.destination.url, method: httpMethod, headers, body })
 
     try {
       const response = await fetch(collectAction.destination.url, { method: httpMethod, headers, body })
       const content = await response.json()
-      const { values, results } = await extractCollectResults(preparedWarp, content, action, modifiedInputs, this.config.transform?.runner)
-      const next = getNextInfo(this.config, this.adapters, preparedWarp, action, results)
+      const { values, results } = await extractCollectResults(
+        executable.warp,
+        content,
+        executable.action,
+        executable.resolvedInputs,
+        this.config.transform?.runner
+      )
+      const next = getNextInfo(this.config, this.adapters, executable.warp, executable.action, results)
 
       return {
         success: response.ok,
-        warp: preparedWarp,
-        action: action,
-        user: this.config.user?.wallets?.[chainInfo.name] || null,
+        warp: executable.warp,
+        action: executable.action,
+        user: this.config.user?.wallets?.[executable.chain.name] || null,
         txHash: null,
         tx: null,
         next,
         values,
         valuesRaw: values.map((value) => this.serializer.stringToNative(value)[1]),
         results: { ...results, _DATA: content },
-        messages: applyResultsToMessages(preparedWarp, results),
+        messages: applyResultsToMessages(executable.warp, results),
       }
     } catch (error) {
       WarpLogger.error('WarpActionExecutor: Error executing collect', error)
       return {
         success: false,
-        warp: preparedWarp,
-        action: action,
-        user: this.config.user?.wallets?.[chainInfo.name] || null,
+        warp: executable.warp,
+        action: executable.action,
+        user: wallet,
         txHash: null,
         tx: null,
         next: null,
