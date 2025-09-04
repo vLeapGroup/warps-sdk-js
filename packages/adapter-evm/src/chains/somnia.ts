@@ -7,7 +7,7 @@ export const NativeTokenSomi: WarpChainAsset = {
   symbol: 'SOMI',
   name: 'Somnia',
   decimals: 18,
-  logoUrl: 'https://vleap.ai/images/tokens/somnia.svg',
+  logoUrl: 'https://assets.coingecko.com/coins/images/68061/standard/somniacg.png?1754641117',
 }
 
 export const NativeTokenStt: WarpChainAsset = {
@@ -16,7 +16,7 @@ export const NativeTokenStt: WarpChainAsset = {
   symbol: 'STT',
   name: 'Somnia Testnet Token',
   decimals: 18,
-  logoUrl: 'https://vleap.ai/images/tokens/somnia.svg',
+  logoUrl: 'https://assets.coingecko.com/coins/images/68061/standard/somniacg.png?1754641117',
 }
 
 export const getSomniaAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Somnia, 'eth', {
