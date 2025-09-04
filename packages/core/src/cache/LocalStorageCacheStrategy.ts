@@ -1,3 +1,5 @@
+import { WarpSerializer } from '../WarpSerializer'
+import { WarpInputTypes } from '../constants'
 import { CacheStrategy } from './CacheStrategy'
 
 type CacheEntry<T> = {
@@ -21,7 +23,7 @@ export class LocalStorageCacheStrategy implements CacheStrategy {
       const entryStr = localStorage.getItem(this.getKey(key))
       if (!entryStr) return null
 
-      const entry: CacheEntry<T> = JSON.parse(entryStr)
+      const entry: CacheEntry<T> = JSON.parse(entryStr, valueReviver)
       if (Date.now() > entry.expiresAt) {
         localStorage.removeItem(this.getKey(key))
         return null
@@ -38,7 +40,7 @@ export class LocalStorageCacheStrategy implements CacheStrategy {
       value,
       expiresAt: Date.now() + ttl * 1000,
     }
-    localStorage.setItem(this.getKey(key), JSON.stringify(entry))
+    localStorage.setItem(this.getKey(key), JSON.stringify(entry, valueReplacer))
   }
 
   forget(key: string): void {
@@ -53,4 +55,20 @@ export class LocalStorageCacheStrategy implements CacheStrategy {
       }
     }
   }
+}
+
+const serializer = new WarpSerializer()
+
+// JSON replacer for value serialization (handles BigInts and other special types)
+const valueReplacer = (key: string, value: any): any => {
+  if (typeof value === 'bigint') return serializer.nativeToString('biguint', value)
+  return value
+}
+
+// JSON reviver for value deserialization (handles BigInts and other special types)
+const valueReviver = (key: string, value: any): any => {
+  if (typeof value === 'string') {
+    if (value.startsWith(WarpInputTypes.Biguint + ':')) return serializer.stringToNative(value)[1]
+  }
+  return value
 }
