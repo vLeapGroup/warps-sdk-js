@@ -1,23 +1,24 @@
 import {
-    applyResultsToMessages,
-    extractCollectResults,
-    findWarpAdapterForChain,
-    findWarpExecutableAction,
-    getNextInfo,
-    getWarpActionByIndex,
+  applyResultsToMessages,
+  extractCollectResults,
+  findWarpAdapterForChain,
+  findWarpExecutableAction,
+  getNextInfo,
+  getWarpActionByIndex,
 } from './helpers'
 import { createAuthHeaders, createAuthMessage } from './helpers/signing'
 import {
-    Adapter,
-    Warp,
-    WarpActionIndex,
-    WarpAdapterGenericRemoteTransaction,
-    WarpAdapterGenericTransaction,
-    WarpChain,
-    WarpChainAssetValue,
-    WarpChainInfo,
-    WarpClientConfig,
-    WarpExecution,
+  Adapter,
+  Warp,
+  WarpActionIndex,
+  WarpAdapterGenericRemoteTransaction,
+  WarpAdapterGenericTransaction,
+  WarpChain,
+  WarpChainAssetValue,
+  WarpChainInfo,
+  WarpClientConfig,
+  WarpCollectAction,
+  WarpExecution,
 } from './types'
 import { WarpFactory } from './WarpFactory'
 import { WarpInterpolator } from './WarpInterpolator'
@@ -73,7 +74,7 @@ export class WarpExecutor {
   }
 
   private async executeCollect(warp: Warp, action: WarpActionIndex, inputs: string[], extra?: Record<string, any>): Promise<WarpExecution> {
-    const collectAction = getWarpActionByIndex(warp, action) as any | null
+    const collectAction = getWarpActionByIndex(warp, action) as WarpCollectAction | null
     if (!collectAction) throw new Error('WarpActionExecutor: Action not found')
 
     const chainInfo = await this.factory.getChainInfoForAction(collectAction)
