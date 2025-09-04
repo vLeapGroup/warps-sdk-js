@@ -1,5 +1,17 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-alpha.26
+
+### Minor Changes
+
+- 52a0958: add evm somnia network
+
+### Patch Changes
+
+- Updated dependencies [15c79ad]
+- Updated dependencies [52a0958]
+  - @vleap/warps@3.0.0-alpha.94
+
 ## 0.2.0-alpha.25
 
 ### Minor Changes

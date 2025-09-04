@@ -1,6 +1,6 @@
 {
   "name": "@vleap/warps-react",
-  "version": "0.1.0-alpha.90",
+  "version": "0.1.0-alpha.91",
   "type": "module",
   "types": "./src/index.tsx",
   "exports": {
@@ -17,7 +17,7 @@
     "test": "npm run lint"
   },
   "dependencies": {
-    "@vleap/warps": "3.0.0-alpha.93"
+    "@vleap/warps": "3.0.0-alpha.94"
   },
   "peerDependencies": {
     "react": ">=18.0.0",

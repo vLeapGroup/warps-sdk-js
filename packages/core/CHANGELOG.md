@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.94
+
+### Minor Changes
+
+- 52a0958: add evm somnia network
+
+### Patch Changes
+
+- 15c79ad: update execution
+
 ## 3.0.0-alpha.93
 
 ### Patch Changes
