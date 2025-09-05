@@ -91,7 +91,7 @@ export interface WarpTypeRegistry {
 }
 
 export interface BaseWarpBuilder {
-  createFromRaw(encoded: string): Promise<Warp>
+  createFromRaw(encoded: string, validate?: boolean): Promise<Warp>
   createFromUrl(url: string): Promise<Warp>
   setName(name: string): BaseWarpBuilder
   setTitle(title: string): BaseWarpBuilder
