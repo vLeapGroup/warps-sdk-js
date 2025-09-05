@@ -6,18 +6,12 @@ BigInt.prototype.toJSON = function () {
   return Number(this)
 }
 
-// Strong Type Definitions
-export type FastSetAddress = string
-export type TokenId = string
-export type Amount = string
-export type HexString = string
-
 // Type guards
-export const isValidFastSetAddress = (address: string): address is FastSetAddress => {
+export const isValidFastSetAddress = (address: string): boolean => {
   return address.startsWith('set1') && address.length === 62
 }
 
-export const isValidHexString = (hex: string): hex is HexString => {
+export const isValidHexString = (hex: string): boolean => {
   return /^0x[0-9a-fA-F]*$/.test(hex)
 }
 
@@ -115,56 +109,96 @@ export const BcsTransaction = bcs.struct('Transaction', {
 })
 
 // TypeScript interfaces for API types
+// Transaction types from the example
+export interface TransactionData {
+  sender: number[] // PublicKeyBytes (32 bytes) as array
+  recipient: Address
+  nonce: number // uint64
+  timestamp_nanos: string // uint128 as string
+  claim: ClaimType
+}
+
+export interface Address {
+  External?: number[]
+  FastSet?: number[]
+}
+
+export interface ClaimType {
+  Transfer?: Transfer
+  TokenTransfer?: TokenTransfer
+  TokenCreation?: TokenCreation
+  TokenManagement?: TokenManagement
+  Mint?: Mint
+  ExternalClaim?: ExternalClaim
+}
+
+export interface Transfer {
+  amount: string // Amount as hex string
+  user_data?: number[] | null // Optional 32 bytes as array
+}
+
+export interface TokenTransfer {
+  token_id: number[] // 32 bytes as array
+  amount: string // Amount as hex string
+  user_data?: number[] | null // Optional 32 bytes as array
+}
+
+export interface TokenCreation {
+  token_name: string
+  decimals: number // uint8
+  initial_amount: string // Amount as hex string
+  mints: number[][] // Array of PublicKeyBytes as arrays
+  user_data?: number[] | null // Optional 32 bytes as array
+}
+
+export interface TokenManagement {
+  token_id: number[] // 32 bytes as array
+  update_id: number // uint64
+  new_admin?: number[] // Optional PublicKeyBytes as array
+  mints: Array<[AddressChange, number[]]>
+  user_data?: number[] | null // Optional 32 bytes as array
+}
+
+export interface AddressChange {
+  Add?: any[]
+  Remove?: any[]
+}
+
+export interface Mint {
+  token_id: number[] // 32 bytes as array
+  amount: string // Amount as hex string
+}
+
+export interface ExternalClaim {
+  claim: ExternalClaimBody
+  signatures: Array<[number[], number[]]> // [(PublicKeyBytes, Signature)] as arrays
+}
+
+export interface ExternalClaimBody {
+  verifier_committee: number[][] // Array of PublicKeyBytes as arrays
+  verifier_quorum: number // uint64
+  claim_data: number[] // Array of bytes
+}
+
+export interface Signature extends Array<number> {} // 64 bytes as array
+
+export interface PageRequest {
+  limit: number
+  token?: number[] // Optional array of bytes
+}
+
+export interface Pagination {
+  limit?: number
+  offset: number
+}
+
+// Legacy interface for backward compatibility
 export interface FastsetTransaction {
   sender: Uint8Array
   recipient: { FastSet: Uint8Array } | { External: Uint8Array }
   nonce: number
   timestamp_nanos: bigint
   claim: any // Can be Transfer, TokenTransfer, TokenCreation, etc.
-}
-
-// API Request/Response Types
-export interface FastsetTransferRequest {
-  recipient: FastSetAddress | Uint8Array
-  amount: Amount
-  user_data?: Uint8Array
-}
-
-export interface FastsetTokenTransferRequest {
-  token_id: Uint8Array | HexString
-  recipient: FastSetAddress | Uint8Array
-  amount: Amount
-  user_data?: Uint8Array
-}
-
-export interface FastsetTokenCreationRequest {
-  token_name: string
-  decimals: number
-  initial_amount: Amount
-  mints: (FastSetAddress | Uint8Array)[]
-  user_data?: Uint8Array
-}
-
-export interface FastsetTokenManagementRequest {
-  token_id: Uint8Array | HexString
-  update_id: number
-  new_admin?: FastSetAddress | Uint8Array
-  mints: Array<{ change: 'Add' | 'Remove'; address: FastSetAddress | Uint8Array }>
-  user_data?: Uint8Array
-}
-
-export interface FastsetMintRequest {
-  token_id: Uint8Array | HexString
-  amount: Amount
-}
-
-export interface FastsetExternalClaimRequest {
-  claim: {
-    verifier_committee: Uint8Array[]
-    verifier_quorum: number
-    claim_data: Uint8Array
-  }
-  signatures: Array<{ signer: Uint8Array; signature: Uint8Array }>
 }
 
 // API Response Types
@@ -186,11 +220,6 @@ export interface Timed<T> {
   timing?: SettleTiming
 }
 
-export interface PageRequest {
-  limit: number
-  token?: Uint8Array
-}
-
 export interface Pagination {
   limit?: number
   offset: number
@@ -206,7 +235,7 @@ export interface TokenInfoResponse {
 }
 
 export interface TransactionWithHash {
-  transaction: FastsetTransaction
+  transaction: TransactionData
   hash: Uint8Array
 }
 
@@ -222,7 +251,7 @@ export interface TransactionCertificate {
 }
 
 export interface TransactionEnvelope {
-  transaction: FastsetTransaction
+  transaction: TransactionData
   signature: Uint8Array
 }
 
@@ -264,9 +293,9 @@ export interface FastsetSubmitCertificateRequest {
 }
 
 export interface FastsetFaucetRequest {
-  recipient: FastSetAddress | Uint8Array
-  amount: Amount
-  tokenId?: TokenId | Uint8Array
+  recipient: string | Uint8Array
+  amount: typeof Amount
+  tokenId?: typeof TokenId | Uint8Array
 }
 
 export interface FastsetFaucetResponse {

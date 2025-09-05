@@ -7,23 +7,8 @@ import {
   WarpClientConfig,
   WarpDataLoaderOptions,
 } from '@vleap/warps'
+import * as bech32 from 'bech32'
 import { FastsetClient } from './sdk/FastsetClient'
-import { Wallet } from './sdk/Wallet'
-
-export interface FastsetAccountData {
-  address: string
-  balance: string
-  balanceDecimal: number
-  nextNonce: number
-  sequenceNumber: number
-}
-
-export interface FastsetTransactionData {
-  hash: string
-  hashHex: string
-  status: string
-  details: any
-}
 
 export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
   private client: FastsetClient
@@ -32,58 +17,55 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
     private readonly config: WarpClientConfig,
     private readonly chain: WarpChainInfo
   ) {
-    this.client = new FastsetClient()
+    this.client = new FastsetClient(config, chain)
+  }
+
+  private addressToBytes(address: string): number[] {
+    try {
+      const decoded = bech32.bech32m.decode(address)
+      return Array.from(bech32.bech32m.fromWords(decoded.words))
+    } catch {
+      try {
+        const decoded = bech32.bech32.decode(address)
+        return Array.from(bech32.bech32.fromWords(decoded.words))
+      } catch {
+        throw new Error(`Invalid FastSet address: ${address}`)
+      }
+    }
   }
 
   async getAccount(address: string): Promise<WarpChainAccount> {
-    const addressBytes = Wallet.decodeBech32Address(address)
+    const addressBytes = this.addressToBytes(address)
     const accountInfo = await this.client.getAccountInfo(addressBytes)
 
-    if (!accountInfo) {
-      return {
-        chain: this.chain.name,
-        address,
-        balance: BigInt(0),
-      }
-    }
-
-    return {
-      chain: this.chain.name,
-      address,
-      balance: BigInt(accountInfo.balance),
-    }
+    return { chain: this.chain.name, address, balance: BigInt(accountInfo.balance) }
   }
 
   async getAccountAssets(address: string): Promise<WarpChainAsset[]> {
-    // Get account info which includes token balances
-    const addressBytes = Wallet.decodeBech32Address(address)
+    const addressBytes = this.addressToBytes(address)
     const accountInfo = await this.client.getAccountInfo(addressBytes)
 
     const assets: WarpChainAsset[] = []
-
-    // Add native token balance
-    if (accountInfo && BigInt(accountInfo.balance) > 0) {
-      assets.push({
-        ...this.chain.nativeToken,
-        amount: BigInt(accountInfo.balance),
-      })
+    const balance = BigInt(accountInfo.balance)
+    if (balance > 0n) {
+      assets.push({ ...this.chain.nativeToken, amount: balance })
     }
 
-    // Add token balances from the account info
-    if (accountInfo && accountInfo.token_balance.length > 0) {
-      for (const [tokenId, balance] of accountInfo.token_balance) {
-        const amount = BigInt(balance)
-        if (amount > 0) {
-          assets.push({
-            chain: this.chain.name,
-            identifier: Buffer.from(tokenId).toString('hex'),
-            symbol: 'TOKEN',
-            name: `Token ${Buffer.from(tokenId).toString('hex').slice(0, 8)}`,
-            decimals: 6, // Default decimals
-            logoUrl: undefined,
-            amount,
-          })
-        }
+    for (const [tokenId, tokenBalance] of accountInfo.token_balance) {
+      const amount = BigInt(tokenBalance)
+      if (amount > 0n) {
+        const tokenInfo = await this.client.getTokenInfo([tokenId])
+        const metadata = tokenInfo.requested_token_metadata[0]?.[1]
+
+        assets.push({
+          chain: this.chain.name,
+          identifier: Buffer.from(tokenId).toString('hex'),
+          symbol: metadata?.token_name || 'UNKNOWN',
+          name: metadata?.token_name || 'Unknown Token',
+          decimals: metadata?.decimals || 6,
+          logoUrl: undefined,
+          amount,
+        })
       }
     }
 
@@ -91,7 +73,23 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
   }
 
   async getAsset(identifier: string): Promise<WarpChainAsset | null> {
-    return null
+    const tokenId = Buffer.from(identifier, 'hex')
+    const tokenInfo = await this.client.getTokenInfo([Array.from(tokenId)])
+    const metadata = tokenInfo.requested_token_metadata[0]?.[1]
+
+    if (!metadata) {
+      return null
+    }
+
+    return {
+      chain: this.chain.name,
+      identifier,
+      symbol: metadata.token_name,
+      name: metadata.token_name,
+      decimals: metadata.decimals,
+      logoUrl: undefined,
+      amount: BigInt(metadata.total_supply),
+    }
   }
 
   async getAction(identifier: string, awaitCompleted = false): Promise<WarpChainAction | null> {
@@ -100,97 +98,5 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
 
   async getAccountActions(address: string, options?: WarpDataLoaderOptions): Promise<WarpChainAction[]> {
     return []
-  }
-
-  async getAccountInfo(address: string): Promise<FastsetAccountData | null> {
-    const addressBytes = Wallet.decodeBech32Address(address)
-    const accountInfo = await this.client.getAccountInfo(addressBytes)
-
-    if (!accountInfo) {
-      return null
-    }
-
-    const balanceDecimal = parseInt(accountInfo.balance)
-
-    return {
-      address,
-      balance: accountInfo.balance,
-      balanceDecimal,
-      nextNonce: accountInfo.next_nonce,
-      sequenceNumber: accountInfo.next_nonce, // Use next_nonce as sequence number
-    }
-  }
-
-  async getTransactionInfo(txHash: string): Promise<FastsetTransactionData | null> {
-    return {
-      hash: txHash,
-      hashHex: txHash.startsWith('0x') ? txHash.slice(2) : txHash,
-      status: 'submitted',
-      details: {
-        hash: txHash,
-        timestamp: new Date().toISOString(),
-      },
-    }
-  }
-
-  async checkTransferStatus(fromAddress: string, toAddress: string, amount: string): Promise<boolean> {
-    const fromAccount = await this.getAccountInfo(fromAddress)
-    const toAccount = await this.getAccountInfo(toAddress)
-
-    if (!fromAccount || !toAccount) {
-      return false
-    }
-
-    const transferAmount = parseInt(amount)
-    const fromBalance = fromAccount.balanceDecimal
-
-    return fromBalance < transferAmount
-  }
-
-  async getAccountBalance(address: string): Promise<{ balance: string; balanceDecimal: number } | null> {
-    const accountInfo = await this.getAccountInfo(address)
-    if (!accountInfo) {
-      return null
-    }
-
-    return {
-      balance: accountInfo.balance,
-      balanceDecimal: accountInfo.balanceDecimal,
-    }
-  }
-
-  async getAssetBalance(address: string, assetId: string): Promise<WarpChainAsset | null> {
-    const addressBytes = Wallet.decodeBech32Address(address)
-    const accountInfo = await this.client.getAccountInfo(addressBytes)
-
-    if (!accountInfo) {
-      return null
-    }
-
-    // Look for the specific token in the account's token balances
-    const tokenBalance = accountInfo.token_balance.find(([tokenId]) => {
-      return Buffer.from(tokenId).toString('hex') === assetId
-    })
-
-    if (!tokenBalance) {
-      return null
-    }
-
-    const [, balance] = tokenBalance
-    const amount = BigInt(balance)
-
-    if (amount === 0n) {
-      return null
-    }
-
-    return {
-      chain: this.chain.name,
-      identifier: assetId,
-      symbol: 'TOKEN',
-      name: `Token ${assetId.slice(0, 8)}`,
-      decimals: 6, // Default decimals
-      logoUrl: undefined,
-      amount,
-    }
   }
 }

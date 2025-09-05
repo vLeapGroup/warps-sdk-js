@@ -1,3 +1,4 @@
+import * as ed25519 from '@noble/ed25519'
 import {
   AdapterWarpExecutor,
   getProviderUrl,
@@ -7,7 +8,8 @@ import {
   WarpExecutable,
   WarpQueryAction,
 } from '@vleap/warps'
-import { FastsetClient } from './sdk/FastsetClient'
+import { FastsetClient, TransactionData } from './sdk/FastsetClient'
+import { Wallet } from './sdk/Wallet'
 import { WarpFastsetSerializer } from './WarpFastsetSerializer'
 
 export class WarpFastsetExecutor implements AdapterWarpExecutor {
@@ -136,6 +138,21 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
     throw new Error('Not implemented')
   }
 
+  private async signTransaction(transaction: TransactionData, privateKey: Uint8Array): Promise<Uint8Array> {
+    // Create the message to sign following the same pattern as the original TransactionSigner
+    const transactionJson = JSON.stringify(transaction, (key, value) => {
+      if (value instanceof Uint8Array) {
+        return Array.from(value)
+      }
+      return value
+    })
+
+    const prefix = 'Transaction::'
+    const dataToSign = new TextEncoder().encode(prefix + transactionJson)
+
+    return await ed25519.sign(dataToSign, privateKey)
+  }
+
   async executeTransfer(executable: WarpExecutable): Promise<any> {
     const userWallet = this.config.user?.wallets?.[executable.chain.name]
     if (!userWallet) throw new Error('WarpFastsetExecutor: executeTransfer - user wallet not set')
@@ -156,13 +173,27 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
 
     const transaction = await this.createTransferTransaction(executable)
     const privateKeyBytes = this.fromBase64(privateKey)
-    const { transaction: signedTx, signature } = await this.fastsetClient.createAndSignTransfer(
-      privateKeyBytes,
-      transaction.recipient,
-      transaction.amount,
-      transaction.userData
-    )
-    const transactionHash = await this.fastsetClient.submitSignedTransaction(signedTx, signature)
+
+    // Create transaction data for the new API
+    const transactionData = {
+      sender: Array.from(privateKeyBytes.slice(0, 32)), // First 32 bytes as public key
+      recipient: { FastSet: transaction.recipient },
+      nonce: await this.fastsetClient.getNextNonce(Wallet.encodeBech32Address(privateKeyBytes.slice(0, 32))),
+      timestamp_nanos: (BigInt(Date.now()) * 1_000_000n).toString(),
+      claim: {
+        Transfer: {
+          recipient: { FastSet: transaction.recipient },
+          amount: transaction.amount,
+          user_data: transaction.userData ? Array.from(transaction.userData as Uint8Array) : null,
+        },
+      },
+    }
+
+    // Sign the transaction
+    const signature = await this.signTransaction(transactionData, privateKeyBytes)
+
+    // Submit the transaction
+    const transactionHash = await this.fastsetClient.submitTransaction(transactionData, signature)
 
     return {
       success: true,

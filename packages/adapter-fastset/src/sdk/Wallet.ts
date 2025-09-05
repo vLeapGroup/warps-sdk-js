@@ -1,7 +1,6 @@
 import * as bech32 from 'bech32'
 import { ed } from './ed25519-setup'
 import { Transaction } from './Transaction'
-import { TransactionSigner } from './TransactionSigner'
 
 export interface WalletConfig {
   privateKeyHex: string
@@ -56,11 +55,6 @@ export class Wallet {
 
   createTransaction(nonce: number, recipient: { FastSet: Uint8Array } | { External: Uint8Array }, claim: any): Transaction {
     return new Transaction(this.publicKey, recipient, nonce, claim)
-  }
-
-  async signTransaction(transaction: Transaction): Promise<Uint8Array> {
-    const transactionData = transaction.toTransaction()
-    return await TransactionSigner.signTransaction(transactionData, this.privateKey)
   }
 
   static decodeBech32Address(address: string): Uint8Array {
