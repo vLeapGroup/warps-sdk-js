@@ -1,4 +1,4 @@
-import { Address, Transaction, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
+import { Address, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
 import {
   AdapterWarpBuilder,
   Warp,
@@ -10,6 +10,7 @@ import {
   WarpClientConfig,
   WarpLogger,
 } from '@vleap/warps'
+import { WarpAdapterGenericTransaction } from '@vleap/warps/src/types'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
 export class WarpMultiversxBuilder extends WarpBuilder implements AdapterWarpBuilder {
@@ -25,7 +26,7 @@ export class WarpMultiversxBuilder extends WarpBuilder implements AdapterWarpBui
     this.core = new WarpBuilder(config)
   }
 
-  async createInscriptionTransaction(warp: Warp): Promise<Transaction> {
+  async createInscriptionTransaction(warp: Warp): Promise<WarpAdapterGenericTransaction> {
     const userWallet = this.config.user?.wallets?.[this.chain.name]
     if (!userWallet) throw new Error('WarpBuilder: user address not set')
     const factoryConfig = new TransactionsFactoryConfig({ chainID: this.chain.chainId })

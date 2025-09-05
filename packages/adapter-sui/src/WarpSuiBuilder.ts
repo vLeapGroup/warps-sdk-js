@@ -1,14 +1,15 @@
 import { SuiClient } from '@mysten/sui/client'
 import { Transaction } from '@mysten/sui/transactions'
 import {
-    AdapterWarpBuilder,
-    getProviderUrl,
-    Warp,
-    WarpBuilder,
-    WarpCache,
-    WarpCacheConfig,
-    WarpChainInfo,
-    WarpClientConfig,
+  AdapterWarpBuilder,
+  getProviderUrl,
+  Warp,
+  WarpAdapterGenericTransaction,
+  WarpBuilder,
+  WarpCache,
+  WarpCacheConfig,
+  WarpChainInfo,
+  WarpClientConfig,
 } from '@vleap/warps'
 import { toRegistryMoveTarget } from './helpers/registry'
 
@@ -28,7 +29,7 @@ export class WarpSuiBuilder extends WarpBuilder implements AdapterWarpBuilder {
     this.userWallet = this.config.user?.wallets?.[this.chain.name] || null
   }
 
-  createInscriptionTransaction(warp: Warp, registryObjectId?: string): Transaction {
+  async createInscriptionTransaction(warp: Warp, registryObjectId?: string): Promise<WarpAdapterGenericTransaction> {
     if (!registryObjectId) throw new Error('WarpSuiBuilder: registryObjectId is required')
     if (!this.userWallet) throw new Error('WarpSuiBuilder: user address not set')
     if (!warp.meta || !warp.meta.hash) throw new Error('WarpSuiBuilder: warp.meta.hash is required')

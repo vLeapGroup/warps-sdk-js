@@ -1,5 +1,13 @@
 import { SuiClient } from '@mysten/sui/client'
-import { AdapterWarpAbiBuilder, getProviderUrl, WarpCacheConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import {
+  AdapterWarpAbiBuilder,
+  getProviderUrl,
+  WarpAbiContents,
+  WarpAdapterGenericTransaction,
+  WarpCacheConfig,
+  WarpChainInfo,
+  WarpClientConfig,
+} from '@vleap/warps'
 
 export class WarpSuiAbiBuilder implements AdapterWarpAbiBuilder {
   private readonly client: SuiClient
@@ -10,6 +18,10 @@ export class WarpSuiAbiBuilder implements AdapterWarpAbiBuilder {
   ) {
     const apiUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
     this.client = new SuiClient({ url: apiUrl })
+  }
+
+  async createInscriptionTransaction(abi: WarpAbiContents): Promise<WarpAdapterGenericTransaction> {
+    throw new Error('WarpSuiAbiBuilder: createInscriptionTransaction not implemented')
   }
 
   async createFromRaw(encoded: string): Promise<any> {

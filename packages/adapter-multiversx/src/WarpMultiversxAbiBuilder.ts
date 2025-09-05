@@ -1,16 +1,19 @@
-import { AbiRegistry, TransactionOnNetwork } from '@multiversx/sdk-core'
+import { AbiRegistry, Address, TransactionOnNetwork, TransactionsFactoryConfig, TransferTransactionsFactory } from '@multiversx/sdk-core'
 import {
-    AdapterWarpAbiBuilder,
-    WarpAbi,
-    WarpCache,
-    WarpCacheConfig,
-    WarpCacheKey,
-    WarpChainInfo,
-    WarpClientConfig,
-    WarpConstants,
-    WarpContractAction,
-    WarpLogger,
-    WarpQueryAction,
+  AdapterWarpAbiBuilder,
+  getLatestProtocolIdentifier,
+  WarpAbi,
+  WarpAbiContents,
+  WarpAdapterGenericTransaction,
+  WarpCache,
+  WarpCacheConfig,
+  WarpCacheKey,
+  WarpChainInfo,
+  WarpClientConfig,
+  WarpConstants,
+  WarpContractAction,
+  WarpLogger,
+  WarpQueryAction,
 } from '@vleap/warps'
 import { WarpMultiversxContractLoader } from './WarpMultiversxContractLoader'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
@@ -25,6 +28,31 @@ export class WarpMultiversxAbiBuilder implements AdapterWarpAbiBuilder {
   ) {
     this.contractLoader = new WarpMultiversxContractLoader(this.config)
     this.cache = new WarpCache(this.config.cache?.type)
+  }
+
+  async createInscriptionTransaction(abi: WarpAbiContents): Promise<WarpAdapterGenericTransaction> {
+    const userWallet = this.config.user?.wallets?.[this.chain.name]
+    if (!userWallet) throw new Error('WarpBuilder: user address not set')
+    const factoryConfig = new TransactionsFactoryConfig({ chainID: this.chain.chainId })
+    const factory = new TransferTransactionsFactory({ config: factoryConfig })
+    const sender = Address.newFromBech32(userWallet)
+
+    const warpAbi: WarpAbi = {
+      protocol: getLatestProtocolIdentifier('abi'),
+      content: abi,
+    }
+
+    const serialized = JSON.stringify(warpAbi)
+
+    const tx = await factory.createTransactionForTransfer(sender, {
+      receiver: sender,
+      nativeAmount: BigInt(0),
+      data: Uint8Array.from(Buffer.from(serialized)),
+    })
+
+    tx.gasLimit = tx.gasLimit + BigInt(2_000_000) // overestimate to avoid gas limit errors for slight inaccuracies
+
+    return tx
   }
 
   async createFromRaw(encoded: string): Promise<WarpAbi> {
@@ -87,7 +115,7 @@ export class WarpMultiversxAbiBuilder implements AdapterWarpAbiBuilder {
   async fetchAbi(action: WarpContractAction | WarpQueryAction): Promise<AbiRegistry> {
     if (!action.abi) throw new Error('WarpActionExecutor: ABI not found')
     if (action.abi.startsWith(WarpConstants.IdentifierType.Hash)) {
-      const hashValue = action.abi.split(WarpConstants.IdentifierParamSeparatorDefault)[1]
+      const hashValue = action.abi.split(WarpConstants.ArgParamsSeparator)[1]
       const abi = await this.createFromTransactionHash(hashValue)
       if (!abi) throw new Error(`WarpActionExecutor: ABI not found for hash: ${action.abi}`)
       return AbiRegistry.create(abi.content)

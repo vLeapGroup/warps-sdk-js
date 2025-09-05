@@ -1,3 +1,4 @@
+import { WarpAbiContents } from './abi'
 import { WarpBrand } from './brand'
 import { ClientCacheConfig } from './cache'
 import { WarpChainAccount, WarpChainAction, WarpChainAsset } from './chain'
@@ -103,7 +104,7 @@ export interface BaseWarpBuilder {
 }
 
 export interface AdapterWarpBuilder {
-  createInscriptionTransaction(warp: Warp): WarpAdapterGenericTransaction
+  createInscriptionTransaction(warp: Warp): Promise<WarpAdapterGenericTransaction>
   createFromTransaction(tx: WarpAdapterGenericTransaction, validate?: boolean): Promise<Warp>
   createFromTransactionHash(hash: string, cache?: WarpCacheConfig): Promise<Warp | null>
 }
@@ -111,6 +112,7 @@ export interface AdapterWarpBuilder {
 export type CombinedWarpBuilder = AdapterWarpBuilder & BaseWarpBuilder
 
 export interface AdapterWarpAbiBuilder {
+  createInscriptionTransaction(abi: WarpAbiContents): Promise<WarpAdapterGenericTransaction>
   createFromRaw(encoded: string): Promise<any>
   createFromTransaction(tx: WarpAdapterGenericTransaction): Promise<any>
   createFromTransactionHash(hash: string, cache?: WarpCacheConfig): Promise<any | null>
