@@ -1,5 +1,13 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.95
+
+### Patch Changes
+
+- 5b50409: upgrade deps
+- a7696aa: add client exec support via object
+- 1613364: update cache local storage serialization
+
 ## 3.0.0-alpha.94
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 {
   "name": "@vleap/warps-adapter-evm",
-  "version": "0.2.0-alpha.26",
+  "version": "0.2.0-alpha.27",
   "description": "EVM adapter for Warps SDK",
   "type": "module",
   "types": "./dist/index.d.ts",
@@ -38,6 +38,6 @@
   },
   "dependencies": {
     "ethers": "^6.15.0",
-    "@vleap/warps": "^3.0.0-alpha.94"
+    "@vleap/warps": "^3.0.0-alpha.95"
   }
 }

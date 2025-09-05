@@ -1,5 +1,15 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-alpha.20
+
+### Patch Changes
+
+- 49c6517: update fastset adapter
+- Updated dependencies [5b50409]
+- Updated dependencies [a7696aa]
+- Updated dependencies [1613364]
+  - @vleap/warps@3.0.0-alpha.95
+
 ## 0.1.0-alpha.19
 
 ### Minor Changes
