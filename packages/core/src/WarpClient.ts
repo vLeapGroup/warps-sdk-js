@@ -49,7 +49,7 @@ export class WarpClient {
   }
 
   async executeWarp(
-    identifier: string,
+    warpOrIdentifierOrUrl: string | Warp,
     inputs: string[],
     handlers?: ExecutionHandlers,
     options: { cache?: WarpCacheConfig } = {}
@@ -58,12 +58,14 @@ export class WarpClient {
     chain: WarpChainInfo | null
     evaluateResults: (remoteTx: WarpAdapterGenericRemoteTransaction) => Promise<void>
   }> {
-    const warp =
-      identifier.startsWith('http') && identifier.endsWith('.json')
-        ? ((await (await fetch(identifier)).json()) as Warp)
-        : (await this.detectWarp(identifier, options.cache)).warp
+    const isWarp = typeof warpOrIdentifierOrUrl === 'object'
+    const isUrl = !isWarp && warpOrIdentifierOrUrl.startsWith('http') && warpOrIdentifierOrUrl.endsWith('.json')
 
+    let warp: Warp | null = isWarp ? warpOrIdentifierOrUrl : null
+    if (!warp && isUrl) warp = (await (await fetch(warpOrIdentifierOrUrl)).json()) as Warp
+    if (!warp) warp = (await this.detectWarp(warpOrIdentifierOrUrl as string, options.cache)).warp
     if (!warp) throw new Error('Warp not found')
+
     const executor = this.createExecutor(handlers)
     const { tx, chain } = await executor.execute(warp, inputs)
 
