@@ -147,7 +147,7 @@ export interface AdapterWarpRegistry {
   getRegistryConfig(): WarpRegistryConfigInfo
   createWarpRegisterTransaction(txHash: string, alias?: string | null, brand?: string | null): Promise<WarpAdapterGenericTransaction>
   createWarpUnregisterTransaction(txHash: string): Promise<WarpAdapterGenericTransaction>
-  createWarpUpgradeTransaction(alias: string, txHash: string): Promise<WarpAdapterGenericTransaction>
+  createWarpUpgradeTransaction(alias: string, txHash: string, brand?: string | null): Promise<WarpAdapterGenericTransaction>
   createWarpAliasSetTransaction(txHash: string, alias: string): Promise<WarpAdapterGenericTransaction>
   createWarpVerifyTransaction(txHash: string): Promise<WarpAdapterGenericTransaction>
   createWarpTransferOwnershipTransaction(txHash: string, newOwner: string): Promise<WarpAdapterGenericTransaction>
