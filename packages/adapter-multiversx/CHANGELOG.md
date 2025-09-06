@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.50
+
+### Patch Changes
+
+- ac6195b: update brand meta
+- Updated dependencies [ac6195b]
+  - @vleap/warps@3.0.0-alpha.97
+
 ## 0.2.0-alpha.49
 
 ### Patch Changes

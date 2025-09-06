@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.97
+
+### Patch Changes
+
+- ac6195b: update brand meta
+
 ## 3.0.0-alpha.96
 
 ### Patch Changes
