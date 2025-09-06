@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.96
+
+### Patch Changes
+
+- 3f391a6: fix registry upgrade signature
+
 ## 3.0.0-alpha.95
 
 ### Patch Changes
