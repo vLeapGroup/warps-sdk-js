@@ -29,7 +29,16 @@ export class WarpMultiversxBrandBuilder {
   }
 
   async createFromTransaction(tx: TransactionOnNetwork, validateSchema = false): Promise<WarpBrand> {
-    return await this.core.createFromRaw(tx.data.toString(), validateSchema)
+    const brand = await this.core.createFromRaw(tx.data.toString(), validateSchema)
+
+    brand.meta = {
+      chain: this.chain.name,
+      hash: tx.hash,
+      creator: tx.sender.toBech32(),
+      createdAt: new Date(tx.timestamp * 1000).toISOString(),
+    }
+
+    return brand
   }
 
   async createFromTransactionHash(hash: string): Promise<WarpBrand | null> {

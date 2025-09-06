@@ -1,3 +1,5 @@
+import { WarpMeta } from './warp'
+
 export type WarpBrand = {
   protocol: string
   name: string
@@ -6,7 +8,7 @@ export type WarpBrand = {
   urls?: WarpBrandUrls
   colors?: WarpBrandColors
   cta?: WarpBrandCta
-  meta?: WarpBrandMeta
+  meta?: WarpMeta
 }
 
 export type WarpBrandUrls = {
@@ -23,10 +25,4 @@ export type WarpBrandCta = {
   description: string
   label: string
   url: string
-}
-
-export type WarpBrandMeta = {
-  hash: string
-  creator: string
-  createdAt: string
 }
