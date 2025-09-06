@@ -85,6 +85,11 @@
                 {
                     "name": "new_warp",
                     "type": "bytes"
+                },
+                {
+                    "name": "brand_opt",
+                    "type": "optional<bytes>",
+                    "multi_arg": true
                 }
             ],
             "outputs": []
@@ -295,84 +300,6 @@
                     "multi_result": true
                 }
             ]
-        },
-        {
-            "name": "setChain",
-            "onlyOwner": true,
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "name",
-                    "type": "bytes"
-                },
-                {
-                    "name": "display_name",
-                    "type": "bytes"
-                },
-                {
-                    "name": "chain_id",
-                    "type": "bytes"
-                },
-                {
-                    "name": "block_time",
-                    "type": "u32"
-                },
-                {
-                    "name": "address_hrp",
-                    "type": "bytes"
-                },
-                {
-                    "name": "api_url",
-                    "type": "bytes"
-                },
-                {
-                    "name": "explorer_url",
-                    "type": "bytes"
-                },
-                {
-                    "name": "native_token",
-                    "type": "bytes"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "removeChain",
-            "onlyOwner": true,
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "name",
-                    "type": "bytes"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "getChain",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "name",
-                    "type": "bytes"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "ChainView"
-                }
-            ]
-        },
-        {
-            "name": "getChains",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "variadic<ChainView>",
-                    "multi_result": true
-                }
-            ]
         }
     ],
     "events": [
@@ -475,43 +402,6 @@
     "esdtAttributes": [],
     "hasCallback": false,
     "types": {
-        "ChainView": {
-            "type": "struct",
-            "fields": [
-                {
-                    "name": "name",
-                    "type": "bytes"
-                },
-                {
-                    "name": "display_name",
-                    "type": "bytes"
-                },
-                {
-                    "name": "chain_id",
-                    "type": "bytes"
-                },
-                {
-                    "name": "block_time",
-                    "type": "u32"
-                },
-                {
-                    "name": "address_hrp",
-                    "type": "bytes"
-                },
-                {
-                    "name": "api_url",
-                    "type": "bytes"
-                },
-                {
-                    "name": "explorer_url",
-                    "type": "bytes"
-                },
-                {
-                    "name": "native_token",
-                    "type": "bytes"
-                }
-            ]
-        },
         "ConfigView": {
             "type": "struct",
             "fields": [
