@@ -88,7 +88,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
     })
   }
 
-  async createWarpUpgradeTransaction(alias: string, txHash: string): Promise<Transaction> {
+  async createWarpUpgradeTransaction(alias: string, txHash: string, brand?: string | null): Promise<Transaction> {
     if (this.registryConfig.unitPrice === BigInt(0)) throw new Error('WarpRegistry: config not loaded. forgot to call init()?')
     if (!this.userWallet) throw new Error('WarpRegistry: user address not set')
     const sender = Address.newFromBech32(this.userWallet)
@@ -98,7 +98,9 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
       function: 'upgradeWarp',
       gasLimit: BigInt(10_000_000),
       nativeTransferAmount: this.isCurrentUserAdmin() ? undefined : this.registryConfig.unitPrice,
-      arguments: [BytesValue.fromUTF8(alias), BytesValue.fromHex(txHash)],
+      arguments: brand
+        ? [BytesValue.fromUTF8(alias), BytesValue.fromHex(txHash), BytesValue.fromHex(brand)]
+        : [BytesValue.fromUTF8(alias), BytesValue.fromHex(txHash)],
     })
   }
 
