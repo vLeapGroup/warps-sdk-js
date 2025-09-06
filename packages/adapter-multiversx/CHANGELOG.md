@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.49
+
+### Patch Changes
+
+- 94fb6d3: add opt brand to registry upgrade
+
 ## 0.2.0-alpha.48
 
 ### Patch Changes
