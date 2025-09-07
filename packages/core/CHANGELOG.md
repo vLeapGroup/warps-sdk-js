@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.100
+
+### Patch Changes
+
+- e35c4ae: update logging
+
 ## 3.0.0-alpha.99
 
 ### Minor Changes
