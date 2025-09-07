@@ -137,7 +137,14 @@ export type WarpActionInputType = string
 
 export type WarpNativeValue = string | number | bigint | boolean | WarpChainAssetValue | null | WarpNativeValue[]
 
-export type WarpActionInputPosition = 'receiver' | 'value' | 'transfer' | `arg:${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}` | 'data' | 'chain'
+export type WarpActionInputPosition =
+  | 'receiver'
+  | 'value'
+  | 'transfer'
+  | `arg:${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}`
+  | 'data'
+  | 'chain'
+  | `payload:${string}`
 
 export type WarpActionInputModifier = 'scale'
 

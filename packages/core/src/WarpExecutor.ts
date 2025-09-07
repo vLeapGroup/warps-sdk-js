@@ -1,3 +1,4 @@
+import { WarpConstants } from './constants'
 import {
   applyResultsToMessages,
   extractCollectResults,
@@ -6,6 +7,7 @@ import {
   getNextInfo,
   getWarpActionByIndex,
 } from './helpers'
+import { buildNestedPayload, mergeNestedPayload } from './helpers/payload'
 import { createAuthHeaders, createAuthMessage } from './helpers/signing'
 import {
   Adapter,
@@ -106,7 +108,18 @@ export class WarpExecutor {
       headers.set(key, value as string)
     })
 
-    const payload = Object.fromEntries(executable.resolvedInputs.map((i: any) => [i.input.as || i.input.name, toInputPayloadValue(i)]))
+    let payload: any = {}
+    executable.resolvedInputs.forEach((resolvedInput: any) => {
+      const fieldName = resolvedInput.input.as || resolvedInput.input.name
+      const value = toInputPayloadValue(resolvedInput)
+      if (resolvedInput.input.position && resolvedInput.input.position.startsWith(WarpConstants.Position.Payload)) {
+        const nestedPayload = buildNestedPayload(resolvedInput.input.position, fieldName, value)
+        payload = mergeNestedPayload(payload, nestedPayload)
+      } else {
+        // or use flat structure when position is not set
+        payload[fieldName] = value
+      }
+    })
     const httpMethod = collectAction.destination.method || 'GET'
     const body = httpMethod === 'GET' ? undefined : JSON.stringify({ ...payload, ...extra })
 

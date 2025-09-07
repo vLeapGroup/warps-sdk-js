@@ -119,5 +119,194 @@ describe('WarpExecutor', () => {
       expect(result).toBeDefined()
       expect(handlers.onExecuted).toHaveBeenCalled()
     })
+
+    it('handles nested payload structure with position parameter', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: 'test data' }),
+      })
+
+      const nestedPayloadWarp = {
+        ...warp,
+        actions: [
+          {
+            type: 'collect' as const,
+            label: 'Collect Nested Data',
+            destination: {
+              url: 'https://api.example.com/collect',
+              method: 'POST' as const,
+              headers: { 'Content-Type': 'application/json' },
+            },
+            inputs: [
+              {
+                name: 'reference',
+                as: 'ref',
+                type: 'string',
+                source: 'field' as const,
+                position: 'payload:data.attributes.customer' as const,
+              },
+              {
+                name: 'email',
+                type: 'string',
+                source: 'field' as const,
+                position: 'payload:data.attributes.customer' as const,
+              },
+              {
+                name: 'country',
+                type: 'string',
+                source: 'field' as const,
+                position: 'payload:data.attributes.customer' as const,
+              },
+              {
+                name: 'amount',
+                type: 'string',
+                source: 'field' as const,
+                position: 'payload:data.attributes.customer' as const,
+              },
+            ],
+          } as WarpCollectAction,
+        ],
+      }
+
+      const inputs = ['string:123', 'string:micha@vleap.ai', 'string:AT', 'string:10.00']
+      const result = await executor.execute(nestedPayloadWarp, inputs)
+
+      expect(result).toBeDefined()
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://api.example.com/collect',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({
+            data: {
+              attributes: {
+                customer: {
+                  ref: '123',
+                  email: 'micha@vleap.ai',
+                  country: 'AT',
+                  amount: '10.00',
+                },
+              },
+            },
+          }),
+        })
+      )
+    })
+
+    it('maintains flat payload structure when position is not set', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: 'test data' }),
+      })
+
+      const flatPayloadWarp = {
+        ...warp,
+        actions: [
+          {
+            type: 'collect' as const,
+            label: 'Collect Flat Data',
+            destination: {
+              url: 'https://api.example.com/collect',
+              method: 'POST' as const,
+              headers: { 'Content-Type': 'application/json' },
+            },
+            inputs: [
+              {
+                name: 'reference',
+                type: 'string',
+                source: 'field' as const,
+              },
+              {
+                name: 'email',
+                type: 'string',
+                source: 'field' as const,
+              },
+            ],
+          } as WarpCollectAction,
+        ],
+      }
+
+      const inputs = ['string:123', 'string:micha@vleap.ai']
+      const result = await executor.execute(flatPayloadWarp, inputs)
+
+      expect(result).toBeDefined()
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://api.example.com/collect',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({
+            reference: '123',
+            email: 'micha@vleap.ai',
+          }),
+        })
+      )
+    })
+
+    it('builds nested payload correctly with multiple levels', async () => {
+      // Mock successful fetch response
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: 'test data' }),
+      })
+
+      const multiLevelWarp = {
+        ...warp,
+        actions: [
+          {
+            type: 'collect' as const,
+            label: 'Collect Multi Level Data',
+            destination: {
+              url: 'https://api.example.com/collect',
+              method: 'POST' as const,
+              headers: { 'Content-Type': 'application/json' },
+            },
+            inputs: [
+              {
+                name: 'user',
+                as: 'name',
+                type: 'string',
+                source: 'field' as const,
+                position: 'payload:request.customer.info' as const,
+              },
+              {
+                name: 'email',
+                type: 'string',
+                source: 'field' as const,
+                position: 'payload:request.customer.info' as const,
+              },
+              {
+                name: 'amount',
+                type: 'string',
+                source: 'field' as const,
+                position: 'payload:request.transaction' as const,
+              },
+            ],
+          } as WarpCollectAction,
+        ],
+      }
+
+      const inputs = ['string:John Doe', 'string:john@example.com', 'string:100.00']
+      const result = await executor.execute(multiLevelWarp, inputs)
+
+      expect(result).toBeDefined()
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://api.example.com/collect',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({
+            request: {
+              customer: {
+                info: {
+                  name: 'John Doe',
+                  email: 'john@example.com',
+                },
+              },
+              transaction: {
+                amount: '100.00',
+              },
+            },
+          }),
+        })
+      )
+    })
   })
 })

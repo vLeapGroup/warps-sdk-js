@@ -26,10 +26,6 @@ export const WarpConstants = {
     Hash: 'hash' as WarpIdType,
   },
 
-  Source: {
-    UserWallet: 'user:wallet',
-  },
-
   Globals: {
     UserWallet: {
       Placeholder: 'USER_WALLET',
@@ -55,6 +51,14 @@ export const WarpConstants = {
 
   Transform: {
     Prefix: 'transform:',
+  },
+
+  Source: {
+    UserWallet: 'user:wallet',
+  },
+
+  Position: {
+    Payload: 'payload:',
   },
 }
 
