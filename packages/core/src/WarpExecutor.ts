@@ -47,9 +47,13 @@ export class WarpExecutor {
     this.serializer = new WarpSerializer()
   }
 
-  async execute(warp: Warp, inputs: string[]): Promise<{ tx: WarpAdapterGenericTransaction | null; chain: WarpChainInfo | null }> {
+  async execute(
+    warp: Warp,
+    inputs: string[],
+    env?: Record<string, any>
+  ): Promise<{ tx: WarpAdapterGenericTransaction | null; chain: WarpChainInfo | null }> {
     const { action, actionIndex } = findWarpExecutableAction(warp)
-    const executable = await this.factory.createExecutable(warp, actionIndex, inputs)
+    const executable = await this.factory.createExecutable(warp, actionIndex, inputs, env)
 
     if (action.type === 'collect') {
       const result = await this.executeCollect(executable)
@@ -116,7 +120,7 @@ export class WarpExecutor {
         const nestedPayload = buildNestedPayload(resolvedInput.input.position, fieldName, value)
         payload = mergeNestedPayload(payload, nestedPayload)
       } else {
-        // or use flat structure when position is not set
+        // Use flat structure when position is not set
         payload[fieldName] = value
       }
     })

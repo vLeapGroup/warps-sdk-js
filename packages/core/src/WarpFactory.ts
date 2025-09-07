@@ -48,12 +48,12 @@ export class WarpFactory {
     }
   }
 
-  async createExecutable(warp: Warp, actionIndex: number, inputs: string[]): Promise<WarpExecutable> {
+  async createExecutable(warp: Warp, actionIndex: number, inputs: string[], envs?: Record<string, any>): Promise<WarpExecutable> {
     const action = getWarpActionByIndex(warp, actionIndex) as WarpTransferAction | WarpContractAction | WarpCollectAction
     if (!action) throw new Error('WarpFactory: Action not found')
     const chain = await this.getChainInfoForAction(action, inputs)
     const adapter = findWarpAdapterForChain(chain.name, this.adapters)
-    const preparedWarp = await new WarpInterpolator(this.config, adapter).apply(this.config, warp)
+    const preparedWarp = await new WarpInterpolator(this.config, adapter).apply(this.config, warp, envs)
     const preparedAction = getWarpActionByIndex(preparedWarp, actionIndex) as WarpTransferAction | WarpContractAction | WarpCollectAction
 
     const resolvedInputs = await this.getResolvedInputs(chain.name, preparedAction, inputs)

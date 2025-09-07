@@ -7,8 +7,8 @@ export class WarpInterpolator {
     private adapter: Adapter
   ) {}
 
-  async apply(config: WarpClientConfig, warp: Warp): Promise<Warp> {
-    const modifiable = this.applyVars(config, warp)
+  async apply(config: WarpClientConfig, warp: Warp, envs?: Record<string, any>): Promise<Warp> {
+    const modifiable = this.applyVars(config, warp, envs)
     return await this.applyGlobals(config, modifiable)
   }
 
@@ -21,7 +21,7 @@ export class WarpInterpolator {
     return modifiable
   }
 
-  applyVars(config: WarpClientConfig, warp: Warp): Warp {
+  applyVars(config: WarpClientConfig, warp: Warp, envs?: Record<string, any>): Warp {
     if (!warp?.vars) return warp
     let modifiable = JSON.stringify(warp)
 
@@ -39,7 +39,8 @@ export class WarpInterpolator {
         if (queryParamValue) modify(placeholder, queryParamValue)
       } else if (value.startsWith(`${WarpConstants.Vars.Env}:`)) {
         const envVarName = value.split(`${WarpConstants.Vars.Env}:`)[1]
-        const envVarValue = config.vars?.[envVarName]
+        const combinedEnvs = { ...config.vars, ...envs }
+        const envVarValue = combinedEnvs?.[envVarName]
         if (envVarValue) modify(placeholder, envVarValue)
       } else if (value === WarpConstants.Source.UserWallet && config.user?.wallets?.[this.adapter.chainInfo.name]) {
         const wallet = config.user.wallets[this.adapter.chainInfo.name]
