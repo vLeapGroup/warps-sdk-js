@@ -146,7 +146,7 @@ export class WarpExecutor {
         tx: null,
         next,
         values,
-        valuesRaw: values.map((value) => this.serializer.stringToNative(value)[1]),
+        valuesRaw: [],
         results: { ...results, _DATA: content },
         messages: applyResultsToMessages(executable.warp, results),
       }
