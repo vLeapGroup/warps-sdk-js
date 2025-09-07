@@ -127,13 +127,13 @@ export class WarpExecutor {
     const httpMethod = collectAction.destination.method || 'GET'
     const body = httpMethod === 'GET' ? undefined : JSON.stringify({ ...payload, ...extra })
 
-    WarpLogger.info('Executing collect', { url: collectAction.destination.url, method: httpMethod, headers, body })
+    WarpLogger.debug('Executing collect', { url: collectAction.destination.url, method: httpMethod, headers, body })
 
     try {
       const response = await fetch(collectAction.destination.url, { method: httpMethod, headers, body })
-      WarpLogger.info('Collect response status', { status: response.status })
+      WarpLogger.debug('Collect response status', { status: response.status })
       const content = await response.json()
-      WarpLogger.info('Collect response content', { content })
+      WarpLogger.debug('Collect response content', { content })
       const { values, results } = await extractCollectResults(
         executable.warp,
         content,
