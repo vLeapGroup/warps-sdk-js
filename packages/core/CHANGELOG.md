@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.99
+
+### Minor Changes
+
+- fd56907: add dynamic env injection to executor
+
+### Patch Changes
+
+- 8113897: remove value serialization for collect responses
+
 ## 3.0.0-alpha.98
 
 ### Minor Changes
