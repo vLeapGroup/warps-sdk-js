@@ -1,6 +1,13 @@
 export class WarpLogger {
   private static isTestEnv = typeof process !== 'undefined' && process.env.JEST_WORKER_ID !== undefined
 
+  static debug(...args: any[]): void {
+    if (!WarpLogger.isTestEnv) {
+      // eslint-disable-next-line no-console
+      console.debug(...args)
+    }
+  }
+
   static info(...args: any[]): void {
     if (!WarpLogger.isTestEnv) {
       // eslint-disable-next-line no-console
