@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.98
+
+### Minor Changes
+
+- 6aaf181: add custom collector payloads
+- e546232: add hidden input sources
+
 ## 3.0.0-alpha.97
 
 ### Patch Changes
