@@ -131,8 +131,9 @@ export class WarpExecutor {
 
     try {
       const response = await fetch(collectAction.destination.url, { method: httpMethod, headers, body })
-      WarpLogger.info('Collect response', { response })
+      WarpLogger.info('Collect response status', { status: response.status })
       const content = await response.json()
+      WarpLogger.info('Collect response content', { content })
       const { values, results } = await extractCollectResults(
         executable.warp,
         content,
