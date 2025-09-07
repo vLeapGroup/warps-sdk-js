@@ -128,6 +128,9 @@ export class WarpFactory {
       } else if (input.source === WarpConstants.Source.UserWallet) {
         if (!this.config.user?.wallets?.[chain]) return null
         return this.serializer.nativeToString('address', this.config.user.wallets[chain])
+      } else if (input.source === 'hidden') {
+        // Hidden inputs always use their default value
+        return input.default !== undefined ? this.serializer.nativeToString(input.type, input.default) : null
       } else {
         return preprocessed[index] || null
       }

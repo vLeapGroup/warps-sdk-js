@@ -21,7 +21,7 @@ export const WarpConfig = {
 
   SuperClientUrls: ['https://usewarp.to', 'https://testnet.usewarp.to', 'https://devnet.usewarp.to'],
 
-  AvailableActionInputSources: ['field', 'query', WarpConstants.Source.UserWallet] as WarpActionInputSource[],
+  AvailableActionInputSources: ['field', 'query', WarpConstants.Source.UserWallet, 'hidden'] as WarpActionInputSource[],
 
   AvailableActionInputTypes: ['string', 'uint8', 'uint16', 'uint32', 'uint64', 'biguint', 'boolean', 'address'] as WarpActionInputType[],
 

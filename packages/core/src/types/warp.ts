@@ -117,7 +117,7 @@ export type WarpLinkAction = {
   inputs?: WarpActionInput[]
 }
 
-export type WarpActionInputSource = 'field' | 'query' | 'user:wallet'
+export type WarpActionInputSource = 'field' | 'query' | 'user:wallet' | 'hidden'
 
 export type BaseWarpActionInputType =
   | 'string'

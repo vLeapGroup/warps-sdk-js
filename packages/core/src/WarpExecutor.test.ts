@@ -308,5 +308,195 @@ describe('WarpExecutor', () => {
         })
       )
     })
+
+    it('should handle hidden inputs with default values', async () => {
+      // Mock successful fetch response
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: 'test data' }),
+      })
+
+      const hiddenInputWarp = {
+        ...warp,
+        actions: [
+          {
+            type: 'collect' as const,
+            label: 'Collect with Hidden Input',
+            destination: {
+              url: 'https://api.example.com/collect',
+              method: 'POST' as const,
+              headers: { 'Content-Type': 'application/json' },
+            },
+            inputs: [
+              {
+                name: 'reference',
+                type: 'string',
+                source: 'field' as const,
+                position: 'payload:data.attributes.customer' as const,
+              },
+              {
+                name: 'apiVersion',
+                type: 'string',
+                source: 'hidden' as const,
+                default: 'v1.0',
+                position: 'payload:data.attributes.customer' as const,
+              },
+              {
+                name: 'timestamp',
+                type: 'string',
+                source: 'hidden' as const,
+                default: '2024-01-01T00:00:00Z',
+                position: 'payload:data.metadata' as const,
+              },
+            ],
+          } as WarpCollectAction,
+        ],
+      }
+
+      const inputs = ['string:REF123']
+      const result = await executor.execute(hiddenInputWarp, inputs)
+
+      expect(result).toBeDefined()
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://api.example.com/collect',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({
+            data: {
+              attributes: {
+                customer: {
+                  reference: 'REF123',
+                  apiVersion: 'v1.0',
+                },
+              },
+              metadata: {
+                timestamp: '2024-01-01T00:00:00Z',
+              },
+            },
+          }),
+        })
+      )
+    })
+
+    it('should handle mixed hidden and user inputs', async () => {
+      // Mock successful fetch response
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: 'test data' }),
+      })
+
+      const mixedInputWarp = {
+        ...warp,
+        actions: [
+          {
+            type: 'collect' as const,
+            label: 'Collect with Mixed Inputs',
+            destination: {
+              url: 'https://api.example.com/collect',
+              method: 'POST' as const,
+              headers: { 'Content-Type': 'application/json' },
+            },
+            inputs: [
+              {
+                name: 'userEmail',
+                as: 'email',
+                type: 'string',
+                source: 'field' as const,
+                position: 'payload:request.customer' as const,
+              },
+              {
+                name: 'apiKey',
+                type: 'string',
+                source: 'hidden' as const,
+                default: 'secret-key-123',
+                position: 'payload:request.headers' as const,
+              },
+              {
+                name: 'requestId',
+                type: 'string',
+                source: 'hidden' as const,
+                default: 'req-456',
+                position: 'payload:request.metadata' as const,
+              },
+            ],
+          } as WarpCollectAction,
+        ],
+      }
+
+      const inputs = ['string:user@example.com']
+      const result = await executor.execute(mixedInputWarp, inputs)
+
+      expect(result).toBeDefined()
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://api.example.com/collect',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({
+            request: {
+              customer: {
+                email: 'user@example.com',
+              },
+              headers: {
+                apiKey: 'secret-key-123',
+              },
+              metadata: {
+                requestId: 'req-456',
+              },
+            },
+          }),
+        })
+      )
+    })
+
+    it('should handle hidden inputs without position (flat structure)', async () => {
+      // Mock successful fetch response
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: 'test data' }),
+      })
+
+      const flatHiddenWarp = {
+        ...warp,
+        actions: [
+          {
+            type: 'collect' as const,
+            label: 'Collect with Flat Hidden Input',
+            destination: {
+              url: 'https://api.example.com/collect',
+              method: 'POST' as const,
+              headers: { 'Content-Type': 'application/json' },
+            },
+            inputs: [
+              {
+                name: 'userInput',
+                type: 'string',
+                source: 'field' as const,
+              },
+              {
+                name: 'version',
+                type: 'string',
+                source: 'hidden' as const,
+                default: '2.1.0',
+              },
+            ],
+          } as WarpCollectAction,
+        ],
+      }
+
+      const inputs = ['string:test-value']
+      const result = await executor.execute(flatHiddenWarp, inputs)
+
+      expect(result).toBeDefined()
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://api.example.com/collect',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({
+            userInput: 'test-value',
+            version: '2.1.0',
+          }),
+        })
+      )
+    })
   })
 })
