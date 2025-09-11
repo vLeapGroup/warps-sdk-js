@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.101
+
+### Patch Changes
+
+- 1460f4e: add env helper
+- f9628d4: add env secret type + helper
+
 ## 3.0.0-alpha.100
 
 ### Patch Changes
