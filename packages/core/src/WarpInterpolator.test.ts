@@ -158,6 +158,148 @@ describe('WarpInterpolator', () => {
       const result = await interpolator.apply(testConfig, warp)
       expect(result).toBeDefined()
     })
+
+    it('interpolates env vars with descriptions', async () => {
+      const warp = {
+        ...createMockWarp(),
+        vars: {
+          API_KEY: 'env:XMONEY_API_KEY|Get your API key from the xMoney Merchant Dashboard',
+        },
+        actions: [
+          {
+            type: 'transfer' as const,
+            label: 'Transfer',
+            address: 'erd1abc',
+            value: '{{API_KEY}}',
+            inputs: [],
+          } as WarpTransferAction,
+        ],
+      }
+
+      const configWithSecrets = {
+        ...testConfig,
+        vars: {
+          XMONEY_API_KEY: 'secret-api-key-123',
+        },
+      }
+
+      const interpolator = new WarpInterpolator(configWithSecrets, createMockAdapter())
+      const result = await interpolator.apply(configWithSecrets, warp)
+      expect((result.actions[0] as WarpTransferAction).value).toBe('secret-api-key-123')
+    })
+
+    it('interpolates env vars with descriptions using secrets parameter', async () => {
+      const warp = {
+        ...createMockWarp(),
+        vars: {
+          API_KEY: 'env:XMONEY_API_KEY|Get your API key from the xMoney Merchant Dashboard',
+        },
+        actions: [
+          {
+            type: 'transfer' as const,
+            label: 'Transfer',
+            address: 'erd1abc',
+            value: '{{API_KEY}}',
+            inputs: [],
+          } as WarpTransferAction,
+        ],
+      }
+
+      const secrets = {
+        XMONEY_API_KEY: 'secret-api-key-from-secrets-456',
+      }
+
+      const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+      const result = await interpolator.apply(testConfig, warp, secrets)
+      expect((result.actions[0] as WarpTransferAction).value).toBe('secret-api-key-from-secrets-456')
+    })
+
+    it('interpolates env vars without descriptions', async () => {
+      const warp = {
+        ...createMockWarp(),
+        vars: {
+          API_KEY: 'env:XMONEY_API_KEY',
+        },
+        actions: [
+          {
+            type: 'transfer' as const,
+            label: 'Transfer',
+            address: 'erd1abc',
+            value: '{{API_KEY}}',
+            inputs: [],
+          } as WarpTransferAction,
+        ],
+      }
+
+      const configWithSecrets = {
+        ...testConfig,
+        vars: {
+          XMONEY_API_KEY: 'simple-api-key-789',
+        },
+      }
+
+      const interpolator = new WarpInterpolator(configWithSecrets, createMockAdapter())
+      const result = await interpolator.apply(configWithSecrets, warp)
+      expect((result.actions[0] as WarpTransferAction).value).toBe('simple-api-key-789')
+    })
+
+    it('handles env vars with multiple pipe characters in description', async () => {
+      const warp = {
+        ...createMockWarp(),
+        vars: {
+          API_KEY: 'env:XMONEY_API_KEY|Get your API key from xMoney|Additional info|More details',
+        },
+        actions: [
+          {
+            type: 'transfer' as const,
+            label: 'Transfer',
+            address: 'erd1abc',
+            value: '{{API_KEY}}',
+            inputs: [],
+          } as WarpTransferAction,
+        ],
+      }
+
+      const configWithSecrets = {
+        ...testConfig,
+        vars: {
+          XMONEY_API_KEY: 'multi-pipe-api-key',
+        },
+      }
+
+      const interpolator = new WarpInterpolator(configWithSecrets, createMockAdapter())
+      const result = await interpolator.apply(configWithSecrets, warp)
+      expect((result.actions[0] as WarpTransferAction).value).toBe('multi-pipe-api-key')
+    })
+
+    it('handles env vars with empty description', async () => {
+      const warp = {
+        ...createMockWarp(),
+        vars: {
+          API_KEY: 'env:XMONEY_API_KEY|',
+        },
+        actions: [
+          {
+            type: 'transfer' as const,
+            label: 'Transfer',
+            address: 'erd1abc',
+            value: '{{API_KEY}}',
+            inputs: [],
+          } as WarpTransferAction,
+        ],
+      }
+
+      const configWithSecrets = {
+        ...testConfig,
+        vars: {
+          XMONEY_API_KEY: 'empty-desc-api-key',
+        },
+      }
+
+      const interpolator = new WarpInterpolator(configWithSecrets, createMockAdapter())
+      const result = await interpolator.apply(configWithSecrets, warp)
+      expect((result.actions[0] as WarpTransferAction).value).toBe('empty-desc-api-key')
+    })
   })
 })
 

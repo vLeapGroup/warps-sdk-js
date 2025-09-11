@@ -21,7 +21,7 @@ export class WarpInterpolator {
     return modifiable
   }
 
-  applyVars(config: WarpClientConfig, warp: Warp, envs?: Record<string, any>): Warp {
+  applyVars(config: WarpClientConfig, warp: Warp, secrets?: Record<string, any>): Warp {
     if (!warp?.vars) return warp
     let modifiable = JSON.stringify(warp)
 
@@ -38,8 +38,9 @@ export class WarpInterpolator {
         const queryParamValue = new URLSearchParams(config.currentUrl.split('?')[1]).get(queryParamName)
         if (queryParamValue) modify(placeholder, queryParamValue)
       } else if (value.startsWith(`${WarpConstants.Vars.Env}:`)) {
-        const envVarName = value.split(`${WarpConstants.Vars.Env}:`)[1]
-        const combinedEnvs = { ...config.vars, ...envs }
+        const envVar = value.slice(WarpConstants.Vars.Env.length + 1)
+        const [envVarName, _envVarDescription] = envVar.split(WarpConstants.ArgCompositeSeparator)
+        const combinedEnvs = { ...config.vars, ...secrets }
         const envVarValue = combinedEnvs?.[envVarName]
         if (envVarValue) modify(placeholder, envVarValue)
       } else if (value === WarpConstants.Source.UserWallet && config.user?.wallets?.[this.adapter.chainInfo.name]) {
