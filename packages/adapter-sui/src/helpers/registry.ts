@@ -1,4 +1,4 @@
-import { WarpChainEnv, WarpChainInfo, WarpRegistryInfo, WarpTrustStatus } from '@vleap/warps'
+import { WarpChainEnv, WarpRegistryInfo, WarpTrustStatus } from '@vleap/warps'
 import { getSuiRegistryPackageId } from '../config'
 
 export const toRegistryMoveTarget = (env: WarpChainEnv, module: string) => `${getSuiRegistryPackageId(env)}::${module}`
@@ -18,20 +18,4 @@ export const toTypedRegistryInfo = (infoView: any): WarpRegistryInfo => ({
   upgradedAt: Number(infoView.upgraded_at),
   brand: infoView.brand ? Buffer.from(infoView.brand).toString('hex') : null,
   upgrade: infoView.upgrade ? Buffer.from(infoView.upgrade).toString('hex') : null,
-})
-
-export const toTypedChainInfo = (chainView: any): WarpChainInfo => ({
-  name: Buffer.from(chainView.name).toString(),
-  displayName: Buffer.from(chainView.display_name).toString(),
-  chainId: Buffer.from(chainView.chain_id).toString(),
-  blockTime: Number(chainView.block_time),
-  addressHrp: Buffer.from(chainView.address_hrp).toString(),
-  defaultApiUrl: Buffer.from(chainView.api_url).toString(),
-  nativeToken: {
-    chain: Buffer.from(chainView.name).toString(),
-    identifier: Buffer.from(chainView.native_token).toString(),
-    name: Buffer.from(chainView.native_token).toString(),
-    decimals: 9,
-    logoUrl: `https://example.com/${Buffer.from(chainView.native_token).toString().toLowerCase()}-logo.png`,
-  },
 })

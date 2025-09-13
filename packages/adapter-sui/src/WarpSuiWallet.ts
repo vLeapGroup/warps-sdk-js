@@ -3,7 +3,6 @@ import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519'
 
 import {
   AdapterWarpWallet,
-  getProviderUrl,
   getWarpWalletAddressFromConfig,
   getWarpWalletPrivateKeyFromConfig,
   WarpAdapterGenericTransaction,
@@ -11,6 +10,7 @@ import {
   WarpClientConfig,
   WarpWalletDetails,
 } from '@vleap/warps'
+import { getConfiguredSuiClient } from './helpers'
 
 export class WarpSuiWallet implements AdapterWarpWallet {
   private client: SuiClient
@@ -19,7 +19,7 @@ export class WarpSuiWallet implements AdapterWarpWallet {
     private config: WarpClientConfig,
     private chain: WarpChainInfo
   ) {
-    this.client = new SuiClient({ url: getProviderUrl(config, chain.name, config.env, chain.defaultApiUrl) })
+    this.client = getConfiguredSuiClient(config, chain)
   }
 
   async signTransaction(tx: WarpAdapterGenericTransaction): Promise<WarpAdapterGenericTransaction> {
