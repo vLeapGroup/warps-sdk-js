@@ -19,7 +19,7 @@ import {
   WarpNativeValue,
 } from './warp'
 
-export type WarpWalletDetails = { address: string; mnemonic?: string; privateKey?: string }
+export type WarpWalletDetails = { address: string; mnemonic?: string | null; privateKey?: string | null }
 
 export type WarpUserWallets = Record<WarpChain, WarpWalletDetails | string | null>
 
