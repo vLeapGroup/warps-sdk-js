@@ -51,7 +51,7 @@ export class WarpSuiWallet implements AdapterWarpWallet {
     return result.digest
   }
 
-  create(mnemonic: string): { address: string; privateKey: string; mnemonic: string } {
+  create(mnemonic: string): WarpWalletDetails {
     const keypair = Ed25519Keypair.deriveKeypair(mnemonic.trim())
     const address = keypair.getPublicKey().toSuiAddress()
     const privateKey = Buffer.from(keypair.getSecretKey()).toString('hex')
