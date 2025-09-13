@@ -1,29 +1,31 @@
-// @ts-ignore - Sui SDK has ESM compatibility issues but this is production code
 import { SuiClient } from '@mysten/sui/client'
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519'
 
-import { AdapterWarpWallet, WarpAdapterGenericTransaction, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import {
+  AdapterWarpWallet,
+  getProviderUrl,
+  getWarpWalletAddressFromConfig,
+  getWarpWalletPrivateKeyFromConfig,
+  WarpAdapterGenericTransaction,
+  WarpChainInfo,
+  WarpClientConfig,
+  WarpWalletDetails,
+} from '@vleap/warps'
 
 export class WarpSuiWallet implements AdapterWarpWallet {
   private client: SuiClient
-  private keypair: Ed25519Keypair | null = null
 
   constructor(
     private config: WarpClientConfig,
     private chain: WarpChainInfo
   ) {
-    this.client = new SuiClient({ url: chain.defaultApiUrl || 'https://fullnode.devnet.sui.io:443' })
+    this.client = new SuiClient({ url: getProviderUrl(config, chain.name, config.env, chain.defaultApiUrl) })
   }
 
   async signTransaction(tx: WarpAdapterGenericTransaction): Promise<WarpAdapterGenericTransaction> {
-    if (!tx || typeof tx !== 'object') {
-      throw new Error('Invalid transaction object')
-    }
+    if (!tx || typeof tx !== 'object') throw new Error('Invalid transaction object')
 
     const keypair = this.getKeypairFromConfig()
-
-    // For Sui, we need to serialize the transaction first
-    // This is a simplified approach - in production you'd use proper transaction building
     const txBytes = new TextEncoder().encode(JSON.stringify(tx))
     const signature = await keypair.signPersonalMessage(txBytes)
 
@@ -32,20 +34,14 @@ export class WarpSuiWallet implements AdapterWarpWallet {
 
   async signMessage(message: string): Promise<string> {
     const keypair = this.getKeypairFromConfig()
-
     const messageBytes = new TextEncoder().encode(message)
     const signature = await keypair.signPersonalMessage(messageBytes)
     return signature.signature
   }
 
   async sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string> {
-    if (!tx || typeof tx !== 'object') {
-      throw new Error('Invalid transaction object')
-    }
-
-    if (!tx.signature) {
-      throw new Error('Transaction must be signed before sending')
-    }
+    if (!tx || typeof tx !== 'object') throw new Error('Invalid transaction object')
+    if (!tx.signature) throw new Error('Transaction must be signed before sending')
 
     const result = await this.client.signAndExecuteTransaction({
       transaction: tx,
@@ -62,45 +58,20 @@ export class WarpSuiWallet implements AdapterWarpWallet {
     return { address, privateKey, mnemonic }
   }
 
-  generate(): { address: string; privateKey: string; mnemonic: string } {
+  generate(): WarpWalletDetails {
     const keypair = Ed25519Keypair.generate()
     const address = keypair.getPublicKey().toSuiAddress()
     const privateKey = Buffer.from(keypair.getSecretKey()).toString('hex')
-    // Sui keypairs don't have mnemonics, so we'll use the address as identifier
-    return { address, privateKey, mnemonic: address }
+    return { address, privateKey, mnemonic: null }
   }
 
   getAddress(): string | null {
-    try {
-      const keypair = this.getKeypairFromConfig()
-      return keypair.getPublicKey().toSuiAddress()
-    } catch (error) {
-      return null
-    }
-  }
-
-  private getPrivateKeyFromConfig(): string | null {
-    const walletConfig = this.config.user?.wallets?.[this.chain.name]
-    if (!walletConfig) return null
-
-    // Check if it's an object with privateKey property
-    if (typeof walletConfig === 'object' && 'privateKey' in walletConfig) {
-      return walletConfig.privateKey || null
-    }
-
-    // Check if it's a string (the private key itself)
-    if (typeof walletConfig === 'string') {
-      return walletConfig
-    }
-
-    return null
+    return getWarpWalletAddressFromConfig(this.config, this.chain.name)
   }
 
   private getKeypairFromConfig(): Ed25519Keypair {
-    const privateKey = this.getPrivateKeyFromConfig()
-    if (!privateKey) {
-      throw new Error('Wallet not initialized - no private key provided')
-    }
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
+    if (!privateKey) throw new Error('Wallet not initialized - no private key provided')
 
     try {
       const privateKeyBytes = Buffer.from(privateKey, 'hex')
