@@ -8,6 +8,7 @@ import {
   WarpDataLoaderOptions,
 } from '@vleap/warps'
 import * as bech32 from 'bech32'
+import { getConfiguredFastsetClient } from './helpers'
 import { FastsetClient } from './sdk/FastsetClient'
 
 export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
@@ -17,21 +18,7 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
     private readonly config: WarpClientConfig,
     private readonly chain: WarpChainInfo
   ) {
-    this.client = new FastsetClient(config, chain)
-  }
-
-  private addressToBytes(address: string): number[] {
-    try {
-      const decoded = bech32.bech32m.decode(address)
-      return Array.from(bech32.bech32m.fromWords(decoded.words))
-    } catch {
-      try {
-        const decoded = bech32.bech32.decode(address)
-        return Array.from(bech32.bech32.fromWords(decoded.words))
-      } catch {
-        throw new Error(`Invalid FastSet address: ${address}`)
-      }
-    }
+    this.client = getConfiguredFastsetClient(config, chain)
   }
 
   async getAccount(address: string): Promise<WarpChainAccount> {
@@ -46,7 +33,7 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
     const accountInfo = await this.client.getAccountInfo(addressBytes)
 
     const assets: WarpChainAsset[] = []
-    const balance = BigInt(accountInfo.balance)
+    const balance = BigInt(parseInt(accountInfo.balance, 16))
     if (balance > 0n) {
       assets.push({ ...this.chain.nativeToken, amount: balance })
     }
@@ -76,10 +63,7 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
     const tokenId = Buffer.from(identifier, 'hex')
     const tokenInfo = await this.client.getTokenInfo([Array.from(tokenId)])
     const metadata = tokenInfo.requested_token_metadata[0]?.[1]
-
-    if (!metadata) {
-      return null
-    }
+    if (!metadata) return null
 
     return {
       chain: this.chain.name,
@@ -98,5 +82,19 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
 
   async getAccountActions(address: string, options?: WarpDataLoaderOptions): Promise<WarpChainAction[]> {
     return []
+  }
+
+  private addressToBytes(address: string): number[] {
+    try {
+      const decoded = bech32.bech32m.decode(address)
+      return Array.from(bech32.bech32m.fromWords(decoded.words))
+    } catch {
+      try {
+        const decoded = bech32.bech32.decode(address)
+        return Array.from(bech32.bech32.fromWords(decoded.words))
+      } catch {
+        throw new Error(`Invalid FastSet address: ${address}`)
+      }
+    }
   }
 }
