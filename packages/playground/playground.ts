@@ -2,14 +2,13 @@ import { WarpClient } from '@vleap/warps'
 import { getAllEvmAdapters } from '@vleap/warps-adapter-evm'
 import { getFastsetAdapter } from '@vleap/warps-adapter-fastset'
 import { getAllMultiversxAdapters, getMultiversxAdapter } from '@vleap/warps-adapter-multiversx'
-import { getSuiAdapter } from '@vleap/warps-adapter-sui'
 import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-const Chain = 'multiversx'
-const WarpToTest = 'test.json'
-const WarpInputs: string[] = ['address:erd1l5n8fd7hqezn0u8602h7euxmjnx32uulgxr3d5ruu72pp0qhnjgqgsvhde', 'asset:EGLD|0.5']
+const Chain = 'fastset'
+const WarpToTest = null
+const WarpInputs: string[] = [] // e.g. 'address:moon', 'asset:EGLD|0.5'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -20,28 +19,21 @@ const runWarp = async (warpFile: string) => {
   if (!warpFile.endsWith('.json')) return
   const warpRaw = fs.readFileSync(warpPath, 'utf-8')
   const walletData = await loadWallet(Chain)
-  const privateKey = await loadFile(Chain)
+  const privateKey = walletData.privateKey || (await loadFile(Chain))
 
-  console.log('🔑 Wallet data loaded:', { address: walletData?.address, hasPrivateKey: !!privateKey })
+  console.log('🔑 Wallet data loaded:', { address: walletData?.address, hasPrivateKey: privateKey })
 
-  if (!privateKey) {
-    throw new Error('Private key not found in wallet file')
-  }
-
-  const config: WarpConfig = {
+  const config: any = {
     env: 'devnet',
     currentUrl: 'https://usewarp.to',
     user: { wallets: { [Chain]: { ...walletData, privateKey } } },
   }
 
   const client = new WarpClient(config, [
-    getSuiAdapter(config),
     ...getAllMultiversxAdapters(config),
     ...getAllEvmAdapters(config, getMultiversxAdapter(config)),
     getFastsetAdapter(config, getMultiversxAdapter(config)),
   ])
-
-  const warp = await client.createBuilder(Chain).createFromRaw(warpRaw)
 
   const executor = client.createExecutor({
     onExecuted: (result) => {
@@ -64,21 +56,24 @@ const runWarp = async (warpFile: string) => {
   console.log('Wallet assets:', await dataLoader.getAccountAssets(address))
   console.log('--------------------------------')
 
-  const { tx } = await executor.execute(warp, WarpInputs)
-  const signedTx = await client.getWallet(Chain).signTransaction(tx)
-  console.log('--------------------------------')
-  console.log('Signed transaction:', signedTx)
-  console.log('--------------------------------')
-  const sentTxHash = await client.getWallet(Chain).sendTransaction(signedTx)
-  console.log('--------------------------------')
-  console.log('Sent transaction:', sentTxHash)
-  console.log('--------------------------------')
-  const remoteTx = await client.getDataLoader(Chain).getAction(sentTxHash, true)
-  console.log('--------------------------------')
-  console.log('Remote transaction:', remoteTx)
-  console.log('--------------------------------')
+  if (WarpToTest) {
+    const warp = await client.createBuilder(Chain).createFromRaw(warpRaw)
+    const { tx } = await executor.execute(warp, WarpInputs)
+    const signedTx = await client.getWallet(Chain).signTransaction(tx)
+    console.log('--------------------------------')
+    console.log('Signed transaction:', signedTx)
+    console.log('--------------------------------')
+    const sentTxHash = await client.getWallet(Chain).sendTransaction(signedTx)
+    console.log('--------------------------------')
+    console.log('Sent transaction:', sentTxHash)
+    console.log('--------------------------------')
+    const remoteTx = await client.getDataLoader(Chain).getAction(sentTxHash, true)
+    console.log('--------------------------------')
+    console.log('Remote transaction:', remoteTx)
+    console.log('--------------------------------')
 
-  executor.evaluateResults(warp, Chain, remoteTx)
+    executor.evaluateResults(warp, Chain, remoteTx)
+  }
 }
 
 const listWarps = () => fs.readdirSync(warpsDir).filter((f) => f.endsWith('.ts') || f.endsWith('.js') || f.endsWith('.json'))
