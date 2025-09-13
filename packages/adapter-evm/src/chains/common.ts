@@ -4,6 +4,7 @@ import { WarpEvmExecutor } from '../WarpEvmExecutor'
 import { WarpEvmExplorer } from '../WarpEvmExplorer'
 import { WarpEvmResults } from '../WarpEvmResults'
 import { WarpEvmSerializer } from '../WarpEvmSerializer'
+import { WarpEvmWallet } from '../WarpEvmWallet'
 
 export const createEvmAdapter = (
   chainName: string,
@@ -26,6 +27,7 @@ export const createEvmAdapter = (
       abiBuilder: () => fallback.abiBuilder(),
       brandBuilder: () => fallback.brandBuilder(),
       dataLoader: new WarpEvmDataLoader(config, chainInfos[config.env]),
+      wallet: new WarpEvmWallet(config, chainInfos[config.env]),
     }
   }
 }

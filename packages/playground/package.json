@@ -14,9 +14,9 @@
   "dependencies": {
     "@vleap/warps": "3.0.0-alpha.101",
     "@vleap/warps-adapter-evm": "0.2.0-alpha.27",
-    "@vleap/warps-adapter-multiversx": "0.2.0-alpha.50",
-    "@vleap/warps-adapter-sui": "0.2.0-alpha.36",
-    "@vleap/warps-adapter-fastset": "0.1.0-alpha.20"
+    "@vleap/warps-adapter-fastset": "0.1.0-alpha.20",
+    "@vleap/warps-adapter-multiversx": "^0.2.0-alpha.50",
+    "@vleap/warps-adapter-sui": "^0.2.0-alpha.36"
   },
   "devDependencies": {
     "ts-node": "^10.9.1",

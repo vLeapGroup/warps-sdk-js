@@ -1,71 +1,46 @@
-// Playground for testing warps in isolation
-import {
-  Address,
-  DevnetEntrypoint,
-  Transaction as MultiversxTransaction,
-  TransactionComputer,
-  TransactionOnNetwork,
-  UserSigner,
-} from '@multiversx/sdk-core'
-import { getFullnodeUrl, SuiClient } from '@mysten/sui/client'
-import { Keypair } from '@mysten/sui/dist/cjs/cryptography'
-import { getFaucetHost, requestSuiFromFaucetV2 } from '@mysten/sui/faucet'
-import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519'
-import { SerialTransactionExecutor, Transaction as SuiTransaction } from '@mysten/sui/transactions'
 import { WarpClient, WarpClientConfig } from '@vleap/warps'
-import { getArbitrumAdapter, getBaseAdapter, getEthereumAdapter } from '@vleap/warps-adapter-evm'
-import { getMultiversxAdapter } from '@vleap/warps-adapter-multiversx'
-import { getSuiAdapter } from '@vleap/warps-adapter-sui'
-import { ethers } from 'ethers'
+import { getAllEvmAdapters } from '@vleap/warps-adapter-evm'
+import { getFastsetAdapter } from '@vleap/warps-adapter-fastset'
+import { getAllMultiversxAdapters, getMultiversxAdapter } from '@vleap/warps-adapter-multiversx'
 import * as fs from 'fs'
 import * as path from 'path'
-
-const walletMultiversxFileName = 'mvx.pem'
-const walletSuiFileName = 'sui.mnemonic'
-const walletEvmFileName = 'evm.mnemonic'
-const warpInputs: string[] = []
-
-const suiNetwork = 'testnet'
-
-const warpsDir = path.join(__dirname, 'warps')
+import { fileURLToPath } from 'url'
 
 const Chain = 'multiversx'
+const WarpToTest = 'test.json'
+const WarpInputs: string[] = ['address:erd1l5n8fd7hqezn0u8602h7euxmjnx32uulgxr3d5ruu72pp0qhnjgqgsvhde', 'asset:EGLD|0.5']
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const warpsDir = path.join(__dirname, 'warps')
 
 const runWarp = async (warpFile: string) => {
   const warpPath = path.join(warpsDir, warpFile)
-  if (!warpFile.endsWith('.json')) {
-    return
-  }
-
+  if (!warpFile.endsWith('.json')) return
   const warpRaw = fs.readFileSync(warpPath, 'utf-8')
+  const walletData = await loadWallet(Chain)
+  const privateKey = await loadFile(Chain)
+
+  console.log('🔑 Wallet data loaded:', { address: walletData?.address, hasPrivateKey: !!privateKey })
+
+  if (!privateKey) {
+    throw new Error('Private key not found in wallet file')
+  }
 
   const config: WarpClientConfig = {
     env: 'devnet',
     currentUrl: 'https://usewarp.to',
-    user: {},
+    user: { wallets: { [Chain]: { ...walletData, privateKey } } },
   }
 
-  const multiversxAdapter = getMultiversxAdapter(config)
   const client = new WarpClient(config, [
-    multiversxAdapter,
     getSuiAdapter(config),
-    getEthereumAdapter(config, multiversxAdapter),
-    getArbitrumAdapter(config, multiversxAdapter),
-    getBaseAdapter(config, multiversxAdapter),
+    ...getAllMultiversxAdapters(config),
+    ...getAllEvmAdapters(config, getMultiversxAdapter(config)),
+    getFastsetAdapter(config, getMultiversxAdapter(config)),
   ])
 
   const warp = await client.createBuilder(Chain).createFromRaw(warpRaw)
-
-  const registry = await client.getRegistry(Chain)
-  const chain = await registry.getChainInfo(Chain)
-
-  config.user.wallets = {
-    multiversx: (await getMultiversxWallet()).address,
-    sui: (await getSuiWallet()).address,
-    ethereum: (await getEvmWallet()).address,
-    arbitrum: (await getEvmWallet()).address,
-    base: (await getEvmWallet()).address,
-  }
 
   const executor = client.createExecutor({
     onExecuted: (result) => {
@@ -73,24 +48,43 @@ const runWarp = async (warpFile: string) => {
       console.log('Executed:', result)
       console.log('--------------------------------')
     },
+    onError: (result) => {
+      console.log('--------------------------------')
+      console.log('Error:', result)
+      console.log('--------------------------------')
+    },
   })
-  const { tx } = await executor.execute(warp, warpInputs)
 
-  if (chain.name === 'multiversx') {
-    const txOnNetwork = await signAndSendWithMultiversX(tx)
-    executor.evaluateResults(warp, chain, txOnNetwork)
-  } else if (chain.name === 'sui') {
-    const txOnNetwork = await signAndSendWithSui(tx)
-    executor.evaluateResults(warp, chain, txOnNetwork)
-  } else if (chain.name === 'ethereum' || chain.name === 'arbitrum' || chain.name === 'base') {
-    const txOnNetwork = await signAndSendWithEvm(tx, chain)
-    executor.evaluateResults(warp, chain, txOnNetwork)
-  } else {
-    throw new Error(`Unsupported chain: ${chain}`)
-  }
+  const { tx } = await executor.execute(warp, WarpInputs)
+  const signedTx = await client.getWallet(Chain).signTransaction(tx)
+  console.log('--------------------------------')
+  console.log('Signed transaction:', signedTx)
+  console.log('--------------------------------')
+  const sentTxHash = await client.getWallet(Chain).sendTransaction(signedTx)
+  console.log('--------------------------------')
+  console.log('Sent transaction:', sentTxHash)
+  console.log('--------------------------------')
+  const remoteTx = await client.getDataLoader(Chain).getAction(sentTxHash, true)
+  console.log('--------------------------------')
+  console.log('Remote transaction:', remoteTx)
+  console.log('--------------------------------')
+
+  executor.evaluateResults(warp, Chain, remoteTx)
 }
 
 const listWarps = () => fs.readdirSync(warpsDir).filter((f) => f.endsWith('.ts') || f.endsWith('.js') || f.endsWith('.json'))
+
+const loadWallet = async (chain: string): Promise<any> => {
+  const walletPath = path.join(__dirname, 'wallets', `${chain}.json`)
+  const wallet = await fs.promises.readFile(walletPath, { encoding: 'utf8' })
+  return JSON.parse(wallet)
+}
+
+const loadFile = async (chain: string): Promise<string | null> => {
+  const filePath = path.join(__dirname, 'wallets', `${chain}.txt`)
+  const file = await fs.promises.readFile(filePath, { encoding: 'utf8' })
+  return file || null
+}
 
 const warps = listWarps()
 if (warps.length === 0) {
@@ -98,32 +92,12 @@ if (warps.length === 0) {
   process.exit(1)
 }
 
-const warpToRun = warps[0] // Run the first warp we find
+const warpToRun = warps.find((w) => w === WarpToTest) || warps[0]
+
+console.log(`🎯 Testing warp: ${warpToRun}`)
 runWarp(warpToRun)
 
-const getMultiversxWallet = async (): Promise<{ address: string; signer: UserSigner }> => {
-  const pemPath = path.join(__dirname, 'wallets', walletMultiversxFileName)
-  const pemText = await fs.promises.readFile(pemPath, { encoding: 'utf8' })
-  const signer = UserSigner.fromPem(pemText)
-  return { address: signer.getAddress().toBech32(), signer }
-}
-
-const signAndSendWithMultiversX = async (tx: MultiversxTransaction): Promise<TransactionOnNetwork> => {
-  const { address, signer } = await getMultiversxWallet()
-  const entrypoint = new DevnetEntrypoint({ kind: 'api', clientName: 'warp-test-playground' })
-  const provider = entrypoint.createNetworkProvider()
-  const account = await provider.getAccount(Address.newFromBech32(address))
-  tx.nonce = account.nonce
-  const serializedTx = new TransactionComputer().computeBytesForSigning(tx)
-  tx.signature = await signer.sign(serializedTx)
-  const txHash = await provider.sendTransaction(tx)
-  await provider.awaitTransactionCompleted(txHash)
-  console.log('--------------------------------')
-  console.log('Sent transaction on MultiversX:', txHash)
-  console.log('--------------------------------')
-  const txOnNetwork = await provider.getTransaction(txHash)
-  return txOnNetwork
-}
+/*const signAndSendWithMultiversX = async (tx: MultiversxTransaction): Promise<TransactionOnNetwork> => {
 
 const getSuiWallet = async (): Promise<{ address: string; keypair: Keypair }> => {
   const mnemonicPath = path.join(__dirname, 'wallets', walletSuiFileName)
@@ -222,3 +196,4 @@ const signAndSendWithEvm = async (tx: any, chain: any): Promise<any> => {
 
   return receipt
 }
+  */

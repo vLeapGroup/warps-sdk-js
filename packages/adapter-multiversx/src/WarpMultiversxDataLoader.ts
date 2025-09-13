@@ -12,8 +12,7 @@ import {
   WarpClientConfig,
   WarpDataLoaderOptions,
 } from '@vleap/warps'
-import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
-import { getNormalizedTokenIdentifier, isNativeToken } from './helpers/general'
+import { getMultiversxEntrypoint, getNormalizedTokenIdentifier, isNativeToken } from './helpers/general'
 import { findKnownTokenById } from './tokens'
 
 export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
@@ -27,7 +26,7 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
   }
 
   async getAccount(address: string): Promise<WarpChainAccount> {
-    const provider = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env, this.config).createNetworkProvider()
+    const provider = getMultiversxEntrypoint(this.chain, this.config.env, this.config).createNetworkProvider()
     const accountReq = await provider.getAccount(Address.newFromBech32(address))
 
     return {
@@ -38,7 +37,7 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
   }
 
   async getAccountAssets(address: string): Promise<WarpChainAsset[]> {
-    const provider = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env, this.config).createNetworkProvider()
+    const provider = getMultiversxEntrypoint(this.chain, this.config.env, this.config).createNetworkProvider()
     const accountReq = provider.getAccount(Address.newFromBech32(address))
     const tokensReq = provider.getFungibleTokensOfAccount(Address.newFromBech32(address))
     const [account, tokens] = await Promise.all([accountReq, tokensReq])
@@ -82,7 +81,7 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
     const token = new Token({ identifier, nonce: BigInt(nonce || 0) })
     const _isFungible = tokenComputer.isFungible(token)
 
-    const provider = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env, this.config).createNetworkProvider()
+    const provider = getMultiversxEntrypoint(this.chain, this.config.env, this.config).createNetworkProvider()
     const normalizedIdentifier = getNormalizedTokenIdentifier(identifier)
 
     // TODO: add handling for non-fungible tokens like meta-esdts
@@ -104,7 +103,7 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
   }
 
   async getAction(identifier: string, awaitCompleted = false): Promise<WarpChainAction | null> {
-    const entrypoint = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env, this.config)
+    const entrypoint = getMultiversxEntrypoint(this.chain, this.config.env, this.config)
     const tx = awaitCompleted ? await entrypoint.awaitCompletedTransaction(identifier) : await entrypoint.getTransaction(identifier)
 
     return {
@@ -122,7 +121,7 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
   }
 
   async getAccountActions(address: string, options?: WarpDataLoaderOptions): Promise<WarpChainAction[]> {
-    const provider = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env, this.config).createNetworkProvider()
+    const provider = getMultiversxEntrypoint(this.chain, this.config.env, this.config).createNetworkProvider()
 
     let url = `accounts/${address}/transactions`
     const params = new URLSearchParams()

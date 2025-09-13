@@ -2,6 +2,7 @@ import { AbiRegistry, Address, TransactionOnNetwork, TransactionsFactoryConfig, 
 import {
   AdapterWarpAbiBuilder,
   getLatestProtocolIdentifier,
+  getWarpWalletAddressFromConfig,
   WarpAbi,
   WarpAbiContents,
   WarpAdapterGenericTransaction,
@@ -15,8 +16,8 @@ import {
   WarpLogger,
   WarpQueryAction,
 } from '@vleap/warps'
+import { getMultiversxEntrypoint } from './helpers/general'
 import { WarpMultiversxContractLoader } from './WarpMultiversxContractLoader'
-import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 
 export class WarpMultiversxAbiBuilder implements AdapterWarpAbiBuilder {
   private readonly contractLoader: WarpMultiversxContractLoader
@@ -31,7 +32,7 @@ export class WarpMultiversxAbiBuilder implements AdapterWarpAbiBuilder {
   }
 
   async createInscriptionTransaction(abi: WarpAbiContents): Promise<WarpAdapterGenericTransaction> {
-    const userWallet = this.config.user?.wallets?.[this.chain.name]
+    const userWallet = getWarpWalletAddressFromConfig(this.config, this.chain.name)
     if (!userWallet) throw new Error('WarpBuilder: user address not set')
     const factoryConfig = new TransactionsFactoryConfig({ chainID: this.chain.chainId })
     const factory = new TransferTransactionsFactory({ config: factoryConfig })
@@ -83,7 +84,7 @@ export class WarpMultiversxAbiBuilder implements AdapterWarpAbiBuilder {
       }
     }
 
-    const chainEntry = WarpMultiversxExecutor.getChainEntrypoint(this.chain, this.config.env)
+    const chainEntry = getMultiversxEntrypoint(this.chain, this.config.env, this.config)
     const chainProvider = chainEntry.createNetworkProvider()
 
     try {

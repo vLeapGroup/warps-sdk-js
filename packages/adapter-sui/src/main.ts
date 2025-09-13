@@ -8,6 +8,7 @@ import { WarpSuiExplorer } from './WarpSuiExplorer'
 import { WarpSuiRegistry } from './WarpSuiRegistry'
 import { WarpSuiResults } from './WarpSuiResults'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
+import { WarpSuiWallet } from './WarpSuiWallet'
 
 export const NativeTokenSui: WarpChainAsset = {
   chain: WarpChainName.Sui,
@@ -36,6 +37,7 @@ function createSuiAdapter(chainName: string, chainPrefix: string, chainInfos: Re
       abiBuilder: () => new WarpSuiAbiBuilder(config, chainInfo),
       brandBuilder: () => new WarpSuiBrandBuilder(config, chainInfo),
       dataLoader: new WarpSuiDataLoader(config, chainInfo),
+      wallet: new WarpSuiWallet(config, chainInfo),
     }
   }
 }

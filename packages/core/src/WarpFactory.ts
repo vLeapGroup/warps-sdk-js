@@ -1,5 +1,5 @@
 import { WarpConstants } from './constants'
-import { findWarpAdapterForChain, getWarpActionByIndex, shiftBigintBy, splitInput } from './helpers'
+import { findWarpAdapterForChain, getWarpActionByIndex, getWarpWalletAddressFromConfig, shiftBigintBy, splitInput } from './helpers'
 import {
   Adapter,
   ResolvedInput,
@@ -126,8 +126,9 @@ export class WarpFactory {
         if (!value) return null
         return this.serializer.nativeToString(input.type, value)
       } else if (input.source === WarpConstants.Source.UserWallet) {
-        if (!this.config.user?.wallets?.[chain]) return null
-        return this.serializer.nativeToString('address', this.config.user.wallets[chain])
+        const wallet = getWarpWalletAddressFromConfig(this.config, chain)
+        if (!wallet) return null
+        return this.serializer.nativeToString('address', wallet)
       } else if (input.source === 'hidden') {
         // Hidden inputs always use their default value
         return input.default !== undefined ? this.serializer.nativeToString(input.type, input.default) : null

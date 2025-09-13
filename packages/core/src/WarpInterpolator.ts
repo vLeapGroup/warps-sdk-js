@@ -1,4 +1,5 @@
 import { WarpChainName, WarpConstants } from './constants'
+import { getWarpWalletAddressFromConfig } from './helpers'
 import { Adapter, InterpolationBag, Warp, WarpAction, WarpClientConfig } from './types'
 
 export class WarpInterpolator {
@@ -23,6 +24,7 @@ export class WarpInterpolator {
 
   applyVars(config: WarpClientConfig, warp: Warp, secrets?: Record<string, any>): Warp {
     if (!warp?.vars) return warp
+    const wallet = getWarpWalletAddressFromConfig(config, this.adapter.chainInfo.name)
     let modifiable = JSON.stringify(warp)
 
     const modify = (placeholder: string, value: string | number) => {
@@ -43,9 +45,8 @@ export class WarpInterpolator {
         const combinedEnvs = { ...config.vars, ...secrets }
         const envVarValue = combinedEnvs?.[envVarName]
         if (envVarValue) modify(placeholder, envVarValue)
-      } else if (value === WarpConstants.Source.UserWallet && config.user?.wallets?.[this.adapter.chainInfo.name]) {
-        const wallet = config.user.wallets[this.adapter.chainInfo.name]
-        if (wallet) modify(placeholder, wallet)
+      } else if (value === WarpConstants.Source.UserWallet && wallet) {
+        modify(placeholder, wallet)
       } else {
         modify(placeholder, value)
       }

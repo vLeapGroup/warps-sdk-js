@@ -8,6 +8,7 @@ import { WarpMultiversxExplorer } from '../WarpMultiversxExplorer'
 import { WarpMultiversxRegistry } from '../WarpMultiversxRegistry'
 import { WarpMultiversxResults } from '../WarpMultiversxResults'
 import { WarpMultiversxSerializer } from '../WarpMultiversxSerializer'
+import { WarpMultiversxWallet } from '../WarpMultiversxWallet'
 
 export const createMultiversxAdapter = (
   chainName: string,
@@ -29,6 +30,7 @@ export const createMultiversxAdapter = (
       abiBuilder: () => new WarpMultiversxAbiBuilder(config, chainInfo),
       brandBuilder: () => new WarpMultiversxBrandBuilder(config, chainInfo),
       dataLoader: new WarpMultiversxDataLoader(config, chainInfo),
+      wallet: new WarpMultiversxWallet(config, chainInfo),
       registerTypes: (typeRegistry: WarpTypeRegistry) => {
         typeRegistry.registerType('token', {
           stringToNative: (value: string) => value,

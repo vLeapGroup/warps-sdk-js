@@ -3,6 +3,7 @@ import { Transaction } from '@mysten/sui/transactions'
 import {
   AdapterWarpRegistry,
   getProviderUrl,
+  getWarpWalletAddressFromConfig,
   WarpBrand,
   WarpCache,
   WarpCacheConfig,
@@ -32,7 +33,7 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
     const apiUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
     this.client = new SuiClient({ url: apiUrl })
     this.cache = new WarpCache(config.cache?.type)
-    this.userWallet = this.config.user?.wallets?.[this.chain.name] || null
+    this.userWallet = getWarpWalletAddressFromConfig(this.config, this.chain.name)
   }
 
   async init(): Promise<void> {

@@ -18,7 +18,7 @@ export class Wallet {
 
   constructor(privateKeyHex: string) {
     const cleanPrivateKey = privateKeyHex.replace(/^0x/, '')
-    this.privateKey = Buffer.from(cleanPrivateKey, 'hex')
+    this.privateKey = new Uint8Array(Buffer.from(cleanPrivateKey, 'hex'))
 
     // For now, we'll use a synchronous approach
     this.publicKey = ed.getPublicKey(this.privateKey)
@@ -83,8 +83,8 @@ export class Wallet {
   }
 
   static async fromPrivateKeyFile(filePath: string): Promise<Wallet> {
-    const fs = await import('fs/promises')
-    const privateKeyHex = (await fs.readFile(filePath, 'utf8')).trim()
+    const fs = await import('fs')
+    const privateKeyHex = fs.readFileSync(filePath, 'utf8').trim()
     return new Wallet(privateKeyHex)
   }
 }

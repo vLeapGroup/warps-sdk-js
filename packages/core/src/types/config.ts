@@ -19,7 +19,9 @@ import {
   WarpNativeValue,
 } from './warp'
 
-export type WarpUserWallets = Record<WarpChain, string | null>
+export type WarpWalletDetails = { address: string; mnemonic?: string; privateKey?: string }
+
+export type WarpUserWallets = Record<WarpChain, WarpWalletDetails | string | null>
 
 export type WarpProviderConfig = Record<WarpChainEnv, string>
 
@@ -62,6 +64,7 @@ export type Adapter = {
   abiBuilder: () => AdapterWarpAbiBuilder
   brandBuilder: () => AdapterWarpBrandBuilder
   dataLoader: AdapterWarpDataLoader
+  wallet: AdapterWarpWallet
   // Optional method for registering adapter-specific types
   registerTypes?: (typeRegistry: WarpTypeRegistry) => void
 }
@@ -127,7 +130,6 @@ export interface AdapterWarpBrandBuilder {
 export interface AdapterWarpExecutor {
   createTransaction(executable: WarpExecutable): Promise<WarpAdapterGenericTransaction>
   executeQuery(executable: WarpExecutable): Promise<WarpExecution>
-  signMessage(message: string, privateKey: string): Promise<string>
 }
 
 export interface AdapterWarpResults {
@@ -178,4 +180,13 @@ export interface AdapterWarpDataLoader {
   getAsset(identifier: string): Promise<WarpChainAsset | null>
   getAction(identifier: string, awaitCompleted?: boolean): Promise<WarpChainAction | null>
   getAccountActions(address: string, options?: WarpDataLoaderOptions): Promise<WarpChainAction[]>
+}
+
+export interface AdapterWarpWallet {
+  signTransaction(tx: WarpAdapterGenericTransaction): Promise<WarpAdapterGenericTransaction>
+  signMessage(message: string): Promise<string>
+  sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string>
+  create(mnemonic: string): WarpWalletDetails
+  generate(): WarpWalletDetails
+  getAddress(): string | null
 }

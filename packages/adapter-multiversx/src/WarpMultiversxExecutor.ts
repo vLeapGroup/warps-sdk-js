@@ -1,11 +1,7 @@
 import {
   Address,
   ArgSerializer,
-  DevnetEntrypoint,
-  MainnetEntrypoint,
-  NetworkEntrypoint,
   SmartContractTransactionsFactory,
-  TestnetEntrypoint,
   Token,
   TokenComputer,
   TokenTransfer,
@@ -19,16 +15,16 @@ import {
   AdapterWarpExecutor,
   applyResultsToMessages,
   getNextInfo,
-  getProviderUrl,
   getWarpActionByIndex,
+  getWarpWalletAddressFromConfig,
   WarpChainAssetValue,
-  WarpChainEnv,
   WarpChainInfo,
   WarpClientConfig,
   WarpExecutable,
   WarpExecution,
   WarpQueryAction,
 } from '@vleap/warps'
+import { getMultiversxEntrypoint } from './helpers/general'
 import { WarpMultiversxAbiBuilder } from './WarpMultiversxAbiBuilder'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
@@ -69,7 +65,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
   }
 
   async createTransferTransaction(executable: WarpExecutable): Promise<Transaction> {
-    const userWallet = this.config.user?.wallets?.[executable.chain.name]
+    const userWallet = getWarpWalletAddressFromConfig(this.config, executable.chain.name)
     if (!userWallet) throw new Error('WarpMultiversxExecutor: createTransfer - user address not set')
     const sender = Address.newFromBech32(userWallet)
     const config = new TransactionsFactoryConfig({ chainID: executable.chain.chainId })
@@ -83,7 +79,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
   }
 
   async createContractCallTransaction(executable: WarpExecutable): Promise<Transaction> {
-    const userWallet = this.config.user?.wallets?.[executable.chain.name]
+    const userWallet = getWarpWalletAddressFromConfig(this.config, executable.chain.name)
     if (!userWallet) throw new Error('WarpMultiversxExecutor: createContractCall - user address not set')
     const action = getWarpActionByIndex(executable.warp, executable.action)
     const sender = Address.newFromBech32(userWallet)
@@ -104,7 +100,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
     if (action.type !== 'query') throw new Error(`WarpMultiversxExecutor: Invalid action type for executeQuery: ${action.type}`)
     const abi = await this.abi.getAbiForAction(action)
     const typedArgs = executable.args.map((arg) => this.serializer.stringToTyped(arg))
-    const entrypoint = WarpMultiversxExecutor.getChainEntrypoint(executable.chain, this.config.env, this.config)
+    const entrypoint = getMultiversxEntrypoint(executable.chain, this.config.env, this.config)
     const contractAddress = Address.newFromBech32(executable.destination)
     const controller = entrypoint.createSmartContractController(abi)
     const query = controller.createQuery({ contract: contractAddress, function: action.func || '', arguments: typedArgs })
@@ -126,7 +122,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
       success: isSuccess,
       warp: executable.warp,
       action: executable.action,
-      user: this.config.user?.wallets?.[executable.chain.name] || null,
+      user: getWarpWalletAddressFromConfig(this.config, executable.chain.name),
       txHash: null,
       tx: null,
       next,
@@ -135,15 +131,6 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
       results,
       messages: applyResultsToMessages(executable.warp, results),
     }
-  }
-
-  static getChainEntrypoint(chainInfo: WarpChainInfo, env: WarpChainEnv, config?: WarpClientConfig): NetworkEntrypoint {
-    const clientName = 'warp-sdk'
-    const kind = 'api'
-    const apiUrl = config ? getProviderUrl(config, chainInfo.name, env, chainInfo.defaultApiUrl) : chainInfo.defaultApiUrl
-    if (env === 'devnet') return new DevnetEntrypoint({ url: apiUrl, kind, clientName })
-    if (env === 'testnet') return new TestnetEntrypoint({ url: apiUrl, kind, clientName })
-    return new MainnetEntrypoint({ url: apiUrl, kind, clientName })
   }
 
   async signMessage(message: string, privateKey: string): Promise<string> {

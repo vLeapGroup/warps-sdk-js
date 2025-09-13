@@ -1,6 +1,8 @@
 import { WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 import { WarpMultiversxDataLoader } from './WarpMultiversxDataLoader'
-import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
+import { getMultiversxEntrypoint } from './helpers/general'
+
+jest.mock('./helpers/general')
 
 describe('WarpMultiversxDataLoader', () => {
   const mockConfig: WarpClientConfig = {
@@ -67,7 +69,7 @@ describe('WarpMultiversxDataLoader', () => {
         ]),
       }
 
-      jest.spyOn(WarpMultiversxExecutor, 'getChainEntrypoint').mockReturnValue({
+      ;(getMultiversxEntrypoint as jest.MockedFunction<typeof getMultiversxEntrypoint>).mockReturnValue({
         createNetworkProvider: () => mockProvider,
       } as any)
 
@@ -106,7 +108,7 @@ describe('WarpMultiversxDataLoader', () => {
         ]),
       }
 
-      jest.spyOn(WarpMultiversxExecutor, 'getChainEntrypoint').mockReturnValue({
+      ;(getMultiversxEntrypoint as jest.MockedFunction<typeof getMultiversxEntrypoint>).mockReturnValue({
         createNetworkProvider: () => mockProvider,
       } as any)
 
@@ -132,7 +134,7 @@ describe('WarpMultiversxDataLoader', () => {
         doGetGeneric: jest.fn().mockResolvedValue([]),
       }
 
-      jest.spyOn(WarpMultiversxExecutor, 'getChainEntrypoint').mockReturnValue({
+      ;(getMultiversxEntrypoint as jest.MockedFunction<typeof getMultiversxEntrypoint>).mockReturnValue({
         createNetworkProvider: () => mockProvider,
       } as any)
 

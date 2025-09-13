@@ -1,6 +1,7 @@
 import {
   AdapterWarpResults,
   evaluateResultsCommon,
+  getWarpWalletAddressFromConfig,
   parseResultsOutIndex,
   ResolvedInput,
   Warp,
@@ -32,7 +33,7 @@ export class WarpFastsetResults implements AdapterWarpResults {
       success,
       warp,
       action: 0,
-      user: this.config.user?.wallets?.[this.chain.name] || null,
+      user: getWarpWalletAddressFromConfig(this.config, this.chain.name),
       txHash: transactionHash,
       tx,
       next: null,

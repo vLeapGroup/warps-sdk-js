@@ -4,6 +4,7 @@ import {
   getNextInfo,
   getProviderUrl,
   getWarpActionByIndex,
+  getWarpWalletAddressFromConfig,
   WarpChainAssetValue,
   WarpChainInfo,
   WarpClientConfig,
@@ -53,7 +54,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
   }
 
   async createTransferTransaction(executable: WarpExecutable): Promise<ethers.TransactionRequest> {
-    const userWallet = this.config.user?.wallets?.[executable.chain.name]
+    const userWallet = getWarpWalletAddressFromConfig(this.config, executable.chain.name)
     if (!userWallet) throw new Error('WarpEvmExecutor: createTransfer - user address not set')
 
     if (!ethers.isAddress(executable.destination)) {
@@ -76,7 +77,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
   }
 
   async createContractCallTransaction(executable: WarpExecutable): Promise<ethers.TransactionRequest> {
-    const userWallet = this.config.user?.wallets?.[executable.chain.name]
+    const userWallet = getWarpWalletAddressFromConfig(this.config, executable.chain.name)
     if (!userWallet) throw new Error('WarpEvmExecutor: createContractCall - user address not set')
 
     const action = getWarpActionByIndex(executable.warp, executable.action)
@@ -213,7 +214,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         success: isSuccess,
         warp: executable.warp,
         action: executable.action,
-        user: this.config.user?.wallets?.[executable.chain.name] || null,
+        user: getWarpWalletAddressFromConfig(this.config, executable.chain.name),
         txHash: null,
         tx: null,
         next,
@@ -227,7 +228,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         success: false,
         warp: executable.warp,
         action: executable.action,
-        user: this.config.user?.wallets?.[executable.chain.name] || null,
+        user: getWarpWalletAddressFromConfig(this.config, executable.chain.name),
         txHash: null,
         tx: null,
         next: null,

@@ -1,3 +1,5 @@
 *.pem
 *.mnemonic
 *.private-key
+*.json
+*.txt

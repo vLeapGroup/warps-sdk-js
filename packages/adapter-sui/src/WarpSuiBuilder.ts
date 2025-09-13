@@ -3,6 +3,7 @@ import { Transaction } from '@mysten/sui/transactions'
 import {
   AdapterWarpBuilder,
   getProviderUrl,
+  getWarpWalletAddressFromConfig,
   Warp,
   WarpAdapterGenericTransaction,
   WarpBuilder,
@@ -26,7 +27,7 @@ export class WarpSuiBuilder extends WarpBuilder implements AdapterWarpBuilder {
     this.cache = new WarpCache(config.cache?.type)
     const apiUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
     this.client = new SuiClient({ url: apiUrl })
-    this.userWallet = this.config.user?.wallets?.[this.chain.name] || null
+    this.userWallet = getWarpWalletAddressFromConfig(this.config, this.chain.name)
   }
 
   async createInscriptionTransaction(warp: Warp, registryObjectId?: string): Promise<WarpAdapterGenericTransaction> {

@@ -6,6 +6,7 @@ import {
   AdapterWarpExplorer,
   AdapterWarpRegistry,
   AdapterWarpResults,
+  AdapterWarpWallet,
   Warp,
   WarpAdapterGenericRemoteTransaction,
   WarpAdapterGenericTransaction,
@@ -97,7 +98,7 @@ export class WarpClient {
     if (!walletAddress) throw new Error(`No wallet configured for chain ${chain}`)
 
     const adapter = findWarpAdapterForChain(chain, this.adapters)
-    return adapter.executor.signMessage(message, privateKey)
+    return adapter.wallet.signMessage(message)
   }
 
   getExplorer(chain: WarpChain): AdapterWarpExplorer {
@@ -116,6 +117,10 @@ export class WarpClient {
 
   getDataLoader(chain: WarpChain): AdapterWarpDataLoader {
     return findWarpAdapterForChain(chain, this.adapters).dataLoader
+  }
+
+  getWallet(chain: WarpChain): AdapterWarpWallet {
+    return findWarpAdapterForChain(chain, this.adapters).wallet
   }
 
   get factory(): WarpFactory {

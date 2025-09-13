@@ -4,6 +4,7 @@ import { WarpFastsetExecutor } from './WarpFastsetExecutor'
 import { WarpFastsetExplorer } from './WarpFastsetExplorer'
 import { WarpFastsetResults } from './WarpFastsetResults'
 import { WarpFastsetSerializer } from './WarpFastsetSerializer'
+import { WarpFastsetWallet } from './WarpFastsetWallet'
 
 export const NativeTokenSet: WarpChainAsset = {
   chain: WarpChainName.Fastset,
@@ -34,6 +35,7 @@ function createFastsetAdapter(chainName: string, chainPrefix: string, chainInfos
       abiBuilder: () => fallback.abiBuilder(),
       brandBuilder: () => fallback.brandBuilder(),
       dataLoader: new WarpFastsetDataLoader(config, chainInfo),
+      wallet: new WarpFastsetWallet(config, chainInfo),
     }
   }
 }

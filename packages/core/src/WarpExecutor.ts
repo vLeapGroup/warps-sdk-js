@@ -6,6 +6,7 @@ import {
   findWarpExecutableAction,
   getNextInfo,
   getWarpActionByIndex,
+  getWarpWalletAddressFromConfig,
 } from './helpers'
 import { buildNestedPayload, mergeNestedPayload } from './helpers/payload'
 import { createAuthHeaders, createAuthMessage } from './helpers/signing'
@@ -80,7 +81,7 @@ export class WarpExecutor {
   }
 
   private async executeCollect(executable: WarpExecutable, extra?: Record<string, any>): Promise<WarpExecution> {
-    const wallet = this.config.user?.wallets?.[executable.chain.name] || null
+    const wallet = getWarpWalletAddressFromConfig(this.config, executable.chain.name)
     const collectAction = getWarpActionByIndex(executable.warp, executable.action) as WarpCollectAction
 
     const toInputPayloadValue = (resolvedInput: ResolvedInput) => {
@@ -147,7 +148,7 @@ export class WarpExecutor {
         success: response.ok,
         warp: executable.warp,
         action: executable.action,
-        user: this.config.user?.wallets?.[executable.chain.name] || null,
+        user: getWarpWalletAddressFromConfig(this.config, executable.chain.name),
         txHash: null,
         tx: null,
         next,
