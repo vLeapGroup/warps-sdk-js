@@ -1,7 +1,8 @@
-import { WarpClient, WarpClientConfig } from '@vleap/warps'
+import { WarpClient } from '@vleap/warps'
 import { getAllEvmAdapters } from '@vleap/warps-adapter-evm'
 import { getFastsetAdapter } from '@vleap/warps-adapter-fastset'
 import { getAllMultiversxAdapters, getMultiversxAdapter } from '@vleap/warps-adapter-multiversx'
+import { getSuiAdapter } from '@vleap/warps-adapter-sui'
 import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
@@ -27,7 +28,7 @@ const runWarp = async (warpFile: string) => {
     throw new Error('Private key not found in wallet file')
   }
 
-  const config: WarpClientConfig = {
+  const config: WarpConfig = {
     env: 'devnet',
     currentUrl: 'https://usewarp.to',
     user: { wallets: { [Chain]: { ...walletData, privateKey } } },
@@ -54,6 +55,14 @@ const runWarp = async (warpFile: string) => {
       console.log('--------------------------------')
     },
   })
+
+  const address = client.getWallet(Chain).getAddress()
+  const dataLoader = client.getDataLoader(Chain)
+
+  console.log('-------------------------------')
+  console.log('Wallet address:', address)
+  console.log('Wallet assets:', await dataLoader.getAccountAssets(address))
+  console.log('--------------------------------')
 
   const { tx } = await executor.execute(warp, WarpInputs)
   const signedTx = await client.getWallet(Chain).signTransaction(tx)
@@ -82,6 +91,7 @@ const loadWallet = async (chain: string): Promise<any> => {
 
 const loadFile = async (chain: string): Promise<string | null> => {
   const filePath = path.join(__dirname, 'wallets', `${chain}.txt`)
+  if (!fs.existsSync(filePath)) return null
   const file = await fs.promises.readFile(filePath, { encoding: 'utf8' })
   return file || null
 }
@@ -95,105 +105,5 @@ if (warps.length === 0) {
 const warpToRun = warps.find((w) => w === WarpToTest) || warps[0]
 
 console.log(`🎯 Testing warp: ${warpToRun}`)
+
 runWarp(warpToRun)
-
-/*const signAndSendWithMultiversX = async (tx: MultiversxTransaction): Promise<TransactionOnNetwork> => {
-
-const getSuiWallet = async (): Promise<{ address: string; keypair: Keypair }> => {
-  const mnemonicPath = path.join(__dirname, 'wallets', walletSuiFileName)
-  const mnemonic = await fs.promises.readFile(mnemonicPath, { encoding: 'utf8' })
-  const keypair = Ed25519Keypair.deriveKeypair(mnemonic.trim())
-  return { address: keypair.getPublicKey().toSuiAddress(), keypair }
-}
-
-const signAndSendWithSui = async (tx: SuiTransaction): Promise<any> => {
-  const { address, keypair } = await getSuiWallet()
-  const client = new SuiClient({ url: getFullnodeUrl(suiNetwork) })
-  const balance = await client.getBalance({ owner: address })
-  if (!balance.totalBalance || BigInt(balance.totalBalance) === 0n) {
-    await requestSuiFromFaucetV2({ host: getFaucetHost(suiNetwork), recipient: address })
-  }
-  const executor = new SerialTransactionExecutor({ client, signer: keypair })
-  const result = await executor.executeTransaction(tx)
-  console.log('--------------------------------')
-  console.log('Sent transaction on Sui:', result.digest)
-  console.log('--------------------------------')
-  return result
-}
-
-const getEvmWallet = async (): Promise<{ address: string; wallet: ethers.HDNodeWallet }> => {
-  const mnemonicPath = path.join(__dirname, 'wallets', walletEvmFileName)
-  const mnemonic = await fs.promises.readFile(mnemonicPath, { encoding: 'utf8' })
-  const wallet = ethers.Wallet.fromPhrase(mnemonic.trim())
-  return { address: wallet.address, wallet }
-}
-
-const signAndSendWithEvm = async (tx: any, chain: any): Promise<any> => {
-  const { address, wallet } = await getEvmWallet()
-  let rpcUrl: string
-  switch (chain.name) {
-    case 'ethereum':
-      rpcUrl = 'https://rpc.sepolia.org' // Sepolia testnet
-      break
-    case 'arbitrum':
-      rpcUrl = 'https://sepolia-rollup.arbitrum.io/rpc' // Arbitrum Sepolia testnet
-      break
-    case 'base':
-      rpcUrl = 'https://sepolia.base.org' // Base Sepolia testnet
-      break
-    default:
-      rpcUrl = 'https://eth-sepolia.g.alchemy.com/v2/demo'
-  }
-
-  const provider = new ethers.JsonRpcProvider(rpcUrl)
-  const connectedWallet = wallet.connect(provider)
-  const nonce = await provider.getTransactionCount(address)
-  const feeData = await provider.getFeeData()
-
-  const gasLimit =
-    tx.gasLimit ||
-    (await provider.estimateGas({
-      to: tx.to,
-      data: tx.data,
-      value: tx.value || 0,
-      from: address,
-    }))
-
-  // Get the correct chain ID for each network
-  let chainId: number
-  switch (chain.name) {
-    case 'ethereum':
-      chainId = 11155111 // Sepolia
-      break
-    case 'arbitrum':
-      chainId = 421614 // Arbitrum Sepolia
-      break
-    case 'base':
-      chainId = 84532 // Base Sepolia
-      break
-    default:
-      chainId = 11155111 // Sepolia
-  }
-
-  const txRequest = {
-    to: tx.to,
-    data: tx.data,
-    value: tx.value || 0,
-    gasLimit: gasLimit,
-    maxFeePerGas: tx.maxFeePerGas || feeData.maxFeePerGas,
-    maxPriorityFeePerGas: tx.maxPriorityFeePerGas || feeData.maxPriorityFeePerGas,
-    nonce: nonce,
-    chainId: chainId,
-  }
-
-  const signedTx = await connectedWallet.signTransaction(txRequest)
-  const txResponse = await provider.broadcastTransaction(signedTx)
-  const receipt = await txResponse.wait()
-
-  console.log('--------------------------------')
-  console.log(`Sent transaction on ${chain.name}:`, receipt.hash)
-  console.log('--------------------------------')
-
-  return receipt
-}
-  */
