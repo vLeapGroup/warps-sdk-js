@@ -3,6 +3,7 @@ import {
   AdapterWarpExecutor,
   getProviderUrl,
   getWarpActionByIndex,
+  getWarpWalletAddressFromConfig,
   WarpChainInfo,
   WarpClientConfig,
   WarpExecutable,
@@ -29,32 +30,19 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
 
   async createTransaction(executable: WarpExecutable): Promise<any> {
     const action = getWarpActionByIndex(executable.warp, executable.action)
-
-    switch (action.type) {
-      case 'transfer':
-        return this.createTransferTransaction(executable)
-      case 'contract':
-        return this.createContractCallTransaction(executable)
-      case 'query':
-        throw new Error('WarpFastsetExecutor: Invalid action type for createTransaction; Use executeQuery instead')
-      case 'collect':
-        throw new Error('WarpFastsetExecutor: Invalid action type for createTransaction; Use executeCollect instead')
-      default:
-        throw new Error(`WarpFastsetExecutor: Invalid action type (${action.type})`)
-    }
+    if (action.type === 'transfer') return this.createTransferTransaction(executable)
+    if (action.type === 'contract') return this.createContractCallTransaction(executable)
+    if (action.type === 'query') throw new Error('WarpFastsetExecutor: Invalid type for createTransaction; Use executeQuery instead')
+    if (action.type === 'collect') throw new Error('WarpFastsetExecutor: Invalid type for createTransaction; Use executeCollect instead')
+    throw new Error(`WarpFastsetExecutor: Invalid type (${action.type})`)
   }
 
   async createTransferTransaction(executable: WarpExecutable): Promise<any> {
-    const userWallet = this.config.user?.wallets?.[executable.chain.name]
+    const userWallet = getWarpWalletAddressFromConfig(this.config, executable.chain.name)
     if (!userWallet) throw new Error('WarpFastsetExecutor: createTransfer - user address not set')
-
-    if (!this.isValidFastsetAddress(executable.destination)) {
-      throw new Error(`WarpFastsetExecutor: Invalid destination address: ${executable.destination}`)
-    }
-
-    if (executable.value < 0) {
-      throw new Error(`WarpFastsetExecutor: Transfer value cannot be negative: ${executable.value}`)
-    }
+    console.log('createTransferTransaction - userWallet', userWallet, executable)
+    if (!this.isValidAddress(executable.destination)) throw new Error(`WarpFastsetExecutor: Invalid destination: ${executable.destination}`)
+    if (executable.value < 0) throw new Error(`WarpFastsetExecutor: Negative transfer value: ${executable.value}`)
 
     const recipientAddress = this.fromBase64(executable.destination)
     const amount = this.normalizeAmount(executable.value.toString())
@@ -72,19 +60,10 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
   async createContractCallTransaction(executable: WarpExecutable): Promise<any> {
     const userWallet = this.config.user?.wallets?.[executable.chain.name]
     if (!userWallet) throw new Error('WarpFastsetExecutor: createContractCall - user address not set')
-
     const action = getWarpActionByIndex(executable.warp, executable.action)
-    if (!action || !('func' in action) || !action.func) {
-      throw new Error('WarpFastsetExecutor: Contract action must have a function name')
-    }
-
-    if (!this.isValidFastsetAddress(executable.destination)) {
-      throw new Error(`WarpFastsetExecutor: Invalid contract address: ${executable.destination}`)
-    }
-
-    if (executable.value < 0) {
-      throw new Error(`WarpFastsetExecutor: Contract call value cannot be negative: ${executable.value}`)
-    }
+    if (!action || !('func' in action) || !action.func) throw new Error('WarpFastsetExecutor: Contract action must have a function name')
+    if (!this.isValidAddress(executable.destination)) throw new Error(`WarpFastsetExecutor: Invalid address: ${executable.destination}`)
+    if (executable.value < 0) throw new Error(`WarpFastsetExecutor: Contract call value cannot be negative: ${executable.value}`)
 
     try {
       const contractAddress = this.fromBase64(executable.destination)
@@ -105,16 +84,9 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
 
   async executeQuery(executable: WarpExecutable): Promise<any> {
     const action = getWarpActionByIndex(executable.warp, executable.action) as WarpQueryAction
-    if (action.type !== 'query') {
-      throw new Error(`WarpFastsetExecutor: Invalid action type for executeQuery: ${action.type}`)
-    }
-    if (!action.func) {
-      throw new Error('WarpFastsetExecutor: Query action must have a function name')
-    }
-
-    if (!this.isValidFastsetAddress(executable.destination)) {
-      throw new Error(`WarpFastsetExecutor: Invalid contract address for query: ${executable.destination}`)
-    }
+    if (action.type !== 'query') throw new Error(`WarpFastsetExecutor: Invalid action type for executeQuery: ${action.type}`)
+    if (!action.func) throw new Error('WarpFastsetExecutor: Query action must have a function name')
+    if (!this.isValidAddress(executable.destination)) throw new Error(`WarpFastsetExecutor: Invalid address: ${executable.destination}`)
 
     try {
       const contractAddress = this.fromBase64(executable.destination)
@@ -139,7 +111,6 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
   }
 
   private async signTransaction(transaction: TransactionData, privateKey: Uint8Array): Promise<Uint8Array> {
-    // Create the message to sign following the same pattern as the original TransactionSigner
     const transactionJson = JSON.stringify(transaction, (key, value) => {
       if (value instanceof Uint8Array) {
         return Array.from(value)
@@ -173,7 +144,6 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
 
     const transaction = await this.createTransferTransaction(executable)
     const privateKeyBytes = this.fromBase64(privateKey)
-
     // Create transaction data for the new API
     const transactionData = {
       sender: Array.from(privateKeyBytes.slice(0, 32)), // First 32 bytes as public key
@@ -189,10 +159,7 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
       },
     }
 
-    // Sign the transaction
     const signature = await this.signTransaction(transactionData, privateKeyBytes)
-
-    // Submit the transaction
     const transactionHash = await this.fastsetClient.submitTransaction(transactionData, signature)
 
     return {
@@ -230,18 +197,10 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
     return response.json()
   }
 
-  private isValidFastsetAddress(address: string): boolean {
-    if (typeof address !== 'string' || address.length === 0) {
-      return false
-    }
-
-    // For testing purposes, allow addresses that start with 'fs' or 'pi'
-    if (address.startsWith('fs') || address.startsWith('pi')) {
-      return true
-    }
-
+  private isValidAddress(address: string): boolean {
+    if (typeof address !== 'string' || address.length === 0) return false
     try {
-      const decoded = this.fromBase64(address)
+      const decoded = Wallet.decodeBech32Address(address)
       return decoded.length === 32
     } catch {
       return false

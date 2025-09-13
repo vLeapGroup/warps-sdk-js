@@ -21,6 +21,22 @@ export class WarpFastsetWallet implements AdapterWarpWallet {
     private chain: WarpChainInfo
   ) {
     this.client = getConfiguredFastsetClient(config, chain)
+    this.initializeWallet()
+  }
+
+  private initializeWallet() {
+    const wallets = this.config.user?.wallets
+    if (!wallets) return
+
+    const walletConfig = wallets[this.chain.name]
+    if (!walletConfig) return
+
+    if (typeof walletConfig === 'object' && 'privateKey' in walletConfig) {
+      const privateKey = walletConfig.privateKey
+      if (privateKey && typeof privateKey === 'string') {
+        this.wallet = new Wallet(privateKey)
+      }
+    }
   }
 
   async signTransaction(tx: WarpAdapterGenericTransaction): Promise<WarpAdapterGenericTransaction> {
