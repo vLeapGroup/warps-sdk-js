@@ -6,17 +6,20 @@ import {
   WarpClientConfig,
   WarpWalletDetails,
 } from '@vleap/warps'
+import { getConfiguredFastsetClient } from './helpers'
 import { FastsetClient, Transaction, Wallet } from './sdk'
 import { ed } from './sdk/ed25519-setup'
 
 export class WarpFastsetWallet implements AdapterWarpWallet {
   private wallet: Wallet | null = null
+  private client: FastsetClient
 
   constructor(
     private config: WarpClientConfig,
     private chain: WarpChainInfo
   ) {
     this.initializeWallet()
+    this.client = getConfiguredFastsetClient(this.config, this.chain)
   }
 
   private initializeWallet() {
@@ -57,8 +60,7 @@ export class WarpFastsetWallet implements AdapterWarpWallet {
       ? new Uint8Array(Buffer.from(tx.signature, 'hex'))
       : await ed.sign(this.serializeTransaction(transactionData), this.wallet.getPrivateKey())
 
-    const client = new FastsetClient({ proxyUrl: 'https://proxy.fastset.xyz' })
-    return await client.submitTransaction(transactionData, signature)
+    return await this.client.submitTransaction(transactionData, signature)
   }
 
   create(mnemonic: string): WarpWalletDetails {
