@@ -39,6 +39,7 @@ export class WarpSuiDataLoader implements AdapterWarpDataLoader {
 
   async getAccountAssets(address: string): Promise<WarpChainAsset[]> {
     const allBalances = await this.client.getAllBalances({ owner: address })
+    console.log('WarpSuiDataLoader.getAccountAssets', allBalances)
 
     const suiBalance = allBalances.find((balance: any) => balance.coinType === '0x2::sui::SUI')
     const tokenBalances = allBalances.filter((balance: any) => balance.coinType !== '0x2::sui::SUI' && BigInt(balance.totalBalance) > 0n)
