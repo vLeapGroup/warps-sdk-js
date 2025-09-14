@@ -53,7 +53,10 @@ export class WarpSuiDataLoader implements AdapterWarpDataLoader {
       assets.push(
         ...tokenAssets
           .filter((asset: any) => asset !== null)
-          .map((asset: any) => ({ ...asset, amount: BigInt(tokenBalances.find((b: any) => b.coinType === asset.identifier)?.totalBalance || 0) }))
+          .map((asset: any) => ({
+            ...asset,
+            amount: BigInt(tokenBalances.find((b: any) => b.coinType === asset.identifier)?.totalBalance || 0),
+          }))
       )
     }
 
