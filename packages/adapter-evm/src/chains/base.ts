@@ -18,6 +18,7 @@ export const getBaseAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Bas
     blockTime: 2000,
     addressHrp: '0x',
     defaultApiUrl: 'https://mainnet.base.org',
+    logoUrl: 'https://vleap.ai/images/chains/base.svg',
     nativeToken: NativeTokenBase,
   },
   testnet: {
@@ -27,6 +28,7 @@ export const getBaseAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Bas
     blockTime: 2000,
     addressHrp: '0x',
     defaultApiUrl: 'https://sepolia.base.org',
+    logoUrl: 'https://vleap.ai/images/chains/base.svg',
     nativeToken: NativeTokenBase,
   },
   devnet: {
@@ -36,6 +38,7 @@ export const getBaseAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Bas
     blockTime: 2000,
     addressHrp: '0x',
     defaultApiUrl: 'https://sepolia.base.org',
+    logoUrl: 'https://vleap.ai/images/chains/base.svg',
     nativeToken: NativeTokenBase,
   },
 })

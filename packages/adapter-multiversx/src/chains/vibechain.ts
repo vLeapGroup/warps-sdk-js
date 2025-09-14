@@ -17,6 +17,7 @@ const chainInfo: WarpChainInfo = {
   blockTime: 600,
   addressHrp: 'vibe',
   defaultApiUrl: 'https://vibeox-api.multiversx.com',
+  logoUrl: 'https://vleap.ai/images/chains/vibechain.svg',
   nativeToken: NativeTokenVibe,
 }
 

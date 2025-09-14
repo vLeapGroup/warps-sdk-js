@@ -48,6 +48,7 @@ export const getFastsetAdapter: AdapterFactory = createFastsetAdapter(WarpChainN
     blockTime: 1000,
     addressHrp: 'set',
     defaultApiUrl: 'https://proxy.fastset.xyz',
+    logoUrl: 'https://vleap.ai/images/chains/fastset.svg',
     nativeToken: NativeTokenSet,
   },
   testnet: {
@@ -57,6 +58,7 @@ export const getFastsetAdapter: AdapterFactory = createFastsetAdapter(WarpChainN
     blockTime: 1000,
     addressHrp: 'set',
     defaultApiUrl: 'https://proxy.fastset.xyz',
+    logoUrl: 'https://vleap.ai/images/chains/fastset.svg',
     nativeToken: NativeTokenSet,
   },
   devnet: {
@@ -66,6 +68,7 @@ export const getFastsetAdapter: AdapterFactory = createFastsetAdapter(WarpChainN
     blockTime: 1000,
     addressHrp: 'set',
     defaultApiUrl: 'https://proxy.fastset.xyz',
+    logoUrl: 'https://vleap.ai/images/chains/fastset.svg',
     nativeToken: NativeTokenSet,
   },
 })

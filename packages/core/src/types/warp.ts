@@ -11,6 +11,7 @@ export type WarpChainInfo = {
   blockTime: number
   addressHrp: string
   defaultApiUrl: string
+  logoUrl: string
   nativeToken: WarpChainAsset
 }
 

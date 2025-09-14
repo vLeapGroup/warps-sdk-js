@@ -18,6 +18,7 @@ export const getArbitrumAdapter: AdapterFactory = createEvmAdapter(WarpChainName
     blockTime: 1000,
     addressHrp: '0x',
     defaultApiUrl: 'https://arb1.arbitrum.io/rpc',
+    logoUrl: 'https://vleap.ai/images/chains/arbitrum.svg',
     nativeToken: NativeTokenArb,
   },
   testnet: {
@@ -27,6 +28,7 @@ export const getArbitrumAdapter: AdapterFactory = createEvmAdapter(WarpChainName
     blockTime: 1000,
     addressHrp: '0x',
     defaultApiUrl: 'https://sepolia-rollup.arbitrum.io/rpc',
+    logoUrl: 'https://vleap.ai/images/chains/arbitrum.svg',
     nativeToken: NativeTokenArb,
   },
   devnet: {
@@ -36,6 +38,7 @@ export const getArbitrumAdapter: AdapterFactory = createEvmAdapter(WarpChainName
     blockTime: 1000,
     addressHrp: '0x',
     defaultApiUrl: 'https://sepolia-rollup.arbitrum.io/rpc',
+    logoUrl: 'https://vleap.ai/images/chains/arbitrum.svg',
     nativeToken: NativeTokenArb,
   },
 })

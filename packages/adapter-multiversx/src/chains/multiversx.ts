@@ -18,6 +18,7 @@ export const getMultiversxAdapter = createMultiversxAdapter(WarpChainName.Multiv
     blockTime: 6000,
     addressHrp: 'erd',
     defaultApiUrl: 'https://api.multiversx.com',
+    logoUrl: 'https://vleap.ai/images/chains/multiversx.svg',
     nativeToken: NativeTokenEgld,
   },
   testnet: {
@@ -27,6 +28,7 @@ export const getMultiversxAdapter = createMultiversxAdapter(WarpChainName.Multiv
     blockTime: 6000,
     addressHrp: 'erd',
     defaultApiUrl: 'https://testnet-api.multiversx.com',
+    logoUrl: 'https://vleap.ai/images/chains/multiversx.svg',
     nativeToken: NativeTokenEgld,
   },
   devnet: {
@@ -36,6 +38,7 @@ export const getMultiversxAdapter = createMultiversxAdapter(WarpChainName.Multiv
     blockTime: 6000,
     addressHrp: 'erd',
     defaultApiUrl: 'https://devnet-api.multiversx.com',
+    logoUrl: 'https://vleap.ai/images/chains/multiversx.svg',
     nativeToken: NativeTokenEgld,
   },
 })

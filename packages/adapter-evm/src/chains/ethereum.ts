@@ -18,6 +18,7 @@ export const getEthereumAdapter: AdapterFactory = createEvmAdapter(WarpChainName
     blockTime: 12000,
     addressHrp: '0x',
     defaultApiUrl: 'https://ethereum-rpc.publicnode.com',
+    logoUrl: 'https://vleap.ai/images/chains/ethereum.svg',
     nativeToken: NativeTokenEth,
   },
   testnet: {
@@ -27,6 +28,7 @@ export const getEthereumAdapter: AdapterFactory = createEvmAdapter(WarpChainName
     blockTime: 12000,
     addressHrp: '0x',
     defaultApiUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
+    logoUrl: 'https://vleap.ai/images/chains/ethereum.svg',
     nativeToken: NativeTokenEth,
   },
   devnet: {
@@ -36,6 +38,7 @@ export const getEthereumAdapter: AdapterFactory = createEvmAdapter(WarpChainName
     blockTime: 12000,
     addressHrp: '0x',
     defaultApiUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
+    logoUrl: 'https://vleap.ai/images/chains/ethereum.svg',
     nativeToken: NativeTokenEth,
   },
 })
