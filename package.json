@@ -7,7 +7,8 @@
     "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "packages:publish": "turbo run build lint test && changeset publish",
-    "typegen": "ts-json-schema-generator --path 'packages/core/src/types/index.ts' --type 'Warp' --tsconfig 'tsconfig.typegen.json' --out 'warp-schema.json'"
+    "typegen": "ts-json-schema-generator --path 'packages/core/src/types/index.ts' --type 'Warp' --tsconfig 'tsconfig.typegen.json' --out 'warp-schema.json'",
+    "playground": "turbo run build && ts-node --esm packages/playground/playground.ts"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.5",
@@ -17,6 +18,7 @@
     "eslint-config-custom": "*",
     "prettier": "^3.6.2",
     "ts-json-schema-generator": "^2.4.0",
+    "ts-node": "^10.9.1",
     "turbo": "^2.5.5"
   },
   "name": "warp-sdk-js",

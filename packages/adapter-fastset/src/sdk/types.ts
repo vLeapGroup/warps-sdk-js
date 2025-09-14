@@ -17,8 +17,10 @@ export const isValidHexString = (hex: string): boolean => {
 
 // BCS Type Definitions
 export const Bytes32 = bcs.fixedArray(32, bcs.u8())
+export const Bytes64 = bcs.fixedArray(64, bcs.u8())
+// FastSet uses Ed25519 public keys as addresses.
 export const PublicKey = Bytes32
-export const Signature = bcs.fixedArray(64, bcs.u8())
+export const Signature = Bytes64
 
 export const Address = bcs.enum('Address', {
   External: PublicKey,
@@ -26,6 +28,9 @@ export const Address = bcs.enum('Address', {
 })
 
 export const Amount = bcs.u256().transform({
+  // CAUTION: When we build a transaction object, we must use a hex encoded string because the
+  // validator expects amounts to be in hex. However, bcs.u256() by default expects a decimal
+  // string. Therefore, we must transform the input amount from hex to decimal here.
   input: (val: unknown) => hexToDecimal((val as string).toString()),
   output: (value: string) => value,
 })
@@ -41,7 +46,6 @@ export const Quorum = bcs.u64()
 export const TokenId = Bytes32
 
 export const Transfer = bcs.struct('Transfer', {
-  recipient: Address,
   amount: Amount,
   user_data: UserData,
 })
@@ -100,7 +104,8 @@ export const ClaimType = bcs.enum('ClaimType', {
   ExternalClaim: ExternalClaim,
 })
 
-export const BcsTransaction = bcs.struct('Transaction', {
+// The Transaction data type is the one that users sign over.
+export const Transaction = bcs.struct('Transaction', {
   sender: PublicKey,
   recipient: Address,
   nonce: Nonce,
@@ -332,7 +337,25 @@ export interface FastsetAssetBalances {
   [assetId: string]: FastsetAssetBalance
 }
 
-// Helper function
-function hexToDecimal(hex: string): string {
+// API Response Types
+export const SubmitTransactionResponse = bcs.struct('SubmitTransactionResponse', {
+  validator: PublicKey,
+  signature: Signature,
+  next_nonce: Nonce,
+  transaction_hash: bcs.vector(bcs.u8()),
+})
+
+export const TransactionEnvelope = bcs.struct('TransactionEnvelope', {
+  transaction: Transaction,
+  signature: Signature,
+})
+
+export const TransactionCertificate = bcs.struct('TransactionCertificate', {
+  envelope: TransactionEnvelope,
+  signatures: bcs.vector(bcs.tuple([PublicKey, Signature])),
+})
+
+// Helper functions
+export function hexToDecimal(hex: string): string {
   return BigInt(`0x${hex}`).toString()
 }

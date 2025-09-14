@@ -6,93 +6,70 @@ import {
   WarpClientConfig,
   WarpWalletDetails,
 } from '@vleap/warps'
-import { getConfiguredFastsetClient } from './helpers'
-import { FastsetClient } from './sdk/FastsetClient'
-import { Transaction } from './sdk/Transaction'
-import { Wallet } from './sdk/Wallet'
+import { FastsetClient, Transaction, Wallet } from './sdk'
 import { ed } from './sdk/ed25519-setup'
 
 export class WarpFastsetWallet implements AdapterWarpWallet {
   private wallet: Wallet | null = null
-  private client: FastsetClient
 
   constructor(
     private config: WarpClientConfig,
     private chain: WarpChainInfo
   ) {
-    this.client = getConfiguredFastsetClient(config, chain)
     this.initializeWallet()
   }
 
   private initializeWallet() {
-    const wallets = this.config.user?.wallets
-    if (!wallets) return
-
-    const walletConfig = wallets[this.chain.name]
-    if (!walletConfig) return
-
-    if (typeof walletConfig === 'object' && 'privateKey' in walletConfig) {
-      const privateKey = walletConfig.privateKey
-      if (privateKey && typeof privateKey === 'string') {
-        this.wallet = new Wallet(privateKey)
-      }
+    const walletConfig = this.config.user?.wallets?.[this.chain.name]
+    if (walletConfig && typeof walletConfig === 'object' && 'privateKey' in walletConfig && walletConfig.privateKey) {
+      this.wallet = new Wallet(walletConfig.privateKey)
     }
   }
 
   async signTransaction(tx: WarpAdapterGenericTransaction): Promise<WarpAdapterGenericTransaction> {
-    if (!this.wallet) throw new Error('Wallet not initialized - no private key provided')
-    if (!tx || typeof tx !== 'object') throw new Error('Invalid transaction object')
-
+    if (!this.wallet) throw new Error('Wallet not initialized')
     const transaction = tx as Transaction
-    const transactionData = transaction.toTransaction()
-    const serializedTx = this.serializeTransaction(transactionData)
-    const signature = await ed.sign(serializedTx, (this.wallet as any).privateKey)
-
-    return { ...tx, signature }
+    const serializedTx = this.serializeTransaction(transaction.toTransaction())
+    const signature = await ed.sign(serializedTx, this.wallet.getPrivateKey())
+    return Object.assign(transaction, { signature })
   }
 
   async signMessage(message: string): Promise<string> {
-    if (!this.wallet) throw new Error('Wallet not initialized - no private key provided')
-
-    const messageBytes = new TextEncoder().encode(message)
-    const signature = await ed.sign(messageBytes, (this.wallet as any).privateKey)
+    if (!this.wallet) throw new Error('Wallet not initialized')
+    const signature = await ed.sign(new TextEncoder().encode(message), this.wallet.getPrivateKey())
     return Buffer.from(signature).toString('hex')
   }
 
   async sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string> {
-    if (!tx || typeof tx !== 'object') throw new Error('Invalid transaction object')
-    if (!tx.signature) throw new Error('Transaction must be signed before sending')
-    if (!this.wallet) throw new Error('Wallet not initialized - no private key provided')
-
+    if (!this.wallet) throw new Error('Wallet not initialized')
     const transaction = tx as Transaction
     const fastsetTx = transaction.toTransaction()
 
     const transactionData = {
-      sender: Array.from(fastsetTx.sender),
+      sender: fastsetTx.sender,
       recipient: fastsetTx.recipient,
       nonce: fastsetTx.nonce,
-      timestamp_nanos: fastsetTx.timestamp_nanos.toString(),
+      timestamp_nanos: fastsetTx.timestamp_nanos,
       claim: fastsetTx.claim,
     }
 
-    const serializedTx = this.serializeTransaction(transactionData)
-    const signature = await ed.sign(serializedTx, (this.wallet as any).privateKey)
-    const result = await this.client.submitTransaction(transactionData, signature)
-    return result.transaction_hash || result.hash || 'transaction-sent'
+    const signature = tx.signature
+      ? new Uint8Array(Buffer.from(tx.signature, 'hex'))
+      : await ed.sign(this.serializeTransaction(transactionData), this.wallet.getPrivateKey())
+
+    const client = new FastsetClient({ proxyUrl: 'https://proxy.fastset.xyz' })
+    return await client.submitTransaction(transactionData, signature)
   }
 
   create(mnemonic: string): WarpWalletDetails {
     const wallet = new Wallet(mnemonic)
-    return {
-      address: wallet.toBech32(),
-      privateKey: (wallet as any).privateKey.toString('hex'),
-      mnemonic,
-    }
+    return { address: wallet.toBech32(), privateKey: Buffer.from(wallet.getPrivateKey()).toString('hex'), mnemonic }
   }
 
   generate(): WarpWalletDetails {
-    const wallet = Wallet.generateNew()
-    return { address: wallet.toBech32(), privateKey: (wallet as any).privateKey.toString('hex'), mnemonic: null }
+    const privateKey = ed.utils.randomPrivateKey()
+    const wallet = new Wallet(Buffer.from(privateKey).toString('hex'))
+    return { address: wallet.toBech32(), privateKey: Buffer.from(privateKey).toString('hex'), mnemonic: null }
   }
 
   getAddress(): string | null {
@@ -100,8 +77,7 @@ export class WarpFastsetWallet implements AdapterWarpWallet {
   }
 
   private serializeTransaction(tx: any): Uint8Array {
-    const encoder = new TextEncoder()
-    const serialized = JSON.stringify(tx, Object.keys(tx).sort())
-    return encoder.encode(serialized)
+    const serialized = JSON.stringify(tx, (k, v) => (v instanceof Uint8Array ? Array.from(v) : v))
+    return new TextEncoder().encode(serialized)
   }
 }

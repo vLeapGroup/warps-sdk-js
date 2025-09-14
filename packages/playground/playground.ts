@@ -7,8 +7,8 @@ import * as path from 'path'
 import { fileURLToPath } from 'url'
 
 const Chain = 'fastset'
-const WarpToTest = null
-const WarpInputs: string[] = [] // e.g. 'address:moon', 'asset:EGLD|0.5'
+const WarpToTest = 'test.json'
+const WarpInputs: string[] = ['address:set1y0nxhrezjh66e2zfh6nx70lc69sr8zcfe55sqgs4wh9xvxsytxasxc3p2h', 'asset:SET|1'] // e.g. 'address:moon', 'asset:EGLD|0.5'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -53,7 +53,10 @@ const runWarp = async (warpFile: string) => {
 
   console.log('-------------------------------')
   console.log('Wallet address:', address)
-  console.log('Wallet assets:', await dataLoader.getAccountAssets(address))
+  console.log(
+    'Wallet assets:',
+    (await dataLoader.getAccountAssets(address)).map((asset) => `${asset.identifier} - ${asset.amount}`)
+  )
   console.log('--------------------------------')
 
   if (WarpToTest) {

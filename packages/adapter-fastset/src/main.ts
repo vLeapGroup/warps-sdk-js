@@ -47,7 +47,7 @@ export const getFastsetAdapter: AdapterFactory = createFastsetAdapter(WarpChainN
     chainId: '1',
     blockTime: 1000,
     addressHrp: 'set',
-    defaultApiUrl: 'https://rpc.fastset.xyz',
+    defaultApiUrl: 'https://proxy.fastset.xyz',
     nativeToken: NativeTokenSet,
   },
   testnet: {
@@ -56,7 +56,7 @@ export const getFastsetAdapter: AdapterFactory = createFastsetAdapter(WarpChainN
     chainId: 'testnet',
     blockTime: 1000,
     addressHrp: 'set',
-    defaultApiUrl: 'https://rpc.fastset.xyz',
+    defaultApiUrl: 'https://proxy.fastset.xyz',
     nativeToken: NativeTokenSet,
   },
   devnet: {
@@ -65,7 +65,7 @@ export const getFastsetAdapter: AdapterFactory = createFastsetAdapter(WarpChainN
     chainId: 'devnet',
     blockTime: 1000,
     addressHrp: 'set',
-    defaultApiUrl: 'https://rpc.fastset.xyz',
+    defaultApiUrl: 'https://proxy.fastset.xyz',
     nativeToken: NativeTokenSet,
   },
 })
