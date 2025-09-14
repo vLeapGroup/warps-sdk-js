@@ -1,5 +1,14 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.52
+
+### Patch Changes
+
+- 36fce86: add mvx helper exports
+- 92c2d54: add further chain asset info
+- Updated dependencies [92c2d54]
+  - @vleap/warps@3.0.0-alpha.103
+
 ## 0.2.0-alpha.51
 
 ### Minor Changes

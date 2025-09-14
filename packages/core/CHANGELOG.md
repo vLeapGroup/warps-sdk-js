@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.103
+
+### Patch Changes
+
+- 92c2d54: add further chain asset info
+
 ## 3.0.0-alpha.102
 
 ### Minor Changes
