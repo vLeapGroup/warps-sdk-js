@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-alpha.22
+
+### Patch Changes
+
+- 1544019: upgrade deps
+
 ## 0.1.0-alpha.21
 
 ### Minor Changes
