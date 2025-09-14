@@ -1,5 +1,17 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-alpha.21
+
+### Minor Changes
+
+- c721f10: add wallet manager
+
+### Patch Changes
+
+- Updated dependencies [c721f10]
+- Updated dependencies [93fbd3d]
+  - @vleap/warps@3.0.0-alpha.102
+
 ## 0.1.0-alpha.20
 
 ### Patch Changes

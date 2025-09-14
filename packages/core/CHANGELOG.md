@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.102
+
+### Minor Changes
+
+- c721f10: add wallet manager
+
+### Patch Changes
+
+- 93fbd3d: upate env var interpolation
+
 ## 3.0.0-alpha.101
 
 ### Patch Changes

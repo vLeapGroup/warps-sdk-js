@@ -1,5 +1,17 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.51
+
+### Minor Changes
+
+- c721f10: add wallet manager
+
+### Patch Changes
+
+- Updated dependencies [c721f10]
+- Updated dependencies [93fbd3d]
+  - @vleap/warps@3.0.0-alpha.102
+
 ## 0.2.0-alpha.50
 
 ### Patch Changes
