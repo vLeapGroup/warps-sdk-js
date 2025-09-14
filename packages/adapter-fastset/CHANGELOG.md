@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-alpha.23
+
+### Patch Changes
+
+- eb57e0d: add chain logos
+- Updated dependencies [eb57e0d]
+  - @vleap/warps@3.0.0-alpha.104
+
 ## 0.1.0-alpha.22
 
 ### Patch Changes

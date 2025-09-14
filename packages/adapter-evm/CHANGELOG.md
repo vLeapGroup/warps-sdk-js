@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-alpha.29
+
+### Patch Changes
+
+- eb57e0d: add chain logos
+- Updated dependencies [eb57e0d]
+  - @vleap/warps@3.0.0-alpha.104
+
 ## 0.2.0-alpha.28
 
 ### Minor Changes

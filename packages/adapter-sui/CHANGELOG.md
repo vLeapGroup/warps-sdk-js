@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.40
+
+### Patch Changes
+
+- eb57e0d: add chain logos
+- Updated dependencies [eb57e0d]
+  - @vleap/warps@3.0.0-alpha.104
+
 ## 0.2.0-alpha.39
 
 ### Patch Changes

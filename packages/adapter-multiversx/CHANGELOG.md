@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.53
+
+### Patch Changes
+
+- eb57e0d: add chain logos
+- Updated dependencies [eb57e0d]
+  - @vleap/warps@3.0.0-alpha.104
+
 ## 0.2.0-alpha.52
 
 ### Patch Changes

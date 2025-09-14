@@ -1,6 +1,6 @@
 {
   "name": "@vleap/warps-adapter-fastset",
-  "version": "0.1.0-alpha.22",
+  "version": "0.1.0-alpha.23",
   "description": "Fastset adapter for Warps SDK",
   "type": "module",
   "types": "./dist/index.d.ts",
@@ -40,7 +40,7 @@
     "@mysten/bcs": "^1.8.0",
     "@noble/ed25519": "^3.0.0",
     "@noble/hashes": "^2.0.0",
-    "@vleap/warps": "^3.0.0-alpha.102",
+    "@vleap/warps": "^3.0.0-alpha.104",
     "bech32": "^2.0.0"
   }
 }

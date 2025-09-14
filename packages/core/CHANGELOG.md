@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.104
+
+### Patch Changes
+
+- eb57e0d: add chain logos
+
 ## 3.0.0-alpha.103
 
 ### Patch Changes
