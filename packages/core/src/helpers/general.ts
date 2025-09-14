@@ -74,7 +74,7 @@ export const applyResultsToMessages = (warp: Warp, results: Record<string, any>)
   return Object.fromEntries(parts)
 }
 
-export const getWarpWalletAddress = (wallet: WarpWalletDetails | string | null) => {
+export const getWarpWalletAddress = (wallet: WarpWalletDetails | string | null | undefined) => {
   if (!wallet) return null
   if (typeof wallet === 'string') return wallet
   return wallet.address
@@ -83,7 +83,7 @@ export const getWarpWalletAddress = (wallet: WarpWalletDetails | string | null) 
 export const getWarpWalletAddressFromConfig = (config: WarpClientConfig, chain: WarpChain) =>
   getWarpWalletAddress(config.user?.wallets?.[chain] || null)
 
-export const getWarpWalletPrivateKey = (wallet: WarpWalletDetails | string | null) => {
+export const getWarpWalletPrivateKey = (wallet: WarpWalletDetails | string | null | undefined) => {
   if (!wallet) return null
   if (typeof wallet === 'string') return wallet
   return wallet.privateKey
