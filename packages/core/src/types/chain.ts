@@ -20,6 +20,8 @@ export type WarpChainAsset = {
   amount?: bigint
   decimals?: number
   logoUrl?: string
+  price?: number
+  supply?: bigint
 }
 
 export type WarpChainAction = {

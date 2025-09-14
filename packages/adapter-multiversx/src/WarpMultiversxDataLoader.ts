@@ -45,15 +45,19 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
     let assets: WarpChainAsset[] = account.balance > 0 ? [{ ...this.chain.nativeToken, amount: account.balance }] : []
 
     assets.push(
-      ...tokens.map((token) => ({
-        chain: this.chain.name,
-        identifier: token.token.identifier,
-        name: token.raw.name,
-        symbol: token.raw.ticker,
-        amount: token.amount,
-        decimals: token.raw.decimals,
-        logoUrl: token.raw.assets?.pngUrl || '',
-      }))
+      ...tokens.map(
+        (token): WarpChainAsset => ({
+          chain: this.chain.name,
+          identifier: token.token.identifier,
+          name: token.raw.name,
+          symbol: token.raw.ticker,
+          amount: token.amount,
+          decimals: token.raw.decimals,
+          logoUrl: token.raw.assets?.pngUrl || '',
+          price: token.raw.price ? Number(token.raw.price) : undefined,
+          supply: token.raw.supply ? BigInt(token.raw.supply) : undefined,
+        })
+      )
     )
 
     return assets
@@ -95,6 +99,8 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
       amount: 0n,
       decimals: tokenData.decimals,
       logoUrl: tokenData.assets?.pngUrl || '#',
+      price: tokenData.price ? Number(tokenData.price) : undefined,
+      supply: tokenData.supply ? BigInt(tokenData.supply) : undefined,
     }
 
     this.cache.set(cacheKey, asset, CacheTtl.OneHour)
