@@ -1,4 +1,4 @@
-import { WarpConfig } from '../config'
+import { WarpConstants } from '../constants'
 import { Adapter, WarpClientConfig } from '../types'
 import { WarpExecutionNextInfo, WarpExecutionResults } from '../types/results'
 import { Warp } from '../types/warp'
@@ -78,7 +78,7 @@ export const getNextInfo = (
 const buildNextUrl = (adapters: Adapter[], identifier: string, config: WarpClientConfig): string => {
   const [rawId, queryString] = identifier.split('?')
   const info = getWarpInfoFromIdentifier(rawId) || {
-    chainPrefix: WarpConfig.DefaultChainPrefix,
+    chainPrefix: WarpConstants.IdentifierChainDefault,
     type: 'alias',
     identifier: rawId,
     identifierBase: rawId,

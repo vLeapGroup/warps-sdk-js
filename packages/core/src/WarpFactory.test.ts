@@ -19,7 +19,7 @@ describe('getNextInfo', () => {
     }
     const adapter = createMockAdapter()
     const result = getNextInfo(testConfig, [adapter], warp, 0, {})
-    expect(result?.[0].url).toBe('https://devnet.usewarp.to/mvx.mywarp')
+    expect(result?.[0].url).toBe('https://devnet.usewarp.to/multiversx%3Amywarp')
   })
 
   it('returns info for a warp with next', () => {
@@ -29,7 +29,7 @@ describe('getNextInfo', () => {
     }
     const adapter = createMockAdapter()
     const result = getNextInfo(testConfig, [adapter], warp, 0, {})
-    expect(result?.[0].url).toBe('https://devnet.usewarp.to/mvx.next-warp')
+    expect(result?.[0].url).toBe('https://devnet.usewarp.to/multiversx%3Anext-warp')
   })
 
   it('returns info for a warp with hash', () => {
@@ -39,7 +39,7 @@ describe('getNextInfo', () => {
     }
     const adapter = createMockAdapter()
     const result = getNextInfo(testConfig, [adapter], warp, 0, {})
-    expect(result?.[0].url).toBe('https://devnet.usewarp.to/mvx.hash.123')
+    expect(result?.[0].url).toBe('https://devnet.usewarp.to/multiversx%3Ahash%3A123')
   })
 
   it('returns info for a warp with query params', () => {
@@ -49,7 +49,7 @@ describe('getNextInfo', () => {
     }
     const adapter = createMockAdapter()
     const result = getNextInfo(testConfig, [adapter], warp, 0, {})
-    expect(result?.[0].url).toBe('https://devnet.usewarp.to/mvx.mywarp?param1=value1&param2=value2')
+    expect(result?.[0].url).toBe('https://devnet.usewarp.to/multiversx%3Amywarp?param1=value1&param2=value2')
   })
 
   it('returns info for multiple results', () => {
@@ -60,8 +60,8 @@ describe('getNextInfo', () => {
     const adapter = createMockAdapter()
     const result = getNextInfo(testConfig, [adapter], warp, 0, { address: ['ABC', 'DEF'] })
     expect(result).toEqual([
-      { identifier: 'mywarp?address=ABC', url: 'https://devnet.usewarp.to/mvx.mywarp?address=ABC' },
-      { identifier: 'mywarp?address=DEF', url: 'https://devnet.usewarp.to/mvx.mywarp?address=DEF' },
+      { identifier: 'mywarp?address=ABC', url: 'https://devnet.usewarp.to/multiversx%3Amywarp?address=ABC' },
+      { identifier: 'mywarp?address=DEF', url: 'https://devnet.usewarp.to/multiversx%3Amywarp?address=DEF' },
     ])
   })
 
@@ -73,7 +73,7 @@ describe('getNextInfo', () => {
     }
     const adapter = createMockAdapter()
     const result = getNextInfo(config, [adapter], warp, 0, {})
-    expect(result?.[0].url).toBe('https://usewarp.to/mvx.mywarp?param1=value1&param2=value2')
+    expect(result?.[0].url).toBe('https://usewarp.to/multiversx%3Amywarp?param1=value1&param2=value2')
   })
 })
 

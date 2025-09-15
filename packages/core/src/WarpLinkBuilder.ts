@@ -23,8 +23,8 @@ export class WarpLinkBuilder {
     const clientUrl = this.config.clientUrl || WarpConfig.DefaultClientUrl(this.config.env)
     const adapter = findWarpAdapterForChain(chain, this.adapters)
 
-    const identifier = type === WarpConstants.IdentifierType.Alias ? id : type + WarpConstants.IdentifierParamSeparatorDefault + id
-    const identifierWithChainPrefix = adapter.prefix + WarpConstants.IdentifierParamSeparatorDefault + identifier
+    const identifier = type === WarpConstants.IdentifierType.Alias ? id : type + WarpConstants.IdentifierParamSeparator + id
+    const identifierWithChainPrefix = adapter.prefix + WarpConstants.IdentifierParamSeparator + identifier
     const encodedIdentifier = encodeURIComponent(identifierWithChainPrefix)
 
     return WarpConfig.SuperClientUrls.includes(clientUrl)

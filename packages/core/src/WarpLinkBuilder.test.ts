@@ -13,7 +13,7 @@ const baseMockAdapter = createMockAdapter()
 const mockAdapter = {
   ...baseMockAdapter,
   chain: 'multiversx',
-  prefix: 'mvx',
+  prefix: 'multiversx',
   builder: () => baseMockAdapter.builder(),
   abiBuilder: () => baseMockAdapter.abiBuilder(),
   brandBuilder: () => ({
@@ -31,17 +31,17 @@ const mockAdapter = {
 describe('build', () => {
   it('builds a link with hash', () => {
     const link = new WarpLinkBuilder(Config, [mockAdapter]).build('multiversx', 'hash', '123')
-    expect(link).toBe('https://anyclient.com?warp=mvx.hash.123')
+    expect(link).toBe('https://anyclient.com?warp=multiversx%3Ahash%3A123')
   })
 
   it('builds a link with alias', () => {
     const link = new WarpLinkBuilder(Config, [mockAdapter]).build('multiversx', 'alias', 'mywarp')
-    expect(link).toBe('https://anyclient.com?warp=mvx.mywarp')
+    expect(link).toBe('https://anyclient.com?warp=multiversx%3Amywarp')
   })
 
   it('builds a link with alias for super client', () => {
     Config.clientUrl = 'https://devnet.usewarp.to'
     const link = new WarpLinkBuilder(Config, [mockAdapter]).build('multiversx', 'alias', 'mywarp')
-    expect(link).toBe('https://devnet.usewarp.to/mvx.mywarp')
+    expect(link).toBe('https://devnet.usewarp.to/multiversx%3Amywarp')
   })
 })

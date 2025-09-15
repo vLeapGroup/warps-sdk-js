@@ -16,10 +16,9 @@ export const WarpConstants = {
 
   IdentifierParamName: 'warp',
 
-  IdentifierParamSeparator: [':', '.'],
-  IdentifierParamSeparatorDefault: '.',
+  IdentifierParamSeparator: ':',
 
-  IdentifierChainDefault: 'mvx',
+  IdentifierChainDefault: 'multiversx',
 
   IdentifierType: {
     Alias: 'alias' as WarpIdType,

@@ -10,7 +10,7 @@ export const NativeTokenEgld: WarpChainAsset = {
   logoUrl: 'https://vleap.ai/images/tokens/egld.svg',
 }
 
-export const getMultiversxAdapter = createMultiversxAdapter(WarpChainName.Multiversx, 'mvx', {
+export const getMultiversxAdapter = createMultiversxAdapter(WarpChainName.Multiversx, 'multiversx', {
   mainnet: {
     name: WarpChainName.Multiversx,
     displayName: 'MultiversX',

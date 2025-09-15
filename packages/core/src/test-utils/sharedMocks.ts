@@ -19,7 +19,7 @@ export const createMockChainInfo = (chainName: string = 'multiversx') => ({
 export const createMockAdapter = () => ({
   chain: 'multiversx',
   chainInfo: createMockChainInfo('multiversx'),
-  prefix: 'mvx',
+  prefix: 'multiversx',
   explorer: {
     getTransactionUrl: () => '',
     getAddressUrl: () => '',

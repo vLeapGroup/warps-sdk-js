@@ -20,7 +20,7 @@ describe('WarpExecutor', () => {
     (() => {
       const a = createMockAdapter()
       a.chain = 'multiversx'
-      a.prefix = 'mvx'
+      a.prefix = 'multiversx'
       return a
     })(),
     (() => {

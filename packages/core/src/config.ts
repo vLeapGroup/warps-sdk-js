@@ -17,8 +17,6 @@ export const WarpConfig = {
     return 'https://usewarp.to'
   },
 
-  DefaultChainPrefix: 'mvx',
-
   SuperClientUrls: ['https://usewarp.to', 'https://testnet.usewarp.to', 'https://devnet.usewarp.to'],
 
   AvailableActionInputSources: ['field', 'query', WarpConstants.Source.UserWallet, 'hidden'] as WarpActionInputSource[],

@@ -11,19 +11,9 @@ const isHash = (identifier: string, chainPrefix?: string): boolean => {
 }
 
 const findFirstSeparator = (str: string): { separator: string; index: number } | null => {
-  const separators = WarpConstants.IdentifierParamSeparator
-  let firstIndex = -1
-  let firstSeparator = ''
-
-  for (const separator of separators) {
-    const index = str.indexOf(separator)
-    if (index !== -1 && (firstIndex === -1 || index < firstIndex)) {
-      firstIndex = index
-      firstSeparator = separator
-    }
-  }
-
-  return firstIndex !== -1 ? { separator: firstSeparator, index: firstIndex } : null
+  const separator = WarpConstants.IdentifierParamSeparator
+  const index = str.indexOf(separator)
+  return index !== -1 ? { separator, index } : null
 }
 
 const splitBySeparators = (str: string): string[] => {
@@ -96,9 +86,7 @@ export const getWarpInfoFromIdentifier = (
       const identifierWithQuery = decoded.includes('?') ? identifier + decoded.substring(decoded.indexOf('?')) : identifier
 
       // Determine if identifier is a hash (hex string > 32 chars)
-      const identifierType = isHash(identifier, chainPrefix)
-        ? WarpConstants.IdentifierType.Hash
-        : WarpConstants.IdentifierType.Alias
+      const identifierType = isHash(identifier, chainPrefix) ? WarpConstants.IdentifierType.Hash : WarpConstants.IdentifierType.Alias
 
       return {
         chainPrefix,
