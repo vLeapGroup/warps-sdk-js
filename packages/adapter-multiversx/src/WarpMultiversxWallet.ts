@@ -55,7 +55,16 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
   }
 
   async signMessage(message: string): Promise<string> {
-    throw new Error('Not implemented')
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
+    if (!privateKey) throw new Error('Wallet not initialized - no private key provided')
+
+    const isPrivateKeyPem = privateKey.startsWith('-----')
+    const secretKey = isPrivateKeyPem ? UserSecretKey.fromPem(privateKey) : UserSecretKey.fromString(privateKey)
+    const signer = new UserSigner(secretKey)
+
+    const messageBytes = new TextEncoder().encode(message)
+    const signature = await signer.sign(messageBytes)
+    return Buffer.from(signature).toString('hex')
   }
 
   async sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string> {

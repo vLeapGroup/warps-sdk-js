@@ -1,12 +1,15 @@
+import * as bip39 from '@scure/bip39'
 import {
   AdapterWarpWallet,
   getWarpWalletAddressFromConfig,
+  getWarpWalletPrivateKeyFromConfig,
   WarpAdapterGenericTransaction,
   WarpChainInfo,
   WarpClientConfig,
   WarpWalletDetails,
 } from '@vleap/warps'
-import { getConfiguredFastsetClient } from './helpers'
+import { encoder, hexToUint8Array, stringToUint8Array, uint8ArrayToHex } from './helpers'
+import { getConfiguredFastsetClient } from './helpers/general'
 import { FastsetClient, Transaction, Wallet } from './sdk'
 import { ed } from './sdk/ed25519-setup'
 
@@ -18,15 +21,11 @@ export class WarpFastsetWallet implements AdapterWarpWallet {
     private config: WarpClientConfig,
     private chain: WarpChainInfo
   ) {
-    this.initializeWallet()
-    this.client = getConfiguredFastsetClient(this.config, this.chain)
-  }
-
-  private initializeWallet() {
-    const walletConfig = this.config.user?.wallets?.[this.chain.name]
-    if (walletConfig && typeof walletConfig === 'object' && 'privateKey' in walletConfig && walletConfig.privateKey) {
-      this.wallet = new Wallet(walletConfig.privateKey)
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
+    if (privateKey) {
+      this.wallet = new Wallet(privateKey)
     }
+    this.client = getConfiguredFastsetClient(this.config, this.chain)
   }
 
   async signTransaction(tx: WarpAdapterGenericTransaction): Promise<WarpAdapterGenericTransaction> {
@@ -34,13 +33,14 @@ export class WarpFastsetWallet implements AdapterWarpWallet {
     const transaction = tx as Transaction
     const serializedTx = this.serializeTransaction(transaction.toTransaction())
     const signature = await ed.sign(serializedTx, this.wallet.getPrivateKey())
-    return Object.assign(transaction, { signature })
+    return Object.assign(transaction, { signature: uint8ArrayToHex(signature) })
   }
 
   async signMessage(message: string): Promise<string> {
     if (!this.wallet) throw new Error('Wallet not initialized')
-    const signature = await ed.sign(new TextEncoder().encode(message), this.wallet.getPrivateKey())
-    return Buffer.from(signature).toString('hex')
+    const messageBytes = stringToUint8Array(message)
+    const signature = await ed.sign(messageBytes, this.wallet.getPrivateKey())
+    return uint8ArrayToHex(signature)
   }
 
   async sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string> {
@@ -57,21 +57,23 @@ export class WarpFastsetWallet implements AdapterWarpWallet {
     }
 
     const signature = tx.signature
-      ? new Uint8Array(Buffer.from(tx.signature, 'hex'))
+      ? hexToUint8Array(tx.signature)
       : await ed.sign(this.serializeTransaction(transactionData), this.wallet.getPrivateKey())
 
     return await this.client.submitTransaction(transactionData, signature)
   }
 
   create(mnemonic: string): WarpWalletDetails {
-    const wallet = new Wallet(mnemonic)
-    return { address: wallet.toBech32(), privateKey: Buffer.from(wallet.getPrivateKey()).toString('hex'), mnemonic }
+    const seed = bip39.mnemonicToSeedSync(mnemonic)
+    const privateKey = seed.slice(0, 32) // Use first 32 bytes of seed as private key
+    const wallet = new Wallet(uint8ArrayToHex(privateKey))
+    return { address: wallet.toBech32(), privateKey: uint8ArrayToHex(wallet.getPrivateKey()), mnemonic }
   }
 
   generate(): WarpWalletDetails {
     const privateKey = ed.utils.randomPrivateKey()
-    const wallet = new Wallet(Buffer.from(privateKey).toString('hex'))
-    return { address: wallet.toBech32(), privateKey: Buffer.from(privateKey).toString('hex'), mnemonic: null }
+    const wallet = new Wallet(uint8ArrayToHex(privateKey))
+    return { address: wallet.toBech32(), privateKey: uint8ArrayToHex(wallet.getPrivateKey()), mnemonic: null }
   }
 
   getAddress(): string | null {
@@ -79,7 +81,11 @@ export class WarpFastsetWallet implements AdapterWarpWallet {
   }
 
   private serializeTransaction(tx: any): Uint8Array {
-    const serialized = JSON.stringify(tx, (k, v) => (v instanceof Uint8Array ? Array.from(v) : v))
-    return new TextEncoder().encode(serialized)
+    const serialized = JSON.stringify(tx, (k, v) => {
+      if (v instanceof Uint8Array) return Array.from(v)
+      if (typeof v === 'bigint') return v.toString()
+      return v
+    })
+    return encoder.encode(serialized)
   }
 }

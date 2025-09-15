@@ -2,11 +2,25 @@ import { WarpEvmWallet } from './WarpEvmWallet'
 
 describe('WarpEvmWallet', () => {
   const privateKey = '0x1234567890123456789012345678901234567890123456789012345678901234'
-  const rpcUrl = 'https://rpc.sepolia.org'
   let wallet: WarpEvmWallet
+  let config: any
+  let chain: any
 
   beforeEach(() => {
-    wallet = new WarpEvmWallet(privateKey, rpcUrl)
+    chain = {
+      name: 'ethereum',
+      defaultApiUrl: 'https://rpc.sepolia.org',
+      addressHrp: '0x'
+    }
+    config = {
+      env: 'testnet',
+      user: {
+        wallets: {
+          [chain.name]: privateKey
+        }
+      }
+    }
+    wallet = new WarpEvmWallet(config, chain)
   })
 
   describe('signMessage', () => {

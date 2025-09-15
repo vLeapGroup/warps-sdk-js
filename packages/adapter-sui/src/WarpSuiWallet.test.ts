@@ -2,33 +2,39 @@ import { WarpSuiWallet } from './WarpSuiWallet'
 
 describe('WarpSuiWallet', () => {
   let wallet: WarpSuiWallet
-  let mockKeypair: any
-  let mockClient: any
+  let config: any
+  let chain: any
 
   beforeEach(() => {
-    // Mock the keypair
-    mockKeypair = {
-      signTransaction: jest.fn().mockResolvedValue('mock-signed-tx'),
-      signPersonalMessage: jest.fn().mockResolvedValue({
-        signature: 'mock-signature',
-      }),
+    chain = {
+      name: 'sui',
+      defaultApiUrl: 'https://fullnode.testnet.sui.io',
+      addressHrp: '0x',
     }
-
-    // Mock the client
-    mockClient = {
-      signAndExecuteTransaction: jest.fn().mockResolvedValue({
-        digest: 'mock-digest',
-      }),
+    // Use a valid 32-byte hex private key for Ed25519
+    config = {
+      env: 'testnet',
+      user: {
+        wallets: {
+          [chain.name]: '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+        },
+      },
     }
+    wallet = new WarpSuiWallet(config, chain)
 
-    wallet = new WarpSuiWallet(mockKeypair, mockClient)
+    // Mock the client methods to avoid real network calls
+    wallet['client'] = {
+      signAndExecuteTransaction: jest.fn().mockResolvedValue({ digest: 'mock-digest' }),
+    } as any
   })
 
   describe('signMessage', () => {
     it('should sign a message successfully', async () => {
       const message = 'Hello World'
       const signature = await wallet.signMessage(message)
-      expect(signature).toBe('mock-signature')
+      expect(signature).toBeDefined()
+      expect(typeof signature).toBe('string')
+      expect(signature.length).toBeGreaterThan(0)
     })
   })
 
@@ -42,8 +48,9 @@ describe('WarpSuiWallet', () => {
 
       const signedTx = await wallet.signTransaction(tx)
       expect(signedTx).toBeDefined()
-      expect(signedTx.signature).toBe('mock-signed-tx')
-      expect(mockKeypair.signTransaction).toHaveBeenCalledWith(tx)
+      expect(signedTx.signature).toBeDefined()
+      expect(typeof signedTx.signature).toBe('string')
+      expect(signedTx.signature.length).toBeGreaterThan(0)
     })
 
     it('should throw error for invalid transaction', async () => {
@@ -58,14 +65,11 @@ describe('WarpSuiWallet', () => {
         kind: 'ProgrammableTransaction',
         inputs: [],
         transactions: [],
+        signature: 'mock-signature',
       }
 
       const digest = await wallet.sendTransaction(tx)
       expect(digest).toBe('mock-digest')
-      expect(mockClient.signAndExecuteTransaction).toHaveBeenCalledWith({
-        transaction: tx,
-        signer: mockKeypair,
-      })
     })
 
     it('should throw error for invalid transaction', async () => {

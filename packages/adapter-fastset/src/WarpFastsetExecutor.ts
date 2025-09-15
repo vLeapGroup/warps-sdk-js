@@ -22,21 +22,29 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
     const action = getWarpActionByIndex(executable.warp, executable.action)
     if (action.type === 'transfer') return this.createTransferTransaction(executable)
     if (action.type === 'contract') return this.createContractCallTransaction(executable)
-    if (action.type === 'query') throw new Error('WarpFastsetExecutor: Invalid type for createTransaction; Use executeQuery instead')
-    if (action.type === 'collect') throw new Error('WarpFastsetExecutor: Invalid type for createTransaction; Use executeCollect instead')
-    throw new Error(`WarpFastsetExecutor: Invalid type (${action.type})`)
+    if (action.type === 'query') throw new Error('WarpFastsetExecutor: Invalid action type for createTransaction; Use executeQuery instead')
+    if (action.type === 'collect')
+      throw new Error('WarpFastsetExecutor: Invalid action type for createTransaction; Use executeCollect instead')
+    throw new Error(`WarpFastsetExecutor: Invalid action type (unknown)`)
   }
 
   async createTransferTransaction(executable: WarpExecutable): Promise<Transaction> {
     const userWallet = getWarpWalletAddressFromConfig(this.config, executable.chain.name)
-    if (!userWallet) throw new Error('WarpFastsetExecutor: User address not set')
+    if (!userWallet) throw new Error('WarpFastsetExecutor: createTransfer - user address not set')
 
     const senderAddress = FastsetClient.decodeBech32Address(userWallet)
-    const recipientAddress = FastsetClient.decodeBech32Address(executable.destination)
+    let recipientAddress: Uint8Array
+    try {
+      recipientAddress = FastsetClient.decodeBech32Address(executable.destination)
+    } catch (error) {
+      throw new Error(`WarpFastsetExecutor: Invalid destination address: ${executable.destination}`)
+    }
     const nonce = await this.fastsetClient.getNextNonce(userWallet)
 
     // Get amount from transfers or value
-    const amount = executable.transfers?.[0]?.amount ? '0x' + executable.transfers[0].amount.toString(16) : executable.value.toString()
+    const transferValue = executable.transfers?.[0]?.amount || executable.value
+    if (transferValue < 0) throw new Error(`WarpFastsetExecutor: Transfer value cannot be negative: ${transferValue}`)
+    const amount = '0x' + transferValue.toString(16)
 
     const userData = executable.data ? this.fromBase64(executable.data) : null
 
@@ -46,13 +54,20 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
 
   async createContractCallTransaction(executable: WarpExecutable): Promise<any> {
     const userWallet = this.config.user?.wallets?.[executable.chain.name]
-    if (!userWallet) throw new Error('WarpFastsetExecutor: User address not set')
+    if (!userWallet) throw new Error('WarpFastsetExecutor: createTransfer - user address not set')
     const action = getWarpActionByIndex(executable.warp, executable.action)
-    if (!action || !('func' in action) || !action.func) throw new Error('Contract action must have function name')
+    if (!action || !('func' in action) || !action.func) throw new Error('WarpFastsetExecutor: Contract action must have a function name')
+
+    let contractAddress: Uint8Array
+    try {
+      contractAddress = this.fromBase64(executable.destination)
+    } catch (error) {
+      throw new Error(`WarpFastsetExecutor: Invalid contract address: ${executable.destination}`)
+    }
 
     return {
       type: 'fastset-contract-call',
-      contract: this.fromBase64(executable.destination),
+      contract: contractAddress,
       function: action.func,
       data: JSON.stringify({ function: action.func, arguments: executable.args }),
       value: executable.value,
@@ -62,7 +77,8 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
 
   async executeQuery(executable: WarpExecutable): Promise<any> {
     const action = getWarpActionByIndex(executable.warp, executable.action) as any
-    if (action.type !== 'query') throw new Error(`Invalid action type for executeQuery: ${action.type}`)
+    if (action.type !== 'query') throw new Error(`WarpFastsetExecutor: Invalid action type for executeQuery: ${action.type}`)
+    if (!action.func) throw new Error('WarpFastsetExecutor: Query action must have a function name')
 
     try {
       const result = await this.executeFastsetQuery(this.fromBase64(executable.destination), action.func, executable.args)
@@ -116,7 +132,7 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
         id: 1,
       }),
     })
-    if (!response.ok) throw new Error(`Query failed: ${response.statusText}`)
+    if (!response.ok) throw new Error(`Fastset query failed: ${response.statusText}`)
     return response.json()
   }
 

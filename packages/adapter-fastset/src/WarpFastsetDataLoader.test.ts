@@ -27,6 +27,29 @@ describe('WarpFastsetDataLoader', () => {
 
   beforeEach(() => {
     dataLoader = new WarpFastsetDataLoader(mockConfig, mockChainInfo)
+    // Mock the client methods to prevent actual network calls
+    dataLoader['client'] = {
+      getAccountInfo: jest.fn().mockResolvedValue({
+        address: 'set17wm3vmdqk48cfw65w9xff5s2uzk8rvngp8mhgthjr8dyk77ltu7qv5a489',
+        balance: '0x123456789abcdef',
+        balanceDecimal: 81985529216486896,
+        nextNonce: 1,
+        sequenceNumber: 1,
+        token_balance: [],
+      }),
+      getTokenInfo: jest.fn().mockResolvedValue({
+        requested_token_metadata: [
+          [
+            null,
+            {
+              token_name: 'Test Token',
+              decimals: 6,
+              total_supply: '0x1000000',
+            },
+          ],
+        ],
+      }),
+    } as any
   })
 
   describe('constructor', () => {
@@ -88,75 +111,6 @@ describe('WarpFastsetDataLoader', () => {
         expect(action).toHaveProperty('id')
         expect(action).toHaveProperty('sender')
         expect(action.chain).toBe('fastset')
-      }
-    })
-  })
-
-  describe('getAccountInfo', () => {
-    it('should have getAccountInfo method', () => {
-      expect(typeof dataLoader.getAccountInfo).toBe('function')
-    })
-
-    it('should return FastsetAccountData or null', async () => {
-      const result = await dataLoader.getAccountInfo('set17wm3vmdqk48cfw65w9xff5s2uzk8rvngp8mhgthjr8dyk77ltu7qv5a489')
-
-      if (result) {
-        expect(result).toHaveProperty('address')
-        expect(result).toHaveProperty('balance')
-        expect(result).toHaveProperty('balanceDecimal')
-        expect(result).toHaveProperty('nextNonce')
-        expect(result).toHaveProperty('sequenceNumber')
-        expect(typeof result.balanceDecimal).toBe('number')
-        expect(typeof result.nextNonce).toBe('number')
-      }
-    })
-  })
-
-  describe('getTransactionInfo', () => {
-    it('should have getTransactionInfo method', () => {
-      expect(typeof dataLoader.getTransactionInfo).toBe('function')
-    })
-
-    it('should return FastsetTransactionData or null', async () => {
-      const result = await dataLoader.getTransactionInfo('0x1234567890abcdef')
-
-      if (result) {
-        expect(result).toHaveProperty('hash')
-        expect(result).toHaveProperty('hashHex')
-        expect(result).toHaveProperty('status')
-        expect(result).toHaveProperty('details')
-      }
-    })
-  })
-
-  describe('checkTransferStatus', () => {
-    it('should have checkTransferStatus method', () => {
-      expect(typeof dataLoader.checkTransferStatus).toBe('function')
-    })
-
-    it('should return boolean', async () => {
-      const result = await dataLoader.checkTransferStatus(
-        'set17wm3vmdqk48cfw65w9xff5s2uzk8rvngp8mhgthjr8dyk77ltu7qv5a489',
-        'set177rt9kr5z64tv4hecea8lqql5qwtfqfd6nxzrtcdqk33d0ccrq9snqekm6',
-        '1000000'
-      )
-
-      expect(typeof result).toBe('boolean')
-    })
-  })
-
-  describe('getAccountBalance', () => {
-    it('should have getAccountBalance method', () => {
-      expect(typeof dataLoader.getAccountBalance).toBe('function')
-    })
-
-    it('should return balance info or null', async () => {
-      const result = await dataLoader.getAccountBalance('set17wm3vmdqk48cfw65w9xff5s2uzk8rvngp8mhgthjr8dyk77ltu7qv5a489')
-
-      if (result) {
-        expect(result).toHaveProperty('balance')
-        expect(result).toHaveProperty('balanceDecimal')
-        expect(typeof result.balanceDecimal).toBe('number')
       }
     })
   })

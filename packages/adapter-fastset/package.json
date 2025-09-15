@@ -40,7 +40,9 @@
     "@mysten/bcs": "^1.8.0",
     "@noble/ed25519": "^3.0.0",
     "@noble/hashes": "^2.0.0",
+    "@scure/bip39": "^1.5.4",
     "@vleap/warps": "^3.0.0-alpha.104",
-    "bech32": "^2.0.0"
+    "bech32": "^2.0.0",
+    "buffer": "^6.0.3"
   }
 }

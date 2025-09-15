@@ -1,4 +1,4 @@
-import { AdapterWarpWallet, WarpAdapterGenericTransaction, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { AdapterWarpWallet, getWarpWalletPrivateKeyFromConfig, WarpAdapterGenericTransaction, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 import { ethers } from 'ethers'
 
 export class WarpEvmWallet implements AdapterWarpWallet {
@@ -13,14 +13,14 @@ export class WarpEvmWallet implements AdapterWarpWallet {
   }
 
   async signTransaction(tx: WarpAdapterGenericTransaction): Promise<WarpAdapterGenericTransaction> {
-    if (!this.wallet) {
-      throw new Error('Wallet not initialized - no private key provided')
-    }
-
     if (!tx || typeof tx !== 'object') {
       throw new Error('Invalid transaction object')
     }
 
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
+    if (!privateKey) throw new Error('Wallet not initialized - no private key provided')
+
+    const wallet = new ethers.Wallet(privateKey)
     const txRequest = {
       to: tx.to,
       data: tx.data,
@@ -32,16 +32,16 @@ export class WarpEvmWallet implements AdapterWarpWallet {
       chainId: tx.chainId,
     }
 
-    const signedTx = await this.wallet.signTransaction(txRequest)
+    const signedTx = await wallet.signTransaction(txRequest)
     return { ...tx, signature: signedTx }
   }
 
   async signMessage(message: string): Promise<string> {
-    if (!this.wallet) {
-      throw new Error('Wallet not initialized - no private key provided')
-    }
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
+    if (!privateKey) throw new Error('Wallet not initialized - no private key provided')
 
-    return await this.wallet.signMessage(message)
+    const wallet = new ethers.Wallet(privateKey)
+    return await wallet.signMessage(message)
   }
 
   async sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string> {
@@ -53,12 +53,11 @@ export class WarpEvmWallet implements AdapterWarpWallet {
       throw new Error('Transaction must be signed before sending')
     }
 
-    if (!this.wallet) {
-      throw new Error('Wallet not initialized - no private key provided')
-    }
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
+    if (!privateKey) throw new Error('Wallet not initialized - no private key provided')
 
-    const connectedWallet = this.wallet.connect(this.provider)
-    const txResponse = await connectedWallet.sendTransaction(tx as any)
+    const wallet = new ethers.Wallet(privateKey).connect(this.provider)
+    const txResponse = await wallet.sendTransaction(tx as any)
     return txResponse.hash
   }
 
@@ -73,6 +72,9 @@ export class WarpEvmWallet implements AdapterWarpWallet {
   }
 
   getAddress(): string | null {
-    return this.wallet?.address || null
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
+    if (!privateKey) return null
+    const wallet = new ethers.Wallet(privateKey)
+    return wallet.address
   }
 }

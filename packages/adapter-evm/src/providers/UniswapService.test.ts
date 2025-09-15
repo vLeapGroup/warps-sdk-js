@@ -187,7 +187,7 @@ describe('UniswapService', () => {
       expect(mockCache.set).toHaveBeenCalledWith('uniswap:metadata:1:0x0000000000000000000000000000000000000000', null, 300)
     })
 
-    it.skip('should return cached metadata on subsequent calls', async () => {
+    it('should return cached metadata on subsequent calls', async () => {
       const cachedMetadata = {
         name: 'USD Coin',
         symbol: 'USDC',
@@ -199,10 +199,22 @@ describe('UniswapService', () => {
       mockCache.get.mockClear()
       mockFetch.mockClear()
 
+      // Setup fetch mock to return token list
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: jest.fn().mockResolvedValue(mockTokenList),
+      })
+
       // Setup: first call cache miss, second call cache hit
-      mockCache.get
-        .mockReturnValueOnce(null) // First call cache miss
-        .mockReturnValueOnce(cachedMetadata) // Second call cache hit
+      let callCount = 0
+      mockCache.get.mockImplementation((key: string) => {
+        if (key === 'uniswap:metadata:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') {
+          callCount++
+          if (callCount === 1) return null // First call cache miss
+          if (callCount === 2) return cachedMetadata // Second call cache hit
+        }
+        return undefined // Other keys or additional calls
+      })
 
       // First call should fetch and cache
       await service.getTokenMetadata('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
@@ -260,7 +272,7 @@ describe('UniswapService', () => {
       expect(mockCache.set).toHaveBeenCalledWith('uniswap:bridge:1:0x0000000000000000000000000000000000000000', null, 300)
     })
 
-    it.skip('should return cached bridge info on subsequent calls', async () => {
+    it('should return cached bridge info on subsequent calls', async () => {
       const cachedBridgeInfo = {
         '56': '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',
         '137': '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
@@ -270,10 +282,22 @@ describe('UniswapService', () => {
       mockCache.get.mockClear()
       mockFetch.mockClear()
 
+      // Setup fetch mock to return token list
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: jest.fn().mockResolvedValue(mockTokenList),
+      })
+
       // Setup: first call cache miss, second call cache hit
-      mockCache.get
-        .mockReturnValueOnce(null) // First call cache miss
-        .mockReturnValueOnce(cachedBridgeInfo) // Second call cache hit
+      let bridgeCallCount = 0
+      mockCache.get.mockImplementation((key: string) => {
+        if (key === 'uniswap:bridge:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') {
+          bridgeCallCount++
+          if (bridgeCallCount === 1) return null // First call cache miss
+          if (bridgeCallCount === 2) return cachedBridgeInfo // Second call cache hit
+        }
+        return undefined // Other keys or additional calls
+      })
 
       // First call should fetch and cache
       await service.getBridgeInfo('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
