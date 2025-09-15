@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.105
+
+### Patch Changes
+
+- 8a3c7c5: update chain prefixs
+
 ## 3.0.0-alpha.104
 
 ### Patch Changes

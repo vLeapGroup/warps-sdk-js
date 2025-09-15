@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.41
+
+### Patch Changes
+
+- 0dfbec0: update wallets
+- Updated dependencies [8a3c7c5]
+  - @vleap/warps@3.0.0-alpha.105
+
 ## 0.2.0-alpha.40
 
 ### Patch Changes

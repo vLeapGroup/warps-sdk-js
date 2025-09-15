@@ -1,5 +1,14 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.54
+
+### Patch Changes
+
+- 0dfbec0: update wallets
+- 8a3c7c5: update chain prefixs
+- Updated dependencies [8a3c7c5]
+  - @vleap/warps@3.0.0-alpha.105
+
 ## 0.2.0-alpha.53
 
 ### Patch Changes
