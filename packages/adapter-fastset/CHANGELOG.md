@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-alpha.26
+
+### Patch Changes
+
+- 295e54e: update fastset adapter
+
 ## 0.1.0-alpha.25
 
 ### Patch Changes
