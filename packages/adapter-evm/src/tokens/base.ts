@@ -29,7 +29,7 @@ export const BaseTokens: WarpChainAsset[] = [
   },
   {
     chain: BaseChain,
-    fidentifier: '0xcbB7C0006F23900c38EB856149F799620fcb8A4a',
+    identifier: '0xcbB7C0006F23900c38EB856149F799620fcb8A4a',
     name: 'Coinbase Wrapped BTC',
     symbol: 'CBETH',
     decimals: 8,
