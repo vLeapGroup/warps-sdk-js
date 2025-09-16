@@ -9,7 +9,7 @@ import {
   WarpClientConfig,
   WarpWalletDetails,
 } from '@vleap/warps'
-import { stringToUint8Array, uint8ArrayToHex } from './helpers'
+import { hexToUint8Array, stringToUint8Array, uint8ArrayToHex } from './helpers'
 import { getConfiguredFastsetClient } from './helpers/general'
 import { FastsetClient } from './sdk'
 import { ed } from './sdk/ed25519-setup'
@@ -37,24 +37,21 @@ export class WarpFastsetWallet implements AdapterWarpWallet {
     const dataToSign = new Uint8Array(prefix.length + msgBytes.length)
     dataToSign.set(prefix, 0)
     dataToSign.set(msgBytes, prefix.length)
-    const signature = ed.sign(dataToSign, this.privateKey as any)
+    const privateKeyBytes = hexToUint8Array(this.privateKey)
+    const signature = ed.sign(dataToSign, privateKeyBytes)
     return { ...tx, signature }
   }
 
   async signMessage(message: string): Promise<string> {
     const messageBytes = stringToUint8Array(message)
-    const signature = ed.sign(messageBytes, this.privateKey as any)
+    const privateKeyBytes = hexToUint8Array(this.privateKey)
+    const signature = ed.sign(messageBytes, privateKeyBytes)
     return uint8ArrayToHex(signature)
   }
 
   async sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string> {
     const { signature, ...transactionWithoutSignature } = tx
-
-    const submitTxReq = {
-      transaction: transactionWithoutSignature,
-      signature,
-    }
-
+    const submitTxReq = { transaction: transactionWithoutSignature, signature }
     const proxyUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
     const response = await this.client.request(proxyUrl, 'set_proxy_submitTransaction', submitTxReq)
 

@@ -1,4 +1,3 @@
-import { BCS, getSuiMoveConfig } from '@mysten/bcs'
 import * as bech32 from 'bech32'
 import { FastsetJsonRpcResponse } from './types'
 ;(BigInt.prototype as any).toJSON = function () {
@@ -39,47 +38,6 @@ export interface AccountInfoResponse {
   requested_claim_by_id?: any
   requested_claims: any[]
 }
-
-// BCS instance for Fastset transaction serialization
-const bcs = new BCS(getSuiMoveConfig())
-
-// Register Fastset-specific types
-bcs.registerStructType('FastSetAddress', {
-  bytes: 'vector<u8>',
-})
-
-bcs.registerStructType('ExternalAddress', {
-  bytes: 'vector<u8>',
-})
-
-// Register Address as a union type
-bcs.registerEnumType('Address', {
-  FastSet: 'FastSetAddress',
-  External: 'ExternalAddress',
-})
-
-// Register option type as enum
-bcs.registerEnumType('UserDataOption', {
-  Some: 'vector<u8>',
-  None: 'bool', // Use bool for None variant (false = None)
-})
-
-bcs.registerStructType('TransferClaim', {
-  amount: 'u256', // 256-bit unsigned integer
-  user_data: 'UserDataOption', // Use our custom option type
-})
-
-bcs.registerStructType('ClaimType', {
-  Transfer: 'TransferClaim',
-})
-
-bcs.registerStructType('Transaction', {
-  sender: 'vector<u8>', // 32 bytes
-  recipient: 'Address',
-  nonce: 'u64',
-  timestamp_nanos: 'u128',
-  claim: 'ClaimType',
-})
 
 let id = 0
 
