@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url'
 
 const Chain = 'fastset'
 const WarpToTest = 'test.json'
-const WarpInputs: string[] = ['address:set1y0nxhrezjh66e2zfh6nx70lc69sr8zcfe55sqgs4wh9xvxsytxasxc3p2h', 'asset:SET|1'] // e.g. 'address:moon', 'asset:EGLD|0.5'
+const WarpInputs: string[] = ['address:set1y0nxhrezjh66e2zfh6nx70lc69sr8zcfe55sqgs4wh9xvxsytxasxc3p2h', 'asset:SET|10|0'] // e.g. 'address:abc', 'asset:EGLD|0.5'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)

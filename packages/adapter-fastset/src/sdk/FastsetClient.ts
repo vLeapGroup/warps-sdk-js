@@ -1,5 +1,4 @@
 import { BCS, getSuiMoveConfig } from '@mysten/bcs'
-import { WarpClientConfig } from '@vleap/warps'
 import * as bech32 from 'bech32'
 import { FastsetJsonRpcResponse } from './types'
 ;(BigInt.prototype as any).toJSON = function () {
@@ -82,31 +81,26 @@ bcs.registerStructType('Transaction', {
   claim: 'ClaimType',
 })
 
+let id = 0
+
 export class FastsetClient {
   private proxyUrl: string
 
-  constructor(config?: WarpClientConfig | { proxyUrl: string }, chain?: any) {
-    this.proxyUrl = config && 'proxyUrl' in config ? config.proxyUrl : config && chain ? chain.defaultApiUrl : 'https://proxy.fastset.xyz'
+  constructor(proxyUrl: string) {
+    this.proxyUrl = proxyUrl
   }
 
   async request(url: string, method: string, params: any): Promise<any> {
-    const request = this.buildJsonRpcRequest(1, method, params)
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: this.jsonSerialize(request),
-    })
+    const request = this.buildJsonRpcRequest(id++, method, params)
+    const headers = { 'Content-Type': 'application/json' }
+    const body = this.jsonSerialize(request)
+    const response = await fetch(url, { method: 'POST', headers, body })
     const json = await response.json()
     return json
   }
 
   private buildJsonRpcRequest(id: number, method: string, params: any) {
-    return {
-      jsonrpc: '2.0',
-      id,
-      method,
-      params,
-    }
+    return { jsonrpc: '2.0', id, method, params }
   }
 
   private jsonSerialize(data: any) {

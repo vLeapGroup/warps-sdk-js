@@ -38,7 +38,7 @@ export class WarpFastsetWallet implements AdapterWarpWallet {
     dataToSign.set(prefix, 0)
     dataToSign.set(msgBytes, prefix.length)
     const signature = ed.sign(dataToSign, this.privateKey)
-    return { ...tx, signature: uint8ArrayToHex(signature) }
+    return { ...tx, signature }
   }
 
   async signMessage(message: string): Promise<string> {
@@ -48,15 +48,11 @@ export class WarpFastsetWallet implements AdapterWarpWallet {
   }
 
   async sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string> {
-    // Convert hex signature back to Uint8Array for the JSON-RPC request
-    const signatureBytes = stringToUint8Array(tx.signature as string)
-
-    // Create transaction object without signature (signature is sent separately)
     const { signature, ...transactionWithoutSignature } = tx
 
     const submitTxReq = {
       transaction: transactionWithoutSignature,
-      signature: signatureBytes,
+      signature,
     }
 
     const proxyUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)

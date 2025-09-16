@@ -11,7 +11,7 @@ export const NativeTokenSet: WarpChainAsset = {
   identifier: 'SET',
   name: 'SET',
   symbol: 'SET',
-  decimals: 6,
+  decimals: 0,
   logoUrl: 'https://vleap.ai/images/tokens/set.svg',
 }
 

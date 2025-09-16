@@ -7,16 +7,17 @@ import {
   WarpClientConfig,
   WarpExecutable,
 } from '@vleap/warps'
+import { getConfiguredFastsetClient } from './helpers'
 import { FastsetClient } from './sdk'
 
 export class WarpFastsetExecutor implements AdapterWarpExecutor {
-  private readonly fastsetClient: FastsetClient
+  private readonly client: FastsetClient
 
   constructor(
     private readonly config: WarpClientConfig,
     private readonly chain: WarpChainInfo
   ) {
-    this.fastsetClient = new FastsetClient({ proxyUrl: 'https://proxy.fastset.xyz' })
+    this.client = getConfiguredFastsetClient(this.config, this.chain)
   }
 
   async createTransaction(executable: WarpExecutable): Promise<any> {
@@ -33,9 +34,14 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
     const userWallet = getWarpWalletAddressFromConfig(this.config, executable.chain.name)
     if (!userWallet) throw new Error('WarpFastsetExecutor: createTransfer - user address not set')
     const senderPubKey = FastsetClient.decodeBech32Address(userWallet)
-    const recipientPubKey: Uint8Array = FastsetClient.decodeBech32Address(executable.destination)
-    const nonce = await this.fastsetClient.getNextNonce(userWallet)
-    const amountHex = BigInt(executable.value).toString(16)
+    const recipientPubKey = FastsetClient.decodeBech32Address(executable.destination)
+    const nonce = await this.client.getNextNonce(userWallet)
+
+    const nativeAmountInTransfers =
+      executable.transfers.find((transfer) => transfer.identifier === this.chain.nativeToken?.identifier)?.amount || 0n
+
+    const nativeAmountTotal = nativeAmountInTransfers + executable.value
+    const amountHex = BigInt(nativeAmountTotal).toString(16)
 
     return {
       sender: senderPubKey,
