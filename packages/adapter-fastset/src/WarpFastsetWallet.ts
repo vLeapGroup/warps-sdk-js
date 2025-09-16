@@ -37,13 +37,13 @@ export class WarpFastsetWallet implements AdapterWarpWallet {
     const dataToSign = new Uint8Array(prefix.length + msgBytes.length)
     dataToSign.set(prefix, 0)
     dataToSign.set(msgBytes, prefix.length)
-    const signature = ed.sign(dataToSign, this.privateKey)
+    const signature = ed.sign(dataToSign, this.privateKey as any)
     return { ...tx, signature }
   }
 
   async signMessage(message: string): Promise<string> {
     const messageBytes = stringToUint8Array(message)
-    const signature = ed.sign(messageBytes, this.privateKey)
+    const signature = ed.sign(messageBytes, this.privateKey as any)
     return uint8ArrayToHex(signature)
   }
 
@@ -72,6 +72,7 @@ export class WarpFastsetWallet implements AdapterWarpWallet {
   }
 
   generate(): WarpWalletDetails {
+    // @ts-ignore
     const privateKey = ed.utils.randomPrivateKey()
     const publicKey = ed.getPublicKey(privateKey)
     const address = FastsetClient.encodeBech32Address(publicKey)
