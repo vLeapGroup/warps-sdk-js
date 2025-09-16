@@ -14,10 +14,12 @@ describe('WarpFastsetExplorer', () => {
     blockTime: 1000,
     addressHrp: 'set',
     defaultApiUrl: 'https://rpc.fastset.xyz',
+    logoUrl: 'https://example.com/set-logo.png',
     nativeToken: {
       chain: 'fastset',
       identifier: 'SET',
       name: 'SET',
+      symbol: 'SET',
       decimals: 6,
       logoUrl: 'https://example.com/set-logo.png',
     },

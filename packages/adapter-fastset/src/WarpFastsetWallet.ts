@@ -1,6 +1,7 @@
 import * as bip39 from '@scure/bip39'
 import {
   AdapterWarpWallet,
+  getProviderUrl,
   getWarpWalletAddressFromConfig,
   getWarpWalletPrivateKeyFromConfig,
   WarpAdapterGenericTransaction,
@@ -8,84 +9,80 @@ import {
   WarpClientConfig,
   WarpWalletDetails,
 } from '@vleap/warps'
-import { encoder, hexToUint8Array, stringToUint8Array, uint8ArrayToHex } from './helpers'
+import { stringToUint8Array, uint8ArrayToHex } from './helpers'
 import { getConfiguredFastsetClient } from './helpers/general'
-import { FastsetClient, Transaction, Wallet } from './sdk'
+import { FastsetClient } from './sdk'
 import { ed } from './sdk/ed25519-setup'
+import { Transaction } from './sdk/types'
 
 export class WarpFastsetWallet implements AdapterWarpWallet {
-  private wallet: Wallet | null = null
   private client: FastsetClient
+  private privateKey: string
 
   constructor(
     private config: WarpClientConfig,
     private chain: WarpChainInfo
   ) {
-    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
-    if (privateKey) {
-      this.wallet = new Wallet(privateKey)
-    }
     this.client = getConfiguredFastsetClient(this.config, this.chain)
+
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
+    if (!privateKey) throw new Error('Wallet not initialized - no private key provided')
+    this.privateKey = privateKey
   }
 
   async signTransaction(tx: WarpAdapterGenericTransaction): Promise<WarpAdapterGenericTransaction> {
-    if (!this.wallet) throw new Error('Wallet not initialized')
-    const transaction = tx as Transaction
-    const serializedTx = this.serializeTransaction(transaction.toTransaction())
-    const signature = await ed.sign(serializedTx, this.wallet.getPrivateKey())
-    return Object.assign(transaction, { signature: uint8ArrayToHex(signature) })
+    const msg = Transaction.serialize(tx)
+    const msgBytes = msg.toBytes()
+    const prefix = new TextEncoder().encode('Transaction::')
+    const dataToSign = new Uint8Array(prefix.length + msgBytes.length)
+    dataToSign.set(prefix, 0)
+    dataToSign.set(msgBytes, prefix.length)
+    const signature = ed.sign(dataToSign, this.privateKey)
+    return { ...tx, signature: uint8ArrayToHex(signature) }
   }
 
   async signMessage(message: string): Promise<string> {
-    if (!this.wallet) throw new Error('Wallet not initialized')
     const messageBytes = stringToUint8Array(message)
-    const signature = await ed.sign(messageBytes, this.wallet.getPrivateKey())
+    const signature = ed.sign(messageBytes, this.privateKey)
     return uint8ArrayToHex(signature)
   }
 
   async sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string> {
-    if (!this.wallet) throw new Error('Wallet not initialized')
-    const transaction = tx as Transaction
-    const fastsetTx = transaction.toTransaction()
+    // Convert hex signature back to Uint8Array for the JSON-RPC request
+    const signatureBytes = stringToUint8Array(tx.signature as string)
 
-    const transactionData = {
-      sender: fastsetTx.sender,
-      recipient: fastsetTx.recipient,
-      nonce: fastsetTx.nonce,
-      timestamp_nanos: fastsetTx.timestamp_nanos,
-      claim: fastsetTx.claim,
+    // Create transaction object without signature (signature is sent separately)
+    const { signature, ...transactionWithoutSignature } = tx
+
+    const submitTxReq = {
+      transaction: transactionWithoutSignature,
+      signature: signatureBytes,
     }
 
-    const signature = tx.signature
-      ? hexToUint8Array(tx.signature)
-      : await ed.sign(this.serializeTransaction(transactionData), this.wallet.getPrivateKey())
+    const proxyUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
+    const response = await this.client.request(proxyUrl, 'set_proxy_submitTransaction', submitTxReq)
 
-    return await this.client.submitTransaction(transactionData, signature)
+    if (response.error) throw new Error(`JSON-RPC error ${response.error.code}: ${response.error.message}`)
+    console.log('submitTransaction response', response.result)
+    return 'TODO'
   }
 
   create(mnemonic: string): WarpWalletDetails {
     const seed = bip39.mnemonicToSeedSync(mnemonic)
     const privateKey = seed.slice(0, 32) // Use first 32 bytes of seed as private key
-    const wallet = new Wallet(uint8ArrayToHex(privateKey))
-    return { address: wallet.toBech32(), privateKey: uint8ArrayToHex(wallet.getPrivateKey()), mnemonic }
+    const publicKey = ed.getPublicKey(privateKey)
+    const address = FastsetClient.encodeBech32Address(publicKey)
+    return { address, privateKey: uint8ArrayToHex(privateKey), mnemonic }
   }
 
   generate(): WarpWalletDetails {
     const privateKey = ed.utils.randomPrivateKey()
-    const wallet = new Wallet(uint8ArrayToHex(privateKey))
-    return { address: wallet.toBech32(), privateKey: uint8ArrayToHex(wallet.getPrivateKey()), mnemonic: null }
+    const publicKey = ed.getPublicKey(privateKey)
+    const address = FastsetClient.encodeBech32Address(publicKey)
+    return { address, privateKey: uint8ArrayToHex(privateKey), mnemonic: null }
   }
 
   getAddress(): string | null {
     return getWarpWalletAddressFromConfig(this.config, this.chain.name)
-  }
-
-  private serializeTransaction(tx: any): Uint8Array {
-    const serialized = JSON.stringify(tx, (k, v) => {
-      if (v instanceof Uint8Array) return Array.from(v)
-      if (typeof v === 'bigint') return v.toString()
-      return v
-    })
-    return encoder.encode(serialized)
   }
 }

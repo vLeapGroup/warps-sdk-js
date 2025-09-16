@@ -25,7 +25,7 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
     const addressBytes = this.addressToBytes(address)
     const accountInfo = await this.client.getAccountInfo(addressBytes)
 
-    return { chain: this.chain.name, address, balance: BigInt(parseInt(accountInfo.balance, 16)) }
+    return { chain: this.chain.name, address, balance: BigInt(parseInt(accountInfo.result?.balance ?? '0', 16)) }
   }
 
   async getAccountAssets(address: string): Promise<WarpChainAsset[]> {
@@ -33,12 +33,13 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
     const accountInfo = await this.client.getAccountInfo(addressBytes)
 
     const assets: WarpChainAsset[] = []
-    const balance = BigInt(parseInt(accountInfo.balance, 16))
+    console.log('accountInfo', accountInfo)
+    const balance = BigInt(parseInt(accountInfo.result?.balance ?? '0', 16))
     if (balance > 0n) {
       assets.push({ ...this.chain.nativeToken, amount: balance })
     }
 
-    for (const [tokenId, tokenBalance] of accountInfo.token_balance) {
+    for (const [tokenId, tokenBalance] of accountInfo.result?.token_balance ?? []) {
       const amount = BigInt(parseInt(tokenBalance, 16))
       if (amount > 0n) {
         const tokenInfo = await this.client.getTokenInfo([tokenId])
