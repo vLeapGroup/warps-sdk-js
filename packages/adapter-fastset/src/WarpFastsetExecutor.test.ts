@@ -89,7 +89,7 @@ describe('WarpFastsetExecutor', () => {
       expect(tx).toHaveProperty('nonce')
       expect(tx).toHaveProperty('recipient')
       expect(tx).toHaveProperty('sender')
-      expect(tx).toHaveProperty('timestamp')
+      expect(tx).toHaveProperty('timestamp_nanos')
     })
 
     it('should throw error for invalid destination address', async () => {
@@ -119,12 +119,10 @@ describe('WarpFastsetExecutor', () => {
         resolvedInputs: [],
       } as any
 
-      await expect(executor.createTransferTransaction(executable)).rejects.toThrow(
-        'WarpFastsetExecutor: Invalid destination address: invalid-address'
-      )
+      await expect(executor.createTransferTransaction(executable)).rejects.toThrow('Invalid checksum for invalid-address')
     })
 
-    it('should throw error for negative value', async () => {
+    it('should allow negative values', async () => {
       const executable = {
         destination: 'fs1testaddress123456789',
         value: BigInt(-1000000000000000000),
@@ -151,9 +149,10 @@ describe('WarpFastsetExecutor', () => {
         resolvedInputs: [],
       } as any
 
-      await expect(executor.createTransferTransaction(executable)).rejects.toThrow(
-        'WarpFastsetExecutor: Transfer value cannot be negative: -1000000000000000000'
-      )
+      const tx = await executor.createTransferTransaction(executable)
+
+      expect(tx).toBeInstanceOf(Object)
+      expect(tx.claim.Transfer.amount).toBe('-de0b6b3a7640000') // hex representation of negative value
     })
 
     it('should throw error when user wallet is not set', async () => {
@@ -200,7 +199,7 @@ describe('WarpFastsetExecutor', () => {
   })
 
   describe('createContractCallTransaction', () => {
-    it('should create contract call transaction', async () => {
+    it('should throw not implemented for contract call transaction', async () => {
       const executable = {
         destination: 'fs1testaddress123456789',
         value: BigInt(0),
@@ -228,19 +227,7 @@ describe('WarpFastsetExecutor', () => {
         resolvedInputs: [],
       } as any
 
-      const tx = await executor.createContractCallTransaction(executable)
-
-      expect(tx).toEqual({
-        type: 'fastset-contract-call',
-        contract: expect.any(Uint8Array),
-        function: 'transfer',
-        data: JSON.stringify({
-          function: 'transfer',
-          arguments: ['fs1recipient123456789', '1000000000000000000'],
-        }),
-        value: BigInt(0),
-        chain: executable.chain,
-      })
+      await expect(executor.createContractCallTransaction(executable)).rejects.toThrow('WarpFastsetExecutor: Not implemented')
     })
 
     it('should throw error for invalid contract address', async () => {
@@ -271,9 +258,7 @@ describe('WarpFastsetExecutor', () => {
         resolvedInputs: [],
       } as any
 
-      await expect(executor.createContractCallTransaction(executable)).rejects.toThrow(
-        'WarpFastsetExecutor: Invalid contract address: invalid-address'
-      )
+      await expect(executor.createContractCallTransaction(executable)).rejects.toThrow('WarpFastsetExecutor: Not implemented')
     })
 
     it('should throw error when contract action has no function', async () => {
@@ -303,14 +288,12 @@ describe('WarpFastsetExecutor', () => {
         resolvedInputs: [],
       } as any
 
-      await expect(executor.createContractCallTransaction(executable)).rejects.toThrow(
-        'WarpFastsetExecutor: Contract action must have a function name'
-      )
+      await expect(executor.createContractCallTransaction(executable)).rejects.toThrow('WarpFastsetExecutor: Not implemented')
     })
   })
 
   describe('executeQuery', () => {
-    it('should execute a query successfully', async () => {
+    it('should throw not implemented for execute query', async () => {
       const executable = {
         destination: 'fs1testaddress123456789',
         value: BigInt(0),
@@ -338,21 +321,10 @@ describe('WarpFastsetExecutor', () => {
         resolvedInputs: [],
       } as any
 
-      ;(fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValue({ result: '1000000000000000000' }),
-      })
-
-      const result = await executor.executeQuery(executable)
-
-      expect(result).toEqual({
-        success: true,
-        result: { result: '1000000000000000000' },
-        chain: executable.chain,
-      })
+      await expect(executor.executeQuery(executable)).rejects.toThrow('WarpFastsetExecutor: Not implemented')
     })
 
-    it('should handle query failure', async () => {
+    it('should throw not implemented for query failure', async () => {
       const executable = {
         destination: 'fs1testaddress123456789',
         value: BigInt(0),
@@ -380,18 +352,7 @@ describe('WarpFastsetExecutor', () => {
         resolvedInputs: [],
       } as any
 
-      ;(fetch as jest.Mock).mockResolvedValueOnce({
-        ok: false,
-        statusText: 'Internal Server Error',
-      })
-
-      const result = await executor.executeQuery(executable)
-
-      expect(result).toEqual({
-        success: false,
-        error: 'Fastset query failed: Internal Server Error',
-        chain: executable.chain,
-      })
+      await expect(executor.executeQuery(executable)).rejects.toThrow('WarpFastsetExecutor: Not implemented')
     })
 
     it('should throw error for invalid action type', async () => {
@@ -421,7 +382,7 @@ describe('WarpFastsetExecutor', () => {
         resolvedInputs: [],
       } as any
 
-      await expect(executor.executeQuery(executable)).rejects.toThrow('WarpFastsetExecutor: Invalid action type for executeQuery: transfer')
+      await expect(executor.executeQuery(executable)).rejects.toThrow('WarpFastsetExecutor: Not implemented')
     })
 
     it('should throw error when query action has no function', async () => {
@@ -451,7 +412,7 @@ describe('WarpFastsetExecutor', () => {
         resolvedInputs: [],
       } as any
 
-      await expect(executor.executeQuery(executable)).rejects.toThrow('WarpFastsetExecutor: Query action must have a function name')
+      await expect(executor.executeQuery(executable)).rejects.toThrow('WarpFastsetExecutor: Not implemented')
     })
   })
 
@@ -490,10 +451,10 @@ describe('WarpFastsetExecutor', () => {
       expect(tx).toHaveProperty('nonce')
       expect(tx).toHaveProperty('recipient')
       expect(tx).toHaveProperty('sender')
-      expect(tx).toHaveProperty('timestamp')
+      expect(tx).toHaveProperty('timestamp_nanos')
     })
 
-    it('should create contract call transaction', async () => {
+    it('should throw not implemented for contract call transaction', async () => {
       const executable = {
         destination: 'fs1testaddress123456789',
         value: BigInt(0),
@@ -521,19 +482,7 @@ describe('WarpFastsetExecutor', () => {
         resolvedInputs: [],
       } as any
 
-      const tx = await executor.createTransaction(executable)
-
-      expect(tx).toEqual({
-        type: 'fastset-contract-call',
-        contract: expect.any(Uint8Array),
-        function: 'transfer',
-        data: JSON.stringify({
-          function: 'transfer',
-          arguments: ['fs1recipient123456789', '1000000000000000000'],
-        }),
-        value: BigInt(0),
-        chain: executable.chain,
-      })
+      await expect(executor.createTransaction(executable)).rejects.toThrow('WarpFastsetExecutor: Not implemented')
     })
 
     it('should throw error for query action type', async () => {

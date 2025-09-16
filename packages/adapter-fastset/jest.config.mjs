@@ -16,6 +16,7 @@ export default {
     '^(\\.{1,2}/.*)\\.js$': '$1',
     '^@vleap/warps$': '<rootDir>/../core/src/index.ts',
     '^@noble/ed25519$': '<rootDir>/src/__mocks__/@noble/ed25519.ts',
+    '^@scure/bip39$': '<rootDir>/src/__mocks__/@scure/bip39.ts',
   },
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
