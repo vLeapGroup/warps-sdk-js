@@ -17,17 +17,12 @@ import { Transaction } from './sdk/types'
 
 export class WarpFastsetWallet implements AdapterWarpWallet {
   private client: FastsetClient
-  private privateKey: string
 
   constructor(
     private config: WarpClientConfig,
     private chain: WarpChainInfo
   ) {
     this.client = getConfiguredFastsetClient(this.config, this.chain)
-
-    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
-    if (!privateKey) throw new Error('Wallet not initialized - no private key provided')
-    this.privateKey = privateKey
   }
 
   async signTransaction(tx: WarpAdapterGenericTransaction): Promise<WarpAdapterGenericTransaction> {
@@ -37,14 +32,18 @@ export class WarpFastsetWallet implements AdapterWarpWallet {
     const dataToSign = new Uint8Array(prefix.length + msgBytes.length)
     dataToSign.set(prefix, 0)
     dataToSign.set(msgBytes, prefix.length)
-    const privateKeyBytes = hexToUint8Array(this.privateKey)
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
+    if (!privateKey) throw new Error('Wallet not initialized - no private key provided')
+    const privateKeyBytes = hexToUint8Array(privateKey)
     const signature = ed.sign(dataToSign, privateKeyBytes)
     return { ...tx, signature }
   }
 
   async signMessage(message: string): Promise<string> {
     const messageBytes = stringToUint8Array(message)
-    const privateKeyBytes = hexToUint8Array(this.privateKey)
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
+    if (!privateKey) throw new Error('Wallet not initialized - no private key provided')
+    const privateKeyBytes = hexToUint8Array(privateKey)
     const signature = ed.sign(messageBytes, privateKeyBytes)
     return uint8ArrayToHex(signature)
   }
