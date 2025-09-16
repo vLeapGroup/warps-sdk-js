@@ -28,7 +28,6 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
   ) {
     this.serializer = new WarpEvmSerializer()
     const apiUrl = getProviderUrl(this.config, chain.name, this.config.env, this.chain.defaultApiUrl)
-    // Create provider with explicit network configuration using ethers.Network
     const network = new ethers.Network(this.chain.name, parseInt(this.chain.chainId))
     this.provider = new ethers.JsonRpcProvider(apiUrl, network)
     this.results = new WarpEvmResults(config, this.chain)
