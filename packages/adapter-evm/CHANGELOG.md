@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-alpha.31
+
+### Patch Changes
+
+- 3caf402: update evm adapter
+
 ## 0.2.0-alpha.30
 
 ### Patch Changes
