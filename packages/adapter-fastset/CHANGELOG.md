@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-alpha.27
+
+### Patch Changes
+
+- 605a8b1: fix fastset wallet
+
 ## 0.1.0-alpha.26
 
 ### Patch Changes
