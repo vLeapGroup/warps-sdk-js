@@ -7,7 +7,7 @@ import {
   WarpClientConfig,
   WarpExecutable,
 } from '@vleap/warps'
-import { getConfiguredFastsetClient } from './helpers'
+import { getConfiguredFastsetClient, hexToUint8Array } from './helpers'
 import { FastsetClient } from './sdk'
 
 export class WarpFastsetExecutor implements AdapterWarpExecutor {
@@ -60,7 +60,7 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
         timestamp_nanos: BigInt(Date.now()) * 1_000_000n,
         claim: {
           TokenTransfer: {
-            token_id: executable.transfers[0].identifier,
+            token_id: hexToUint8Array(executable.transfers[0].identifier),
             amount: executable.transfers[0].amount.toString(16),
             user_data: null,
           },
