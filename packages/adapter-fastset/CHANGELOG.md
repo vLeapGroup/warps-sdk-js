@@ -1,5 +1,12 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-alpha.29
+
+### Patch Changes
+
+- 7213711: add fastset token support
+- 256eada: update fastset adapter
+
 ## 0.1.0-alpha.28
 
 ### Patch Changes

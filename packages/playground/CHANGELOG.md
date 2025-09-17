@@ -1,5 +1,13 @@
 # @warps/playground
 
+## 0.2.0-alpha.53
+
+### Patch Changes
+
+- Updated dependencies [7213711]
+- Updated dependencies [256eada]
+  - @vleap/warps-adapter-fastset@0.1.0-alpha.29
+
 ## 0.2.0-alpha.52
 
 ### Patch Changes
