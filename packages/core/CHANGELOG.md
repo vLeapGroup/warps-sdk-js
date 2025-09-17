@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.106
+
+### Patch Changes
+
+- fe5ae46: update chain asset logo to be nullable
+
 ## 3.0.0-alpha.105
 
 ### Patch Changes
