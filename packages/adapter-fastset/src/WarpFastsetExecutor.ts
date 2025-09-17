@@ -38,17 +38,36 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
     const nonce = await this.client.getNextNonce(userWallet)
 
     const nativeAmountInTransfers =
-      executable.transfers.find((transfer) => transfer.identifier === this.chain.nativeToken?.identifier)?.amount || 0n
+      executable.transfers.length === 1 && executable.transfers[0].identifier === this.chain.nativeToken?.identifier
+        ? executable.transfers[0].amount
+        : 0n
 
     const nativeAmountTotal = nativeAmountInTransfers + executable.value
-    const amountHex = BigInt(nativeAmountTotal).toString(16)
 
-    return {
-      sender: senderPubKey,
-      recipient: { FastSet: recipientPubKey },
-      nonce,
-      timestamp_nanos: BigInt(Date.now()) * 1_000_000n,
-      claim: { Transfer: { amount: amountHex, user_data: null } },
+    if (nativeAmountTotal > 0n) {
+      return {
+        sender: senderPubKey,
+        recipient: { FastSet: recipientPubKey },
+        nonce,
+        timestamp_nanos: BigInt(Date.now()) * 1_000_000n,
+        claim: { Transfer: { amount: nativeAmountTotal.toString(16), user_data: null } },
+      }
+    } else if (executable.transfers.length === 1 && executable.transfers[0].identifier !== this.chain.nativeToken?.identifier) {
+      return {
+        sender: senderPubKey,
+        recipient: { FastSet: recipientPubKey },
+        nonce,
+        timestamp_nanos: BigInt(Date.now()) * 1_000_000n,
+        claim: {
+          TokenTransfer: {
+            token_id: executable.transfers[0].identifier,
+            amount: executable.transfers[0].amount.toString(16),
+            user_data: null,
+          },
+        },
+      }
+    } else {
+      throw new Error('WarpFastsetExecutor: No valid transfers provided (maximum 1 transfer allowed)')
     }
   }
 
