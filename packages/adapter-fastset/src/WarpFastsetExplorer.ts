@@ -1,5 +1,7 @@
 import { AdapterWarpExplorer, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 
+const HEX_PREFIX = '0x'
+
 export class WarpFastsetExplorer implements AdapterWarpExplorer {
   private readonly explorerUrl = 'https://explorer.fastset.xyz'
 
@@ -13,11 +15,11 @@ export class WarpFastsetExplorer implements AdapterWarpExplorer {
   }
 
   getTransactionUrl(hash: string): string {
-    return `${this.explorerUrl}/transaction/${hash}`
+    return `${this.explorerUrl}/txs/${HEX_PREFIX}${hash}`
   }
 
   getAssetUrl(identifier: string): string {
-    return `${this.explorerUrl}/asset/${identifier}`
+    return `${this.explorerUrl}/asset/${HEX_PREFIX}${identifier}`
   }
 
   getContractUrl(address: string): string {
