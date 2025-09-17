@@ -19,7 +19,7 @@ export type WarpChainAsset = {
   symbol: string
   amount?: bigint
   decimals?: number
-  logoUrl?: string
+  logoUrl?: string | null
   price?: number
   supply?: bigint
 }
