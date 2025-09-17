@@ -55,7 +55,7 @@ const runWarp = async (warpFile: string) => {
   console.log('Wallet address:', address)
   console.log(
     'Wallet assets:',
-    (await dataLoader.getAccountAssets(address)).map((asset) => `${asset.identifier} - ${asset.amount}`)
+    (await dataLoader.getAccountAssets(address)).map((asset) => `${asset.symbol} (${asset.identifier}) - ${asset.amount}`)
   )
   console.log('--------------------------------')
 
