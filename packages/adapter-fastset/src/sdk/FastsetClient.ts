@@ -1,5 +1,5 @@
 import * as bech32 from 'bech32'
-import { FastsetJsonRpcResponse } from './types'
+import { FastsetJsonRpcResponse, TokenInfoResponse } from './types'
 ;(BigInt.prototype as any).toJSON = function () {
   return Number(this)
 }
@@ -70,23 +70,27 @@ export class FastsetClient {
     })
   }
 
-  async getAccountInfo(address: number[]): Promise<FastsetJsonRpcResponse<AccountInfoResponse>> {
-    return this.request(this.proxyUrl, 'set_proxy_getAccountInfo', { address })
+  async getAccountInfo(address: Uint8Array): Promise<FastsetJsonRpcResponse<AccountInfoResponse>> {
+    return this.request(this.proxyUrl, 'set_proxy_getAccountInfo', { address, token_balances_filter: [] })
   }
 
-  async getNextNonce(address: string | number[]): Promise<number> {
+  async getTokenInfo(tokenIds: Uint8Array): Promise<FastsetJsonRpcResponse<TokenInfoResponse>> {
+    return this.request(this.proxyUrl, 'set_proxy_getTokenInfo', { tokenIds: [Array.from(tokenIds)] })
+  }
+
+  async getNextNonce(address: string | Uint8Array): Promise<number> {
     const addressBytes = typeof address === 'string' ? this.addressToBytes(address) : address
     const accountInfoRes = await this.getAccountInfo(addressBytes)
     return accountInfoRes.result?.next_nonce ?? 0
   }
 
-  private addressToBytes(address: string): number[] {
+  private addressToBytes(address: string): Uint8Array {
     try {
       const decoded = bech32.bech32m.decode(address)
-      return Array.from(bech32.bech32m.fromWords(decoded.words))
+      return new Uint8Array(bech32.bech32m.fromWords(decoded.words))
     } catch {
       const decoded = bech32.bech32.decode(address)
-      return Array.from(bech32.bech32.fromWords(decoded.words))
+      return new Uint8Array(bech32.bech32.fromWords(decoded.words))
     }
   }
 
