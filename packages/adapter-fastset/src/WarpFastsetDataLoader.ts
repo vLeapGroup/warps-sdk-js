@@ -7,8 +7,9 @@ import {
   WarpClientConfig,
   WarpDataLoaderOptions,
 } from '@vleap/warps'
-import { getConfiguredFastsetClient } from './helpers'
+import { getConfiguredFastsetClient, hexToUint8Array } from './helpers'
 import { FastsetClient } from './sdk/FastsetClient'
+import { findKnownTokenById, findKnownTokenBySymbol } from './tokens'
 
 export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
   private client: FastsetClient
@@ -39,18 +40,18 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
 
     for (const [tokenId, tokenBalance] of accountInfo.result?.token_balance ?? []) {
       const amount = BigInt(parseInt(tokenBalance, 16))
+
       if (amount > 0n) {
-        const tokenInfo = await this.client.getTokenInfo(new Uint8Array(tokenId))
-        const metadata = tokenInfo.result?.requested_token_metadata[0]?.[1]
-        if (!metadata) continue
+        const assetInfo = await this.getAssetInfo(Buffer.from(tokenId).toString('hex'))
+        if (!assetInfo) continue
 
         assets.push({
           chain: this.chain.name,
           identifier: Buffer.from(tokenId).toString('hex'),
-          symbol: metadata.token_name,
-          name: metadata.token_name,
-          decimals: metadata.decimals,
-          logoUrl: undefined,
+          symbol: assetInfo.symbol,
+          name: assetInfo.name,
+          decimals: assetInfo.decimals,
+          logoUrl: assetInfo.logoUrl || '',
           amount,
         })
       }
@@ -64,19 +65,20 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
       return this.chain.nativeToken
     }
 
-    const tokenId = Buffer.from(identifier, 'hex')
-    const tokenInfo = await this.client.getTokenInfo(new Uint8Array(tokenId))
-    const metadata = tokenInfo.result?.requested_token_metadata[0]?.[1]
-    if (!metadata) return null
+    const assetInfo = await this.getAssetInfo(identifier)
+
+    if (!assetInfo) {
+      return null
+    }
 
     return {
       chain: this.chain.name,
       identifier,
-      symbol: metadata.token_name,
-      name: metadata.token_name,
-      decimals: metadata.decimals,
-      logoUrl: undefined,
-      amount: BigInt(metadata.total_supply),
+      symbol: assetInfo.symbol,
+      name: assetInfo.name,
+      decimals: assetInfo.decimals,
+      logoUrl: assetInfo.logoUrl || null,
+      amount: 0n,
     }
   }
 
@@ -86,5 +88,29 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
 
   async getAccountActions(address: string, options?: WarpDataLoaderOptions): Promise<WarpChainAction[]> {
     return []
+  }
+
+  private async getAssetInfo(identifier: string): Promise<WarpChainAsset | null> {
+    const knownToken = findKnownTokenById(identifier, this.config.env) || findKnownTokenBySymbol(identifier, this.config.env)
+
+    if (knownToken) {
+      return knownToken
+    }
+
+    const tokenInfo = await this.client.getTokenInfo(hexToUint8Array(identifier))
+    const metadata = tokenInfo.result?.requested_token_metadata[0]?.[1]
+
+    if (metadata) {
+      return {
+        chain: this.chain.name,
+        identifier,
+        symbol: metadata.token_name,
+        name: metadata.token_name,
+        decimals: metadata.decimals,
+        logoUrl: null,
+      }
+    }
+
+    return null
   }
 }
