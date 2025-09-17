@@ -55,7 +55,7 @@ export class WarpFastsetWallet implements AdapterWarpWallet {
     const response = await this.client.request(proxyUrl, 'set_proxy_submitTransaction', submitTxReq)
 
     if (response.error) throw new Error(`JSON-RPC error ${response.error.code}: ${response.error.message}`)
-    console.log('submitTransaction response', response.result)
+
     return 'TODO'
   }
 
