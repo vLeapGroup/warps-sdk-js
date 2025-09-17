@@ -1,5 +1,5 @@
 import * as bech32 from 'bech32'
-import { FastsetJsonRpcResponse, TokenInfoResponse } from './types'
+import { FastsetJsonRpcResponse, TokenInfoResponse, TransactionCertificate } from './types'
 ;(BigInt.prototype as any).toJSON = function () {
   return Number(this)
 }
@@ -82,6 +82,22 @@ export class FastsetClient {
     const addressBytes = typeof address === 'string' ? this.addressToBytes(address) : address
     const accountInfoRes = await this.getAccountInfo(addressBytes)
     return accountInfoRes.result?.next_nonce ?? 0
+  }
+
+  async submitTransaction(tx: any, signature: Uint8Array): Promise<any> {
+    const submitTxReq = { transaction: tx, signature }
+    const response = await this.request(this.proxyUrl, 'set_proxy_submitTransaction', submitTxReq)
+    const proxyCert = this.parse_TransactionCertificate(response.result)
+
+    console.log('FastSet Transaction Certificate:', proxyCert)
+
+    return proxyCert
+  }
+
+  private parse_TransactionCertificate(res: Record<string, unknown>) {
+    let bcs_bytes = TransactionCertificate.serialize(res as any).toBytes()
+    let bcs_value = TransactionCertificate.parse(bcs_bytes)
+    return bcs_value
   }
 
   private addressToBytes(address: string): Uint8Array {

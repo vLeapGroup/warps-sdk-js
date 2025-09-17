@@ -1,7 +1,6 @@
 import * as bip39 from '@scure/bip39'
 import {
   AdapterWarpWallet,
-  getProviderUrl,
   getWarpWalletAddressFromConfig,
   getWarpWalletPrivateKeyFromConfig,
   WarpAdapterGenericTransaction,
@@ -50,11 +49,7 @@ export class WarpFastsetWallet implements AdapterWarpWallet {
 
   async sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string> {
     const { signature, ...transactionWithoutSignature } = tx
-    const submitTxReq = { transaction: transactionWithoutSignature, signature }
-    const proxyUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
-    const response = await this.client.request(proxyUrl, 'set_proxy_submitTransaction', submitTxReq)
-
-    if (response.error) throw new Error(`JSON-RPC error ${response.error.code}: ${response.error.message}`)
+    const _cert = await this.client.submitTransaction(transactionWithoutSignature, signature)
 
     return 'TODO'
   }
