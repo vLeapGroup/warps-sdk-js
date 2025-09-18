@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.107
+
+### Patch Changes
+
+- 0956fc2: update asset codec
+
 ## 3.0.0-alpha.106
 
 ### Patch Changes

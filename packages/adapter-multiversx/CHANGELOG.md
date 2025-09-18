@@ -1,5 +1,14 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.55
+
+### Patch Changes
+
+- 5f93802: refactor mvx tokens
+- 5af41e0: add further mvx tokens
+- Updated dependencies [0956fc2]
+  - @vleap/warps@3.0.0-alpha.107
+
 ## 0.2.0-alpha.54
 
 ### Patch Changes
