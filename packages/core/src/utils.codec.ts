@@ -1,5 +1,5 @@
 import { WarpConstants, WarpInputTypes } from './constants'
-import { WarpChainAsset } from './types'
+import { WarpChainAssetValue } from './types'
 
 // TODO: implement below
 // export const option = (value: TypedValue | null, type?: Type): string => {
@@ -45,7 +45,7 @@ export const boolean = (value: boolean): string => WarpInputTypes.Boolean + Warp
 
 export const address = (value: string): string => WarpInputTypes.Address + WarpConstants.ArgParamsSeparator + value
 
-export const asset = (value: WarpChainAsset): string => {
+export const asset = (value: WarpChainAssetValue & { decimals?: number }): string => {
   const prefix = WarpInputTypes.Asset + WarpConstants.ArgParamsSeparator
   const baseValue = prefix + value.identifier + WarpConstants.ArgCompositeSeparator + value.amount
 
