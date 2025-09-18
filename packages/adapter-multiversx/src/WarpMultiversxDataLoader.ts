@@ -68,7 +68,7 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
     const cachedAsset = this.cache.get<WarpChainAsset>(cacheKey)
     if (cachedAsset) return cachedAsset
 
-    const local = findKnownTokenById(identifier)
+    const local = findKnownTokenById(this.chain.name, this.config.env, identifier)
     if (local)
       return {
         chain: this.chain.name,
