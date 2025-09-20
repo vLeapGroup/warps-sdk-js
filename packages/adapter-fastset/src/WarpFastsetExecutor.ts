@@ -37,11 +37,10 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
     const recipientPubKey = FastsetClient.decodeBech32Address(executable.destination)
     const nonce = await this.client.getNextNonce(userWallet)
 
-    const nativeAmountInTransfers =
+    const isSingleNativeTransfer =
       executable.transfers.length === 1 && executable.transfers[0].identifier === this.chain.nativeToken?.identifier
-        ? executable.transfers[0].amount
-        : 0n
 
+    const nativeAmountInTransfers = isSingleNativeTransfer ? executable.transfers[0].amount : 0n
     const nativeAmountTotal = nativeAmountInTransfers + executable.value
 
     if (nativeAmountTotal > 0n) {
@@ -52,7 +51,7 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
         timestamp_nanos: BigInt(Date.now()) * 1_000_000n,
         claim: { Transfer: { amount: nativeAmountTotal.toString(16), user_data: null } },
       }
-    } else if (executable.transfers.length === 1 && executable.transfers[0].identifier !== this.chain.nativeToken?.identifier) {
+    } else if (executable.transfers.length === 1) {
       return {
         sender: senderPubKey,
         recipient: { FastSet: recipientPubKey },
