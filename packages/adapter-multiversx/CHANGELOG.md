@@ -1,5 +1,12 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.56
+
+### Patch Changes
+
+- b71bf40: update mvx wallet nonce management
+- aafaa2c: update mvx transfers
+
 ## 0.2.0-alpha.55
 
 ### Patch Changes

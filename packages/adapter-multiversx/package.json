@@ -1,6 +1,6 @@
 {
   "name": "@vleap/warps-adapter-multiversx",
-  "version": "0.2.0-alpha.55",
+  "version": "0.2.0-alpha.56",
   "description": "",
   "type": "module",
   "types": "./dist/index.d.ts",
