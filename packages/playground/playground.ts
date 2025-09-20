@@ -6,9 +6,13 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-const Chain = 'fastset'
+const Chain = 'multiversx'
 const WarpToTest = 'test.json'
-const WarpInputs: string[] = ['address:set1y0nxhrezjh66e2zfh6nx70lc69sr8zcfe55sqgs4wh9xvxsytxasxc3p2h', 'asset:SET|10|0'] // e.g. 'address:abc', 'asset:EGLD|0.5'
+const WarpInputs: string[] = [
+  'string:multiversx',
+  'address:erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+  'asset:EGLD|10|0',
+] // e.g. 'address:abc', 'asset:EGLD|0.5'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
