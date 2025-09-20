@@ -1,12 +1,4 @@
-import {
-  Account,
-  INetworkProvider,
-  Mnemonic,
-  NetworkEntrypoint,
-  TransactionComputer,
-  UserSecretKey,
-  UserSigner,
-} from '@multiversx/sdk-core'
+import { Account, INetworkProvider, Mnemonic, NetworkEntrypoint, UserSecretKey, UserSigner } from '@multiversx/sdk-core'
 import {
   AdapterWarpWallet,
   CacheTtl,
@@ -39,16 +31,16 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
     if (!privateKey) throw new Error('Wallet not initialized - no private key provided')
     const isPrivateKeyPem = privateKey.startsWith('-----')
     const secretKey = isPrivateKeyPem ? UserSecretKey.fromPem(privateKey) : UserSecretKey.fromString(privateKey)
-    const signer = new UserSigner(secretKey)
     const account = new Account(secretKey)
-    const nonceOnNetwork = (await this.provider.getAccount(account.address)).nonce
-    const nonceInCache = this.cache.get<number>(`nonce:${account.address.toBech32()}`) || 0
-    account.nonce = BigInt(Math.max(nonceInCache, Number(nonceOnNetwork)))
-    tx.nonce = account.getNonceThenIncrement()
-    const transactionComputer = new TransactionComputer()
-    const serializedTx = transactionComputer.computeBytesForSigning(tx)
-    tx.signature = await signer.sign(serializedTx)
+    if (tx.nonce === 0n) {
+      const nonceOnNetwork = await this.entry.recallAccountNonce(account.address)
+      const nonceInCache = this.cache.get<number>(`nonce:${account.address.toBech32()}`) || 0
+      const highestNonce = BigInt(Math.max(nonceInCache, Number(nonceOnNetwork)))
+      tx.nonce = highestNonce
+    }
+    tx.signature = await account.signTransaction(tx)
     this.cache.set(`nonce:${account.address.toBech32()}`, Number(account.nonce), CacheTtl.OneHour)
+
     return tx
   }
 
