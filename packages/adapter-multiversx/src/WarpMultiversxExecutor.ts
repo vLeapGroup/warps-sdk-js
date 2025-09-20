@@ -70,10 +70,17 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
     const sender = Address.newFromBech32(userWallet)
     const config = new TransactionsFactoryConfig({ chainID: executable.chain.chainId })
     const data = executable.data ? Buffer.from(this.serializer.stringToTyped(executable.data).valueOf()) : null
-    return new TransferTransactionsFactory({ config }).createTransactionForTransfer(sender, {
+
+    const isSingleNativeTransfer =
+      executable.transfers.length === 1 && executable.transfers[0].identifier === this.chain.nativeToken?.identifier
+
+    const nativeAmountInTransfers = isSingleNativeTransfer ? executable.transfers[0].amount : 0n
+    const nativeAmountTotal = nativeAmountInTransfers + executable.value
+
+    return await new TransferTransactionsFactory({ config }).createTransactionForTransfer(sender, {
       receiver: Address.newFromBech32(executable.destination),
-      nativeAmount: executable.value,
-      tokenTransfers: this.toTokenTransfers(executable.transfers),
+      nativeAmount: nativeAmountTotal,
+      tokenTransfers: isSingleNativeTransfer ? [] : this.toTokenTransfers(executable.transfers),
       data: data ? new Uint8Array(data) : undefined,
     })
   }
