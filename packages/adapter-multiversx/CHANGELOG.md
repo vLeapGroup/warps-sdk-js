@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.57
+
+### Minor Changes
+
+- 74eaaca: update codec
+
+### Patch Changes
+
+- Updated dependencies [74eaaca]
+  - @vleap/warps@3.0.0-alpha.108
+
 ## 0.2.0-alpha.56
 
 ### Patch Changes
