@@ -15,6 +15,7 @@
     "@vleap/warps-adapter-fastset": "0.1.0-alpha.1"
   },
   "changesets": [
+    "afraid-dogs-joke",
     "brave-carrots-feel",
     "brave-points-decide",
     "breezy-queens-joke",

@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.109
+
+### Minor Changes
+
+- 6dc80d4: add structs + complex type fixes
+
 ## 3.0.0-alpha.108
 
 ### Patch Changes
