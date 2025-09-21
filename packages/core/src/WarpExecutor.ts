@@ -29,7 +29,7 @@ import { WarpLogger } from './WarpLogger'
 import { WarpSerializer } from './WarpSerializer'
 
 export type ExecutionHandlers = {
-  onExecuted?: (result: WarpExecution) => void
+  onExecuted?: (result: WarpExecution) => Promise<void>
   onError?: (params: { message: string }) => void
   onSignRequest?: (params: { message: string; chain: WarpChainInfo }) => Promise<string>
 }
@@ -66,7 +66,7 @@ export class WarpExecutor {
 
     if (action.type === 'query') {
       const result = await adapter.executor.executeQuery(executable)
-      result.success ? this.handlers?.onExecuted?.(result) : this.handlers?.onError?.({ message: JSON.stringify(result.values) })
+      result.success ? await this.handlers?.onExecuted?.(result) : this.handlers?.onError?.({ message: JSON.stringify(result.values) })
       return { tx: null, chain: executable.chain }
     }
 
