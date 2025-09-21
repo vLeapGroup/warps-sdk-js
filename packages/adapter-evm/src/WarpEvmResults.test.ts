@@ -15,7 +15,12 @@ describe('WarpEvmResults', () => {
       },
     } as WarpClientConfig
 
-    results = new WarpEvmResults(mockConfig, undefined)
+    results = new WarpEvmResults(mockConfig, {
+      name: 'ethereum',
+      chainId: '1',
+      defaultApiUrl: 'https://eth.llamarpc.com',
+      nativeToken: { identifier: 'ETH', decimals: 18 },
+    } as any)
   })
 
   describe('getTransactionExecutionResults', () => {

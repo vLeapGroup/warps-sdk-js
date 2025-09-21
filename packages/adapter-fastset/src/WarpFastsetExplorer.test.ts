@@ -55,13 +55,13 @@ describe('WarpFastsetExplorer', () => {
     it('should generate correct transaction URL', () => {
       const hash = '0x1234567890abcdef'
       const url = explorer.getTransactionUrl(hash)
-      expect(url).toBe('https://explorer.fastset.xyz/transaction/0x1234567890abcdef')
+      expect(url).toBe('https://explorer.fastset.xyz/txs/0x0x1234567890abcdef')
     })
 
     it('should handle different hash formats', () => {
       const hash = 'abc123def456'
       const url = explorer.getTransactionUrl(hash)
-      expect(url).toBe('https://explorer.fastset.xyz/transaction/abc123def456')
+      expect(url).toBe('https://explorer.fastset.xyz/txs/0xabc123def456')
     })
   })
 
@@ -69,13 +69,13 @@ describe('WarpFastsetExplorer', () => {
     it('should generate correct asset URL', () => {
       const identifier = 'SET'
       const url = explorer.getAssetUrl(identifier)
-      expect(url).toBe('https://explorer.fastset.xyz/asset/SET')
+      expect(url).toBe('https://explorer.fastset.xyz/asset/0xSET')
     })
 
     it('should handle different asset identifiers', () => {
       const identifier = 'USDC'
       const url = explorer.getAssetUrl(identifier)
-      expect(url).toBe('https://explorer.fastset.xyz/asset/USDC')
+      expect(url).toBe('https://explorer.fastset.xyz/asset/0xUSDC')
     })
   })
 

@@ -122,7 +122,7 @@ describe('WarpFastsetExecutor', () => {
       await expect(executor.createTransferTransaction(executable)).rejects.toThrow('Invalid checksum for invalid-address')
     })
 
-    it('should allow negative values', async () => {
+    it('should throw error for negative values', async () => {
       const executable = {
         destination: 'fs1testaddress123456789',
         value: BigInt(-1000000000000000000),
@@ -149,10 +149,7 @@ describe('WarpFastsetExecutor', () => {
         resolvedInputs: [],
       } as any
 
-      const tx = await executor.createTransferTransaction(executable)
-
-      expect(tx).toBeInstanceOf(Object)
-      expect(tx.claim.Transfer.amount).toBe('-de0b6b3a7640000') // hex representation of negative value
+      await expect(executor.createTransferTransaction(executable)).rejects.toThrow('WarpFastsetExecutor: No valid transfers provided (maximum 1 transfer allowed)')
     })
 
     it('should throw error when user wallet is not set', async () => {

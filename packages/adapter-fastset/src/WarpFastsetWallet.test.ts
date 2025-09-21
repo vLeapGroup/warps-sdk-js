@@ -12,6 +12,7 @@ jest.mock('./helpers', () => ({
   stringToUint8Array: (str: string) => new Uint8Array(Buffer.from(str, 'utf8')),
   getConfiguredFastsetClient: jest.fn(() => ({
     request: jest.fn().mockResolvedValue({ result: 'mock-tx-hash' }),
+    submitTransaction: jest.fn().mockResolvedValue({ result: 'mock-certificate' }),
   })),
 }))
 
@@ -95,9 +96,10 @@ describe('WarpFastsetWallet', () => {
       '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
     )
     wallet = new WarpFastsetWallet(mockConfig, mockChain)
-    // Ensure client has request method
+    // Ensure client has request and submitTransaction methods
     if (wallet['client']) {
       wallet['client'].request = jest.fn().mockResolvedValue({ result: 'mock-tx-hash' })
+      wallet['client'].submitTransaction = jest.fn().mockResolvedValue({ result: 'mock-certificate' })
     }
   })
 
@@ -207,9 +209,10 @@ describe('WarpFastsetWallet', () => {
       // Mock private key to be undefined for this test - sendTransaction doesn't check for private key
       ;(getWarpWalletPrivateKeyFromConfig as jest.MockedFunction<typeof getWarpWalletPrivateKeyFromConfig>).mockReturnValueOnce(undefined)
       const walletWithoutConfig = new WarpFastsetWallet({ env: 'testnet' }, mockChain)
-      // Ensure client has request method
+      // Ensure client has request and submitTransaction methods
       if (walletWithoutConfig['client']) {
         walletWithoutConfig['client'].request = jest.fn().mockResolvedValue({ result: 'mock-tx-hash' })
+        walletWithoutConfig['client'].submitTransaction = jest.fn().mockResolvedValue({ result: 'mock-certificate' })
       }
       const mockTx = {
         claim: { Transfer: { amount: '1000000000000000000', user_data: null } },
