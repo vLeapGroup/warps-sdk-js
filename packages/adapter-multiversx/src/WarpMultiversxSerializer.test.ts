@@ -1,36 +1,36 @@
 import {
-    Address,
-    AddressValue,
-    BigUIntValue,
-    BooleanValue,
-    BytesValue,
-    CodeMetadata,
-    CodeMetadataValue,
-    CompositeType,
-    CompositeValue,
-    List,
-    ListType,
-    NothingValue,
-    OptionalType,
-    OptionalValue,
-    OptionType,
-    OptionValue,
-    StringType,
-    StringValue,
-    Struct,
-    Token,
-    TokenIdentifierValue,
-    TokenTransfer,
-    U16Value,
-    U32Value,
-    U64Type,
-    U64Value,
-    U8Value,
-    VariadicType,
-    VariadicValue,
+  Address,
+  AddressValue,
+  BigUIntValue,
+  BooleanValue,
+  BytesValue,
+  CodeMetadata,
+  CodeMetadataValue,
+  CompositeType,
+  CompositeValue,
+  List,
+  ListType,
+  NothingValue,
+  OptionalType,
+  OptionalValue,
+  OptionType,
+  OptionValue,
+  StringType,
+  StringValue,
+  Struct,
+  Token,
+  TokenIdentifierValue,
+  TokenTransfer,
+  U16Value,
+  U32Value,
+  U64Type,
+  U64Value,
+  U8Value,
+  VariadicType,
+  VariadicValue,
 } from '@multiversx/sdk-core/out'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
-import { asset_value } from './utils.codec'
+import { asset_value } from './utils.codec-value'
 
 describe('WarpMultiversxSerializer', () => {
   let serializer: WarpMultiversxSerializer
@@ -59,7 +59,7 @@ describe('WarpMultiversxSerializer', () => {
       const result = serializer.typedToString(
         new VariadicValue(new VariadicType(new StringType()), [StringValue.fromUTF8('abc'), StringValue.fromUTF8('def')])
       )
-      expect(result).toBe('variadic:string:abc,def')
+      expect(result).toBe('vector:string:abc,def')
     })
 
     it('converts CompositeValue', () => {
@@ -69,7 +69,7 @@ describe('WarpMultiversxSerializer', () => {
           new U64Value('12345678901234567890'),
         ])
       )
-      expect(result).toBe('composite(string|uint64):abc|12345678901234567890')
+      expect(result).toBe('tuple(string|uint64):abc|12345678901234567890')
     })
 
     it('converts BigUIntValue to biguint', () => {
@@ -135,11 +135,11 @@ describe('WarpMultiversxSerializer', () => {
       expect(result).toBe('asset:AAA-123456-05|100')
     })
 
-    it('converts a composite value', () => {
+    it('converts a tuple value', () => {
       const result = serializer.typedToString(
         new CompositeValue(new CompositeType(new StringType(), new U64Type()), [StringValue.fromUTF8('abc'), new U64Value(123)])
       )
-      expect(result).toBe('composite(string|uint64):abc|123')
+      expect(result).toBe('tuple(string|uint64):abc|123')
     })
 
     it('converts nested List of CompositeValue', () => {
@@ -150,7 +150,7 @@ describe('WarpMultiversxSerializer', () => {
           new CompositeValue(new CompositeType(new StringType(), new U64Type()), [StringValue.fromUTF8('ghi'), new U64Value(789)]),
         ])
       )
-      expect(result).toBe('list:composite(string|uint64):abc|123,def|456,ghi|789')
+      expect(result).toBe('list:tuple(string|uint64):abc|123,def|456,ghi|789')
     })
 
     it('converts nested VariadicValue of CompositeValue', () => {
@@ -161,7 +161,7 @@ describe('WarpMultiversxSerializer', () => {
           new CompositeValue(new CompositeType(new StringType(), new U64Type()), [StringValue.fromUTF8('ghi'), new U64Value(789)]),
         ])
       )
-      expect(result).toBe('variadic:composite(string|uint64):abc|123,def|456,ghi|789')
+      expect(result).toBe('vector:tuple(string|uint64):abc|123,def|456,ghi|789')
     })
   })
 
@@ -200,8 +200,8 @@ describe('WarpMultiversxSerializer', () => {
       expect(actual.getItems()[1].valueOf()).toBe('world')
     })
 
-    it('converts variadic to VariadicValue', () => {
-      const result = serializer.nativeToTyped('variadic:string', 'hello,world')
+    it('converts vector to VariadicValue', () => {
+      const result = serializer.nativeToTyped('vector:string', 'hello,world')
       const actual = result as VariadicValue
       expect(actual).toBeInstanceOf(VariadicValue)
       expect(actual.getItems()[0]).toBeInstanceOf(StringValue)
@@ -210,8 +210,8 @@ describe('WarpMultiversxSerializer', () => {
       expect(actual.getItems()[1].valueOf()).toBe('world')
     })
 
-    it('converts composite to CompositeValue', () => {
-      const result = serializer.nativeToTyped('composite(string|uint64|uint8)', 'hello|12345678901234567890|255')
+    it('converts tuple to CompositeValue', () => {
+      const result = serializer.nativeToTyped('tuple(string|uint64|uint8)', 'hello|12345678901234567890|255')
       const actual = result as CompositeValue
       expect(actual).toBeInstanceOf(CompositeValue)
       expect(actual.getItems()[0]).toBeInstanceOf(StringValue)
@@ -398,8 +398,8 @@ describe('WarpMultiversxSerializer', () => {
       expect(hexValue).toBe('1234')
     })
 
-    it('converts nested variadic of composite', () => {
-      const result = serializer.stringToTyped('variadic:composite(string|uint64):abc|123,def|456,ghi|789') as VariadicValue
+    it('converts nested vector of tuple', () => {
+      const result = serializer.stringToTyped('vector:tuple(string|uint64):abc|123,def|456,ghi|789') as VariadicValue
       expect(result).toBeInstanceOf(VariadicValue)
       const values = result.getItems()
 

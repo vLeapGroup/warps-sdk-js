@@ -7,6 +7,14 @@ export const WarpMultiversxConstants = {
   },
 }
 
+export const WarpMultiversxInputTypes = {
+  Null: 'null',
+  Optional: 'optional',
+  List: 'list',
+  Token: 'token',
+  CodeMeta: 'codemeta',
+}
+
 export enum MultiversxExplorers {
   MultiversxExplorer = 'multiversx_explorer',
   MultiversxExplorerDevnet = 'multiversx_explorer_devnet',

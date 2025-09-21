@@ -27,17 +27,16 @@ describe('splitInput', () => {
 describe('hasInputPrefix', () => {
   it('should return true for valid basic types', () => {
     expect(hasInputPrefix('string:hello')).toBe(true)
-    expect(hasInputPrefix('u64:123')).toBe(true)
+    expect(hasInputPrefix('uint64:123')).toBe(true)
     expect(hasInputPrefix('address:erd1abc')).toBe(true)
-    expect(hasInputPrefix('boolean:true')).toBe(true)
+    expect(hasInputPrefix('bool:true')).toBe(true)
     expect(hasInputPrefix('biguint:123456')).toBe(true)
   })
 
   it('should return true for complex input types', () => {
     expect(hasInputPrefix('option:string:optional')).toBe(true)
-    expect(hasInputPrefix('list:u64:values')).toBe(true)
-    expect(hasInputPrefix('variadic:string:args')).toBe(true)
-    expect(hasInputPrefix('composite:types:here')).toBe(true)
+    expect(hasInputPrefix('vector:string:args')).toBe(true)
+    expect(hasInputPrefix('tuple:types:here')).toBe(true)
   })
 
   it('should return false for invalid types', () => {

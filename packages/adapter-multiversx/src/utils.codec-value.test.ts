@@ -37,7 +37,7 @@ import {
   u64_value,
   u8_value,
   variadic_value,
-} from './utils.codec'
+} from './utils.codec-value'
 
 describe('Codec Utilities', () => {
   describe('option value', () => {

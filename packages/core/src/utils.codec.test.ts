@@ -1,5 +1,5 @@
 import { WarpInputTypes } from './constants'
-import { address, asset, biguint, boolean, hex, string, u16, u32, u64, u8 } from './utils.codec'
+import { address, asset, biguint, bool, hex, option, string, tuple, uint16, uint32, uint64, uint8 } from './utils.codec'
 
 describe('utils.codec', () => {
   describe('string', () => {
@@ -10,31 +10,31 @@ describe('utils.codec', () => {
     })
   })
 
-  describe('u8', () => {
-    it('encodes a u8 value', () => {
-      expect(u8(0)).toBe(`${WarpInputTypes.U8}:0`)
-      expect(u8(255)).toBe(`${WarpInputTypes.U8}:255`)
+  describe('uint8', () => {
+    it('encodes a uint8 value', () => {
+      expect(uint8(0)).toBe(`${WarpInputTypes.Uint8}:0`)
+      expect(uint8(255)).toBe(`${WarpInputTypes.Uint8}:255`)
     })
   })
 
-  describe('u16', () => {
-    it('encodes a u16 value', () => {
-      expect(u16(0)).toBe(`${WarpInputTypes.U16}:0`)
-      expect(u16(65535)).toBe(`${WarpInputTypes.U16}:65535`)
+  describe('uint16', () => {
+    it('encodes a uint16 value', () => {
+      expect(uint16(0)).toBe(`${WarpInputTypes.Uint16}:0`)
+      expect(uint16(65535)).toBe(`${WarpInputTypes.Uint16}:65535`)
     })
   })
 
-  describe('u32', () => {
-    it('encodes a u32 value', () => {
-      expect(u32(0)).toBe(`${WarpInputTypes.U32}:0`)
-      expect(u32(4294967295)).toBe(`${WarpInputTypes.U32}:4294967295`)
+  describe('uint32', () => {
+    it('encodes a uint32 value', () => {
+      expect(uint32(0)).toBe(`${WarpInputTypes.Uint32}:0`)
+      expect(uint32(4294967295)).toBe(`${WarpInputTypes.Uint32}:4294967295`)
     })
   })
 
-  describe('u64', () => {
-    it('encodes a u64 value', () => {
-      expect(u64(BigInt(0))).toBe(`${WarpInputTypes.U64}:0`)
-      expect(u64(BigInt('18446744073709551615'))).toBe(`${WarpInputTypes.U64}:18446744073709551615`)
+  describe('uint64', () => {
+    it('encodes a uint64 value', () => {
+      expect(uint64(BigInt(0))).toBe(`${WarpInputTypes.Uint64}:0`)
+      expect(uint64(BigInt('18446744073709551615'))).toBe(`${WarpInputTypes.Uint64}:18446744073709551615`)
     })
   })
 
@@ -53,8 +53,8 @@ describe('utils.codec', () => {
 
   describe('boolean', () => {
     it('encodes a boolean value', () => {
-      expect(boolean(true)).toBe(`${WarpInputTypes.Boolean}:true`)
-      expect(boolean(false)).toBe(`${WarpInputTypes.Boolean}:false`)
+      expect(bool(true)).toBe(`${WarpInputTypes.Bool}:true`)
+      expect(bool(false)).toBe(`${WarpInputTypes.Bool}:false`)
     })
   })
 
@@ -92,6 +92,67 @@ describe('utils.codec', () => {
     it('encodes a hex value', () => {
       expect(hex('deadbeef')).toBe(`${WarpInputTypes.Hex}:deadbeef`)
       expect(hex('')).toBe(`${WarpInputTypes.Hex}:`)
+    })
+  })
+
+  describe('option', () => {
+    it('encodes an option with a value', () => {
+      expect(option('hello', 'string')).toBe(`${WarpInputTypes.Option}:hello`)
+      expect(option(123, 'u32')).toBe(`${WarpInputTypes.Option}:123`)
+      expect(option(BigInt(456), 'u64')).toBe(`${WarpInputTypes.Option}:456`)
+    })
+
+    it('encodes an option without a value (null)', () => {
+      expect(option(null, 'string')).toBe(`${WarpInputTypes.Option}:`)
+      expect(option(null, 'u32')).toBe(`${WarpInputTypes.Option}:`)
+      expect(option(null, 'u64')).toBe(`${WarpInputTypes.Option}:`)
+    })
+  })
+
+  describe('tuple', () => {
+    it('encodes a tuple with raw values', () => {
+      expect(tuple(['hello', 123])).toBe(`${WarpInputTypes.Tuple}:hello,123`)
+      expect(tuple(['world', BigInt(456)])).toBe(`${WarpInputTypes.Tuple}:world,456`)
+      expect(tuple([BigInt(1), BigInt(2), BigInt(3)])).toBe(`${WarpInputTypes.Tuple}:1,2,3`)
+      expect(tuple([true, false])).toBe(`${WarpInputTypes.Tuple}:true,false`)
+      expect(tuple(['hello', 123, true, BigInt(456)])).toBe(`${WarpInputTypes.Tuple}:hello,123,true,456`)
+    })
+
+    it('encodes a tuple with helper function results', () => {
+      const projectId = 123n
+      const amount = 456n
+      expect(tuple(uint64(projectId), biguint(amount))).toBe(`${WarpInputTypes.Tuple}(uint64|biguint):123,456`)
+      expect(tuple(string('hello'), uint32(123))).toBe(`${WarpInputTypes.Tuple}(string|uint32):hello,123`)
+      expect(tuple(uint8(1), uint16(2), uint32(3), uint64(4n))).toBe(`${WarpInputTypes.Tuple}(uint8|uint16|uint32|uint64):1,2,3,4`)
+      expect(tuple(bool(true), address('erd1...'))).toBe(`${WarpInputTypes.Tuple}(bool|address):true,erd1...`)
+      expect(tuple(hex('deadbeef'), uint64(123n))).toBe(`${WarpInputTypes.Tuple}(hex|uint64):deadbeef,123`)
+    })
+
+    it('encodes a tuple with asset helper function', () => {
+      const assetValue = {
+        chain: 'multiversx',
+        identifier: 'WEGLD-123456',
+        name: 'Wrapped EGLD',
+        amount: BigInt('1000000000000000000'),
+      }
+      expect(tuple(asset(assetValue), uint64(123n))).toBe(`${WarpInputTypes.Tuple}(asset|uint64):WEGLD-123456|1000000000000000000,123`)
+    })
+
+    it('encodes a tuple with option helper function', () => {
+      expect(tuple(option('hello', 'string'), uint64(123n))).toBe(`${WarpInputTypes.Tuple}(option|uint64):hello,123`)
+      expect(tuple(option(null, 'string'), uint64(123n))).toBe(`${WarpInputTypes.Tuple}(option|uint64):,123`)
+    })
+
+    it('handles mixed helper functions and raw values', () => {
+      expect(tuple(uint64(123n), 'raw_string')).toBe(`${WarpInputTypes.Tuple}:uint64:123,raw_string`)
+      expect(tuple('raw_string', uint64(123n))).toBe(`${WarpInputTypes.Tuple}:raw_string,uint64:123`)
+    })
+
+    it('handles edge cases', () => {
+      expect(tuple()).toBe(`${WarpInputTypes.Tuple}:`)
+      expect(tuple([])).toBe(`${WarpInputTypes.Tuple}:`)
+      expect(tuple(['hello', null, 123])).toBe(`${WarpInputTypes.Tuple}:hello,,123`)
+      expect(tuple([null, null])).toBe(`${WarpInputTypes.Tuple}:,`)
     })
   })
 })

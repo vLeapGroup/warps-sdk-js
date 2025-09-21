@@ -47,6 +47,7 @@ export const WarpConstants = {
 
   ArgParamsSeparator: ':',
   ArgCompositeSeparator: '|',
+  ArgListSeparator: ',',
 
   Transform: {
     Prefix: 'transform:',
@@ -63,19 +64,17 @@ export const WarpConstants = {
 
 export const WarpInputTypes = {
   Option: 'option',
-  Optional: 'optional',
-  List: 'list',
-  Variadic: 'variadic',
-  Composite: 'composite',
+  Vector: 'vector',
+  Tuple: 'tuple',
   String: 'string',
-  U8: 'u8',
-  U16: 'u16',
-  U32: 'u32',
-  U64: 'u64',
-  U128: 'u128',
-  U256: 'u256',
+  Uint8: 'uint8',
+  Uint16: 'uint16',
+  Uint32: 'uint32',
+  Uint64: 'uint64',
+  Uint128: 'uint128',
+  Uint256: 'uint256',
   Biguint: 'biguint',
-  Boolean: 'boolean',
+  Bool: 'bool',
   Address: 'address',
   Asset: 'asset',
   Hex: 'hex',

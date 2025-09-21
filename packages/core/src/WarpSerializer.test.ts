@@ -77,70 +77,19 @@ describe('WarpSerializer', () => {
       expect(result[0]).toBe('option:string')
       expect(result[1]).toBe(null)
     })
-
-    it('deserializes optional', () => {
-      const result = serializer.stringToNative('optional:string:hello')
-      expect(result[0]).toBe('optional:string')
-      expect(result[1]).toBe('hello')
-    })
-
-    it('deserializes optional with missing value', () => {
-      const result = serializer.stringToNative('optional:string')
-      expect(result[0]).toBe('optional:string')
-      expect(result[1]).toBe(null)
-    })
-
-    it('deserializes a simple list', () => {
-      const result = serializer.stringToNative('list:string:hello,world')
-      expect(result[0]).toBe('list:string')
-      expect(result[1]).toEqual(['hello', 'world'])
-    })
-
-    it('deserializes an empty list', () => {
-      const result = serializer.stringToNative('list:string:')
-      expect(result[0]).toBe('list:string')
-      expect(result[1]).toEqual([])
-    })
-
-    it('deserializes a list of composite values', () => {
-      const result = serializer.stringToNative('list:composite(string|uint64):hello|123,world|456')
-      expect(result[0]).toBe('list:composite(string|uint64)')
-      const values = result[1] as [string, BigInt][]
-      expect(values[0][0].toString()).toBe('hello')
-      expect(values[0][1].toString()).toBe('123')
-      expect(values[1][0].toString()).toBe('world')
-      expect(values[1][1].toString()).toBe('456')
-    })
-
-    it('deserializes a list of composite values', () => {
-      const result = serializer.stringToNative('list:composite(string|uint64):hello|123,world|456')
-      expect(result[0]).toBe('list:composite(string|uint64)')
-      const values = result[1] as [string, BigInt][]
-      expect(values[0][0].toString()).toBe('hello')
-      expect(values[0][1].toString()).toBe('123')
-      expect(values[1][0].toString()).toBe('world')
-      expect(values[1][1].toString()).toBe('456')
-    })
-
-    it('deserializes a list of empty values', () => {
-      const result = serializer.stringToNative('list:composite(string|uint64):')
-      expect(result[0]).toBe('list:composite(string|uint64)')
-      expect(result[1]).toEqual([])
-    })
-
-    it('deserializes variadic of u64', () => {
-      const result = serializer.stringToNative('variadic:uint64:123,456,789')
-      expect(result[0]).toBe('variadic:uint64')
+    it('deserializes vector of u64', () => {
+      const result = serializer.stringToNative('vector:uint64:123,456,789')
+      expect(result[0]).toBe('vector:uint64')
       const values = result[1] as BigInt[]
       expect(values[0].toString()).toBe('123')
       expect(values[1].toString()).toBe('456')
       expect(values[2].toString()).toBe('789')
     })
 
-    it('deserializes variadic of composite', function () {
-      const result = serializer.stringToNative('variadic:composite(string|uint64):abc|123,def|456,ghi|789')
+    it('deserializes vector of tuple', function () {
+      const result = serializer.stringToNative('vector:tuple(string|uint64):abc|123,def|456,ghi|789')
 
-      expect(result[0]).toBe('variadic:composite(string|uint64)')
+      expect(result[0]).toBe('vector:tuple(string|uint64)')
       const values = result[1] as [string, BigInt][]
       expect(values[0][0].toString()).toBe('abc')
       expect(values[0][1].toString()).toBe('123')
@@ -150,15 +99,15 @@ describe('WarpSerializer', () => {
       expect(values[2][1].toString()).toBe('789')
     })
 
-    it('deserializes variadic of empty values', () => {
-      const result = serializer.stringToNative('variadic:string:')
-      expect(result[0]).toBe('variadic:string')
+    it('deserializes vector of empty values', () => {
+      const result = serializer.stringToNative('vector:string:')
+      expect(result[0]).toBe('vector:string')
       expect(result[1]).toEqual([])
     })
 
-    it('deserializes composite values', () => {
-      const result = serializer.stringToNative('composite(string|uint64):hello|123')
-      expect(result[0]).toBe('composite(string|uint64)')
+    it('deserializes tuple values', () => {
+      const result = serializer.stringToNative('tuple(string|uint64):hello|123')
+      expect(result[0]).toBe('tuple(string|uint64)')
       const values = result[1] as [string, BigInt][]
       expect(values[0].toString()).toBe('hello')
       expect(values[1].toString()).toBe('123')
@@ -215,8 +164,6 @@ describe('WarpSerializer', () => {
     it('deserializes hex values', () => {
       expect(serializer.stringToNative('hex:0x1234')).toEqual(['hex', '0x1234'])
     })
-
-
 
     it('deserializes asset values', () => {
       const result = serializer.stringToNative('asset:AAA-123456-05|100')
