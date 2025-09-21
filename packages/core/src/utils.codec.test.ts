@@ -1,5 +1,5 @@
 import { WarpInputTypes } from './constants'
-import { address, asset, biguint, bool, hex, option, string, tuple, uint16, uint32, uint64, uint8 } from './utils.codec'
+import { address, asset, biguint, bool, hex, option, string, struct, tuple, uint16, uint32, uint64, uint8 } from './utils.codec'
 
 describe('utils.codec', () => {
   describe('string', () => {
@@ -153,6 +153,20 @@ describe('utils.codec', () => {
       expect(tuple([])).toBe(`${WarpInputTypes.Tuple}:`)
       expect(tuple(['hello', null, 123])).toBe(`${WarpInputTypes.Tuple}:hello,,123`)
       expect(tuple([null, null])).toBe(`${WarpInputTypes.Tuple}:,`)
+    })
+  })
+
+  describe('struct', () => {
+    it('encodes a struct with helper function', () => {
+      expect(struct({ name: 'hello', age: 123 })).toBe('struct:(name:string)hello,(age:uint32)123')
+    })
+
+    it('handles empty struct', () => {
+      expect(struct({})).toBe('struct:')
+    })
+
+    it('handles struct with different types', () => {
+      expect(struct({ id: 1, name: 'test', active: true })).toBe('struct:(id:uint32)1,(name:string)test,(active:bool)true')
     })
   })
 })

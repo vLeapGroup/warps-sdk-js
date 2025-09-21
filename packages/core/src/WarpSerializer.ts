@@ -1,5 +1,12 @@
 import { WarpConstants, WarpInputTypes } from './constants'
-import { BaseWarpActionInputType, WarpActionInputType, WarpChainAssetValue, WarpNativeValue, WarpTypeRegistry } from './types'
+import {
+  BaseWarpActionInputType,
+  WarpActionInputType,
+  WarpChainAssetValue,
+  WarpNativeValue,
+  WarpStructValue,
+  WarpTypeRegistry,
+} from './types'
 
 export class WarpSerializer {
   private typeRegistry: WarpTypeRegistry | undefined
@@ -10,13 +17,45 @@ export class WarpSerializer {
 
   nativeToString(type: WarpActionInputType, value: WarpNativeValue): string {
     if (type === WarpInputTypes.Tuple && Array.isArray(value)) {
-      if (value.length === 0) return `${type}:`
+      if (value.length === 0) return type + WarpConstants.ArgParamsSeparator
       if (value.every((v) => typeof v === 'string' && v.includes(WarpConstants.ArgParamsSeparator))) {
-        const types = value.map((v) => (v as string).split(WarpConstants.ArgParamsSeparator)[0])
-        const vals = value.map((v) => (v as string).split(WarpConstants.ArgParamsSeparator)[1])
-        return `${type}(${types.join(WarpConstants.ArgCompositeSeparator)}):${vals.join(WarpConstants.ArgListSeparator)}`
+        const typeValuePairs = value.map((v) => this.getTypeAndValue(v))
+        const types = typeValuePairs.map(([type]) => type)
+        const vals = typeValuePairs.map(([, val]) => val)
+        return `${type}(${types.join(WarpConstants.ArgCompositeSeparator)})${WarpConstants.ArgParamsSeparator}${vals.join(WarpConstants.ArgListSeparator)}`
       }
-      return `${type}:${value.join(WarpConstants.ArgListSeparator)}`
+      return type + WarpConstants.ArgParamsSeparator + value.join(WarpConstants.ArgListSeparator)
+    }
+    if (type === WarpInputTypes.Struct && typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      const obj = value as WarpStructValue
+      const keys = Object.keys(obj)
+      if (keys.length === 0) return `${type}${WarpConstants.ArgParamsSeparator}`
+      const fields = keys.map((key) => {
+        const [typeStr, valueStr] = this.getTypeAndValue(obj[key])
+        return `(${key}${WarpConstants.ArgParamsSeparator}${typeStr})${valueStr}`
+      })
+      return type + WarpConstants.ArgParamsSeparator + fields.join(WarpConstants.ArgListSeparator)
+    }
+    if (type === WarpInputTypes.Vector && Array.isArray(value)) {
+      if (value.length === 0) return `${type}${WarpConstants.ArgParamsSeparator}`
+      if (value.every((v) => typeof v === 'string' && v.includes(WarpConstants.ArgParamsSeparator))) {
+        const firstValue = value[0] as string
+        const baseType = firstValue.split(WarpConstants.ArgParamsSeparator)[0]
+        const values = value.map((v) => {
+          const val = (v as string).split(WarpConstants.ArgParamsSeparator)[1]
+          return baseType.startsWith(WarpInputTypes.Tuple) || baseType.startsWith(WarpInputTypes.Struct)
+            ? val.replace(WarpConstants.ArgListSeparator, WarpConstants.ArgCompositeSeparator)
+            : val
+        })
+        return (
+          type +
+          WarpConstants.ArgParamsSeparator +
+          baseType +
+          WarpConstants.ArgParamsSeparator +
+          values.join(WarpConstants.ArgListSeparator)
+        )
+      }
+      return type + WarpConstants.ArgParamsSeparator + value.join(WarpConstants.ArgListSeparator)
     }
     if (type === WarpInputTypes.Asset && typeof value === 'object' && value && 'identifier' in value && 'amount' in value) {
       return 'decimals' in value
@@ -24,7 +63,7 @@ export class WarpSerializer {
             WarpConstants.ArgParamsSeparator +
             value.identifier +
             WarpConstants.ArgCompositeSeparator +
-            value.amount.toString() +
+            String(value.amount) +
             WarpConstants.ArgCompositeSeparator +
             String(value.decimals)
         : WarpInputTypes.Asset +
@@ -68,8 +107,24 @@ export class WarpSerializer {
     } else if (baseType.startsWith(WarpInputTypes.Tuple)) {
       const rawTypes = baseType.match(/\(([^)]+)\)/)?.[1]?.split(WarpConstants.ArgCompositeSeparator) as BaseWarpActionInputType[]
       const valuesStrings = val.split(WarpConstants.ArgCompositeSeparator)
-      const values = valuesStrings.map((val, index) => this.stringToNative(`${rawTypes[index]}:${val}`)[1])
+      const values = valuesStrings.map(
+        (val, index) => this.stringToNative(`${rawTypes[index]}${WarpConstants.IdentifierParamSeparator}${val}`)[1]
+      )
       return [baseType, values]
+    } else if (baseType.startsWith(WarpInputTypes.Struct)) {
+      const obj: WarpStructValue = {}
+      if (val) {
+        val.split(WarpConstants.ArgListSeparator).forEach((field) => {
+          const match = field.match(
+            new RegExp(`^\\(([^${WarpConstants.ArgParamsSeparator}]+)${WarpConstants.ArgParamsSeparator}([^)]+)\\)(.+)$`)
+          )
+          if (match) {
+            const [, fieldName, fieldType, fieldValue] = match
+            obj[fieldName] = this.stringToNative(`${fieldType}${WarpConstants.IdentifierParamSeparator}${fieldValue}`)[1]
+          }
+        })
+      }
+      return [baseType, obj]
     } else if (baseType === WarpInputTypes.String) return [baseType, val]
     else if (baseType === WarpInputTypes.Uint8 || baseType === WarpInputTypes.Uint16 || baseType === WarpInputTypes.Uint32)
       return [baseType, Number(val)]
@@ -99,5 +154,16 @@ export class WarpSerializer {
     }
 
     throw new Error(`WarpArgSerializer (stringToNative): Unsupported input type: ${baseType}`)
+  }
+
+  private getTypeAndValue(val: WarpNativeValue): [string, WarpNativeValue] {
+    if (typeof val === 'string' && val.includes(WarpConstants.ArgParamsSeparator)) {
+      const [type, value] = val.split(WarpConstants.ArgParamsSeparator)
+      return [type, value]
+    }
+    if (typeof val === 'number') return [WarpInputTypes.Uint32, val]
+    if (typeof val === 'bigint') return [WarpInputTypes.Uint64, val]
+    if (typeof val === 'boolean') return [WarpInputTypes.Bool, val]
+    return [typeof val, val]
   }
 }

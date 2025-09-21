@@ -1,5 +1,5 @@
 import { WarpInputTypes } from './constants'
-import { WarpActionInputType, WarpChainAssetValue, WarpNativeValue } from './types'
+import { WarpActionInputType, WarpChainAssetValue, WarpNativeValue, WarpStructValue } from './types'
 import { WarpSerializer } from './WarpSerializer'
 
 export const string = (value: string): string => {
@@ -51,6 +51,10 @@ export const option = (value: WarpNativeValue | null, type: WarpActionInputType)
 // output: vector:tuple(string|uint64):abc|123,def|456,ghi|789
 export const tuple = (...values: WarpNativeValue[]): string => {
   return new WarpSerializer().nativeToString(WarpInputTypes.Tuple, values)
+}
+
+export const struct = (value: WarpStructValue): string => {
+  return new WarpSerializer().nativeToString(WarpInputTypes.Struct, value)
 }
 
 export const vector = (values: WarpNativeValue[]): string => {

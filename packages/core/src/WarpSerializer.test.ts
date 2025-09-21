@@ -1,4 +1,5 @@
 import { WarpSerializer } from './WarpSerializer'
+import { WarpStructValue } from './types'
 
 describe('WarpSerializer', () => {
   let serializer: WarpSerializer
@@ -57,6 +58,32 @@ describe('WarpSerializer', () => {
       const assetValue = { identifier: 'AAA-123456-05', amount: BigInt(100) }
       expect(serializer.nativeToString('asset', assetValue)).toBe('asset:AAA-123456-05|100')
     })
+
+    it('serializes tuple values', () => {
+      const tupleValue = ['hello', 123]
+      expect(serializer.nativeToString('tuple', tupleValue)).toBe('tuple:hello,123')
+    })
+
+    it('serializes struct values', () => {
+      const structValue = { name: 'world', age: 456 }
+      expect(serializer.nativeToString('struct', structValue)).toBe('struct:(name:string)world,(age:uint32)456')
+    })
+
+    it('serializes complex struct with address', () => {
+      const structValue = {
+        name: 'Alex',
+        age: 34,
+        wallet: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      }
+      expect(serializer.nativeToString('struct', structValue)).toBe(
+        'struct:(name:string)Alex,(age:uint32)34,(wallet:string)erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8'
+      )
+    })
+
+    it('serializes vector of tuples', () => {
+      const vectorValue = ['tuple(uint64|biguint):1,1000000', 'tuple(uint64|biguint):2,2000000', 'tuple(uint64|biguint):3,3000000']
+      expect(serializer.nativeToString('vector', vectorValue)).toBe('vector:tuple(uint64|biguint):1|1000000,2|2000000,3|3000000')
+    })
   })
 
   describe('stringToNative', () => {
@@ -111,6 +138,26 @@ describe('WarpSerializer', () => {
       const values = result[1] as [string, BigInt][]
       expect(values[0].toString()).toBe('hello')
       expect(values[1].toString()).toBe('123')
+    })
+
+    it('deserializes struct values', () => {
+      const result = serializer.stringToNative('struct:(name:string)world,(age:uint32)456')
+      expect(result[0]).toBe('struct')
+      const obj = result[1] as WarpStructValue
+      expect(obj.name).toBe('world')
+      expect(obj.age).toBe(456)
+    })
+
+    it('deserializes complex struct with address', () => {
+      const serialized =
+        'struct:(name:string)Alex,(age:uint32)34,(wallet:string)erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8'
+      const [type, deserialized] = serializer.stringToNative(serialized)
+      expect(type).toBe('struct')
+      expect(deserialized).toEqual({
+        name: 'Alex',
+        age: 34,
+        wallet: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+      })
     })
 
     it('deserializes string values', () => {

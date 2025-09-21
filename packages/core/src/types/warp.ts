@@ -136,7 +136,11 @@ export type BaseWarpActionInputType =
 
 export type WarpActionInputType = string
 
-export type WarpNativeValue = string | number | bigint | boolean | WarpChainAssetValue | null | WarpNativeValue[]
+export interface WarpStructValue {
+  [key: string]: WarpNativeValue
+}
+
+export type WarpNativeValue = string | number | bigint | boolean | WarpChainAssetValue | null | WarpNativeValue[] | WarpStructValue
 
 export type WarpActionInputPosition =
   | 'receiver'

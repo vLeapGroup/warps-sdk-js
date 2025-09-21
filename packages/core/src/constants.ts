@@ -66,6 +66,7 @@ export const WarpInputTypes = {
   Option: 'option',
   Vector: 'vector',
   Tuple: 'tuple',
+  Struct: 'struct',
   String: 'string',
   Uint8: 'uint8',
   Uint16: 'uint16',
