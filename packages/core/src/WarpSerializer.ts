@@ -9,7 +9,15 @@ export class WarpSerializer {
   }
 
   nativeToString(type: WarpActionInputType, value: WarpNativeValue): string {
-    // Check built-in types first
+    if (type === WarpInputTypes.Tuple && Array.isArray(value)) {
+      if (value.length === 0) return `${type}:`
+      if (value.every((v) => typeof v === 'string' && v.includes(WarpConstants.ArgParamsSeparator))) {
+        const types = value.map((v) => (v as string).split(WarpConstants.ArgParamsSeparator)[0])
+        const vals = value.map((v) => (v as string).split(WarpConstants.ArgParamsSeparator)[1])
+        return `${type}(${types.join(WarpConstants.ArgCompositeSeparator)}):${vals.join(WarpConstants.ArgListSeparator)}`
+      }
+      return `${type}:${value.join(WarpConstants.ArgListSeparator)}`
+    }
     if (type === WarpInputTypes.Asset && typeof value === 'object' && value && 'identifier' in value && 'amount' in value) {
       return 'decimals' in value
         ? WarpInputTypes.Asset +
@@ -35,7 +43,7 @@ export class WarpSerializer {
     }
 
     // Default behavior for standard types
-    return `${type}:${value?.toString() ?? ''}`
+    return type + WarpConstants.ArgParamsSeparator + (value?.toString() ?? '')
   }
 
   stringToNative(value: string): [WarpActionInputType, WarpNativeValue] {
