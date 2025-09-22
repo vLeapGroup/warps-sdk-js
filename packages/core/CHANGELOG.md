@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.110
+
+### Minor Changes
+
+- 627badf: add further struct support
+
 ## 3.0.0-alpha.109
 
 ### Minor Changes

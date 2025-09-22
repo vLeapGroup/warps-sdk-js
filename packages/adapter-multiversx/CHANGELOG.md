@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.58
+
+### Minor Changes
+
+- 627badf: add further struct support
+
+### Patch Changes
+
+- Updated dependencies [627badf]
+  - @vleap/warps@3.0.0-alpha.110
+
 ## 0.2.0-alpha.57
 
 ### Minor Changes
