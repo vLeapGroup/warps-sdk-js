@@ -6,6 +6,7 @@ import {
   AdapterWarpExplorer,
   AdapterWarpRegistry,
   AdapterWarpResults,
+  AdapterWarpSerializer,
   AdapterWarpWallet,
   Warp,
   WarpAdapterGenericRemoteTransaction,
@@ -145,5 +146,9 @@ export class WarpClient {
 
   createBrandBuilder(chain: WarpChain) {
     return findWarpAdapterForChain(chain, this.adapters).brandBuilder()
+  }
+
+  createSerializer(chain: WarpChain): AdapterWarpSerializer {
+    return findWarpAdapterForChain(chain, this.adapters).serializer
   }
 }
