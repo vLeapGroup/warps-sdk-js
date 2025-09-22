@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.111
+
+### Patch Changes
+
+- 822d380: add exec handler async-sync
+
 ## 3.0.0-alpha.110
 
 ### Minor Changes
