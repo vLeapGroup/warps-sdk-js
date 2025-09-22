@@ -28,13 +28,15 @@ export class WarpSerializer {
     }
     if (type === WarpInputTypes.Struct && typeof value === 'object' && value !== null && !Array.isArray(value)) {
       const obj = value as WarpStructValue
-      const keys = Object.keys(obj)
-      if (keys.length === 0) return `${type}${WarpConstants.ArgParamsSeparator}`
+      if (!obj._name) throw new Error('Struct objects must have a _name property to specify the struct name')
+      const structName = obj._name
+      const keys = Object.keys(obj).filter((key) => key !== '_name')
+      if (keys.length === 0) return `${type}(${structName})${WarpConstants.ArgParamsSeparator}`
       const fields = keys.map((key) => {
         const [typeStr, valueStr] = this.getTypeAndValue(obj[key])
         return `(${key}${WarpConstants.ArgParamsSeparator}${typeStr})${valueStr}`
       })
-      return type + WarpConstants.ArgParamsSeparator + fields.join(WarpConstants.ArgListSeparator)
+      return `${type}(${structName})${WarpConstants.ArgParamsSeparator}${fields.join(WarpConstants.ArgListSeparator)}`
     }
     if (type === WarpInputTypes.Vector && Array.isArray(value)) {
       if (value.length === 0) return `${type}${WarpConstants.ArgParamsSeparator}`
@@ -112,7 +114,10 @@ export class WarpSerializer {
       )
       return [baseType, values]
     } else if (baseType.startsWith(WarpInputTypes.Struct)) {
-      const obj: WarpStructValue = {}
+      const structNameMatch = baseType.match(/\(([^)]+)\)/)
+      if (!structNameMatch) throw new Error('Struct type must include a name in the format struct(Name)')
+      const structName = structNameMatch[1]
+      const obj: WarpStructValue = { _name: structName }
       if (val) {
         val.split(WarpConstants.ArgListSeparator).forEach((field) => {
           const match = field.match(

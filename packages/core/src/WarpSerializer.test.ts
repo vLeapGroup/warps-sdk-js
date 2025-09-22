@@ -65,18 +65,26 @@ describe('WarpSerializer', () => {
     })
 
     it('serializes struct values', () => {
-      const structValue = { name: 'world', age: 456 }
-      expect(serializer.nativeToString('struct', structValue)).toBe('struct:(name:string)world,(age:uint32)456')
+      const structValue = { _name: 'User', name: 'world', age: 456 }
+      expect(serializer.nativeToString('struct', structValue)).toBe('struct(User):(name:string)world,(age:uint32)456')
     })
 
     it('serializes complex struct with address', () => {
       const structValue = {
+        _name: 'Person',
         name: 'Alex',
         age: 34,
         wallet: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
       }
       expect(serializer.nativeToString('struct', structValue)).toBe(
-        'struct:(name:string)Alex,(age:uint32)34,(wallet:string)erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8'
+        'struct(Person):(name:string)Alex,(age:uint32)34,(wallet:string)erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8'
+      )
+    })
+
+    it('throws error when struct object lacks _name property', () => {
+      const structValue = { name: 'world', age: 456 }
+      expect(() => serializer.nativeToString('struct', structValue)).toThrow(
+        'Struct objects must have a _name property to specify the struct name'
       )
     })
 
@@ -141,23 +149,31 @@ describe('WarpSerializer', () => {
     })
 
     it('deserializes struct values', () => {
-      const result = serializer.stringToNative('struct:(name:string)world,(age:uint32)456')
-      expect(result[0]).toBe('struct')
+      const result = serializer.stringToNative('struct(User):(name:string)world,(age:uint32)456')
+      expect(result[0]).toBe('struct(User)')
       const obj = result[1] as WarpStructValue
+      expect(obj._name).toBe('User')
       expect(obj.name).toBe('world')
       expect(obj.age).toBe(456)
     })
 
     it('deserializes complex struct with address', () => {
       const serialized =
-        'struct:(name:string)Alex,(age:uint32)34,(wallet:string)erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8'
+        'struct(Person):(name:string)Alex,(age:uint32)34,(wallet:string)erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8'
       const [type, deserialized] = serializer.stringToNative(serialized)
-      expect(type).toBe('struct')
+      expect(type).toBe('struct(Person)')
       expect(deserialized).toEqual({
+        _name: 'Person',
         name: 'Alex',
         age: 34,
         wallet: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
       })
+    })
+
+    it('throws error when deserializing struct without name', () => {
+      expect(() => serializer.stringToNative('struct:(name:string)world,(age:uint32)456')).toThrow(
+        'Struct type must include a name in the format struct(Name)'
+      )
     })
 
     it('deserializes string values', () => {

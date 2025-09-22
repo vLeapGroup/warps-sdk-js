@@ -8,6 +8,8 @@ import {
   CodeMetadataValue,
   CompositeType,
   CompositeValue,
+  Field,
+  FieldDefinition,
   List,
   ListType,
   NothingValue,
@@ -18,10 +20,12 @@ import {
   StringType,
   StringValue,
   Struct,
+  StructType,
   Token,
   TokenIdentifierValue,
   TokenTransfer,
   U16Value,
+  U32Type,
   U32Value,
   U64Type,
   U64Value,
@@ -162,6 +166,21 @@ describe('WarpMultiversxSerializer', () => {
         ])
       )
       expect(result).toBe('vector:tuple(string|uint64):abc|123,def|456,ghi|789')
+    })
+
+    it('converts Struct to struct string', () => {
+      const struct = new Struct(
+        new StructType('User', [new FieldDefinition('name', '', new StringType()), new FieldDefinition('age', '', new U32Type())]),
+        [new Field(StringValue.fromUTF8('Alice'), 'name'), new Field(new U32Value(25), 'age')]
+      )
+      const result = serializer.typedToString(struct)
+      expect(result).toBe('struct(User):(name:string)Alice,(age:uint32)25')
+    })
+
+    it('converts empty Struct to struct string', () => {
+      const struct = new Struct(new StructType('Empty', []), [])
+      const result = serializer.typedToString(struct)
+      expect(result).toBe('struct(Empty):')
     })
   })
 
@@ -308,6 +327,15 @@ describe('WarpMultiversxSerializer', () => {
       expect(result.getFieldValue('amount').toString()).toBe('10')
     })
 
+    it('converts struct native value to Struct', () => {
+      const structValue = { _name: 'User', name: 'Bob', age: 30 }
+      const result = serializer.nativeToTyped('struct', structValue) as Struct
+      expect(result).toBeInstanceOf(Struct)
+      expect(result.getType().getName()).toBe('User')
+      expect(result.getFieldValue('name').valueOf()).toBe('Bob')
+      expect((result.getFieldValue('age') as U32Value).toString()).toBe('30')
+    })
+
     it('throws error for unsupported type', () => {
       expect(() => serializer.nativeToTyped('unsupported' as any, 'value')).toThrow('Unsupported input type')
     })
@@ -414,6 +442,19 @@ describe('WarpMultiversxSerializer', () => {
       const actualThird = (values[2] as CompositeValue).getItems()
       expect(actualThird[0].valueOf().toString()).toBe('ghi')
       expect(actualThird[1].toString()).toBe('789')
+    })
+
+    it('converts struct string to Struct', () => {
+      const result = serializer.stringToTyped('struct(User):(name:string)Alice,(age:uint32)25') as Struct
+      expect(result).toBeInstanceOf(Struct)
+      expect(result.getFieldValue('name').valueOf()).toBe('Alice')
+      expect((result.getFieldValue('age') as U32Value).toString()).toBe('25')
+    })
+
+    it('converts empty struct string to Struct', () => {
+      const result = serializer.stringToTyped('struct(Empty):') as Struct
+      expect(result).toBeInstanceOf(Struct)
+      expect(result.getFields()).toHaveLength(0)
     })
 
     it('throws error for unsupported type', () => {

@@ -158,15 +158,21 @@ describe('utils.codec', () => {
 
   describe('struct', () => {
     it('encodes a struct with helper function', () => {
-      expect(struct({ name: 'hello', age: 123 })).toBe('struct:(name:string)hello,(age:uint32)123')
+      expect(struct({ _name: 'User', name: 'hello', age: 123 })).toBe('struct(User):(name:string)hello,(age:uint32)123')
     })
 
     it('handles empty struct', () => {
-      expect(struct({})).toBe('struct:')
+      expect(struct({ _name: 'Empty' })).toBe('struct(Empty):')
+    })
+
+    it('throws error when struct object lacks _name property', () => {
+      expect(() => struct({ name: 'hello', age: 123 })).toThrow('Struct objects must have a _name property to specify the struct name')
     })
 
     it('handles struct with different types', () => {
-      expect(struct({ id: 1, name: 'test', active: true })).toBe('struct:(id:uint32)1,(name:string)test,(active:bool)true')
+      expect(struct({ _name: 'Config', id: 1, name: 'test', active: true })).toBe(
+        'struct(Config):(id:uint32)1,(name:string)test,(active:bool)true'
+      )
     })
   })
 })

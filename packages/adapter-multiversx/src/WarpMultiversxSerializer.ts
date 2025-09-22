@@ -140,6 +140,21 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
       const tokenIdentifier = tokenComputer.computeExtendedIdentifier(new Token({ identifier, nonce: BigInt(nonce) }))
       return WarpInputTypes.Asset + WarpConstants.ArgParamsSeparator + tokenIdentifier + WarpConstants.ArgCompositeSeparator + amount
     }
+    if (type.hasExactClass(StructType.ClassName) || value.hasClassOrSuperclass(Struct.ClassName)) {
+      const struct = value as Struct
+      const structType = struct.getType() as StructType
+      const structName = structType.getName()
+      const fields = struct.getFields()
+      if (fields.length === 0) return `${WarpInputTypes.Struct}(${structName})${WarpConstants.ArgParamsSeparator}`
+      const fieldStrings = fields.map((field) => {
+        const fieldName = field.name
+        const fieldValue = field.value
+        const fieldType = fieldValue.getType()
+        const fieldValueStr = this.typedToString(fieldValue).split(WarpConstants.ArgParamsSeparator)[1]
+        return `(${fieldName}${WarpConstants.ArgParamsSeparator}${this.typeToString(fieldType)})${fieldValueStr}`
+      })
+      return `${WarpInputTypes.Struct}(${structName})${WarpConstants.ArgParamsSeparator}${fieldStrings.join(WarpConstants.ArgListSeparator)}`
+    }
     if (type.hasExactClass(TokenIdentifierType.ClassName) || value.hasClassOrSuperclass(TokenIdentifierValue.ClassName))
       return WarpMultiversxInputTypes.Token + WarpConstants.ArgParamsSeparator + (value as TokenIdentifierValue).valueOf()
     if (type.hasExactClass(CodeMetadataType.ClassName) || value.hasClassOrSuperclass(CodeMetadataValue.ClassName))
@@ -164,6 +179,12 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
       return new CompositeType(
         ...rawTypes.split(WarpConstants.ArgCompositeSeparator).map((t) => this.nativeToType(t as BaseWarpActionInputType))
       )
+    }
+    if (type.startsWith(WarpInputTypes.Struct)) {
+      const structNameMatch = type.match(/\(([^)]+)\)/)
+      if (!structNameMatch) throw new Error('Struct type must include a name in the format struct(Name)')
+      const structName = structNameMatch[1]
+      return new StructType(structName, [])
     }
     if (type === WarpInputTypes.String) return new StringType()
     if (type === WarpInputTypes.Uint8) return new U8Type()
@@ -207,6 +228,26 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
       const values = rawValues.map((val, i) => this.stringToTyped(rawTypes[i] + WarpConstants.ArgParamsSeparator + val))
       const types = values.map((v) => v.getType())
       return new CompositeValue(new CompositeType(...types), values)
+    }
+    if (type.startsWith(WarpInputTypes.Struct)) {
+      const structNameMatch = type.match(/\(([^)]+)\)/)
+      const structName = structNameMatch ? structNameMatch[1] : 'CustomStruct'
+      if (!val) return new Struct(new StructType(structName, []), [])
+      const fields = val.split(WarpConstants.ArgListSeparator)
+      const fieldDefinitions: FieldDefinition[] = []
+      const fieldValues: Field[] = []
+      fields.forEach((field) => {
+        const match = field.match(
+          new RegExp(`^\\(([^${WarpConstants.ArgParamsSeparator}]+)${WarpConstants.ArgParamsSeparator}([^)]+)\\)(.+)$`)
+        )
+        if (match) {
+          const [, fieldName, fieldType, fieldValue] = match
+          const typedValue = this.stringToTyped(`${fieldType}${WarpConstants.ArgParamsSeparator}${fieldValue}`)
+          fieldDefinitions.push(new FieldDefinition(fieldName, '', typedValue.getType()))
+          fieldValues.push(new Field(typedValue, fieldName))
+        }
+      })
+      return new Struct(new StructType(structName, fieldDefinitions), fieldValues)
     }
     if (type === WarpInputTypes.String) return val ? StringValue.fromUTF8(val as string) : new NothingValue()
     if (type === WarpInputTypes.Uint8) return val ? new U8Value(Number(val)) : new NothingValue()
@@ -271,6 +312,7 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
       return WarpMultiversxInputTypes.List + WarpConstants.ArgParamsSeparator + this.typeToString(type.getFirstTypeParameter())
     if (type.hasExactClass(CodeMetadataType.ClassName)) return WarpMultiversxInputTypes.CodeMeta
     if (type.hasExactClass(StructType.ClassName) && type.getClassName() === 'EsdtTokenPayment') return WarpInputTypes.Asset
+    if (type.hasExactClass(StructType.ClassName)) return `${WarpInputTypes.Struct}(${type.getName()})`
 
     throw new Error(`WarpArgSerializer (typeToString): Unsupported input type: ${type.getClassName()}`)
   }
