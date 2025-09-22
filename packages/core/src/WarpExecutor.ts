@@ -49,7 +49,7 @@ export class WarpExecutor {
     warp: Warp,
     inputs: string[],
     env?: Record<string, any>
-  ): Promise<{ tx: WarpAdapterGenericTransaction | null; chain: WarpChainInfo | null }> {
+  ): Promise<{ tx: WarpAdapterGenericTransaction | null; chain: WarpChainInfo | null; immediateExecution: WarpExecution | null }> {
     const { action, actionIndex } = findWarpExecutableAction(warp)
     const executable = await this.factory.createExecutable(warp, actionIndex, inputs, env)
 
@@ -57,10 +57,11 @@ export class WarpExecutor {
       const result = await this.executeCollect(executable)
       if (result.success) {
         await this.callHandler(() => this.handlers?.onExecuted?.(result))
+        return { tx: null, chain: null, immediateExecution: result }
       } else {
         this.handlers?.onError?.({ message: JSON.stringify(result.values) })
       }
-      return { tx: null, chain: null }
+      return { tx: null, chain: null, immediateExecution: null }
     }
 
     const adapter = findWarpAdapterForChain(executable.chain.name, this.adapters)
@@ -72,12 +73,12 @@ export class WarpExecutor {
       } else {
         this.handlers?.onError?.({ message: JSON.stringify(result.values) })
       }
-      return { tx: null, chain: executable.chain }
+      return { tx: null, chain: executable.chain, immediateExecution: result }
     }
 
     const tx = await adapter.executor.createTransaction(executable)
 
-    return { tx, chain: executable.chain }
+    return { tx, chain: executable.chain, immediateExecution: null }
   }
 
   async evaluateResults(warp: Warp, chain: WarpChain, tx: WarpAdapterGenericRemoteTransaction): Promise<void> {
