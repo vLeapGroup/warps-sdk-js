@@ -29,9 +29,9 @@ import { WarpLogger } from './WarpLogger'
 import { WarpSerializer } from './WarpSerializer'
 
 export type ExecutionHandlers = {
-  onExecuted?: (result: WarpExecution) => Promise<void>
+  onExecuted?: (result: WarpExecution) => void | Promise<void>
   onError?: (params: { message: string }) => void
-  onSignRequest?: (params: { message: string; chain: WarpChainInfo }) => Promise<string>
+  onSignRequest?: (params: { message: string; chain: WarpChainInfo }) => string | Promise<string>
 }
 
 export class WarpExecutor {
@@ -58,7 +58,11 @@ export class WarpExecutor {
 
     if (action.type === 'collect') {
       const result = await this.executeCollect(executable)
-      result.success ? this.handlers?.onExecuted?.(result) : this.handlers?.onError?.({ message: JSON.stringify(result.values) })
+      if (result.success) {
+        await this.callHandler(() => this.handlers?.onExecuted?.(result))
+      } else {
+        this.handlers?.onError?.({ message: JSON.stringify(result.values) })
+      }
       return { tx: null, chain: null }
     }
 
@@ -66,7 +70,11 @@ export class WarpExecutor {
 
     if (action.type === 'query') {
       const result = await adapter.executor.executeQuery(executable)
-      result.success ? await this.handlers?.onExecuted?.(result) : this.handlers?.onError?.({ message: JSON.stringify(result.values) })
+      if (result.success) {
+        await this.callHandler(() => this.handlers?.onExecuted?.(result))
+      } else {
+        this.handlers?.onError?.({ message: JSON.stringify(result.values) })
+      }
       return { tx: null, chain: executable.chain }
     }
 
@@ -77,7 +85,7 @@ export class WarpExecutor {
 
   async evaluateResults(warp: Warp, chain: WarpChain, tx: WarpAdapterGenericRemoteTransaction): Promise<void> {
     const result = await findWarpAdapterForChain(chain, this.adapters).results.getTransactionExecutionResults(warp, tx)
-    this.handlers?.onExecuted?.(result)
+    await this.callHandler(() => this.handlers?.onExecuted?.(result))
   }
 
   private async executeCollect(executable: WarpExecutable, extra?: Record<string, any>): Promise<WarpExecution> {
@@ -104,9 +112,11 @@ export class WarpExecutor {
     if (this.handlers?.onSignRequest) {
       if (!wallet) throw new Error(`No wallet configured for chain ${executable.chain.name}`)
       const { message, nonce, expiresAt } = await createAuthMessage(wallet, `${executable.chain.name}-adapter`)
-      const signature = await this.handlers.onSignRequest({ message, chain: executable.chain })
-      const authHeaders = createAuthHeaders(wallet, signature, nonce, expiresAt)
-      Object.entries(authHeaders).forEach(([key, value]) => headers.set(key, value))
+      const signature = await this.callHandler(() => this.handlers?.onSignRequest?.({ message, chain: executable.chain }))
+      if (signature) {
+        const authHeaders = createAuthHeaders(wallet, signature, nonce, expiresAt)
+        Object.entries(authHeaders).forEach(([key, value]) => headers.set(key, value))
+      }
     }
 
     Object.entries(collectAction.destination.headers || {}).forEach(([key, value]) => {
@@ -173,5 +183,10 @@ export class WarpExecutor {
         messages: {},
       }
     }
+  }
+
+  private async callHandler<T>(handler: (() => T | Promise<T>) | undefined): Promise<T | undefined> {
+    if (!handler) return undefined
+    return await handler()
   }
 }

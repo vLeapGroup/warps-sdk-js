@@ -499,4 +499,142 @@ describe('WarpExecutor', () => {
       )
     })
   })
+
+  describe('execution handlers - async vs sync', () => {
+    it('should handle sync onExecuted handler', async () => {
+      const syncHandler = jest.fn()
+      const syncHandlers = { onExecuted: syncHandler, onError: jest.fn() }
+      const syncExecutor = new WarpExecutor(config, adapters, syncHandlers)
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: 'test data' }),
+      })
+
+      const collectWarp = {
+        ...warp,
+        actions: [
+          {
+            type: 'collect' as const,
+            label: 'Collect Data',
+            destination: {
+              url: 'https://api.example.com/collect',
+              method: 'POST' as const,
+            },
+            inputs: [
+              {
+                name: 'address',
+                type: 'string',
+                source: 'field' as const,
+                position: 'receiver' as const,
+              },
+            ],
+          } as WarpCollectAction,
+        ],
+      }
+
+      const inputs = ['address:erd1receiver']
+      await syncExecutor.execute(collectWarp, inputs)
+
+      expect(syncHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          warp: collectWarp,
+          action: 1,
+        })
+      )
+    })
+
+    it('should handle async onExecuted handler', async () => {
+      const asyncHandler = jest.fn().mockResolvedValue(undefined)
+      const asyncHandlers = { onExecuted: asyncHandler, onError: jest.fn() }
+      const asyncExecutor = new WarpExecutor(config, adapters, asyncHandlers)
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: 'test data' }),
+      })
+
+      const collectWarp = {
+        ...warp,
+        actions: [
+          {
+            type: 'collect' as const,
+            label: 'Collect Data',
+            destination: {
+              url: 'https://api.example.com/collect',
+              method: 'POST' as const,
+            },
+            inputs: [
+              {
+                name: 'address',
+                type: 'string',
+                source: 'field' as const,
+                position: 'receiver' as const,
+              },
+            ],
+          } as WarpCollectAction,
+        ],
+      }
+
+      const inputs = ['address:erd1receiver']
+      await asyncExecutor.execute(collectWarp, inputs)
+
+      expect(asyncHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          warp: collectWarp,
+          action: 1,
+        })
+      )
+    })
+
+    it('should handle mixed async/sync handlers', async () => {
+      const syncExecutedHandler = jest.fn()
+      const asyncExecutedHandler = jest.fn().mockResolvedValue(undefined)
+      const mixedHandlers = {
+        onExecuted: syncExecutedHandler,
+        onError: jest.fn(),
+      }
+      const mixedExecutor = new WarpExecutor(config, adapters, mixedHandlers)
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: 'test data' }),
+      })
+
+      const collectWarp = {
+        ...warp,
+        actions: [
+          {
+            type: 'collect' as const,
+            label: 'Collect Data',
+            destination: {
+              url: 'https://api.example.com/collect',
+              method: 'POST' as const,
+            },
+            inputs: [
+              {
+                name: 'address',
+                type: 'string',
+                source: 'field' as const,
+                position: 'receiver' as const,
+              },
+            ],
+          } as WarpCollectAction,
+        ],
+      }
+
+      const inputs = ['address:erd1receiver']
+      await mixedExecutor.execute(collectWarp, inputs)
+
+      expect(syncExecutedHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          warp: collectWarp,
+          action: 1,
+        })
+      )
+    })
+  })
 })
