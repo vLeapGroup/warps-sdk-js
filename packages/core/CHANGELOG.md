@@ -1,5 +1,16 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.112
+
+### Minor Changes
+
+- caf0979: update custom types + add type aliases
+
+### Patch Changes
+
+- df20c26: add executor immediate result
+- 4af1b7d: add executor immediate result
+
 ## 3.0.0-alpha.111
 
 ### Patch Changes

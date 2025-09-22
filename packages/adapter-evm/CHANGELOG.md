@@ -1,5 +1,18 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-alpha.32
+
+### Minor Changes
+
+- caf0979: update custom types + add type aliases
+
+### Patch Changes
+
+- Updated dependencies [caf0979]
+- Updated dependencies [df20c26]
+- Updated dependencies [4af1b7d]
+  - @vleap/warps@3.0.0-alpha.112
+
 ## 0.2.0-alpha.31
 
 ### Patch Changes
