@@ -6,6 +6,7 @@ import {
   TypedValue,
 } from '@multiversx/sdk-core'
 import {
+  AdapterTypeRegistry,
   AdapterWarpResults,
   applyResultsToMessages,
   evaluateResultsCommon,
@@ -35,10 +36,11 @@ export class WarpMultiversxResults implements AdapterWarpResults {
 
   constructor(
     private readonly config: WarpClientConfig,
-    private readonly chain: WarpChainInfo
+    private readonly chain: WarpChainInfo,
+    private readonly typeRegistry: AdapterTypeRegistry
   ) {
     this.abi = new WarpMultiversxAbiBuilder(config, chain)
-    this.serializer = new WarpMultiversxSerializer()
+    this.serializer = new WarpMultiversxSerializer(this.typeRegistry)
     this.cache = new WarpCache(config.cache?.type)
   }
 
@@ -83,7 +85,17 @@ export class WarpMultiversxResults implements AdapterWarpResults {
       for (const [resultName, resultPath] of Object.entries(warp.results)) {
         results[resultName] = resultPath
       }
-      return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.config.transform?.runner) }
+      return {
+        values,
+        results: await evaluateResultsCommon(
+          warp,
+          results,
+          actionIndex,
+          inputs,
+          this.serializer.coreSerializer,
+          this.config.transform?.runner
+        ),
+      }
     }
     const abi = await this.abi.getAbiForAction(action)
     const eventParser = new TransactionEventsParser({ abi })
@@ -125,7 +137,7 @@ export class WarpMultiversxResults implements AdapterWarpResults {
         results[resultName] = resultPath
       }
     }
-    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
+    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer) }
   }
 
   async extractQueryResults(
@@ -164,7 +176,7 @@ export class WarpMultiversxResults implements AdapterWarpResults {
         results[key] = path
       }
     }
-    return { values, valuesRaw, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
+    return { values, valuesRaw, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer) }
   }
 
   async resolveWarpResultsRecursively(props: {
@@ -223,7 +235,14 @@ export class WarpMultiversxResults implements AdapterWarpResults {
         }
       }
     }
-    const finalResults = await evaluateResultsCommon(warp, combinedResults, entryActionIndex, inputs, this.config.transform?.runner)
+    const finalResults = await evaluateResultsCommon(
+      warp,
+      combinedResults,
+      entryActionIndex,
+      inputs,
+      this.serializer.coreSerializer,
+      this.config.transform?.runner
+    )
     const entryExecution = resultsCache.get(entryActionIndex)
     return {
       ...entryExecution,

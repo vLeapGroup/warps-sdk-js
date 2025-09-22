@@ -24,6 +24,7 @@ import {
   WarpExecution,
   WarpQueryAction,
 } from '@vleap/warps'
+import { AdapterTypeRegistry } from '@vleap/warps/src/types'
 import { getMultiversxEntrypoint } from './helpers/general'
 import { WarpMultiversxAbiBuilder } from './WarpMultiversxAbiBuilder'
 import { WarpMultiversxResults } from './WarpMultiversxResults'
@@ -38,11 +39,12 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
 
   constructor(
     private readonly config: WarpClientConfig,
-    private readonly chain: WarpChainInfo
+    private readonly chain: WarpChainInfo,
+    private readonly typeRegistry: AdapterTypeRegistry
   ) {
-    this.serializer = new WarpMultiversxSerializer()
+    this.serializer = new WarpMultiversxSerializer(this.typeRegistry)
     this.abi = new WarpMultiversxAbiBuilder(this.config, this.chain)
-    this.results = new WarpMultiversxResults(this.config, this.chain)
+    this.results = new WarpMultiversxResults(this.config, this.chain, this.typeRegistry)
   }
 
   async createTransaction(executable: WarpExecutable): Promise<Transaction> {

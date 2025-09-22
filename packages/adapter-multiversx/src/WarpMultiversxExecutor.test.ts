@@ -1,4 +1,4 @@
-import { Warp, WarpChainEnv, WarpClientConfig as WarpConfig, WarpTransferAction } from '@vleap/warps/src/types'
+import { Warp, WarpChainEnv, WarpClientConfig as WarpConfig, WarpTransferAction, WarpTypeRegistry } from '@vleap/warps'
 import { promises as fs, PathLike } from 'fs'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 import { getMultiversxAdapter } from './chains'
@@ -13,7 +13,17 @@ const testChainInfo = getMultiversxAdapter(testConfig).chainInfo
 
 describe('WarpMultiversxExecutor', () => {
   it('createTransactionForExecute - creates a native transfer with message', async () => {
-    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo)
+    const typeRegistry = new WarpTypeRegistry()
+    typeRegistry.registerType('token', {
+      stringToNative: (value: string) => value,
+      nativeToString: (value: any) => `token:${value}`,
+    })
+    typeRegistry.registerType('codemeta', {
+      stringToNative: (value: string) => value,
+      nativeToString: (value: any) => `codemeta:${value}`,
+    })
+    typeRegistry.registerTypeAlias('list', 'vector')
+    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo, typeRegistry)
     const action: WarpTransferAction = {
       type: 'transfer',
       label: 'test',
@@ -39,7 +49,17 @@ describe('WarpMultiversxExecutor', () => {
   })
 
   it('createTransactionForExecute - creates a native transfer with message from input', async () => {
-    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo)
+    const typeRegistry = new WarpTypeRegistry()
+    typeRegistry.registerType('token', {
+      stringToNative: (value: string) => value,
+      nativeToString: (value: any) => `token:${value}`,
+    })
+    typeRegistry.registerType('codemeta', {
+      stringToNative: (value: string) => value,
+      nativeToString: (value: any) => `codemeta:${value}`,
+    })
+    typeRegistry.registerTypeAlias('list', 'vector')
+    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo, typeRegistry)
     const action: WarpTransferAction = {
       type: 'transfer',
       label: 'test',
@@ -65,7 +85,17 @@ describe('WarpMultiversxExecutor', () => {
   })
 
   it('createTransactionForExecute - creates a native transfer field-based receiver', async () => {
-    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo)
+    const typeRegistry = new WarpTypeRegistry()
+    typeRegistry.registerType('token', {
+      stringToNative: (value: string) => value,
+      nativeToString: (value: any) => `token:${value}`,
+    })
+    typeRegistry.registerType('codemeta', {
+      stringToNative: (value: string) => value,
+      nativeToString: (value: any) => `codemeta:${value}`,
+    })
+    typeRegistry.registerTypeAlias('list', 'vector')
+    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo, typeRegistry)
     const action: WarpTransferAction = {
       type: 'transfer',
       label: 'test',
@@ -91,23 +121,63 @@ describe('WarpMultiversxExecutor', () => {
   })
 
   it('createTransactionForExecute - creates a native transfer with esdt from field', async () => {
-    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo)
+    const typeRegistry = new WarpTypeRegistry()
+    typeRegistry.registerType('token', {
+      stringToNative: (value: string) => value,
+      nativeToString: (value: any) => `token:${value}`,
+    })
+    typeRegistry.registerType('codemeta', {
+      stringToNative: (value: string) => value,
+      nativeToString: (value: any) => `codemeta:${value}`,
+    })
+    typeRegistry.registerTypeAlias('list', 'vector')
+    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo, typeRegistry)
     // ... test logic for esdt from field ...
   })
 
   it('createTransactionForExecute - creates a contract call with esdt transfer from field', async () => {
-    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo)
+    const typeRegistry = new WarpTypeRegistry()
+    typeRegistry.registerType('token', {
+      stringToNative: (value: string) => value,
+      nativeToString: (value: any) => `token:${value}`,
+    })
+    typeRegistry.registerType('codemeta', {
+      stringToNative: (value: string) => value,
+      nativeToString: (value: any) => `codemeta:${value}`,
+    })
+    typeRegistry.registerTypeAlias('list', 'vector')
+    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo, typeRegistry)
     // ... test logic for contract call with esdt transfer ...
   })
 
   it('createTransactionForExecute - creates a contract call with scaled value from field', async () => {
-    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo)
+    const typeRegistry = new WarpTypeRegistry()
+    typeRegistry.registerType('token', {
+      stringToNative: (value: string) => value,
+      nativeToString: (value: any) => `token:${value}`,
+    })
+    typeRegistry.registerType('codemeta', {
+      stringToNative: (value: string) => value,
+      nativeToString: (value: any) => `codemeta:${value}`,
+    })
+    typeRegistry.registerTypeAlias('list', 'vector')
+    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo, typeRegistry)
     // ... test logic for contract call with scaled value ...
   })
 
   it('createTransactionForExecute - creates a contract call with modified values from url', async () => {
     testConfig.currentUrl = 'https://example.com/issue?name=WarpToken&ticker=WAPT&supply=1000&decimals=18'
-    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo)
+    const typeRegistry = new WarpTypeRegistry()
+    typeRegistry.registerType('token', {
+      stringToNative: (value: string) => value,
+      nativeToString: (value: any) => `token:${value}`,
+    })
+    typeRegistry.registerType('codemeta', {
+      stringToNative: (value: string) => value,
+      nativeToString: (value: any) => `codemeta:${value}`,
+    })
+    typeRegistry.registerTypeAlias('list', 'vector')
+    const subject = new WarpMultiversxExecutor(testConfig, testChainInfo, typeRegistry)
     // ... test logic for contract call with modified values from url ...
   })
 

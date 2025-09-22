@@ -26,7 +26,6 @@ import {
 } from './types'
 import { WarpFactory } from './WarpFactory'
 import { WarpLogger } from './WarpLogger'
-import { WarpSerializer } from './WarpSerializer'
 
 export type ExecutionHandlers = {
   onExecuted?: (result: WarpExecution) => void | Promise<void>
@@ -36,7 +35,6 @@ export type ExecutionHandlers = {
 
 export class WarpExecutor {
   private factory: WarpFactory
-  private serializer: WarpSerializer
 
   constructor(
     private config: WarpClientConfig,
@@ -45,7 +43,6 @@ export class WarpExecutor {
   ) {
     this.handlers = handlers
     this.factory = new WarpFactory(config, adapters)
-    this.serializer = new WarpSerializer()
   }
 
   async execute(
@@ -94,7 +91,7 @@ export class WarpExecutor {
 
     const toInputPayloadValue = (resolvedInput: ResolvedInput) => {
       if (!resolvedInput.value) return null
-      const value = this.serializer.stringToNative(resolvedInput.value)[1]
+      const value = this.factory.getSerializer().stringToNative(resolvedInput.value)[1]
       if (resolvedInput.input.type === 'biguint') {
         return (value as bigint).toString()
       } else if (resolvedInput.input.type === 'asset') {
@@ -150,6 +147,7 @@ export class WarpExecutor {
         content,
         executable.action,
         executable.resolvedInputs,
+        this.factory.getSerializer(),
         this.config.transform?.runner
       )
       const next = getNextInfo(this.config, this.adapters, executable.warp, executable.action, results)

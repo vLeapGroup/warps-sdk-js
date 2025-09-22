@@ -49,9 +49,68 @@ describe('WarpSerializer', () => {
         }),
         registerType: () => {},
         getRegisteredTypes: () => ['token'],
+        registerTypeAlias: () => {},
+        getAlias: () => undefined,
+        resolveType: (type: string) => type,
       }
-      serializer.setTypeRegistry(mockTypeRegistry as any)
-      expect(serializer.nativeToString('token', 'TOKEN-123456')).toBe('token:TOKEN-123456')
+      const serializerWithRegistry = new WarpSerializer(mockTypeRegistry as any)
+      expect(serializerWithRegistry.nativeToString('token', 'TOKEN-123456')).toBe('token:TOKEN-123456')
+    })
+
+    it('serializes list values via type registry alias', () => {
+      // Mock type registry with list as alias for vector
+      const mockTypeRegistry = {
+        hasType: (type: string) => type === 'list' || type === 'vector',
+        getHandler: (type: string) => {
+          if (type === 'list') {
+            // Return vector handler for list alias
+            return {
+              stringToNative: (value: string) => {
+                // Vector handler logic
+                const [baseType, listValues] = value.split(':', 2)
+                const values = listValues ? listValues.split(',') : []
+                return values.map((v) => `${baseType}:${v}`)
+              },
+              nativeToString: (value: any) => {
+                // Vector handler logic
+                if (!Array.isArray(value)) return 'vector:'
+                if (value.length === 0) return 'vector:'
+                const firstValue = value[0]
+                if (typeof firstValue === 'string' && firstValue.includes(':')) {
+                  const baseType = firstValue.split(':')[0]
+                  const values = value.map((v) => v.split(':')[1] || '')
+                  return `vector:${baseType}:${values.join(',')}`
+                }
+                return 'vector:'
+              },
+            }
+          }
+          return undefined
+        },
+        registerType: () => {},
+        registerTypeAlias: () => {},
+        getRegisteredTypes: () => ['list', 'vector'],
+        getAlias: () => undefined,
+        resolveType: (type: string) => type,
+      }
+      const serializerWithRegistry = new WarpSerializer(mockTypeRegistry as any)
+      expect(serializerWithRegistry.nativeToString('list', ['string:hello', 'string:world'])).toBe('vector:string:hello,world')
+    })
+
+    it('serializes list values via alias to core vector type', () => {
+      // Mock type registry with list as alias for core vector type
+      const mockTypeRegistry = {
+        hasType: (type: string) => type === 'list',
+        getHandler: (type: string) => undefined, // No handler for core types
+        getAlias: (type: string) => (type === 'list' ? 'vector' : undefined),
+        resolveType: (type: string) => (type === 'list' ? 'vector' : type),
+        registerType: () => {},
+        registerTypeAlias: () => {},
+        getRegisteredTypes: () => ['list'],
+      }
+      const serializerWithRegistry = new WarpSerializer(mockTypeRegistry as any)
+      // Should use core vector serialization
+      expect(serializerWithRegistry.nativeToString('list', ['hello', 'world'])).toBe('vector:hello,world')
     })
 
     it('serializes asset values', () => {
@@ -190,9 +249,68 @@ describe('WarpSerializer', () => {
         }),
         registerType: () => {},
         getRegisteredTypes: () => ['token'],
+        registerTypeAlias: () => {},
+        getAlias: () => undefined,
+        resolveType: (type: string) => type,
       }
-      serializer.setTypeRegistry(mockTypeRegistry as any)
-      expect(serializer.stringToNative('token:TOKEN-123456')).toEqual(['token', 'TOKEN-123456'])
+      const serializerWithRegistry = new WarpSerializer(mockTypeRegistry as any)
+      expect(serializerWithRegistry.stringToNative('token:TOKEN-123456')).toEqual(['token', 'TOKEN-123456'])
+    })
+
+    it('deserializes list values via type registry alias', () => {
+      // Mock type registry with list as alias for vector
+      const mockTypeRegistry = {
+        hasType: (type: string) => type === 'list' || type === 'vector',
+        getHandler: (type: string) => {
+          if (type === 'list') {
+            // Return vector handler for list alias
+            return {
+              stringToNative: (value: string) => {
+                // Vector handler logic
+                const [baseType, listValues] = value.split(':', 2)
+                const values = listValues ? listValues.split(',') : []
+                return values.map((v) => `${baseType}:${v}`)
+              },
+              nativeToString: (value: any) => {
+                // Vector handler logic
+                if (!Array.isArray(value)) return 'vector:'
+                if (value.length === 0) return 'vector:'
+                const firstValue = value[0]
+                if (typeof firstValue === 'string' && firstValue.includes(':')) {
+                  const baseType = firstValue.split(':')[0]
+                  const values = value.map((v) => v.split(':')[1] || '')
+                  return `vector:${baseType}:${values.join(',')}`
+                }
+                return 'vector:'
+              },
+            }
+          }
+          return undefined
+        },
+        registerType: () => {},
+        registerTypeAlias: () => {},
+        getRegisteredTypes: () => ['list', 'vector'],
+        getAlias: () => undefined,
+        resolveType: (type: string) => type,
+      }
+      const serializerWithRegistry = new WarpSerializer(mockTypeRegistry as any)
+      expect(serializerWithRegistry.stringToNative('list:string:hello,world')).toEqual(['list', ['string:hello', 'string:world']])
+    })
+
+    it('deserializes list values via alias to core vector type', () => {
+      // Mock type registry with list as alias for core vector type
+      const mockTypeRegistry = {
+        hasType: (type: string) => type === 'list',
+        getHandler: (type: string) => undefined, // No handler for core types
+        getAlias: (type: string) => (type === 'list' ? 'vector' : undefined),
+        resolveType: (type: string) => (type === 'list' ? 'vector' : type),
+        registerType: () => {},
+        registerTypeAlias: () => {},
+        getRegisteredTypes: () => ['list'],
+      }
+      const serializerWithRegistry = new WarpSerializer(mockTypeRegistry as any)
+      // Should use core vector deserialization
+      expect(serializerWithRegistry.stringToNative('list:string:hello,world')).toEqual(['list', ['hello', 'world']])
     })
 
     it('deserializes uint values', () => {

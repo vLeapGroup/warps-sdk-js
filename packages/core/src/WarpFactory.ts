@@ -20,7 +20,6 @@ import { CacheTtl, WarpCache, WarpCacheKey } from './WarpCache'
 import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
 import { WarpSerializer } from './WarpSerializer'
-import { WarpTypeRegistryImpl } from './WarpTypeRegistry'
 
 export class WarpFactory {
   private url: URL
@@ -35,17 +34,10 @@ export class WarpFactory {
     this.url = new URL(config.currentUrl)
     this.serializer = new WarpSerializer()
     this.cache = new WarpCache(config.cache?.type)
+  }
 
-    // Initialize type registry with adapter-specific types
-    const typeRegistry = new WarpTypeRegistryImpl()
-    this.serializer.setTypeRegistry(typeRegistry)
-
-    // Register types from all adapters
-    for (const adapter of adapters) {
-      if (adapter.registerTypes) {
-        adapter.registerTypes(typeRegistry)
-      }
-    }
+  getSerializer(): WarpSerializer {
+    return this.serializer
   }
 
   async createExecutable(warp: Warp, actionIndex: number, inputs: string[], envs?: Record<string, any>): Promise<WarpExecutable> {
@@ -224,9 +216,7 @@ export class WarpFactory {
     const chainInput = inputs[chainPositionIndex]
     if (!chainInput) throw new Error('Chain input not found')
 
-    const serializer = new WarpSerializer()
-    const chainValue = serializer.stringToNative(chainInput)[1] as WarpChain
-
+    const chainValue = this.serializer.stringToNative(chainInput)[1] as WarpChain
     const adapter = findWarpAdapterForChain(chainValue, this.adapters)
 
     return adapter.chainInfo

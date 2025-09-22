@@ -65,8 +65,6 @@ export type Adapter = {
   brandBuilder: () => AdapterWarpBrandBuilder
   dataLoader: AdapterWarpDataLoader
   wallet: AdapterWarpWallet
-  // Optional method for registering adapter-specific types
-  registerTypes?: (typeRegistry: WarpTypeRegistry) => void
 }
 
 export type WarpAdapterGenericTransaction = any
@@ -83,13 +81,19 @@ export interface WarpTypeHandler {
 }
 
 // Registry for adapter-specific types
-export interface WarpTypeRegistry {
+export interface AdapterTypeRegistry {
   // Register a custom type handler for a specific type
   registerType(typeName: string, handler: WarpTypeHandler): void
+  // Register an alias for a type
+  registerTypeAlias(typeName: string, alias: string): void
   // Check if a type is registered
   hasType(typeName: string): boolean
   // Get handler for a type
   getHandler(typeName: string): WarpTypeHandler | undefined
+  // Get alias for a type (if it exists)
+  getAlias(typeName: string): string | undefined
+  // Resolve the final type name (handles aliases recursively)
+  resolveType(typeName: string): string
   // Get all registered type names
   getRegisteredTypes(): string[]
 }

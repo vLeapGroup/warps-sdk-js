@@ -1,6 +1,14 @@
 // Tests for the MultiversxResults class. All tests focus on the MultiversxResults class directly.
 import { SmartContractResult, TransactionEvent, TransactionLogs, TransactionOnNetwork, TypedValue } from '@multiversx/sdk-core/out'
-import { extractCollectResults, Warp, WarpChainInfo, WarpClientConfig, WarpContractAction } from '@vleap/warps'
+import {
+  extractCollectResults,
+  Warp,
+  WarpChainInfo,
+  WarpClientConfig,
+  WarpContractAction,
+  WarpSerializer,
+  WarpTypeRegistry,
+} from '@vleap/warps'
 import { promises as fs, PathLike } from 'fs'
 import fetchMock from 'jest-fetch-mock'
 import path from 'path'
@@ -73,8 +81,20 @@ jest.mock('@vleap/warps-vm-node', () => ({
 
 describe('Result Helpers', () => {
   let subject: WarpMultiversxResults
+  let typeRegistry: WarpTypeRegistry
+
   beforeEach(() => {
-    subject = new WarpMultiversxResults(testConfig, mockChainInfo)
+    typeRegistry = new WarpTypeRegistry()
+    typeRegistry.registerType('token', {
+      stringToNative: (value: string) => value,
+      nativeToString: (value: any) => `token:${value}`,
+    })
+    typeRegistry.registerType('codemeta', {
+      stringToNative: (value: string) => value,
+      nativeToString: (value: any) => `codemeta:${value}`,
+    })
+    typeRegistry.registerTypeAlias('list', 'vector')
+    subject = new WarpMultiversxResults(testConfig, mockChainInfo, typeRegistry)
   })
 
   describe('input-based results', () => {
@@ -191,7 +211,7 @@ describe('Result Helpers', () => {
         { input: warp.actions[0].inputs[0], value: 'string:abc' },
         { input: warp.actions[0].inputs[1], value: 'string:xyz' },
       ]
-      const { results } = await extractCollectResults(warp, response, 1, inputs)
+      const { results } = await extractCollectResults(warp, response, 1, inputs, new WarpSerializer())
       expect(results.FOO).toBe('abc')
       expect(results.BAR).toBe('xyz')
     })
@@ -216,7 +236,7 @@ describe('Result Helpers', () => {
       } as any
       const response = { data: { some: 'value' } }
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:aliased' }]
-      const { results } = await extractCollectResults(warp, response, 1, inputs)
+      const { results } = await extractCollectResults(warp, response, 1, inputs, new WarpSerializer())
       expect(results.FOO).toBe('aliased')
     })
 
@@ -240,7 +260,7 @@ describe('Result Helpers', () => {
       } as any
       const response = { data: { some: 'value' } }
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:abc' }]
-      const { results } = await extractCollectResults(warp, response, 1, inputs)
+      const { results } = await extractCollectResults(warp, response, 1, inputs, new WarpSerializer())
       expect(results.BAR).toBeNull()
     })
   })
@@ -525,7 +545,17 @@ describe('Result Helpers', () => {
       }
 
       // Create subject after mock server is started
-      const subject = new WarpMultiversxResults(testConfig, mockChainInfo)
+      const typeRegistry = new WarpTypeRegistry()
+      typeRegistry.registerType('token', {
+        stringToNative: (value: string) => value,
+        nativeToString: (value: any) => `token:${value}`,
+      })
+      typeRegistry.registerType('codemeta', {
+        stringToNative: (value: string) => value,
+        nativeToString: (value: any) => `codemeta:${value}`,
+      })
+      typeRegistry.registerTypeAlias('list', 'vector')
+      const subject = new WarpMultiversxResults(testConfig, mockChainInfo, typeRegistry)
       // Patch executeCollect and executeQuery to always return a full WarpExecution object
       const mockExecutor = {
         executeCollect: async (warpArg: any, actionIndex: any, actionInputs: any, meta: any) => ({
@@ -568,7 +598,7 @@ describe('Result Helpers', () => {
       })
 
       // Patch: evaluate transforms directly if missing
-      const finalResults = await evaluateResultsCommon(warp, result.results, 1, [], testConfig.transform?.runner)
+      const finalResults = await evaluateResultsCommon(warp, result.results, 1, [], new WarpSerializer(), testConfig.transform?.runner)
 
       // The result should be from the entry action (1)
       expect(result.success).toBe(true)
@@ -644,7 +674,17 @@ describe('Result Helpers', () => {
       }
 
       // Create subject after mock server is started
-      const subject = new WarpMultiversxResults(testConfig, mockChainInfo)
+      const typeRegistry = new WarpTypeRegistry()
+      typeRegistry.registerType('token', {
+        stringToNative: (value: string) => value,
+        nativeToString: (value: any) => `token:${value}`,
+      })
+      typeRegistry.registerType('codemeta', {
+        stringToNative: (value: string) => value,
+        nativeToString: (value: any) => `codemeta:${value}`,
+      })
+      typeRegistry.registerTypeAlias('list', 'vector')
+      const subject = new WarpMultiversxResults(testConfig, mockChainInfo, typeRegistry)
       // Patch executeCollect and executeQuery to always return a full WarpExecution object
       const mockExecutor = {
         executeCollect: async (warpArg: any, actionIndex: any, actionInputs: any, meta: any) => ({
@@ -687,7 +727,7 @@ describe('Result Helpers', () => {
       })
 
       // Patch: evaluate transforms directly if missing
-      const finalResults = await evaluateResultsCommon(warp, result.results, 1, [], testConfig.transform?.runner)
+      const finalResults = await evaluateResultsCommon(warp, result.results, 1, [], new WarpSerializer(), testConfig.transform?.runner)
 
       // The result should be from the entry action (1)
       expect(result.success).toBe(true)

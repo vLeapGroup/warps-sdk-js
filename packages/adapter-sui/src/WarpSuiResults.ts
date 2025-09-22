@@ -84,7 +84,7 @@ export class WarpSuiResults implements AdapterWarpResults {
         results[resultName] = resultPath
       }
     }
-    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
+    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer) }
   }
 
   async extractQueryResults(
@@ -116,6 +116,6 @@ export class WarpSuiResults implements AdapterWarpResults {
         results[key] = path
       }
     }
-    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs) }
+    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer) }
   }
 }

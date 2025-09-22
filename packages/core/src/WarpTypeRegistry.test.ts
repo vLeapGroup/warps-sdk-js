@@ -1,10 +1,10 @@
-import { WarpTypeRegistryImpl } from './WarpTypeRegistry'
+import { WarpTypeRegistry } from './WarpTypeRegistry'
 
 describe('WarpTypeRegistryImpl', () => {
-  let registry: WarpTypeRegistryImpl
+  let registry: WarpTypeRegistry
 
   beforeEach(() => {
-    registry = new WarpTypeRegistryImpl()
+    registry = new WarpTypeRegistry()
   })
 
   describe('registerType', () => {
@@ -60,6 +60,71 @@ describe('WarpTypeRegistryImpl', () => {
 
     it('should return false for non-existent type', () => {
       expect(registry.hasType('nonexistent')).toBe(false)
+    })
+
+    it('should handle type aliases correctly', () => {
+      const vectorHandler = {
+        stringToNative: (value: string) => {
+          // Mock vector handler
+          const [baseType, listValues] = value.split(':', 2)
+          const values = listValues ? listValues.split(',') : []
+          return values.map((v) => `${baseType}:${v}`)
+        },
+        nativeToString: (value: any) => {
+          // Mock vector handler
+          if (!Array.isArray(value)) return 'vector:'
+          if (value.length === 0) return 'vector:'
+          const firstValue = value[0]
+          if (typeof firstValue === 'string' && firstValue.includes(':')) {
+            const baseType = firstValue.split(':')[0]
+            const values = value.map((v) => v.split(':')[1] || '')
+            return `vector:${baseType}:${values.join(',')}`
+          }
+          return 'vector:'
+        },
+      }
+
+      // Register the base type
+      registry.registerType('vector', vectorHandler)
+
+      // Register an alias
+      registry.registerTypeAlias('list', 'vector')
+
+      expect(registry.hasType('vector')).toBe(true)
+      expect(registry.hasType('list')).toBe(true)
+
+      const retrievedVectorHandler = registry.getHandler('vector')
+      const retrievedListHandler = registry.getHandler('list')
+
+      expect(retrievedVectorHandler).toBe(vectorHandler)
+      expect(retrievedListHandler).toBe(vectorHandler) // Should be the same handler
+
+      const registeredTypes = registry.getRegisteredTypes()
+      expect(registeredTypes).toContain('vector')
+      expect(registeredTypes).toContain('list')
+    })
+
+    it('should handle aliases to core types', () => {
+      // Register an alias that points to a core type (not in registry)
+      registry.registerTypeAlias('list', 'vector')
+
+      expect(registry.hasType('list')).toBe(true)
+      expect(registry.getAlias('list')).toBe('vector')
+      expect(registry.resolveType('list')).toBe('vector')
+      expect(registry.getHandler('list')).toBeUndefined() // No handler since vector is core type
+
+      const registeredTypes = registry.getRegisteredTypes()
+      expect(registeredTypes).toContain('list')
+    })
+
+    it('should handle chained aliases', () => {
+      // Register chained aliases: list -> array -> vector
+      registry.registerTypeAlias('list', 'array')
+      registry.registerTypeAlias('array', 'vector')
+
+      expect(registry.resolveType('list')).toBe('vector')
+      expect(registry.resolveType('array')).toBe('vector')
+      expect(registry.resolveType('vector')).toBe('vector') // No alias, returns itself
     })
   })
 })

@@ -1,19 +1,15 @@
 import { WarpConstants, WarpInputTypes } from './constants'
 import {
+  AdapterTypeRegistry,
   BaseWarpActionInputType,
   WarpActionInputType,
   WarpChainAssetValue,
   WarpNativeValue,
   WarpStructValue,
-  WarpTypeRegistry,
 } from './types'
 
 export class WarpSerializer {
-  private typeRegistry: WarpTypeRegistry | undefined
-
-  setTypeRegistry(typeRegistry: WarpTypeRegistry): void {
-    this.typeRegistry = typeRegistry
-  }
+  constructor(private readonly typeRegistry?: AdapterTypeRegistry) {}
 
   nativeToString(type: WarpActionInputType, value: WarpNativeValue): string {
     if (type === WarpInputTypes.Tuple && Array.isArray(value)) {
@@ -75,11 +71,18 @@ export class WarpSerializer {
             String(value.amount)
     }
 
-    // Check adapter-registered types
-    if (this.typeRegistry?.hasType(type)) {
+    // Check adapter-registered types and aliases
+    if (this.typeRegistry) {
       const handler = this.typeRegistry.getHandler(type)
       if (handler) {
         return handler.nativeToString(value)
+      }
+
+      // Check if this is an alias that points to a core type
+      const resolvedType = this.typeRegistry.resolveType(type)
+      if (resolvedType !== type) {
+        // Use the resolved type for serialization
+        return this.nativeToString(resolvedType, value)
       }
     }
 
@@ -101,11 +104,11 @@ export class WarpSerializer {
     }
     if (baseType === WarpInputTypes.Vector) {
       const vectorParts = (val as string).split(WarpConstants.ArgParamsSeparator) as [WarpActionInputType, WarpNativeValue]
-      const baseType = vectorParts.slice(0, -1).join(WarpConstants.ArgParamsSeparator)
+      const elementType = vectorParts.slice(0, -1).join(WarpConstants.ArgParamsSeparator)
       const valuesRaw = vectorParts[vectorParts.length - 1]
       const valuesStrings = valuesRaw ? (valuesRaw as string).split(',') : []
-      const values = valuesStrings.map((v) => this.stringToNative(baseType + WarpConstants.ArgParamsSeparator + v)[1])
-      return [WarpInputTypes.Vector + WarpConstants.ArgParamsSeparator + baseType, values]
+      const values = valuesStrings.map((v) => this.stringToNative(elementType + WarpConstants.ArgParamsSeparator + v)[1])
+      return [WarpInputTypes.Vector + WarpConstants.ArgParamsSeparator + elementType, values]
     } else if (baseType.startsWith(WarpInputTypes.Tuple)) {
       const rawTypes = baseType.match(/\(([^)]+)\)/)?.[1]?.split(WarpConstants.ArgCompositeSeparator) as BaseWarpActionInputType[]
       const valuesStrings = val.split(WarpConstants.ArgCompositeSeparator)
@@ -149,11 +152,19 @@ export class WarpSerializer {
       return [baseType, value]
     }
 
-    // Check adapter-registered types before throwing error
-    if (this.typeRegistry?.hasType(baseType)) {
+    // Check adapter-registered types and aliases before throwing error
+    if (this.typeRegistry) {
       const handler = this.typeRegistry.getHandler(baseType)
       if (handler) {
         const nativeValue = handler.stringToNative(val)
+        return [baseType as WarpActionInputType, nativeValue]
+      }
+
+      // Check if this is an alias that points to a core type
+      const resolvedType = this.typeRegistry.resolveType(baseType)
+      if (resolvedType !== baseType) {
+        // Recursively call stringToNative with the resolved type, but preserve original type name
+        const [_, nativeValue] = this.stringToNative(`${resolvedType}:${val}`)
         return [baseType as WarpActionInputType, nativeValue]
       }
     }

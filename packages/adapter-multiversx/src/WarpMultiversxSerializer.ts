@@ -51,6 +51,7 @@ import {
   WarpNativeValue,
   WarpSerializer,
 } from '@vleap/warps'
+import { AdapterTypeRegistry } from '@vleap/warps/src/types'
 import { WarpConstants, WarpInputTypes } from '../../core/src/constants'
 import { WarpMultiversxInputTypes } from './constants'
 import { getNormalizedTokenIdentifier, isNativeToken } from './helpers/general'
@@ -60,8 +61,8 @@ const SplitParamsRegex = new RegExp(`${WarpConstants.ArgParamsSeparator}(.*)`)
 export class WarpMultiversxSerializer implements AdapterWarpSerializer {
   public readonly coreSerializer: WarpSerializer
 
-  constructor() {
-    this.coreSerializer = new WarpSerializer()
+  constructor(typeRegistry: AdapterTypeRegistry) {
+    this.coreSerializer = new WarpSerializer(typeRegistry)
   }
 
   typedToString(value: TypedValue): string {

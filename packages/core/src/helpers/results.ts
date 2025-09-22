@@ -10,6 +10,7 @@ export const extractCollectResults = async (
   response: any,
   actionIndex: number,
   inputs: ResolvedInput[],
+  serializer: WarpSerializer,
   transformRunner?: TransformRunner | null
 ): Promise<{ values: any[]; results: WarpExecutionResults }> => {
   const values: any[] = []
@@ -34,7 +35,7 @@ export const extractCollectResults = async (
       results[resultName] = resultPath
     }
   }
-  return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, transformRunner) }
+  return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, serializer, transformRunner) }
 }
 
 // Processes and finalizes the results of a Warp action, supporting result definitions like:
@@ -46,11 +47,12 @@ export const evaluateResultsCommon = async (
   baseResults: WarpExecutionResults,
   actionIndex: number,
   inputs: ResolvedInput[],
+  serializer: WarpSerializer,
   transformRunner?: TransformRunner | null
 ): Promise<WarpExecutionResults> => {
   if (!warp.results) return baseResults
   let results = { ...baseResults }
-  results = evaluateInputResults(results, warp, actionIndex, inputs)
+  results = evaluateInputResults(results, warp, actionIndex, inputs, serializer)
   results = await evaluateTransformResults(warp, results, transformRunner)
   return results
 }
@@ -61,11 +63,12 @@ const evaluateInputResults = (
   results: WarpExecutionResults,
   warp: Warp,
   actionIndex: number,
-  inputs: ResolvedInput[]
+  inputs: ResolvedInput[],
+  serializer: WarpSerializer
 ): WarpExecutionResults => {
   const modifiable = { ...results }
   const actionInputs = getWarpActionByIndex(warp, actionIndex)?.inputs || []
-  const serializer = new WarpSerializer()
+
   for (const [key, value] of Object.entries(modifiable)) {
     if (typeof value === 'string' && value.startsWith('input.')) {
       const inputName = value.split('.')[1]
