@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.60
+
+### Patch Changes
+
+- 4e09d48: improve complex struct serialization
+- Updated dependencies [4e09d48]
+  - @vleap/warps@3.0.0-alpha.113
+
 ## 0.2.0-alpha.59
 
 ### Minor Changes

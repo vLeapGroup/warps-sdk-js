@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.113
+
+### Patch Changes
+
+- 4e09d48: improve complex struct serialization
+
 ## 3.0.0-alpha.112
 
 ### Minor Changes
