@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.61
+
+### Patch Changes
+
+- a4b7dd5: fix mvx empty vector handling
+
 ## 0.2.0-alpha.60
 
 ### Patch Changes
