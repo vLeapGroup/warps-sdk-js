@@ -1,4 +1,5 @@
 import { WarpSerializer } from './WarpSerializer'
+import { WarpConstants } from './constants'
 import { WarpStructValue } from './types'
 
 describe('WarpSerializer', () => {
@@ -151,6 +152,17 @@ describe('WarpSerializer', () => {
       const vectorValue = ['tuple(uint64|biguint):1,1000000', 'tuple(uint64|biguint):2,2000000', 'tuple(uint64|biguint):3,3000000']
       expect(serializer.nativeToString('vector', vectorValue)).toBe('vector:tuple(uint64|biguint):1|1000000,2|2000000,3|3000000')
     })
+
+    it('serializes vector of structs', () => {
+      const vectorValue = [
+        'struct(User):(name:string)Alice,(age:uint32)25',
+        'struct(User):(name:string)Bob,(age:uint32)30',
+        'struct(User):(name:string)Charlie,(age:uint32)35',
+      ]
+      expect(serializer.nativeToString('vector', vectorValue)).toBe(
+        `vector:struct(User):(name:string)Alice,(age:uint32)25${WarpConstants.ArgStructSeparator}(name:string)Bob,(age:uint32)30${WarpConstants.ArgStructSeparator}(name:string)Charlie,(age:uint32)35`
+      )
+    })
   })
 
   describe('stringToNative', () => {
@@ -197,6 +209,28 @@ describe('WarpSerializer', () => {
       const result = serializer.stringToNative('vector:string:')
       expect(result[0]).toBe('vector:string')
       expect(result[1]).toEqual([])
+    })
+
+    it('deserializes vector of structs', () => {
+      const result = serializer.stringToNative(
+        `vector:struct(User):(name:string)Alice,(age:uint32)25${WarpConstants.ArgStructSeparator}(name:string)Bob,(age:uint32)30${WarpConstants.ArgStructSeparator}(name:string)Charlie,(age:uint32)35`
+      )
+
+      expect(result[0]).toBe('vector:struct(User)')
+      const values = result[1] as WarpStructValue[]
+      expect(values).toHaveLength(3)
+
+      expect(values[0]._name).toBe('User')
+      expect(values[0].name).toBe('Alice')
+      expect(values[0].age).toBe(25)
+
+      expect(values[1]._name).toBe('User')
+      expect(values[1].name).toBe('Bob')
+      expect(values[1].age).toBe(30)
+
+      expect(values[2]._name).toBe('User')
+      expect(values[2].name).toBe('Charlie')
+      expect(values[2].age).toBe(35)
     })
 
     it('deserializes tuple values', () => {

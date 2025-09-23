@@ -33,6 +33,7 @@ import {
   VariadicType,
   VariadicValue,
 } from '@multiversx/sdk-core/out'
+import { WarpConstants } from '../../core/src/constants'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
 import { asset_value } from './utils.codec-value'
 
@@ -181,6 +182,22 @@ describe('WarpMultiversxSerializer', () => {
       const struct = new Struct(new StructType('Empty', []), [])
       const result = serializer.typedToString(struct)
       expect(result).toBe('struct(Empty):')
+    })
+
+    it('converts VariadicValue of Structs to vector of structs string', () => {
+      const structType = new StructType('User', [
+        new FieldDefinition('name', '', new StringType()),
+        new FieldDefinition('age', '', new U32Type()),
+      ])
+      const structs = [
+        new Struct(structType, [new Field(StringValue.fromUTF8('Alice'), 'name'), new Field(new U32Value(25), 'age')]),
+        new Struct(structType, [new Field(StringValue.fromUTF8('Bob'), 'name'), new Field(new U32Value(30), 'age')]),
+        new Struct(structType, [new Field(StringValue.fromUTF8('Charlie'), 'name'), new Field(new U32Value(35), 'age')]),
+      ]
+      const result = serializer.typedToString(new VariadicValue(new VariadicType(structType), structs))
+      expect(result).toBe(
+        `vector:struct(User):(name:string)Alice,(age:uint32)25${WarpConstants.ArgStructSeparator}(name:string)Bob,(age:uint32)30${WarpConstants.ArgStructSeparator}(name:string)Charlie,(age:uint32)35`
+      )
     })
   })
 
@@ -455,6 +472,30 @@ describe('WarpMultiversxSerializer', () => {
       const result = serializer.stringToTyped('struct(Empty):') as Struct
       expect(result).toBeInstanceOf(Struct)
       expect(result.getFields()).toHaveLength(0)
+    })
+
+    it('converts vector of structs string to VariadicValue of Structs', () => {
+      const result = serializer.stringToTyped(
+        `vector:struct(User):(name:string)Alice,(age:uint32)25${WarpConstants.ArgStructSeparator}(name:string)Bob,(age:uint32)30${WarpConstants.ArgStructSeparator}(name:string)Charlie,(age:uint32)35`
+      ) as VariadicValue
+      expect(result).toBeInstanceOf(VariadicValue)
+      const structs = result.getItems()
+      expect(structs).toHaveLength(3)
+
+      const firstStruct = structs[0] as Struct
+      expect(firstStruct).toBeInstanceOf(Struct)
+      expect(firstStruct.getFieldValue('name').valueOf()).toBe('Alice')
+      expect((firstStruct.getFieldValue('age') as U32Value).toString()).toBe('25')
+
+      const secondStruct = structs[1] as Struct
+      expect(secondStruct).toBeInstanceOf(Struct)
+      expect(secondStruct.getFieldValue('name').valueOf()).toBe('Bob')
+      expect((secondStruct.getFieldValue('age') as U32Value).toString()).toBe('30')
+
+      const thirdStruct = structs[2] as Struct
+      expect(thirdStruct).toBeInstanceOf(Struct)
+      expect(thirdStruct.getFieldValue('name').valueOf()).toBe('Charlie')
+      expect((thirdStruct.getFieldValue('age') as U32Value).toString()).toBe('35')
     })
 
     it('throws error for unsupported type', () => {

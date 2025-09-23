@@ -48,6 +48,7 @@ export const WarpConstants = {
   ArgParamsSeparator: ':',
   ArgCompositeSeparator: '|',
   ArgListSeparator: ',',
+  ArgStructSeparator: ';',
 
   Transform: {
     Prefix: 'transform:',

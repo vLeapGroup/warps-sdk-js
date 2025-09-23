@@ -38,20 +38,18 @@ export class WarpSerializer {
       if (value.length === 0) return `${type}${WarpConstants.ArgParamsSeparator}`
       if (value.every((v) => typeof v === 'string' && v.includes(WarpConstants.ArgParamsSeparator))) {
         const firstValue = value[0] as string
-        const baseType = firstValue.split(WarpConstants.ArgParamsSeparator)[0]
+        const colonIndex = firstValue.indexOf(WarpConstants.ArgParamsSeparator)
+        const baseType = firstValue.substring(0, colonIndex)
         const values = value.map((v) => {
-          const val = (v as string).split(WarpConstants.ArgParamsSeparator)[1]
-          return baseType.startsWith(WarpInputTypes.Tuple) || baseType.startsWith(WarpInputTypes.Struct)
+          const colonIndex = (v as string).indexOf(WarpConstants.ArgParamsSeparator)
+          const val = (v as string).substring(colonIndex + 1)
+          return baseType.startsWith(WarpInputTypes.Tuple)
             ? val.replace(WarpConstants.ArgListSeparator, WarpConstants.ArgCompositeSeparator)
             : val
         })
-        return (
-          type +
-          WarpConstants.ArgParamsSeparator +
-          baseType +
-          WarpConstants.ArgParamsSeparator +
-          values.join(WarpConstants.ArgListSeparator)
-        )
+        // Use struct separator for structs, comma for other types
+        const separator = baseType.startsWith(WarpInputTypes.Struct) ? WarpConstants.ArgStructSeparator : WarpConstants.ArgListSeparator
+        return type + WarpConstants.ArgParamsSeparator + baseType + WarpConstants.ArgParamsSeparator + values.join(separator)
       }
       return type + WarpConstants.ArgParamsSeparator + value.join(WarpConstants.ArgListSeparator)
     }
@@ -103,10 +101,12 @@ export class WarpSerializer {
       return [WarpInputTypes.Option + WarpConstants.ArgParamsSeparator + baseType, baseValue || null]
     }
     if (baseType === WarpInputTypes.Vector) {
-      const vectorParts = (val as string).split(WarpConstants.ArgParamsSeparator) as [WarpActionInputType, WarpNativeValue]
-      const elementType = vectorParts.slice(0, -1).join(WarpConstants.ArgParamsSeparator)
-      const valuesRaw = vectorParts[vectorParts.length - 1]
-      const valuesStrings = valuesRaw ? (valuesRaw as string).split(',') : []
+      const colonIndex = (val as string).indexOf(WarpConstants.ArgParamsSeparator)
+      const elementType = (val as string).substring(0, colonIndex)
+      const valuesRaw = (val as string).substring(colonIndex + 1)
+      // Use struct separator for structs, comma for other types
+      const separator = elementType.startsWith(WarpInputTypes.Struct) ? WarpConstants.ArgStructSeparator : WarpConstants.ArgListSeparator
+      const valuesStrings = valuesRaw ? (valuesRaw as string).split(separator) : []
       const values = valuesStrings.map((v) => this.stringToNative(elementType + WarpConstants.ArgParamsSeparator + v)[1])
       return [WarpInputTypes.Vector + WarpConstants.ArgParamsSeparator + elementType, values]
     } else if (baseType.startsWith(WarpInputTypes.Tuple)) {

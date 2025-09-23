@@ -74,16 +74,17 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
     }
     if (type.hasExactClass(VariadicType.ClassName) || value.hasClassOrSuperclass(VariadicValue.ClassName)) {
       const items = (value as VariadicValue).getItems()
-      const types = items.map((item) => this.typedToString(item).split(WarpConstants.ArgParamsSeparator)[0]) as BaseWarpActionInputType[]
-      const type = types[0] as BaseWarpActionInputType
-      const values = items.map((item) => this.typedToString(item).split(WarpConstants.ArgParamsSeparator)[1]) as WarpNativeValue[]
-      return (
-        WarpInputTypes.Vector +
-        WarpConstants.ArgParamsSeparator +
-        type +
-        WarpConstants.ArgParamsSeparator +
-        values.join(WarpConstants.ArgListSeparator)
-      )
+      const firstItemString = this.typedToString(items[0])
+      const colonIndex = firstItemString.indexOf(WarpConstants.ArgParamsSeparator)
+      const baseType = firstItemString.substring(0, colonIndex)
+      const values = items.map((item) => {
+        const itemString = this.typedToString(item)
+        const colonIndex = itemString.indexOf(WarpConstants.ArgParamsSeparator)
+        return itemString.substring(colonIndex + 1)
+      })
+      // Use struct separator for structs, comma for other types
+      const separator = baseType.startsWith(WarpInputTypes.Struct) ? WarpConstants.ArgStructSeparator : WarpConstants.ArgListSeparator
+      return WarpInputTypes.Vector + WarpConstants.ArgParamsSeparator + baseType + WarpConstants.ArgParamsSeparator + values.join(separator)
     }
     if (type.hasExactClass(OptionalType.ClassName) || value.hasClassOrSuperclass(OptionalValue.ClassName)) {
       if (!(value as OptionalValue).isSet()) return WarpMultiversxInputTypes.Optional + WarpConstants.ArgParamsSeparator + 'null'
@@ -217,8 +218,12 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
       return baseValue instanceof NothingValue ? OptionValue.newMissingTyped(baseValue.getType()) : OptionValue.newProvided(baseValue)
     }
     if (type === WarpInputTypes.Vector) {
-      const [baseType, listValues] = val.split(SplitParamsRegex, 2) as [BaseWarpActionInputType, string]
-      const values = listValues.split(WarpConstants.ArgListSeparator)
+      const colonIndex = val.indexOf(WarpConstants.ArgParamsSeparator)
+      const baseType = val.substring(0, colonIndex)
+      const listValues = val.substring(colonIndex + 1)
+      // Use struct separator for structs, comma for other types
+      const separator = baseType.startsWith(WarpInputTypes.Struct) ? WarpConstants.ArgStructSeparator : WarpConstants.ArgListSeparator
+      const values = listValues.split(separator)
       const typedValues = values.map((v) => this.stringToTyped(`${baseType}:${v}`))
       return new VariadicValue(new VariadicType(this.nativeToType(baseType)), typedValues)
     }
