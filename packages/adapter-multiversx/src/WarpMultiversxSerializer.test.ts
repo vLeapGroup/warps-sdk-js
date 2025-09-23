@@ -103,7 +103,7 @@ describe('WarpMultiversxSerializer', () => {
           new U64Value('12345678901234567890'),
         ])
       )
-      expect(result).toBe('tuple(string|uint64):abc|12345678901234567890')
+      expect(result).toBe('tuple(string,abc,uint64,12345678901234567890)')
     })
 
     it('converts BigUIntValue to biguint', () => {
@@ -173,7 +173,7 @@ describe('WarpMultiversxSerializer', () => {
       const result = serializer.typedToString(
         new CompositeValue(new CompositeType(new StringType(), new U64Type()), [StringValue.fromUTF8('abc'), new U64Value(123)])
       )
-      expect(result).toBe('tuple(string|uint64):abc|123')
+      expect(result).toBe('tuple(string,abc,uint64,123)')
     })
 
     it('converts nested List of CompositeValue', () => {
@@ -184,7 +184,7 @@ describe('WarpMultiversxSerializer', () => {
           new CompositeValue(new CompositeType(new StringType(), new U64Type()), [StringValue.fromUTF8('ghi'), new U64Value(789)]),
         ])
       )
-      expect(result).toBe('list:tuple(string|uint64):abc|123,def|456,ghi|789')
+      expect(result).toBe('list:tuple(string,abc,uint64,123),tuple(string,def,uint64,456),tuple(string,ghi,uint64,789)')
     })
 
     it('converts nested VariadicValue of CompositeValue', () => {
@@ -195,7 +195,7 @@ describe('WarpMultiversxSerializer', () => {
           new CompositeValue(new CompositeType(new StringType(), new U64Type()), [StringValue.fromUTF8('ghi'), new U64Value(789)]),
         ])
       )
-      expect(result).toBe('vector:tuple(string|uint64):abc|123,def|456,ghi|789')
+      expect(result).toBe('vector:tuple(string,abc,uint64,123),tuple(string,def,uint64,456),tuple(string,ghi,uint64,789)')
     })
 
     it('converts Struct to struct string', () => {
@@ -276,7 +276,7 @@ describe('WarpMultiversxSerializer', () => {
     })
 
     it('converts tuple to CompositeValue', () => {
-      const result = serializer.nativeToTyped('tuple(string|uint64|uint8)', 'hello|12345678901234567890|255')
+      const result = serializer.nativeToTyped('tuple(string,hello,uint64,12345678901234567890,uint8,255)', '')
       const actual = result as CompositeValue
       expect(actual).toBeInstanceOf(CompositeValue)
       expect(actual.getItems()[0]).toBeInstanceOf(StringValue)
@@ -473,7 +473,9 @@ describe('WarpMultiversxSerializer', () => {
     })
 
     it('converts nested vector of tuple', () => {
-      const result = serializer.stringToTyped('vector:tuple(string|uint64):abc|123,def|456,ghi|789') as VariadicValue
+      const result = serializer.stringToTyped(
+        'vector:tuple(string,abc,uint64,123),tuple(string,def,uint64,456),tuple(string,ghi,uint64,789)'
+      ) as VariadicValue
       expect(result).toBeInstanceOf(VariadicValue)
       const values = result.getItems()
 

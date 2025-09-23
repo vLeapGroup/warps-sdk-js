@@ -78,13 +78,21 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
         const baseType = this.typeToString(type.getFirstTypeParameter())
         return WarpInputTypes.Vector + WarpConstants.ArgParamsSeparator + baseType + WarpConstants.ArgParamsSeparator
       }
-      const firstItemString = this.typedToString(items[0])
+
+      const itemStrings = items.map((item) => this.typedToString(item))
+
+      // Check if all items are tuples
+      if (itemStrings.every((str) => str.startsWith(WarpInputTypes.Tuple))) {
+        return WarpInputTypes.Vector + WarpConstants.ArgParamsSeparator + itemStrings.join(',')
+      }
+
+      // For non-tuple items, use the original logic
+      const firstItemString = itemStrings[0]
       const colonIndex = firstItemString.indexOf(WarpConstants.ArgParamsSeparator)
       const baseType = firstItemString.substring(0, colonIndex)
-      const values = items.map((item) => {
-        const itemString = this.typedToString(item)
-        const colonIndex = itemString.indexOf(WarpConstants.ArgParamsSeparator)
-        return itemString.substring(colonIndex + 1)
+      const values = itemStrings.map((str) => {
+        const colonIndex = str.indexOf(WarpConstants.ArgParamsSeparator)
+        return str.substring(colonIndex + 1)
       })
       // Use struct separator for structs, comma for other types
       const separator = baseType.startsWith(WarpInputTypes.Struct) ? WarpConstants.ArgStructSeparator : WarpConstants.ArgListSeparator
@@ -97,24 +105,35 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
     }
     if (type.hasExactClass(ListType.ClassName) || value.hasClassOrSuperclass(List.ClassName)) {
       const items = (value as List).getItems()
-      const types = items.map((item) => this.typedToString(item).split(WarpConstants.ArgParamsSeparator)[0]) as BaseWarpActionInputType[]
-      const type = types[0] as BaseWarpActionInputType
-      const values = items.map((item) => this.typedToString(item).split(WarpConstants.ArgParamsSeparator)[1]) as WarpNativeValue[]
+      const itemStrings = items.map((item) => this.typedToString(item))
+
+      // Check if all items are tuples
+      if (itemStrings.every((str) => str.startsWith(WarpInputTypes.Tuple))) {
+        return WarpMultiversxInputTypes.List + WarpConstants.ArgParamsSeparator + itemStrings.join(',')
+      }
+
+      // For non-tuple items, use the original logic
+      const types = itemStrings.map((str) => str.split(WarpConstants.ArgParamsSeparator)[0]) as BaseWarpActionInputType[]
+      const baseType = types[0] as BaseWarpActionInputType
+      const values = itemStrings.map((str) => str.split(WarpConstants.ArgParamsSeparator)[1]) as WarpNativeValue[]
       return (
         WarpMultiversxInputTypes.List +
         WarpConstants.ArgParamsSeparator +
-        type +
+        baseType +
         WarpConstants.ArgParamsSeparator +
         values.join(WarpConstants.ArgListSeparator)
       )
     }
     if (type.hasExactClass(CompositeType.ClassName) || value.hasClassOrSuperclass(CompositeValue.ClassName)) {
       const items = (value as CompositeValue).getItems()
-      const types = items.map((item) => this.typedToString(item).split(WarpConstants.ArgParamsSeparator)[0]) as BaseWarpActionInputType[]
-      const values = items.map((item) => this.typedToString(item).split(WarpConstants.ArgParamsSeparator)[1]) as WarpNativeValue[]
-      const rawTypes = types.join(WarpConstants.ArgCompositeSeparator)
-      const rawValues = values.join(WarpConstants.ArgCompositeSeparator)
-      return `${WarpInputTypes.Tuple}(${rawTypes})${WarpConstants.ArgParamsSeparator}${rawValues}`
+      const typeValuePairs = items.map((item) => {
+        const itemString = this.typedToString(item)
+        const colonIndex = itemString.indexOf(WarpConstants.ArgParamsSeparator)
+        const itemType = itemString.substring(0, colonIndex)
+        const itemValue = itemString.substring(colonIndex + 1)
+        return `${itemType},${itemValue}`
+      })
+      return `${WarpInputTypes.Tuple}(${typeValuePairs.join(',')})`
     }
     if (
       type.hasExactClass(BigUIntType.ClassName) ||
@@ -175,16 +194,27 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
   }
 
   nativeToTyped(type: WarpActionInputType, value: WarpNativeValue): TypedValue {
+    // For tuples, the type now contains the values, so we can parse it directly
+    if (type.startsWith(WarpInputTypes.Tuple)) {
+      return this.stringToTyped(type + ':')
+    }
     const stringValue = this.coreSerializer.nativeToString(type, value)
     return this.stringToTyped(stringValue)
   }
 
   nativeToType(type: BaseWarpActionInputType): WarpAdapterGenericType {
     if (type.startsWith(WarpInputTypes.Tuple)) {
-      const rawTypes = type.match(/\(([^)]+)\)/)?.[1] as BaseWarpActionInputType
-      return new CompositeType(
-        ...rawTypes.split(WarpConstants.ArgCompositeSeparator).map((t) => this.nativeToType(t as BaseWarpActionInputType))
-      )
+      const content = type.match(/\(([^)]+)\)/)?.[1]
+      if (!content) {
+        throw new Error(`Invalid tuple type format: ${type}`)
+      }
+      // Extract only the type names (every other element starting from 0)
+      const typeValuePairs = content.split(',')
+      const typeNames = []
+      for (let i = 0; i < typeValuePairs.length; i += 2) {
+        typeNames.push(typeValuePairs[i])
+      }
+      return new CompositeType(...typeNames.map((t) => this.nativeToType(t as BaseWarpActionInputType)))
     }
     if (type.startsWith(WarpInputTypes.Struct)) {
       const structNameMatch = type.match(/\(([^)]+)\)/)
@@ -225,6 +255,26 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
       const colonIndex = val.indexOf(WarpConstants.ArgParamsSeparator)
       const baseType = val.substring(0, colonIndex)
       const listValues = val.substring(colonIndex + 1)
+
+      // Handle tuples specially - they don't need the baseType prefix
+      if (baseType.startsWith(WarpInputTypes.Tuple)) {
+        const values = listValues.split(',')
+        const typedValues = values.map((v) => this.stringToTyped(v))
+        return new VariadicValue(new VariadicType(this.nativeToType(baseType)), typedValues)
+      }
+
+      // Handle lists of tuples - the entire listValues is the tuple strings
+      if (listValues.includes('tuple(')) {
+        // Split by comma, but be careful not to split within tuple parentheses
+        const values = this.splitTupleStrings(listValues)
+        const typedValues = values.map((v) => this.stringToTyped(v))
+        // Extract just the tuple type from the first tuple string
+        const firstTuple = values[0]
+        const tupleTypeMatch = firstTuple.match(/^(tuple\([^)]+\))/)
+        const tupleType = tupleTypeMatch ? tupleTypeMatch[1] : 'tuple'
+        return new VariadicValue(new VariadicType(this.nativeToType(tupleType)), typedValues)
+      }
+
       // Use struct separator for structs, comma for other types
       const separator = baseType.startsWith(WarpInputTypes.Struct) ? WarpConstants.ArgStructSeparator : WarpConstants.ArgListSeparator
       const values = listValues.split(separator)
@@ -232,10 +282,18 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
       return new VariadicValue(new VariadicType(this.nativeToType(baseType)), typedValues)
     }
     if (type.startsWith(WarpInputTypes.Tuple)) {
-      const baseType = type.match(/\(([^)]+)\)/)?.[1] as BaseWarpActionInputType
-      const rawValues = (val as string).split(WarpConstants.ArgCompositeSeparator)
-      const rawTypes = baseType.split(WarpConstants.ArgCompositeSeparator) as BaseWarpActionInputType[]
-      const values = rawValues.map((val, i) => this.stringToTyped(rawTypes[i] + WarpConstants.ArgParamsSeparator + val))
+      // Extract the content inside the parentheses
+      const content = type.match(/\(([^)]+)\)/)?.[1]
+      if (!content) {
+        throw new Error(`Invalid tuple format: ${type}`)
+      }
+      const typeValuePairs = content.split(',')
+      const values = []
+      for (let i = 0; i < typeValuePairs.length; i += 2) {
+        const itemType = typeValuePairs[i]
+        const itemValue = typeValuePairs[i + 1]
+        values.push(this.stringToTyped(`${itemType}:${itemValue}`))
+      }
       const types = values.map((v) => v.getType())
       return new CompositeValue(new CompositeType(...types), values)
     }
@@ -299,6 +357,32 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
       return new CodeMetadataValue(CodeMetadata.newFromBytes(Uint8Array.from(Buffer.from(val as string, 'hex'))))
 
     throw new Error(`WarpArgSerializer (stringToTyped): Unsupported input type: ${type}`)
+  }
+
+  private splitTupleStrings(str: string): string[] {
+    const result = []
+    let current = ''
+    let parenCount = 0
+
+    for (let i = 0; i < str.length; i++) {
+      const char = str[i]
+      if (char === '(') {
+        parenCount++
+      } else if (char === ')') {
+        parenCount--
+      } else if (char === ',' && parenCount === 0) {
+        result.push(current.trim())
+        current = ''
+        continue
+      }
+      current += char
+    }
+
+    if (current.trim()) {
+      result.push(current.trim())
+    }
+
+    return result
   }
 
   typeToString(type: Type): WarpActionInputType {
