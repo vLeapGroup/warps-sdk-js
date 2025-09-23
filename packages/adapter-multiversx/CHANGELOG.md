@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.63
+
+### Patch Changes
+
+- 53ac884: update complex type serialization
+- Updated dependencies [53ac884]
+  - @vleap/warps@3.0.0-alpha.115
+
 ## 0.2.0-alpha.62
 
 ### Minor Changes

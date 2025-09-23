@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.115
+
+### Patch Changes
+
+- 53ac884: update complex type serialization
+
 ## 3.0.0-alpha.114
 
 ### Minor Changes
