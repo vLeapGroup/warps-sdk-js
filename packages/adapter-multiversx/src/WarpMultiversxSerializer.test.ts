@@ -2,6 +2,7 @@ import {
   Address,
   AddressValue,
   BigUIntValue,
+  BooleanType,
   BooleanValue,
   BytesValue,
   CodeMetadata,
@@ -65,6 +66,34 @@ describe('WarpMultiversxSerializer', () => {
         new VariadicValue(new VariadicType(new StringType()), [StringValue.fromUTF8('abc'), StringValue.fromUTF8('def')])
       )
       expect(result).toBe('vector:string:abc,def')
+    })
+
+    it('converts empty VariadicValue', () => {
+      const result = serializer.typedToString(new VariadicValue(new VariadicType(new StringType()), []))
+      expect(result).toBe('vector:string:')
+    })
+
+    it('converts empty VariadicValue with different types', () => {
+      const stringResult = serializer.typedToString(new VariadicValue(new VariadicType(new StringType()), []))
+      expect(stringResult).toBe('vector:string:')
+
+      const uint64Result = serializer.typedToString(new VariadicValue(new VariadicType(new U64Type()), []))
+      expect(uint64Result).toBe('vector:uint64:')
+
+      const boolResult = serializer.typedToString(new VariadicValue(new VariadicType(new BooleanType()), []))
+      expect(boolResult).toBe('vector:bool:')
+    })
+
+    it('converts empty VariadicValue of complex structs', () => {
+      // Create a complex struct type
+      const structType = new StructType('ComplexStruct', [
+        new FieldDefinition('name', '', new StringType()),
+        new FieldDefinition('age', '', new U64Type()),
+        new FieldDefinition('active', '', new BooleanType()),
+      ])
+
+      const result = serializer.typedToString(new VariadicValue(new VariadicType(structType), []))
+      expect(result).toBe('vector:struct(ComplexStruct):')
     })
 
     it('converts CompositeValue', () => {

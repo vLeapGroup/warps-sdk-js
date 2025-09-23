@@ -74,6 +74,10 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
     }
     if (type.hasExactClass(VariadicType.ClassName) || value.hasClassOrSuperclass(VariadicValue.ClassName)) {
       const items = (value as VariadicValue).getItems()
+      if (items.length === 0) {
+        const baseType = this.typeToString(type.getFirstTypeParameter())
+        return WarpInputTypes.Vector + WarpConstants.ArgParamsSeparator + baseType + WarpConstants.ArgParamsSeparator
+      }
       const firstItemString = this.typedToString(items[0])
       const colonIndex = firstItemString.indexOf(WarpConstants.ArgParamsSeparator)
       const baseType = firstItemString.substring(0, colonIndex)
