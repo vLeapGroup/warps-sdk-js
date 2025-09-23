@@ -172,11 +172,11 @@ export class WarpMultiversxSerializer implements AdapterWarpSerializer {
       const fields = struct.getFields()
       if (fields.length === 0) return `${WarpInputTypes.Struct}(${structName})${WarpConstants.ArgParamsSeparator}`
       const fieldStrings = fields.map((field) => {
-        const fieldName = field.name
-        const fieldValue = field.value
-        const fieldType = fieldValue.getType()
-        const fieldValueStr = this.typedToString(fieldValue).split(WarpConstants.ArgParamsSeparator)[1]
-        return `(${fieldName}${WarpConstants.ArgParamsSeparator}${this.typeToString(fieldType)})${fieldValueStr}`
+        const fieldType = field.value.getType()
+        const fieldValueStr = this.typedToString(field.value)
+        const parts = fieldValueStr.split(WarpConstants.ArgParamsSeparator)
+        const valuePart = parts.length > 2 ? parts.slice(2).join(WarpConstants.ArgParamsSeparator) : parts[1] || ''
+        return `(${field.name}${WarpConstants.ArgParamsSeparator}${this.typeToString(fieldType)})${valuePart}`
       })
       return `${WarpInputTypes.Struct}(${structName})${WarpConstants.ArgParamsSeparator}${fieldStrings.join(WarpConstants.ArgListSeparator)}`
     }

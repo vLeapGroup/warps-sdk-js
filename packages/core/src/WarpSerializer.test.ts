@@ -163,6 +163,11 @@ describe('WarpSerializer', () => {
         `vector:struct(User):(name:string)Alice,(age:uint32)25${WarpConstants.ArgStructSeparator}(name:string)Bob,(age:uint32)30${WarpConstants.ArgStructSeparator}(name:string)Charlie,(age:uint32)35`
       )
     })
+
+    it('serializes empty vector returns proper format', () => {
+      const result = serializer.nativeToString('vector', [])
+      expect(result).toBe('vector:')
+    })
   })
 
   describe('stringToNative', () => {
@@ -208,6 +213,13 @@ describe('WarpSerializer', () => {
     it('deserializes vector of empty values', () => {
       const result = serializer.stringToNative('vector:string:')
       expect(result[0]).toBe('vector:string')
+      expect(result[1]).toEqual([])
+    })
+
+    it('deserializes empty vector returns array not undefined', () => {
+      const result = serializer.stringToNative('vector:string:')
+      expect(result[0]).toBe('vector:string')
+      expect(Array.isArray(result[1])).toBe(true)
       expect(result[1]).toEqual([])
     })
 

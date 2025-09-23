@@ -1,5 +1,6 @@
 import {
   Address,
+  AddressType,
   AddressValue,
   BigUIntValue,
   BooleanType,
@@ -200,11 +201,36 @@ describe('WarpMultiversxSerializer', () => {
 
     it('converts Struct to struct string', () => {
       const struct = new Struct(
-        new StructType('User', [new FieldDefinition('name', '', new StringType()), new FieldDefinition('age', '', new U32Type())]),
+        new StructType('User', [
+          new FieldDefinition('name', '', new StringType()),
+          new FieldDefinition('age', '', new U32Type()),
+          new FieldDefinition('contracts', '', new ListType(new AddressType())),
+        ]),
+        [
+          new Field(StringValue.fromUTF8('Alice'), 'name'),
+          new Field(new U32Value(25), 'age'),
+          new Field(
+            new List(new ListType(new AddressType()), [
+              new AddressValue(Address.newFromBech32('erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8')),
+              new AddressValue(Address.newFromBech32('erd1gqdq5q5g99xjhqfz7as9gzkswv5c28cu90smx9qprs98ps84gn6s5asty7')),
+            ]),
+            'contracts'
+          ),
+        ]
+      )
+      const result = serializer.typedToString(struct)
+      expect(result).toBe(
+        'struct(User):(name:string)Alice,(age:uint32)25,(contracts:list:address)erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8,erd1gqdq5q5g99xjhqfz7as9gzkswv5c28cu90smx9qprs98ps84gn6s5asty7'
+      )
+    })
+
+    it('converts simple Struct to struct string', () => {
+      const struct = new Struct(
+        new StructType('SimpleUser', [new FieldDefinition('name', '', new StringType()), new FieldDefinition('age', '', new U32Type())]),
         [new Field(StringValue.fromUTF8('Alice'), 'name'), new Field(new U32Value(25), 'age')]
       )
       const result = serializer.typedToString(struct)
-      expect(result).toBe('struct(User):(name:string)Alice,(age:uint32)25')
+      expect(result).toBe('struct(SimpleUser):(name:string)Alice,(age:uint32)25')
     })
 
     it('converts empty Struct to struct string', () => {
