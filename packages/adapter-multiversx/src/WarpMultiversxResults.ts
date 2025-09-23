@@ -40,7 +40,7 @@ export class WarpMultiversxResults implements AdapterWarpResults {
     private readonly typeRegistry: AdapterTypeRegistry
   ) {
     this.abi = new WarpMultiversxAbiBuilder(config, chain)
-    this.serializer = new WarpMultiversxSerializer(this.typeRegistry)
+    this.serializer = new WarpMultiversxSerializer({ typeRegistry: this.typeRegistry })
     this.cache = new WarpCache(config.cache?.type)
   }
 

@@ -54,7 +54,7 @@ describe('WarpSerializer', () => {
         getAlias: () => undefined,
         resolveType: (type: string) => type,
       }
-      const serializerWithRegistry = new WarpSerializer(mockTypeRegistry as any)
+      const serializerWithRegistry = new WarpSerializer({ typeRegistry: mockTypeRegistry as any })
       expect(serializerWithRegistry.nativeToString('token', 'TOKEN-123456')).toBe('token:TOKEN-123456')
     })
 
@@ -94,7 +94,7 @@ describe('WarpSerializer', () => {
         getAlias: () => undefined,
         resolveType: (type: string) => type,
       }
-      const serializerWithRegistry = new WarpSerializer(mockTypeRegistry as any)
+      const serializerWithRegistry = new WarpSerializer({ typeRegistry: mockTypeRegistry as any })
       expect(serializerWithRegistry.nativeToString('list', ['string:hello', 'string:world'])).toBe('vector:string:hello,world')
     })
 
@@ -109,7 +109,7 @@ describe('WarpSerializer', () => {
         registerTypeAlias: () => {},
         getRegisteredTypes: () => ['list'],
       }
-      const serializerWithRegistry = new WarpSerializer(mockTypeRegistry as any)
+      const serializerWithRegistry = new WarpSerializer({ typeRegistry: mockTypeRegistry as any })
       // Should use core vector serialization
       expect(serializerWithRegistry.nativeToString('list', ['hello', 'world'])).toBe('vector:hello,world')
     })
@@ -287,7 +287,7 @@ describe('WarpSerializer', () => {
         getAlias: () => undefined,
         resolveType: (type: string) => type,
       }
-      const serializerWithRegistry = new WarpSerializer(mockTypeRegistry as any)
+      const serializerWithRegistry = new WarpSerializer({ typeRegistry: mockTypeRegistry as any })
       expect(serializerWithRegistry.stringToNative('token:TOKEN-123456')).toEqual(['token', 'TOKEN-123456'])
     })
 
@@ -327,7 +327,7 @@ describe('WarpSerializer', () => {
         getAlias: () => undefined,
         resolveType: (type: string) => type,
       }
-      const serializerWithRegistry = new WarpSerializer(mockTypeRegistry as any)
+      const serializerWithRegistry = new WarpSerializer({ typeRegistry: mockTypeRegistry as any })
       expect(serializerWithRegistry.stringToNative('list:string:hello,world')).toEqual(['list', ['string:hello', 'string:world']])
     })
 
@@ -342,7 +342,7 @@ describe('WarpSerializer', () => {
         registerTypeAlias: () => {},
         getRegisteredTypes: () => ['list'],
       }
-      const serializerWithRegistry = new WarpSerializer(mockTypeRegistry as any)
+      const serializerWithRegistry = new WarpSerializer({ typeRegistry: mockTypeRegistry as any })
       // Should use core vector deserialization
       expect(serializerWithRegistry.stringToNative('list:string:hello,world')).toEqual(['list', ['hello', 'world']])
     })

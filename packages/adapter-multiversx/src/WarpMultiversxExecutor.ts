@@ -42,7 +42,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
     private readonly chain: WarpChainInfo,
     private readonly typeRegistry: AdapterTypeRegistry
   ) {
-    this.serializer = new WarpMultiversxSerializer(this.typeRegistry)
+    this.serializer = new WarpMultiversxSerializer({ typeRegistry: this.typeRegistry })
     this.abi = new WarpMultiversxAbiBuilder(this.config, this.chain)
     this.results = new WarpMultiversxResults(this.config, this.chain, this.typeRegistry)
   }

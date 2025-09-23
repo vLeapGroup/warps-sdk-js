@@ -9,7 +9,11 @@ import {
 } from './types'
 
 export class WarpSerializer {
-  constructor(private readonly typeRegistry?: AdapterTypeRegistry) {}
+  private readonly typeRegistry?: AdapterTypeRegistry
+
+  constructor(options?: { typeRegistry?: AdapterTypeRegistry }) {
+    this.typeRegistry = options?.typeRegistry
+  }
 
   nativeToString(type: WarpActionInputType, value: WarpNativeValue): string {
     if (type === WarpInputTypes.Tuple && Array.isArray(value)) {

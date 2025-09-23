@@ -36,7 +36,7 @@ export const createMultiversxAdapter = (
       builder: () => new WarpMultiversxBuilder(config, chainInfo),
       executor: new WarpMultiversxExecutor(config, chainInfo, typeRegistry),
       results: new WarpMultiversxResults(config, chainInfo, typeRegistry),
-      serializer: new WarpMultiversxSerializer(typeRegistry),
+      serializer: new WarpMultiversxSerializer({ typeRegistry }),
       registry: new WarpMultiversxRegistry(config, chainInfo),
       explorer: new WarpMultiversxExplorer(chainName, config),
       abiBuilder: () => new WarpMultiversxAbiBuilder(config, chainInfo),

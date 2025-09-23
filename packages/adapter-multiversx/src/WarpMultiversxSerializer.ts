@@ -61,8 +61,8 @@ const SplitParamsRegex = new RegExp(`${WarpConstants.ArgParamsSeparator}(.*)`)
 export class WarpMultiversxSerializer implements AdapterWarpSerializer {
   public readonly coreSerializer: WarpSerializer
 
-  constructor(typeRegistry: AdapterTypeRegistry) {
-    this.coreSerializer = new WarpSerializer(typeRegistry)
+  constructor(options?: { typeRegistry?: AdapterTypeRegistry }) {
+    this.coreSerializer = new WarpSerializer(options)
   }
 
   typedToString(value: TypedValue): string {
