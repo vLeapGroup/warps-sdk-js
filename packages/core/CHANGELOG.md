@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.114
+
+### Minor Changes
+
+- 0d22c03: update codec
+
 ## 3.0.0-alpha.113
 
 ### Patch Changes
