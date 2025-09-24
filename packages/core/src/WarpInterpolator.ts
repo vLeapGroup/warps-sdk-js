@@ -39,7 +39,8 @@ export class WarpInterpolator {
       if (typeof value !== 'string') {
         modify(placeholder, value)
       } else if (value.startsWith(WarpConstants.Vars.Query + WarpConstants.ArgParamsSeparator)) {
-        const queryName = value.split(WarpConstants.Vars.Query + WarpConstants.ArgParamsSeparator)[1]
+        const queryVar = value.slice(WarpConstants.Vars.Query.length + 1)
+        const [queryName, _queryDescription] = queryVar.split(WarpConstants.ArgCompositeSeparator)
         const queryValueInUrl = config.currentUrl ? new URLSearchParams(config.currentUrl.split('?')[1]).get(queryName) : null
         const queryValueInMeta = meta.queries?.[queryName] || null
         const queryValue = queryValueInMeta || queryValueInUrl

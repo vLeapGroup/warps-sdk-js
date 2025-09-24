@@ -420,6 +420,34 @@ describe('WarpInterpolator', () => {
       const result = await interpolator.apply(testConfig, warp, meta)
       expect((result.actions[0] as WarpTransferAction).value).toBe('{{TOKEN_ADDRESS}}')
     })
+
+    it('interpolates query vars with descriptions from meta.queries', async () => {
+      const warp = {
+        ...createMockWarp(),
+        vars: {
+          TOKEN_ADDRESS: 'query:token|The contract address of the token to deposit.',
+        },
+        actions: [
+          {
+            type: 'transfer' as const,
+            label: 'Transfer',
+            address: 'erd1abc',
+            value: '{{TOKEN_ADDRESS}}',
+            inputs: [],
+          } as WarpTransferAction,
+        ],
+      }
+
+      const meta = {
+        queries: {
+          token: '0x1234567890abcdef',
+        },
+      }
+
+      const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+      const result = await interpolator.apply(testConfig, warp, meta)
+      expect((result.actions[0] as WarpTransferAction).value).toBe('0x1234567890abcdef')
+    })
   })
 })
 
