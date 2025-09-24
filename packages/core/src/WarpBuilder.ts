@@ -1,10 +1,11 @@
 import { getLatestProtocolIdentifier, toPreviewText } from './helpers'
-import { BaseWarpBuilder, Warp, WarpAction, WarpClientConfig } from './types'
+import { BaseWarpBuilder, Warp, WarpAction, WarpChain, WarpClientConfig } from './types'
 import { WarpValidator } from './WarpValidator'
 
 export class WarpBuilder implements BaseWarpBuilder {
   private pendingWarp: Warp = {
     protocol: getLatestProtocolIdentifier('warp'),
+    chain: '',
     name: '',
     title: '',
     description: null,
@@ -28,6 +29,11 @@ export class WarpBuilder implements BaseWarpBuilder {
     const response = await fetch(url)
     const encoded = await response.json()
     return encoded as Warp
+  }
+
+  setChain(chain: WarpChain): WarpBuilder {
+    this.pendingWarp.chain = chain
+    return this
   }
 
   setName(name: string): WarpBuilder {

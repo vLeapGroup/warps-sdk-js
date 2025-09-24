@@ -10,8 +10,8 @@ import {
   AdapterWarpResults,
   applyResultsToMessages,
   evaluateResultsCommon,
-  findWarpExecutableAction,
   getNextInfo,
+  getWarpActionByIndex,
   getWarpWalletAddressFromConfig,
   parseResultsOutIndex,
   ResolvedInput,
@@ -44,13 +44,11 @@ export class WarpMultiversxResults implements AdapterWarpResults {
     this.cache = new WarpCache(config.cache?.type)
   }
 
-  async getTransactionExecutionResults(warp: Warp, tx: TransactionOnNetwork): Promise<WarpExecution> {
-    const { actionIndex } = findWarpExecutableAction(warp)
-
+  async getTransactionExecutionResults(warp: Warp, actionIndex: WarpActionIndex, tx: TransactionOnNetwork): Promise<WarpExecution> {
     // Restore inputs via cache as transactions are broadcasted and processed asynchronously
     const inputs: ResolvedInput[] = this.cache.get(WarpCacheKey.WarpExecutable(this.config.env, warp.meta?.hash || '', actionIndex)) ?? []
 
-    const results = await this.extractContractResults(warp, tx, inputs)
+    const results = await this.extractContractResults(warp, actionIndex, tx, inputs)
     const next = getNextInfo(this.config, [], warp, actionIndex, results)
     const messages = applyResultsToMessages(warp, results.results)
 
@@ -70,10 +68,11 @@ export class WarpMultiversxResults implements AdapterWarpResults {
 
   async extractContractResults(
     warp: Warp,
+    actionIndex: WarpActionIndex,
     tx: TransactionOnNetwork,
     inputs: ResolvedInput[]
   ): Promise<{ values: { string: string[]; native: any[] }; results: WarpExecutionResults }> {
-    const { action, actionIndex } = findWarpExecutableAction(warp) as { action: WarpContractAction; actionIndex: WarpActionIndex }
+    const action = getWarpActionByIndex(warp, actionIndex) as WarpContractAction
     let stringValues: string[] = []
     let nativeValues: any[] = []
     let results: WarpExecutionResults = {}

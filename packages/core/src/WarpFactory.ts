@@ -49,7 +49,7 @@ export class WarpFactory {
   ): Promise<WarpExecutable> {
     const action = getWarpActionByIndex(warp, actionIndex) as WarpTransferAction | WarpContractAction | WarpCollectAction
     if (!action) throw new Error('WarpFactory: Action not found')
-    const chain = await this.getChainInfoForAction(action, inputs)
+    const chain = await this.getChainInfoForWarp(warp, inputs)
     const adapter = findWarpAdapterForChain(chain.name, this.adapters)
     const preparedWarp = await new WarpInterpolator(this.config, adapter).apply(this.config, warp, meta)
     const preparedAction = getWarpActionByIndex(preparedWarp, actionIndex) as WarpTransferAction | WarpContractAction | WarpCollectAction
@@ -98,14 +98,14 @@ export class WarpFactory {
     return executable
   }
 
-  async getChainInfoForAction(action: WarpAction, inputs?: string[]): Promise<WarpChainInfo> {
-    if (action.chain) {
-      const adapter = findWarpAdapterForChain(action.chain, this.adapters)
+  async getChainInfoForWarp(warp: Warp, inputs?: string[]): Promise<WarpChainInfo> {
+    if (warp.chain) {
+      const adapter = findWarpAdapterForChain(warp.chain, this.adapters)
       return adapter.chainInfo
     }
 
     if (inputs) {
-      const chainFromInputs = await this.tryGetChainFromInputs(action, inputs)
+      const chainFromInputs = await this.tryGetChainFromInputs(warp, inputs)
       if (chainFromInputs) return chainFromInputs
     }
 
@@ -215,7 +215,9 @@ export class WarpFactory {
     return args
   }
 
-  private async tryGetChainFromInputs(action: WarpAction, inputs: string[]): Promise<WarpChainInfo | null> {
+  private async tryGetChainFromInputs(warp: Warp, inputs: string[]): Promise<WarpChainInfo | null> {
+    const action = warp.actions.find((a) => a.inputs?.some((i) => i.position === 'chain'))
+    if (!action) return null
     const chainPositionIndex = action.inputs?.findIndex((i) => i.position === 'chain')
     if (chainPositionIndex === -1 || chainPositionIndex === undefined) return null
 

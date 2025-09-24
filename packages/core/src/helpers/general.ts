@@ -1,5 +1,5 @@
 import { WarpProtocolVersions } from '../config'
-import { Adapter, ProtocolName, Warp, WarpAction, WarpActionIndex, WarpChain } from '../types'
+import { Adapter, ProtocolName, Warp, WarpAction, WarpChain } from '../types'
 
 export const findWarpAdapterForChain = (chain: WarpChain, adapters: Adapter[]): Adapter => {
   const adapter = adapters.find((a) => a.chainInfo.name.toLowerCase() === chain.toLowerCase())
@@ -22,13 +22,10 @@ export const getLatestProtocolIdentifier = (name: ProtocolName): string => {
 
 export const getWarpActionByIndex = (warp: Warp, index: number) => warp?.actions[index - 1]
 
-export const findWarpExecutableAction = (warp: Warp): { action: WarpAction; actionIndex: WarpActionIndex } => {
-  warp.actions.forEach((action, index) => {
-    if (action.type === 'link') return
-    return { action, actionIndex: index }
-  })
-
-  return { action: getWarpActionByIndex(warp, 1), actionIndex: 1 }
+export const isWarpActionAutoExecute = (action: WarpAction) => {
+  if (action.auto === false) return false // actions can be explicitly set to not auto execute
+  if (action.type === 'link') return false // links should not automatically open, unless explicitly set to auto
+  return true
 }
 
 export const shiftBigintBy = (value: bigint | string | number, decimals: number): bigint => {

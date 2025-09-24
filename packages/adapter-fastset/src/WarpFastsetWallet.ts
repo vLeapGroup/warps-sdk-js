@@ -47,11 +47,19 @@ export class WarpFastsetWallet implements AdapterWarpWallet {
     return uint8ArrayToHex(signature)
   }
 
+  async signTransactions(txs: WarpAdapterGenericTransaction[]): Promise<WarpAdapterGenericTransaction[]> {
+    return Promise.all(txs.map(async (tx) => this.signTransaction(tx)))
+  }
+
   async sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string> {
     const { signature, ...transactionWithoutSignature } = tx
     const _cert = await this.client.submitTransaction(transactionWithoutSignature, signature)
 
     return 'TODO'
+  }
+
+  async sendTransactions(txs: WarpAdapterGenericTransaction[]): Promise<string[]> {
+    return Promise.all(txs.map(async (tx) => this.sendTransaction(tx)))
   }
 
   create(mnemonic: string): WarpWalletDetails {

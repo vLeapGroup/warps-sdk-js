@@ -11,6 +11,7 @@ import {
   BaseWarpActionInputType,
   Warp,
   WarpAction,
+  WarpActionIndex,
   WarpActionInputType,
   WarpChain,
   WarpChainInfo,
@@ -137,7 +138,7 @@ export interface AdapterWarpExecutor {
 }
 
 export interface AdapterWarpResults {
-  getTransactionExecutionResults(warp: Warp, tx: WarpAdapterGenericRemoteTransaction): Promise<WarpExecution>
+  getTransactionExecutionResults(warp: Warp, actionIndex: WarpActionIndex, tx: WarpAdapterGenericRemoteTransaction): Promise<WarpExecution>
 }
 
 export interface AdapterWarpSerializer {
@@ -188,7 +189,9 @@ export interface AdapterWarpDataLoader {
 
 export interface AdapterWarpWallet {
   signTransaction(tx: WarpAdapterGenericTransaction): Promise<WarpAdapterGenericTransaction>
+  signTransactions(txs: WarpAdapterGenericTransaction[]): Promise<WarpAdapterGenericTransaction[]>
   signMessage(message: string): Promise<string>
+  sendTransactions(txs: WarpAdapterGenericTransaction[]): Promise<string[]>
   sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string>
   create(mnemonic: string): WarpWalletDetails
   generate(): WarpWalletDetails

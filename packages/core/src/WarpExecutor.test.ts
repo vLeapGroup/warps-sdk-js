@@ -40,8 +40,12 @@ describe('WarpExecutor', () => {
     it('executes a warp with multiple actions', async () => {
       const result = await executor.execute(warp, [])
       expect(result).toBeDefined()
-      // onExecuted is only called for collect actions or after evaluateResults
-      // For regular actions, it's not called during execute
+      expect(result.chains).toBeDefined()
+      expect(result.immediateExecutions).toBeDefined()
+      expect(result.transactionsByChain).toBeDefined()
+      expect(Array.isArray(result.chains)).toBe(true)
+      expect(Array.isArray(result.immediateExecutions)).toBe(true)
+      expect(result.transactionsByChain instanceof Map).toBe(true)
     })
 
     it('handles execution errors gracefully', async () => {
@@ -497,6 +501,115 @@ describe('WarpExecutor', () => {
           }),
         })
       )
+    })
+  })
+
+  describe('multi-action execution', () => {
+    it('should emit onActionExecuted for each action', async () => {
+      const onActionExecuted = jest.fn()
+      const multiActionHandlers = {
+        onActionExecuted,
+        onError: jest.fn(),
+      }
+      const multiActionExecutor = new WarpExecutor(config, adapters, multiActionHandlers)
+
+      const multiActionWarp = {
+        ...warp,
+        actions: [
+          {
+            type: 'transfer' as const,
+            label: 'Transfer 1',
+            chain: 'multiversx',
+            address: 'erd1receiver1',
+            value: '1000000000000000000',
+            inputs: [],
+          },
+          {
+            type: 'transfer' as const,
+            label: 'Transfer 2',
+            chain: 'multiversx',
+            address: 'erd1receiver2',
+            value: '2000000000000000000',
+            inputs: [],
+          },
+        ],
+      }
+
+      await multiActionExecutor.execute(multiActionWarp, [])
+
+      expect(onActionExecuted).toHaveBeenCalledTimes(2)
+      expect(onActionExecuted).toHaveBeenNthCalledWith(1, {
+        actionIndex: 0,
+        actionType: 'transfer',
+        chain: expect.any(Object),
+        execution: null,
+        tx: expect.any(Object),
+      })
+      expect(onActionExecuted).toHaveBeenNthCalledWith(2, {
+        actionIndex: 1,
+        actionType: 'transfer',
+        chain: expect.any(Object),
+        execution: null,
+        tx: expect.any(Object),
+      })
+    })
+
+    it('should handle mixed action types correctly', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: 'collect data' }),
+      })
+
+      const mixedWarp = {
+        ...warp,
+        actions: [
+          {
+            type: 'collect' as const,
+            label: 'Collect Data',
+            destination: {
+              url: 'https://api.example.com/collect',
+              method: 'POST' as const,
+            },
+            inputs: [],
+          },
+          {
+            type: 'transfer' as const,
+            label: 'Transfer After Collect',
+            chain: 'multiversx',
+            address: 'erd1receiver',
+            value: '1000000000000000000',
+            inputs: [],
+          },
+        ],
+      }
+
+      await executor.execute(mixedWarp, [])
+    })
+
+    it('should handle multiple actions on same chain correctly', async () => {
+      const multiActionWarp = {
+        ...warp,
+        actions: [
+          {
+            type: 'transfer' as const,
+            label: 'Transfer 1',
+            chain: 'multiversx',
+            address: 'erd1receiver1',
+            value: '1000000000000000000',
+            inputs: [],
+          },
+          {
+            type: 'transfer' as const,
+            label: 'Transfer 2',
+            chain: 'multiversx',
+            address: 'erd1receiver2',
+            value: '2000000000000000000',
+            inputs: [],
+          },
+        ],
+      }
+
+      await executor.execute(multiActionWarp, [])
     })
   })
 

@@ -84,7 +84,7 @@ export const createMockAdapter = () => ({
   }),
   executor: {
     createTransaction() {
-      return Promise.resolve({})
+      return Promise.resolve([{}])
     },
     preprocessInput(chain: any, input: string, type: string, value: string) {
       return Promise.resolve(input)

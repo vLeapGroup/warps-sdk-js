@@ -1,4 +1,10 @@
-import { findWarpAdapterByPrefix, findWarpAdapterForChain, getWarpInfoFromIdentifier } from './helpers'
+import {
+  findWarpAdapterByPrefix,
+  findWarpAdapterForChain,
+  getWarpActionByIndex,
+  getWarpInfoFromIdentifier,
+  isWarpActionAutoExecute,
+} from './helpers'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
 
 import {
@@ -14,8 +20,10 @@ import {
   WarpAdapterGenericTransaction,
   WarpCacheConfig,
   WarpChain,
+  WarpChainAction,
   WarpChainInfo,
   WarpClientConfig,
+  WarpExecution,
 } from './types'
 import { ExecutionHandlers, WarpExecutor } from './WarpExecutor'
 import { WarpFactory } from './WarpFactory'
@@ -55,29 +63,39 @@ export class WarpClient {
     warpOrIdentifierOrUrl: string | Warp,
     inputs: string[],
     handlers?: ExecutionHandlers,
-    options: { cache?: WarpCacheConfig } = {}
+    params: { cache?: WarpCacheConfig; queries?: Record<string, any> } = {}
   ): Promise<{
-    tx: WarpAdapterGenericTransaction | null
-    chain: WarpChainInfo | null
-    evaluateResults: (remoteTx: WarpAdapterGenericRemoteTransaction) => Promise<void>
+    txs: WarpAdapterGenericTransaction[]
+    chain: WarpChainInfo
+    immediateExecutions: WarpExecution[]
+    evaluateResults: (remoteTxs: WarpAdapterGenericRemoteTransaction[]) => Promise<void>
   }> {
     const isWarp = typeof warpOrIdentifierOrUrl === 'object'
     const isUrl = !isWarp && warpOrIdentifierOrUrl.startsWith('http') && warpOrIdentifierOrUrl.endsWith('.json')
 
     let warp: Warp | null = isWarp ? warpOrIdentifierOrUrl : null
     if (!warp && isUrl) warp = (await (await fetch(warpOrIdentifierOrUrl)).json()) as Warp
-    if (!warp) warp = (await this.detectWarp(warpOrIdentifierOrUrl as string, options.cache)).warp
+    if (!warp) warp = (await this.detectWarp(warpOrIdentifierOrUrl as string, params.cache)).warp
     if (!warp) throw new Error('Warp not found')
 
     const executor = this.createExecutor(handlers)
-    const { tx, chain } = await executor.execute(warp, inputs)
+    const { txs, chain, immediateExecutions } = await executor.execute(warp, inputs, {
+      queries: params.queries,
+    })
 
-    const evaluateResults = async (remoteTx: WarpAdapterGenericRemoteTransaction): Promise<void> => {
-      if (!chain || !tx || !warp) throw new Error('Warp not found')
-      await executor.evaluateResults(warp, chain.name, remoteTx)
+    const evaluateResults = async (tx: WarpAdapterGenericRemoteTransaction[]): Promise<void> => {
+      if (!warp) throw new Error('Warp not found')
+
+      tx.forEach((t, index) => {
+        const currentActionIndex = index + 1
+        const action = getWarpActionByIndex(warp, currentActionIndex)
+        if (!action || !isWarpActionAutoExecute(action)) return
+        if (action.type !== 'transfer' && action.type !== 'contract') return
+        executor.evaluateResults(warp, currentActionIndex, chain.name, t)
+      })
     }
 
-    return { tx, chain, evaluateResults }
+    return { txs, chain, immediateExecutions, evaluateResults }
   }
 
   createInscriptionTransaction(chain: WarpChain, warp: Warp): WarpAdapterGenericTransaction {
@@ -101,6 +119,12 @@ export class WarpClient {
 
     const adapter = findWarpAdapterForChain(chain, this.adapters)
     return adapter.wallet.signMessage(message)
+  }
+
+  async getActions(chain: WarpChain, ids: string[], awaitCompleted = false): Promise<WarpChainAction[]> {
+    const dataLoader = this.getDataLoader(chain)
+    const actions = await Promise.all(ids.map(async (id) => dataLoader.getAction(id, awaitCompleted)))
+    return actions.filter((action) => action !== null)
   }
 
   getExplorer(chain: WarpChain): AdapterWarpExplorer {

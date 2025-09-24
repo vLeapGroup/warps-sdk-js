@@ -39,6 +39,10 @@ export class WarpSuiWallet implements AdapterWarpWallet {
     return signature.signature
   }
 
+  async signTransactions(txs: WarpAdapterGenericTransaction[]): Promise<WarpAdapterGenericTransaction[]> {
+    return Promise.all(txs.map(async (tx) => this.signTransaction(tx)))
+  }
+
   async sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string> {
     if (!tx || typeof tx !== 'object') throw new Error('Invalid transaction object')
     if (!tx.signature) throw new Error('Transaction must be signed before sending')
@@ -49,6 +53,10 @@ export class WarpSuiWallet implements AdapterWarpWallet {
     })
 
     return result.digest
+  }
+
+  async sendTransactions(txs: WarpAdapterGenericTransaction[]): Promise<string[]> {
+    return Promise.all(txs.map(async (tx) => this.sendTransaction(tx)))
   }
 
   create(mnemonic: string): WarpWalletDetails {

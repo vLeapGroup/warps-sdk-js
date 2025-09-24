@@ -7,13 +7,18 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-const Chain = 'base'
-const WarpToTest = 'test.json'
+const Chain = 'ethereum'
+const WarpToTest = 'deposit.json'
+const QueryItems = {
+  token: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
+  amount: '100000',
+  receiver: '0x5A92C4763dDAc3119a65f8882a53234C9988Efd9',
+}
 const WarpInputs: string[] = [
-  'string:base',
-  'address:0x5A92C4763dDAc3119a65f8882a53234C9988Efd9',
-  'asset:0x808456652fdb597867f38412077A9182bf77359F|0.01',
-] // e.g. 'address:abc', 'asset:EGLD|0.5'
+  'address:0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238', // USDC token address
+  'uint256:100000', // 1 USDC (6 decimals)
+  'address:0x5A92C4763dDAc3119a65f8882a53234C9988Efd9', // receiver address
+]
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -41,26 +46,29 @@ const runWarp = async (warpFile: string) => {
     getFastsetAdapter(config, getMultiversxAdapter(config)),
   ])
 
-  const executor = client.createExecutor({
-    onExecuted: (result) => console.log('Executed:', result),
-    onError: (result) => console.log('Error:', result),
-  })
-
   const address = client.getWallet(Chain).getAddress()
   const dataLoader = client.getDataLoader(Chain)
   const accountAssets = await dataLoader.getAccountAssets(address)
 
   console.log('Account assets:', accountAssets)
 
-  const warp = await client.createBuilder(Chain).createFromRaw(warpRaw)
-  const { tx } = await executor.execute(warp, WarpInputs)
-  const signedTx = await client.getWallet(Chain).signTransaction(tx)
-  const sentTxHash = await client.getWallet(Chain).sendTransaction(signedTx)
-  console.log('Sent transaction hash:', sentTxHash)
-  const remoteTx = await client.getDataLoader(Chain).getAction(sentTxHash, true)
+  const warp = await client.createBuilder(Chain).createFromRaw(warpRaw, false)
 
-  executor.evaluateResults(warp, Chain, remoteTx)
-  console.log('Remote transaction:', remoteTx)
+  const { txs, chain, evaluateResults } = await client.executeWarp(
+    warp,
+    WarpInputs,
+    {
+      onExecuted: (result) => console.log('Executed:', result),
+      onError: (result) => console.log('Error:', result),
+    },
+    { queries: QueryItems }
+  )
+
+  const signedTxs = await client.getWallet(chain.name).signTransactions(txs)
+  const hashes = await client.getWallet(chain.name).sendTransactions(signedTxs)
+  const remoteTxs = await client.getActions(chain.name, hashes, true)
+
+  await evaluateResults(remoteTxs)
 }
 
 const listWarps = () => fs.readdirSync(warpsDir).filter((f) => f.endsWith('.ts') || f.endsWith('.js') || f.endsWith('.json'))

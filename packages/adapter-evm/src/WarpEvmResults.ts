@@ -6,6 +6,7 @@ import {
   parseResultsOutIndex,
   ResolvedInput,
   Warp,
+  WarpActionIndex,
   WarpChainInfo,
   WarpClientConfig,
   WarpConstants,
@@ -29,12 +30,16 @@ export class WarpEvmResults implements AdapterWarpResults {
     this.provider = new ethers.JsonRpcProvider(apiUrl, network)
   }
 
-  async getTransactionExecutionResults(warp: Warp, tx: ethers.TransactionReceipt | null): Promise<WarpExecution> {
+  async getTransactionExecutionResults(
+    warp: Warp,
+    actionIndex: WarpActionIndex,
+    tx: ethers.TransactionReceipt | null
+  ): Promise<WarpExecution> {
     if (!tx) {
       return {
         success: false,
         warp,
-        action: 0,
+        action: actionIndex,
         user: getWarpWalletAddressFromConfig(this.config, this.chain.name),
         txHash: '',
         tx: null,
@@ -66,7 +71,7 @@ export class WarpEvmResults implements AdapterWarpResults {
     return {
       success,
       warp,
-      action: 0,
+      action: actionIndex,
       user: getWarpWalletAddressFromConfig(this.config, this.chain.name),
       txHash: transactionHash,
       tx,

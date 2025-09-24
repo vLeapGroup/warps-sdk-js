@@ -27,6 +27,7 @@ export type WarpMessageName = string
 
 export type Warp = {
   protocol: string
+  chain: WarpChain
   name: string
   title: string
   description: string | null
@@ -63,12 +64,12 @@ export type WarpTransferAction = {
   value?: string
   transfers?: string[]
   inputs?: WarpActionInput[]
+  auto?: boolean
   next?: string
 }
 
 export type WarpContractAction = {
   type: WarpActionType
-  chain?: WarpChain
   label: string
   description?: string | null
   address?: string
@@ -79,12 +80,12 @@ export type WarpContractAction = {
   transfers?: string[]
   abi?: string
   inputs?: WarpActionInput[]
+  auto?: boolean
   next?: string
 }
 
 export type WarpQueryAction = {
   type: WarpActionType
-  chain?: WarpChain
   label: string
   description?: string | null
   address?: string
@@ -92,12 +93,12 @@ export type WarpQueryAction = {
   args?: string[]
   abi?: string
   inputs?: WarpActionInput[]
+  auto?: boolean
   next?: string
 }
 
 export type WarpCollectAction = {
   type: WarpActionType
-  chain?: WarpChain
   label: string
   description?: string | null
   destination: {
@@ -106,16 +107,17 @@ export type WarpCollectAction = {
     headers?: Record<string, string>
   }
   inputs?: WarpActionInput[]
+  auto?: boolean
   next?: string
 }
 
 export type WarpLinkAction = {
   type: WarpActionType
-  chain?: WarpChain
   label: string
   description?: string | null
   url: string
   inputs?: WarpActionInput[]
+  auto?: boolean
 }
 
 export type WarpActionInputSource = 'field' | 'query' | 'user:wallet' | 'hidden'

@@ -3,9 +3,9 @@ import {
   applyResultsToMessages,
   extractCollectResults,
   findWarpAdapterForChain,
-  findWarpExecutableAction,
   getNextInfo,
   getWarpActionByIndex,
+  isWarpActionAutoExecute,
 } from './helpers'
 import { buildNestedPayload, mergeNestedPayload } from './helpers/payload'
 import { createAuthHeaders, createAuthMessage } from './helpers/signing'
@@ -14,6 +14,7 @@ import {
   Adapter,
   ResolvedInput,
   Warp,
+  WarpActionIndex,
   WarpAdapterGenericRemoteTransaction,
   WarpAdapterGenericTransaction,
   WarpChain,
@@ -31,6 +32,12 @@ export type ExecutionHandlers = {
   onExecuted?: (result: WarpExecution) => void | Promise<void>
   onError?: (params: { message: string }) => void
   onSignRequest?: (params: { message: string; chain: WarpChainInfo }) => string | Promise<string>
+  onActionExecuted?: (params: {
+    action: WarpActionIndex
+    chain: WarpChainInfo | null
+    execution: WarpExecution | null
+    tx: WarpAdapterGenericTransaction | null
+  }) => void
 }
 
 export class WarpExecutor {
@@ -49,14 +56,42 @@ export class WarpExecutor {
     warp: Warp,
     inputs: string[],
     meta: { envs?: Record<string, any>; queries?: Record<string, any> } = {}
+  ): Promise<{
+    txs: WarpAdapterGenericTransaction[]
+    chain: WarpChainInfo
+    immediateExecutions: WarpExecution[]
+  }> {
+    let txs: WarpAdapterGenericTransaction[] = []
+    let chainInfo: WarpChainInfo | null = null
+    let immediateExecutions: WarpExecution[] = []
+
+    for (let index = 1; index <= warp.actions.length; index++) {
+      const action = getWarpActionByIndex(warp, index)
+      if (!isWarpActionAutoExecute(action)) continue
+      const { tx, chain, immediateExecution } = await this.executeAction(warp, index, inputs, meta)
+      if (tx) txs.push(tx)
+      if (chain) chainInfo = chain
+      if (immediateExecution) immediateExecutions.push(immediateExecution)
+    }
+
+    if (!chainInfo) throw new Error('WarpExecutor: Chain not found')
+
+    return { txs, chain: chainInfo, immediateExecutions }
+  }
+
+  async executeAction(
+    warp: Warp,
+    actionIndex: WarpActionIndex,
+    inputs: string[],
+    meta: { envs?: Record<string, any>; queries?: Record<string, any> } = {}
   ): Promise<{ tx: WarpAdapterGenericTransaction | null; chain: WarpChainInfo | null; immediateExecution: WarpExecution | null }> {
-    const { action, actionIndex } = findWarpExecutableAction(warp)
+    const action = getWarpActionByIndex(warp, actionIndex)
     const executable = await this.factory.createExecutable(warp, actionIndex, inputs, meta)
 
     if (action.type === 'collect') {
       const result = await this.executeCollect(executable)
       if (result.success) {
-        await this.callHandler(() => this.handlers?.onExecuted?.(result))
+        await this.callHandler(() => this.handlers?.onActionExecuted?.({ action: actionIndex, chain: null, execution: result, tx: null }))
         return { tx: null, chain: null, immediateExecution: result }
       } else {
         this.handlers?.onError?.({ message: JSON.stringify(result.values) })
@@ -69,7 +104,9 @@ export class WarpExecutor {
     if (action.type === 'query') {
       const result = await adapter.executor.executeQuery(executable)
       if (result.success) {
-        await this.callHandler(() => this.handlers?.onExecuted?.(result))
+        await this.callHandler(() =>
+          this.handlers?.onActionExecuted?.({ action: actionIndex, chain: executable.chain, execution: result, tx: null })
+        )
       } else {
         this.handlers?.onError?.({ message: JSON.stringify(result.values) })
       }
@@ -81,8 +118,13 @@ export class WarpExecutor {
     return { tx, chain: executable.chain, immediateExecution: null }
   }
 
-  async evaluateResults(warp: Warp, chain: WarpChain, tx: WarpAdapterGenericRemoteTransaction): Promise<void> {
-    const result = await findWarpAdapterForChain(chain, this.adapters).results.getTransactionExecutionResults(warp, tx)
+  async evaluateResults(
+    warp: Warp,
+    actionIndex: WarpActionIndex,
+    chain: WarpChain,
+    tx: WarpAdapterGenericRemoteTransaction
+  ): Promise<void> {
+    const result = await findWarpAdapterForChain(chain, this.adapters).results.getTransactionExecutionResults(warp, actionIndex, tx)
     await this.callHandler(() => this.handlers?.onExecuted?.(result))
   }
 

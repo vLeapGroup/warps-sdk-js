@@ -3,7 +3,6 @@ import {
   AdapterWarpResults,
   applyResultsToMessages,
   evaluateResultsCommon,
-  findWarpExecutableAction,
   getNextInfo,
   getProviderUrl,
   getWarpWalletAddressFromConfig,
@@ -14,7 +13,6 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpConstants,
-  WarpContractAction,
   WarpExecution,
   WarpExecutionResults,
 } from '@vleap/warps'
@@ -33,8 +31,7 @@ export class WarpSuiResults implements AdapterWarpResults {
     this.client = new SuiClient({ url: apiUrl })
   }
 
-  async getTransactionExecutionResults(warp: Warp, tx: any): Promise<WarpExecution> {
-    const { action, actionIndex } = findWarpExecutableAction(warp) as { action: WarpContractAction; actionIndex: WarpActionIndex }
+  async getTransactionExecutionResults(warp: Warp, actionIndex: WarpActionIndex, tx: any): Promise<WarpExecution> {
     // SUI: tx is a TransactionBlockResponse
     const results = await this.extractContractResults(warp, actionIndex, tx, [])
     const next = getNextInfo(this.config, [], warp, actionIndex, results)

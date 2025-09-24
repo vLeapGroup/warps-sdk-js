@@ -41,6 +41,10 @@ export class WarpEvmWallet implements AdapterWarpWallet {
     return { ...tx, signature: signedTx }
   }
 
+  async signTransactions(txs: WarpAdapterGenericTransaction[]): Promise<WarpAdapterGenericTransaction[]> {
+    return Promise.all(txs.map(async (tx) => this.signTransaction(tx)))
+  }
+
   async signMessage(message: string): Promise<string> {
     const wallet = this.getWallet()
     const signature = await wallet.signMessage(message)
@@ -58,6 +62,10 @@ export class WarpEvmWallet implements AdapterWarpWallet {
     const connectedWallet = wallet.connect(this.provider)
     const txResponse = await connectedWallet.sendTransaction(tx as any)
     return txResponse.hash
+  }
+
+  async sendTransactions(txs: WarpAdapterGenericTransaction[]): Promise<string[]> {
+    return Promise.all(txs.map(async (tx) => this.sendTransaction(tx)))
   }
 
   create(mnemonic: string): { address: string; privateKey: string; mnemonic: string } {

@@ -44,6 +44,10 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
     return tx
   }
 
+  async signTransactions(txs: WarpAdapterGenericTransaction[]): Promise<WarpAdapterGenericTransaction[]> {
+    return Promise.all(txs.map(async (tx) => this.signTransaction(tx)))
+  }
+
   async signMessage(message: string): Promise<string> {
     const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
     if (!privateKey) throw new Error('Wallet not initialized - no private key provided')
@@ -55,6 +59,10 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
     const messageBytes = new TextEncoder().encode(message)
     const signature = await signer.sign(messageBytes)
     return Buffer.from(signature).toString('hex')
+  }
+
+  async sendTransactions(txs: WarpAdapterGenericTransaction[]): Promise<string[]> {
+    return Promise.all(txs.map(async (tx) => this.sendTransaction(tx)))
   }
 
   async sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string> {

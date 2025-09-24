@@ -276,7 +276,7 @@ describe('getChainInfoForAction', () => {
         { name: 'amount', type: 'biguint', position: 'value', source: 'field' },
       ],
     }
-    const chainInfo = await factory.getChainInfoForAction(action, ['string:mainnet', 'biguint:1000000000000000000'])
+    const chainInfo = await factory.getChainInfoForWarp(action, ['string:mainnet', 'biguint:1000000000000000000'])
     expect(chainInfo.name).toBe('mainnet')
   })
 
@@ -293,7 +293,7 @@ describe('getChainInfoForAction', () => {
     }
 
     const factory = new WarpFactory(testConfig, [createMockAdapter()])
-    const chainInfo = await factory.getChainInfoForAction(action, ['biguint:1000000000000000000'])
+    const chainInfo = await factory.getChainInfoForWarp(action, ['biguint:1000000000000000000'])
 
     expect(chainInfo.displayName).toBe('MultiversX') // Default chain name from config
   })
@@ -345,7 +345,7 @@ describe('getChainInfoForAction', () => {
         { name: 'amount', type: 'biguint', position: 'value', source: 'field' },
       ],
     }
-    const chainInfo = await factory.getChainInfoForAction(action, ['string:testnet', 'biguint:500'])
+    const chainInfo = await factory.getChainInfoForWarp(action, ['string:testnet', 'biguint:500'])
     expect(chainInfo.displayName).toBe('Testnet')
   })
 
@@ -362,7 +362,7 @@ describe('getChainInfoForAction', () => {
     }
 
     const factory = new WarpFactory(testConfig, [createMockAdapter()])
-    await expect(factory.getChainInfoForAction(action, [])).rejects.toThrow('Chain input not found')
+    await expect(factory.getChainInfoForWarp(action, [])).rejects.toThrow('Chain input not found')
   })
 
   it('uses default chain when no inputs are provided', async () => {
@@ -378,7 +378,7 @@ describe('getChainInfoForAction', () => {
     }
 
     const factory = new WarpFactory(testConfig, [createMockAdapter()])
-    const chainInfo = await factory.getChainInfoForAction(action)
+    const chainInfo = await factory.getChainInfoForWarp(action)
 
     expect(chainInfo.displayName).toBe('MultiversX') // Default chain name from config
   })
