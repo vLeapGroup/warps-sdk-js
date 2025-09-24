@@ -505,27 +505,4 @@ describe('WarpEvmExecutor', () => {
       )
     })
   })
-
-  describe('signMessage', () => {
-    it('should sign a message', async () => {
-      const message = 'test message'
-      const privateKey = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
-
-      const signature = await executor.signMessage(message, privateKey)
-      expect(signature).toBeDefined()
-      expect(typeof signature).toBe('string')
-      expect(signature.length).toBeGreaterThan(0)
-    })
-
-    it('should verify a message signature', async () => {
-      const message = 'test message'
-      const privateKey = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
-      const wallet = new ethers.Wallet(privateKey)
-
-      const signature = await executor.signMessage(message, privateKey)
-      const recoveredAddress = await executor.verifyMessage(message, signature)
-
-      expect(recoveredAddress).toBe(wallet.address)
-    })
-  })
 })

@@ -8,8 +8,6 @@ import {
   Transaction,
   TransactionsFactoryConfig,
   TransferTransactionsFactory,
-  UserSecretKey,
-  UserSigner,
 } from '@multiversx/sdk-core'
 import {
   AdapterWarpExecutor,
@@ -139,13 +137,6 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
       results,
       messages: applyResultsToMessages(executable.warp, results),
     }
-  }
-
-  async signMessage(message: string, privateKey: string): Promise<string> {
-    const secretKey = UserSecretKey.fromString(privateKey)
-    const signer = new UserSigner(secretKey)
-    const signature = await signer.sign(new Uint8Array(Buffer.from(message, 'utf-8')))
-    return signature.toString()
   }
 
   private toTokenTransfers(transfers: WarpChainAssetValue[]): TokenTransfer[] {
