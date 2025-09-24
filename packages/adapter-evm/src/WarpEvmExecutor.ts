@@ -78,17 +78,19 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
     if (!userWallet) throw new Error('WarpEvmExecutor: createContractCall - user address not set')
 
     const action = getWarpActionByIndex(executable.warp, executable.action)
-    if (!action || !('func' in action) || !action.func) {
-      throw new Error('WarpEvmExecutor: Contract action must have a function name')
-    }
-
-    if (!ethers.isAddress(executable.destination)) {
-      throw new Error(`WarpEvmExecutor: Invalid contract address: ${executable.destination}`)
-    }
+    if (!action || !('func' in action) || !action.func) throw new Error('WarpEvmExecutor: Contract action must have a function name')
+    if (!ethers.isAddress(executable.destination)) throw new Error(`WarpEvmExecutor: Invalid contract address: ${executable.destination}`)
 
     try {
-      const iface = new ethers.Interface([`function ${action.func}`])
-      const encodedData = iface.encodeFunctionData(action.func, executable.args)
+      let iface: ethers.Interface
+      try {
+        iface = new ethers.Interface(JSON.parse(action.abi as string))
+      } catch {
+        iface = new ethers.Interface([action.abi as string])
+      }
+
+      const nativeArgs = executable.args.map((arg) => this.serializer.coreSerializer.stringToNative(arg)[1])
+      const encodedData = iface.encodeFunctionData(action.func, nativeArgs)
 
       const tx: ethers.TransactionRequest = {
         to: executable.destination,
@@ -103,13 +105,8 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
   }
 
   private async createTokenTransferTransaction(executable: WarpExecutable, userWallet: string): Promise<ethers.TransactionRequest> {
-    if (executable.transfers.length === 0) {
-      throw new Error('WarpEvmExecutor: No transfers provided')
-    }
-
-    if (!this.chain.nativeToken?.identifier) {
-      throw new Error('WarpEvmExecutor: No native token defined for this chain')
-    }
+    if (executable.transfers.length === 0) throw new Error('WarpEvmExecutor: No transfers provided')
+    if (!this.chain.nativeToken?.identifier) throw new Error('WarpEvmExecutor: No native token defined for this chain')
 
     const nativeTokenTransfers = executable.transfers.filter((transfer) => transfer.identifier === this.chain.nativeToken!.identifier)
     const erc20Transfers = executable.transfers.filter((transfer) => transfer.identifier !== this.chain.nativeToken!.identifier)
@@ -117,9 +114,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
     if (nativeTokenTransfers.length === 1 && erc20Transfers.length === 0) {
       const transfer = nativeTokenTransfers[0]
 
-      if (transfer.amount <= 0n) {
-        throw new Error('WarpEvmExecutor: Native token transfer amount must be positive')
-      }
+      if (transfer.amount <= 0n) throw new Error('WarpEvmExecutor: Native token transfer amount must be positive')
 
       const tx: ethers.TransactionRequest = {
         to: executable.destination,
@@ -134,9 +129,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
       return this.createSingleTokenTransfer(executable, erc20Transfers[0], userWallet)
     }
 
-    if (executable.transfers.length > 1) {
-      throw new Error('WarpEvmExecutor: Multiple token transfers not yet supported')
-    }
+    if (executable.transfers.length > 1) throw new Error('WarpEvmExecutor: Multiple token transfers not yet supported')
 
     throw new Error('WarpEvmExecutor: Invalid transfer configuration')
   }
@@ -165,20 +158,20 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
 
   async executeQuery(executable: WarpExecutable): Promise<WarpExecution> {
     const action = getWarpActionByIndex(executable.warp, executable.action) as WarpQueryAction
-    if (action.type !== 'query') {
-      throw new Error(`WarpEvmExecutor: Invalid action type for executeQuery: ${action.type}`)
-    }
-    if (!action.func) {
-      throw new Error('WarpEvmExecutor: Query action must have a function name')
-    }
-
-    if (!ethers.isAddress(executable.destination)) {
-      throw new Error(`WarpEvmExecutor: Invalid contract address for query: ${executable.destination}`)
-    }
+    if (action.type !== 'query') throw new Error(`WarpEvmExecutor: Invalid action type for executeQuery: ${action.type}`)
+    if (!action.func) throw new Error('WarpEvmExecutor: Query action must have a function name')
+    if (!ethers.isAddress(executable.destination)) throw new Error(`WarpEvmExecutor: Invalid address for query: ${executable.destination}`)
 
     try {
-      const iface = new ethers.Interface([`function ${action.func}`])
-      const encodedData = iface.encodeFunctionData(action.func, executable.args)
+      let iface: ethers.Interface
+      try {
+        iface = new ethers.Interface(JSON.parse(action.abi as string))
+      } catch {
+        iface = new ethers.Interface([action.abi as string])
+      }
+
+      const nativeArgs = executable.args.map((arg) => this.serializer.coreSerializer.stringToNative(arg)[1])
+      const encodedData = iface.encodeFunctionData(action.func, nativeArgs)
 
       const result = await this.provider.call({
         to: executable.destination,
@@ -232,13 +225,8 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         from,
       })
 
-      // Validate gas estimate
-      if (gasEstimate < BigInt(WarpEvmConstants.Validation.MinGasLimit)) {
-        throw new Error(`Gas estimate too low: ${gasEstimate}`)
-      }
-      if (gasEstimate > BigInt(WarpEvmConstants.Validation.MaxGasLimit)) {
-        throw new Error(`Gas estimate too high: ${gasEstimate}`)
-      }
+      if (gasEstimate < BigInt(WarpEvmConstants.Validation.MinGasLimit)) throw new Error(`Gas estimate too low: ${gasEstimate}`)
+      if (gasEstimate > BigInt(WarpEvmConstants.Validation.MaxGasLimit)) throw new Error(`Gas estimate too high: ${gasEstimate}`)
 
       const feeData = await this.provider.getFeeData()
 
