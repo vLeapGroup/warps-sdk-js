@@ -1,4 +1,5 @@
-import { findWarpAdapterByPrefix, findWarpAdapterForChain, getWarpInfoFromIdentifier, getWarpWalletAddressFromConfig } from './helpers'
+import { findWarpAdapterByPrefix, findWarpAdapterForChain, getWarpInfoFromIdentifier } from './helpers'
+import { getWarpWalletAddressFromConfig } from './helpers/wallet'
 
 import {
   Adapter,

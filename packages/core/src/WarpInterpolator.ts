@@ -1,5 +1,5 @@
 import { WarpChainName, WarpConstants } from './constants'
-import { getWarpWalletAddressFromConfig } from './helpers'
+import { getWarpWalletAddressFromConfig } from './helpers/wallet'
 import { Adapter, InterpolationBag, Warp, WarpAction, WarpClientConfig } from './types'
 
 export class WarpInterpolator {

@@ -1,5 +1,6 @@
 import { WarpConstants } from './constants'
-import { findWarpAdapterForChain, getWarpActionByIndex, getWarpWalletAddressFromConfig, shiftBigintBy, splitInput } from './helpers'
+import { findWarpAdapterForChain, getWarpActionByIndex, shiftBigintBy, splitInput } from './helpers'
+import { getWarpWalletAddressFromConfig } from './helpers/wallet'
 import {
   Adapter,
   ResolvedInput,

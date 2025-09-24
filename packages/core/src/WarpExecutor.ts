@@ -6,10 +6,10 @@ import {
   findWarpExecutableAction,
   getNextInfo,
   getWarpActionByIndex,
-  getWarpWalletAddressFromConfig,
 } from './helpers'
 import { buildNestedPayload, mergeNestedPayload } from './helpers/payload'
 import { createAuthHeaders, createAuthMessage } from './helpers/signing'
+import { getWarpWalletAddressFromConfig } from './helpers/wallet'
 import {
   Adapter,
   ResolvedInput,
