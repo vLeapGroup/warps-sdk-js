@@ -25,7 +25,7 @@ const runWarp = async (warpFile: string) => {
   const walletData = await loadWallet(Chain)
   const privateKey = walletData.privateKey || (await loadFile(Chain))
 
-  console.log('🔑 Wallet data loaded:', { address: walletData?.address, hasPrivateKey: privateKey })
+  console.log('🔑 Wallet data loaded:', { address: walletData?.address, privateKey })
 
   const config: any = {
     env: 'devnet',
