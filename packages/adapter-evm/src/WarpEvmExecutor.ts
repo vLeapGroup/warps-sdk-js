@@ -200,7 +200,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
       const decodedResult = iface.decodeFunctionResult(action.func, result)
       const isSuccess = true
 
-      const { values, valuesRaw, results } = await this.results.extractQueryResults(
+      const { values, results } = await this.results.extractQueryResults(
         executable.warp,
         decodedResult,
         executable.action,
@@ -218,7 +218,6 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         tx: null,
         next,
         values,
-        valuesRaw,
         results,
         messages: applyResultsToMessages(executable.warp, results),
       }
@@ -231,8 +230,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         txHash: null,
         tx: null,
         next: null,
-        values: [],
-        valuesRaw: [],
+        values: { string: [], native: [] },
         results: {},
         messages: {},
       }

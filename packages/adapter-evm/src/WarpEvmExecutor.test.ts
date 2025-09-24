@@ -371,8 +371,7 @@ describe('WarpEvmExecutor', () => {
         txHash: null,
         tx: null,
         next: null,
-        values: [],
-        valuesRaw: [],
+        values: { string: [], native: [] },
         results: {},
         messages: {},
       })
@@ -408,8 +407,7 @@ describe('WarpEvmExecutor', () => {
         txHash: null,
         tx: null,
         next: null,
-        values: [],
-        valuesRaw: [],
+        values: { string: [], native: [] },
         results: {},
         messages: {},
       })

@@ -1,5 +1,5 @@
 import { WarpAdapterGenericTransaction } from './config'
-import { Warp, WarpMessageName, WarpResultName } from './warp'
+import { Warp, WarpMessageName, WarpNativeValue, WarpResultName } from './warp'
 
 export type WarpExecution = {
   success: boolean
@@ -9,8 +9,7 @@ export type WarpExecution = {
   txHash: string | null
   tx: WarpAdapterGenericTransaction | null
   next: WarpExecutionNextInfo | null
-  values: any[]
-  valuesRaw: any[]
+  values: { string: string[]; native: WarpNativeValue[] }
   results: WarpExecutionResults
   messages: WarpExecutionMessages
 }

@@ -38,12 +38,15 @@ export class WarpEvmResults implements AdapterWarpResults {
 
     const logs = tx.logs.map((log) => ({
       address: log.address,
-      topics: log.topics,
+      topics: [...log.topics],
       data: log.data,
       blockNumber: log.blockNumber?.toString() || '0',
       transactionHash: log.transactionHash,
       index: log.index?.toString() || '0',
     }))
+
+    const rawValues = [transactionHash, blockNumber, gasUsed, gasPrice, ...(logs.length > 0 ? logs : [])]
+    const stringValues = rawValues.map((v) => String(v))
 
     return {
       success,
@@ -53,8 +56,7 @@ export class WarpEvmResults implements AdapterWarpResults {
       txHash: transactionHash,
       tx,
       next: null,
-      values: [transactionHash, blockNumber, gasUsed, gasPrice, ...(logs.length > 0 ? logs : [])],
-      valuesRaw: [transactionHash, blockNumber, gasUsed, gasPrice, ...(logs.length > 0 ? logs : [])],
+      values: { string: stringValues, native: rawValues },
       results: {},
       messages: {},
     }
@@ -65,12 +67,13 @@ export class WarpEvmResults implements AdapterWarpResults {
     typedValues: any[],
     actionIndex: number,
     inputs: ResolvedInput[]
-  ): Promise<{ values: any[]; valuesRaw: any[]; results: WarpExecutionResults }> {
-    const values = typedValues.map((t) => this.serializer.typedToString(t))
-    const valuesRaw = typedValues.map((t) => this.serializer.typedToNative(t)[1])
+  ): Promise<{ values: { string: string[]; native: any[] }; results: WarpExecutionResults }> {
+    const stringValues = typedValues.map((t) => this.serializer.typedToString(t))
+    const nativeValues = typedValues.map((t) => this.serializer.typedToNative(t)[1])
+    const values = { string: stringValues, native: nativeValues }
     let results: WarpExecutionResults = {}
 
-    if (!warp.results) return { values, valuesRaw, results }
+    if (!warp.results) return { values, results }
 
     const getNestedValue = (path: string): unknown => {
       const indices = path
@@ -78,7 +81,7 @@ export class WarpEvmResults implements AdapterWarpResults {
         .slice(1)
         .map((i) => parseInt(i) - 1)
       if (indices.length === 0) return undefined
-      let value: any = valuesRaw[indices[0]]
+      let value: any = nativeValues[indices[0]]
       for (let i = 1; i < indices.length; i++) {
         if (value === undefined || value === null) return undefined
         value = value[indices[i]]
@@ -100,7 +103,7 @@ export class WarpEvmResults implements AdapterWarpResults {
       }
     }
 
-    return { values, valuesRaw, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer) }
+    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer) }
   }
 
   async getTransactionStatus(

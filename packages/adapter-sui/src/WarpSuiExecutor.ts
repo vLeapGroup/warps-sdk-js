@@ -144,7 +144,6 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
       tx: null,
       next,
       values: extractedValues,
-      valuesRaw: [],
       results,
       messages: applyResultsToMessages(executable.warp, results),
     }

@@ -102,7 +102,7 @@ describe('extractCollectResults', () => {
 
     const { values, results } = await extractCollectResults(warp, response, 1, [], new WarpSerializer())
 
-    expect(values).toEqual([])
+    expect(values).toEqual({ string: [], native: [] })
     expect(results).toEqual({})
   })
 
@@ -132,7 +132,8 @@ describe('extractCollectResults', () => {
     expect(results.USERNAME).toBe('testuser')
     expect(results.ID).toBe('123')
     expect(results.ALL).toEqual(response.data)
-    expect(values).toHaveLength(3)
+    expect(values.string).toHaveLength(3)
+    expect(values.native).toHaveLength(3)
   })
 
   it('handles null values in response', async () => {
@@ -158,7 +159,8 @@ describe('extractCollectResults', () => {
 
     expect(results.USERNAME).toBeNull()
     expect(results.MISSING).toBeNull()
-    expect(values).toHaveLength(2)
+    expect(values.string).toHaveLength(2)
+    expect(values.native).toHaveLength(2)
   })
 
   it('evaluates transform results in collect', async () => {

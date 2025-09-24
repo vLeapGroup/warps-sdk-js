@@ -373,7 +373,7 @@ describe('Result Helpers', () => {
 
       const { values, results } = await subject.extractContractResults(warp, tx, [])
 
-      expect(values).toEqual([])
+      expect(values).toEqual({ string: [], native: [] })
       expect(results).toEqual({})
     })
 
@@ -488,7 +488,7 @@ describe('Result Helpers', () => {
       ;(tx as any).typedValues = typedValues
       const { values, results } = await subject.extractQueryResults(warp, typedValues, 1, [])
 
-      expect(values).toEqual([])
+      expect(values).toEqual({ string: [], native: [] })
       expect(results).toEqual({})
     })
   })
@@ -565,7 +565,7 @@ describe('Result Helpers', () => {
           user: testConfig.user?.wallets?.MULTIVERSX || null,
           txHash: '',
           next: null,
-          values: [],
+          values: { string: [], native: [] },
           results: {
             USER_ID: '12345',
             USERNAME: 'testuser',
@@ -583,7 +583,7 @@ describe('Result Helpers', () => {
           user: testConfig.user?.wallets?.MULTIVERSX || null,
           txHash: '',
           next: null,
-          values: [],
+          values: { string: [], native: [] },
           results: {},
           messages: {},
         }),
@@ -694,7 +694,7 @@ describe('Result Helpers', () => {
           user: testConfig.user?.wallets?.MULTIVERSX || null,
           txHash: '',
           next: null,
-          values: [],
+          values: { string: [], native: [] },
           results: {
             USER_ID: '12345',
             USERNAME: 'testuser',
@@ -712,7 +712,7 @@ describe('Result Helpers', () => {
           user: testConfig.user?.wallets?.MULTIVERSX || null,
           txHash: '',
           next: null,
-          values: [],
+          values: { string: [], native: [] },
           results: {},
           messages: {},
         }),

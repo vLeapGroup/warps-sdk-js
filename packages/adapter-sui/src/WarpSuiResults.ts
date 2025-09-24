@@ -48,7 +48,6 @@ export class WarpSuiResults implements AdapterWarpResults {
       tx,
       next,
       values: results.values,
-      valuesRaw: [],
       results: results.results,
       messages,
     }
@@ -59,11 +58,12 @@ export class WarpSuiResults implements AdapterWarpResults {
     actionIndex: WarpActionIndex,
     tx: any,
     inputs: ResolvedInput[]
-  ): Promise<{ values: any[]; results: WarpExecutionResults }> {
+  ): Promise<{ values: { string: string[]; native: any[] }; results: WarpExecutionResults }> {
     // SUI: extract results from tx effects or return values
-    let values: any[] = []
+    let stringValues: string[] = []
+    let nativeValues: any[] = []
     let results: WarpExecutionResults = {}
-    if (!warp.results) return { values, results }
+    if (!warp.results) return { values: { string: stringValues, native: nativeValues }, results }
     for (const [resultName, resultPath] of Object.entries(warp.results)) {
       if (resultPath.startsWith(WarpConstants.Transform.Prefix)) continue
       if (resultPath.startsWith('input.')) {
@@ -78,13 +78,18 @@ export class WarpSuiResults implements AdapterWarpResults {
       // SUI: support extracting from tx return values or events
       if (resultPath.startsWith('out.')) {
         // For SUI, use tx.effects?.events or tx.returnValues
-        results[resultName] = tx.returnValues ? tx.returnValues[resultName] : null
-        values.push(results[resultName])
+        const nativeValue = tx.returnValues ? tx.returnValues[resultName] : null
+        results[resultName] = nativeValue
+        stringValues.push(String(nativeValue))
+        nativeValues.push(nativeValue)
       } else {
         results[resultName] = resultPath
       }
     }
-    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer) }
+    return {
+      values: { string: stringValues, native: nativeValues },
+      results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer),
+    }
   }
 
   async extractQueryResults(
@@ -92,9 +97,11 @@ export class WarpSuiResults implements AdapterWarpResults {
     typedValues: any[],
     actionIndex: number,
     inputs: ResolvedInput[]
-  ): Promise<{ values: any[]; results: WarpExecutionResults }> {
+  ): Promise<{ values: { string: string[]; native: any[] }; results: WarpExecutionResults }> {
     // SUI: typedValues are direct query results
-    const values = typedValues
+    const stringValues = typedValues.map((native) => String(native))
+    const nativeValues = typedValues
+    const values = { string: stringValues, native: nativeValues }
     let results: WarpExecutionResults = {}
     if (!warp.results) return { values, results }
     for (const [key, path] of Object.entries(warp.results)) {
@@ -106,11 +113,11 @@ export class WarpSuiResults implements AdapterWarpResults {
       }
       if (path.startsWith('out.') || path === 'out') {
         // If values is an array of objects, extract the property
-        if (Array.isArray(values) && values.length > 0 && typeof values[0] === 'object' && values[0] !== null) {
+        if (Array.isArray(typedValues) && typedValues.length > 0 && typeof typedValues[0] === 'object' && typedValues[0] !== null) {
           const prop = path.replace(/^out\./, '')
-          results[key] = values[0][prop]
+          results[key] = typedValues[0][prop]
         } else {
-          results[key] = values[0]
+          results[key] = typedValues[0]
         }
       } else {
         results[key] = path

@@ -58,10 +58,8 @@ describe('WarpEvmResults', () => {
       expect(result.user).toBe(mockConfig.user?.wallets?.evm)
       expect(result.txHash).toBe('0x1234567890abcdef')
       expect(result.next).toBe(null)
-      expect(result.values).toContain('0x1234567890abcdef')
-      expect(result.values).toContain('12345')
-      expect(result.values).toContain('21000')
-      expect(result.values).toContain('20000000000')
+      expect(result.values.string).toEqual(expect.arrayContaining(['0x1234567890abcdef', '12345', '21000', '20000000000']))
+      expect(result.values.native).toEqual(expect.arrayContaining(['0x1234567890abcdef', '12345', '21000', '20000000000']))
       expect(result.results).toEqual({})
       expect(result.messages).toEqual({})
     })
@@ -86,10 +84,8 @@ describe('WarpEvmResults', () => {
       const result = await results.getTransactionExecutionResults(warp, mockReceipt)
 
       expect(result.success).toBe(false)
-      expect(result.values).toContain('0x1234567890abcdef')
-      expect(result.values).toContain('12345')
-      expect(result.values).toContain('21000')
-      expect(result.values).toContain('20000000000')
+      expect(result.values.string).toEqual(expect.arrayContaining(['0x1234567890abcdef', '12345', '21000', '20000000000']))
+      expect(result.values.native).toEqual(expect.arrayContaining(['0x1234567890abcdef', '12345', '21000', '20000000000']))
     })
 
     it('should handle missing optional fields', async () => {
@@ -109,10 +105,8 @@ describe('WarpEvmResults', () => {
       const result = await results.getTransactionExecutionResults(warp, mockReceipt)
 
       expect(result.success).toBe(true)
-      expect(result.values).toContain('0x1234567890abcdef')
-      expect(result.values).toContain('0')
-      expect(result.values).toContain('0')
-      expect(result.values).toContain('0')
+      expect(result.values.string).toEqual(expect.arrayContaining(['0x1234567890abcdef', '0', '0', '0']))
+      expect(result.values.native).toEqual(expect.arrayContaining(['0x1234567890abcdef', '0', '0', '0']))
     })
   })
 })

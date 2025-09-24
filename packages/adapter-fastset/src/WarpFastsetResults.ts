@@ -29,6 +29,9 @@ export class WarpFastsetResults implements AdapterWarpResults {
     const blockNumber = this.extractBlockNumber(tx)
     const timestamp = this.extractTimestamp(tx)
 
+    const rawValues = [transactionHash, blockNumber, timestamp]
+    const stringValues = rawValues.map((v) => String(v))
+
     return {
       success,
       warp,
@@ -37,8 +40,7 @@ export class WarpFastsetResults implements AdapterWarpResults {
       txHash: transactionHash,
       tx,
       next: null,
-      values: [transactionHash, blockNumber, timestamp],
-      valuesRaw: [transactionHash, blockNumber, timestamp],
+      values: { string: stringValues, native: rawValues },
       results: {},
       messages: {},
     }
@@ -49,9 +51,10 @@ export class WarpFastsetResults implements AdapterWarpResults {
     typedValues: any[],
     actionIndex: number,
     inputs: ResolvedInput[]
-  ): Promise<{ values: any[]; results: WarpExecutionResults }> {
-    const values = typedValues.map((t) => this.serializer.typedToString(t))
-    const valuesRaw = typedValues.map((t) => this.serializer.typedToNative(t)[1])
+  ): Promise<{ values: { string: string[]; native: any[] }; results: WarpExecutionResults }> {
+    const stringValues = typedValues.map((t) => this.serializer.typedToString(t))
+    const nativeValues = typedValues.map((t) => this.serializer.typedToNative(t)[1])
+    const values = { string: stringValues, native: nativeValues }
     let results: WarpExecutionResults = {}
 
     if (!warp.results) return { values, results }
@@ -60,7 +63,7 @@ export class WarpFastsetResults implements AdapterWarpResults {
       const match = path.match(/^out\[(\d+)\]$/)
       if (match) {
         const index = parseInt(match[1]) - 1
-        return valuesRaw[index]
+        return nativeValues[index]
       }
 
       const indices = path
@@ -68,7 +71,7 @@ export class WarpFastsetResults implements AdapterWarpResults {
         .slice(1)
         .map((i) => parseInt(i) - 1)
       if (indices.length === 0) return undefined
-      let value: any = valuesRaw[indices[0]]
+      let value: any = nativeValues[indices[0]]
       for (let i = 1; i < indices.length; i++) {
         if (value === undefined || value === null) return undefined
         value = value[indices[i]]
@@ -91,7 +94,17 @@ export class WarpFastsetResults implements AdapterWarpResults {
       }
     }
 
-    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.config.transform?.runner) }
+    return {
+      values,
+      results: await evaluateResultsCommon(
+        warp,
+        results,
+        actionIndex,
+        inputs,
+        this.serializer.coreSerializer,
+        this.config.transform?.runner
+      ),
+    }
   }
 
   private isTransactionSuccessful(tx: any): boolean {

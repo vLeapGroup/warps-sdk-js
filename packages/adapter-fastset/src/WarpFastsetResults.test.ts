@@ -90,8 +90,10 @@ describe('WarpFastsetResults', () => {
           status: 'success',
         },
         next: null,
-        values: ['0x123456789abcdef', '12345', expect.any(String)],
-        valuesRaw: ['0x123456789abcdef', '12345', expect.any(String)],
+        values: {
+          string: ['0x123456789abcdef', '12345', expect.any(String)],
+          native: ['0x123456789abcdef', '12345', expect.any(String)],
+        },
         results: {},
         messages: {},
       })
@@ -138,7 +140,8 @@ describe('WarpFastsetResults', () => {
       const result = await results.getTransactionExecutionResults(warp, tx)
 
       expect(result.success).toBe(true)
-      expect(result.values).toEqual(['0x123456789abcdef', '0', expect.any(String)])
+      expect(result.values.string).toEqual(['0x123456789abcdef', '0', expect.any(String)])
+      expect(result.values.native).toEqual(['0x123456789abcdef', '0', expect.any(String)])
     })
 
     it('should handle transaction with different status formats', async () => {
@@ -181,7 +184,8 @@ describe('WarpFastsetResults', () => {
 
       const result = await results.extractQueryResults(warp, typedValues, actionIndex, inputs)
 
-      expect(result.values).toEqual(['biguint:1000000', 'string:Test Token'])
+      expect(result.values.string).toEqual(['biguint:1000000', 'string:Test Token'])
+      expect(result.values.native).toEqual(['1000000', 'Test Token'])
       expect(result.results).toEqual({
         balance: '1000000',
         name: 'Test Token',
@@ -235,7 +239,8 @@ describe('WarpFastsetResults', () => {
 
       const result = await results.extractQueryResults(warp, typedValues, actionIndex, inputs)
 
-      expect(result.values).toEqual(['biguint:1000000'])
+      expect(result.values.string).toEqual(['biguint:1000000'])
+      expect(result.values.native).toEqual(['1000000'])
       expect(result.results).toEqual({})
     })
 

@@ -119,7 +119,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
     const endpoint = abi.getEndpoint(response.function || action.func || '')
     const parts = (response.returnDataParts || []).map((part: any) => (typeof part === 'string' ? Buffer.from(part) : Buffer.from(part)))
     const typedValues = argsSerializer.buffersToValues(parts, endpoint.output)
-    const { values, valuesRaw, results } = await this.results.extractQueryResults(
+    const { values, results } = await this.results.extractQueryResults(
       executable.warp,
       typedValues,
       executable.action,
@@ -136,7 +136,6 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
       tx: null,
       next,
       values,
-      valuesRaw,
       results,
       messages: applyResultsToMessages(executable.warp, results),
     }

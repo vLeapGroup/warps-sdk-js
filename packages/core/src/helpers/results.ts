@@ -12,8 +12,9 @@ export const extractCollectResults = async (
   inputs: ResolvedInput[],
   serializer: WarpSerializer,
   transformRunner?: TransformRunner | null
-): Promise<{ values: any[]; results: WarpExecutionResults }> => {
-  const values: any[] = []
+): Promise<{ values: { string: string[]; native: any[] }; results: WarpExecutionResults }> => {
+  const stringValues: string[] = []
+  const nativeValues: any[] = []
   let results: WarpExecutionResults = {}
   for (const [resultName, resultPath] of Object.entries(warp.results || {})) {
     if (resultPath.startsWith(WarpConstants.Transform.Prefix)) continue
@@ -29,13 +30,17 @@ export const extractCollectResults = async (
 
     if (resultType === 'out' || resultType.startsWith('out[')) {
       const value = pathParts.length === 0 ? response?.data || response : getNestedValueFromObject(response, pathParts)
-      values.push(value)
+      stringValues.push(String(value))
+      nativeValues.push(value)
       results[resultName] = value
     } else {
       results[resultName] = resultPath
     }
   }
-  return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, serializer, transformRunner) }
+  return {
+    values: { string: stringValues, native: nativeValues },
+    results: await evaluateResultsCommon(warp, results, actionIndex, inputs, serializer, transformRunner),
+  }
 }
 
 // Processes and finalizes the results of a Warp action, supporting result definitions like:

@@ -162,7 +162,6 @@ export class WarpExecutor {
         tx: null,
         next,
         values,
-        valuesRaw: [],
         results: { ...results, _DATA: content },
         messages: applyResultsToMessages(executable.warp, results),
       }
@@ -176,8 +175,7 @@ export class WarpExecutor {
         txHash: null,
         tx: null,
         next: null,
-        values: [],
-        valuesRaw: [],
+        values: { string: [], native: [] },
         results: { _DATA: error },
         messages: {},
       }

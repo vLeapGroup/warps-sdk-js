@@ -63,7 +63,6 @@ export class WarpMultiversxResults implements AdapterWarpResults {
       tx,
       next,
       values: results.values,
-      valuesRaw: [],
       results: results.results,
       messages,
     }
@@ -73,12 +72,13 @@ export class WarpMultiversxResults implements AdapterWarpResults {
     warp: Warp,
     tx: TransactionOnNetwork,
     inputs: ResolvedInput[]
-  ): Promise<{ values: any[]; results: WarpExecutionResults }> {
+  ): Promise<{ values: { string: string[]; native: any[] }; results: WarpExecutionResults }> {
     const { action, actionIndex } = findWarpExecutableAction(warp) as { action: WarpContractAction; actionIndex: WarpActionIndex }
-    let values: any[] = []
+    let stringValues: string[] = []
+    let nativeValues: any[] = []
     let results: WarpExecutionResults = {}
     if (!warp.results || action.type !== 'contract') {
-      return { values, results }
+      return { values: { string: stringValues, native: nativeValues }, results }
     }
     const needsAbi = Object.values(warp.results).some((resultPath) => resultPath.includes('out') || resultPath.includes('event'))
     if (!needsAbi) {
@@ -86,7 +86,7 @@ export class WarpMultiversxResults implements AdapterWarpResults {
         results[resultName] = resultPath
       }
       return {
-        values,
+        values: { string: stringValues, native: nativeValues },
         results: await evaluateResultsCommon(
           warp,
           results,
@@ -119,7 +119,8 @@ export class WarpMultiversxResults implements AdapterWarpResults {
         const events = findEventsByFirstTopic(tx, partOne)
         const outcome = eventParser.parseEvents({ events })[0]
         const outcomeAtPosition = (Object.values(outcome)[topicPosition] || null) as object | null
-        values.push(outcomeAtPosition)
+        stringValues.push(String(outcomeAtPosition))
+        nativeValues.push(outcomeAtPosition)
         results[resultName] = outcomeAtPosition ? outcomeAtPosition.valueOf() : outcomeAtPosition
       } else if (resultType === 'out' || resultType.startsWith('out[')) {
         if (!partOne) continue
@@ -131,13 +132,17 @@ export class WarpMultiversxResults implements AdapterWarpResults {
         if (outputAtPosition && typeof outputAtPosition === 'object') {
           outputAtPosition = 'toFixed' in outputAtPosition ? outputAtPosition.toFixed() : outputAtPosition.valueOf()
         }
-        values.push(outputAtPosition)
+        stringValues.push(String(outputAtPosition))
+        nativeValues.push(outputAtPosition)
         results[resultName] = outputAtPosition ? outputAtPosition.valueOf() : outputAtPosition
       } else {
         results[resultName] = resultPath
       }
     }
-    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer) }
+    return {
+      values: { string: stringValues, native: nativeValues },
+      results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer),
+    }
   }
 
   async extractQueryResults(
@@ -145,18 +150,19 @@ export class WarpMultiversxResults implements AdapterWarpResults {
     typedValues: TypedValue[],
     actionIndex: number,
     inputs: ResolvedInput[]
-  ): Promise<{ values: any[]; valuesRaw: any[]; results: WarpExecutionResults }> {
-    const values = typedValues.map((t) => this.serializer.typedToString(t))
-    const valuesRaw = typedValues.map((t) => this.serializer.typedToNative(t)[1])
+  ): Promise<{ values: { string: string[]; native: any[] }; results: WarpExecutionResults }> {
+    const stringValues = typedValues.map((t) => this.serializer.typedToString(t))
+    const nativeValues = typedValues.map((t) => this.serializer.typedToNative(t)[1])
+    const values = { string: stringValues, native: nativeValues }
     let results: WarpExecutionResults = {}
-    if (!warp.results) return { values, valuesRaw, results }
+    if (!warp.results) return { values, results }
     const getNestedValue = (path: string): unknown => {
       const indices = path
         .split('.')
         .slice(1)
         .map((i) => parseInt(i) - 1)
       if (indices.length === 0) return undefined
-      let value: any = valuesRaw[indices[0]]
+      let value: any = nativeValues[indices[0]]
       for (let i = 1; i < indices.length; i++) {
         if (value === undefined || value === null) return undefined
         value = value[indices[i]]
@@ -176,7 +182,7 @@ export class WarpMultiversxResults implements AdapterWarpResults {
         results[key] = path
       }
     }
-    return { values, valuesRaw, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer) }
+    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer) }
   }
 
   async resolveWarpResultsRecursively(props: {
