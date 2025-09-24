@@ -51,7 +51,7 @@ export class WarpEvmResults implements AdapterWarpResults {
     const blockNumber = tx.blockNumber?.toString() || '0'
     const transactionHash = tx.hash
 
-    const logs = tx.logs.map((log) => ({
+    const logs = (tx.logs || []).map((log) => ({
       address: log.address,
       topics: [...log.topics],
       data: log.data,
