@@ -298,7 +298,7 @@ describe('WarpEvmExecutor', () => {
           ],
         },
         action: 1,
-        args: ['0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6', '1000000000000000000'],
+        args: ['address:0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6', 'uint256:1000000000000000000'],
         transfers: [],
         resolvedInputs: [],
       } as any
@@ -331,7 +331,7 @@ describe('WarpEvmExecutor', () => {
           ],
         },
         action: 1,
-        args: ['0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6', '1000000000000000000'],
+        args: ['address:0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6', 'uint256:1000000000000000000'],
         transfers: [],
         resolvedInputs: [],
       } as any
@@ -356,7 +356,7 @@ describe('WarpEvmExecutor', () => {
           ],
         },
         action: 1,
-        args: ['0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6'],
+        args: ['address:0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6'],
         transfers: [],
         resolvedInputs: [],
       } as any
@@ -392,7 +392,7 @@ describe('WarpEvmExecutor', () => {
           ],
         },
         action: 1,
-        args: ['0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6'],
+        args: ['address:0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6'],
         transfers: [],
         resolvedInputs: [],
       } as any
@@ -462,7 +462,7 @@ describe('WarpEvmExecutor', () => {
           ],
         },
         action: 1,
-        args: ['0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6', '1000000000000000000'],
+        args: ['address:0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6', 'uint256:1000000000000000000'],
         transfers: [],
         resolvedInputs: [],
       } as any
