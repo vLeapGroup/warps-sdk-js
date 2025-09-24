@@ -2,16 +2,17 @@ import { WarpClient } from '@vleap/warps'
 import { getAllEvmAdapters } from '@vleap/warps-adapter-evm'
 import { getFastsetAdapter } from '@vleap/warps-adapter-fastset'
 import { getAllMultiversxAdapters, getMultiversxAdapter } from '@vleap/warps-adapter-multiversx'
+import { getSuiAdapter } from '@vleap/warps-adapter-sui'
 import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-const Chain = 'multiversx'
+const Chain = 'base'
 const WarpToTest = 'test.json'
 const WarpInputs: string[] = [
-  'string:multiversx',
-  'address:erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
-  'asset:EGLD|10|0',
+  'string:base',
+  'address:0x5A92C4763dDAc3119a65f8882a53234C9988Efd9',
+  'asset:0x808456652fdb597867f38412077A9182bf77359F|0.01',
 ] // e.g. 'address:abc', 'asset:EGLD|0.5'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -36,51 +37,30 @@ const runWarp = async (warpFile: string) => {
   const client = new WarpClient(config, [
     ...getAllMultiversxAdapters(config),
     ...getAllEvmAdapters(config, getMultiversxAdapter(config)),
+    getSuiAdapter(config),
     getFastsetAdapter(config, getMultiversxAdapter(config)),
   ])
 
   const executor = client.createExecutor({
-    onExecuted: (result) => {
-      console.log('--------------------------------')
-      console.log('Executed:', result)
-      console.log('--------------------------------')
-    },
-    onError: (result) => {
-      console.log('--------------------------------')
-      console.log('Error:', result)
-      console.log('--------------------------------')
-    },
+    onExecuted: (result) => console.log('Executed:', result),
+    onError: (result) => console.log('Error:', result),
   })
 
   const address = client.getWallet(Chain).getAddress()
   const dataLoader = client.getDataLoader(Chain)
+  const accountAssets = await dataLoader.getAccountAssets(address)
 
-  console.log('-------------------------------')
-  console.log('Wallet address:', address)
-  console.log(
-    'Wallet assets:',
-    (await dataLoader.getAccountAssets(address)).map((asset) => `${asset.symbol} (${asset.identifier}) - ${asset.amount}`)
-  )
-  console.log('--------------------------------')
+  console.log('Account assets:', accountAssets)
 
-  if (WarpToTest) {
-    const warp = await client.createBuilder(Chain).createFromRaw(warpRaw)
-    const { tx } = await executor.execute(warp, WarpInputs)
-    const signedTx = await client.getWallet(Chain).signTransaction(tx)
-    console.log('--------------------------------')
-    console.log('Signed transaction:', signedTx)
-    console.log('--------------------------------')
-    const sentTxHash = await client.getWallet(Chain).sendTransaction(signedTx)
-    console.log('--------------------------------')
-    console.log('Sent transaction:', sentTxHash)
-    console.log('--------------------------------')
-    const remoteTx = await client.getDataLoader(Chain).getAction(sentTxHash, true)
-    console.log('--------------------------------')
-    console.log('Remote transaction:', remoteTx)
-    console.log('--------------------------------')
+  const warp = await client.createBuilder(Chain).createFromRaw(warpRaw)
+  const { tx } = await executor.execute(warp, WarpInputs)
+  const signedTx = await client.getWallet(Chain).signTransaction(tx)
+  const sentTxHash = await client.getWallet(Chain).sendTransaction(signedTx)
+  console.log('Sent transaction hash:', sentTxHash)
+  const remoteTx = await client.getDataLoader(Chain).getAction(sentTxHash, true)
 
-    executor.evaluateResults(warp, Chain, remoteTx)
-  }
+  executor.evaluateResults(warp, Chain, remoteTx)
+  console.log('Remote transaction:', remoteTx)
 }
 
 const listWarps = () => fs.readdirSync(warpsDir).filter((f) => f.endsWith('.ts') || f.endsWith('.js') || f.endsWith('.json'))
