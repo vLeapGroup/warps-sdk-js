@@ -10,7 +10,7 @@ describe('WarpEvmResults', () => {
       env: 'testnet',
       user: {
         wallets: {
-          evm: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+          ethereum: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
         },
       },
     } as WarpClientConfig
@@ -55,7 +55,7 @@ describe('WarpEvmResults', () => {
       expect(result.success).toBe(true)
       expect(result.warp).toBe(warp)
       expect(result.action).toBe(0)
-      expect(result.user).toBe(mockConfig.user?.wallets?.evm)
+      expect(result.user).toBe(mockConfig.user?.wallets?.ethereum)
       expect(result.txHash).toBe('0x1234567890abcdef')
       expect(result.next).toBe(null)
       expect(result.values.string).toEqual(expect.arrayContaining(['0x1234567890abcdef', '12345', '21000', '20000000000']))
@@ -107,6 +107,29 @@ describe('WarpEvmResults', () => {
       expect(result.success).toBe(true)
       expect(result.values.string).toEqual(expect.arrayContaining(['0x1234567890abcdef', '0', '0', '0']))
       expect(result.values.native).toEqual(expect.arrayContaining(['0x1234567890abcdef', '0', '0', '0']))
+    })
+
+    it('should handle null transaction gracefully', async () => {
+      const warp = {
+        protocol: 'warp',
+        name: 'test-warp',
+        title: 'Test Warp',
+        actions: [],
+      } as any
+
+      const result = await results.getTransactionExecutionResults(warp, null)
+
+      expect(result.success).toBe(false)
+      expect(result.warp).toBe(warp)
+      expect(result.action).toBe(0)
+      expect(result.user).toBe(mockConfig.user?.wallets?.ethereum)
+      expect(result.txHash).toBe('')
+      expect(result.tx).toBe(null)
+      expect(result.next).toBe(null)
+      expect(result.values.string).toEqual([])
+      expect(result.values.native).toEqual([])
+      expect(result.results).toEqual({})
+      expect(result.messages).toEqual({})
     })
   })
 })

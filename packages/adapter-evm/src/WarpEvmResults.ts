@@ -29,7 +29,22 @@ export class WarpEvmResults implements AdapterWarpResults {
     this.provider = new ethers.JsonRpcProvider(apiUrl, network)
   }
 
-  async getTransactionExecutionResults(warp: Warp, tx: ethers.TransactionReceipt): Promise<WarpExecution> {
+  async getTransactionExecutionResults(warp: Warp, tx: ethers.TransactionReceipt | null): Promise<WarpExecution> {
+    if (!tx) {
+      return {
+        success: false,
+        warp,
+        action: 0,
+        user: getWarpWalletAddressFromConfig(this.config, this.chain.name),
+        txHash: '',
+        tx: null,
+        next: null,
+        values: { string: [], native: [] },
+        results: {},
+        messages: {},
+      }
+    }
+
     const success = tx.status === 1
     const gasUsed = tx.gasUsed?.toString() || '0'
     const gasPrice = tx.gasPrice?.toString() || '0'
@@ -52,7 +67,7 @@ export class WarpEvmResults implements AdapterWarpResults {
       success,
       warp,
       action: 0,
-      user: getWarpWalletAddressFromConfig(this.config, 'evm'),
+      user: getWarpWalletAddressFromConfig(this.config, this.chain.name),
       txHash: transactionHash,
       tx,
       next: null,
