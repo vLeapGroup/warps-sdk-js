@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-alpha.30
+
+### Minor Changes
+
+- d005120: update exec results
+
+### Patch Changes
+
+- Updated dependencies [d005120]
+  - @vleap/warps@3.0.0-alpha.116
+
 ## 0.1.0-alpha.29
 
 ### Patch Changes

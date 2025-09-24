@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.64
+
+### Minor Changes
+
+- d005120: update exec results
+
+### Patch Changes
+
+- Updated dependencies [d005120]
+  - @vleap/warps@3.0.0-alpha.116
+
 ## 0.2.0-alpha.63
 
 ### Patch Changes

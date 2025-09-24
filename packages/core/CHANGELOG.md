@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.116
+
+### Minor Changes
+
+- d005120: update exec results
+
 ## 3.0.0-alpha.115
 
 ### Patch Changes
