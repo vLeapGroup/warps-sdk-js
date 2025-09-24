@@ -8,8 +8,12 @@ export class WarpInterpolator {
     private adapter: Adapter
   ) {}
 
-  async apply(config: WarpClientConfig, warp: Warp, envs?: Record<string, any>): Promise<Warp> {
-    const modifiable = this.applyVars(config, warp, envs)
+  async apply(
+    config: WarpClientConfig,
+    warp: Warp,
+    meta: { envs?: Record<string, any>; queries?: Record<string, any> } = {}
+  ): Promise<Warp> {
+    const modifiable = this.applyVars(config, warp, meta)
     return await this.applyGlobals(config, modifiable)
   }
 
@@ -22,7 +26,7 @@ export class WarpInterpolator {
     return modifiable
   }
 
-  applyVars(config: WarpClientConfig, warp: Warp, secrets?: Record<string, any>): Warp {
+  applyVars(config: WarpClientConfig, warp: Warp, meta: { envs?: Record<string, any>; queries?: Record<string, any> } = {}): Warp {
     if (!warp?.vars) return warp
     const wallet = getWarpWalletAddressFromConfig(config, this.adapter.chainInfo.name)
     let modifiable = JSON.stringify(warp)
@@ -34,15 +38,16 @@ export class WarpInterpolator {
     Object.entries(warp.vars).forEach(([placeholder, value]) => {
       if (typeof value !== 'string') {
         modify(placeholder, value)
-      } else if (value.startsWith(`${WarpConstants.Vars.Query}:`)) {
-        if (!config.currentUrl) throw new Error('WarpUtils: currentUrl config is required to prepare vars')
-        const queryParamName = value.split(`${WarpConstants.Vars.Query}:`)[1]
-        const queryParamValue = new URLSearchParams(config.currentUrl.split('?')[1]).get(queryParamName)
-        if (queryParamValue) modify(placeholder, queryParamValue)
-      } else if (value.startsWith(`${WarpConstants.Vars.Env}:`)) {
+      } else if (value.startsWith(WarpConstants.Vars.Query + WarpConstants.ArgParamsSeparator)) {
+        const queryName = value.split(WarpConstants.Vars.Query + WarpConstants.ArgParamsSeparator)[1]
+        const queryValueInUrl = config.currentUrl ? new URLSearchParams(config.currentUrl.split('?')[1]).get(queryName) : null
+        const queryValueInMeta = meta.queries?.[queryName] || null
+        const queryValue = queryValueInMeta || queryValueInUrl
+        if (queryValue) modify(placeholder, queryValue)
+      } else if (value.startsWith(WarpConstants.Vars.Env + WarpConstants.ArgParamsSeparator)) {
         const envVar = value.slice(WarpConstants.Vars.Env.length + 1)
         const [envVarName, _envVarDescription] = envVar.split(WarpConstants.ArgCompositeSeparator)
-        const combinedEnvs = { ...config.vars, ...secrets }
+        const combinedEnvs = { ...config.vars, ...meta.envs }
         const envVarValue = combinedEnvs?.[envVarName]
         if (envVarValue) modify(placeholder, envVarValue)
       } else if (value === WarpConstants.Source.UserWallet && wallet) {

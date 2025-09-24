@@ -41,12 +41,17 @@ export class WarpFactory {
     return this.serializer
   }
 
-  async createExecutable(warp: Warp, actionIndex: number, inputs: string[], envs?: Record<string, any>): Promise<WarpExecutable> {
+  async createExecutable(
+    warp: Warp,
+    actionIndex: number,
+    inputs: string[],
+    meta: { envs?: Record<string, any>; queries?: Record<string, any> } = {}
+  ): Promise<WarpExecutable> {
     const action = getWarpActionByIndex(warp, actionIndex) as WarpTransferAction | WarpContractAction | WarpCollectAction
     if (!action) throw new Error('WarpFactory: Action not found')
     const chain = await this.getChainInfoForAction(action, inputs)
     const adapter = findWarpAdapterForChain(chain.name, this.adapters)
-    const preparedWarp = await new WarpInterpolator(this.config, adapter).apply(this.config, warp, envs)
+    const preparedWarp = await new WarpInterpolator(this.config, adapter).apply(this.config, warp, meta)
     const preparedAction = getWarpActionByIndex(preparedWarp, actionIndex) as WarpTransferAction | WarpContractAction | WarpCollectAction
 
     const resolvedInputs = await this.getResolvedInputs(chain.name, preparedAction, inputs)
@@ -61,7 +66,7 @@ export class WarpFactory {
 
     const valueInput = modifiedInputs.find((i) => i.input.position === 'value')?.value || null
     const valueInAction = 'value' in preparedAction ? preparedAction.value : null
-    let value = BigInt(valueInput?.split(':')[1] || valueInAction || 0)
+    let value = BigInt(valueInput?.split(WarpConstants.ArgParamsSeparator)[1] || valueInAction || 0)
 
     const transferInputs = modifiedInputs.filter((i) => i.input.position === 'transfer' && i.value).map((i) => i.value) as string[]
     const transfersInAction = 'transfers' in preparedAction ? preparedAction.transfers : []

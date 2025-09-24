@@ -210,7 +210,7 @@ describe('WarpInterpolator', () => {
       }
 
       const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
-      const result = await interpolator.apply(testConfig, warp, secrets)
+      const result = await interpolator.apply(testConfig, warp, { envs: secrets })
       expect((result.actions[0] as WarpTransferAction).value).toBe('secret-api-key-from-secrets-456')
     })
 
@@ -299,6 +299,126 @@ describe('WarpInterpolator', () => {
       const interpolator = new WarpInterpolator(configWithSecrets, createMockAdapter())
       const result = await interpolator.apply(configWithSecrets, warp)
       expect((result.actions[0] as WarpTransferAction).value).toBe('empty-desc-api-key')
+    })
+  })
+
+  describe('query params from meta', () => {
+    it('interpolates query vars from meta.queries', async () => {
+      const warp = {
+        ...createMockWarp(),
+        vars: {
+          TOKEN_ADDRESS: 'query:token',
+          AMOUNT: 'query:amount',
+        },
+        actions: [
+          {
+            type: 'transfer' as const,
+            label: 'Transfer',
+            address: 'erd1abc',
+            value: '{{TOKEN_ADDRESS}}',
+            inputs: [],
+          } as WarpTransferAction,
+        ],
+      }
+
+      const meta = {
+        queries: {
+          token: '0x1234567890abcdef',
+          amount: '1000000',
+        },
+      }
+
+      const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+      const result = await interpolator.apply(testConfig, warp, meta)
+      expect((result.actions[0] as WarpTransferAction).value).toBe('0x1234567890abcdef')
+    })
+
+    it('prioritizes meta.queries over URL query params', async () => {
+      const warp = {
+        ...createMockWarp(),
+        vars: {
+          TOKEN_ADDRESS: 'query:token',
+        },
+        actions: [
+          {
+            type: 'transfer' as const,
+            label: 'Transfer',
+            address: 'erd1abc',
+            value: '{{TOKEN_ADDRESS}}',
+            inputs: [],
+          } as WarpTransferAction,
+        ],
+      }
+
+      const configWithUrl = {
+        ...testConfig,
+        currentUrl: 'https://example.com?token=url-token-value',
+      }
+
+      const meta = {
+        queries: {
+          token: 'meta-token-value',
+        },
+      }
+
+      const interpolator = new WarpInterpolator(configWithUrl, createMockAdapter())
+      const result = await interpolator.apply(configWithUrl, warp, meta)
+      expect((result.actions[0] as WarpTransferAction).value).toBe('meta-token-value')
+    })
+
+    it('falls back to URL query params when meta.queries is not provided', async () => {
+      const warp = {
+        ...createMockWarp(),
+        vars: {
+          TOKEN_ADDRESS: 'query:token',
+        },
+        actions: [
+          {
+            type: 'transfer' as const,
+            label: 'Transfer',
+            address: 'erd1abc',
+            value: '{{TOKEN_ADDRESS}}',
+            inputs: [],
+          } as WarpTransferAction,
+        ],
+      }
+
+      const configWithUrl = {
+        ...testConfig,
+        currentUrl: 'https://example.com?token=url-token-value',
+      }
+
+      const interpolator = new WarpInterpolator(configWithUrl, createMockAdapter())
+      const result = await interpolator.apply(configWithUrl, warp)
+      expect((result.actions[0] as WarpTransferAction).value).toBe('url-token-value')
+    })
+
+    it('handles missing query params gracefully', async () => {
+      const warp = {
+        ...createMockWarp(),
+        vars: {
+          TOKEN_ADDRESS: 'query:nonexistent',
+        },
+        actions: [
+          {
+            type: 'transfer' as const,
+            label: 'Transfer',
+            address: 'erd1abc',
+            value: '{{TOKEN_ADDRESS}}',
+            inputs: [],
+          } as WarpTransferAction,
+        ],
+      }
+
+      const meta = {
+        queries: {
+          token: 'existing-token',
+        },
+      }
+
+      const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+      const result = await interpolator.apply(testConfig, warp, meta)
+      expect((result.actions[0] as WarpTransferAction).value).toBe('{{TOKEN_ADDRESS}}')
     })
   })
 })

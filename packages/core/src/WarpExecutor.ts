@@ -48,10 +48,10 @@ export class WarpExecutor {
   async execute(
     warp: Warp,
     inputs: string[],
-    env?: Record<string, any>
+    meta: { envs?: Record<string, any>; queries?: Record<string, any> } = {}
   ): Promise<{ tx: WarpAdapterGenericTransaction | null; chain: WarpChainInfo | null; immediateExecution: WarpExecution | null }> {
     const { action, actionIndex } = findWarpExecutableAction(warp)
-    const executable = await this.factory.createExecutable(warp, actionIndex, inputs, env)
+    const executable = await this.factory.createExecutable(warp, actionIndex, inputs, meta)
 
     if (action.type === 'collect') {
       const result = await this.executeCollect(executable)
