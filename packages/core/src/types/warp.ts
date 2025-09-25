@@ -64,6 +64,7 @@ export type WarpTransferAction = {
   value?: string
   transfers?: string[]
   inputs?: WarpActionInput[]
+  primary?: boolean
   auto?: boolean
   next?: string
 }
@@ -80,6 +81,7 @@ export type WarpContractAction = {
   transfers?: string[]
   abi?: string
   inputs?: WarpActionInput[]
+  primary?: boolean
   auto?: boolean
   next?: string
 }
@@ -93,6 +95,7 @@ export type WarpQueryAction = {
   args?: string[]
   abi?: string
   inputs?: WarpActionInput[]
+  primary?: boolean
   auto?: boolean
   next?: string
 }
@@ -107,6 +110,7 @@ export type WarpCollectAction = {
     headers?: Record<string, string>
   }
   inputs?: WarpActionInput[]
+  primary?: boolean
   auto?: boolean
   next?: string
 }
@@ -117,6 +121,7 @@ export type WarpLinkAction = {
   description?: string | null
   url: string
   inputs?: WarpActionInput[]
+  primary?: boolean
   auto?: boolean
 }
 

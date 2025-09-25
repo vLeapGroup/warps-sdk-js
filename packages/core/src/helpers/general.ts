@@ -1,5 +1,5 @@
 import { WarpProtocolVersions } from '../config'
-import { Adapter, ProtocolName, Warp, WarpAction, WarpChain } from '../types'
+import { Adapter, ProtocolName, Warp, WarpAction, WarpActionType, WarpChain } from '../types'
 
 export const findWarpAdapterForChain = (chain: WarpChain, adapters: Adapter[]): Adapter => {
   const adapter = adapters.find((a) => a.chainInfo.name.toLowerCase() === chain.toLowerCase())
@@ -21,6 +21,16 @@ export const getLatestProtocolIdentifier = (name: ProtocolName): string => {
 }
 
 export const getWarpActionByIndex = (warp: Warp, index: number) => warp?.actions[index - 1]
+
+export const getWarpPrimaryAction = (warp: Warp) => {
+  const actionWithPrimary = warp.actions.find((action) => action.primary === true)
+  if (actionWithPrimary) return actionWithPrimary
+  const detectableTypes: WarpActionType[] = ['transfer', 'contract', 'query', 'collect']
+  const reversedActions = warp.actions.reverse()
+  const primaryAction = reversedActions.find((action) => detectableTypes.includes(action.type))
+  if (!primaryAction) throw new Error(`Warp has no primary action: ${warp.meta?.hash}`)
+  return primaryAction
+}
 
 export const isWarpActionAutoExecute = (action: WarpAction) => {
   if (action.auto === false) return false // actions can be explicitly set to not auto execute

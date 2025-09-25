@@ -14,14 +14,15 @@ describe('WarpBuilder', () => {
         type: 'link',
         label: 'test link',
         url: 'https://test.com',
+        primary: true,
       })
-      .build(false)
+      .build()
 
     expect(warp.name).toBe('testname')
     expect(warp.title).toBe('test title')
     expect(warp.description).toBe('test description')
     expect(warp.preview).toBe('test preview')
-    expect(warp.actions).toEqual([{ type: 'link', label: 'test link', url: 'https://test.com' }])
+    expect(warp.actions).toEqual([{ type: 'link', label: 'test link', url: 'https://test.com', primary: true }])
   })
 
   it('getDescriptionPreview - strips all html', () => {

@@ -17,7 +17,9 @@ describe('WarpValidator', () => {
 
   it('validates a valid warp', async () => {
     const validator = new WarpValidator(defaultConfig)
-    const warp = createWarp()
+    const warp = createWarp({
+      actions: [{ type: 'transfer', label: 'test', description: 'test', address: 'erd1...' }],
+    })
     const result = await validator.validate(warp)
     expect(result.valid).toBe(true)
     expect(result.errors).toHaveLength(0)
@@ -86,6 +88,7 @@ describe('WarpValidator', () => {
     it('allows uppercase variable names', async () => {
       const validator = new WarpValidator(defaultConfig)
       const warp = createWarp({
+        actions: [{ type: 'transfer', label: 'test', description: 'test', address: 'erd1...' }],
         vars: {
           TEST: 'value',
           ANOTHER_TEST: 'value',
@@ -99,6 +102,7 @@ describe('WarpValidator', () => {
     it('allows uppercase result names', async () => {
       const validator = new WarpValidator(defaultConfig)
       const warp = createWarp({
+        actions: [{ type: 'transfer', label: 'test', description: 'test', address: 'erd1...' }],
         results: {
           TEST: 'value',
           ANOTHER_TEST: 'value',
@@ -111,7 +115,10 @@ describe('WarpValidator', () => {
 
     it('returns error when variable name is not uppercase', async () => {
       const validator = new WarpValidator(defaultConfig)
-      const warp = createWarp({ vars: { test: 'value' } })
+      const warp = createWarp({
+        actions: [{ type: 'transfer', label: 'test', description: 'test', address: 'erd1...' }],
+        vars: { test: 'value' },
+      })
       const result = await validator.validate(warp)
       expect(result.valid).toBe(false)
       expect(result.errors).toContain("Variable name 'test' must be uppercase")
@@ -119,7 +126,10 @@ describe('WarpValidator', () => {
 
     it('returns error when result name is not uppercase', async () => {
       const validator = new WarpValidator(defaultConfig)
-      const warp = createWarp({ results: { test: 'value' } })
+      const warp = createWarp({
+        actions: [{ type: 'transfer', label: 'test', description: 'test', address: 'erd1...' }],
+        results: { test: 'value' },
+      })
       const result = await validator.validate(warp)
       expect(result.valid).toBe(false)
       expect(result.errors).toContain("Result name 'test' must be uppercase")
@@ -259,19 +269,69 @@ describe('WarpValidator', () => {
     })
   })
 
+  describe('validatePrimaryAction', () => {
+    it('returns error when no detectable actions exist', async () => {
+      const validator = new WarpValidator(defaultConfig)
+      const warp = createWarp({
+        actions: [{ type: 'link', label: 'test link', url: 'https://test.com' }],
+      })
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(false)
+      expect(result.errors).toContain('Warp has no primary action: undefined')
+    })
+
+    it('returns error when actions array is empty', async () => {
+      const validator = new WarpValidator(defaultConfig)
+      const warp = createWarp({
+        actions: [],
+      })
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(false)
+      expect(result.errors).toContain('Warp has no primary action: undefined')
+    })
+
+    it('validates successfully when detectable actions exist', async () => {
+      const validator = new WarpValidator(defaultConfig)
+      const warp = createWarp({
+        actions: [
+          { type: 'link', label: 'test link', url: 'https://test.com' },
+          { type: 'transfer', label: 'test transfer', address: 'erd1...' },
+        ],
+      })
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(true)
+      expect(result.errors).toHaveLength(0)
+    })
+
+    it('validates successfully when action has primary flag', async () => {
+      const configWithoutSchema = createMockConfig({ schema: undefined })
+      const validator = new WarpValidator(configWithoutSchema)
+      const warp = createWarp({
+        actions: [{ type: 'transfer', label: 'test transfer', description: 'test', address: 'erd1...', primary: true }],
+      })
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(true)
+      expect(result.errors).toHaveLength(0)
+    })
+  })
+
   describe('validateSchema', () => {
     it('validates against schema', async () => {
       const validator = new WarpValidator(defaultConfig)
-      const warp = createWarp()
+      const warp = createWarp({
+        actions: [{ type: 'transfer', label: 'test', description: 'test', address: 'erd1...' }],
+      })
       const result = await validator.validate(warp)
       expect(result.valid).toBe(true)
       expect(result.errors).toHaveLength(0)
     })
 
     it('returns error when schema validation fails', async () => {
-      const validator = new WarpValidator(defaultConfig)
+      const configWithSchema = createMockConfig({ schema: { warp: 'https://example.com/schema.json' } })
+      const validator = new WarpValidator(configWithSchema)
       const warp = createWarp({
         actions: [
+          { type: 'transfer', label: 'valid action', description: 'test', address: 'erd1...' },
           // @ts-expect-error - intentionally invalid action type
           { type: 'invalid', label: 'test', description: 'test' },
         ],
