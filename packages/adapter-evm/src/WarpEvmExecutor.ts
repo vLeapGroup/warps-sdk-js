@@ -235,7 +235,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         // EIP-1559 pricing
         return {
           ...tx,
-          chainId: BigInt(this.chain.chainId),
+          chainId: parseInt(this.chain.chainId),
           gasLimit: gasEstimate,
           maxFeePerGas: feeData.maxFeePerGas,
           maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
@@ -244,7 +244,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         // Legacy pricing
         return {
           ...tx,
-          chainId: BigInt(this.chain.chainId),
+          chainId: parseInt(this.chain.chainId),
           gasLimit: gasEstimate,
           gasPrice: feeData.gasPrice,
         }
@@ -252,7 +252,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         // Fallback to default values
         return {
           ...tx,
-          chainId: BigInt(this.chain.chainId),
+          chainId: parseInt(this.chain.chainId),
           gasLimit: gasEstimate,
           gasPrice: ethers.parseUnits(WarpEvmConstants.GasPrice.Default, 'wei'),
         }
@@ -276,7 +276,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
 
       return {
         ...tx,
-        chainId: BigInt(this.chain.chainId),
+        chainId: parseInt(this.chain.chainId),
         gasLimit: defaultGasLimit,
         gasPrice: ethers.parseUnits(WarpEvmConstants.GasPrice.Default, 'wei'),
       }
