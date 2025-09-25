@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-alpha.36
+
+### Patch Changes
+
+- dc967eb: fix evm chain id type
+
 ## 0.2.0-alpha.35
 
 ### Minor Changes
