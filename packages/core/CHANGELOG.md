@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.120
+
+### Patch Changes
+
+- 01e5545: update primary action func
+
 ## 3.0.0-alpha.119
 
 ### Patch Changes
