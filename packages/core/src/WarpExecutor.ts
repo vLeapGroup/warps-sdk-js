@@ -98,17 +98,19 @@ export class WarpExecutor {
           safeWindow.open(url, '_blank')
         }
       })
+
+      return { tx: null, chain: executable.chain, immediateExecution: null }
     }
 
     if (action.type === 'collect') {
       const result = await this.executeCollect(executable)
       if (result.success) {
         await this.callHandler(() => this.handlers?.onActionExecuted?.({ action: actionIndex, chain: null, execution: result, tx: null }))
-        return { tx: null, chain: null, immediateExecution: result }
+        return { tx: null, chain: executable.chain, immediateExecution: result }
       } else {
         this.handlers?.onError?.({ message: JSON.stringify(result.values) })
       }
-      return { tx: null, chain: null, immediateExecution: null }
+      return { tx: null, chain: executable.chain, immediateExecution: null }
     }
 
     const adapter = findWarpAdapterForChain(executable.chain.name, this.adapters)
