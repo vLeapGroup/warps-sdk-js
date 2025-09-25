@@ -62,14 +62,16 @@ export class WarpEvmWallet implements AdapterWarpWallet {
         // Give earlier transactions higher gas price for priority
         if (i > 0) {
           const priorityReduction = BigInt(i * 1000000000) // 1 gwei per transaction
+          const minGasPrice = BigInt(1000000000) // 1 gwei minimum
 
           if (tx.maxFeePerGas && tx.maxPriorityFeePerGas) {
-            tx.maxFeePerGas = tx.maxFeePerGas - priorityReduction
-            tx.maxPriorityFeePerGas = tx.maxPriorityFeePerGas - priorityReduction
+            tx.maxFeePerGas = tx.maxFeePerGas > priorityReduction ? tx.maxFeePerGas - priorityReduction : minGasPrice
+            tx.maxPriorityFeePerGas =
+              tx.maxPriorityFeePerGas > priorityReduction ? tx.maxPriorityFeePerGas - priorityReduction : minGasPrice
             // Remove gasPrice if it exists to avoid EIP-1559 conflict
             delete tx.gasPrice
           } else if (tx.gasPrice) {
-            tx.gasPrice = tx.gasPrice - priorityReduction
+            tx.gasPrice = tx.gasPrice > priorityReduction ? tx.gasPrice - priorityReduction : minGasPrice
             // Remove EIP-1559 fields if they exist to avoid conflict
             delete tx.maxFeePerGas
             delete tx.maxPriorityFeePerGas
