@@ -4,7 +4,7 @@ export const sign = jest.fn((message, privateKey) => new Uint8Array(64)) // Retu
 export const verify = jest.fn(() => true)
 export const utils = {
   randomBytes: jest.fn(() => new Uint8Array(32)),
-  randomPrivateKey: jest.fn(() => new Uint8Array(32)),
+  randomSecretKey: jest.fn(() => new Uint8Array(32)),
 }
 export const Point = jest.fn()
 export const CURVE = {}

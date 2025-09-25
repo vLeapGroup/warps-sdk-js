@@ -71,8 +71,7 @@ export class WarpFastsetWallet implements AdapterWarpWallet {
   }
 
   generate(): WarpWalletDetails {
-    // @ts-ignore
-    const privateKey = ed.utils.randomPrivateKey()
+    const privateKey = ed.utils.randomSecretKey()
     const publicKey = ed.getPublicKey(privateKey)
     const address = FastsetClient.encodeBech32Address(publicKey)
     return { address, privateKey: uint8ArrayToHex(privateKey), mnemonic: null }

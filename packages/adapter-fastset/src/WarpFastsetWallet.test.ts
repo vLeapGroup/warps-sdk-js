@@ -47,7 +47,7 @@ jest.mock('./sdk/ed25519-setup', () => ({
   ed: {
     getPublicKey: jest.fn((privateKey) => new Uint8Array(32)),
     utils: {
-      randomPrivateKey: jest.fn(() => new Uint8Array(32)),
+      randomSecretKey: jest.fn(() => new Uint8Array(32)),
     },
     sign: jest.fn((message, privateKey) => new Uint8Array(64).fill(1)), // Fill with 1s so hex conversion works
   },
