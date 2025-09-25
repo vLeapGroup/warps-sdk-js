@@ -27,7 +27,7 @@ export type WarpMessageName = string
 
 export type Warp = {
   protocol: string
-  chain: WarpChain
+  chain?: WarpChain
   name: string
   title: string
   description: string | null
@@ -56,7 +56,6 @@ export type WarpActionType = 'transfer' | 'contract' | 'query' | 'collect' | 'li
 
 export type WarpTransferAction = {
   type: WarpActionType
-  chain?: WarpChain
   label: string
   description?: string | null
   address?: string
