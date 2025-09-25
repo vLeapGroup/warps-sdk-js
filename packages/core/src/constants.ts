@@ -81,3 +81,5 @@ export const WarpInputTypes = {
   Asset: 'asset',
   Hex: 'hex',
 }
+
+export const safeWindow = typeof window !== 'undefined' ? window : ({ open: () => {} } as Window)

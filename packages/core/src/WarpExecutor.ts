@@ -1,4 +1,4 @@
-import { WarpConstants } from './constants'
+import { safeWindow, WarpConstants } from './constants'
 import {
   applyResultsToMessages,
   extractCollectResults,
@@ -24,6 +24,7 @@ import {
   WarpCollectAction,
   WarpExecutable,
   WarpExecution,
+  WarpLinkAction,
 } from './types'
 import { WarpFactory } from './WarpFactory'
 import { WarpLogger } from './WarpLogger'
@@ -87,6 +88,16 @@ export class WarpExecutor {
   ): Promise<{ tx: WarpAdapterGenericTransaction | null; chain: WarpChainInfo | null; immediateExecution: WarpExecution | null }> {
     const action = getWarpActionByIndex(warp, actionIndex)
     const executable = await this.factory.createExecutable(warp, actionIndex, inputs, meta)
+
+    if (action.type === 'link') {
+      await this.callHandler(() => {
+        const url = (action as WarpLinkAction).url
+
+        safeWindow.open(url, '_blank')
+
+        return Promise.resolve()
+      })
+    }
 
     if (action.type === 'collect') {
       const result = await this.executeCollect(executable)
