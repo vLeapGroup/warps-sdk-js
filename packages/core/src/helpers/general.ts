@@ -22,14 +22,14 @@ export const getLatestProtocolIdentifier = (name: ProtocolName): string => {
 
 export const getWarpActionByIndex = (warp: Warp, index: number) => warp?.actions[index - 1]
 
-export const getWarpPrimaryAction = (warp: Warp) => {
+export const getWarpPrimaryAction = (warp: Warp): { action: WarpAction; index: number } => {
   const actionWithPrimary = warp.actions.find((action) => action.primary === true)
-  if (actionWithPrimary) return actionWithPrimary
+  if (actionWithPrimary) return { action: actionWithPrimary, index: warp.actions.indexOf(actionWithPrimary) }
   const detectableTypes: WarpActionType[] = ['transfer', 'contract', 'query', 'collect']
-  const reversedActions = warp.actions.reverse()
+  const reversedActions = [...warp.actions].reverse()
   const primaryAction = reversedActions.find((action) => detectableTypes.includes(action.type))
   if (!primaryAction) throw new Error(`Warp has no primary action: ${warp.meta?.hash}`)
-  return primaryAction
+  return { action: primaryAction, index: warp.actions.indexOf(primaryAction) }
 }
 
 export const isWarpActionAutoExecute = (action: WarpAction) => {

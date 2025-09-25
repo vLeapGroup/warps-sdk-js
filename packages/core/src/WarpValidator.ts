@@ -32,7 +32,7 @@ export class WarpValidator {
 
   private validatePrimaryAction(warp: Warp): ValidationError[] {
     try {
-      const primaryAction = getWarpPrimaryAction(warp)
+      const { action: primaryAction } = getWarpPrimaryAction(warp)
       return primaryAction ? [] : ['Primary action is required']
     } catch (error) {
       return [error instanceof Error ? error.message : 'Primary action is required']

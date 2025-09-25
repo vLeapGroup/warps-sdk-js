@@ -1,5 +1,5 @@
-import { getWarpPrimaryAction } from './general'
 import { Warp, WarpAction, WarpActionType } from '../types'
+import { getWarpPrimaryAction } from './general'
 
 describe('getWarpPrimaryAction', () => {
   const createMockWarp = (actions: WarpAction[], meta?: { hash: string }): Warp => ({
@@ -12,26 +12,23 @@ describe('getWarpPrimaryAction', () => {
     meta,
   })
 
-  const createMockAction = (
-    type: WarpActionType,
-    primary?: boolean,
-    label = 'Test Action'
-  ): WarpAction => ({
+  const createMockAction = (type: WarpActionType, primary?: boolean, label = 'Test Action'): WarpAction => ({
     type,
     label,
     primary,
   })
 
   describe('when an action has primary: true', () => {
-    it('should return the action with primary: true', () => {
+    it('should return the action with primary: true and correct index', () => {
       const primaryAction = createMockAction('transfer', true, 'Primary Transfer')
       const secondaryAction = createMockAction('contract', false, 'Secondary Contract')
       const warp = createMockWarp([secondaryAction, primaryAction])
 
       const result = getWarpPrimaryAction(warp)
 
-      expect(result).toBe(primaryAction)
-      expect(result.label).toBe('Primary Transfer')
+      expect(result.action).toBe(primaryAction)
+      expect(result.action.label).toBe('Primary Transfer')
+      expect(result.index).toBe(1) // primaryAction is at index 1
     })
 
     it('should return the first action with primary: true when multiple exist', () => {
@@ -41,13 +38,14 @@ describe('getWarpPrimaryAction', () => {
 
       const result = getWarpPrimaryAction(warp)
 
-      expect(result).toBe(firstPrimary)
-      expect(result.label).toBe('First Primary')
+      expect(result.action).toBe(firstPrimary)
+      expect(result.action.label).toBe('First Primary')
+      expect(result.index).toBe(0) // firstPrimary is at index 0
     })
   })
 
   describe('when no action has primary: true', () => {
-    it('should return the last detectable action (transfer)', () => {
+    it('should return the last detectable action (transfer) and correct index', () => {
       const linkAction = createMockAction('link', false, 'Link Action')
       const transferAction = createMockAction('transfer', false, 'Transfer Action')
       const contractAction = createMockAction('contract', false, 'Contract Action')
@@ -55,30 +53,33 @@ describe('getWarpPrimaryAction', () => {
 
       const result = getWarpPrimaryAction(warp)
 
-      expect(result).toBe(contractAction)
-      expect(result.label).toBe('Contract Action')
+      expect(result.action).toBe(contractAction)
+      expect(result.action.label).toBe('Contract Action')
+      expect(result.index).toBe(2) // contractAction is at index 2
     })
 
-    it('should return the last detectable action (query)', () => {
+    it('should return the last detectable action (query) and correct index', () => {
       const linkAction = createMockAction('link', false, 'Link Action')
       const queryAction = createMockAction('query', false, 'Query Action')
       const warp = createMockWarp([linkAction, queryAction])
 
       const result = getWarpPrimaryAction(warp)
 
-      expect(result).toBe(queryAction)
-      expect(result.label).toBe('Query Action')
+      expect(result.action).toBe(queryAction)
+      expect(result.action.label).toBe('Query Action')
+      expect(result.index).toBe(1) // queryAction is at index 1
     })
 
-    it('should return the last detectable action (collect)', () => {
+    it('should return the last detectable action (collect) and correct index', () => {
       const linkAction = createMockAction('link', false, 'Link Action')
       const collectAction = createMockAction('collect', false, 'Collect Action')
       const warp = createMockWarp([linkAction, collectAction])
 
       const result = getWarpPrimaryAction(warp)
 
-      expect(result).toBe(collectAction)
-      expect(result.label).toBe('Collect Action')
+      expect(result.action).toBe(collectAction)
+      expect(result.action.label).toBe('Collect Action')
+      expect(result.index).toBe(1) // collectAction is at index 1
     })
 
     it('should return the last detectable action when mixed with non-detectable types', () => {
@@ -90,8 +91,9 @@ describe('getWarpPrimaryAction', () => {
 
       const result = getWarpPrimaryAction(warp)
 
-      expect(result).toBe(contractAction)
-      expect(result.label).toBe('Contract Action')
+      expect(result.action).toBe(contractAction)
+      expect(result.action.label).toBe('Contract Action')
+      expect(result.index).toBe(3) // contractAction is at index 3
     })
   })
 
@@ -125,8 +127,9 @@ describe('getWarpPrimaryAction', () => {
 
       const result = getWarpPrimaryAction(warp)
 
-      expect(result).toBe(transferAction)
-      expect(result.label).toBe('Single Transfer')
+      expect(result.action).toBe(transferAction)
+      expect(result.action.label).toBe('Single Transfer')
+      expect(result.index).toBe(0) // single action at index 0
     })
 
     it('should handle single primary action', () => {
@@ -135,8 +138,9 @@ describe('getWarpPrimaryAction', () => {
 
       const result = getWarpPrimaryAction(warp)
 
-      expect(result).toBe(primaryAction)
-      expect(result.label).toBe('Primary Link')
+      expect(result.action).toBe(primaryAction)
+      expect(result.action.label).toBe('Primary Link')
+      expect(result.index).toBe(0) // single action at index 0
     })
 
     it('should prioritize primary flag over detectable types', () => {
@@ -146,8 +150,23 @@ describe('getWarpPrimaryAction', () => {
 
       const result = getWarpPrimaryAction(warp)
 
-      expect(result).toBe(primaryLinkAction)
-      expect(result.label).toBe('Primary Link')
+      expect(result.action).toBe(primaryLinkAction)
+      expect(result.action.label).toBe('Primary Link')
+      expect(result.index).toBe(1) // primaryLinkAction is at index 1
+    })
+
+    it('should not modify the original actions array when finding last detectable action', () => {
+      const linkAction = createMockAction('link', false, 'Link Action')
+      const transferAction = createMockAction('transfer', false, 'Transfer Action')
+      const contractAction = createMockAction('contract', false, 'Contract Action')
+      const originalActions = [linkAction, transferAction, contractAction]
+      const warp = createMockWarp(originalActions)
+
+      const result = getWarpPrimaryAction(warp)
+
+      expect(result.action).toBe(contractAction)
+      expect(result.index).toBe(2) // contractAction is at index 2
+      expect(warp.actions).toEqual(originalActions) // original array should not be modified
     })
   })
 })
