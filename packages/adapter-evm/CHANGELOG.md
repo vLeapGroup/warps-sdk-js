@@ -1,5 +1,23 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-alpha.35
+
+### Minor Changes
+
+- f442d80: add evm abi encoding
+- 3bd42a7: add multi-action exec
+
+### Patch Changes
+
+- e870fd7: update evm fee handling
+- c26f671: fix evm results
+- Updated dependencies [6a6fa41]
+- Updated dependencies [68aadaf]
+- Updated dependencies [735334a]
+- Updated dependencies [3bd42a7]
+- Updated dependencies [d919b6e]
+  - @vleap/warps@3.0.0-alpha.118
+
 ## 0.2.0-alpha.34
 
 ### Patch Changes

@@ -1,5 +1,27 @@
 # @warps/playground
 
+## 0.2.0-alpha.65
+
+### Minor Changes
+
+- 3bd42a7: add multi-action exec
+
+### Patch Changes
+
+- Updated dependencies [e870fd7]
+- Updated dependencies [6a6fa41]
+- Updated dependencies [f442d80]
+- Updated dependencies [c26f671]
+- Updated dependencies [68aadaf]
+- Updated dependencies [735334a]
+- Updated dependencies [3bd42a7]
+- Updated dependencies [d919b6e]
+  - @vleap/warps-adapter-evm@0.2.0-alpha.35
+  - @vleap/warps@3.0.0-alpha.118
+  - @vleap/warps-adapter-multiversx@0.2.0-alpha.65
+  - @vleap/warps-adapter-fastset@0.1.0-alpha.31
+  - @vleap/warps-adapter-sui@0.2.0-alpha.44
+
 ## 0.2.0-alpha.64
 
 ### Patch Changes

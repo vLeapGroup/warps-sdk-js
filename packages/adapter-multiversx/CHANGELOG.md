@@ -1,5 +1,20 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.65
+
+### Minor Changes
+
+- 3bd42a7: add multi-action exec
+
+### Patch Changes
+
+- Updated dependencies [6a6fa41]
+- Updated dependencies [68aadaf]
+- Updated dependencies [735334a]
+- Updated dependencies [3bd42a7]
+- Updated dependencies [d919b6e]
+  - @vleap/warps@3.0.0-alpha.118
+
 ## 0.2.0-alpha.64
 
 ### Minor Changes

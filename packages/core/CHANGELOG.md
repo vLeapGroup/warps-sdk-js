@@ -1,5 +1,18 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.118
+
+### Minor Changes
+
+- 3bd42a7: add multi-action exec
+- d919b6e: add vars query description support
+
+### Patch Changes
+
+- 6a6fa41: add action link interceptor
+- 68aadaf: add exec meta queries
+- 735334a: add action link exec
+
 ## 3.0.0-alpha.117
 
 ### Patch Changes
