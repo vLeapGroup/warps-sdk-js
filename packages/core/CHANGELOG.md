@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.119
+
+### Patch Changes
+
+- f372b98: add warp primary actions
+
 ## 3.0.0-alpha.118
 
 ### Minor Changes
