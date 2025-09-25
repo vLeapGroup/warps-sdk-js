@@ -92,10 +92,11 @@ export class WarpExecutor {
     if (action.type === 'link') {
       await this.callHandler(() => {
         const url = (action as WarpLinkAction).url
-
-        safeWindow.open(url, '_blank')
-
-        return Promise.resolve()
+        if (this.config.interceptors?.openLink) {
+          this.config.interceptors.openLink(url)
+        } else {
+          safeWindow.open(url, '_blank')
+        }
       })
     }
 

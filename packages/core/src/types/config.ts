@@ -45,6 +45,9 @@ export type WarpClientConfig = {
   cache?: ClientCacheConfig
   transform?: ClientTransformConfig
   index?: ClientIndexConfig
+  interceptors?: {
+    openLink?: (url: string) => Promise<void>
+  }
 }
 
 export type WarpCacheConfig = {
