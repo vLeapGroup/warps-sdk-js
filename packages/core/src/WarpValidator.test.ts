@@ -10,6 +10,7 @@ describe('WarpValidator', () => {
     name: 'test',
     title: 'test',
     description: 'test',
+    chain: 'multiversx',
     actions: [],
     ...overrides,
   })

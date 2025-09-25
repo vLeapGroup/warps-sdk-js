@@ -4,7 +4,7 @@ import { ClientCacheConfig } from './cache'
 import { WarpChainAccount, WarpChainAction, WarpChainAsset } from './chain'
 import { WarpChainEnv } from './general'
 import { WarpRegistryConfigInfo, WarpRegistryInfo } from './registry'
-import { WarpExecution } from './results'
+import { WarpActionExecution } from './results'
 import { ClientIndexConfig } from './search'
 import { ClientTransformConfig } from './transform'
 import {
@@ -137,11 +137,11 @@ export interface AdapterWarpBrandBuilder {
 
 export interface AdapterWarpExecutor {
   createTransaction(executable: WarpExecutable): Promise<WarpAdapterGenericTransaction>
-  executeQuery(executable: WarpExecutable): Promise<WarpExecution>
+  executeQuery(executable: WarpExecutable): Promise<WarpActionExecution>
 }
 
 export interface AdapterWarpResults {
-  getTransactionExecutionResults(warp: Warp, actionIndex: WarpActionIndex, tx: WarpAdapterGenericRemoteTransaction): Promise<WarpExecution>
+  getActionExecution(warp: Warp, actionIndex: WarpActionIndex, tx: WarpAdapterGenericRemoteTransaction): Promise<WarpActionExecution>
 }
 
 export interface AdapterWarpSerializer {

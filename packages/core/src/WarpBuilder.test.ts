@@ -15,7 +15,7 @@ describe('WarpBuilder', () => {
         label: 'test link',
         url: 'https://test.com',
       })
-      .build()
+      .build(false)
 
     expect(warp.name).toBe('testname')
     expect(warp.title).toBe('test title')

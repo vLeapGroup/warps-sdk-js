@@ -15,11 +15,11 @@ import {
   getNextInfo,
   getWarpActionByIndex,
   getWarpWalletAddressFromConfig,
+  WarpActionExecution,
   WarpChainAssetValue,
   WarpChainInfo,
   WarpClientConfig,
   WarpExecutable,
-  WarpExecution,
   WarpQueryAction,
 } from '@vleap/warps'
 import { AdapterTypeRegistry } from '@vleap/warps/src/types'
@@ -102,7 +102,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
     })
   }
 
-  async executeQuery(executable: WarpExecutable): Promise<WarpExecution> {
+  async executeQuery(executable: WarpExecutable): Promise<WarpActionExecution> {
     const action = getWarpActionByIndex(executable.warp, executable.action) as WarpQueryAction
     if (action.type !== 'query') throw new Error(`WarpMultiversxExecutor: Invalid action type for executeQuery: ${action.type}`)
     const abi = await this.abi.getAbiForAction(action)

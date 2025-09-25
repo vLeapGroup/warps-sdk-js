@@ -64,7 +64,7 @@ describe('WarpFastsetResults', () => {
         ],
       }
 
-      const result = await results.getTransactionExecutionResults(warp, tx)
+      const result = await results.getActionExecution(warp, 1, tx)
 
       expect(result).toEqual({
         success: true,
@@ -117,7 +117,7 @@ describe('WarpFastsetResults', () => {
         logs: [],
       }
 
-      const result = await results.getTransactionExecutionResults(warp, tx)
+      const result = await results.getActionExecution(warp, 1, tx)
 
       expect(result.success).toBe(false)
       expect(result.txHash).toBe('0x123456789abcdef')
@@ -137,7 +137,7 @@ describe('WarpFastsetResults', () => {
         hash: '0x123456789abcdef',
       }
 
-      const result = await results.getTransactionExecutionResults(warp, tx)
+      const result = await results.getActionExecution(warp, 1, tx)
 
       expect(result.success).toBe(true)
       expect(result.values.string).toEqual(['0x123456789abcdef', '0', expect.any(String)])
@@ -156,8 +156,8 @@ describe('WarpFastsetResults', () => {
       const tx1 = { status: 1, hash: '0x123456789abcdef' }
       const tx2 = { success: true, hash: '0x123456789abcdef' }
 
-      const result1 = await results.getTransactionExecutionResults(warp, tx1)
-      const result2 = await results.getTransactionExecutionResults(warp, tx2)
+      const result1 = await results.getActionExecution(warp, 1, tx1)
+      const result2 = await results.getActionExecution(warp, 1, tx2)
 
       expect(result1.success).toBe(true)
       expect(result2.success).toBe(true)

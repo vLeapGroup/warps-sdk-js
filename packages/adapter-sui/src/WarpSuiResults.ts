@@ -9,11 +9,12 @@ import {
   parseResultsOutIndex,
   ResolvedInput,
   Warp,
+  WarpActionExecution,
   WarpActionIndex,
+  WarpAdapterGenericRemoteTransaction,
   WarpChainInfo,
   WarpClientConfig,
   WarpConstants,
-  WarpExecution,
   WarpExecutionResults,
 } from '@vleap/warps'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
@@ -31,8 +32,11 @@ export class WarpSuiResults implements AdapterWarpResults {
     this.client = new SuiClient({ url: apiUrl })
   }
 
-  async getTransactionExecutionResults(warp: Warp, actionIndex: WarpActionIndex, tx: any): Promise<WarpExecution> {
-    // SUI: tx is a TransactionBlockResponse
+  async getActionExecution(
+    warp: Warp,
+    actionIndex: WarpActionIndex,
+    tx: WarpAdapterGenericRemoteTransaction
+  ): Promise<WarpActionExecution> {
     const results = await this.extractContractResults(warp, actionIndex, tx, [])
     const next = getNextInfo(this.config, [], warp, actionIndex, results)
     const messages = applyResultsToMessages(warp, results.results)

@@ -263,37 +263,47 @@ describe('getChainInfoForAction', () => {
     }
     adapter.registry.getChainInfo = mockGetChainInfo
     const factory = new WarpFactory(testConfig, [adapter])
-    const action: WarpContractAction = {
-      type: 'contract',
-      label: 'test',
-      description: 'test',
-      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
-      func: 'testFunc',
-      args: [],
-      gasLimit: 1000000,
-      inputs: [
-        { name: 'targetChain', type: 'string', position: 'chain', source: 'field' },
-        { name: 'amount', type: 'biguint', position: 'value', source: 'field' },
+    const warp = {
+      ...createMockWarp(),
+      actions: [
+        {
+          type: 'contract',
+          label: 'test',
+          description: 'test',
+          address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+          func: 'testFunc',
+          args: [],
+          gasLimit: 1000000,
+          inputs: [
+            { name: 'targetChain', type: 'string', position: 'chain', source: 'field' },
+            { name: 'amount', type: 'biguint', position: 'value', source: 'field' },
+          ],
+        } as WarpContractAction,
       ],
     }
-    const chainInfo = await factory.getChainInfoForWarp(action, ['string:mainnet', 'biguint:1000000000000000000'])
+    const chainInfo = await factory.getChainInfoForWarp(warp, ['string:mainnet', 'biguint:1000000000000000000'])
     expect(chainInfo.name).toBe('mainnet')
   })
 
   it('uses default chain when no chain position is specified', async () => {
-    const action: WarpContractAction = {
-      type: 'contract',
-      label: 'test',
-      description: 'test',
-      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
-      func: 'testFunc',
-      args: [],
-      gasLimit: 1000000,
-      inputs: [{ name: 'amount', type: 'biguint', position: 'value', source: 'field' }],
+    const warp = {
+      ...createMockWarp(),
+      actions: [
+        {
+          type: 'contract',
+          label: 'test',
+          description: 'test',
+          address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+          func: 'testFunc',
+          args: [],
+          gasLimit: 1000000,
+          inputs: [{ name: 'amount', type: 'biguint', position: 'value', source: 'field' }],
+        } as WarpContractAction,
+      ],
     }
 
     const factory = new WarpFactory(testConfig, [createMockAdapter()])
-    const chainInfo = await factory.getChainInfoForWarp(action, ['biguint:1000000000000000000'])
+    const chainInfo = await factory.getChainInfoForWarp(warp, ['biguint:1000000000000000000'])
 
     expect(chainInfo.displayName).toBe('MultiversX') // Default chain name from config
   })
@@ -332,53 +342,68 @@ describe('getChainInfoForAction', () => {
     }
     adapter.registry.getChainInfo = mockGetChainInfo
     const factory = new WarpFactory(testConfig, [adapter])
-    const action: WarpContractAction = {
-      type: 'contract',
-      label: 'test',
-      description: 'test',
-      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
-      func: 'testFunc',
-      args: [],
-      gasLimit: 1000000,
-      inputs: [
-        { name: 'targetChain', type: 'string', position: 'chain', source: 'field' }, // At index 0
-        { name: 'amount', type: 'biguint', position: 'value', source: 'field' },
+    const warp = {
+      ...createMockWarp(),
+      actions: [
+        {
+          type: 'contract',
+          label: 'test',
+          description: 'test',
+          address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+          func: 'testFunc',
+          args: [],
+          gasLimit: 1000000,
+          inputs: [
+            { name: 'targetChain', type: 'string', position: 'chain', source: 'field' }, // At index 0
+            { name: 'amount', type: 'biguint', position: 'value', source: 'field' },
+          ],
+        } as WarpContractAction,
       ],
     }
-    const chainInfo = await factory.getChainInfoForWarp(action, ['string:testnet', 'biguint:500'])
+    const chainInfo = await factory.getChainInfoForWarp(warp, ['string:testnet', 'biguint:500'])
     expect(chainInfo.displayName).toBe('Testnet')
   })
 
   it('throws error when chain input is not found at specified position', async () => {
-    const action: WarpContractAction = {
-      type: 'contract',
-      label: 'test',
-      description: 'test',
-      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
-      func: 'testFunc',
-      args: [],
-      gasLimit: 1000000,
-      inputs: [{ name: 'targetChain', type: 'string', position: 'chain', source: 'field' }],
+    const warp = {
+      ...createMockWarp(),
+      actions: [
+        {
+          type: 'contract',
+          label: 'test',
+          description: 'test',
+          address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+          func: 'testFunc',
+          args: [],
+          gasLimit: 1000000,
+          inputs: [{ name: 'targetChain', type: 'string', position: 'chain', source: 'field' }],
+        } as WarpContractAction,
+      ],
     }
 
     const factory = new WarpFactory(testConfig, [createMockAdapter()])
-    await expect(factory.getChainInfoForWarp(action, [])).rejects.toThrow('Chain input not found')
+    await expect(factory.getChainInfoForWarp(warp, [])).rejects.toThrow('Chain input not found')
   })
 
   it('uses default chain when no inputs are provided', async () => {
-    const action: WarpContractAction = {
-      type: 'contract',
-      label: 'test',
-      description: 'test',
-      address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
-      func: 'testFunc',
-      args: [],
-      gasLimit: 1000000,
-      inputs: [{ name: 'targetChain', type: 'string', position: 'chain', source: 'field' }],
+    const warp = {
+      ...createMockWarp(),
+      actions: [
+        {
+          type: 'contract',
+          label: 'test',
+          description: 'test',
+          address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+          func: 'testFunc',
+          args: [],
+          gasLimit: 1000000,
+          inputs: [{ name: 'targetChain', type: 'string', position: 'chain', source: 'field' }],
+        } as WarpContractAction,
+      ],
     }
 
     const factory = new WarpFactory(testConfig, [createMockAdapter()])
-    const chainInfo = await factory.getChainInfoForWarp(action)
+    const chainInfo = await factory.getChainInfoForWarp(warp)
 
     expect(chainInfo.displayName).toBe('MultiversX') // Default chain name from config
   })

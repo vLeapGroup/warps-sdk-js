@@ -16,14 +16,15 @@ import {
   parseResultsOutIndex,
   ResolvedInput,
   Warp,
+  WarpActionExecution,
   WarpActionIndex,
+  WarpAdapterGenericRemoteTransaction,
   WarpCache,
   WarpCacheKey,
   WarpChainInfo,
   WarpClientConfig,
   WarpConstants,
   WarpContractAction,
-  WarpExecution,
   WarpExecutionResults,
 } from '@vleap/warps'
 import { WarpMultiversxAbiBuilder } from './WarpMultiversxAbiBuilder'
@@ -44,7 +45,11 @@ export class WarpMultiversxResults implements AdapterWarpResults {
     this.cache = new WarpCache(config.cache?.type)
   }
 
-  async getTransactionExecutionResults(warp: Warp, actionIndex: WarpActionIndex, tx: TransactionOnNetwork): Promise<WarpExecution> {
+  async getActionExecution(
+    warp: Warp,
+    actionIndex: WarpActionIndex,
+    tx: WarpAdapterGenericRemoteTransaction
+  ): Promise<WarpActionExecution> {
     // Restore inputs via cache as transactions are broadcasted and processed asynchronously
     const inputs: ResolvedInput[] = this.cache.get(WarpCacheKey.WarpExecutable(this.config.env, warp.meta?.hash || '', actionIndex)) ?? []
 

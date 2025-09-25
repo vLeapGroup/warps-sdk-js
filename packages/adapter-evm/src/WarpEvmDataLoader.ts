@@ -132,7 +132,12 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
       const tx = await this.provider.getTransaction(identifier)
       if (!tx) return null
 
-      const receipt = await this.provider.getTransactionReceipt(identifier)
+      let receipt = await this.provider.getTransactionReceipt(identifier)
+
+      if (awaitCompleted && !receipt) {
+        receipt = await tx.wait()
+      }
+
       const block = await this.provider.getBlock(tx.blockNumber || 'latest')
 
       return {

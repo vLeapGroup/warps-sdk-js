@@ -14,29 +14,28 @@ import {
   Adapter,
   ResolvedInput,
   Warp,
+  WarpActionExecution,
   WarpActionIndex,
-  WarpAdapterGenericRemoteTransaction,
   WarpAdapterGenericTransaction,
-  WarpChain,
+  WarpChainAction,
   WarpChainAssetValue,
   WarpChainInfo,
   WarpClientConfig,
   WarpCollectAction,
   WarpExecutable,
-  WarpExecution,
   WarpLinkAction,
 } from './types'
 import { WarpFactory } from './WarpFactory'
 import { WarpLogger } from './WarpLogger'
 
 export type ExecutionHandlers = {
-  onExecuted?: (result: WarpExecution) => void | Promise<void>
+  onExecuted?: (result: WarpActionExecution) => void | Promise<void>
   onError?: (params: { message: string }) => void
   onSignRequest?: (params: { message: string; chain: WarpChainInfo }) => string | Promise<string>
   onActionExecuted?: (params: {
     action: WarpActionIndex
     chain: WarpChainInfo | null
-    execution: WarpExecution | null
+    execution: WarpActionExecution | null
     tx: WarpAdapterGenericTransaction | null
   }) => void
 }
@@ -59,12 +58,12 @@ export class WarpExecutor {
     meta: { envs?: Record<string, any>; queries?: Record<string, any> } = {}
   ): Promise<{
     txs: WarpAdapterGenericTransaction[]
-    chain: WarpChainInfo
-    immediateExecutions: WarpExecution[]
+    chain: WarpChainInfo | null
+    immediateExecutions: WarpActionExecution[]
   }> {
     let txs: WarpAdapterGenericTransaction[] = []
     let chainInfo: WarpChainInfo | null = null
-    let immediateExecutions: WarpExecution[] = []
+    let immediateExecutions: WarpActionExecution[] = []
 
     for (let index = 1; index <= warp.actions.length; index++) {
       const action = getWarpActionByIndex(warp, index)
@@ -75,7 +74,14 @@ export class WarpExecutor {
       if (immediateExecution) immediateExecutions.push(immediateExecution)
     }
 
-    if (!chainInfo) throw new Error('WarpExecutor: Chain not found')
+    if (!chainInfo && txs.length > 0) throw new Error(`WarpExecutor: Chain not found for ${txs.length} transactions`)
+
+    // Call onExecuted handler after all actions are executed – if there are no transactions, call it with the last immediate execution
+    // If there are transactions to be executed, defer onExecuted call to transaction result evaluation
+    if (txs.length === 0 && immediateExecutions.length > 0) {
+      const lastImmediateExecution = immediateExecutions[immediateExecutions.length - 1]
+      await this.callHandler(() => this.handlers?.onExecuted?.(lastImmediateExecution))
+    }
 
     return { txs, chain: chainInfo, immediateExecutions }
   }
@@ -85,32 +91,33 @@ export class WarpExecutor {
     actionIndex: WarpActionIndex,
     inputs: string[],
     meta: { envs?: Record<string, any>; queries?: Record<string, any> } = {}
-  ): Promise<{ tx: WarpAdapterGenericTransaction | null; chain: WarpChainInfo | null; immediateExecution: WarpExecution | null }> {
+  ): Promise<{ tx: WarpAdapterGenericTransaction | null; chain: WarpChainInfo | null; immediateExecution: WarpActionExecution | null }> {
     const action = getWarpActionByIndex(warp, actionIndex)
-    const executable = await this.factory.createExecutable(warp, actionIndex, inputs, meta)
 
     if (action.type === 'link') {
-      await this.callHandler(() => {
+      await this.callHandler(async () => {
         const url = (action as WarpLinkAction).url
         if (this.config.interceptors?.openLink) {
-          this.config.interceptors.openLink(url)
+          await this.config.interceptors.openLink(url)
         } else {
           safeWindow.open(url, '_blank')
         }
       })
 
-      return { tx: null, chain: executable.chain, immediateExecution: null }
+      return { tx: null, chain: null, immediateExecution: null }
     }
+
+    const executable = await this.factory.createExecutable(warp, actionIndex, inputs, meta)
 
     if (action.type === 'collect') {
       const result = await this.executeCollect(executable)
       if (result.success) {
         await this.callHandler(() => this.handlers?.onActionExecuted?.({ action: actionIndex, chain: null, execution: result, tx: null }))
-        return { tx: null, chain: executable.chain, immediateExecution: result }
+        return { tx: null, chain: null, immediateExecution: result }
       } else {
         this.handlers?.onError?.({ message: JSON.stringify(result.values) })
       }
-      return { tx: null, chain: executable.chain, immediateExecution: null }
+      return { tx: null, chain: null, immediateExecution: null }
     }
 
     const adapter = findWarpAdapterForChain(executable.chain.name, this.adapters)
@@ -132,17 +139,50 @@ export class WarpExecutor {
     return { tx, chain: executable.chain, immediateExecution: null }
   }
 
-  async evaluateResults(
-    warp: Warp,
-    actionIndex: WarpActionIndex,
-    chain: WarpChain,
-    tx: WarpAdapterGenericRemoteTransaction
-  ): Promise<void> {
-    const result = await findWarpAdapterForChain(chain, this.adapters).results.getTransactionExecutionResults(warp, actionIndex, tx)
-    await this.callHandler(() => this.handlers?.onExecuted?.(result))
+  async evaluateResults(warp: Warp, actions: WarpChainAction[]): Promise<void> {
+    if (actions.length === 0) return
+    if (warp.actions.length === 0) return
+    if (!this.handlers) return
+
+    const chain = await this.factory.getChainInfoForWarp(warp)
+    const adapter = findWarpAdapterForChain(chain.name, this.adapters)
+
+    const results = (
+      await Promise.all(
+        warp.actions.map(async (action, index) => {
+          if (!isWarpActionAutoExecute(action)) return null
+          if (action.type !== 'transfer' && action.type !== 'contract') return null
+          const chainAction = actions[index]
+          const currentActionIndex = index + 1
+          const result = await adapter.results.getActionExecution(warp, currentActionIndex, chainAction)
+
+          if (result.success) {
+            await this.callHandler(() =>
+              this.handlers?.onActionExecuted?.({
+                action: currentActionIndex,
+                chain: chain,
+                execution: result,
+                tx: chainAction,
+              })
+            )
+          } else {
+            await this.callHandler(() => this.handlers?.onError?.({ message: 'Action failed: ' + JSON.stringify(result.values) }))
+          }
+
+          return result
+        })
+      )
+    ).filter((r) => r !== null)
+
+    if (results.every((r) => r.success)) {
+      const lastResult = results[results.length - 1]
+      await this.callHandler(() => this.handlers?.onExecuted?.(lastResult))
+    } else {
+      await this.callHandler(() => this.handlers?.onError?.({ message: `Warp failed: ${JSON.stringify(results.map((r) => r.values))}` }))
+    }
   }
 
-  private async executeCollect(executable: WarpExecutable, extra?: Record<string, any>): Promise<WarpExecution> {
+  private async executeCollect(executable: WarpExecutable, extra?: Record<string, any>): Promise<WarpActionExecution> {
     const wallet = getWarpWalletAddressFromConfig(this.config, executable.chain.name)
     const collectAction = getWarpActionByIndex(executable.warp, executable.action) as WarpCollectAction
 

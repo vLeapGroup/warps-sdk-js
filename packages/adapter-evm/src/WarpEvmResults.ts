@@ -6,12 +6,15 @@ import {
   parseResultsOutIndex,
   ResolvedInput,
   Warp,
+  WarpActionExecution,
   WarpActionIndex,
+  WarpAdapterGenericRemoteTransaction,
+  WarpChainAction,
   WarpChainInfo,
   WarpClientConfig,
   WarpConstants,
-  WarpExecution,
   WarpExecutionResults,
+  WarpNativeValue,
 } from '@vleap/warps'
 import { ethers } from 'ethers'
 import { WarpEvmSerializer } from './WarpEvmSerializer'
@@ -30,33 +33,71 @@ export class WarpEvmResults implements AdapterWarpResults {
     this.provider = new ethers.JsonRpcProvider(apiUrl, network)
   }
 
-  async getTransactionExecutionResults(
+  async getActionExecution(
     warp: Warp,
     actionIndex: WarpActionIndex,
-    tx: ethers.TransactionReceipt | null
-  ): Promise<WarpExecution> {
+    tx: WarpAdapterGenericRemoteTransaction
+  ): Promise<WarpActionExecution> {
     if (!tx) {
-      return {
-        success: false,
-        warp,
-        action: actionIndex,
-        user: getWarpWalletAddressFromConfig(this.config, this.chain.name),
-        txHash: '',
-        tx: null,
-        next: null,
-        values: { string: [], native: [] },
-        results: {},
-        messages: {},
-      }
+      return this.createFailedExecution(warp, actionIndex)
     }
 
+    // Handle WarpChainAction object (from getActions)
+    if ('status' in tx && typeof tx.status === 'string') {
+      return this.handleWarpChainAction(warp, actionIndex, tx as WarpChainAction)
+    }
+
+    // Handle ethers.TransactionReceipt object (legacy)
+    return this.handleTransactionReceipt(warp, actionIndex, tx as ethers.TransactionReceipt)
+  }
+
+  private createFailedExecution(warp: Warp, actionIndex: WarpActionIndex): WarpActionExecution {
+    return {
+      success: false,
+      warp,
+      action: actionIndex,
+      user: getWarpWalletAddressFromConfig(this.config, this.chain.name),
+      txHash: '',
+      tx: null,
+      next: null,
+      values: { string: [], native: [] },
+      results: {},
+      messages: {},
+    }
+  }
+
+  private handleWarpChainAction(warp: Warp, actionIndex: WarpActionIndex, tx: WarpChainAction): WarpActionExecution {
+    const success = tx.status === 'success'
+    const transactionHash = tx.id || tx.tx?.hash || ''
+    const gasUsed = tx.tx?.gasLimit || '0'
+    const gasPrice = tx.tx?.gasPrice || '0'
+    const blockNumber = tx.tx?.blockNumber || '0'
+
+    const rawValues = [transactionHash, blockNumber, gasUsed, gasPrice]
+    const stringValues = rawValues.map(String)
+
+    return {
+      success,
+      warp,
+      action: actionIndex,
+      user: getWarpWalletAddressFromConfig(this.config, this.chain.name),
+      txHash: transactionHash,
+      tx,
+      next: null,
+      values: { string: stringValues, native: rawValues },
+      results: {},
+      messages: {},
+    }
+  }
+
+  private handleTransactionReceipt(warp: Warp, actionIndex: WarpActionIndex, tx: ethers.TransactionReceipt): WarpActionExecution {
     const success = tx.status === 1
     const gasUsed = tx.gasUsed?.toString() || '0'
     const gasPrice = tx.gasPrice?.toString() || '0'
     const blockNumber = tx.blockNumber?.toString() || '0'
     const transactionHash = tx.hash
 
-    const logs = (tx.logs || []).map((log) => ({
+    const logs = tx.logs.map((log) => ({
       address: log.address,
       topics: [...log.topics],
       data: log.data,
@@ -66,7 +107,7 @@ export class WarpEvmResults implements AdapterWarpResults {
     }))
 
     const rawValues = [transactionHash, blockNumber, gasUsed, gasPrice, ...(logs.length > 0 ? logs : [])]
-    const stringValues = rawValues.map((v) => String(v))
+    const stringValues = rawValues.map(String)
 
     return {
       success,
@@ -84,10 +125,10 @@ export class WarpEvmResults implements AdapterWarpResults {
 
   async extractQueryResults(
     warp: Warp,
-    typedValues: any[],
+    typedValues: unknown[],
     actionIndex: number,
     inputs: ResolvedInput[]
-  ): Promise<{ values: { string: string[]; native: any[] }; results: WarpExecutionResults }> {
+  ): Promise<{ values: { string: string[]; native: WarpNativeValue[] }; results: WarpExecutionResults }> {
     const stringValues = typedValues.map((t) => this.serializer.typedToString(t))
     const nativeValues = typedValues.map((t) => this.serializer.typedToNative(t)[1])
     const values = { string: stringValues, native: nativeValues }
@@ -101,10 +142,10 @@ export class WarpEvmResults implements AdapterWarpResults {
         .slice(1)
         .map((i) => parseInt(i) - 1)
       if (indices.length === 0) return undefined
-      let value: any = nativeValues[indices[0]]
+      let value: unknown = nativeValues[indices[0]]
       for (let i = 1; i < indices.length; i++) {
         if (value === undefined || value === null) return undefined
-        value = value[indices[i]]
+        value = (value as Record<string, unknown>)[indices[i]]
       }
       return value
     }

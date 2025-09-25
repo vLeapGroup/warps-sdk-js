@@ -24,7 +24,7 @@ export const getWarpActionByIndex = (warp: Warp, index: number) => warp?.actions
 
 export const isWarpActionAutoExecute = (action: WarpAction) => {
   if (action.auto === false) return false // actions can be explicitly set to not auto execute
-  if (action.type === 'link') return false // links should not automatically open, unless explicitly set to auto
+  if (action.type === 'link') return action.auto === true // links should not automatically open, unless explicitly set to auto
   return true
 }
 

@@ -5,11 +5,11 @@ import {
   getProviderUrl,
   getWarpActionByIndex,
   getWarpWalletAddressFromConfig,
+  WarpActionExecution,
   WarpChainAssetValue,
   WarpChainInfo,
   WarpClientConfig,
   WarpExecutable,
-  WarpExecution,
   WarpQueryAction,
 } from '@vleap/warps'
 import { ethers } from 'ethers'
@@ -156,7 +156,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
     return this.estimateGasAndSetDefaults(tx, userWallet)
   }
 
-  async executeQuery(executable: WarpExecutable): Promise<WarpExecution> {
+  async executeQuery(executable: WarpExecutable): Promise<WarpActionExecution> {
     const action = getWarpActionByIndex(executable.warp, executable.action) as WarpQueryAction
     if (action.type !== 'query') throw new Error(`WarpEvmExecutor: Invalid action type for executeQuery: ${action.type}`)
     if (!action.func) throw new Error('WarpEvmExecutor: Query action must have a function name')

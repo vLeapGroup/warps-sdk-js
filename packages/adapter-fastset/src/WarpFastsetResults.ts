@@ -5,10 +5,12 @@ import {
   parseResultsOutIndex,
   ResolvedInput,
   Warp,
+  WarpActionExecution,
+  WarpActionIndex,
+  WarpAdapterGenericRemoteTransaction,
   WarpChainInfo,
   WarpClientConfig,
   WarpConstants,
-  WarpExecution,
   WarpExecutionResults,
 } from '@vleap/warps'
 import { WarpFastsetSerializer } from './WarpFastsetSerializer'
@@ -23,7 +25,11 @@ export class WarpFastsetResults implements AdapterWarpResults {
     this.serializer = new WarpFastsetSerializer()
   }
 
-  async getTransactionExecutionResults(warp: Warp, tx: any): Promise<WarpExecution> {
+  async getActionExecution(
+    warp: Warp,
+    actionIndex: WarpActionIndex,
+    tx: WarpAdapterGenericRemoteTransaction
+  ): Promise<WarpActionExecution> {
     const success = this.isTransactionSuccessful(tx)
     const transactionHash = this.extractTransactionHash(tx)
     const blockNumber = this.extractBlockNumber(tx)

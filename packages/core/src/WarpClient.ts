@@ -1,10 +1,4 @@
-import {
-  findWarpAdapterByPrefix,
-  findWarpAdapterForChain,
-  getWarpActionByIndex,
-  getWarpInfoFromIdentifier,
-  isWarpActionAutoExecute,
-} from './helpers'
+import { findWarpAdapterByPrefix, findWarpAdapterForChain, getWarpInfoFromIdentifier } from './helpers'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
 
 import {
@@ -16,6 +10,7 @@ import {
   AdapterWarpSerializer,
   AdapterWarpWallet,
   Warp,
+  WarpActionExecution,
   WarpAdapterGenericRemoteTransaction,
   WarpAdapterGenericTransaction,
   WarpCacheConfig,
@@ -23,7 +18,6 @@ import {
   WarpChainAction,
   WarpChainInfo,
   WarpClientConfig,
-  WarpExecution,
 } from './types'
 import { ExecutionHandlers, WarpExecutor } from './WarpExecutor'
 import { WarpFactory } from './WarpFactory'
@@ -66,8 +60,8 @@ export class WarpClient {
     params: { cache?: WarpCacheConfig; queries?: Record<string, any> } = {}
   ): Promise<{
     txs: WarpAdapterGenericTransaction[]
-    chain: WarpChainInfo
-    immediateExecutions: WarpExecution[]
+    chain: WarpChainInfo | null
+    immediateExecutions: WarpActionExecution[]
     evaluateResults: (remoteTxs: WarpAdapterGenericRemoteTransaction[]) => Promise<void>
   }> {
     const isWarp = typeof warpOrIdentifierOrUrl === 'object'
@@ -83,16 +77,8 @@ export class WarpClient {
       queries: params.queries,
     })
 
-    const evaluateResults = async (tx: WarpAdapterGenericRemoteTransaction[]): Promise<void> => {
-      if (!warp) throw new Error('Warp not found')
-
-      tx.forEach((t, index) => {
-        const currentActionIndex = index + 1
-        const action = getWarpActionByIndex(warp, currentActionIndex)
-        if (!action || !isWarpActionAutoExecute(action)) return
-        if (action.type !== 'transfer' && action.type !== 'contract') return
-        executor.evaluateResults(warp, currentActionIndex, chain.name, t)
-      })
+    const evaluateResults = async (actions: WarpChainAction[]): Promise<void> => {
+      await executor.evaluateResults(warp, actions)
     }
 
     return { txs, chain, immediateExecutions, evaluateResults }

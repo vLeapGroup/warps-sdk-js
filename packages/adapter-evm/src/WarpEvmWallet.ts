@@ -42,6 +42,48 @@ export class WarpEvmWallet implements AdapterWarpWallet {
   }
 
   async signTransactions(txs: WarpAdapterGenericTransaction[]): Promise<WarpAdapterGenericTransaction[]> {
+    if (txs.length === 0) return []
+
+    // For multiple transactions, set sequential nonces and give earlier transactions higher priority
+    if (txs.length > 1) {
+      const wallet = this.getWallet()
+      const address = wallet.address
+
+      // Get current nonce from blockchain
+      const currentNonce = await this.provider.getTransactionCount(address, 'pending')
+
+      const signedTxs = []
+      for (let i = 0; i < txs.length; i++) {
+        const tx = { ...txs[i] }
+
+        // Set sequential nonce
+        tx.nonce = currentNonce + i
+
+        // Give earlier transactions higher gas price for priority
+        if (i > 0) {
+          const priorityReduction = BigInt(i * 1000000000) // 1 gwei per transaction
+
+          if (tx.maxFeePerGas && tx.maxPriorityFeePerGas) {
+            tx.maxFeePerGas = tx.maxFeePerGas - priorityReduction
+            tx.maxPriorityFeePerGas = tx.maxPriorityFeePerGas - priorityReduction
+            // Remove gasPrice if it exists to avoid EIP-1559 conflict
+            delete tx.gasPrice
+          } else if (tx.gasPrice) {
+            tx.gasPrice = tx.gasPrice - priorityReduction
+            // Remove EIP-1559 fields if they exist to avoid conflict
+            delete tx.maxFeePerGas
+            delete tx.maxPriorityFeePerGas
+          }
+        }
+
+        const signedTx = await this.signTransaction(tx)
+        signedTxs.push(signedTx)
+      }
+
+      return signedTxs
+    }
+
+    // Single transaction - use existing logic
     return Promise.all(txs.map(async (tx) => this.signTransaction(tx)))
   }
 
