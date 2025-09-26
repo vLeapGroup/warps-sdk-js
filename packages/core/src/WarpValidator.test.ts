@@ -270,14 +270,17 @@ describe('WarpValidator', () => {
   })
 
   describe('validatePrimaryAction', () => {
-    it('returns error when no detectable actions exist', async () => {
+    it('validates successfully when multiple non-detectable actions exist', async () => {
       const validator = new WarpValidator(defaultConfig)
       const warp = createWarp({
-        actions: [{ type: 'link', label: 'test link', url: 'https://test.com' }],
+        actions: [
+          { type: 'link', label: 'test link 1', url: 'https://test1.com' },
+          { type: 'link', label: 'test link 2', url: 'https://test2.com' },
+        ],
       })
       const result = await validator.validate(warp)
-      expect(result.valid).toBe(false)
-      expect(result.errors).toContain('Warp has no primary action: undefined')
+      expect(result.valid).toBe(true)
+      expect(result.errors).toHaveLength(0)
     })
 
     it('returns error when actions array is empty', async () => {
@@ -288,6 +291,16 @@ describe('WarpValidator', () => {
       const result = await validator.validate(warp)
       expect(result.valid).toBe(false)
       expect(result.errors).toContain('Warp has no primary action: undefined')
+    })
+
+    it('validates successfully when single non-detectable action exists', async () => {
+      const validator = new WarpValidator(defaultConfig)
+      const warp = createWarp({
+        actions: [{ type: 'link', label: 'test link', url: 'https://test.com' }],
+      })
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(true)
+      expect(result.errors).toHaveLength(0)
     })
 
     it('validates successfully when detectable actions exist', async () => {

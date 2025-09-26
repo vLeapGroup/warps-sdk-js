@@ -67,7 +67,7 @@ export class WarpExecutor {
 
     for (let index = 1; index <= warp.actions.length; index++) {
       const action = getWarpActionByIndex(warp, index)
-      if (!isWarpActionAutoExecute(action)) continue
+      if (!isWarpActionAutoExecute(action, warp)) continue
       const { tx, chain, immediateExecution } = await this.executeAction(warp, index, inputs, meta)
       if (tx) txs.push(tx)
       if (chain) chainInfo = chain
@@ -150,7 +150,7 @@ export class WarpExecutor {
     const results = (
       await Promise.all(
         warp.actions.map(async (action, index) => {
-          if (!isWarpActionAutoExecute(action)) return null
+          if (!isWarpActionAutoExecute(action, warp)) return null
           if (action.type !== 'transfer' && action.type !== 'contract') return null
           const chainAction = actions[index]
           const currentActionIndex = index + 1
