@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.121
+
+### Patch Changes
+
+- 6b15123: update primariy action + auto rules
+
 ## 3.0.0-alpha.120
 
 ### Patch Changes
