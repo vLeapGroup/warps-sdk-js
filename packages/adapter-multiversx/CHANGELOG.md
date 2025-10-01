@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.66
+
+### Patch Changes
+
+- 3c58126: update mvx msg signing
+
 ## 0.2.0-alpha.65
 
 ### Minor Changes
