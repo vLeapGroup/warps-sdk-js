@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.122
+
+### Minor Changes
+
+- 430edc0: add automatic input typing
+
 ## 3.0.0-alpha.121
 
 ### Patch Changes
