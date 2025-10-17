@@ -7,10 +7,12 @@ export const createMockChainInfo = (chainName: string = 'multiversx') => ({
   blockTime: 6000,
   addressHrp: 'erd',
   defaultApiUrl: `https://${chainName === 'multiversx' ? 'devnet-api.multiversx' : chainName}.com`,
+  logoUrl: 'https://example.com/chain-logo.png',
   nativeToken: {
     chain: chainName,
     identifier: 'EGLD',
     name: 'MultiversX',
+    symbol: 'EGLD',
     decimals: 18,
     logoUrl: 'https://example.com/egld-logo.png',
   },
@@ -222,6 +224,32 @@ export const createMockAdapter = () => ({
     },
     fetchBrand() {
       return Promise.resolve(null)
+    },
+  },
+  wallet: {
+    signTransaction(tx: any) {
+      return Promise.resolve(tx)
+    },
+    signTransactions(txs: any[]) {
+      return Promise.resolve(txs)
+    },
+    signMessage(message: string) {
+      return Promise.resolve('mock-signature')
+    },
+    sendTransactions(txs: any[]) {
+      return Promise.resolve(['mock-tx-hash'])
+    },
+    sendTransaction(tx: any) {
+      return Promise.resolve('mock-tx-hash')
+    },
+    create(mnemonic: string) {
+      return { address: 'erd1test', privateKey: 'mock-private-key' }
+    },
+    generate() {
+      return { address: 'erd1test', privateKey: 'mock-private-key' }
+    },
+    getAddress() {
+      return 'erd1test'
     },
   },
 })
