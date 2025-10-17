@@ -93,6 +93,7 @@ describe('WarpFactory', () => {
       chain: 'multiversx',
       identifier: 'EGLD',
       name: 'MultiversX',
+      symbol: 'EGLD',
       decimals: 18,
       logoUrl: 'https://example.com/egld-logo.png',
     },
@@ -109,12 +110,10 @@ describe('WarpFactory', () => {
     const factory = new WarpFactory(config, [createMockAdapter()])
     const warp: any = {
       meta: { hash: 'abc' },
-      chain: 'multiversx',
       actions: [
         {
           type: 'transfer',
           label: 'Test',
-          chain: 'multiversx',
           address: 'erd1dest',
           value: '42',
           inputs: [
@@ -135,7 +134,6 @@ describe('WarpFactory', () => {
     const action: WarpAction = {
       type: 'transfer',
       label: 'Test',
-      chain: 'multiversx',
       address: 'erd1dest',
       value: '0',
       inputs: [
@@ -220,6 +218,75 @@ describe('WarpFactory', () => {
       expect(result).toBe('asset:TOKEN-123|150|2')
     })
   })
+
+  describe('getStringTypedInputs', () => {
+    it('types inputs based on action input definitions', () => {
+      const factory = new WarpFactory(config, [createMockAdapter()])
+      const action: WarpAction = {
+        type: 'transfer',
+        label: 'Test',
+        address: 'erd1dest',
+        value: '0',
+        inputs: [
+          { name: 'receiver', type: 'address', position: 'arg:1', source: 'field' },
+          { name: 'amount', type: 'biguint', position: 'value', source: 'field' },
+          { name: 'message', type: 'string', position: 'arg:2', source: 'field' },
+        ],
+      }
+
+      const inputs = ['erd1receiver', '1000000000000000000', 'Hello World']
+      const result = factory.getStringTypedInputs(action, inputs)
+
+      expect(result).toEqual(['address:erd1receiver', 'biguint:1000000000000000000', 'string:Hello World'])
+    })
+
+    it('returns inputs as-is when already typed', () => {
+      const factory = new WarpFactory(config, [createMockAdapter()])
+      const action: WarpAction = {
+        type: 'transfer',
+        label: 'Test',
+        address: 'erd1dest',
+        value: '0',
+        inputs: [{ name: 'receiver', type: 'address', position: 'arg:1', source: 'field' }],
+      }
+
+      const inputs = ['address:erd1receiver']
+      const result = factory.getStringTypedInputs(action, inputs)
+
+      expect(result).toEqual(['address:erd1receiver'])
+    })
+
+    it('handles inputs without corresponding action input definitions', () => {
+      const factory = new WarpFactory(config, [createMockAdapter()])
+      const action: WarpAction = {
+        type: 'transfer',
+        label: 'Test',
+        address: 'erd1dest',
+        value: '0',
+        inputs: [{ name: 'receiver', type: 'address', position: 'arg:1', source: 'field' }],
+      }
+
+      const inputs = ['erd1receiver', 'extra-input']
+      const result = factory.getStringTypedInputs(action, inputs)
+
+      expect(result).toEqual(['address:erd1receiver', 'extra-input'])
+    })
+
+    it('handles actions with no input definitions', () => {
+      const factory = new WarpFactory(config, [createMockAdapter()])
+      const action: WarpAction = {
+        type: 'transfer',
+        label: 'Test',
+        address: 'erd1dest',
+        value: '0',
+      }
+
+      const inputs = ['some-input', 'another-input']
+      const result = factory.getStringTypedInputs(action, inputs)
+
+      expect(result).toEqual(['some-input', 'another-input'])
+    })
+  })
 })
 
 describe('getChainInfoForAction', () => {
@@ -237,7 +304,6 @@ describe('getChainInfoForAction', () => {
       defaultApiUrl: 'https://api.multiversx.com',
       explorerUrl: 'https://explorer.multiversx.com',
       nativeToken: {
-        chain: 'multiversx',
         identifier: 'EGLD',
         name: 'MultiversX',
         decimals: 18,
@@ -254,7 +320,6 @@ describe('getChainInfoForAction', () => {
       addressHrp: 'erd',
       defaultApiUrl: 'https://api.multiversx.com',
       nativeToken: {
-        chain: 'multiversx',
         identifier: 'EGLD',
         name: 'MultiversX',
         decimals: 18,
@@ -316,7 +381,6 @@ describe('getChainInfoForAction', () => {
       addressHrp: 'erd',
       defaultApiUrl: 'https://testnet-api.multiversx.com',
       nativeToken: {
-        chain: 'multiversx',
         identifier: 'EGLD',
         name: 'MultiversX',
         decimals: 18,
@@ -333,7 +397,6 @@ describe('getChainInfoForAction', () => {
       addressHrp: 'erd',
       defaultApiUrl: 'https://testnet-api.multiversx.com',
       nativeToken: {
-        chain: 'multiversx',
         identifier: 'EGLD',
         name: 'MultiversX',
         decimals: 18,

@@ -54,7 +54,8 @@ export class WarpFactory {
     const preparedWarp = await new WarpInterpolator(this.config, adapter).apply(this.config, warp, meta)
     const preparedAction = getWarpActionByIndex(preparedWarp, actionIndex) as WarpTransferAction | WarpContractAction | WarpCollectAction
 
-    const resolvedInputs = await this.getResolvedInputs(chain.name, preparedAction, inputs)
+    const typedInputs = this.getStringTypedInputs(preparedAction, inputs)
+    const resolvedInputs = await this.getResolvedInputs(chain.name, preparedAction, typedInputs)
     const modifiedInputs = this.getModifiedInputs(resolvedInputs)
 
     const destinationInput = modifiedInputs.find((i) => i.input.position === 'receiver')?.value
@@ -112,6 +113,17 @@ export class WarpFactory {
     // Finally use default adapter
     const defaultAdapter = this.adapters[0]
     return defaultAdapter.chainInfo
+  }
+
+  public getStringTypedInputs(action: WarpAction, inputs: string[]): string[] {
+    const actionInputs = action.inputs || []
+
+    return inputs.map((input, index) => {
+      const actionInput = actionInputs[index]
+      if (!actionInput) return input
+      if (input.includes(WarpConstants.ArgParamsSeparator)) return input
+      return this.serializer.nativeToString(actionInput.type, input)
+    })
   }
 
   public async getResolvedInputs(chain: WarpChain, action: WarpAction, inputArgs: string[]): Promise<ResolvedInput[]> {
