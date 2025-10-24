@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.130
+
+### Patch Changes
+
+- 9f77831: add action to alert type
+
 ## 3.0.0-alpha.129
 
 ### Patch Changes
