@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.123
+
+### Patch Changes
+
+- 35c63e0: add i18n
+
 ## 3.0.0-alpha.122
 
 ### Minor Changes
