@@ -1,4 +1,5 @@
 import { WarpChainAsset, WarpChainAssetValue } from './chain'
+import { WarpText } from './i18n'
 
 export type WarpChain = string
 
@@ -29,8 +30,8 @@ export type Warp = {
   protocol: string
   chain?: WarpChain
   name: string
-  title: string
-  description: string | null
+  title: WarpText
+  description: WarpText | null
   bot?: string
   preview?: string
   vars?: Record<WarpVarPlaceholder, string>
@@ -56,8 +57,8 @@ export type WarpActionType = 'transfer' | 'contract' | 'query' | 'collect' | 'li
 
 export type WarpTransferAction = {
   type: WarpActionType
-  label: string
-  description?: string | null
+  label: WarpText
+  description?: WarpText | null
   address?: string
   data?: string
   value?: string
@@ -70,8 +71,8 @@ export type WarpTransferAction = {
 
 export type WarpContractAction = {
   type: WarpActionType
-  label: string
-  description?: string | null
+  label: WarpText
+  description?: WarpText | null
   address?: string
   func?: string | null
   args?: string[]
@@ -87,8 +88,8 @@ export type WarpContractAction = {
 
 export type WarpQueryAction = {
   type: WarpActionType
-  label: string
-  description?: string | null
+  label: WarpText
+  description?: WarpText | null
   address?: string
   func?: string
   args?: string[]
@@ -101,8 +102,8 @@ export type WarpQueryAction = {
 
 export type WarpCollectAction = {
   type: WarpActionType
-  label: string
-  description?: string | null
+  label: WarpText
+  description?: WarpText | null
   destination: {
     url: string
     method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
@@ -116,8 +117,8 @@ export type WarpCollectAction = {
 
 export type WarpLinkAction = {
   type: WarpActionType
-  label: string
-  description?: string | null
+  label: WarpText
+  description?: WarpText | null
   url: string
   inputs?: WarpActionInput[]
   primary?: boolean
@@ -162,7 +163,8 @@ export type WarpActionInputModifier = 'scale'
 export type WarpActionInput = {
   name: string
   as?: string
-  description?: string | null
+  label?: WarpText
+  description?: WarpText | null
   bot?: string
   type: WarpActionInputType
   position?: WarpActionInputPosition
@@ -171,7 +173,7 @@ export type WarpActionInput = {
   min?: number | WarpVarPlaceholder
   max?: number | WarpVarPlaceholder
   pattern?: string
-  patternDescription?: string
+  patternDescription?: WarpText
   options?: string[] | { [key: string]: string }
   modifier?: string
   default?: string | number | boolean

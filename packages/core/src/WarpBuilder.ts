@@ -1,5 +1,5 @@
 import { getLatestProtocolIdentifier, toPreviewText } from './helpers'
-import { BaseWarpBuilder, Warp, WarpAction, WarpChain, WarpClientConfig } from './types'
+import { BaseWarpBuilder, Warp, WarpAction, WarpChain, WarpClientConfig, WarpText } from './types'
 import { WarpValidator } from './WarpValidator'
 
 export class WarpBuilder implements BaseWarpBuilder {
@@ -69,7 +69,7 @@ export class WarpBuilder implements BaseWarpBuilder {
   async build(): Promise<Warp> {
     this.ensure(this.pendingWarp.protocol, 'protocol is required')
     this.ensure(this.pendingWarp.name, 'name is required')
-    this.ensure(this.pendingWarp.title, 'title is required')
+    this.ensureWarpText(this.pendingWarp.title, 'title is required')
     this.ensure(this.pendingWarp.actions.length > 0, 'actions are required')
 
     await this.validate(this.pendingWarp)
@@ -83,6 +83,15 @@ export class WarpBuilder implements BaseWarpBuilder {
 
   private ensure(value: string | null | boolean, errorMessage: string): void {
     if (!value) {
+      throw new Error(errorMessage)
+    }
+  }
+
+  private ensureWarpText(value: WarpText | null, errorMessage: string): void {
+    if (!value) {
+      throw new Error(errorMessage)
+    }
+    if (typeof value === 'object' && !value.en) {
       throw new Error(errorMessage)
     }
   }

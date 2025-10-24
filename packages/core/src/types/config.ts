@@ -3,6 +3,7 @@ import { WarpBrand } from './brand'
 import { ClientCacheConfig } from './cache'
 import { WarpChainAccount, WarpChainAction, WarpChainAsset } from './chain'
 import { WarpChainEnv } from './general'
+import { WarpLanguage } from './i18n'
 import { WarpRegistryConfigInfo, WarpRegistryInfo } from './registry'
 import { WarpActionExecution } from './results'
 import { ClientIndexConfig } from './search'
@@ -35,6 +36,7 @@ export type WarpClientConfig = {
     wallets?: WarpUserWallets
   }
   preferences?: {
+    language?: WarpLanguage
     explorers?: Record<WarpChain, WarpExplorerName>
   }
   providers?: Record<WarpChain, WarpProviderConfig>
