@@ -1,7 +1,7 @@
 import Ajv from 'ajv'
 import { WarpConfig } from './config'
 import { getLatestProtocolIdentifier } from './helpers'
-import { WarpBrand, WarpBrandColors, WarpBrandCta, WarpBrandUrls, WarpClientConfig } from './types'
+import { WarpBrand, WarpBrandColors, WarpBrandCta, WarpBrandUrls, WarpClientConfig, WarpText } from './types'
 
 export class WarpBrandBuilder {
   private config: WarpClientConfig
@@ -58,8 +58,8 @@ export class WarpBrandBuilder {
   }
 
   async build(): Promise<WarpBrand> {
-    this.ensure(this.pendingBrand.name, 'name is required')
-    this.ensure(this.pendingBrand.description, 'description is required')
+    this.ensureWarpText(this.pendingBrand.name, 'name is required')
+    this.ensureWarpText(this.pendingBrand.description, 'description is required')
     this.ensure(this.pendingBrand.logo, 'logo is required')
 
     await this.ensureValidSchema(this.pendingBrand)
@@ -69,6 +69,15 @@ export class WarpBrandBuilder {
 
   private ensure(value: string | null | boolean, errorMessage: string): void {
     if (!value) {
+      throw new Error(`Warp: ${errorMessage}`)
+    }
+  }
+
+  private ensureWarpText(value: WarpText | null, errorMessage: string): void {
+    if (!value) {
+      throw new Error(`Warp: ${errorMessage}`)
+    }
+    if (typeof value === 'object' && Object.keys(value).length === 0) {
       throw new Error(`Warp: ${errorMessage}`)
     }
   }

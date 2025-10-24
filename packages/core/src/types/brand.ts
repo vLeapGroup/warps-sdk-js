@@ -1,9 +1,10 @@
+import { WarpText } from './i18n'
 import { WarpMeta } from './warp'
 
 export type WarpBrand = {
   protocol: string
-  name: string
-  description: string
+  name: WarpText
+  description: WarpText
   logo: string
   urls?: WarpBrandUrls
   colors?: WarpBrandColors
@@ -21,8 +22,8 @@ export type WarpBrandColors = {
 }
 
 export type WarpBrandCta = {
-  title: string
-  description: string
-  label: string
+  title: WarpText
+  description: WarpText
+  label: WarpText
   url: string
 }
