@@ -1,6 +1,6 @@
 {
   "name": "@vleap/warps",
-  "version": "3.0.0-alpha.124",
+  "version": "3.0.0-alpha.125",
   "description": "",
   "type": "module",
   "types": "./dist/index.d.ts",
