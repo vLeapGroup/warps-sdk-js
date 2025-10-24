@@ -41,12 +41,12 @@ export class WarpBuilder implements BaseWarpBuilder {
     return this
   }
 
-  setTitle(title: string): WarpBuilder {
+  setTitle(title: WarpText): WarpBuilder {
     this.pendingWarp.title = title
     return this
   }
 
-  setDescription(description: string): WarpBuilder {
+  setDescription(description: WarpText): WarpBuilder {
     this.pendingWarp.description = description
     return this
   }

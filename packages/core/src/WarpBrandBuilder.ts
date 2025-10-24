@@ -27,12 +27,12 @@ export class WarpBrandBuilder {
     return brand
   }
 
-  setName(name: string): WarpBrandBuilder {
+  setName(name: WarpText): WarpBrandBuilder {
     this.pendingBrand.name = name
     return this
   }
 
-  setDescription(description: string): WarpBrandBuilder {
+  setDescription(description: WarpText): WarpBrandBuilder {
     this.pendingBrand.description = description
     return this
   }
