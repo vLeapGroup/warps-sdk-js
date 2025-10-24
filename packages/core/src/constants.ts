@@ -25,6 +25,8 @@ export const WarpConstants = {
     Hash: 'hash' as WarpIdType,
   },
 
+  IdentifierAliasPrefix: '@',
+
   Globals: {
     UserWallet: {
       Placeholder: 'USER_WALLET',

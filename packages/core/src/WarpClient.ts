@@ -1,3 +1,4 @@
+import { WarpConstants } from './constants'
 import { findWarpAdapterByPrefix, findWarpAdapterForChain, getWarpInfoFromIdentifier } from './helpers'
 import { resolveWarpText } from './helpers/i18n'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
@@ -70,8 +71,18 @@ export class WarpClient {
     const isUrl = !isWarp && warpOrIdentifierOrUrl.startsWith('http') && warpOrIdentifierOrUrl.endsWith('.json')
 
     let warp: Warp | null = isWarp ? warpOrIdentifierOrUrl : null
-    if (!warp && isUrl) warp = (await (await fetch(warpOrIdentifierOrUrl)).json()) as Warp
-    if (!warp) warp = (await this.detectWarp(warpOrIdentifierOrUrl as string, params.cache)).warp
+
+    if (!warp && isUrl) {
+      const response = await fetch(warpOrIdentifierOrUrl)
+      if (!response.ok) throw new Error('WarpClient: executeWarp - invalid url')
+      warp = (await response.json()) as Warp
+    }
+
+    if (!warp) {
+      const identifier = (warpOrIdentifierOrUrl as string).replace(WarpConstants.IdentifierAliasPrefix, '')
+      warp = (await this.detectWarp(identifier, params.cache)).warp
+    }
+
     if (!warp) throw new Error('Warp not found')
 
     const executor = this.createExecutor(handlers)

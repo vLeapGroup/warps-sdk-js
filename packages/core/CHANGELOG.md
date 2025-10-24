@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.129
+
+### Patch Changes
+
+- update client detection
+
 ## 3.0.0-alpha.128
 
 ### Minor Changes
