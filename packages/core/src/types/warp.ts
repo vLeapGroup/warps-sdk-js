@@ -1,3 +1,4 @@
+import { WarpAlerts } from './alerts'
 import { WarpChainAsset, WarpChainAssetValue } from './chain'
 import { WarpText } from './i18n'
 
@@ -39,6 +40,7 @@ export type Warp = {
   next?: string
   results?: Record<WarpResultName, WarpResulutionPath>
   messages?: Record<WarpMessageName, string>
+  alerts?: WarpAlerts
   meta?: WarpMeta
 }
 
