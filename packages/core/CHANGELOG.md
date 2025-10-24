@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.126
+
+### Patch Changes
+
+- e145b00: update types
+
 ## 3.0.0-alpha.125
 
 ### Patch Changes
