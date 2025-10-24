@@ -6,6 +6,7 @@ export type WarpAlert = {
   trigger: string
   subject: WarpText
   body: WarpText
+  action?: string
 }
 
 export type WarpAlerts = Record<WarpAlertName, WarpAlert>
