@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.128
+
+### Minor Changes
+
+- 5c50caf: add alert types
+
 ## 3.0.0-alpha.127
 
 ### Patch Changes
