@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.124
+
+### Minor Changes
+
+- c51a381: add brand i18
+
 ## 3.0.0-alpha.123
 
 ### Patch Changes
