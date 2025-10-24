@@ -7,7 +7,9 @@
     "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "packages:publish": "turbo run build lint test && changeset publish",
-    "typegen": "ts-json-schema-generator --path 'packages/core/src/types/index.ts' --type 'Warp' --tsconfig 'tsconfig.typegen.json' --out 'warp-schema.json'",
+    "typegen": "npm run typegen:warp && npm run typegen:brand",
+    "typegen:warp": "ts-json-schema-generator --path 'packages/core/src/types/index.ts' --type 'Warp' --tsconfig 'tsconfig.typegen.json' --out 'warp-schema.json'",
+    "typegen:brand": "ts-json-schema-generator --path 'packages/core/src/types/index.ts' --type 'WarpBrand' --tsconfig 'tsconfig.typegen.json' --out 'brand-schema.json'",
     "play": "turbo run build && npx tsx packages/playground/playground.ts"
   },
   "devDependencies": {

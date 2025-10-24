@@ -25,3 +25,4 @@ yarn-error.log*
 # generated files
 warp-schema.json
 *.key
+brand-schema.json
