@@ -1,4 +1,5 @@
 import { findWarpAdapterByPrefix, findWarpAdapterForChain, getWarpInfoFromIdentifier } from './helpers'
+import { resolveWarpText } from './helpers/i18n'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
 
 import {
@@ -19,6 +20,7 @@ import {
   WarpChainInfo,
   WarpClientConfig,
 } from './types'
+import { WarpText } from './types/i18n'
 import { ExecutionHandlers, WarpExecutor } from './WarpExecutor'
 import { WarpFactory } from './WarpFactory'
 import { WarpIndex } from './WarpIndex'
@@ -161,5 +163,9 @@ export class WarpClient {
 
   createSerializer(chain: WarpChain): AdapterWarpSerializer {
     return findWarpAdapterForChain(chain, this.adapters).serializer
+  }
+
+  resolveText(warpText: WarpText): string {
+    return resolveWarpText(warpText, this.config)
   }
 }

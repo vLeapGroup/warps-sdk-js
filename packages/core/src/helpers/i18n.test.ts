@@ -7,7 +7,7 @@ describe('i18n helpers', () => {
     it('should return string text as-is', () => {
       const text: WarpText = 'Simple text'
       expect(resolveWarpText(text)).toBe('Simple text')
-      expect(resolveWarpText(text, 'es')).toBe('Simple text')
+      expect(resolveWarpText(text)).toBe('Simple text')
     })
 
     it('should resolve i18n text with requested language', () => {
@@ -16,9 +16,9 @@ describe('i18n helpers', () => {
         es: 'Hola',
         fr: 'Bonjour',
       }
-      expect(resolveWarpText(text, 'es')).toBe('Hola')
-      expect(resolveWarpText(text, 'fr')).toBe('Bonjour')
-      expect(resolveWarpText(text, 'en')).toBe('Hello')
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'es' } })).toBe('Hola')
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'fr' } })).toBe('Bonjour')
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'en' } })).toBe('Hello')
     })
 
     it('should fallback to English when requested language is not available', () => {
@@ -26,8 +26,8 @@ describe('i18n helpers', () => {
         en: 'Hello',
         es: 'Hola',
       }
-      expect(resolveWarpText(text, 'fr')).toBe('Hello')
-      expect(resolveWarpText(text, 'de')).toBe('Hello')
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'fr' } })).toBe('Hello')
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'de' } })).toBe('Hello')
     })
 
     it('should fallback to any available language when English is not available', () => {
@@ -35,24 +35,24 @@ describe('i18n helpers', () => {
         es: 'Hola',
         fr: 'Bonjour',
       }
-      expect(resolveWarpText(text, 'en')).toBe('Hola')
-      expect(resolveWarpText(text, 'de')).toBe('Hola')
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'en' } })).toBe('Hola')
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'de' } })).toBe('Hola')
     })
 
     it('should handle German-only Warp', () => {
       const text: WarpI18nText = {
         de: 'Hallo Welt',
       }
-      expect(resolveWarpText(text, 'de')).toBe('Hallo Welt')
-      expect(resolveWarpText(text, 'en')).toBe('Hallo Welt') // Falls back to available language
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'de' } })).toBe('Hallo Welt')
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'en' } })).toBe('Hallo Welt') // Falls back to available language
     })
 
     it('should handle Spanish-only Warp', () => {
       const text: WarpI18nText = {
         es: 'Hola Mundo',
       }
-      expect(resolveWarpText(text, 'es')).toBe('Hola Mundo')
-      expect(resolveWarpText(text, 'en')).toBe('Hola Mundo') // Falls back to available language
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'es' } })).toBe('Hola Mundo')
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'en' } })).toBe('Hola Mundo') // Falls back to available language
     })
 
     it('should return empty string for invalid text', () => {
@@ -79,8 +79,8 @@ describe('i18n helpers', () => {
         es: 'Hola',
         fr: 'Bonjour',
       } as any
-      expect(resolveWarpText(text, 'en')).toBe('Hola')
-      expect(resolveWarpText(text, 'de')).toBe('Hola')
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'en' } })).toBe('Hola')
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'de' } })).toBe('Hola')
     })
   })
 
@@ -146,8 +146,8 @@ describe('i18n helpers', () => {
         fr: 'Bonjour!',
         de: 'Hallo!',
       }
-      expect(resolveWarpText(text, 'es')).toBe('¡Hola!')
-      expect(resolveWarpText(text, 'fr')).toBe('Bonjour!')
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'es' } })).toBe('¡Hola!')
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'fr' } })).toBe('Bonjour!')
     })
 
     it('should handle empty strings in translations', () => {
@@ -157,8 +157,8 @@ describe('i18n helpers', () => {
         fr: 'Bonjour',
       }
       // Empty string is a valid translation, so it should be returned
-      expect(resolveWarpText(text, 'es')).toBe('')
-      expect(resolveWarpText(text, 'fr')).toBe('Bonjour')
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'es' } })).toBe('')
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'fr' } })).toBe('Bonjour')
     })
 
     it('should handle very long translations', () => {
@@ -167,7 +167,7 @@ describe('i18n helpers', () => {
         en: 'Hello',
         es: longText,
       }
-      expect(resolveWarpText(text, 'es')).toBe(longText)
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'es' } })).toBe(longText)
     })
 
     it('should handle unicode characters', () => {
@@ -177,9 +177,9 @@ describe('i18n helpers', () => {
         ja: 'こんにちは',
         ru: 'Привет',
       }
-      expect(resolveWarpText(text, 'zh')).toBe('你好')
-      expect(resolveWarpText(text, 'ja')).toBe('こんにちは')
-      expect(resolveWarpText(text, 'ru')).toBe('Привет')
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'zh' } })).toBe('你好')
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'ja' } })).toBe('こんにちは')
+      expect(resolveWarpText(text, { env: 'mainnet', preferences: { language: 'ru' } })).toBe('Привет')
     })
   })
 
@@ -196,7 +196,7 @@ describe('i18n helpers', () => {
           language: 'es',
         },
       }
-      expect(resolveWarpText(text, undefined, config)).toBe('Hola')
+      expect(resolveWarpText(text, config)).toBe('Hola')
     })
 
     it('should prioritize provided language over config language', () => {
@@ -211,7 +211,7 @@ describe('i18n helpers', () => {
           language: 'es',
         },
       }
-      expect(resolveWarpText(text, 'fr', config)).toBe('Bonjour')
+      expect(resolveWarpText(text, { ...config, preferences: { language: 'fr' } })).toBe('Bonjour')
     })
 
     it('should fallback to English when config language is not available', () => {
@@ -225,7 +225,7 @@ describe('i18n helpers', () => {
           language: 'fr',
         },
       }
-      expect(resolveWarpText(text, undefined, config)).toBe('Hello')
+      expect(resolveWarpText(text, config)).toBe('Hello')
     })
 
     it('should default to English when no config or language is provided', () => {
@@ -244,7 +244,7 @@ describe('i18n helpers', () => {
       const config: WarpClientConfig = {
         env: 'mainnet',
       }
-      expect(resolveWarpText(text, undefined, config)).toBe('Hello')
+      expect(resolveWarpText(text, config)).toBe('Hello')
     })
   })
 })

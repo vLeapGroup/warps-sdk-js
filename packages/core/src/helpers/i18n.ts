@@ -1,15 +1,12 @@
 import { WarpClientConfig } from '../types/config'
-import { WarpI18nText, WarpLanguage, WarpText } from '../types/i18n'
+import { WarpI18nText, WarpText } from '../types/i18n'
 
-export const resolveWarpText = (text: WarpText, language?: WarpLanguage, config?: WarpClientConfig): string => {
-  const targetLanguage = language || config?.preferences?.language || 'en'
+export const resolveWarpText = (text: WarpText, config?: WarpClientConfig): string => {
+  const targetLanguage = config?.preferences?.language || 'en'
   if (typeof text === 'string') return text
 
   if (typeof text === 'object' && text !== null) {
-    // Try the requested language first
     if (targetLanguage in text) return text[targetLanguage]
-
-    // Fallback to English if available
     if ('en' in text) return text.en
 
     // Fallback to any available language
