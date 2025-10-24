@@ -3,7 +3,7 @@ import { WarpActionInputPosition, WarpActionInputSource, WarpActionInputType, Wa
 
 export const WarpProtocolVersions = {
   Warp: '3.0.0',
-  Brand: '0.1.0',
+  Brand: '0.2.0',
   Abi: '0.1.0',
 }
 
