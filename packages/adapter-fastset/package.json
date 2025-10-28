@@ -26,21 +26,21 @@
   ],
   "devDependencies": {
     "@types/jest": "^30.0.0",
-    "jest": "^30.1.3",
-    "jest-environment-jsdom": "^30.1.2",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
     "jest-fetch-mock": "^3.0.3",
-    "ts-jest": "^29.4.2",
+    "ts-jest": "^29.4.5",
     "tsup": "^8.5.0",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
-    "@mysten/bcs": "^1.8.0",
+    "@mysten/bcs": "^1.9.2",
     "@noble/ed25519": "^3.0.0",
-    "@noble/hashes": "^2.0.0",
-    "@scure/bip39": "^2.0.0",
+    "@noble/hashes": "^2.0.1",
+    "@scure/bip39": "^2.0.1",
     "@vleap/warps": "^3.0.0-alpha.118",
     "bech32": "^2.0.0",
     "buffer": "^6.0.3"

@@ -19,7 +19,7 @@
     "@vleap/warps-adapter-sui": "^0.2.0-alpha.44"
   },
   "devDependencies": {
-    "ts-node": "^10.9.1",
-    "typescript": "^5.0.0"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }
