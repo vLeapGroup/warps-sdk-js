@@ -33,7 +33,8 @@ export const getWarpInfoFromIdentifier = (
   prefixedIdentifier: string
 ): { chainPrefix: string; type: WarpIdType; identifier: string; identifierBase: string } | null => {
   const decoded = decodeURIComponent(prefixedIdentifier).trim()
-  const base = decoded.split('?')[0]
+  const identifierWithoutAliasMarker = decoded.replace(WarpConstants.IdentifierAliasMarker, '')
+  const base = identifierWithoutAliasMarker.split('?')[0]
   const parts = splitBySeparators(base)
 
   // Handle 64-character hex hash (no separator)
@@ -41,7 +42,7 @@ export const getWarpInfoFromIdentifier = (
     return {
       chainPrefix: WarpConstants.IdentifierChainDefault,
       type: WarpConstants.IdentifierType.Hash,
-      identifier: decoded,
+      identifier: identifierWithoutAliasMarker,
       identifierBase: base,
     }
   }
@@ -55,7 +56,9 @@ export const getWarpInfoFromIdentifier = (
   if (parts.length === 3) {
     const [chainPrefix, type, identifier] = parts
     if (type === WarpConstants.IdentifierType.Alias || type === WarpConstants.IdentifierType.Hash) {
-      const identifierWithQuery = decoded.includes('?') ? identifier + decoded.substring(decoded.indexOf('?')) : identifier
+      const identifierWithQuery = identifierWithoutAliasMarker.includes('?')
+        ? identifier + identifierWithoutAliasMarker.substring(identifierWithoutAliasMarker.indexOf('?'))
+        : identifier
       return {
         chainPrefix,
         type: type as WarpIdType,
@@ -69,7 +72,9 @@ export const getWarpInfoFromIdentifier = (
   if (parts.length === 2) {
     const [type, identifier] = parts
     if (type === WarpConstants.IdentifierType.Alias || type === WarpConstants.IdentifierType.Hash) {
-      const identifierWithQuery = decoded.includes('?') ? identifier + decoded.substring(decoded.indexOf('?')) : identifier
+      const identifierWithQuery = identifierWithoutAliasMarker.includes('?')
+        ? identifier + identifierWithoutAliasMarker.substring(identifierWithoutAliasMarker.indexOf('?'))
+        : identifier
       return {
         chainPrefix: WarpConstants.IdentifierChainDefault,
         type: type as WarpIdType,
@@ -83,7 +88,9 @@ export const getWarpInfoFromIdentifier = (
   if (parts.length === 2) {
     const [chainPrefix, identifier] = parts
     if (chainPrefix !== WarpConstants.IdentifierType.Alias && chainPrefix !== WarpConstants.IdentifierType.Hash) {
-      const identifierWithQuery = decoded.includes('?') ? identifier + decoded.substring(decoded.indexOf('?')) : identifier
+      const identifierWithQuery = identifierWithoutAliasMarker.includes('?')
+        ? identifier + identifierWithoutAliasMarker.substring(identifierWithoutAliasMarker.indexOf('?'))
+        : identifier
 
       // Determine if identifier is a hash (hex string > 32 chars)
       const identifierType = isHash(identifier, chainPrefix) ? WarpConstants.IdentifierType.Hash : WarpConstants.IdentifierType.Alias
@@ -101,7 +108,7 @@ export const getWarpInfoFromIdentifier = (
   return {
     chainPrefix: WarpConstants.IdentifierChainDefault,
     type: WarpConstants.IdentifierType.Alias,
-    identifier: decoded,
+    identifier: identifierWithoutAliasMarker,
     identifierBase: base,
   }
 }

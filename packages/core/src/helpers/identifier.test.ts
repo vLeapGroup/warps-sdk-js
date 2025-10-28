@@ -21,6 +21,26 @@ describe('identifier', () => {
     })
   })
 
+  it('removes @ prefix from alias identifier', () => {
+    const result = getWarpInfoFromIdentifier('@mywarp')
+    expect(result).toEqual({
+      chainPrefix: 'multiversx',
+      type: 'alias',
+      identifier: 'mywarp',
+      identifierBase: 'mywarp',
+    })
+  })
+
+  it('removes @ prefix from chain.type.identifier format', () => {
+    const result = getWarpInfoFromIdentifier('@sui:alias:mywarp')
+    expect(result).toEqual({
+      chainPrefix: 'sui',
+      type: 'alias',
+      identifier: 'mywarp',
+      identifierBase: 'mywarp',
+    })
+  })
+
   it('returns info for a hash identifier (defaults to chain mvx)', () => {
     const result = getWarpInfoFromIdentifier('hash:abc123def456')
     expect(result).toEqual({

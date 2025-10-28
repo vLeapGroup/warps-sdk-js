@@ -1,4 +1,3 @@
-import { WarpConstants } from './constants'
 import { findWarpAdapterByPrefix, findWarpAdapterForChain, getWarpInfoFromIdentifier } from './helpers'
 import { resolveWarpText } from './helpers/i18n'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
@@ -79,8 +78,7 @@ export class WarpClient {
     }
 
     if (!warp) {
-      const identifier = (warpOrIdentifierOrUrl as string).replace(WarpConstants.IdentifierAliasPrefix, '')
-      warp = (await this.detectWarp(identifier, params.cache)).warp
+      warp = (await this.detectWarp(warpOrIdentifierOrUrl as string, params.cache)).warp
     }
 
     if (!warp) throw new Error('Warp not found')
