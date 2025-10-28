@@ -48,10 +48,12 @@ export class WarpLinkDetecter {
     return { match: hasMatch, results }
   }
 
-  async detect(url: string, cache?: WarpCacheConfig): Promise<DetectionResult> {
-    const emptyResult: DetectionResult = { match: false, url, warp: null, chain: null, registryInfo: null, brand: null }
+  async detect(urlOrId: string, cache?: WarpCacheConfig): Promise<DetectionResult> {
+    const emptyResult: DetectionResult = { match: false, url: urlOrId, warp: null, chain: null, registryInfo: null, brand: null }
 
-    const idResult = url.startsWith(WarpConstants.HttpProtocolPrefix) ? extractIdentifierInfoFromUrl(url) : getWarpInfoFromIdentifier(url)
+    const idResult = urlOrId.startsWith(WarpConstants.HttpProtocolPrefix)
+      ? extractIdentifierInfoFromUrl(urlOrId)
+      : getWarpInfoFromIdentifier(urlOrId)
 
     if (!idResult) {
       return emptyResult
@@ -81,7 +83,9 @@ export class WarpLinkDetecter {
 
       const preparedWarp = warp ? await new WarpInterpolator(this.config, adapter).apply(this.config, warp) : null
 
-      return preparedWarp ? { match: true, url, warp: preparedWarp, chain: adapter.chainInfo.name, registryInfo, brand } : emptyResult
+      return preparedWarp
+        ? { match: true, url: urlOrId, warp: preparedWarp, chain: adapter.chainInfo.name, registryInfo, brand }
+        : emptyResult
     } catch (e) {
       WarpLogger.error('Error detecting warp link', e)
       return emptyResult
