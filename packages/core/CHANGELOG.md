@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.131
+
+### Minor Changes
+
+- a0c17ea: upgrade deps
+
+### Patch Changes
+
+- f243b65: update alias marker handling
+
 ## 3.0.0-alpha.130
 
 ### Patch Changes

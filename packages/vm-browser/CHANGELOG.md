@@ -1,5 +1,17 @@
 # @vleap/warps-vm-browser
 
+## 0.1.0-alpha.7
+
+### Minor Changes
+
+- a0c17ea: upgrade deps
+
+### Patch Changes
+
+- Updated dependencies [a0c17ea]
+- Updated dependencies [f243b65]
+  - @vleap/warps@3.0.0-alpha.131
+
 ## 0.1.0-alpha.6
 
 ### Minor Changes

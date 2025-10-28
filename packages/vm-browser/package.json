@@ -1,13 +1,13 @@
 {
   "name": "@vleap/warps-vm-browser",
-  "version": "0.1.0-alpha.6",
+  "version": "0.1.0-alpha.7",
   "type": "module",
   "types": "dist/runInVm.d.ts",
   "files": [
     "dist"
   ],
   "dependencies": {
-    "@vleap/warps": "^3.0.0-alpha.87"
+    "@vleap/warps": "^3.0.0-alpha.131"
   },
   "license": "MIT",
   "scripts": {
