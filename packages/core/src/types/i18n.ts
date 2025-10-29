@@ -1,5 +1,5 @@
 // ISO 639-1 language codes (2-letter format)
-export type WarpLanguage =
+export type WarpLocale =
   | 'en'
   | 'es'
   | 'fr'
