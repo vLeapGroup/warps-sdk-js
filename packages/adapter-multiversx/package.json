@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "@multiversx/sdk-core": "^15.3.0",
-    "@vleap/warps": "^3.0.0-alpha.131"
+    "@vleap/warps": "^3.0.0-alpha.131",
+    "bignumber.js": "^9.3.1"
   }
 }
