@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.68
+
+### Patch Changes
+
+- bd42722: add missing mvx bignum dep
+
 ## 0.2.0-alpha.67
 
 ### Minor Changes
