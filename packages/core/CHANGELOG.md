@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.135
+
+### Patch Changes
+
+- d71157b: add brand themed logos
+
 ## 3.0.0-alpha.134
 
 ### Patch Changes
