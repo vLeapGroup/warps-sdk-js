@@ -5,12 +5,15 @@ export type WarpBrand = {
   protocol: string
   name: WarpText
   description: WarpText
-  logo: string
+  logo: WarpBrandLogo
   urls?: WarpBrandUrls
   colors?: WarpBrandColors
   cta?: WarpBrandCta
   meta?: WarpMeta
 }
+
+export type WarpBrandLogoThemed = { light: string; dark: string }
+export type WarpBrandLogo = string | WarpBrandLogoThemed
 
 export type WarpBrandUrls = {
   web?: string
