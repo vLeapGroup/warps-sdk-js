@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.136
+
+### Patch Changes
+
+- ed0d334: add brand logo helper
+
 ## 3.0.0-alpha.135
 
 ### Patch Changes
