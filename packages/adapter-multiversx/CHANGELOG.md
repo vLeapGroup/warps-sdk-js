@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.69
+
+### Patch Changes
+
+- 881e947: fix mvx missing logo value
+
 ## 0.2.0-alpha.68
 
 ### Patch Changes
