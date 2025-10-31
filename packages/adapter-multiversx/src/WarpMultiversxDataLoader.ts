@@ -98,7 +98,7 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
       symbol: tokenData.ticker,
       amount: 0n,
       decimals: tokenData.decimals,
-      logoUrl: tokenData.assets?.pngUrl || '#',
+      logoUrl: tokenData.assets?.pngUrl || null,
       price: tokenData.price ? Number(tokenData.price) : undefined,
       supply: tokenData.supply ? BigInt(tokenData.supply) : undefined,
     }
