@@ -25,7 +25,6 @@ function createSuiAdapter(chainName: string, chainPrefix: string, chainInfos: Re
     if (!chainInfo) throw new Error(`SuiAdapter: chain info not found for chain ${chainName}`)
 
     return {
-      chain: chainName,
       chainInfo,
       prefix: chainPrefix,
       builder: () => new WarpSuiBuilder(config, chainInfo),

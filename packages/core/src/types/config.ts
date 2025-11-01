@@ -25,7 +25,12 @@ export type WarpWalletDetails = { address: string; mnemonic?: string | null; pri
 
 export type WarpUserWallets = Record<WarpChain, WarpWalletDetails | string | null>
 
-export type WarpProviderConfig = Record<WarpChainEnv, string>
+export type WarpProviderPreferences = Record<WarpChainEnv, string | WarpProviderConfig>
+
+export type WarpProviderConfig = {
+  url: string
+  headers?: Record<string, string>
+}
 
 export type WarpClientConfig = {
   env: WarpChainEnv
@@ -38,8 +43,8 @@ export type WarpClientConfig = {
   preferences?: {
     locale?: WarpLocale
     explorers?: Record<WarpChain, WarpExplorerName>
+    providers?: Record<WarpChain, WarpProviderPreferences>
   }
-  providers?: Record<WarpChain, WarpProviderConfig>
   schema?: {
     warp?: string
     brand?: string

@@ -4,7 +4,7 @@ import {
   AdapterWarpExecutor,
   applyResultsToMessages,
   getNextInfo,
-  getProviderUrl,
+  getProviderConfig,
   getWarpActionByIndex,
   getWarpWalletAddressFromConfig,
   WarpActionExecution,
@@ -29,8 +29,8 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
   ) {
     this.serializer = new WarpSuiSerializer()
     this.results = new WarpSuiResults(this.config, this.chain)
-    const apiUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
-    this.client = new SuiClient({ url: apiUrl })
+    const providerConfig = getProviderConfig(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
+    this.client = new SuiClient({ url: providerConfig.url })
     this.userWallet = getWarpWalletAddressFromConfig(this.config, this.chain.name)
   }
 

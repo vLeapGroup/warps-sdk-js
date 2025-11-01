@@ -2,7 +2,7 @@ import { SuiClient } from '@mysten/sui/client'
 import { Transaction } from '@mysten/sui/transactions'
 import {
   AdapterWarpBuilder,
-  getProviderUrl,
+  getProviderConfig,
   getWarpWalletAddressFromConfig,
   Warp,
   WarpAdapterGenericTransaction,
@@ -25,8 +25,8 @@ export class WarpSuiBuilder extends WarpBuilder implements AdapterWarpBuilder {
   ) {
     super(config)
     this.cache = new WarpCache(config.cache?.type)
-    const apiUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
-    this.client = new SuiClient({ url: apiUrl })
+    const providerConfig = getProviderConfig(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
+    this.client = new SuiClient({ url: providerConfig.url })
     this.userWallet = getWarpWalletAddressFromConfig(this.config, this.chain.name)
   }
 

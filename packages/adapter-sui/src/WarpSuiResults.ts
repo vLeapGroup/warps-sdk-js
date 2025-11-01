@@ -4,7 +4,7 @@ import {
   applyResultsToMessages,
   evaluateResultsCommon,
   getNextInfo,
-  getProviderUrl,
+  getProviderConfig,
   getWarpWalletAddressFromConfig,
   parseResultsOutIndex,
   ResolvedInput,
@@ -28,8 +28,8 @@ export class WarpSuiResults implements AdapterWarpResults {
     private readonly chain: WarpChainInfo
   ) {
     this.serializer = new WarpSuiSerializer()
-    const apiUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
-    this.client = new SuiClient({ url: apiUrl })
+    const providerConfig = getProviderConfig(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
+    this.client = new SuiClient({ url: providerConfig.url })
   }
 
   async getActionExecution(

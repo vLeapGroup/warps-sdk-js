@@ -1,7 +1,7 @@
 import { SuiClient } from '@mysten/sui/client'
 import {
   AdapterWarpAbiBuilder,
-  getProviderUrl,
+  getProviderConfig,
   WarpAbiContents,
   WarpAdapterGenericTransaction,
   WarpCacheConfig,
@@ -16,8 +16,8 @@ export class WarpSuiAbiBuilder implements AdapterWarpAbiBuilder {
     private readonly config: WarpClientConfig,
     private readonly chain: WarpChainInfo
   ) {
-    const apiUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
-    this.client = new SuiClient({ url: apiUrl })
+    const providerConfig = getProviderConfig(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
+    this.client = new SuiClient({ url: providerConfig.url })
   }
 
   async createInscriptionTransaction(abi: WarpAbiContents): Promise<WarpAdapterGenericTransaction> {

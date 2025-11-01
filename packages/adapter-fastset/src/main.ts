@@ -23,7 +23,6 @@ function createFastsetAdapter(chainName: string, chainPrefix: string, chainInfos
     if (!fallback) throw new Error('Fastset adapter requires a fallback adapter')
 
     return {
-      chain: chainName,
       chainInfo,
       prefix: chainPrefix,
       builder: () => fallback.builder(),

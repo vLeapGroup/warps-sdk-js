@@ -1,6 +1,6 @@
 import {
   AdapterWarpWallet,
-  getProviderUrl,
+  getProviderConfig,
   getWarpWalletMnemonicFromConfig,
   getWarpWalletPrivateKeyFromConfig,
   WarpAdapterGenericTransaction,
@@ -16,9 +16,8 @@ export class WarpEvmWallet implements AdapterWarpWallet {
     private config: WarpClientConfig,
     private chain: WarpChainInfo
   ) {
-    const apiUrl = getProviderUrl(config, chain.name, config.env, chain.defaultApiUrl)
-
-    this.provider = new ethers.JsonRpcProvider(apiUrl)
+    const providerConfig = getProviderConfig(config, chain.name, config.env, chain.defaultApiUrl)
+    this.provider = new ethers.JsonRpcProvider(providerConfig.url)
   }
 
   async signTransaction(tx: WarpAdapterGenericTransaction): Promise<WarpAdapterGenericTransaction> {

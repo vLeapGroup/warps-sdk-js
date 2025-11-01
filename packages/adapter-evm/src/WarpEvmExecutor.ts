@@ -2,7 +2,7 @@ import {
   AdapterWarpExecutor,
   applyResultsToMessages,
   getNextInfo,
-  getProviderUrl,
+  getProviderConfig,
   getWarpActionByIndex,
   getWarpWalletAddressFromConfig,
   WarpActionExecution,
@@ -27,9 +27,9 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
     private readonly chain: WarpChainInfo
   ) {
     this.serializer = new WarpEvmSerializer()
-    const apiUrl = getProviderUrl(this.config, chain.name, this.config.env, this.chain.defaultApiUrl)
+    const providerConfig = getProviderConfig(this.config, chain.name, this.config.env, this.chain.defaultApiUrl)
     const network = new ethers.Network(this.chain.name, parseInt(this.chain.chainId))
-    this.provider = new ethers.JsonRpcProvider(apiUrl, network)
+    this.provider = new ethers.JsonRpcProvider(providerConfig.url, network)
     this.results = new WarpEvmResults(config, this.chain)
   }
 

@@ -30,7 +30,6 @@ export const createMultiversxAdapter = (
     typeRegistry.registerTypeAlias('list', 'vector')
 
     return {
-      chain: chainName,
       chainInfo,
       prefix: chainPrefix,
       builder: () => new WarpMultiversxBuilder(config, chainInfo),

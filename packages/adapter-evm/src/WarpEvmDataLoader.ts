@@ -1,7 +1,7 @@
 import {
   AdapterWarpDataLoader,
   CacheTtl,
-  getProviderUrl,
+  getProviderConfig,
   WarpCache,
   WarpCacheKey,
   WarpChainAccount,
@@ -41,9 +41,9 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
     private readonly config: WarpClientConfig,
     private readonly chain: WarpChainInfo
   ) {
-    const apiUrl = getProviderUrl(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
+    const providerConfig = getProviderConfig(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
     const network = new ethers.Network(this.chain.name, parseInt(this.chain.chainId))
-    this.provider = new ethers.JsonRpcProvider(apiUrl, network)
+    this.provider = new ethers.JsonRpcProvider(providerConfig.url, network)
     this.cache = new WarpCache(config.cache?.type)
     this.uniswapService = new UniswapService(this.cache, parseInt(this.chain.chainId))
   }

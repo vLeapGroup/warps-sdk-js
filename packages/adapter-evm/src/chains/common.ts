@@ -15,7 +15,6 @@ export const createEvmAdapter = (
     if (!fallback) throw new Error(`${chainName} adapter requires a fallback adapter`)
 
     return {
-      chain: chainName,
       chainInfo: chainInfos[config.env],
       prefix: chainPrefix,
       builder: () => fallback.builder(),
