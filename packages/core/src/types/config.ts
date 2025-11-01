@@ -25,7 +25,7 @@ export type WarpWalletDetails = { address: string; mnemonic?: string | null; pri
 
 export type WarpUserWallets = Record<WarpChain, WarpWalletDetails | string | null>
 
-export type WarpProviderPreferences = Record<WarpChainEnv, string | WarpProviderConfig>
+export type WarpProviderPreferences = Partial<Record<WarpChainEnv, string | WarpProviderConfig>>
 
 export type WarpProviderConfig = {
   url: string
