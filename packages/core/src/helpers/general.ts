@@ -23,29 +23,27 @@ export const getLatestProtocolIdentifier = (name: ProtocolName): string => {
 export const getWarpActionByIndex = (warp: Warp, index: number) => warp?.actions[index - 1]
 
 export const getWarpPrimaryAction = (warp: Warp): { action: WarpAction; index: number } => {
+  if (warp.actions.length === 0) throw new Error(`Warp has no primary action: ${warp.meta?.hash}`)
+
   const actionWithPrimary = warp.actions.find((action) => action.primary === true)
   if (actionWithPrimary) return { action: actionWithPrimary, index: warp.actions.indexOf(actionWithPrimary) }
 
   const detectableTypes: WarpActionType[] = ['transfer', 'contract', 'query', 'collect']
-  const nonDetectableActions = warp.actions.filter((action) => !detectableTypes.includes(action.type))
-
-  if (nonDetectableActions.length > 0) {
-    const lastNonDetectableAction = nonDetectableActions[nonDetectableActions.length - 1]
-    return { action: lastNonDetectableAction, index: warp.actions.indexOf(lastNonDetectableAction) }
+  const firstDetectableAction = warp.actions.find((action) => detectableTypes.includes(action.type))
+  if (firstDetectableAction) {
+    return { action: firstDetectableAction, index: warp.actions.indexOf(firstDetectableAction) }
   }
 
-  const reversedActions = [...warp.actions].reverse()
-  const primaryAction = reversedActions.find((action) => detectableTypes.includes(action.type))
-  if (!primaryAction) throw new Error(`Warp has no primary action: ${warp.meta?.hash}`)
-  return { action: primaryAction, index: warp.actions.indexOf(primaryAction) }
+  const firstAction = warp.actions[0]
+  return { action: firstAction, index: 0 }
 }
 
 export const isWarpActionAutoExecute = (action: WarpAction, warp: Warp) => {
-  if (action.auto === false) return false // actions can be explicitly set to not auto execute
+  if (action.auto === false) return false
   if (action.type === 'link') {
-    // Links should auto-execute if they are the primary action, or if explicitly set to auto
+    if (action.auto === true) return true
     const { action: primaryAction } = getWarpPrimaryAction(warp)
-    return action === primaryAction || action.auto === true
+    return action === primaryAction
   }
   return true
 }

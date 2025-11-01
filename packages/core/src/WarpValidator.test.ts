@@ -270,11 +270,11 @@ describe('WarpValidator', () => {
   })
 
   describe('validatePrimaryAction', () => {
-    it('validates successfully when multiple non-detectable actions exist', async () => {
+    it('validates successfully when non-detectable action is marked as primary', async () => {
       const validator = new WarpValidator(defaultConfig)
       const warp = createWarp({
         actions: [
-          { type: 'link', label: 'test link 1', url: 'https://test1.com' },
+          { type: 'link', label: 'test link 1', url: 'https://test1.com', primary: true },
           { type: 'link', label: 'test link 2', url: 'https://test2.com' },
         ],
       })
@@ -293,7 +293,17 @@ describe('WarpValidator', () => {
       expect(result.errors).toContain('Warp has no primary action: undefined')
     })
 
-    it('validates successfully when single non-detectable action exists', async () => {
+    it('validates successfully when single non-detectable action is marked as primary', async () => {
+      const validator = new WarpValidator(defaultConfig)
+      const warp = createWarp({
+        actions: [{ type: 'link', label: 'test link', url: 'https://test.com', primary: true }],
+      })
+      const result = await validator.validate(warp)
+      expect(result.valid).toBe(true)
+      expect(result.errors).toHaveLength(0)
+    })
+
+    it('validates successfully when only non-detectable actions exist without primary flag', async () => {
       const validator = new WarpValidator(defaultConfig)
       const warp = createWarp({
         actions: [{ type: 'link', label: 'test link', url: 'https://test.com' }],
@@ -329,8 +339,34 @@ describe('WarpValidator', () => {
   })
 
   describe('validateSchema', () => {
+    const mockFetch = jest.fn()
+    beforeEach(() => {
+      global.fetch = mockFetch as any
+    })
+
+    afterEach(() => {
+      mockFetch.mockReset()
+    })
+
     it('validates against schema', async () => {
-      const validator = new WarpValidator(defaultConfig)
+      const mockSchema = {
+        type: 'object',
+        properties: {
+          protocol: { type: 'string' },
+          name: { type: 'string' },
+          title: { type: 'string' },
+          description: { type: 'string' },
+          chain: { type: 'string' },
+          actions: { type: 'array' },
+        },
+      }
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockSchema,
+      })
+
+      const configWithSchema = createMockConfig({ schema: { warp: 'https://example.com/schema.json' } })
+      const validator = new WarpValidator(configWithSchema)
       const warp = createWarp({
         actions: [{ type: 'transfer', label: 'test', description: 'test', address: 'erd1...' }],
       })
@@ -340,6 +376,32 @@ describe('WarpValidator', () => {
     })
 
     it('returns error when schema validation fails', async () => {
+      const mockSchema = {
+        type: 'object',
+        properties: {
+          protocol: { type: 'string' },
+          name: { type: 'string' },
+          title: { type: 'string' },
+          description: { type: 'string' },
+          chain: { type: 'string' },
+          actions: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                type: { type: 'string', enum: ['transfer', 'contract', 'query', 'collect', 'link'] },
+              },
+              required: ['type'],
+            },
+          },
+        },
+        required: ['protocol', 'name', 'title', 'description', 'chain', 'actions'],
+      }
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockSchema,
+      })
+
       const configWithSchema = createMockConfig({ schema: { warp: 'https://example.com/schema.json' } })
       const validator = new WarpValidator(configWithSchema)
       const warp = createWarp({
