@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.70
+
+### Minor Changes
+
+- 795b560: update provider configs
+
+### Patch Changes
+
+- Updated dependencies [795b560]
+  - @vleap/warps@3.0.0-alpha.139
+
 ## 0.2.0-alpha.69
 
 ### Patch Changes

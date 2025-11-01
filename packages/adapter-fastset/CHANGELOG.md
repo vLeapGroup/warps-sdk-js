@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-alpha.34
+
+### Minor Changes
+
+- 795b560: update provider configs
+
+### Patch Changes
+
+- Updated dependencies [795b560]
+  - @vleap/warps@3.0.0-alpha.139
+
 ## 0.1.0-alpha.33
 
 ### Minor Changes

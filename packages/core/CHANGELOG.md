@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.139
+
+### Minor Changes
+
+- 795b560: update provider configs
+
 ## 3.0.0-alpha.138
 
 ### Patch Changes

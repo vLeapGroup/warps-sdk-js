@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.46
+
+### Minor Changes
+
+- 795b560: update provider configs
+
+### Patch Changes
+
+- Updated dependencies [795b560]
+  - @vleap/warps@3.0.0-alpha.139
+
 ## 0.2.0-alpha.45
 
 ### Minor Changes
