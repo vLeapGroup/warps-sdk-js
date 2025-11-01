@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.138
+
+### Patch Changes
+
+- 1565180: update primary action selection
+
 ## 3.0.0-alpha.137
 
 ### Patch Changes
