@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.140
+
+### Patch Changes
+
+- bf64bcf: localize warp options
+
 ## 3.0.0-alpha.139
 
 ### Minor Changes
