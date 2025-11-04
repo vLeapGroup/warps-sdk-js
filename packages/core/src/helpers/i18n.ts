@@ -1,6 +1,35 @@
 import { WarpClientConfig } from '../types/config'
 import { WarpI18nText, WarpText } from '../types/i18n'
 
+export const WARP_LANGUAGES = {
+  de: 'German',
+  en: 'English',
+  es: 'Spanish',
+  fr: 'French',
+  it: 'Italian',
+  pt: 'Portuguese',
+  ru: 'Russian',
+  zh: 'Chinese',
+  ja: 'Japanese',
+  ko: 'Korean',
+  ar: 'Arabic',
+  hi: 'Hindi',
+  nl: 'Dutch',
+  sv: 'Swedish',
+  da: 'Danish',
+  no: 'Norwegian',
+  fi: 'Finnish',
+  pl: 'Polish',
+  tr: 'Turkish',
+  el: 'Greek',
+  he: 'Hebrew',
+  th: 'Thai',
+  vi: 'Vietnamese',
+  id: 'Indonesian',
+  ms: 'Malay',
+  tl: 'Tagalog',
+} as const
+
 export const resolveWarpText = (text: WarpText, config?: WarpClientConfig): string => {
   const targetLanguage = config?.preferences?.locale || 'en'
   if (typeof text === 'string') return text
