@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.141
+
+### Patch Changes
+
+- 14b21c0: add warp languages const
+
 ## 3.0.0-alpha.140
 
 ### Patch Changes
