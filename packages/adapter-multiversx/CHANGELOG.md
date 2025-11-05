@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.72
+
+### Patch Changes
+
+- 7845948: update mvx nonce management
+
 ## 0.2.0-alpha.71
 
 ### Minor Changes
