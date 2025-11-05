@@ -18,8 +18,7 @@ export class WarpIndex {
       })
 
       if (!res.ok) {
-        console.error('WarpIndex: search failed with status', res.status, await res.text(), res)
-        throw new Error(`WarpIndex: search failed with status ${res.status}`)
+        throw new Error(`WarpIndex: search failed with status ${res.status}: ${await res.text()}`)
       }
 
       const data = (await res.json()) as WarpSearchResult
