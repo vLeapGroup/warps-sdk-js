@@ -162,7 +162,6 @@ describe('identifier', () => {
     expect(result).toBeNull()
   })
 
-  // New tests for chain prefix
   it('parses chain prefix sui:hash:abc123', () => {
     const result = getWarpInfoFromIdentifier('sui:hash:abc123')
     expect(result).toEqual({

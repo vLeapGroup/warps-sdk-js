@@ -1,34 +1,6 @@
 import { WarpConstants } from '../constants'
 import { WarpIdType } from '../types'
 
-const isHash = (identifier: string, chainPrefix?: string): boolean => {
-  // If it's a hex string longer than 32 characters, it's a hash
-  // (since aliases cannot exceed 32 characters)
-  const hexRegex = /^[a-fA-F0-9]+$/
-  const MAX_ALIAS_LENGTH = 32
-
-  return hexRegex.test(identifier) && identifier.length > MAX_ALIAS_LENGTH
-}
-
-const findFirstSeparator = (str: string): { separator: string; index: number } | null => {
-  const separator = WarpConstants.IdentifierParamSeparator
-  const index = str.indexOf(separator)
-  return index !== -1 ? { separator, index } : null
-}
-
-const splitBySeparators = (str: string): string[] => {
-  const result = findFirstSeparator(str)
-  if (!result) return [str]
-
-  const { separator, index } = result
-  const firstPart = str.substring(0, index)
-  const remaining = str.substring(index + separator.length)
-
-  // Recursively split the remaining part
-  const remainingParts = splitBySeparators(remaining)
-  return [firstPart, ...remainingParts]
-}
-
 export const getWarpInfoFromIdentifier = (
   prefixedIdentifier: string
 ): { chainPrefix: string; type: WarpIdType; identifier: string; identifierBase: string } | null => {
@@ -130,4 +102,32 @@ export const extractIdentifierInfoFromUrl = (
 
   const decodedParam = decodeURIComponent(value)
   return getWarpInfoFromIdentifier(decodedParam)
+}
+
+const isHash = (identifier: string, chainPrefix?: string): boolean => {
+  // If it's a hex string longer than 32 characters, it's a hash
+  // (since aliases cannot exceed 32 characters)
+  const hexRegex = /^[a-fA-F0-9]+$/
+  const MAX_ALIAS_LENGTH = 32
+
+  return hexRegex.test(identifier) && identifier.length > MAX_ALIAS_LENGTH
+}
+
+const findFirstSeparator = (str: string): { separator: string; index: number } | null => {
+  const separator = WarpConstants.IdentifierParamSeparator
+  const index = str.indexOf(separator)
+  return index !== -1 ? { separator, index } : null
+}
+
+const splitBySeparators = (str: string): string[] => {
+  const result = findFirstSeparator(str)
+  if (!result) return [str]
+
+  const { separator, index } = result
+  const firstPart = str.substring(0, index)
+  const remaining = str.substring(index + separator.length)
+
+  // Recursively split the remaining part
+  const remainingParts = splitBySeparators(remaining)
+  return [firstPart, ...remainingParts]
 }
