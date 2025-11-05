@@ -17,7 +17,7 @@ export type WarpChainInfo = {
   nativeToken: WarpChainAsset
 }
 
-export type WarpIdType = 'hash' | 'alias'
+export type WarpIdentifierType = 'hash' | 'alias'
 
 export type WarpVarPlaceholder = string
 
@@ -46,6 +46,7 @@ export type Warp = {
 
 export type WarpMeta = {
   chain: WarpChain
+  identifier: string
   hash: string
   creator: string
   createdAt: string

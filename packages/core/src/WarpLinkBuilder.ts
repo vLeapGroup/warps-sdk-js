@@ -1,9 +1,9 @@
 import QRCodeStyling from 'qr-code-styling'
 import { WarpConfig } from './config'
 import { WarpConstants } from './constants'
-import { findWarpAdapterByPrefix, findWarpAdapterForChain } from './helpers'
+import { findWarpAdapterForChain } from './helpers'
 import { extractIdentifierInfoFromUrl, getWarpInfoFromIdentifier } from './helpers/identifier'
-import { Adapter, WarpChain, WarpClientConfig, WarpIdType } from './types'
+import { Adapter, WarpChain, WarpClientConfig, WarpIdentifierType } from './types'
 
 // Example Link (Transaction Hash as ID): https://usewarp.to/to?warp=hash.<MYHASH>
 // Example Link (Alias as ID): https://usewarp.to/to?warp=alias.<MYALIAS>
@@ -19,12 +19,12 @@ export class WarpLinkBuilder {
     return !!idResult
   }
 
-  build(chain: WarpChain, type: WarpIdType, id: string): string {
+  build(chain: WarpChain, type: WarpIdentifierType, id: string): string {
     const clientUrl = this.config.clientUrl || WarpConfig.DefaultClientUrl(this.config.env)
     const adapter = findWarpAdapterForChain(chain, this.adapters)
 
     const identifier = type === WarpConstants.IdentifierType.Alias ? id : type + WarpConstants.IdentifierParamSeparator + id
-    const identifierWithChainPrefix = adapter.prefix + WarpConstants.IdentifierParamSeparator + identifier
+    const identifierWithChainPrefix = adapter.chainInfo.name + WarpConstants.IdentifierParamSeparator + identifier
     const encodedIdentifier = encodeURIComponent(identifierWithChainPrefix)
 
     return WarpConfig.SuperClientUrls.includes(clientUrl)
@@ -33,16 +33,16 @@ export class WarpLinkBuilder {
   }
 
   buildFromPrefixedIdentifier(identifier: string): string | null {
-    const idResult = getWarpInfoFromIdentifier(identifier)
-    if (!idResult) return null
-    const adapter = findWarpAdapterByPrefix(idResult.chainPrefix, this.adapters)
+    const identifierResult = getWarpInfoFromIdentifier(identifier)
+    if (!identifierResult) return null
+    const adapter = findWarpAdapterForChain(identifierResult.chain, this.adapters)
     if (!adapter) return null
-    return this.build(adapter.chainInfo.name, idResult.type, idResult.identifierBase)
+    return this.build(adapter.chainInfo.name, identifierResult.type, identifierResult.identifierBase)
   }
 
   generateQrCode(
     chain: WarpChain,
-    type: WarpIdType,
+    type: WarpIdentifierType,
     id: string,
     size = 512,
     background = 'white',

@@ -19,7 +19,7 @@ export const NativeTokenStt: WarpChainAsset = {
   logoUrl: 'https://assets.coingecko.com/coins/images/68061/standard/somniacg.png?1754641117',
 }
 
-export const getSomniaAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Somnia, 'eth', {
+export const getSomniaAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Somnia, {
   mainnet: {
     name: WarpChainName.Somnia,
     displayName: 'Somnia Mainnet',

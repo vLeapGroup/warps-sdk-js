@@ -136,7 +136,7 @@ describe('getWarpPrimaryAction', () => {
 
   describe('when no actions exist', () => {
     it('should throw an error when actions array is empty', () => {
-      const warp = createMockWarp([], { hash: 'empty-hash' })
+      const warp = createMockWarp([], { identifier: 'empty-hash' })
 
       expect(() => getWarpPrimaryAction(warp)).toThrow('Warp has no primary action: empty-hash')
     })

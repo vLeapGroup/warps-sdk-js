@@ -10,6 +10,7 @@ import {
 } from '@multiversx/sdk-core'
 import {
   AdapterWarpRegistry,
+  createWarpIdentifier,
   getWarpWalletAddressFromConfig,
   WarpBrand,
   WarpCache,
@@ -279,6 +280,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
 
       brand.meta = {
         chain: this.chain.name,
+        identifier: createWarpIdentifier(this.chain.name, 'hash', hash),
         hash: tx.hash,
         creator: tx.sender.toBech32(),
         createdAt: new Date(tx.timestamp * 1000).toISOString(),

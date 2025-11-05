@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.142
+
+### Minor Changes
+
+- update warp identifiers
+
 ## 3.0.0-alpha.141
 
 ### Patch Changes

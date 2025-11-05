@@ -10,7 +10,7 @@ export const NativeTokenArb: WarpChainAsset = {
   logoUrl: 'https://vleap.ai/images/tokens/arb.svg',
 }
 
-export const getArbitrumAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Arbitrum, 'arb', {
+export const getArbitrumAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Arbitrum, {
   mainnet: {
     name: WarpChainName.Arbitrum,
     displayName: 'Arbitrum',

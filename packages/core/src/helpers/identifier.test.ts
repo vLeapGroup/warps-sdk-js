@@ -1,10 +1,37 @@
-import { extractIdentifierInfoFromUrl, getWarpInfoFromIdentifier } from './identifier'
+import { createWarpIdentifier, extractIdentifierInfoFromUrl, getWarpInfoFromIdentifier } from './identifier'
 
-describe('identifier', () => {
+describe('createWarpIdentifier', () => {
+  it('creates alias identifier with @ prefix and no alias type', () => {
+    const result = createWarpIdentifier('sui', 'alias', 'mywarp')
+    expect(result).toBe('@sui:mywarp')
+  })
+
+  it('creates identifier with hash type', () => {
+    const result = createWarpIdentifier('multiversx', 'hash', 'abc123def456')
+    expect(result).toBe('multiversx:hash:abc123def456')
+  })
+
+  it('creates alias identifier with different chain', () => {
+    const result = createWarpIdentifier('eth', 'alias', 'mywarp')
+    expect(result).toBe('@eth:mywarp')
+  })
+
+  it('creates alias identifier with empty identifier', () => {
+    const result = createWarpIdentifier('sui', 'alias', '')
+    expect(result).toBe('@sui:')
+  })
+
+  it('removes @ prefix from identifier if present', () => {
+    const result = createWarpIdentifier('sui', 'alias', '@mywarp')
+    expect(result).toBe('@sui:mywarp')
+  })
+})
+
+describe('getWarpInfoFromIdentifier', () => {
   it('returns info for an unprefixed alias (defaults to alias type, chain mvx)', () => {
     const result = getWarpInfoFromIdentifier('mywarp')
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'alias',
       identifier: 'mywarp',
       identifierBase: 'mywarp',
@@ -14,7 +41,7 @@ describe('identifier', () => {
   it('returns info for a prefixed alias (defaults to chain mvx)', () => {
     const result = getWarpInfoFromIdentifier('alias:mywarp')
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'alias',
       identifier: 'mywarp',
       identifierBase: 'mywarp',
@@ -24,7 +51,7 @@ describe('identifier', () => {
   it('removes @ prefix from alias identifier', () => {
     const result = getWarpInfoFromIdentifier('@mywarp')
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'alias',
       identifier: 'mywarp',
       identifierBase: 'mywarp',
@@ -34,7 +61,7 @@ describe('identifier', () => {
   it('removes @ prefix from chain.type.identifier format', () => {
     const result = getWarpInfoFromIdentifier('@sui:alias:mywarp')
     expect(result).toEqual({
-      chainPrefix: 'sui',
+      chain: 'sui',
       type: 'alias',
       identifier: 'mywarp',
       identifierBase: 'mywarp',
@@ -44,7 +71,7 @@ describe('identifier', () => {
   it('returns info for a hash identifier (defaults to chain mvx)', () => {
     const result = getWarpInfoFromIdentifier('hash:abc123def456')
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'hash',
       identifier: 'abc123def456',
       identifierBase: 'abc123def456',
@@ -54,7 +81,7 @@ describe('identifier', () => {
   it('returns info for an alias with query parameters (defaults to chain mvx)', () => {
     const result = getWarpInfoFromIdentifier('alias:mywarp?param1=value1&param2=value2')
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'alias',
       identifier: 'mywarp?param1=value1&param2=value2',
       identifierBase: 'mywarp',
@@ -64,7 +91,7 @@ describe('identifier', () => {
   it('returns info for a hash with query parameters (defaults to chain mvx)', () => {
     const result = getWarpInfoFromIdentifier('hash:abc123?param1=value1')
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'hash',
       identifier: 'abc123?param1=value1',
       identifierBase: 'abc123',
@@ -74,7 +101,7 @@ describe('identifier', () => {
   it('returns info for an unprefixed alias with query parameters (defaults to chain mvx)', () => {
     const result = getWarpInfoFromIdentifier('mywarp?param1=value1&param2=value2')
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'alias',
       identifier: 'mywarp?param1=value1&param2=value2',
       identifierBase: 'mywarp',
@@ -85,7 +112,7 @@ describe('identifier', () => {
     const encoded = encodeURIComponent('alias:mywarp?param1=value with spaces&param2=value2')
     const result = getWarpInfoFromIdentifier(encoded)
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'alias',
       identifier: 'mywarp?param1=value with spaces&param2=value2',
       identifierBase: 'mywarp',
@@ -95,7 +122,7 @@ describe('identifier', () => {
   it('handles empty identifier after prefix (defaults to chain mvx)', () => {
     const result = getWarpInfoFromIdentifier('alias:')
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'alias',
       identifier: '',
       identifierBase: '',
@@ -105,7 +132,7 @@ describe('identifier', () => {
   it('handles empty hash identifier (defaults to chain mvx)', () => {
     const result = getWarpInfoFromIdentifier('hash:')
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'hash',
       identifier: '',
       identifierBase: '',
@@ -116,7 +143,7 @@ describe('identifier', () => {
     const hashString = '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
     const result = getWarpInfoFromIdentifier(hashString)
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'hash',
       identifier: hashString,
       identifierBase: hashString,
@@ -127,7 +154,7 @@ describe('identifier', () => {
     const hashString = '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef?param=value'
     const result = getWarpInfoFromIdentifier(hashString)
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'hash',
       identifier: hashString,
       identifierBase: '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
@@ -138,7 +165,7 @@ describe('identifier', () => {
     const shortString = '123456789'
     const result = getWarpInfoFromIdentifier(shortString)
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'alias',
       identifier: shortString,
       identifierBase: shortString,
@@ -149,7 +176,7 @@ describe('identifier', () => {
     const longString = '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12345'
     const result = getWarpInfoFromIdentifier(longString)
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'alias',
       identifier: longString,
       identifierBase: longString,
@@ -165,7 +192,7 @@ describe('identifier', () => {
   it('parses chain prefix sui:hash:abc123', () => {
     const result = getWarpInfoFromIdentifier('sui:hash:abc123')
     expect(result).toEqual({
-      chainPrefix: 'sui',
+      chain: 'sui',
       type: 'hash',
       identifier: 'abc123',
       identifierBase: 'abc123',
@@ -175,7 +202,7 @@ describe('identifier', () => {
   it('parses chain prefix sui:alias:mywarp', () => {
     const result = getWarpInfoFromIdentifier('sui:alias:mywarp')
     expect(result).toEqual({
-      chainPrefix: 'sui',
+      chain: 'sui',
       type: 'alias',
       identifier: 'mywarp',
       identifierBase: 'mywarp',
@@ -185,7 +212,7 @@ describe('identifier', () => {
   it('parses chain prefix sui:alias:mywarp?param=1', () => {
     const result = getWarpInfoFromIdentifier('sui:alias:mywarp?param=1')
     expect(result).toEqual({
-      chainPrefix: 'sui',
+      chain: 'sui',
       type: 'alias',
       identifier: 'mywarp?param=1',
       identifierBase: 'mywarp',
@@ -195,7 +222,7 @@ describe('identifier', () => {
   it('parses chain prefix sui:mywarp', () => {
     const result = getWarpInfoFromIdentifier('sui:mywarp')
     expect(result).toEqual({
-      chainPrefix: 'sui',
+      chain: 'sui',
       type: 'alias',
       identifier: 'mywarp',
       identifierBase: 'mywarp',
@@ -206,18 +233,17 @@ describe('identifier', () => {
     const hash = '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
     const result = getWarpInfoFromIdentifier(`sui:hash:${hash}`)
     expect(result).toEqual({
-      chainPrefix: 'sui',
+      chain: 'sui',
       type: 'hash',
       identifier: hash,
       identifierBase: hash,
     })
   })
 
-  // Tests for colon separator
   it('parses chain prefix with colon separator sui:hash:abc123', () => {
     const result = getWarpInfoFromIdentifier('sui:hash:abc123')
     expect(result).toEqual({
-      chainPrefix: 'sui',
+      chain: 'sui',
       type: 'hash',
       identifier: 'abc123',
       identifierBase: 'abc123',
@@ -227,7 +253,7 @@ describe('identifier', () => {
   it('parses chain prefix with colon separator sui:alias:mywarp', () => {
     const result = getWarpInfoFromIdentifier('sui:alias:mywarp')
     expect(result).toEqual({
-      chainPrefix: 'sui',
+      chain: 'sui',
       type: 'alias',
       identifier: 'mywarp',
       identifierBase: 'mywarp',
@@ -237,7 +263,7 @@ describe('identifier', () => {
   it('parses chain prefix with colon separator sui:alias:mywarp?param=1', () => {
     const result = getWarpInfoFromIdentifier('sui:alias:mywarp?param=1')
     expect(result).toEqual({
-      chainPrefix: 'sui',
+      chain: 'sui',
       type: 'alias',
       identifier: 'mywarp?param=1',
       identifierBase: 'mywarp',
@@ -247,7 +273,7 @@ describe('identifier', () => {
   it('parses chain prefix with colon separator sui:mywarp', () => {
     const result = getWarpInfoFromIdentifier('sui:mywarp')
     expect(result).toEqual({
-      chainPrefix: 'sui',
+      chain: 'sui',
       type: 'alias',
       identifier: 'mywarp',
       identifierBase: 'mywarp',
@@ -258,7 +284,7 @@ describe('identifier', () => {
     const hash = '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
     const result = getWarpInfoFromIdentifier(`sui:hash:${hash}`)
     expect(result).toEqual({
-      chainPrefix: 'sui',
+      chain: 'sui',
       type: 'hash',
       identifier: hash,
       identifierBase: hash,
@@ -268,7 +294,7 @@ describe('identifier', () => {
   it('parses unprefixed alias with colon separator alias:mywarp', () => {
     const result = getWarpInfoFromIdentifier('alias:mywarp')
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'alias',
       identifier: 'mywarp',
       identifierBase: 'mywarp',
@@ -278,7 +304,7 @@ describe('identifier', () => {
   it('parses unprefixed hash with colon separator hash:abc123def456', () => {
     const result = getWarpInfoFromIdentifier('hash:abc123def456')
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'hash',
       identifier: 'abc123def456',
       identifierBase: 'abc123def456',
@@ -288,7 +314,7 @@ describe('identifier', () => {
   it('parses alias with colon separator and query parameters alias:mywarp?param1=value1&param2=value2', () => {
     const result = getWarpInfoFromIdentifier('alias:mywarp?param1=value1&param2=value2')
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'alias',
       identifier: 'mywarp?param1=value1&param2=value2',
       identifierBase: 'mywarp',
@@ -298,7 +324,7 @@ describe('identifier', () => {
   it('parses hash with colon separator and query parameters hash:abc123?param1=value1', () => {
     const result = getWarpInfoFromIdentifier('hash:abc123?param1=value1')
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'hash',
       identifier: 'abc123?param1=value1',
       identifierBase: 'abc123',
@@ -308,7 +334,7 @@ describe('identifier', () => {
   it('handles empty identifier after colon prefix alias:', () => {
     const result = getWarpInfoFromIdentifier('alias:')
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'alias',
       identifier: '',
       identifierBase: '',
@@ -318,7 +344,7 @@ describe('identifier', () => {
   it('handles empty hash identifier after colon prefix hash:', () => {
     const result = getWarpInfoFromIdentifier('hash:')
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'hash',
       identifier: '',
       identifierBase: '',
@@ -329,7 +355,7 @@ describe('identifier', () => {
     const hash = 'f200f3c68fe7cc471c25eda05409664d5e55ecf795cd02a000bbe7fae9ac3e92'
     const result = getWarpInfoFromIdentifier(`multiversx:${hash}`)
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'hash',
       identifier: hash,
       identifierBase: hash,
@@ -340,7 +366,7 @@ describe('identifier', () => {
     const identifier = '1234567890abcdef1234567890abcdef'
     const result = getWarpInfoFromIdentifier(`sui:${identifier}`)
     expect(result).toEqual({
-      chainPrefix: 'sui',
+      chain: 'sui',
       type: 'alias',
       identifier: identifier,
       identifierBase: identifier,
@@ -351,7 +377,7 @@ describe('identifier', () => {
     const hash = '1234567890abcdef1234567890abcdef1' // 33 characters
     const result = getWarpInfoFromIdentifier(`sui:${hash}`)
     expect(result).toEqual({
-      chainPrefix: 'sui',
+      chain: 'sui',
       type: 'hash',
       identifier: hash,
       identifierBase: hash,
@@ -362,7 +388,7 @@ describe('identifier', () => {
     const hash = '1234567890abcdef1234567890abcdef12345678' // 40 characters
     const result = getWarpInfoFromIdentifier(`eth:${hash}`)
     expect(result).toEqual({
-      chainPrefix: 'eth',
+      chain: 'eth',
       type: 'hash',
       identifier: hash,
       identifierBase: hash,
@@ -373,7 +399,7 @@ describe('identifier', () => {
     const hash = 'f200f3c68fe7cc471c25eda05409664d5e55ecf795cd02a000bbe7fae9ac3e92'
     const result = getWarpInfoFromIdentifier(`multiversx:${hash}`)
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'hash',
       identifier: hash,
       identifierBase: hash,
@@ -384,63 +410,64 @@ describe('identifier', () => {
     const alias = 'my-awesome-warp'
     const result = getWarpInfoFromIdentifier(`multiversx:${alias}`)
     expect(result).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'alias',
       identifier: alias,
       identifierBase: alias,
     })
   })
+})
 
-  // Add tests for extractIdentifierInfoFromUrl
-  it('extractIdentifierInfoFromUrl returns null if no identifier', () => {
+describe('extractIdentifierInfoFromUrl', () => {
+  it('returns null if no identifier', () => {
     const url = 'https://example.com/'
     expect(extractIdentifierInfoFromUrl(url)).toBeNull()
   })
 
-  it('extractIdentifierInfoFromUrl parses chain prefix', () => {
+  it('parses chain prefix', () => {
     const url = 'https://example.com/?warp=sui:hash:abc123'
     expect(extractIdentifierInfoFromUrl(url)).toEqual({
-      chainPrefix: 'sui',
+      chain: 'sui',
       type: 'hash',
       identifier: 'abc123',
       identifierBase: 'abc123',
     })
   })
 
-  it('extractIdentifierInfoFromUrl defaults to mvx', () => {
+  it('defaults to mvx', () => {
     const url = 'https://example.com/?warp=alias:mywarp'
     expect(extractIdentifierInfoFromUrl(url)).toEqual({
-      chainPrefix: 'multiversx',
+      chain: 'multiversx',
       type: 'alias',
       identifier: 'mywarp',
       identifierBase: 'mywarp',
     })
   })
 
-  it('extractIdentifierInfoFromUrl parses encoded chain prefix', () => {
+  it('parses encoded chain prefix', () => {
     const url = 'https://example.com/?warp=' + encodeURIComponent('sui:alias:mywarp')
     expect(extractIdentifierInfoFromUrl(url)).toEqual({
-      chainPrefix: 'sui',
+      chain: 'sui',
       type: 'alias',
       identifier: 'mywarp',
       identifierBase: 'mywarp',
     })
   })
 
-  it('extractIdentifierInfoFromUrl parses chain prefix with colon separator', () => {
+  it('parses chain prefix with colon separator', () => {
     const url = 'https://example.com/?warp=sui:hash:abc123'
     expect(extractIdentifierInfoFromUrl(url)).toEqual({
-      chainPrefix: 'sui',
+      chain: 'sui',
       type: 'hash',
       identifier: 'abc123',
       identifierBase: 'abc123',
     })
   })
 
-  it('extractIdentifierInfoFromUrl parses encoded chain prefix with colon separator', () => {
+  it('parses encoded chain prefix with colon separator', () => {
     const url = 'https://example.com/?warp=' + encodeURIComponent('sui:alias:mywarp')
     expect(extractIdentifierInfoFromUrl(url)).toEqual({
-      chainPrefix: 'sui',
+      chain: 'sui',
       type: 'alias',
       identifier: 'mywarp',
       identifierBase: 'mywarp',

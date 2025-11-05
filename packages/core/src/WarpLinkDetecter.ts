@@ -1,5 +1,5 @@
 import { WarpConstants } from './constants'
-import { extractIdentifierInfoFromUrl, findWarpAdapterByPrefix, getWarpInfoFromIdentifier } from './helpers'
+import { createWarpIdentifier, extractIdentifierInfoFromUrl, findWarpAdapterForChain, getWarpInfoFromIdentifier } from './helpers'
 import { Adapter, Warp, WarpBrand, WarpCacheConfig, WarpChain, WarpClientConfig, WarpRegistryInfo } from './types'
 import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
@@ -51,27 +51,28 @@ export class WarpLinkDetecter {
   async detect(urlOrId: string, cache?: WarpCacheConfig): Promise<DetectionResult> {
     const emptyResult: DetectionResult = { match: false, url: urlOrId, warp: null, chain: null, registryInfo: null, brand: null }
 
-    const idResult = urlOrId.startsWith(WarpConstants.HttpProtocolPrefix)
+    const identifierResult = urlOrId.startsWith(WarpConstants.HttpProtocolPrefix)
       ? extractIdentifierInfoFromUrl(urlOrId)
       : getWarpInfoFromIdentifier(urlOrId)
 
-    if (!idResult) {
+    if (!identifierResult) {
       return emptyResult
     }
 
     try {
-      const { type, identifierBase } = idResult
+      const { type, identifierBase } = identifierResult
       let warp: Warp | null = null
       let registryInfo: WarpRegistryInfo | null = null
       let brand: WarpBrand | null = null
 
-      const adapter = findWarpAdapterByPrefix(idResult.chainPrefix, this.adapters)
+      const adapter = findWarpAdapterForChain(identifierResult.chain, this.adapters)
 
       if (type === 'hash') {
         warp = await adapter.builder().createFromTransactionHash(identifierBase, cache)
         const result = await adapter.registry.getInfoByHash(identifierBase, cache)
         registryInfo = result.registryInfo
         brand = result.brand
+        if (warp) modifyWarpMetaIdentifier(warp, adapter.chainInfo.name, registryInfo, identifierResult.identifier)
       } else if (type === 'alias') {
         const result = await adapter.registry.getInfoByAlias(identifierBase, cache)
         registryInfo = result.registryInfo
@@ -79,6 +80,7 @@ export class WarpLinkDetecter {
         if (result.registryInfo) {
           warp = await adapter.builder().createFromTransactionHash(result.registryInfo.hash, cache)
         }
+        if (warp) modifyWarpMetaIdentifier(warp, adapter.chainInfo.name, registryInfo, identifierResult.identifier)
       }
 
       const preparedWarp = warp ? await new WarpInterpolator(this.config, adapter).apply(this.config, warp) : null
@@ -91,4 +93,11 @@ export class WarpLinkDetecter {
       return emptyResult
     }
   }
+}
+
+const modifyWarpMetaIdentifier = (warp: Warp, chain: WarpChain, registryInfo: WarpRegistryInfo | null, identifier: string) => {
+  if (!warp.meta) return
+  warp.meta.identifier = registryInfo?.alias
+    ? createWarpIdentifier(chain, 'alias', registryInfo.alias)
+    : createWarpIdentifier(chain, 'hash', registryInfo?.hash ?? identifier)
 }

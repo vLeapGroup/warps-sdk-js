@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-alpha.39
+
+### Minor Changes
+
+- update warp identifiers
+
+### Patch Changes
+
+- Updated dependencies
+  - @vleap/warps@3.0.0-alpha.142
+
 ## 0.2.0-alpha.38
 
 ### Minor Changes

@@ -10,11 +10,7 @@ import { WarpMultiversxResults } from '../WarpMultiversxResults'
 import { WarpMultiversxSerializer } from '../WarpMultiversxSerializer'
 import { WarpMultiversxWallet } from '../WarpMultiversxWallet'
 
-export const createMultiversxAdapter = (
-  chainName: string,
-  chainPrefix: string,
-  chainInfos: Record<WarpChainEnv, WarpChainInfo>
-): AdapterFactory => {
+export const createMultiversxAdapter = (chainName: string, chainInfos: Record<WarpChainEnv, WarpChainInfo>): AdapterFactory => {
   return (config: WarpClientConfig, fallback?: Adapter) => {
     const chainInfo = chainInfos[config.env]
 
@@ -31,7 +27,6 @@ export const createMultiversxAdapter = (
 
     return {
       chainInfo,
-      prefix: chainPrefix,
       builder: () => new WarpMultiversxBuilder(config, chainInfo),
       executor: new WarpMultiversxExecutor(config, chainInfo, typeRegistry),
       results: new WarpMultiversxResults(config, chainInfo, typeRegistry),

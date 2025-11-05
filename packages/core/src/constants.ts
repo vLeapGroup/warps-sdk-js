@@ -1,4 +1,4 @@
-import { InterpolationBag, WarpIdType } from './types'
+import { InterpolationBag, WarpIdentifierType } from './types'
 
 export enum WarpChainName {
   Multiversx = 'multiversx',
@@ -21,8 +21,8 @@ export const WarpConstants = {
   IdentifierChainDefault: 'multiversx',
 
   IdentifierType: {
-    Alias: 'alias' as WarpIdType,
-    Hash: 'hash' as WarpIdType,
+    Alias: 'alias' as WarpIdentifierType,
+    Hash: 'hash' as WarpIdentifierType,
   },
 
   IdentifierAliasMarker: '@',

@@ -3,7 +3,7 @@ import { Adapter, WarpClientConfig } from '../types'
 import { WarpExecutionNextInfo, WarpExecutionResults } from '../types/results'
 import { Warp } from '../types/warp'
 import { WarpLinkBuilder } from '../WarpLinkBuilder'
-import { findWarpAdapterByPrefix, replacePlaceholders } from './general'
+import { findWarpAdapterForChain, replacePlaceholders } from './general'
 import { getWarpInfoFromIdentifier } from './identifier'
 
 const URL_PREFIX = 'https://'
@@ -78,13 +78,13 @@ export const getNextInfo = (
 const buildNextUrl = (adapters: Adapter[], identifier: string, config: WarpClientConfig): string => {
   const [rawId, queryString] = identifier.split('?')
   const info = getWarpInfoFromIdentifier(rawId) || {
-    chainPrefix: WarpConstants.IdentifierChainDefault,
+    chain: WarpConstants.IdentifierChainDefault,
     type: 'alias',
     identifier: rawId,
     identifierBase: rawId,
   }
-  const adapter = findWarpAdapterByPrefix(info.chainPrefix, adapters)
-  if (!adapter) throw new Error(`Adapter not found for chain ${info.chainPrefix}`)
+  const adapter = findWarpAdapterForChain(info.chain, adapters)
+  if (!adapter) throw new Error(`Adapter not found for chain ${info.chain}`)
   const baseUrl = new WarpLinkBuilder(config, adapters).build(adapter.chainInfo.name, info.type, info.identifierBase)
   if (!queryString) return baseUrl
 

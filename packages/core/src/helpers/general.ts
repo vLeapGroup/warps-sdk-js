@@ -7,12 +7,6 @@ export const findWarpAdapterForChain = (chain: WarpChain, adapters: Adapter[]): 
   return adapter
 }
 
-export const findWarpAdapterByPrefix = (prefix: string, adapters: Adapter[]): Adapter => {
-  const adapter = adapters.find((a) => a.prefix.toLowerCase() === prefix.toLowerCase())
-  if (!adapter) throw new Error(`Adapter not found for prefix: ${prefix}`)
-  return adapter
-}
-
 export const getLatestProtocolIdentifier = (name: ProtocolName): string => {
   if (name === 'warp') return `warp:${WarpProtocolVersions.Warp}`
   if (name === 'brand') return `brand:${WarpProtocolVersions.Brand}`
@@ -23,7 +17,7 @@ export const getLatestProtocolIdentifier = (name: ProtocolName): string => {
 export const getWarpActionByIndex = (warp: Warp, index: number) => warp?.actions[index - 1]
 
 export const getWarpPrimaryAction = (warp: Warp): { action: WarpAction; index: number } => {
-  if (warp.actions.length === 0) throw new Error(`Warp has no primary action: ${warp.meta?.hash}`)
+  if (warp.actions.length === 0) throw new Error(`Warp has no primary action: ${warp.meta?.identifier}`)
 
   const actionWithPrimary = warp.actions.find((action) => action.primary === true)
   if (actionWithPrimary) return { action: actionWithPrimary, index: warp.actions.indexOf(actionWithPrimary) }

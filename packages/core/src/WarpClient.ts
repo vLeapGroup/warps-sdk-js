@@ -1,4 +1,4 @@
-import { findWarpAdapterByPrefix, findWarpAdapterForChain, getWarpInfoFromIdentifier } from './helpers'
+import { findWarpAdapterForChain, getWarpInfoFromIdentifier } from './helpers'
 import { resolveWarpText } from './helpers/i18n'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
 
@@ -106,7 +106,7 @@ export class WarpClient {
   async createFromTransactionHash(hash: string, cache?: WarpCacheConfig): Promise<Warp | null> {
     const identifierInfo = getWarpInfoFromIdentifier(hash)
     if (!identifierInfo) throw new Error('WarpClient: createFromTransactionHash - invalid hash')
-    const adapter = findWarpAdapterByPrefix(identifierInfo.chainPrefix, this.adapters)
+    const adapter = findWarpAdapterForChain(identifierInfo.chain, this.adapters)
     return adapter.builder().createFromTransactionHash(hash, cache)
   }
 

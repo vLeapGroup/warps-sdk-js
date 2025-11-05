@@ -65,7 +65,6 @@ export type AdapterFactory = (config: WarpClientConfig, fallback?: Adapter) => A
 
 export type Adapter = {
   chainInfo: WarpChainInfo
-  prefix: string
   builder: () => CombinedWarpBuilder
   executor: AdapterWarpExecutor
   results: AdapterWarpResults

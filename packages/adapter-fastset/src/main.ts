@@ -1,4 +1,13 @@
-import { Adapter, AdapterFactory, WarpChainAsset, WarpChainEnv, WarpChainInfo, WarpChainName, WarpClientConfig } from '@vleap/warps'
+import {
+  Adapter,
+  AdapterFactory,
+  WarpChain,
+  WarpChainAsset,
+  WarpChainEnv,
+  WarpChainInfo,
+  WarpChainName,
+  WarpClientConfig,
+} from '@vleap/warps'
 import { WarpFastsetDataLoader } from './WarpFastsetDataLoader'
 import { WarpFastsetExecutor } from './WarpFastsetExecutor'
 import { WarpFastsetExplorer } from './WarpFastsetExplorer'
@@ -15,7 +24,7 @@ export const NativeTokenSet: WarpChainAsset = {
   logoUrl: 'https://vleap.ai/images/tokens/set.svg',
 }
 
-function createFastsetAdapter(chainName: string, chainPrefix: string, chainInfos: Record<WarpChainEnv, WarpChainInfo>): AdapterFactory {
+function createFastsetAdapter(chainName: WarpChain, chainInfos: Record<WarpChainEnv, WarpChainInfo>): AdapterFactory {
   return (config: WarpClientConfig, fallback?: Adapter) => {
     const chainInfo = chainInfos[config.env]
     if (!chainInfo) throw new Error(`FastsetAdapter: chain info not found for chain ${chainName}`)
@@ -24,7 +33,6 @@ function createFastsetAdapter(chainName: string, chainPrefix: string, chainInfos
 
     return {
       chainInfo,
-      prefix: chainPrefix,
       builder: () => fallback.builder(),
       executor: new WarpFastsetExecutor(config, chainInfo),
       results: new WarpFastsetResults(config, chainInfo),
@@ -39,7 +47,7 @@ function createFastsetAdapter(chainName: string, chainPrefix: string, chainInfos
   }
 }
 
-export const getFastsetAdapter: AdapterFactory = createFastsetAdapter(WarpChainName.Fastset, 'fastset', {
+export const getFastsetAdapter: AdapterFactory = createFastsetAdapter(WarpChainName.Fastset, {
   mainnet: {
     name: WarpChainName.Fastset,
     displayName: 'FastSet',

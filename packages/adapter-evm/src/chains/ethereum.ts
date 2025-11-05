@@ -10,7 +10,7 @@ export const NativeTokenEth: WarpChainAsset = {
   logoUrl: 'https://vleap.ai/images/tokens/eth.svg',
 }
 
-export const getEthereumAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Ethereum, 'eth', {
+export const getEthereumAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Ethereum, {
   mainnet: {
     name: WarpChainName.Ethereum,
     displayName: 'Ethereum Mainnet',
