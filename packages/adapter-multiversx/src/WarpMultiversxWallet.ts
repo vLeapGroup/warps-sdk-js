@@ -39,7 +39,9 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
       tx.nonce = highestNonce
     }
     tx.signature = await account.signTransaction(tx)
-    this.cache.set(`nonce:${account.address.toBech32()}`, Number(account.nonce), CacheTtl.OneHour)
+
+    const newNonce = Number(account.nonce) + 1
+    this.cache.set(`nonce:${account.address.toBech32()}`, newNonce, CacheTtl.OneMinute)
 
     return tx
   }
