@@ -134,6 +134,46 @@ describe('WarpExecutor', () => {
       expect(handlers.onExecuted).toHaveBeenCalled()
     })
 
+    it('interpolates input variables in destination URL', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: 'test data' }),
+      })
+
+      const collectWarp = {
+        ...warp,
+        chain: 'multiversx',
+        actions: [
+          {
+            type: 'collect' as const,
+            label: 'Check rewards',
+            destination: {
+              url: '{{CHAIN_API}}/accounts/{{ADDRESS}}/delegation',
+              method: 'GET' as const,
+            },
+            inputs: [
+              {
+                name: 'Address',
+                as: 'ADDRESS',
+                type: 'address',
+                source: 'field' as const,
+                required: true,
+              },
+            ],
+          } as WarpCollectAction,
+        ],
+      }
+
+      const inputs = ['address:erd1test123456789']
+      await executor.execute(collectWarp, inputs)
+
+      expect(mockFetch).toHaveBeenCalledTimes(1)
+      const fetchCall = mockFetch.mock.calls[0]
+      const url = fetchCall[0] as string
+      expect(url).toContain('/accounts/erd1test123456789/delegation')
+      expect(url).toContain('devnet-api.multiversx.com')
+    })
+
     it('handles nested payload structure with position parameter', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,

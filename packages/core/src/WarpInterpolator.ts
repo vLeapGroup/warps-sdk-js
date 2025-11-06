@@ -1,6 +1,8 @@
 import { WarpConstants } from './constants'
+import { replacePlaceholders } from './helpers/general'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
-import { Adapter, InterpolationBag, Warp, WarpAction, WarpClientConfig } from './types'
+import { Adapter, InterpolationBag, ResolvedInput, Warp, WarpAction, WarpClientConfig } from './types'
+import { WarpSerializer } from './WarpSerializer'
 
 export class WarpInterpolator {
   constructor(
@@ -95,5 +97,21 @@ export class WarpInterpolator {
     })
 
     return JSON.parse(modifiable)
+  }
+
+  applyInputs(text: string, resolvedInputs: ResolvedInput[], serializer: WarpSerializer): string {
+    if (!text || typeof text !== 'string') return text
+
+    const bag: Record<string, string> = {}
+    resolvedInputs.forEach((resolvedInput) => {
+      if (!resolvedInput.value) return
+      if (!resolvedInput.input.as) return
+      const key = resolvedInput.input.as
+      if (key !== key.toUpperCase()) return
+      const [, nativeValue] = serializer.stringToNative(resolvedInput.value)
+      bag[key] = String(nativeValue)
+    })
+
+    return replacePlaceholders(text, bag)
   }
 }

@@ -129,6 +129,88 @@ describe('WarpFactory', () => {
     expect(result.args.length).toBeGreaterThan(0)
   })
 
+  it('interpolates input variables in contract action address', async () => {
+    const factory = new WarpFactory(config, [createMockAdapter()])
+    const warp: any = {
+      meta: { hash: 'abc' },
+      actions: [
+        {
+          type: 'contract',
+          label: 'Test Contract',
+          address: '{{CONTRACT_ADDRESS}}',
+          func: 'transfer',
+          args: [],
+          gasLimit: 1000000,
+          inputs: [
+            { name: 'Contract Address', as: 'CONTRACT_ADDRESS', type: 'address', source: 'field' },
+          ],
+        } as WarpContractAction,
+      ],
+    }
+    const result = await factory.createExecutable(warp, 1, ['address:erd1contract123'])
+    expect(result.destination).toBe('erd1contract123')
+  })
+
+  it('interpolates input variables in transfer action address', async () => {
+    const factory = new WarpFactory(config, [createMockAdapter()])
+    const warp: any = {
+      meta: { hash: 'abc' },
+      actions: [
+        {
+          type: 'transfer',
+          label: 'Test Transfer',
+          address: '{{RECIPIENT}}',
+          value: '0',
+          inputs: [
+            { name: 'Recipient', as: 'RECIPIENT', type: 'address', source: 'field' },
+          ],
+        },
+      ],
+    }
+    const result = await factory.createExecutable(warp, 1, ['address:erd1recipient456'])
+    expect(result.destination).toBe('erd1recipient456')
+  })
+
+  it('ignores input variables without as field', async () => {
+    const factory = new WarpFactory(config, [createMockAdapter()])
+    const warp: any = {
+      meta: { hash: 'abc' },
+      actions: [
+        {
+          type: 'transfer',
+          label: 'Test Transfer',
+          address: 'erd1fallback',
+          value: '0',
+          inputs: [
+            { name: 'Recipient', type: 'address', source: 'field' },
+          ],
+        },
+      ],
+    }
+    const result = await factory.createExecutable(warp, 1, ['address:erd1recipient456'])
+    expect(result.destination).toBe('erd1fallback')
+  })
+
+  it('ignores input variables with lowercase as field', async () => {
+    const factory = new WarpFactory(config, [createMockAdapter()])
+    const warp: any = {
+      meta: { hash: 'abc' },
+      actions: [
+        {
+          type: 'transfer',
+          label: 'Test Transfer',
+          address: 'erd1fallback',
+          value: '0',
+          inputs: [
+            { name: 'Recipient', as: 'recipient', type: 'address', source: 'field' },
+          ],
+        },
+      ],
+    }
+    const result = await factory.createExecutable(warp, 1, ['address:erd1recipient456'])
+    expect(result.destination).toBe('erd1fallback')
+  })
+
   it('getResolvedInputs resolves query and user wallet', async () => {
     const factory = new WarpFactory(config, [createMockAdapter()])
     const action: WarpAction = {

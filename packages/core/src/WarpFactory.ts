@@ -51,7 +51,8 @@ export class WarpFactory {
     if (!action) throw new Error('WarpFactory: Action not found')
     const chain = await this.getChainInfoForWarp(warp, inputs)
     const adapter = findWarpAdapterForChain(chain.name, this.adapters)
-    const preparedWarp = await new WarpInterpolator(this.config, adapter).apply(this.config, warp, meta)
+    const interpolator = new WarpInterpolator(this.config, adapter)
+    const preparedWarp = await interpolator.apply(this.config, warp, meta)
     const preparedAction = getWarpActionByIndex(preparedWarp, actionIndex) as WarpTransferAction | WarpContractAction | WarpCollectAction
 
     const typedInputs = this.getStringTypedInputs(preparedAction, inputs)
@@ -60,23 +61,33 @@ export class WarpFactory {
 
     const destinationInput = modifiedInputs.find((i) => i.input.position === 'receiver')?.value
     const destinationInAction = this.getDestinationFromAction(preparedAction)
-    const destination = destinationInput ? (this.serializer.stringToNative(destinationInput)[1] as string) : destinationInAction
+    let destination = destinationInput ? (this.serializer.stringToNative(destinationInput)[1] as string) : destinationInAction
+    if (destination) {
+      destination = interpolator.applyInputs(destination, modifiedInputs, this.serializer)
+    }
     if (!destination) throw new Error('WarpActionExecutor: Destination/Receiver not provided')
 
-    const args = this.getPreparedArgs(preparedAction, modifiedInputs)
+    let args = this.getPreparedArgs(preparedAction, modifiedInputs)
+    args = args.map((arg) => interpolator.applyInputs(arg, modifiedInputs, this.serializer))
 
     const valueInput = modifiedInputs.find((i) => i.input.position === 'value')?.value || null
     const valueInAction = 'value' in preparedAction ? preparedAction.value : null
-    let value = BigInt(valueInput?.split(WarpConstants.ArgParamsSeparator)[1] || valueInAction || 0)
+    const valueString = valueInput?.split(WarpConstants.ArgParamsSeparator)[1] || valueInAction || '0'
+    const interpolatedValueString = interpolator.applyInputs(valueString, modifiedInputs, this.serializer)
+    let value = BigInt(interpolatedValueString)
 
     const transferInputs = modifiedInputs.filter((i) => i.input.position === 'transfer' && i.value).map((i) => i.value) as string[]
     const transfersInAction = 'transfers' in preparedAction ? preparedAction.transfers : []
     const transfersMerged = [...(transfersInAction || []), ...(transferInputs || [])]
-    const transfers = transfersMerged.map((t) => this.serializer.stringToNative(t)[1]) as WarpChainAssetValue[]
+    const transfers = transfersMerged.map((t) => {
+      const interpolated = interpolator.applyInputs(t, modifiedInputs, this.serializer)
+      return this.serializer.stringToNative(interpolated)[1]
+    }) as WarpChainAssetValue[]
 
     const dataInput = modifiedInputs.find((i) => i.input.position === 'data')?.value
     const dataInAction = 'data' in preparedAction ? preparedAction.data || '' : null
-    const data = dataInput || dataInAction || null
+    const dataString = dataInput || dataInAction || null
+    const data = dataString ? interpolator.applyInputs(dataString, modifiedInputs, this.serializer) : null
 
     const executable: WarpExecutable = {
       warp: preparedWarp,

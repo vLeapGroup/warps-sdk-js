@@ -26,6 +26,7 @@ import {
   WarpLinkAction,
 } from './types'
 import { WarpFactory } from './WarpFactory'
+import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
 
 export type ExecutionHandlers = {
@@ -213,8 +214,10 @@ export class WarpExecutor {
       }
     }
 
+    const interpolator = new WarpInterpolator(this.config, findWarpAdapterForChain(executable.chain.name, this.adapters))
     Object.entries(collectAction.destination.headers || {}).forEach(([key, value]) => {
-      headers.set(key, value as string)
+      const interpolatedValue = interpolator.applyInputs(value as string, executable.resolvedInputs, this.factory.getSerializer())
+      headers.set(key, interpolatedValue)
     })
 
     let payload: any = {}
@@ -231,11 +234,12 @@ export class WarpExecutor {
     })
     const httpMethod = collectAction.destination.method || 'GET'
     const body = httpMethod === 'GET' ? undefined : JSON.stringify({ ...payload, ...extra })
+    const url = executable.destination
 
-    WarpLogger.debug('Executing collect', { url: collectAction.destination.url, method: httpMethod, headers, body })
+    WarpLogger.debug('Executing collect', { url, method: httpMethod, headers, body })
 
     try {
-      const response = await fetch(collectAction.destination.url, { method: httpMethod, headers, body })
+      const response = await fetch(url, { method: httpMethod, headers, body })
       WarpLogger.debug('Collect response status', { status: response.status })
       const content = await response.json()
       WarpLogger.debug('Collect response content', { content })
