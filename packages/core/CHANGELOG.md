@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.144
+
+### Minor Changes
+
+- 785b1cd: add input interpolation
+
 ## 3.0.0-alpha.143
 
 ### Patch Changes
