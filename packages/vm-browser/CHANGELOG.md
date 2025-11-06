@@ -1,5 +1,11 @@
 # @vleap/warps-vm-browser
 
+## 0.1.0-alpha.8
+
+### Minor Changes
+
+- 2df2104: update vms
+
 ## 0.1.0-alpha.7
 
 ### Minor Changes
