@@ -4,103 +4,103 @@ import { createBrowserTransformRunner, runInVm } from './runInVm'
 // This tests the core functionality that was changed from eval() to new Function()
 describe('Function Creation Logic', () => {
   it('should create arrow function correctly', () => {
-    const code = '(context) => context.value * 2'
-    const context = { value: 5 }
+    const code = '(results) => results.value * 2'
+    const results = { value: 5 }
 
     // Test the actual function creation logic
     let transformFunction: Function
     if (code.trim().startsWith('(') && code.includes('=>')) {
-      transformFunction = new Function('context', `return (${code})(context);`)
+      transformFunction = new Function('results', `return (${code})(results);`)
     } else {
       throw new Error('Expected arrow function')
     }
 
-    const result = transformFunction(context)
+    const result = transformFunction(results)
     expect(result).toBe(10)
   })
 
   it('should create regular function correctly', () => {
-    const code = 'function(context) { return context.value + 3 }'
-    const context = { value: 7 }
+    const code = 'function(results) { return results.value + 3 }'
+    const results = { value: 7 }
 
     let transformFunction: Function
     if (code.trim().startsWith('function')) {
-      transformFunction = new Function('context', `return (${code})(context);`)
+      transformFunction = new Function('results', `return (${code})(results);`)
     } else {
       throw new Error('Expected function')
     }
 
-    const result = transformFunction(context)
+    const result = transformFunction(results)
     expect(result).toBe(10)
   })
 
   it('should create direct expression correctly', () => {
-    const code = 'context.value * 3'
-    const context = { value: 4 }
+    const code = 'results.value * 3'
+    const results = { value: 4 }
 
-    const transformFunction = new Function('context', `return ${code};`)
+    const transformFunction = new Function('results', `return ${code};`)
 
-    const result = transformFunction(context)
+    const result = transformFunction(results)
     expect(result).toBe(12)
   })
 
-  it('should handle complex context objects', () => {
-    const code = '(context) => context.user.name + " is " + context.user.age + " years old"'
-    const context = { user: { name: 'John', age: 30 } }
+  it('should handle complex results objects', () => {
+    const code = '(results) => results.user.name + " is " + results.user.age + " years old"'
+    const results = { user: { name: 'John', age: 30 } }
 
     let transformFunction: Function
     if (code.trim().startsWith('(') && code.includes('=>')) {
-      transformFunction = new Function('context', `return (${code})(context);`)
+      transformFunction = new Function('results', `return (${code})(results);`)
     } else {
       throw new Error('Expected arrow function')
     }
 
-    const result = transformFunction(context)
+    const result = transformFunction(results)
     expect(result).toBe('John is 30 years old')
   })
 
   it('should handle array operations', () => {
-    const code = '(context) => context.numbers.reduce((sum, num) => sum + num, 0)'
-    const context = { numbers: [1, 2, 3, 4, 5] }
+    const code = '(results) => results.numbers.reduce((sum, num) => sum + num, 0)'
+    const results = { numbers: [1, 2, 3, 4, 5] }
 
     let transformFunction: Function
     if (code.trim().startsWith('(') && code.includes('=>')) {
-      transformFunction = new Function('context', `return (${code})(context);`)
+      transformFunction = new Function('results', `return (${code})(results);`)
     } else {
       throw new Error('Expected arrow function')
     }
 
-    const result = transformFunction(context)
+    const result = transformFunction(results)
     expect(result).toBe(15)
   })
 
   it('should handle conditional logic', () => {
-    const code = '(context) => context.value > 10 ? "high" : "low"'
-    const context = { value: 15 }
+    const code = '(results) => results.value > 10 ? "high" : "low"'
+    const results = { value: 15 }
 
     let transformFunction: Function
     if (code.trim().startsWith('(') && code.includes('=>')) {
-      transformFunction = new Function('context', `return (${code})(context);`)
+      transformFunction = new Function('results', `return (${code})(results);`)
     } else {
       throw new Error('Expected arrow function')
     }
 
-    const result = transformFunction(context)
+    const result = transformFunction(results)
     expect(result).toBe('high')
   })
 
   it('should throw error for invalid code', () => {
-    const code = '(context) => invalidFunction()'
-    const context = { value: 5 }
+    const code = '(results) => invalidFunction()'
+    const results = { value: 5 }
 
     let transformFunction: Function
     if (code.trim().startsWith('(') && code.includes('=>')) {
-      transformFunction = new Function('context', `return (${code})(context);`)
+      transformFunction = new Function('results', `return (${code})(results);`)
     } else {
       throw new Error('Expected arrow function')
     }
 
-    expect(() => transformFunction(context)).toThrow('invalidFunction is not defined')
+    expect(() => transformFunction(results)).toThrow('invalidFunction is not defined')
   })
 })
 
@@ -134,11 +134,11 @@ describe('runInVm', () => {
     mockWorker.onerror = null
   })
 
-  it('should execute arrow function with context', async () => {
-    const code = '(context) => context.value * 2'
-    const context = { value: 5 }
+  it('should execute arrow function with results', async () => {
+    const code = '(results) => results.value * 2'
+    const results = { value: 5 }
 
-    const promise = runInVm(code, context)
+    const promise = runInVm(code, results)
 
     // Simulate worker response
     setTimeout(() => {
@@ -149,11 +149,11 @@ describe('runInVm', () => {
     expect(result).toBe(10)
   })
 
-  it('should execute regular function with context', async () => {
-    const code = 'function(context) { return context.value + 3 }'
-    const context = { value: 7 }
+  it('should execute regular function with results', async () => {
+    const code = 'function(results) { return results.value + 3 }'
+    const results = { value: 7 }
 
-    const promise = runInVm(code, context)
+    const promise = runInVm(code, results)
 
     setTimeout(() => {
       mockWorker.onmessage({ data: { result: 10 } })
@@ -164,10 +164,10 @@ describe('runInVm', () => {
   })
 
   it('should execute direct expression', async () => {
-    const code = 'return context.value * 3'
-    const context = { value: 4 }
+    const code = 'return results.value * 3'
+    const results = { value: 4 }
 
-    const promise = runInVm(code, context)
+    const promise = runInVm(code, results)
 
     setTimeout(() => {
       mockWorker.onmessage({ data: { result: 12 } })
@@ -177,11 +177,11 @@ describe('runInVm', () => {
     expect(result).toBe(12)
   })
 
-  it('should handle complex context objects', async () => {
-    const code = '(context) => context.user.name + " is " + context.user.age + " years old"'
-    const context = { user: { name: 'John', age: 30 } }
+  it('should handle complex results objects', async () => {
+    const code = '(results) => results.user.name + " is " + results.user.age + " years old"'
+    const results = { user: { name: 'John', age: 30 } }
 
-    const promise = runInVm(code, context)
+    const promise = runInVm(code, results)
 
     setTimeout(() => {
       mockWorker.onmessage({ data: { result: 'John is 30 years old' } })
@@ -192,10 +192,10 @@ describe('runInVm', () => {
   })
 
   it('should handle array operations', async () => {
-    const code = '(context) => context.numbers.reduce((sum, num) => sum + num, 0)'
-    const context = { numbers: [1, 2, 3, 4, 5] }
+    const code = '(results) => results.numbers.reduce((sum, num) => sum + num, 0)'
+    const results = { numbers: [1, 2, 3, 4, 5] }
 
-    const promise = runInVm(code, context)
+    const promise = runInVm(code, results)
 
     setTimeout(() => {
       mockWorker.onmessage({ data: { result: 15 } })
@@ -206,10 +206,10 @@ describe('runInVm', () => {
   })
 
   it('should handle conditional logic', async () => {
-    const code = '(context) => context.value > 10 ? "high" : "low"'
-    const context = { value: 15 }
+    const code = '(results) => results.value > 10 ? "high" : "low"'
+    const results = { value: 15 }
 
-    const promise = runInVm(code, context)
+    const promise = runInVm(code, results)
 
     setTimeout(() => {
       mockWorker.onmessage({ data: { result: 'high' } })
@@ -220,10 +220,10 @@ describe('runInVm', () => {
   })
 
   it('should handle worker errors', async () => {
-    const code = '(context) => invalidFunction()'
-    const context = { value: 5 }
+    const code = '(results) => invalidFunction()'
+    const results = { value: 5 }
 
-    const promise = runInVm(code, context)
+    const promise = runInVm(code, results)
 
     setTimeout(() => {
       mockWorker.onmessage({ data: { error: 'ReferenceError: invalidFunction is not defined' } })
@@ -233,10 +233,10 @@ describe('runInVm', () => {
   })
 
   it('should handle worker onerror', async () => {
-    const code = '(context) => context.value * 2'
-    const context = { value: 5 }
+    const code = '(results) => results.value * 2'
+    const results = { value: 5 }
 
-    const promise = runInVm(code, context)
+    const promise = runInVm(code, results)
 
     setTimeout(() => {
       mockWorker.onerror({ message: 'Worker error' })
@@ -246,10 +246,10 @@ describe('runInVm', () => {
   })
 
   it('should create blob with correct content', async () => {
-    const code = '(context) => context.value * 2'
-    const context = { value: 5 }
+    const code = '(results) => results.value * 2'
+    const results = { value: 5 }
 
-    const promise = runInVm(code, context)
+    const promise = runInVm(code, results)
 
     setTimeout(() => {
       mockWorker.onmessage({ data: { result: 10 } })
@@ -262,11 +262,11 @@ describe('runInVm', () => {
     })
   })
 
-  it('should post message with context', async () => {
-    const code = '(context) => context.value * 2'
-    const context = { value: 5 }
+  it('should post message with results', async () => {
+    const code = '(results) => results.value * 2'
+    const results = { value: 5 }
 
-    const promise = runInVm(code, context)
+    const promise = runInVm(code, results)
 
     setTimeout(() => {
       mockWorker.onmessage({ data: { result: 10 } })
@@ -274,14 +274,14 @@ describe('runInVm', () => {
 
     await promise
 
-    expect(mockWorker.postMessage).toHaveBeenCalledWith(context)
+    expect(mockWorker.postMessage).toHaveBeenCalledWith(results)
   })
 
   it('should clean up resources', async () => {
-    const code = '(context) => context.value * 2'
-    const context = { value: 5 }
+    const code = '(results) => results.value * 2'
+    const results = { value: 5 }
 
-    const promise = runInVm(code, context)
+    const promise = runInVm(code, results)
 
     setTimeout(() => {
       mockWorker.onmessage({ data: { result: 10 } })
@@ -304,10 +304,10 @@ describe('createBrowserTransformRunner', () => {
 
   it('should execute transform through runner interface', async () => {
     const runner = createBrowserTransformRunner()
-    const code = '(context) => context.value * 2'
-    const context = { value: 8 }
+    const code = '(results) => results.value * 2'
+    const results = { value: 8 }
 
-    const promise = runner.run(code, context)
+    const promise = runner.run(code, results)
 
     setTimeout(() => {
       mockWorker.onmessage({ data: { result: 16 } })
@@ -319,9 +319,9 @@ describe('createBrowserTransformRunner', () => {
 
   it('should handle multiple transformations', async () => {
     const runner = createBrowserTransformRunner()
-    const context = { value: 3 }
+    const results = { value: 3 }
 
-    const promise = runner.run('(context) => context.value + 1', context)
+    const promise = runner.run('(results) => results.value + 1', results)
 
     setTimeout(() => {
       mockWorker.onmessage({ data: { result: 4 } })

@@ -20,7 +20,7 @@
   },
   "exports": {
     ".": {
-      "types": "dist/runInVm.d.ts",
+      "types": "./dist/runInVm.d.ts",
       "import": "./dist/runInVm.mjs",
       "require": "./dist/runInVm.js",
       "default": "./dist/runInVm.mjs"
