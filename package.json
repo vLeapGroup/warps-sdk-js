@@ -21,7 +21,7 @@
     "prettier": "^3.6.2",
     "ts-json-schema-generator": "^2.4.0",
     "ts-node": "^10.9.2",
-    "turbo": "^2.5.8"
+    "turbo": "^2.6.0"
   },
   "name": "warp-sdk-js",
   "packageManager": "npm@11.6.2",
