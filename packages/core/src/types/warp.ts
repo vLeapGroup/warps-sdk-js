@@ -41,6 +41,7 @@ export type Warp = {
   results?: Record<WarpResultName, WarpResulutionPath>
   messages?: Record<WarpMessageName, string>
   alerts?: WarpAlerts
+  related?: string[]
   meta?: WarpMeta
 }
 
