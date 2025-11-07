@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.145
+
+### Patch Changes
+
+- 0e291f6: add warp releated field"
+
 ## 3.0.0-alpha.144
 
 ### Minor Changes
