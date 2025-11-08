@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.49
+
+### Patch Changes
+
+- 2fcba36: expose query results raw data
+
 ## 0.2.0-alpha.48
 
 ### Patch Changes

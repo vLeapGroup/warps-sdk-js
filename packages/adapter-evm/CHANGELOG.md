@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-alpha.41
+
+### Patch Changes
+
+- 2fcba36: expose query results raw data
+
 ## 0.2.0-alpha.40
 
 ### Patch Changes

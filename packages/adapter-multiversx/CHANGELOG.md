@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.74
+
+### Patch Changes
+
+- 2fcba36: expose query results raw data
+
 ## 0.2.0-alpha.73
 
 ### Patch Changes
