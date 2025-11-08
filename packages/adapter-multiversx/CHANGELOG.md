@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.73
+
+### Patch Changes
+
+- 4aab0b2: update transforms
+- Updated dependencies [4aab0b2]
+  - @vleap/warps@3.0.0-alpha.146
+
 ## 0.2.0-alpha.72
 
 ### Patch Changes
