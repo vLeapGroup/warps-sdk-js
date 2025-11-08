@@ -199,7 +199,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         tx: null,
         next,
         values,
-        results,
+        results: { ...results, _DATA: decodedResult },
         messages: applyResultsToMessages(executable.warp, results),
       }
     } catch (error) {
@@ -212,7 +212,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         tx: null,
         next: null,
         values: { string: [], native: [] },
-        results: {},
+        results: { _DATA: error },
         messages: {},
       }
     }
