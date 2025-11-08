@@ -108,7 +108,7 @@ export class WarpFastsetResults implements AdapterWarpResults {
         actionIndex,
         inputs,
         this.serializer.coreSerializer,
-        this.config.transform?.runner
+        this.config
       ),
     }
   }

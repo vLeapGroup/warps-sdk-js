@@ -91,14 +91,7 @@ export class WarpMultiversxResults implements AdapterWarpResults {
       }
       return {
         values: { string: stringValues, native: nativeValues },
-        results: await evaluateResultsCommon(
-          warp,
-          results,
-          actionIndex,
-          inputs,
-          this.serializer.coreSerializer,
-          this.config.transform?.runner
-        ),
+        results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer, this.config),
       }
     }
     const abi = await this.abi.getAbiForAction(action)
@@ -145,7 +138,7 @@ export class WarpMultiversxResults implements AdapterWarpResults {
     }
     return {
       values: { string: stringValues, native: nativeValues },
-      results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer),
+      results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer, this.config),
     }
   }
 
@@ -186,7 +179,10 @@ export class WarpMultiversxResults implements AdapterWarpResults {
         results[key] = path
       }
     }
-    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer) }
+
+    results = await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer, this.config)
+
+    return { values, results }
   }
 
   async resolveWarpResultsRecursively(props: {
@@ -251,7 +247,7 @@ export class WarpMultiversxResults implements AdapterWarpResults {
       entryActionIndex,
       inputs,
       this.serializer.coreSerializer,
-      this.config.transform?.runner
+      this.config
     )
     const entryExecution = resultsCache.get(entryActionIndex)
     return {

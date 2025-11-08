@@ -89,7 +89,7 @@ export class WarpSuiResults implements AdapterWarpResults {
     }
     return {
       values: { string: stringValues, native: nativeValues },
-      results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer),
+      results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer, this.config),
     }
   }
 
@@ -124,6 +124,6 @@ export class WarpSuiResults implements AdapterWarpResults {
         results[key] = path
       }
     }
-    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer) }
+    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer, this.config) }
   }
 }

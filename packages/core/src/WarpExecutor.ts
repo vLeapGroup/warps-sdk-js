@@ -249,7 +249,7 @@ export class WarpExecutor {
         executable.action,
         executable.resolvedInputs,
         this.factory.getSerializer(),
-        this.config.transform?.runner
+        this.config
       )
       const next = getNextInfo(this.config, this.adapters, executable.warp, executable.action, results)
 

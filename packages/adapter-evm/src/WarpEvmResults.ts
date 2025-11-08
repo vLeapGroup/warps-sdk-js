@@ -164,7 +164,7 @@ export class WarpEvmResults implements AdapterWarpResults {
       }
     }
 
-    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer) }
+    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer, this.config) }
   }
 
   async getTransactionStatus(

@@ -211,7 +211,7 @@ describe('Result Helpers', () => {
         { input: warp.actions[0].inputs[0], value: 'string:abc' },
         { input: warp.actions[0].inputs[1], value: 'string:xyz' },
       ]
-      const { results } = await extractCollectResults(warp, response, 1, inputs, new WarpSerializer())
+      const { results } = await extractCollectResults(warp, response, 1, inputs, new WarpSerializer(), testConfig)
       expect(results.FOO).toBe('abc')
       expect(results.BAR).toBe('xyz')
     })
@@ -236,7 +236,7 @@ describe('Result Helpers', () => {
       } as any
       const response = { data: { some: 'value' } }
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:aliased' }]
-      const { results } = await extractCollectResults(warp, response, 1, inputs, new WarpSerializer())
+      const { results } = await extractCollectResults(warp, response, 1, inputs, new WarpSerializer(), testConfig)
       expect(results.FOO).toBe('aliased')
     })
 
@@ -260,7 +260,7 @@ describe('Result Helpers', () => {
       } as any
       const response = { data: { some: 'value' } }
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:abc' }]
-      const { results } = await extractCollectResults(warp, response, 1, inputs, new WarpSerializer())
+      const { results } = await extractCollectResults(warp, response, 1, inputs, new WarpSerializer(), testConfig)
       expect(results.BAR).toBeNull()
     })
   })
@@ -598,7 +598,7 @@ describe('Result Helpers', () => {
       })
 
       // Patch: evaluate transforms directly if missing
-      const finalResults = await evaluateResultsCommon(warp, result.results, 1, [], new WarpSerializer(), testConfig.transform?.runner)
+      const finalResults = await evaluateResultsCommon(warp, result.results, 1, [], new WarpSerializer(), testConfig)
 
       // The result should be from the entry action (1)
       expect(result.success).toBe(true)
@@ -727,7 +727,7 @@ describe('Result Helpers', () => {
       })
 
       // Patch: evaluate transforms directly if missing
-      const finalResults = await evaluateResultsCommon(warp, result.results, 1, [], new WarpSerializer(), testConfig.transform?.runner)
+      const finalResults = await evaluateResultsCommon(warp, result.results, 1, [], new WarpSerializer(), testConfig)
 
       // The result should be from the entry action (1)
       expect(result.success).toBe(true)

@@ -1,5 +1,5 @@
 import { WarpConstants } from '../constants'
-import { ResolvedInput, TransformRunner, Warp } from '../types'
+import { ResolvedInput, TransformRunner, Warp, WarpClientConfig } from '../types'
 import { WarpExecutionResults } from '../types/results'
 import { WarpLogger } from '../WarpLogger'
 import { WarpSerializer } from '../WarpSerializer'
@@ -11,7 +11,7 @@ export const extractCollectResults = async (
   actionIndex: number,
   inputs: ResolvedInput[],
   serializer: WarpSerializer,
-  transformRunner?: TransformRunner | null
+  config: WarpClientConfig
 ): Promise<{ values: { string: string[]; native: any[] }; results: WarpExecutionResults }> => {
   const stringValues: string[] = []
   const nativeValues: any[] = []
@@ -39,7 +39,7 @@ export const extractCollectResults = async (
   }
   return {
     values: { string: stringValues, native: nativeValues },
-    results: await evaluateResultsCommon(warp, results, actionIndex, inputs, serializer, transformRunner),
+    results: await evaluateResultsCommon(warp, results, actionIndex, inputs, serializer, config),
   }
 }
 
@@ -53,12 +53,12 @@ export const evaluateResultsCommon = async (
   actionIndex: number,
   inputs: ResolvedInput[],
   serializer: WarpSerializer,
-  transformRunner?: TransformRunner | null
+  config: WarpClientConfig
 ): Promise<WarpExecutionResults> => {
   if (!warp.results) return baseResults
   let results = { ...baseResults }
   results = evaluateInputResults(results, warp, actionIndex, inputs, serializer)
-  results = await evaluateTransformResults(warp, results, transformRunner)
+  results = await evaluateTransformResults(warp, results, config.transform?.runner || null)
   return results
 }
 
@@ -91,7 +91,7 @@ const evaluateInputResults = (
 const evaluateTransformResults = async (
   warp: Warp,
   baseResults: WarpExecutionResults,
-  transformRunner?: TransformRunner | null
+  transformRunner: TransformRunner | null
 ): Promise<WarpExecutionResults> => {
   if (!warp.results) return baseResults
   const modifiable = { ...baseResults }
