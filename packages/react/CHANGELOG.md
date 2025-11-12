@@ -1,5 +1,11 @@
 # @vleap/warps-react
 
+## 0.1.0-alpha.144
+
+### Patch Changes
+
+- 008acbc: upgrade deps
+
 ## 0.1.0-alpha.143
 
 ### Patch Changes

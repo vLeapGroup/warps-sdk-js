@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.50
+
+### Patch Changes
+
+- 008acbc: upgrade deps
+
 ## 0.2.0-alpha.49
 
 ### Patch Changes
