@@ -39,7 +39,23 @@ describe('WarpMultiversxWallet', () => {
           },
         },
       },
-      { name: 'multiversx', defaultApiUrl: 'https://api.multiversx.com', addressHrp: 'erd' }
+      {
+        name: 'multiversx',
+        displayName: 'MultiversX',
+        chainId: 'D',
+        blockTime: 6000,
+        addressHrp: 'erd',
+        defaultApiUrl: 'https://api.multiversx.com',
+        logoUrl: 'https://example.com/multiversx-logo.png',
+        nativeToken: {
+          chain: 'multiversx',
+          identifier: 'EGLD',
+          name: 'MultiversX',
+          symbol: 'EGLD',
+          decimals: 18,
+          logoUrl: 'https://example.com/egld-logo.png',
+        },
+      }
     )
 
     // Mock the signTransaction method to avoid complex SDK setup

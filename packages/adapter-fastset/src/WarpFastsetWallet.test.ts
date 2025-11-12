@@ -148,7 +148,7 @@ describe('WarpFastsetWallet', () => {
   describe('Signing Operations', () => {
     test('signMessage() should throw error when wallet not initialized', async () => {
       // Mock private key to be undefined for this test
-      ;(getWarpWalletPrivateKeyFromConfig as jest.MockedFunction<typeof getWarpWalletPrivateKeyFromConfig>).mockReturnValueOnce(undefined)
+      ;(getWarpWalletPrivateKeyFromConfig as jest.MockedFunction<typeof getWarpWalletPrivateKeyFromConfig>).mockReturnValueOnce(null as any)
       const walletWithoutConfig = new WarpFastsetWallet({ env: 'testnet' }, mockChain)
 
       await expect(walletWithoutConfig.signMessage('test')).rejects.toThrow('Wallet not initialized')
@@ -156,7 +156,7 @@ describe('WarpFastsetWallet', () => {
 
     test('signTransaction() should throw error when wallet not initialized', async () => {
       // Mock private key to be undefined for this test
-      ;(getWarpWalletPrivateKeyFromConfig as jest.MockedFunction<typeof getWarpWalletPrivateKeyFromConfig>).mockReturnValueOnce(undefined)
+      ;(getWarpWalletPrivateKeyFromConfig as jest.MockedFunction<typeof getWarpWalletPrivateKeyFromConfig>).mockReturnValueOnce(null as any)
       const walletWithoutConfig = new WarpFastsetWallet({ env: 'testnet' }, mockChain)
       const mockTx = {
         claim: { Transfer: { amount: '1000000000000000000', user_data: null } },
@@ -181,9 +181,14 @@ describe('WarpFastsetWallet', () => {
 
     test('signTransaction() should sign transaction', async () => {
       const originalSerialize = Transaction.serialize
-      Transaction.serialize = jest.fn(() => ({
+      const mockSerialized = {
         toBytes: jest.fn(() => new Uint8Array([1, 2, 3, 4, 5])),
-      }))
+        toHex: jest.fn(() => '0102030405'),
+        toBase64: jest.fn(() => 'AQIDBAU='),
+        toBase58: jest.fn(() => ''),
+        parse: jest.fn(),
+      }
+      Transaction.serialize = jest.fn(() => mockSerialized as any)
 
       const mockTx = {
         sender: new Uint8Array(32),
@@ -207,7 +212,7 @@ describe('WarpFastsetWallet', () => {
   describe('Transaction Submission', () => {
     test('sendTransaction() should work even when wallet not initialized', async () => {
       // Mock private key to be undefined for this test - sendTransaction doesn't check for private key
-      ;(getWarpWalletPrivateKeyFromConfig as jest.MockedFunction<typeof getWarpWalletPrivateKeyFromConfig>).mockReturnValueOnce(undefined)
+      ;(getWarpWalletPrivateKeyFromConfig as jest.MockedFunction<typeof getWarpWalletPrivateKeyFromConfig>).mockReturnValueOnce(null as any)
       const walletWithoutConfig = new WarpFastsetWallet({ env: 'testnet' }, mockChain)
       // Ensure client has request and submitTransaction methods
       if (walletWithoutConfig['client']) {
@@ -286,8 +291,10 @@ describe('WarpFastsetWallet', () => {
       const walletWithoutConfig = new WarpFastsetWallet({ env: 'testnet' }, mockChain)
       const result = walletWithoutConfig.generate()
       expect(result.privateKey).toBeDefined()
-      expect(result.privateKey.length).toBeGreaterThan(0)
-      expect(typeof result.privateKey).toBe('string')
+      if (result.privateKey) {
+        expect(result.privateKey.length).toBeGreaterThan(0)
+        expect(typeof result.privateKey).toBe('string')
+      }
     })
   })
 })

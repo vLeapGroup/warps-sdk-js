@@ -31,6 +31,7 @@ describe('WarpEvmExecutor', () => {
       blockTime: 12000,
       addressHrp: '0x',
       defaultApiUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
+      logoUrl: 'https://example.com/ethereum-logo.png',
       nativeToken: NativeTokenEth,
     }
 
@@ -119,7 +120,6 @@ describe('WarpEvmExecutor', () => {
         transfers: [
           {
             identifier: tokenAddress,
-            nonce: 0n,
             amount: ethers.parseUnits('100', 18),
           },
         ],
@@ -143,7 +143,6 @@ describe('WarpEvmExecutor', () => {
         transfers: [
           {
             identifier: 'ETH',
-            nonce: 0n,
             amount: ethers.parseEther('1.5'),
           },
         ],
@@ -168,7 +167,6 @@ describe('WarpEvmExecutor', () => {
         transfers: [
           {
             identifier: 'invalid-address',
-            nonce: 0n,
             amount: ethers.parseUnits('100', 18),
           },
         ],
@@ -194,12 +192,10 @@ describe('WarpEvmExecutor', () => {
         transfers: [
           {
             identifier: tokenAddress1,
-            nonce: 0n,
             amount: ethers.parseUnits('100', 18),
           },
           {
             identifier: tokenAddress2,
-            nonce: 0n,
             amount: ethers.parseUnits('50', 18),
           },
         ],
@@ -223,7 +219,6 @@ describe('WarpEvmExecutor', () => {
         transfers: [
           {
             identifier: 'ETH',
-            nonce: 0n,
             amount: -1n,
           },
         ],
@@ -247,7 +242,6 @@ describe('WarpEvmExecutor', () => {
         transfers: [
           {
             identifier: 'ETH',
-            nonce: 0n,
             amount: 0n,
           },
         ],

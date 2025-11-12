@@ -10,10 +10,12 @@ describe('WarpSuiAbiBuilder', () => {
     blockTime: 3000,
     addressHrp: 'sui',
     defaultApiUrl: 'https://fullnode.devnet.sui.io',
+    logoUrl: 'https://example.com/sui-chain-logo.png',
     nativeToken: {
       chain: 'sui',
       identifier: 'SUI',
       name: 'Sui',
+      symbol: 'SUI',
       decimals: 9,
       logoUrl: 'https://example.com/sui-logo.png',
     },

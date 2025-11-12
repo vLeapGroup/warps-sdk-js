@@ -10,10 +10,12 @@ describe('WarpEvmExplorer', () => {
     blockTime: 12000,
     addressHrp: '0x',
     defaultApiUrl: 'https://api.example.com',
+    logoUrl: 'https://example.com/ethereum-logo.png',
     nativeToken: {
       chain: 'ethereum',
       identifier: 'ETH',
       name: 'Ethereum',
+      symbol: 'ETH',
       decimals: 18,
     },
   }
@@ -25,10 +27,12 @@ describe('WarpEvmExplorer', () => {
     blockTime: 12000,
     addressHrp: '0x',
     defaultApiUrl: 'https://api.arbitrum.com',
+    logoUrl: 'https://example.com/arbitrum-logo.png',
     nativeToken: {
       chain: 'arbitrum',
       identifier: 'ARB',
       name: 'Arbitrum',
+      symbol: 'ARB',
       decimals: 18,
     },
   }
@@ -40,10 +44,12 @@ describe('WarpEvmExplorer', () => {
     blockTime: 12000,
     addressHrp: '0x',
     defaultApiUrl: 'https://api.base.com',
+    logoUrl: 'https://example.com/base-logo.png',
     nativeToken: {
       chain: 'ethereum',
       identifier: 'ETH',
       name: 'Ethereum',
+      symbol: 'ETH',
       decimals: 18,
       logoUrl: 'https://example.com/eth-logo.png',
     },

@@ -21,10 +21,12 @@ describe('WarpEvmDataLoader', () => {
     blockTime: 12000,
     addressHrp: '',
     defaultApiUrl: 'https://mainnet.infura.io/v3/your-project-id',
+    logoUrl: 'https://example.com/ethereum-logo.png',
     nativeToken: {
       chain: 'ethereum',
       identifier: 'ETH',
       name: 'Ethereum',
+      symbol: 'ETH',
       decimals: 18,
     },
   }

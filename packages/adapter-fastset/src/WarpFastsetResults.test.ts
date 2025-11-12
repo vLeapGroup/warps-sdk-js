@@ -25,10 +25,12 @@ describe('WarpFastsetResults', () => {
       blockTime: 1000,
       addressHrp: 'fs1',
       defaultApiUrl: 'https://api.fastset.com',
+      logoUrl: 'https://example.com/fs-chain.svg',
       nativeToken: {
         chain: 'fastset',
         identifier: 'FS',
         name: 'Fastset Token',
+        symbol: 'FS',
         decimals: 18,
         logoUrl: 'https://example.com/fs.svg',
       },

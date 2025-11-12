@@ -49,6 +49,7 @@ const mockChainInfo: WarpChainInfo = {
     chain: 'multiversx',
     identifier: 'EGLD',
     name: 'MultiversX',
+    symbol: 'EGLD',
     decimals: 18,
     logoUrl: 'https://example.com/egld-logo.png',
   },

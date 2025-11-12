@@ -53,7 +53,7 @@ export class WarpFastsetWallet implements AdapterWarpWallet {
 
   async sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string> {
     const { signature, ...transactionWithoutSignature } = tx
-    const _cert = await this.client.submitTransaction(transactionWithoutSignature, signature)
+    const _cert = await this.client.submitTransaction(transactionWithoutSignature, signature ?? null)
 
     return 'TODO'
   }
