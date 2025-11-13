@@ -95,8 +95,8 @@ export class WarpClient {
     return { txs, chain, immediateExecutions, evaluateResults }
   }
 
-  createInscriptionTransaction(chain: WarpChain, warp: Warp): WarpAdapterGenericTransaction {
-    return findWarpAdapterForChain(chain, this.adapters).builder().createInscriptionTransaction(warp)
+  async createInscriptionTransaction(chain: WarpChain, warp: Warp): Promise<WarpAdapterGenericTransaction> {
+    return await findWarpAdapterForChain(chain, this.adapters).builder().createInscriptionTransaction(warp)
   }
 
   async createFromTransaction(chain: WarpChain, tx: WarpAdapterGenericRemoteTransaction, validate = false): Promise<Warp> {
