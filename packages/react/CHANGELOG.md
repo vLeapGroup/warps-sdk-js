@@ -1,5 +1,12 @@
 # @vleap/warps-react
 
+## 0.1.0-alpha.145
+
+### Patch Changes
+
+- Updated dependencies [d14ce36]
+  - @vleap/warps@3.0.0-alpha.147
+
 ## 0.1.0-alpha.144
 
 ### Patch Changes

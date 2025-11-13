@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.147
+
+### Patch Changes
+
+- d14ce36: fix client create inscription fn
+
 ## 3.0.0-alpha.146
 
 ### Patch Changes
