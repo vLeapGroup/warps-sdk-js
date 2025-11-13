@@ -3,12 +3,10 @@
   "version": "0.0.1-alpha.0",
   "main": "index.js",
   "license": "MIT",
+  "private": true,
   "dependencies": {
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "7.37.5",
     "eslint-config-turbo": "^2.6.1"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }
