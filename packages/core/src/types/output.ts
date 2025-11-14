@@ -1,5 +1,5 @@
 import { WarpAdapterGenericTransaction } from './config'
-import { Warp, WarpMessageName, WarpNativeValue, WarpResultName } from './warp'
+import { Warp, WarpMessageName, WarpNativeValue, WarpOutputName } from './warp'
 
 export type WarpActionExecutionStatus = 'success' | 'error' | 'unhandled'
 
@@ -18,7 +18,6 @@ export type WarpActionExecutionResult = {
 
 export type WarpExecutionNextInfo = { identifier: string | null; url: string }[]
 
-export type WarpExecutionOutput = Record<WarpResultName, any | null>
+export type WarpExecutionOutput = Record<WarpOutputName, any | null>
 
 export type WarpExecutionMessages = Record<WarpMessageName, string | null>
-

@@ -21,7 +21,7 @@ export type WarpIdentifierType = 'hash' | 'alias'
 
 export type WarpVarPlaceholder = string
 
-export type WarpResultName = string
+export type WarpOutputName = string
 
 export type WarpResulutionPath = string
 
@@ -38,7 +38,7 @@ export type Warp = {
   vars?: Record<WarpVarPlaceholder, string>
   actions: WarpAction[]
   next?: string
-  output?: Record<WarpResultName, WarpResulutionPath>
+  output?: Record<WarpOutputName, WarpResulutionPath>
   messages?: Record<WarpMessageName, string>
   alerts?: WarpAlerts
   related?: string[]
