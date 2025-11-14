@@ -1,6 +1,6 @@
 {
   "name": "@warps/playground",
-  "version": "0.2.0-alpha.97",
+  "version": "0.2.0-alpha.98",
   "description": "Playground for testing Warps SDK",
   "private": true,
   "type": "module",
@@ -12,11 +12,11 @@
     "fetchtokens": "ts-node fetch-tokens.ts"
   },
   "dependencies": {
-    "@vleap/warps": "3.0.0-alpha.147",
-    "@vleap/warps-adapter-evm": "0.2.0-alpha.41",
-    "@vleap/warps-adapter-fastset": "0.1.0-alpha.36",
-    "@vleap/warps-adapter-multiversx": "^0.2.0-alpha.74",
-    "@vleap/warps-adapter-sui": "^0.2.0-alpha.49"
+    "@vleap/warps": "3.0.0-alpha.148",
+    "@vleap/warps-adapter-evm": "0.2.0-alpha.42",
+    "@vleap/warps-adapter-fastset": "0.1.0-alpha.37",
+    "@vleap/warps-adapter-multiversx": "^0.2.0-alpha.75",
+    "@vleap/warps-adapter-sui": "^0.2.0-alpha.51"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",

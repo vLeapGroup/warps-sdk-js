@@ -1,5 +1,19 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-alpha.37
+
+### Minor Changes
+
+- 53f5231: rename results to output
+- f0fccb0: update exec results
+
+### Patch Changes
+
+- Updated dependencies [c919e13]
+- Updated dependencies [53f5231]
+- Updated dependencies [f0fccb0]
+  - @vleap/warps@3.0.0-alpha.148
+
 ## 0.1.0-alpha.36
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.148
+
+### Minor Changes
+
+- 53f5231: rename results to output
+- f0fccb0: update exec results
+
+### Patch Changes
+
+- c919e13: add custom destinations
+
 ## 3.0.0-alpha.147
 
 ### Patch Changes
