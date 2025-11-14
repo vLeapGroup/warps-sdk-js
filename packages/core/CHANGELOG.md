@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.149
+
+### Patch Changes
+
+- 9b2716f: update unhandled collect output
+
 ## 3.0.0-alpha.148
 
 ### Minor Changes
