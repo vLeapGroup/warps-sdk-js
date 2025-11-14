@@ -231,7 +231,7 @@ export class WarpExecutor {
       return await this.doHttpRequest(executable, collectAction.destination, wallet, payload, extra)
     }
 
-    const output = {}
+    console.log('Unhandled collect: executable', executable, payload)
 
     return {
       status: 'unhandled',
@@ -242,8 +242,8 @@ export class WarpExecutor {
       tx: null,
       next: null,
       values: { string: [], native: [] },
-      output,
-      messages: applyOutputToMessages(executable.warp, output),
+      output: payload,
+      messages: applyOutputToMessages(executable.warp, payload),
     }
   }
 
