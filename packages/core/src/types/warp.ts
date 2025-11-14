@@ -38,7 +38,7 @@ export type Warp = {
   vars?: Record<WarpVarPlaceholder, string>
   actions: WarpAction[]
   next?: string
-  results?: Record<WarpResultName, WarpResulutionPath>
+  output?: Record<WarpResultName, WarpResulutionPath>
   messages?: Record<WarpMessageName, string>
   alerts?: WarpAlerts
   related?: string[]

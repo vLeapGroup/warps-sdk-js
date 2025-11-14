@@ -587,7 +587,7 @@ describe('WarpExecutor', () => {
       expect(result.immediateExecutions[0].status).toBe('unhandled')
       expect(result.immediateExecutions[0].warp).toEqual(unhandledWarp)
       expect(result.immediateExecutions[0].action).toBe(1)
-      expect(result.immediateExecutions[0].results).toEqual({})
+      expect(result.immediateExecutions[0].output).toEqual({})
       expect(mockFetch).not.toHaveBeenCalled()
       expect(handlers.onExecuted).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -626,7 +626,7 @@ describe('WarpExecutor', () => {
       expect(result.immediateExecutions[0].status).toBe('unhandled')
       expect(result.immediateExecutions[0].warp).toEqual(unhandledWarp)
       expect(result.immediateExecutions[0].action).toBe(1)
-      expect(result.immediateExecutions[0].results).toEqual({})
+      expect(result.immediateExecutions[0].output).toEqual({})
       expect(mockFetch).not.toHaveBeenCalled()
       expect(handlers.onExecuted).toHaveBeenCalledWith(
         expect.objectContaining({

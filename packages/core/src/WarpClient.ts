@@ -6,8 +6,8 @@ import {
   Adapter,
   AdapterWarpDataLoader,
   AdapterWarpExplorer,
+  AdapterWarpOutput,
   AdapterWarpRegistry,
-  AdapterWarpResults,
   AdapterWarpSerializer,
   AdapterWarpWallet,
   Warp,
@@ -64,7 +64,7 @@ export class WarpClient {
     txs: WarpAdapterGenericTransaction[]
     chain: WarpChainInfo | null
     immediateExecutions: WarpActionExecutionResult[]
-    evaluateResults: (remoteTxs: WarpAdapterGenericRemoteTransaction[]) => Promise<void>
+    evaluateOutput: (remoteTxs: WarpAdapterGenericRemoteTransaction[]) => Promise<void>
   }> {
     const isWarp = typeof warpOrIdentifierOrUrl === 'object'
     const isUrl = !isWarp && warpOrIdentifierOrUrl.startsWith('http') && warpOrIdentifierOrUrl.endsWith('.json')
@@ -88,11 +88,11 @@ export class WarpClient {
       queries: params.queries,
     })
 
-    const evaluateResults = async (actions: WarpChainAction[]): Promise<void> => {
-      await executor.evaluateResults(warp, actions)
+    const evaluateOutput = async (actions: WarpChainAction[]): Promise<void> => {
+      await executor.evaluateOutput(warp, actions)
     }
 
-    return { txs, chain, immediateExecutions, evaluateResults }
+    return { txs, chain, immediateExecutions, evaluateOutput }
   }
 
   async createInscriptionTransaction(chain: WarpChain, warp: Warp): Promise<WarpAdapterGenericTransaction> {
@@ -128,8 +128,8 @@ export class WarpClient {
     return findWarpAdapterForChain(chain, this.adapters).explorer
   }
 
-  getResults(chain: WarpChain): AdapterWarpResults {
-    return findWarpAdapterForChain(chain, this.adapters).results
+  getOutput(chain: WarpChain): AdapterWarpOutput {
+    return findWarpAdapterForChain(chain, this.adapters).output
   }
 
   async getRegistry(chain: WarpChain): Promise<AdapterWarpRegistry> {

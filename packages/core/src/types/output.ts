@@ -12,12 +12,13 @@ export type WarpActionExecutionResult = {
   tx: WarpAdapterGenericTransaction | null
   next: WarpExecutionNextInfo | null
   values: { string: string[]; native: WarpNativeValue[] }
-  results: WarpExecutionResults
+  output: WarpExecutionOutput
   messages: WarpExecutionMessages
 }
 
 export type WarpExecutionNextInfo = { identifier: string | null; url: string }[]
 
-export type WarpExecutionResults = Record<WarpResultName, any | null>
+export type WarpExecutionOutput = Record<WarpResultName, any | null>
 
 export type WarpExecutionMessages = Record<WarpMessageName, string | null>
+

@@ -1,8 +1,8 @@
 import {
-  AdapterWarpResults,
-  evaluateResultsCommon,
+  AdapterWarpOutput,
+  evaluateOutputCommon,
   getWarpWalletAddressFromConfig,
-  parseResultsOutIndex,
+  parseOutputOutIndex,
   ResolvedInput,
   Warp,
   WarpActionExecutionResult,
@@ -11,11 +11,11 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpConstants,
-  WarpExecutionResults,
+  WarpExecutionOutput,
 } from '@vleap/warps'
 import { WarpFastsetSerializer } from './WarpFastsetSerializer'
 
-export class WarpFastsetResults implements AdapterWarpResults {
+export class WarpFastsetOutput implements AdapterWarpOutput {
   private readonly serializer: WarpFastsetSerializer
 
   constructor(
@@ -47,23 +47,23 @@ export class WarpFastsetResults implements AdapterWarpResults {
       tx,
       next: null,
       values: { string: stringValues, native: rawValues },
-      results: {},
+      output: {},
       messages: {},
     }
   }
 
-  async extractQueryResults(
+  async extractQueryOutput(
     warp: Warp,
     typedValues: any[],
     actionIndex: number,
     inputs: ResolvedInput[]
-  ): Promise<{ values: { string: string[]; native: any[] }; results: WarpExecutionResults }> {
+  ): Promise<{ values: { string: string[]; native: any[] }; output: WarpExecutionOutput }> {
     const stringValues = typedValues.map((t) => this.serializer.typedToString(t))
     const nativeValues = typedValues.map((t) => this.serializer.typedToNative(t)[1])
     const values = { string: stringValues, native: nativeValues }
-    let results: WarpExecutionResults = {}
+    let output: WarpExecutionOutput = {}
 
-    if (!warp.results) return { values, results }
+    if (!warp.output) return { values, output }
 
     const getNestedValue = (path: string): unknown => {
       const match = path.match(/^out\[(\d+)\]$/)
@@ -85,26 +85,26 @@ export class WarpFastsetResults implements AdapterWarpResults {
       return value
     }
 
-    for (const [key, path] of Object.entries(warp.results)) {
+    for (const [key, path] of Object.entries(warp.output)) {
       if (path.startsWith(WarpConstants.Transform.Prefix)) continue
-      const currentActionIndex = parseResultsOutIndex(path)
+      const currentActionIndex = parseOutputOutIndex(path)
       if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
-        results[key] = null
+        output[key] = null
         continue
       }
       if (path.startsWith('out.') || path === 'out' || path.startsWith('out[')) {
         const value = getNestedValue(path)
-        results[key] = value || null
+        output[key] = value || null
       } else {
-        results[key] = path
+        output[key] = path
       }
     }
 
     return {
       values,
-      results: await evaluateResultsCommon(
+      output: await evaluateOutputCommon(
         warp,
-        results,
+        output,
         actionIndex,
         inputs,
         this.serializer.coreSerializer,

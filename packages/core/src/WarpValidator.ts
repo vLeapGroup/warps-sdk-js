@@ -60,7 +60,7 @@ export class WarpValidator {
     }
 
     validateUppercase(warp.vars, 'Variable')
-    validateUppercase(warp.results, 'Result')
+    validateUppercase(warp.output, 'Output')
     return errors
   }
 
@@ -74,12 +74,12 @@ export class WarpValidator {
 
     const hasAnyAbi = warp.actions.some((action) => (action as WarpContractAction | WarpQueryAction).abi)
 
-    const hasAnyResultRequiringAbi = Object.values(warp.results || {}).some(
-      (result) => result.startsWith('out.') || result.startsWith('event.')
+    const hasAnyOutputRequiringAbi = Object.values(warp.output || {}).some(
+      (output) => output.startsWith('out.') || output.startsWith('event.')
     )
 
-    if (warp.results && !hasAnyAbi && hasAnyResultRequiringAbi) {
-      return ['ABI is required when results are present for contract or query actions']
+    if (warp.output && !hasAnyAbi && hasAnyOutputRequiringAbi) {
+      return ['ABI is required when output is present for contract or query actions']
     }
     return []
   }

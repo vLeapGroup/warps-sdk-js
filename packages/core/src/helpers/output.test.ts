@@ -3,11 +3,11 @@ import { createMockWarp } from '../test-utils/sharedMocks'
 import type { TransformRunner } from '../types'
 import { Warp } from '../types'
 import { WarpSerializer } from '../WarpSerializer'
-import { evaluateResultsCommon, extractCollectResults } from './results'
+import { evaluateOutputCommon, extractCollectOutput } from './output'
 
 const testConfig = createMockConfig()
 
-describe('Result Helpers', () => {
+describe('Output Helpers', () => {
   it('returns input-based result by input name (collect)', async () => {
     const warp = {
       protocol: 'test',
@@ -25,7 +25,7 @@ describe('Result Helpers', () => {
           ],
         },
       ],
-      results: {
+      output: {
         FOO: 'input.foo',
         BAR: 'input.bar',
       },
@@ -35,9 +35,9 @@ describe('Result Helpers', () => {
       { input: warp.actions[0].inputs[0], value: 'string:abc' },
       { input: warp.actions[0].inputs[1], value: 'string:xyz' },
     ]
-    const { results } = await extractCollectResults(warp, response, 1, inputs, new WarpSerializer(), testConfig)
-    expect(results.FOO).toBe('abc')
-    expect(results.BAR).toBe('xyz')
+    const { output } = await extractCollectOutput(warp, response, 1, inputs, new WarpSerializer(), testConfig)
+    expect(output.FOO).toBe('abc')
+    expect(output.BAR).toBe('xyz')
   })
 
   it('returns input-based result by input.as alias (collect)', async () => {
@@ -54,14 +54,14 @@ describe('Result Helpers', () => {
           inputs: [{ name: 'foo', as: 'FOO_ALIAS', type: 'string', source: 'field' }],
         },
       ],
-      results: {
+      output: {
         FOO: 'input.FOO_ALIAS',
       },
     } as any
     const response = { data: { some: 'value' } }
     const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:aliased' }]
-    const { results } = await extractCollectResults(warp, response, 1, inputs, new WarpSerializer(), testConfig)
-    expect(results.FOO).toBe('aliased')
+    const { output } = await extractCollectOutput(warp, response, 1, inputs, new WarpSerializer(), testConfig)
+    expect(output.FOO).toBe('aliased')
   })
 
   it('returns null for missing input (collect)', async () => {
@@ -78,18 +78,18 @@ describe('Result Helpers', () => {
           inputs: [{ name: 'foo', type: 'string', source: 'field' }],
         },
       ],
-      results: {
+      output: {
         BAR: 'input.bar',
       },
     } as any
     const response = { data: { some: 'value' } }
     const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:abc' }]
-    const { results } = await extractCollectResults(warp, response, 1, inputs, new WarpSerializer(), testConfig)
-    expect(results.BAR).toBeNull()
+    const { output } = await extractCollectOutput(warp, response, 1, inputs, new WarpSerializer(), testConfig)
+    expect(output.BAR).toBeNull()
   })
 })
 
-describe('extractCollectResults', () => {
+describe('extractCollectOutput', () => {
   it('returns empty results when no results defined', async () => {
     const warp = {
       protocol: 'test',
@@ -100,10 +100,10 @@ describe('extractCollectResults', () => {
     } as Warp
     const response = {}
 
-    const { values, results } = await extractCollectResults(warp, response, 1, [], new WarpSerializer(), testConfig)
+    const { values, output } = await extractCollectOutput(warp, response, 1, [], new WarpSerializer(), testConfig)
 
     expect(values).toEqual({ string: [], native: [] })
-    expect(results).toEqual({})
+    expect(output).toEqual({})
   })
 
   it('extracts nested values from collect response', async () => {
@@ -113,7 +113,7 @@ describe('extractCollectResults', () => {
       title: 'test',
       description: 'test',
       actions: [],
-      results: {
+      output: {
         USERNAME: 'out.data.username',
         ID: 'out.data.id',
         ALL: 'out',
@@ -127,11 +127,11 @@ describe('extractCollectResults', () => {
       },
     }
 
-    const { values, results } = await extractCollectResults(warp, response, 1, [], new WarpSerializer(), testConfig)
+    const { values, output } = await extractCollectOutput(warp, response, 1, [], new WarpSerializer(), testConfig)
 
-    expect(results.USERNAME).toBe('testuser')
-    expect(results.ID).toBe('123')
-    expect(results.ALL).toEqual(response.data)
+    expect(output.USERNAME).toBe('testuser')
+    expect(output.ID).toBe('123')
+    expect(output.ALL).toEqual(response.data)
     expect(values.string).toHaveLength(3)
     expect(values.native).toHaveLength(3)
   })
@@ -143,7 +143,7 @@ describe('extractCollectResults', () => {
       title: 'test',
       description: 'test',
       actions: [],
-      results: {
+      output: {
         USERNAME: 'out.data.username',
         MISSING: 'out.data.missing',
       },
@@ -155,10 +155,10 @@ describe('extractCollectResults', () => {
       },
     }
 
-    const { values, results } = await extractCollectResults(warp, response, 1, [], new WarpSerializer(), testConfig)
+    const { values, output } = await extractCollectOutput(warp, response, 1, [], new WarpSerializer(), testConfig)
 
-    expect(results.USERNAME).toBeNull()
-    expect(results.MISSING).toBeNull()
+    expect(output.USERNAME).toBeNull()
+    expect(output.MISSING).toBeNull()
     expect(values.string).toHaveLength(2)
     expect(values.native).toHaveLength(2)
   })
@@ -170,7 +170,7 @@ describe('extractCollectResults', () => {
       title: 'test',
       description: 'test',
       actions: [],
-      results: {
+      output: {
         BASE: 'out.value',
         DOUBLED: 'transform:() => { return result.BASE * 2 }',
       },
@@ -180,12 +180,12 @@ describe('extractCollectResults', () => {
       value: 10,
     }
 
-    await expect(extractCollectResults(warp, response, 1, [], new WarpSerializer(), testConfig)).rejects.toThrow(
-      'Transform results are defined but no transform runner is configured'
+    await expect(extractCollectOutput(warp, response, 1, [], new WarpSerializer(), testConfig)).rejects.toThrow(
+      'Transform output is defined but no transform runner is configured'
     )
   })
 
-  describe('extractCollectResults with array notation', () => {
+  describe('extractCollectOutput with array notation', () => {
     it('returns null for out[N] where N != current', async () => {
       const warp = {
         protocol: 'test',
@@ -193,17 +193,17 @@ describe('extractCollectResults', () => {
         title: 'Multi Action Test',
         description: 'Test multiple actions',
         actions: [{}, {}],
-        results: {
+        output: {
           USERS_FROM_ACTION1: 'out[1].users',
           BALANCE_FROM_ACTION2: 'out[2].balance',
           CURRENT_ACTION_DATA: 'out',
         },
       } as any
       const response = { data: 'current-action-data' }
-      const { results } = await extractCollectResults(warp, response, 1, [], new WarpSerializer(), testConfig)
-      expect(results.USERS_FROM_ACTION1).toBeNull()
-      expect(results.BALANCE_FROM_ACTION2).toBeNull()
-      expect(results.CURRENT_ACTION_DATA).toBe('current-action-data')
+      const { output } = await extractCollectOutput(warp, response, 1, [], new WarpSerializer(), testConfig)
+      expect(output.USERS_FROM_ACTION1).toBeNull()
+      expect(output.BALANCE_FROM_ACTION2).toBeNull()
+      expect(output.CURRENT_ACTION_DATA).toBe('current-action-data')
     })
   })
 })
@@ -223,11 +223,11 @@ const createMockBrowserTransformRunner = (): TransformRunner => ({
   },
 })
 
-describe('evaluateResultsCommon with Transform Runners', () => {
+describe('evaluateOutputCommon with Transform Runners', () => {
   it('should evaluate transforms with Node.js runner', async () => {
     const warp = {
       ...createMockWarp(),
-      results: {
+      output: {
         DOUBLED: 'transform: (context) => context.value * 2',
         ADDED: 'transform: (context) => context.value + 10',
         GREETING: 'transform: (context) => `Hello ${context.user.name}`',
@@ -235,7 +235,7 @@ describe('evaluateResultsCommon with Transform Runners', () => {
       },
     }
 
-    const baseResults = {
+    const baseOutput = {
       STATIC: 'test-value',
       value: 5,
       user: { name: 'John' },
@@ -243,7 +243,7 @@ describe('evaluateResultsCommon with Transform Runners', () => {
 
     const nodeRunner = createMockNodeTransformRunner()
     const config = createMockConfig({ transform: { runner: nodeRunner } })
-    const result = await evaluateResultsCommon(warp, baseResults, 0, [], new WarpSerializer(), config)
+    const result = await evaluateOutputCommon(warp, baseOutput, 0, [], new WarpSerializer(), config)
 
     expect(result.DOUBLED).toBe(10)
     expect(result.ADDED).toBe(15)
@@ -254,7 +254,7 @@ describe('evaluateResultsCommon with Transform Runners', () => {
   it('should evaluate transforms with browser runner', async () => {
     const warp = {
       ...createMockWarp(),
-      results: {
+      output: {
         TRIPLED: 'transform: (context) => context.value * 3',
         SUBTRACTED: 'transform: (context) => context.value - 5',
         AGE_INFO: 'transform: (context) => `Age: ${context.user.age}`',
@@ -262,7 +262,7 @@ describe('evaluateResultsCommon with Transform Runners', () => {
       },
     }
 
-    const baseResults = {
+    const baseOutput = {
       STATIC: 'test-value',
       value: 15,
       user: { age: 30 },
@@ -270,7 +270,7 @@ describe('evaluateResultsCommon with Transform Runners', () => {
 
     const browserRunner = createMockBrowserTransformRunner()
     const config = createMockConfig({ transform: { runner: browserRunner } })
-    const result = await evaluateResultsCommon(warp, baseResults, 0, [], new WarpSerializer(), config)
+    const result = await evaluateOutputCommon(warp, baseOutput, 0, [], new WarpSerializer(), config)
 
     expect(result.TRIPLED).toBe(45)
     expect(result.SUBTRACTED).toBe(10)
@@ -281,33 +281,33 @@ describe('evaluateResultsCommon with Transform Runners', () => {
   it('should throw when transforms present and no runner provided', async () => {
     const warp = {
       ...createMockWarp(),
-      results: {
+      output: {
         TRANSFORMED: 'transform: (context) => context.value * 2',
         STATIC: 'out.value',
       },
     }
 
-    const baseResults = {
+    const baseOutput = {
       STATIC: 'test-value',
       value: 5,
     }
 
     const config = createMockConfig()
-    await expect(evaluateResultsCommon(warp, baseResults, 0, [], new WarpSerializer(), config)).rejects.toThrow(
-      'Transform results are defined but no transform runner is configured'
+    await expect(evaluateOutputCommon(warp, baseOutput, 0, [], new WarpSerializer(), config)).rejects.toThrow(
+      'Transform output is defined but no transform runner is configured'
     )
   })
 
   it('should handle transform errors gracefully', async () => {
     const warp = {
       ...createMockWarp(),
-      results: {
+      output: {
         ERROR_TRANSFORM: 'transform: (context) => invalidFunction()',
         STATIC: 'out.value',
       },
     }
 
-    const baseResults = {
+    const baseOutput = {
       STATIC: 'test-value',
       value: 5,
     }
@@ -319,7 +319,7 @@ describe('evaluateResultsCommon with Transform Runners', () => {
     }
 
     const config = createMockConfig({ transform: { runner: errorRunner } })
-    const result = await evaluateResultsCommon(warp, baseResults, 0, [], new WarpSerializer(), config)
+    const result = await evaluateOutputCommon(warp, baseOutput, 0, [], new WarpSerializer(), config)
 
     expect(result.ERROR_TRANSFORM).toBeNull()
     expect(result.STATIC).toBe('test-value')
@@ -330,25 +330,25 @@ describe('evaluateResultsCommon with Transform Runners', () => {
   it('should work with empty results', async () => {
     const warp = {
       ...createMockWarp(),
-      results: {},
+      output: {},
     }
 
-    const baseResults = {}
+    const baseOutput = {}
     const nodeRunner = createMockNodeTransformRunner()
     const config = createMockConfig({ transform: { runner: nodeRunner } })
 
-    const result = await evaluateResultsCommon(warp, baseResults, 0, [], new WarpSerializer(), config)
+    const result = await evaluateOutputCommon(warp, baseOutput, 0, [], new WarpSerializer(), config)
 
     expect(result).toEqual({})
   })
 
   it('should work with warp without results', async () => {
     const warp = createMockWarp()
-    const baseResults = { value: 5 }
+    const baseOutput = { value: 5 }
     const nodeRunner = createMockNodeTransformRunner()
     const config = createMockConfig({ transform: { runner: nodeRunner } })
 
-    const result = await evaluateResultsCommon(warp, baseResults, 0, [], new WarpSerializer(), config)
+    const result = await evaluateOutputCommon(warp, baseOutput, 0, [], new WarpSerializer(), config)
 
     expect(result).toEqual({ value: 5 })
   })

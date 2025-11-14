@@ -1,7 +1,7 @@
-// Tests for the MultiversxResults class. All tests focus on the MultiversxResults class directly.
+// Tests for the MultiversxOutput class. All tests focus on the MultiversxOutput class directly.
 import { SmartContractResult, TransactionEvent, TransactionLogs, TransactionOnNetwork, TypedValue } from '@multiversx/sdk-core/out'
 import {
-  extractCollectResults,
+  extractCollectOutput,
   Warp,
   WarpChainInfo,
   WarpClientConfig,
@@ -12,9 +12,9 @@ import {
 import { promises as fs, PathLike } from 'fs'
 import fetchMock from 'jest-fetch-mock'
 import path from 'path'
-import { evaluateResultsCommon } from '../../core/src/helpers/results'
+import { evaluateOutputCommon } from '../../core/src/helpers/output'
 import { setupHttpMock } from './test-utils/mockHttp'
-import { WarpMultiversxResults } from './WarpMultiversxResults'
+import { WarpMultiversxOutput } from './WarpMultiversxOutput'
 
 const testConfig: WarpClientConfig = {
   env: 'devnet',
@@ -81,7 +81,7 @@ jest.mock('@vleap/warps-vm-node', () => ({
 }))
 
 describe('Result Helpers', () => {
-  let subject: WarpMultiversxResults
+  let subject: WarpMultiversxOutput
   let typeRegistry: WarpTypeRegistry
 
   beforeEach(() => {
@@ -95,7 +95,7 @@ describe('Result Helpers', () => {
       nativeToString: (value: any) => `codemeta:${value}`,
     })
     typeRegistry.registerTypeAlias('list', 'vector')
-    subject = new WarpMultiversxResults(testConfig, mockChainInfo, typeRegistry)
+    subject = new WarpMultiversxOutput(testConfig, mockChainInfo, typeRegistry)
   })
 
   describe('input-based results', () => {
@@ -118,7 +118,7 @@ describe('Result Helpers', () => {
             ],
           },
         ],
-        results: {
+        output: {
           FOO: 'input.foo',
           BAR: 'input.bar',
         },
@@ -128,9 +128,9 @@ describe('Result Helpers', () => {
         { input: warp.actions[0].inputs[0], value: 'string:abc' },
         { input: warp.actions[0].inputs[1], value: 'biguint:1234567890' },
       ]
-      const { results } = await subject.extractQueryResults(warp, typedValues, 1, inputs)
-      expect(results.FOO).toBe('abc')
-      expect(results.BAR).toBe(1234567890n)
+      const { output } = await subject.extractQueryOutput(warp, typedValues, 1, inputs)
+      expect(output.FOO).toBe('abc')
+      expect(output.BAR).toBe(1234567890n)
     })
 
     it('returns input-based result by input.as alias (query)', async () => {
@@ -149,14 +149,14 @@ describe('Result Helpers', () => {
             inputs: [{ name: 'foo', as: 'FOO_ALIAS', type: 'string', source: 'field' }],
           },
         ],
-        results: {
+        output: {
           FOO: 'input.FOO_ALIAS',
         },
       } as any
       const typedValues: TypedValue[] = []
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:aliased' }]
-      const { results } = await subject.extractQueryResults(warp, typedValues, 1, inputs)
-      expect(results.FOO).toBe('aliased')
+      const { output } = await subject.extractQueryOutput(warp, typedValues, 1, inputs)
+      expect(output.FOO).toBe('aliased')
     })
 
     it('returns null for missing input (query)', async () => {
@@ -175,14 +175,14 @@ describe('Result Helpers', () => {
             inputs: [{ name: 'foo', type: 'string', source: 'field' }],
           },
         ],
-        results: {
+        output: {
           BAR: 'input.bar',
         },
       } as any
       const typedValues: TypedValue[] = []
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:abc' }]
-      const { results } = await subject.extractQueryResults(warp, typedValues, 1, inputs)
-      expect(results.BAR).toBeNull()
+      const { output } = await subject.extractQueryOutput(warp, typedValues, 1, inputs)
+      expect(output.BAR).toBeNull()
     })
 
     it('returns input-based result by input name (collect)', async () => {
@@ -202,7 +202,7 @@ describe('Result Helpers', () => {
             ],
           },
         ],
-        results: {
+        output: {
           FOO: 'input.foo',
           BAR: 'input.bar',
         },
@@ -212,9 +212,9 @@ describe('Result Helpers', () => {
         { input: warp.actions[0].inputs[0], value: 'string:abc' },
         { input: warp.actions[0].inputs[1], value: 'string:xyz' },
       ]
-      const { results } = await extractCollectResults(warp, response, 1, inputs, new WarpSerializer(), testConfig)
-      expect(results.FOO).toBe('abc')
-      expect(results.BAR).toBe('xyz')
+      const { output } = await extractCollectOutput(warp, response, 1, inputs, new WarpSerializer(), testConfig)
+      expect(output.FOO).toBe('abc')
+      expect(output.BAR).toBe('xyz')
     })
 
     it('returns input-based result by input.as alias (collect)', async () => {
@@ -231,14 +231,14 @@ describe('Result Helpers', () => {
             inputs: [{ name: 'foo', as: 'FOO_ALIAS', type: 'string', source: 'field' }],
           },
         ],
-        results: {
+        output: {
           FOO: 'input.FOO_ALIAS',
         },
       } as any
       const response = { data: { some: 'value' } }
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:aliased' }]
-      const { results } = await extractCollectResults(warp, response, 1, inputs, new WarpSerializer(), testConfig)
-      expect(results.FOO).toBe('aliased')
+      const { output } = await extractCollectOutput(warp, response, 1, inputs, new WarpSerializer(), testConfig)
+      expect(output.FOO).toBe('aliased')
     })
 
     it('returns null for missing input (collect)', async () => {
@@ -255,14 +255,14 @@ describe('Result Helpers', () => {
             inputs: [{ name: 'foo', type: 'string', source: 'field' }],
           },
         ],
-        results: {
+        output: {
           BAR: 'input.bar',
         },
       } as any
       const response = { data: { some: 'value' } }
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:abc' }]
-      const { results } = await extractCollectResults(warp, response, 1, inputs, new WarpSerializer(), testConfig)
-      expect(results.BAR).toBeNull()
+      const { output } = await extractCollectOutput(warp, response, 1, inputs, new WarpSerializer(), testConfig)
+      expect(output.BAR).toBeNull()
     })
   })
 
@@ -287,7 +287,7 @@ describe('Result Helpers', () => {
             ],
           },
         ],
-        results: {
+        output: {
           FOO: 'input.foo',
           BAR: 'input.bar',
         },
@@ -298,9 +298,9 @@ describe('Result Helpers', () => {
         { input: warp.actions[0].inputs[0], value: 'string:abc' },
         { input: warp.actions[0].inputs[1], value: 'string:xyz' },
       ]
-      const { results } = await subject.extractContractResults(warp, 1, tx, inputs)
-      expect(results.FOO).toBe('abc')
-      expect(results.BAR).toBe('xyz')
+      const { output } = await subject.extractContractOutput(warp, 1, tx, inputs)
+      expect(output.FOO).toBe('abc')
+      expect(output.BAR).toBe('xyz')
     })
 
     it('returns input-based result by input.as alias (contract)', async () => {
@@ -320,15 +320,15 @@ describe('Result Helpers', () => {
             inputs: [{ name: 'foo', as: 'FOO_ALIAS', type: 'string', source: 'field' }],
           },
         ],
-        results: {
+        output: {
           FOO: 'input.FOO_ALIAS',
         },
       } as any
       const action = warp.actions[0]
       const tx = new TransactionOnNetwork()
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:aliased' }]
-      const { results } = await subject.extractContractResults(warp, 1, tx, inputs)
-      expect(results.FOO).toBe('aliased')
+      const { output } = await subject.extractContractOutput(warp, 1, tx, inputs)
+      expect(output.FOO).toBe('aliased')
     })
 
     it('returns null for missing input (contract)', async () => {
@@ -348,19 +348,19 @@ describe('Result Helpers', () => {
             inputs: [{ name: 'foo', type: 'string', source: 'field' }],
           },
         ],
-        results: {
+        output: {
           BAR: 'input.bar',
         },
       } as any
       const action = warp.actions[0]
       const tx = new TransactionOnNetwork()
       const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:abc' }]
-      const { results } = await subject.extractContractResults(warp, 1, tx, inputs)
-      expect(results.BAR).toBeNull()
+      const { output } = await subject.extractContractOutput(warp, 1, tx, inputs)
+      expect(output.BAR).toBeNull()
     })
   })
 
-  describe('extractContractResults', () => {
+  describe('extractContractOutput', () => {
     it('returns empty results when no results defined', async () => {
       const warp = {
         protocol: 'test',
@@ -372,10 +372,10 @@ describe('Result Helpers', () => {
       const action = { type: 'contract' } as WarpContractAction
       const tx = new TransactionOnNetwork()
 
-      const { values, results } = await subject.extractContractResults(warp, 1, tx, [])
+      const { values, output } = await subject.extractContractOutput(warp, 1, tx, [])
 
       expect(values).toEqual({ string: [], native: [] })
-      expect(results).toEqual({})
+      expect(output).toEqual({})
     })
 
     it('extracts event results from transaction', async () => {
@@ -397,7 +397,7 @@ describe('Result Helpers', () => {
             gasLimit: 1000000,
           } as WarpContractAction,
         ],
-        results: {
+        output: {
           TOKEN_ID: 'event.registeredWithToken.2',
           DURATION: 'event.registeredWithToken.4',
         },
@@ -427,10 +427,10 @@ describe('Result Helpers', () => {
         ],
       })
 
-      const { values, results } = await subject.extractContractResults(warp, 1, tx, [])
+      const { values, output } = await subject.extractContractOutput(warp, 1, tx, [])
 
-      expect(results.TOKEN_ID).toBe('DEF-123456')
-      expect(results.DURATION).toBeNull()
+      expect(output.TOKEN_ID).toBe('DEF-123456')
+      expect(output.DURATION).toBeNull()
     })
 
     it('extracts output results from transaction', async () => {
@@ -461,20 +461,20 @@ describe('Result Helpers', () => {
         title: 'test',
         description: 'test',
         actions: [action],
-        results: {
+        output: {
           FIRST_OUT: 'out.1',
           SECOND_OUT: 'out.2',
         },
       } as Warp
 
-      const { results } = await subject.extractContractResults(warp, 1, tx, [])
+      const { output } = await subject.extractContractOutput(warp, 1, tx, [])
 
-      expect(results.FIRST_OUT).toBe('22')
-      expect(results.SECOND_OUT).toBeNull()
+      expect(output.FIRST_OUT).toBe('22')
+      expect(output.SECOND_OUT).toBeNull()
     })
   })
 
-  describe('extractQueryResults', () => {
+  describe('extractQueryOutput', () => {
     it('returns empty results when no results defined', async () => {
       const warp = {
         protocol: 'test',
@@ -487,10 +487,10 @@ describe('Result Helpers', () => {
 
       const tx = new TransactionOnNetwork()
       ;(tx as any).typedValues = typedValues
-      const { values, results } = await subject.extractQueryResults(warp, typedValues, 1, [])
+      const { values, output } = await subject.extractQueryOutput(warp, typedValues, 1, [])
 
       expect(values).toEqual({ string: [], native: [] })
-      expect(results).toEqual({})
+      expect(output).toEqual({})
     })
   })
 
@@ -536,7 +536,7 @@ describe('Result Helpers', () => {
         title: 'Test Multi Action',
         description: 'Test with multiple actions and dependencies',
         actions: [userAction, postsAction],
-        results: {
+        output: {
           USER_ID: 'out[1].id',
           USERNAME: 'out[1].username',
           POSTS: 'out[2].posts',
@@ -556,7 +556,7 @@ describe('Result Helpers', () => {
         nativeToString: (value: any) => `codemeta:${value}`,
       })
       typeRegistry.registerTypeAlias('list', 'vector')
-      const subject = new WarpMultiversxResults(testConfig, mockChainInfo, typeRegistry)
+      const subject = new WarpMultiversxOutput(testConfig, mockChainInfo, typeRegistry)
       // Patch executeCollect and executeQuery to always return a full WarpExecution object
       const mockExecutor = {
         executeCollect: async (warpArg: any, actionIndex: any, actionInputs: any, meta: any) => ({
@@ -567,7 +567,7 @@ describe('Result Helpers', () => {
           txHash: '',
           next: null,
           values: { string: [], native: [] },
-          results: {
+          output: {
             USER_ID: '12345',
             USERNAME: 'testuser',
             POSTS: [
@@ -585,13 +585,13 @@ describe('Result Helpers', () => {
           txHash: '',
           next: null,
           values: { string: [], native: [] },
-          results: {},
+          output: {},
           messages: {},
         }),
       }
 
       // Execute the warp from the first action (entry point 1)
-      const result = await subject.resolveWarpResultsRecursively({
+      const result = await subject.resolveWarpOutputRecursively({
         warp,
         entryActionIndex: 1,
         executor: mockExecutor,
@@ -599,23 +599,23 @@ describe('Result Helpers', () => {
       })
 
       // Patch: evaluate transforms directly if missing
-      const finalResults = await evaluateResultsCommon(warp, result.results, 1, [], new WarpSerializer(), testConfig)
+      const finalOutput = await evaluateOutputCommon(warp, result.output, 1, [], new WarpSerializer(), testConfig)
 
       // The result should be from the entry action (1)
       expect(result.status).toBe('success')
       expect(result.action).toBe(1)
 
       // It should include all results
-      expect(finalResults.USER_ID).toBe('12345')
-      expect(finalResults.USERNAME).toBe('testuser')
-      expect(finalResults.POSTS).toEqual([
+      expect(finalOutput.USER_ID).toBe('12345')
+      expect(finalOutput.USERNAME).toBe('testuser')
+      expect(finalOutput.POSTS).toEqual([
         { id: 1, title: 'First post' },
         { id: 2, title: 'Second post' },
       ])
 
       // And transforms should have access to the combined results
-      expect(finalResults.POST_COUNT).toBe(2)
-      expect(finalResults.USER_WITH_POSTS).toEqual({
+      expect(finalOutput.POST_COUNT).toBe(2)
+      expect(finalOutput.USER_WITH_POSTS).toEqual({
         user: 'testuser',
         posts: [
           { id: 1, title: 'First post' },
@@ -665,7 +665,7 @@ describe('Result Helpers', () => {
         title: 'Test Multi Action',
         description: 'Test with multiple actions and dependencies',
         actions: [userAction, postsAction],
-        results: {
+        output: {
           USER_ID: 'out[1].id',
           USERNAME: 'out[1].username',
           POSTS: 'out[2].posts',
@@ -685,7 +685,7 @@ describe('Result Helpers', () => {
         nativeToString: (value: any) => `codemeta:${value}`,
       })
       typeRegistry.registerTypeAlias('list', 'vector')
-      const subject = new WarpMultiversxResults(testConfig, mockChainInfo, typeRegistry)
+      const subject = new WarpMultiversxOutput(testConfig, mockChainInfo, typeRegistry)
       // Patch executeCollect and executeQuery to always return a full WarpExecution object
       const mockExecutor = {
         executeCollect: async (warpArg: any, actionIndex: any, actionInputs: any, meta: any) => ({
@@ -696,7 +696,7 @@ describe('Result Helpers', () => {
           txHash: '',
           next: null,
           values: { string: [], native: [] },
-          results: {
+          output: {
             USER_ID: '12345',
             USERNAME: 'testuser',
             POSTS: [
@@ -714,13 +714,13 @@ describe('Result Helpers', () => {
           txHash: '',
           next: null,
           values: { string: [], native: [] },
-          results: {},
+          output: {},
           messages: {},
         }),
       }
 
       // Execute the warp from the first action (entry point 1)
-      const result = await subject.resolveWarpResultsRecursively({
+      const result = await subject.resolveWarpOutputRecursively({
         warp,
         entryActionIndex: 1,
         executor: mockExecutor,
@@ -728,23 +728,23 @@ describe('Result Helpers', () => {
       })
 
       // Patch: evaluate transforms directly if missing
-      const finalResults = await evaluateResultsCommon(warp, result.results, 1, [], new WarpSerializer(), testConfig)
+      const finalOutput = await evaluateOutputCommon(warp, result.output, 1, [], new WarpSerializer(), testConfig)
 
       // The result should be from the entry action (1)
       expect(result.status).toBe('success')
       expect(result.action).toBe(1)
 
       // It should include all results
-      expect(finalResults.USER_ID).toBe('12345')
-      expect(finalResults.USERNAME).toBe('testuser')
-      expect(finalResults.POSTS).toEqual([
+      expect(finalOutput.USER_ID).toBe('12345')
+      expect(finalOutput.USERNAME).toBe('testuser')
+      expect(finalOutput.POSTS).toEqual([
         { id: 1, title: 'First post' },
         { id: 2, title: 'Second post' },
       ])
 
       // And transforms should have access to the combined results
-      expect(finalResults.POST_COUNT).toBe(2)
-      expect(finalResults.USER_WITH_POSTS).toEqual({
+      expect(finalOutput.POST_COUNT).toBe(2)
+      expect(finalOutput.USER_WITH_POSTS).toEqual({
         user: 'testuser',
         posts: [
           { id: 1, title: 'First post' },

@@ -103,13 +103,13 @@ export const createMockAdapter = () => ({
         txHash: null,
         next: null,
         values: { string: [], native: [] },
-        results: {},
+        output: {},
         messages: {},
         tx: null,
       })
     },
   },
-  results: {
+  output: {
     getTransactionExecutionResults() {
       return Promise.resolve({
         status: 'success',
@@ -119,7 +119,7 @@ export const createMockAdapter = () => ({
         txHash: null,
         next: null,
         values: { string: [], native: [] },
-        results: {},
+        output: {},
         messages: {},
         tx: null,
       })
@@ -289,6 +289,6 @@ export const createMockExecutionResults = () => ({
   txHash: null,
   next: null,
   values: { string: [], native: [] },
-  results: {},
+  output: {},
   messages: {},
 })

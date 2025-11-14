@@ -11,7 +11,7 @@ import {
 } from '@multiversx/sdk-core'
 import {
   AdapterWarpExecutor,
-  applyResultsToMessages,
+  applyOutputToMessages,
   getNextInfo,
   getWarpActionByIndex,
   getWarpWalletAddressFromConfig,
@@ -25,7 +25,7 @@ import {
 import { AdapterTypeRegistry } from '@vleap/warps/src/types'
 import { getMultiversxEntrypoint } from './helpers/general'
 import { WarpMultiversxAbiBuilder } from './WarpMultiversxAbiBuilder'
-import { WarpMultiversxResults } from './WarpMultiversxResults'
+import { WarpMultiversxOutput } from './WarpMultiversxOutput'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
 
 const EgldIdentifierMultiTransfer = 'EGLD-000000'
@@ -33,7 +33,7 @@ const EgldIdentifierMultiTransfer = 'EGLD-000000'
 export class WarpMultiversxExecutor implements AdapterWarpExecutor {
   private readonly serializer: WarpMultiversxSerializer
   private readonly abi: WarpMultiversxAbiBuilder
-  private readonly results: WarpMultiversxResults
+  private readonly output: WarpMultiversxOutput
 
   constructor(
     private readonly config: WarpClientConfig,
@@ -42,7 +42,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
   ) {
     this.serializer = new WarpMultiversxSerializer({ typeRegistry: this.typeRegistry })
     this.abi = new WarpMultiversxAbiBuilder(this.config, this.chain)
-    this.results = new WarpMultiversxResults(this.config, this.chain, this.typeRegistry)
+    this.output = new WarpMultiversxOutput(this.config, this.chain, this.typeRegistry)
   }
 
   async createTransaction(executable: WarpExecutable): Promise<Transaction> {
@@ -117,13 +117,13 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
     const endpoint = abi.getEndpoint(response.function || action.func || '')
     const parts = (response.returnDataParts || []).map((part: any) => (typeof part === 'string' ? Buffer.from(part) : Buffer.from(part)))
     const typedValues = argsSerializer.buffersToValues(parts, endpoint.output)
-    const { values, results } = await this.results.extractQueryResults(
+    const { values, output } = await this.output.extractQueryOutput(
       executable.warp,
       typedValues,
       executable.action,
       executable.resolvedInputs
     )
-    const next = getNextInfo(this.config, [], executable.warp, executable.action, results)
+    const next = getNextInfo(this.config, [], executable.warp, executable.action, output)
 
     return {
       status: isSuccess ? 'success' : 'error',
@@ -134,8 +134,8 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
       tx: null,
       next,
       values,
-      results: { ...results, _DATA: typedValues },
-      messages: applyResultsToMessages(executable.warp, results),
+      output: { ...output, _DATA: typedValues },
+      messages: applyOutputToMessages(executable.warp, output),
     }
   }
 

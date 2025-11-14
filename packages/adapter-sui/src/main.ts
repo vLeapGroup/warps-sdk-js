@@ -15,7 +15,7 @@ import { WarpSuiDataLoader } from './WarpSuiDataLoader'
 import { WarpSuiExecutor } from './WarpSuiExecutor'
 import { WarpSuiExplorer } from './WarpSuiExplorer'
 import { WarpSuiRegistry } from './WarpSuiRegistry'
-import { WarpSuiResults } from './WarpSuiResults'
+import { WarpSuiOutput } from './WarpSuiOutput'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
 import { WarpSuiWallet } from './WarpSuiWallet'
 
@@ -37,7 +37,7 @@ function createSuiAdapter(chainName: WarpChain, chainInfos: Record<WarpChainEnv,
       chainInfo,
       builder: () => new WarpSuiBuilder(config, chainInfo),
       executor: new WarpSuiExecutor(config, chainInfo),
-      results: new WarpSuiResults(config, chainInfo),
+      output: new WarpSuiOutput(config, chainInfo),
       serializer: new WarpSuiSerializer(),
       registry: new WarpSuiRegistry(config, chainInfo),
       explorer: new WarpSuiExplorer(config, chainInfo),

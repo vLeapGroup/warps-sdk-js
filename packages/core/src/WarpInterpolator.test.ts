@@ -46,7 +46,7 @@ const mockAdapter = {
     createTransaction: jest.fn(),
     preprocessInput: jest.fn(),
   },
-  results: {
+  output: {
     getTransactionExecutionResults: jest.fn(),
   },
   serializer: {

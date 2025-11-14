@@ -79,8 +79,8 @@ export const toPreviewText = (text: string, maxChars = 100) => {
 export const replacePlaceholders = (message: string, bag: Record<string, any>) =>
   message.replace(/\{\{([^}]+)\}\}/g, (match, p1) => bag[p1] || '')
 
-export const applyResultsToMessages = (warp: Warp, results: Record<string, any>): Record<string, string> => {
-  const parts = Object.entries(warp.messages || {}).map(([key, value]) => [key, replacePlaceholders(value, results)])
+export const applyOutputToMessages = (warp: Warp, output: Record<string, any>): Record<string, string> => {
+  const parts = Object.entries(warp.messages || {}).map(([key, value]) => [key, replacePlaceholders(value, output)])
 
   return Object.fromEntries(parts)
 }

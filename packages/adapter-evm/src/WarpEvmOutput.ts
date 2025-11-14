@@ -1,9 +1,9 @@
 import {
-  AdapterWarpResults,
-  evaluateResultsCommon,
+  AdapterWarpOutput,
+  evaluateOutputCommon,
   getProviderConfig,
   getWarpWalletAddressFromConfig,
-  parseResultsOutIndex,
+  parseOutputOutIndex,
   ResolvedInput,
   Warp,
   WarpActionExecutionResult,
@@ -13,13 +13,13 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpConstants,
-  WarpExecutionResults,
+  WarpExecutionOutput,
   WarpNativeValue,
 } from '@vleap/warps'
 import { ethers } from 'ethers'
 import { WarpEvmSerializer } from './WarpEvmSerializer'
 
-export class WarpEvmResults implements AdapterWarpResults {
+export class WarpEvmOutput implements AdapterWarpOutput {
   private readonly serializer: WarpEvmSerializer
   private readonly provider: ethers.JsonRpcProvider
 
@@ -42,12 +42,10 @@ export class WarpEvmResults implements AdapterWarpResults {
       return this.createFailedExecution(warp, actionIndex)
     }
 
-    // Handle WarpChainAction object (from getActions)
     if ('status' in tx && typeof tx.status === 'string') {
       return this.handleWarpChainAction(warp, actionIndex, tx as WarpChainAction)
     }
 
-    // Handle ethers.TransactionReceipt object (legacy)
     return this.handleTransactionReceipt(warp, actionIndex, tx as ethers.TransactionReceipt)
   }
 
@@ -61,7 +59,7 @@ export class WarpEvmResults implements AdapterWarpResults {
       tx: null,
       next: null,
       values: { string: [], native: [] },
-      results: {},
+      output: {},
       messages: {},
     }
   }
@@ -85,7 +83,7 @@ export class WarpEvmResults implements AdapterWarpResults {
       tx,
       next: null,
       values: { string: stringValues, native: rawValues },
-      results: {},
+      output: {},
       messages: {},
     }
   }
@@ -118,23 +116,23 @@ export class WarpEvmResults implements AdapterWarpResults {
       tx,
       next: null,
       values: { string: stringValues, native: rawValues },
-      results: {},
+      output: {},
       messages: {},
     }
   }
 
-  async extractQueryResults(
+  async extractQueryOutput(
     warp: Warp,
     typedValues: unknown[],
     actionIndex: number,
     inputs: ResolvedInput[]
-  ): Promise<{ values: { string: string[]; native: WarpNativeValue[] }; results: WarpExecutionResults }> {
+  ): Promise<{ values: { string: string[]; native: WarpNativeValue[] }; output: WarpExecutionOutput }> {
     const stringValues = typedValues.map((t) => this.serializer.typedToString(t))
     const nativeValues = typedValues.map((t) => this.serializer.typedToNative(t)[1])
     const values = { string: stringValues, native: nativeValues }
-    let results: WarpExecutionResults = {}
+    let output: WarpExecutionOutput = {}
 
-    if (!warp.results) return { values, results }
+    if (!warp.output) return { values, output }
 
     const getNestedValue = (path: string): unknown => {
       const indices = path
@@ -150,21 +148,21 @@ export class WarpEvmResults implements AdapterWarpResults {
       return value
     }
 
-    for (const [key, path] of Object.entries(warp.results)) {
+    for (const [key, path] of Object.entries(warp.output)) {
       if (path.startsWith(WarpConstants.Transform.Prefix)) continue
-      const currentActionIndex = parseResultsOutIndex(path)
+      const currentActionIndex = parseOutputOutIndex(path)
       if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
-        results[key] = null
+        output[key] = null
         continue
       }
       if (path.startsWith('out.') || path === 'out' || path.startsWith('out[')) {
-        results[key] = getNestedValue(path) || null
+        output[key] = getNestedValue(path) || null
       } else {
-        results[key] = path
+        output[key] = path
       }
     }
 
-    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer, this.config) }
+    return { values, output: await evaluateOutputCommon(warp, output, actionIndex, inputs, this.serializer.coreSerializer, this.config) }
   }
 
   async getTransactionStatus(
@@ -195,3 +193,4 @@ export class WarpEvmResults implements AdapterWarpResults {
     }
   }
 }
+

@@ -1,7 +1,7 @@
-import { WarpFastsetResults } from './WarpFastsetResults'
+import { WarpFastsetOutput } from './WarpFastsetOutput'
 
-describe('WarpFastsetResults', () => {
-  let results: WarpFastsetResults
+describe('WarpFastsetOutput', () => {
+  let output: WarpFastsetOutput
   let mockConfig: any
 
   beforeEach(() => {
@@ -35,7 +35,7 @@ describe('WarpFastsetResults', () => {
         logoUrl: 'https://example.com/fs.svg',
       },
     }
-    results = new WarpFastsetResults(mockConfig, mockChain)
+    output = new WarpFastsetOutput(mockConfig, mockChain)
   })
 
   describe('getTransactionExecutionResults', () => {
@@ -66,7 +66,7 @@ describe('WarpFastsetResults', () => {
         ],
       }
 
-      const result = await results.getActionExecution(warp, 1, tx)
+      const result = await output.getActionExecution(warp, 1, tx)
 
       expect(result).toEqual({
         status: 'success',
@@ -96,7 +96,7 @@ describe('WarpFastsetResults', () => {
           string: ['0x123456789abcdef', '12345', expect.any(String)],
           native: ['0x123456789abcdef', '12345', expect.any(String)],
         },
-        results: {},
+        output: {},
         messages: {},
       })
     })
@@ -119,7 +119,7 @@ describe('WarpFastsetResults', () => {
         logs: [],
       }
 
-      const result = await results.getActionExecution(warp, 1, tx)
+      const result = await output.getActionExecution(warp, 1, tx)
 
       expect(result.status).toBe('error')
       expect(result.txHash).toBe('0x123456789abcdef')
@@ -139,7 +139,7 @@ describe('WarpFastsetResults', () => {
         hash: '0x123456789abcdef',
       }
 
-      const result = await results.getActionExecution(warp, 1, tx)
+      const result = await output.getActionExecution(warp, 1, tx)
 
       expect(result.status).toBe('success')
       expect(result.values.string).toEqual(['0x123456789abcdef', '0', expect.any(String)])
@@ -158,8 +158,8 @@ describe('WarpFastsetResults', () => {
       const tx1 = { status: 1, hash: '0x123456789abcdef' }
       const tx2 = { success: true, hash: '0x123456789abcdef' }
 
-      const result1 = await results.getActionExecution(warp, 1, tx1)
-      const result2 = await results.getActionExecution(warp, 1, tx2)
+      const result1 = await output.getActionExecution(warp, 1, tx1)
+      const result2 = await output.getActionExecution(warp, 1, tx2)
 
       expect(result1.status).toBe('success')
       expect(result2.status).toBe('success')
@@ -174,7 +174,7 @@ describe('WarpFastsetResults', () => {
         title: 'Test Warp',
         actions: [],
         meta: {},
-        results: {
+        output: {
           balance: 'out.1',
           name: 'out.2',
         },
@@ -184,11 +184,11 @@ describe('WarpFastsetResults', () => {
       const actionIndex = 1
       const inputs: any[] = []
 
-      const result = await results.extractQueryResults(warp, typedValues, actionIndex, inputs)
+      const result = await output.extractQueryOutput(warp, typedValues, actionIndex, inputs)
 
       expect(result.values.string).toEqual(['biguint:1000000', 'string:Test Token'])
       expect(result.values.native).toEqual(['1000000', 'Test Token'])
-      expect(result.results).toEqual({
+      expect(result.output).toEqual({
         balance: '1000000',
         name: 'Test Token',
       })
@@ -201,7 +201,7 @@ describe('WarpFastsetResults', () => {
         title: 'Test Warp',
         actions: [],
         meta: {},
-        results: {
+        output: {
           tokenInfo: 'out.1.0',
           decimals: 'out.1.1',
         },
@@ -216,11 +216,11 @@ describe('WarpFastsetResults', () => {
       const actionIndex = 1
       const inputs: any[] = []
 
-      const result = await results.extractQueryResults(warp, typedValues, actionIndex, inputs)
+      const result = await output.extractQueryOutput(warp, typedValues, actionIndex, inputs)
 
       // The current implementation doesn't handle nested paths correctly
       // This is expected behavior for the scaffold
-      expect(result.results).toEqual({
+      expect(result.output).toEqual({
         tokenInfo: null,
         decimals: '[',
       })
@@ -239,11 +239,11 @@ describe('WarpFastsetResults', () => {
       const actionIndex = 1
       const inputs: any[] = []
 
-      const result = await results.extractQueryResults(warp, typedValues, actionIndex, inputs)
+      const result = await output.extractQueryOutput(warp, typedValues, actionIndex, inputs)
 
       expect(result.values.string).toEqual(['biguint:1000000'])
       expect(result.values.native).toEqual(['1000000'])
-      expect(result.results).toEqual({})
+      expect(result.output).toEqual({})
     })
 
     it('should handle different action indices', async () => {
@@ -253,7 +253,7 @@ describe('WarpFastsetResults', () => {
         title: 'Test Warp',
         actions: [],
         meta: {},
-        results: {
+        output: {
           balance: 'out.1',
           name: 'out.2',
         },
@@ -263,11 +263,11 @@ describe('WarpFastsetResults', () => {
       const actionIndex = 2 // Different from the results paths
       const inputs: any[] = []
 
-      const result = await results.extractQueryResults(warp, typedValues, actionIndex, inputs)
+      const result = await output.extractQueryOutput(warp, typedValues, actionIndex, inputs)
 
       // The current implementation doesn't handle action index filtering correctly
       // This is expected behavior for the scaffold
-      expect(result.results).toEqual({
+      expect(result.output).toEqual({
         balance: '1000000',
         name: 'Test Token',
       })
@@ -280,7 +280,7 @@ describe('WarpFastsetResults', () => {
         title: 'Test Warp',
         actions: [],
         meta: {},
-        results: {
+        output: {
           balance: 'out.1',
           formattedBalance: 'transform:formatBalance:out.1',
         },
@@ -290,10 +290,10 @@ describe('WarpFastsetResults', () => {
       const actionIndex = 1
       const inputs: any[] = []
 
-      const result = await results.extractQueryResults(warp, typedValues, actionIndex, inputs)
+      const result = await output.extractQueryOutput(warp, typedValues, actionIndex, inputs)
 
       // Now that we have a transform runner configured, it should handle transforms
-      expect(result.results).toEqual({
+      expect(result.output).toEqual({
         balance: '1000000',
         formattedBalance: 'formatted_value',
       })

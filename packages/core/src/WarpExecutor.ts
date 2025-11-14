@@ -1,7 +1,7 @@
 import { safeWindow, WarpConstants } from './constants'
 import {
-  applyResultsToMessages,
-  extractCollectResults,
+  applyOutputToMessages,
+  extractCollectOutput,
   findWarpAdapterForChain,
   getNextInfo,
   getWarpActionByIndex,
@@ -154,7 +154,7 @@ export class WarpExecutor {
     return { tx, chain: executable.chain, immediateExecution: null }
   }
 
-  async evaluateResults(warp: Warp, actions: WarpChainAction[]): Promise<void> {
+  async evaluateOutput(warp: Warp, actions: WarpChainAction[]): Promise<void> {
     if (actions.length === 0) return
     if (warp.actions.length === 0) return
     if (!this.handlers) return
@@ -162,14 +162,14 @@ export class WarpExecutor {
     const chain = await this.factory.getChainInfoForWarp(warp)
     const adapter = findWarpAdapterForChain(chain.name, this.adapters)
 
-    const results = (
+    const outputs = (
       await Promise.all(
         warp.actions.map(async (action, index) => {
           if (!isWarpActionAutoExecute(action, warp)) return null
           if (action.type !== 'transfer' && action.type !== 'contract') return null
           const chainAction = actions[index]
           const currentActionIndex = index + 1
-          const result = await adapter.results.getActionExecution(warp, currentActionIndex, chainAction)
+          const result = await adapter.output.getActionExecution(warp, currentActionIndex, chainAction)
 
           if (result.status === 'success') {
             await this.callHandler(() =>
@@ -189,11 +189,11 @@ export class WarpExecutor {
       )
     ).filter((r) => r !== null)
 
-    if (results.every((r) => r.status === 'success')) {
-      const lastResult = results[results.length - 1]
-      await this.callHandler(() => this.handlers?.onExecuted?.(lastResult))
+    if (outputs.every((r) => r.status === 'success')) {
+      const lastOutput = outputs[outputs.length - 1]
+      await this.callHandler(() => this.handlers?.onExecuted?.(lastOutput))
     } else {
-      await this.callHandler(() => this.handlers?.onError?.({ message: `Warp failed: ${JSON.stringify(results.map((r) => r.values))}` }))
+      await this.callHandler(() => this.handlers?.onError?.({ message: `Warp failed: ${JSON.stringify(outputs.map((r) => r.values))}` }))
     }
   }
 
@@ -231,7 +231,7 @@ export class WarpExecutor {
       return await this.doHttpRequest(executable, collectAction.destination, wallet, payload, extra)
     }
 
-    const results = {}
+    const output = {}
 
     return {
       status: 'unhandled',
@@ -242,8 +242,8 @@ export class WarpExecutor {
       tx: null,
       next: null,
       values: { string: [], native: [] },
-      results,
-      messages: applyResultsToMessages(executable.warp, results),
+      output,
+      messages: applyOutputToMessages(executable.warp, output),
     }
   }
 
@@ -288,7 +288,7 @@ export class WarpExecutor {
       WarpLogger.debug('Collect response status', { status: response.status })
       const content = await response.json()
       WarpLogger.debug('Collect response content', { content })
-      const { values, results } = await extractCollectResults(
+      const { values, output } = await extractCollectOutput(
         executable.warp,
         content,
         executable.action,
@@ -296,7 +296,7 @@ export class WarpExecutor {
         this.factory.getSerializer(),
         this.config
       )
-      const next = getNextInfo(this.config, this.adapters, executable.warp, executable.action, results)
+      const next = getNextInfo(this.config, this.adapters, executable.warp, executable.action, output)
 
       return {
         status: response.ok ? 'success' : 'error',
@@ -307,8 +307,8 @@ export class WarpExecutor {
         tx: null,
         next,
         values,
-        results: { ...results, _DATA: content },
-        messages: applyResultsToMessages(executable.warp, results),
+        output: { ...output, _DATA: content },
+        messages: applyOutputToMessages(executable.warp, output),
       }
     } catch (error) {
       WarpLogger.error('WarpActionExecutor: Error executing collect', error)
@@ -321,7 +321,7 @@ export class WarpExecutor {
         tx: null,
         next: null,
         values: { string: [], native: [] },
-        results: { _DATA: error },
+        output: { _DATA: error },
         messages: {},
       }
     }

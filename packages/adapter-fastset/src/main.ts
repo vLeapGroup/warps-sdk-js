@@ -11,7 +11,7 @@ import {
 import { WarpFastsetDataLoader } from './WarpFastsetDataLoader'
 import { WarpFastsetExecutor } from './WarpFastsetExecutor'
 import { WarpFastsetExplorer } from './WarpFastsetExplorer'
-import { WarpFastsetResults } from './WarpFastsetResults'
+import { WarpFastsetOutput } from './WarpFastsetOutput'
 import { WarpFastsetSerializer } from './WarpFastsetSerializer'
 import { WarpFastsetWallet } from './WarpFastsetWallet'
 
@@ -35,7 +35,7 @@ function createFastsetAdapter(chainName: WarpChain, chainInfos: Record<WarpChain
       chainInfo,
       builder: () => fallback.builder(),
       executor: new WarpFastsetExecutor(config, chainInfo),
-      results: new WarpFastsetResults(config, chainInfo),
+      output: new WarpFastsetOutput(config, chainInfo),
       serializer: new WarpFastsetSerializer(),
       registry: fallback.registry,
       explorer: new WarpFastsetExplorer(chainInfo, config),

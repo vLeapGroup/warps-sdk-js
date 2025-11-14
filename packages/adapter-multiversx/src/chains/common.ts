@@ -6,7 +6,7 @@ import { WarpMultiversxDataLoader } from '../WarpMultiversxDataLoader'
 import { WarpMultiversxExecutor } from '../WarpMultiversxExecutor'
 import { WarpMultiversxExplorer } from '../WarpMultiversxExplorer'
 import { WarpMultiversxRegistry } from '../WarpMultiversxRegistry'
-import { WarpMultiversxResults } from '../WarpMultiversxResults'
+import { WarpMultiversxOutput } from '../WarpMultiversxOutput'
 import { WarpMultiversxSerializer } from '../WarpMultiversxSerializer'
 import { WarpMultiversxWallet } from '../WarpMultiversxWallet'
 
@@ -29,7 +29,7 @@ export const createMultiversxAdapter = (chainName: string, chainInfos: Record<Wa
       chainInfo,
       builder: () => new WarpMultiversxBuilder(config, chainInfo),
       executor: new WarpMultiversxExecutor(config, chainInfo, typeRegistry),
-      results: new WarpMultiversxResults(config, chainInfo, typeRegistry),
+      output: new WarpMultiversxOutput(config, chainInfo, typeRegistry),
       serializer: new WarpMultiversxSerializer({ typeRegistry }),
       registry: new WarpMultiversxRegistry(config, chainInfo),
       explorer: new WarpMultiversxExplorer(chainName, config),

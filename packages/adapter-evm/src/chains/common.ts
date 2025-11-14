@@ -2,7 +2,7 @@ import { Adapter, AdapterFactory, WarpChain, WarpChainEnv, WarpChainInfo, WarpCl
 import { WarpEvmDataLoader } from '../WarpEvmDataLoader'
 import { WarpEvmExecutor } from '../WarpEvmExecutor'
 import { WarpEvmExplorer } from '../WarpEvmExplorer'
-import { WarpEvmResults } from '../WarpEvmResults'
+import { WarpEvmOutput } from '../WarpEvmOutput'
 import { WarpEvmSerializer } from '../WarpEvmSerializer'
 import { WarpEvmWallet } from '../WarpEvmWallet'
 
@@ -14,7 +14,7 @@ export const createEvmAdapter = (chainName: WarpChain, chainInfos: Record<WarpCh
       chainInfo: chainInfos[config.env],
       builder: () => fallback.builder(),
       executor: new WarpEvmExecutor(config, chainInfos[config.env]),
-      results: new WarpEvmResults(config, chainInfos[config.env]),
+      output: new WarpEvmOutput(config, chainInfos[config.env]),
       serializer: new WarpEvmSerializer(),
       registry: fallback.registry,
       explorer: new WarpEvmExplorer(chainInfos[config.env], config),

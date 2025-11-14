@@ -1,6 +1,6 @@
 import { WarpConstants } from '../constants'
 import { Adapter, WarpClientConfig } from '../types'
-import { WarpExecutionNextInfo, WarpExecutionResults } from '../types/results'
+import { WarpExecutionNextInfo, WarpExecutionOutput } from '../types/output'
 import { Warp } from '../types/warp'
 import { WarpLinkBuilder } from '../WarpLinkBuilder'
 import { findWarpAdapterForChain, replacePlaceholders } from './general'
@@ -13,7 +13,7 @@ export const getNextInfo = (
   adapters: Adapter[],
   warp: Warp,
   actionIndex: number,
-  results: WarpExecutionResults
+  output: WarpExecutionOutput
 ): WarpExecutionNextInfo | null => {
   const next = (warp.actions?.[actionIndex] as { next?: string })?.next || warp.next || null
   if (!next) return null
@@ -27,7 +27,7 @@ export const getNextInfo = (
   // Find all array placeholders like {{DELEGATIONS[].contract}}
   const arrayPlaceholders = queryWithPlaceholders.match(/{{([^}]+)\[\](\.[^}]+)?}}/g) || []
   if (arrayPlaceholders.length === 0) {
-    const query = replacePlaceholders(queryWithPlaceholders, { ...warp.vars, ...results })
+    const query = replacePlaceholders(queryWithPlaceholders, { ...warp.vars, ...output })
     const identifier = query ? `${baseIdentifier}?${query}` : baseIdentifier
     return [{ identifier, url: buildNextUrl(adapters, identifier, config) }]
   }
@@ -35,16 +35,16 @@ export const getNextInfo = (
   // Support multiple array placeholders that reference the same array
   const placeholder = arrayPlaceholders[0]
   if (!placeholder) return []
-  const resultNameMatch = placeholder.match(/{{([^[]+)\[\]/)
-  const resultName = resultNameMatch ? resultNameMatch[1] : null
-  if (!resultName || results[resultName] === undefined) return []
+  const outputNameMatch = placeholder.match(/{{([^[]+)\[\]/)
+  const outputName = outputNameMatch ? outputNameMatch[1] : null
+  if (!outputName || output[outputName] === undefined) return []
 
-  const resultArray = Array.isArray(results[resultName]) ? results[resultName] : [results[resultName]]
-  if (resultArray.length === 0) return []
+  const outputArray = Array.isArray(output[outputName]) ? output[outputName] : [output[outputName]]
+  if (outputArray.length === 0) return []
 
-  // Create regex patterns for all array placeholders with the same result name
+  // Create regex patterns for all array placeholders with the same output name
   const arrayRegexes = arrayPlaceholders
-    .filter((p) => p.includes(`{{${resultName}[]`))
+    .filter((p) => p.includes(`{{${outputName}[]`))
     .map((p) => {
       const fieldMatch = p.match(/\[\](\.[^}]+)?}}/)
       const field = fieldMatch ? fieldMatch[1] || '' : ''
@@ -55,7 +55,7 @@ export const getNextInfo = (
       }
     })
 
-  const nextLinks = resultArray
+  const nextLinks = outputArray
     .map((item) => {
       let replacedQuery = queryWithPlaceholders
 

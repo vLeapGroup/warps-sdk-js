@@ -1,6 +1,6 @@
 import {
   AdapterWarpExecutor,
-  applyResultsToMessages,
+  applyOutputToMessages,
   getNextInfo,
   getProviderConfig,
   getWarpActionByIndex,
@@ -14,13 +14,13 @@ import {
 } from '@vleap/warps'
 import { ethers } from 'ethers'
 import { WarpEvmConstants } from './constants'
-import { WarpEvmResults } from './WarpEvmResults'
+import { WarpEvmOutput } from './WarpEvmOutput'
 import { WarpEvmSerializer } from './WarpEvmSerializer'
 
 export class WarpEvmExecutor implements AdapterWarpExecutor {
   private readonly serializer: WarpEvmSerializer
   private readonly provider: ethers.JsonRpcProvider
-  private readonly results: WarpEvmResults
+  private readonly output: WarpEvmOutput
 
   constructor(
     private readonly config: WarpClientConfig,
@@ -30,7 +30,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
     const providerConfig = getProviderConfig(this.config, chain.name, this.config.env, this.chain.defaultApiUrl)
     const network = new ethers.Network(this.chain.name, parseInt(this.chain.chainId))
     this.provider = new ethers.JsonRpcProvider(providerConfig.url, network)
-    this.results = new WarpEvmResults(config, this.chain)
+    this.output = new WarpEvmOutput(config, this.chain)
   }
 
   async createTransaction(executable: WarpExecutable): Promise<ethers.TransactionRequest> {
@@ -181,14 +181,14 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
       const decodedResult = iface.decodeFunctionResult(action.func, result)
       const isSuccess = true
 
-      const { values, results } = await this.results.extractQueryResults(
+      const { values, output } = await this.output.extractQueryOutput(
         executable.warp,
         decodedResult,
         executable.action,
         executable.resolvedInputs
       )
 
-      const next = getNextInfo(this.config, [], executable.warp, executable.action, results)
+      const next = getNextInfo(this.config, [], executable.warp, executable.action, output)
 
       return {
         status: isSuccess ? 'success' : 'error',
@@ -199,8 +199,8 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         tx: null,
         next,
         values,
-        results: { ...results, _DATA: decodedResult },
-        messages: applyResultsToMessages(executable.warp, results),
+        output: { ...output, _DATA: decodedResult },
+        messages: applyOutputToMessages(executable.warp, output),
       }
     } catch (error) {
       return {
@@ -212,7 +212,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         tx: null,
         next: null,
         values: { string: [], native: [] },
-        results: { _DATA: error },
+        output: { _DATA: error },
         messages: {},
       }
     }

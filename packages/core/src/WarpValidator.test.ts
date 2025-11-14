@@ -1,6 +1,18 @@
+import { readFileSync } from 'fs'
+import { join } from 'path'
 import { createMockConfig } from './test-utils/mockConfig'
 import { Warp } from './types'
 import { WarpValidator } from './WarpValidator'
+
+const localSchemaPath = join(__dirname, '../../../warp-schema.json')
+const localSchema = JSON.parse(readFileSync(localSchemaPath, 'utf-8'))
+
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve(localSchema),
+  } as Response)
+) as jest.Mock
 
 describe('WarpValidator', () => {
   const defaultConfig = createMockConfig()
@@ -103,7 +115,7 @@ describe('WarpValidator', () => {
       const validator = new WarpValidator(defaultConfig)
       const warp = createWarp({
         actions: [{ type: 'transfer', label: 'test', description: 'test', address: 'erd1...' }],
-        results: {
+        output: {
           TEST: 'value',
           ANOTHER_TEST: 'value',
         },
@@ -124,15 +136,15 @@ describe('WarpValidator', () => {
       expect(result.errors).toContain("Variable name 'test' must be uppercase")
     })
 
-    it('returns error when result name is not uppercase', async () => {
+    it('returns error when output name is not uppercase', async () => {
       const validator = new WarpValidator(defaultConfig)
       const warp = createWarp({
         actions: [{ type: 'transfer', label: 'test', description: 'test', address: 'erd1...' }],
-        results: { test: 'value' },
+        output: { test: 'value' },
       })
       const result = await validator.validate(warp)
       expect(result.valid).toBe(false)
-      expect(result.errors).toContain("Result name 'test' must be uppercase")
+      expect(result.errors).toContain("Output name 'test' must be uppercase")
     })
   })
 
@@ -152,7 +164,7 @@ describe('WarpValidator', () => {
             abi: 'hashOfAbi',
           },
         ],
-        results: {
+        output: {
           TEST: 'value',
         },
       })
@@ -175,7 +187,7 @@ describe('WarpValidator', () => {
             abi: 'hashOfAbi',
           },
         ],
-        results: {
+        output: {
           TEST: 'value',
         },
       })
@@ -223,7 +235,7 @@ describe('WarpValidator', () => {
       expect(result.errors).toHaveLength(0)
     })
 
-    it('returns error when contract action has results but no ABI', async () => {
+    it('returns error when contract action has output but no ABI', async () => {
       const validator = new WarpValidator(defaultConfig)
       const warp = createWarp({
         actions: [
@@ -237,16 +249,16 @@ describe('WarpValidator', () => {
             gasLimit: 1000000,
           },
         ],
-        results: {
+        output: {
           TEST: 'out.value',
         },
       })
       const result = await validator.validate(warp)
       expect(result.valid).toBe(false)
-      expect(result.errors).toContain('ABI is required when results are present for contract or query actions')
+      expect(result.errors).toContain('ABI is required when output is present for contract or query actions')
     })
 
-    it('returns error when query action has results but no ABI', async () => {
+    it('returns error when query action has output but no ABI', async () => {
       const validator = new WarpValidator(defaultConfig)
       const warp = createWarp({
         actions: [
@@ -259,13 +271,13 @@ describe('WarpValidator', () => {
             args: [],
           },
         ],
-        results: {
+        output: {
           TEST: 'out.value',
         },
       })
       const result = await validator.validate(warp)
       expect(result.valid).toBe(false)
-      expect(result.errors).toContain('ABI is required when results are present for contract or query actions')
+      expect(result.errors).toContain('ABI is required when output is present for contract or query actions')
     })
   })
 

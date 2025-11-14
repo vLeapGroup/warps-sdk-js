@@ -1,8 +1,8 @@
 import { WarpClientConfig } from '@vleap/warps'
-import { WarpEvmResults } from './WarpEvmResults'
+import { WarpEvmOutput } from './WarpEvmOutput'
 
-describe('WarpEvmResults', () => {
-  let results: WarpEvmResults
+describe('WarpEvmOutput', () => {
+  let output: WarpEvmOutput
   let mockConfig: WarpClientConfig
 
   beforeEach(() => {
@@ -15,7 +15,7 @@ describe('WarpEvmResults', () => {
       },
     } as WarpClientConfig
 
-    results = new WarpEvmResults(mockConfig, {
+    output = new WarpEvmOutput(mockConfig, {
       name: 'ethereum',
       chainId: '1',
       defaultApiUrl: 'https://eth.llamarpc.com',
@@ -50,7 +50,7 @@ describe('WarpEvmResults', () => {
         ],
       } as any
 
-      const result = await results.getActionExecution(warp, 1, mockReceipt)
+      const result = await output.getActionExecution(warp, 1, mockReceipt)
 
       expect(result.status).toBe('success')
       expect(result.warp).toBe(warp)
@@ -60,7 +60,7 @@ describe('WarpEvmResults', () => {
       expect(result.next).toBe(null)
       expect(result.values.string).toEqual(expect.arrayContaining(['0x1234567890abcdef', '12345', '21000', '20000000000']))
       expect(result.values.native).toEqual(expect.arrayContaining(['0x1234567890abcdef', '12345', '21000', '20000000000']))
-      expect(result.results).toEqual({})
+      expect(result.output).toEqual({})
       expect(result.messages).toEqual({})
     })
 
@@ -81,7 +81,7 @@ describe('WarpEvmResults', () => {
         logs: [],
       } as any
 
-      const result = await results.getActionExecution(warp, 1, mockReceipt)
+      const result = await output.getActionExecution(warp, 1, mockReceipt)
 
       expect(result.status).toBe('error')
       expect(result.values.string).toEqual(expect.arrayContaining(['0x1234567890abcdef', '12345', '21000', '20000000000']))
@@ -102,7 +102,7 @@ describe('WarpEvmResults', () => {
         logs: [],
       } as any
 
-      const result = await results.getActionExecution(warp, 1, mockReceipt)
+      const result = await output.getActionExecution(warp, 1, mockReceipt)
 
       expect(result.status).toBe('success')
       expect(result.values.string).toEqual(expect.arrayContaining(['0x1234567890abcdef', '0', '0', '0']))
@@ -117,7 +117,7 @@ describe('WarpEvmResults', () => {
         actions: [],
       } as any
 
-      const result = await results.getActionExecution(warp, 1, null)
+      const result = await output.getActionExecution(warp, 1, null)
 
       expect(result.status).toBe('error')
       expect(result.warp).toBe(warp)
@@ -128,7 +128,7 @@ describe('WarpEvmResults', () => {
       expect(result.next).toBe(null)
       expect(result.values.string).toEqual([])
       expect(result.values.native).toEqual([])
-      expect(result.results).toEqual({})
+      expect(result.output).toEqual({})
       expect(result.messages).toEqual({})
     })
   })

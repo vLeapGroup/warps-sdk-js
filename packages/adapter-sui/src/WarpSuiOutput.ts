@@ -1,12 +1,12 @@
 import { SuiClient } from '@mysten/sui/client'
 import {
-  AdapterWarpResults,
-  applyResultsToMessages,
-  evaluateResultsCommon,
+  AdapterWarpOutput,
+  applyOutputToMessages,
+  evaluateOutputCommon,
   getNextInfo,
   getProviderConfig,
   getWarpWalletAddressFromConfig,
-  parseResultsOutIndex,
+  parseOutputOutIndex,
   ResolvedInput,
   Warp,
   WarpActionExecutionResult,
@@ -15,11 +15,11 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpConstants,
-  WarpExecutionResults,
+  WarpExecutionOutput,
 } from '@vleap/warps'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
 
-export class WarpSuiResults implements AdapterWarpResults {
+export class WarpSuiOutput implements AdapterWarpOutput {
   private readonly serializer: WarpSuiSerializer
   private readonly client: SuiClient
 
@@ -37,9 +37,9 @@ export class WarpSuiResults implements AdapterWarpResults {
     actionIndex: WarpActionIndex,
     tx: WarpAdapterGenericRemoteTransaction
   ): Promise<WarpActionExecutionResult> {
-    const results = await this.extractContractResults(warp, actionIndex, tx, [])
-    const next = getNextInfo(this.config, [], warp, actionIndex, results)
-    const messages = applyResultsToMessages(warp, results.results)
+    const output = await this.extractContractOutput(warp, actionIndex, tx, [])
+    const next = getNextInfo(this.config, [], warp, actionIndex, output.output)
+    const messages = applyOutputToMessages(warp, output.output)
     return {
       status: tx.effects?.status?.status === 'success' ? 'success' : 'error',
       warp,
@@ -48,82 +48,82 @@ export class WarpSuiResults implements AdapterWarpResults {
       txHash: tx.digest,
       tx,
       next,
-      values: results.values,
-      results: results.results,
+      values: output.values,
+      output: output.output,
       messages,
     }
   }
 
-  async extractContractResults(
+  async extractContractOutput(
     warp: Warp,
     actionIndex: WarpActionIndex,
     tx: any,
     inputs: ResolvedInput[]
-  ): Promise<{ values: { string: string[]; native: any[] }; results: WarpExecutionResults }> {
+  ): Promise<{ values: { string: string[]; native: any[] }; output: WarpExecutionOutput }> {
     // SUI: extract results from tx effects or return values
     let stringValues: string[] = []
     let nativeValues: any[] = []
-    let results: WarpExecutionResults = {}
-    if (!warp.results) return { values: { string: stringValues, native: nativeValues }, results }
-    for (const [resultName, resultPath] of Object.entries(warp.results)) {
+    let output: WarpExecutionOutput = {}
+    if (!warp.output) return { values: { string: stringValues, native: nativeValues }, output }
+    for (const [resultName, resultPath] of Object.entries(warp.output)) {
       if (resultPath.startsWith(WarpConstants.Transform.Prefix)) continue
       if (resultPath.startsWith('input.')) {
-        results[resultName] = resultPath
+        output[resultName] = resultPath
         continue
       }
-      const currentActionIndex = parseResultsOutIndex(resultPath)
+      const currentActionIndex = parseOutputOutIndex(resultPath)
       if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
-        results[resultName] = null
+        output[resultName] = null
         continue
       }
       // SUI: support extracting from tx return values or events
       if (resultPath.startsWith('out.')) {
         // For SUI, use tx.effects?.events or tx.returnValues
         const nativeValue = tx.returnValues ? tx.returnValues[resultName] : null
-        results[resultName] = nativeValue
+        output[resultName] = nativeValue
         stringValues.push(String(nativeValue))
         nativeValues.push(nativeValue)
       } else {
-        results[resultName] = resultPath
+        output[resultName] = resultPath
       }
     }
     return {
       values: { string: stringValues, native: nativeValues },
-      results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer, this.config),
+      output: await evaluateOutputCommon(warp, output, actionIndex, inputs, this.serializer.coreSerializer, this.config),
     }
   }
 
-  async extractQueryResults(
+  async extractQueryOutput(
     warp: Warp,
     typedValues: any[],
     actionIndex: number,
     inputs: ResolvedInput[]
-  ): Promise<{ values: { string: string[]; native: any[] }; results: WarpExecutionResults }> {
+  ): Promise<{ values: { string: string[]; native: any[] }; output: WarpExecutionOutput }> {
     // SUI: typedValues are direct query results
     const stringValues = typedValues.map((native) => String(native))
     const nativeValues = typedValues
     const values = { string: stringValues, native: nativeValues }
-    let results: WarpExecutionResults = {}
-    if (!warp.results) return { values, results }
-    for (const [key, path] of Object.entries(warp.results)) {
+    let output: WarpExecutionOutput = {}
+    if (!warp.output) return { values, output }
+    for (const [key, path] of Object.entries(warp.output)) {
       if (path.startsWith(WarpConstants.Transform.Prefix)) continue
-      const currentActionIndex = parseResultsOutIndex(path)
+      const currentActionIndex = parseOutputOutIndex(path)
       if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
-        results[key] = null
+        output[key] = null
         continue
       }
       if (path.startsWith('out.') || path === 'out') {
         // If values is an array of objects, extract the property
         if (Array.isArray(typedValues) && typedValues.length > 0 && typeof typedValues[0] === 'object' && typedValues[0] !== null) {
           const prop = path.replace(/^out\./, '')
-          results[key] = typedValues[0][prop]
+          output[key] = typedValues[0][prop]
         } else {
-          results[key] = typedValues[0]
+          output[key] = typedValues[0]
         }
       } else {
-        results[key] = path
+        output[key] = path
       }
     }
-    return { values, results: await evaluateResultsCommon(warp, results, actionIndex, inputs, this.serializer.coreSerializer, this.config) }
+    return { values, output: await evaluateOutputCommon(warp, output, actionIndex, inputs, this.serializer.coreSerializer, this.config) }
   }
 }

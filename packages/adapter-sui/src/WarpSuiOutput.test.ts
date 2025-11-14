@@ -1,6 +1,6 @@
-import { WarpSuiResults } from './WarpSuiResults'
+import { WarpSuiOutput } from './WarpSuiOutput'
 
-describe('WarpSuiResults', () => {
+describe('WarpSuiOutput', () => {
   const config = { env: 'devnet' as const }
   const chain = {
     name: 'sui',
@@ -19,23 +19,23 @@ describe('WarpSuiResults', () => {
       logoUrl: 'https://example.com/sui-logo.png',
     },
   }
-  const results = new WarpSuiResults(config, chain)
+  const output = new WarpSuiOutput(config, chain)
 
   it('should extract contract results', async () => {
-    const warp = { results: { foo: 'out.foo' }, actions: [{ inputs: [] }] } as any
+    const warp = { output: { foo: 'out.foo' }, actions: [{ inputs: [] }] } as any
     const tx = { returnValues: { foo: 'string:bar' }, effects: { status: { status: 'success' } }, digest: '0xabc' }
-    const res = await results.extractContractResults(warp, 1, tx, [])
+    const res = await output.extractContractOutput(warp, 1, tx, [])
     expect(res.values.string).toEqual(['string:bar'])
     expect(res.values.native).toEqual(['string:bar'])
-    expect(res.results.foo).toBe('string:bar')
+    expect(res.output.foo).toBe('string:bar')
   })
 
   it('should extract query results', async () => {
-    const warp = { results: { bar: 'out.bar' }, actions: [{ inputs: [] }] } as any
+    const warp = { output: { bar: 'out.bar' }, actions: [{ inputs: [] }] } as any
     const values = [{ bar: 'string:baz' }]
-    const res = await results.extractQueryResults(warp, values, 1, [])
+    const res = await output.extractQueryOutput(warp, values, 1, [])
     expect(res.values.string).toEqual(['[object Object]'])
     expect(res.values.native).toEqual([{ bar: 'string:baz' }])
-    expect(res.results.bar).toBe('string:baz')
+    expect(res.output.bar).toBe('string:baz')
   })
 })

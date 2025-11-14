@@ -366,7 +366,7 @@ describe('WarpEvmExecutor', () => {
         tx: null,
         next: null,
         values: { string: [], native: [] },
-        results: expect.objectContaining({ _DATA: expect.any(Error) }),
+        output: expect.objectContaining({ _DATA: expect.any(Error) }),
         messages: {},
       })
     })
@@ -402,7 +402,7 @@ describe('WarpEvmExecutor', () => {
         tx: null,
         next: null,
         values: { string: [], native: [] },
-        results: expect.objectContaining({ _DATA: expect.any(Error) }),
+        output: expect.objectContaining({ _DATA: expect.any(Error) }),
         messages: {},
       })
     })

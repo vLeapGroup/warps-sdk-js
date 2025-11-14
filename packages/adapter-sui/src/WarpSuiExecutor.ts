@@ -2,7 +2,7 @@ import { SuiClient } from '@mysten/sui/client'
 import { Transaction } from '@mysten/sui/transactions'
 import {
   AdapterWarpExecutor,
-  applyResultsToMessages,
+  applyOutputToMessages,
   getNextInfo,
   getProviderConfig,
   getWarpActionByIndex,
@@ -14,12 +14,12 @@ import {
   WarpExecutable,
   WarpQueryAction,
 } from '@vleap/warps'
-import { WarpSuiResults } from './WarpSuiResults'
+import { WarpSuiOutput } from './WarpSuiOutput'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
 
 export class WarpSuiExecutor implements AdapterWarpExecutor {
   private readonly serializer: WarpSuiSerializer
-  private readonly results: WarpSuiResults
+  private readonly output: WarpSuiOutput
   private readonly client: SuiClient
   private readonly userWallet: string | null
 
@@ -28,7 +28,7 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
     private readonly chain: WarpChainInfo
   ) {
     this.serializer = new WarpSuiSerializer()
-    this.results = new WarpSuiResults(this.config, this.chain)
+    this.output = new WarpSuiOutput(this.config, this.chain)
     const providerConfig = getProviderConfig(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
     this.client = new SuiClient({ url: providerConfig.url })
     this.userWallet = getWarpWalletAddressFromConfig(this.config, this.chain.name)
@@ -128,13 +128,13 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
     if (action.type !== 'query') throw new Error(`WarpSuiExecutor: Invalid action type for executeQuery: ${action.type}`)
     const result = await this.client.getObject({ id: executable.destination, options: { showContent: true } })
     const values = [result]
-    const { values: extractedValues, results } = await this.results.extractQueryResults(
+    const { values: extractedValues, output } = await this.output.extractQueryOutput(
       executable.warp,
       values,
       executable.action,
       executable.resolvedInputs
     )
-    const next = getNextInfo(this.config, [], executable.warp, executable.action, results)
+    const next = getNextInfo(this.config, [], executable.warp, executable.action, output)
     return {
       status: 'success',
       warp: executable.warp,
@@ -144,8 +144,8 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
       tx: null,
       next,
       values: extractedValues,
-      results: { ...results, _DATA: result },
-      messages: applyResultsToMessages(executable.warp, results),
+      output: { ...output, _DATA: result },
+      messages: applyOutputToMessages(executable.warp, output),
     }
   }
 

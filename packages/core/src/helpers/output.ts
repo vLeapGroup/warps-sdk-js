@@ -1,0 +1,117 @@
+import { WarpConstants } from '../constants'
+import { ResolvedInput, TransformRunner, Warp, WarpClientConfig } from '../types'
+import { WarpExecutionOutput } from '../types/output'
+import { WarpLogger } from '../WarpLogger'
+import { WarpSerializer } from '../WarpSerializer'
+import { getWarpActionByIndex } from './general'
+
+export const extractCollectOutput = async (
+  warp: Warp,
+  response: any,
+  actionIndex: number,
+  inputs: ResolvedInput[],
+  serializer: WarpSerializer,
+  config: WarpClientConfig
+): Promise<{ values: { string: string[]; native: any[] }; output: WarpExecutionOutput }> => {
+  const stringValues: string[] = []
+  const nativeValues: any[] = []
+  let output: WarpExecutionOutput = {}
+  for (const [outputName, outputPath] of Object.entries(warp.output || {})) {
+    if (outputPath.startsWith(WarpConstants.Transform.Prefix)) continue
+    const currentActionIndex = parseOutputOutIndex(outputPath)
+    if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
+      output[outputName] = null
+      continue
+    }
+    const [outputType, ...pathParts] = outputPath.split('.')
+
+    const getNestedValueFromObject = (obj: any, path: string[]): any =>
+      path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : null), obj)
+
+    if (outputType === 'out' || outputType.startsWith('out[')) {
+      const value = pathParts.length === 0 ? response?.data || response : getNestedValueFromObject(response, pathParts)
+      stringValues.push(String(value))
+      nativeValues.push(value)
+      output[outputName] = value
+    } else {
+      output[outputName] = outputPath
+    }
+  }
+  return {
+    values: { string: stringValues, native: nativeValues },
+    output: await evaluateOutputCommon(warp, output, actionIndex, inputs, serializer, config),
+  }
+}
+
+export const evaluateOutputCommon = async (
+  warp: Warp,
+  baseOutput: WarpExecutionOutput,
+  actionIndex: number,
+  inputs: ResolvedInput[],
+  serializer: WarpSerializer,
+  config: WarpClientConfig
+): Promise<WarpExecutionOutput> => {
+  if (!warp.output) return baseOutput
+  let output = { ...baseOutput }
+  output = evaluateInputOutput(output, warp, actionIndex, inputs, serializer)
+  output = await evaluateTransformOutput(warp, output, config.transform?.runner || null)
+  return output
+}
+
+const evaluateInputOutput = (
+  output: WarpExecutionOutput,
+  warp: Warp,
+  actionIndex: number,
+  inputs: ResolvedInput[],
+  serializer: WarpSerializer
+): WarpExecutionOutput => {
+  const modifiable = { ...output }
+  const actionInputs = getWarpActionByIndex(warp, actionIndex)?.inputs || []
+
+  for (const [key, value] of Object.entries(modifiable)) {
+    if (typeof value === 'string' && value.startsWith('input.')) {
+      const inputName = value.split('.')[1]
+      const inputIndex = actionInputs.findIndex((i) => i.as === inputName || i.name === inputName)
+      const valueAtIndex = inputIndex !== -1 ? inputs[inputIndex]?.value : null
+      modifiable[key] = valueAtIndex ? serializer.stringToNative(valueAtIndex)[1] : null
+    }
+  }
+  return modifiable
+}
+
+const evaluateTransformOutput = async (
+  warp: Warp,
+  baseOutput: WarpExecutionOutput,
+  transformRunner: TransformRunner | null
+): Promise<WarpExecutionOutput> => {
+  if (!warp.output) return baseOutput
+  const modifiable = { ...baseOutput }
+
+  const transforms = Object.entries(warp.output)
+    .filter(([, path]) => path.startsWith(WarpConstants.Transform.Prefix))
+    .map(([key, path]) => ({ key, code: path.substring(WarpConstants.Transform.Prefix.length) }))
+
+  if (transforms.length > 0 && (!transformRunner || typeof transformRunner.run !== 'function')) {
+    throw new Error('Transform output is defined but no transform runner is configured. Provide a runner via config.transform.runner.')
+  }
+
+  for (const { key, code } of transforms) {
+    try {
+      modifiable[key] = await transformRunner!.run(code, modifiable)
+    } catch (err) {
+      WarpLogger.error(`Transform error for output '${key}':`, err)
+      modifiable[key] = null
+    }
+  }
+
+  return modifiable
+}
+
+export const parseOutputOutIndex = (outputPath: string): number | null => {
+  if (outputPath === 'out') return 1
+  const outIndexMatch = outputPath.match(/^out\[(\d+)\]/)
+  if (outIndexMatch) return parseInt(outIndexMatch[1], 10)
+  if (outputPath.startsWith('out.') || outputPath.startsWith('event.')) return null
+  return null
+}
+

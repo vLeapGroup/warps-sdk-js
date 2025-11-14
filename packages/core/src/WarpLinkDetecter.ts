@@ -15,7 +15,7 @@ export type DetectionResult = {
 
 export type DetectionResultFromHtml = {
   match: boolean
-  results: {
+  output: {
     url: string
     warp: Warp
   }[]
@@ -36,16 +36,16 @@ export class WarpLinkDetecter {
   }
 
   async detectFromHtml(content: string): Promise<DetectionResultFromHtml> {
-    if (!content.length) return { match: false, results: [] }
+    if (!content.length) return { match: false, output: [] }
     const links = [...content.matchAll(/https?:\/\/[^\s"'<>]+/gi)].map((link) => link[0])
     const warpLinks = links.filter((link) => this.isValid(link))
     const detectionReqs = warpLinks.map((link) => this.detect(link))
     const detectionResults = await Promise.all(detectionReqs)
     const validDetections = detectionResults.filter((result) => result.match)
     const hasMatch = validDetections.length > 0
-    const results = validDetections.map((result) => ({ url: result.url, warp: result.warp! }))
+    const output = validDetections.map((result) => ({ url: result.url, warp: result.warp! }))
 
-    return { match: hasMatch, results }
+    return { match: hasMatch, output }
   }
 
   async detect(urlOrId: string, cache?: WarpCacheConfig): Promise<DetectionResult> {
