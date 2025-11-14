@@ -5,7 +5,7 @@ import {
   parseResultsOutIndex,
   ResolvedInput,
   Warp,
-  WarpActionExecution,
+  WarpActionExecutionResult,
   WarpActionIndex,
   WarpAdapterGenericRemoteTransaction,
   WarpChainInfo,
@@ -29,7 +29,7 @@ export class WarpFastsetResults implements AdapterWarpResults {
     warp: Warp,
     actionIndex: WarpActionIndex,
     tx: WarpAdapterGenericRemoteTransaction
-  ): Promise<WarpActionExecution> {
+  ): Promise<WarpActionExecutionResult> {
     const success = this.isTransactionSuccessful(tx)
     const transactionHash = this.extractTransactionHash(tx)
     const blockNumber = this.extractBlockNumber(tx)
@@ -39,7 +39,7 @@ export class WarpFastsetResults implements AdapterWarpResults {
     const stringValues = rawValues.map((v) => String(v))
 
     return {
-      success,
+      status: success ? 'success' : 'error',
       warp,
       action: 0,
       user: getWarpWalletAddressFromConfig(this.config, this.chain.name),

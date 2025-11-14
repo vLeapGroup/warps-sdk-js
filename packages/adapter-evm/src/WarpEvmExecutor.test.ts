@@ -358,7 +358,7 @@ describe('WarpEvmExecutor', () => {
       const result = await executor.executeQuery(executable)
 
       expect(result).toEqual({
-        success: false,
+        status: 'error',
         warp: executable.warp,
         action: 1,
         user: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
@@ -394,7 +394,7 @@ describe('WarpEvmExecutor', () => {
       const result = await executor.executeQuery(executable)
 
       expect(result).toEqual({
-        success: false,
+        status: 'error',
         warp: executable.warp,
         action: 1,
         user: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',

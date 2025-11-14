@@ -16,7 +16,7 @@ import {
   parseResultsOutIndex,
   ResolvedInput,
   Warp,
-  WarpActionExecution,
+  WarpActionExecutionResult,
   WarpActionIndex,
   WarpAdapterGenericRemoteTransaction,
   WarpCache,
@@ -49,7 +49,7 @@ export class WarpMultiversxResults implements AdapterWarpResults {
     warp: Warp,
     actionIndex: WarpActionIndex,
     tx: WarpAdapterGenericRemoteTransaction
-  ): Promise<WarpActionExecution> {
+  ): Promise<WarpActionExecutionResult> {
     // Restore inputs via cache as transactions are broadcasted and processed asynchronously
     const inputs: ResolvedInput[] = this.cache.get(WarpCacheKey.WarpExecutable(this.config.env, warp.meta?.hash || '', actionIndex)) ?? []
 
@@ -58,7 +58,7 @@ export class WarpMultiversxResults implements AdapterWarpResults {
     const messages = applyResultsToMessages(warp, results.results)
 
     return {
-      success: tx.status.isSuccessful(),
+      status: tx.status.isSuccessful() ? 'success' : 'error',
       warp,
       action: actionIndex,
       user: getWarpWalletAddressFromConfig(this.config, this.chain.name),

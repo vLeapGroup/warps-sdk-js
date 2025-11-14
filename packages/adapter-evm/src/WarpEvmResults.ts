@@ -6,7 +6,7 @@ import {
   parseResultsOutIndex,
   ResolvedInput,
   Warp,
-  WarpActionExecution,
+  WarpActionExecutionResult,
   WarpActionIndex,
   WarpAdapterGenericRemoteTransaction,
   WarpChainAction,
@@ -37,7 +37,7 @@ export class WarpEvmResults implements AdapterWarpResults {
     warp: Warp,
     actionIndex: WarpActionIndex,
     tx: WarpAdapterGenericRemoteTransaction
-  ): Promise<WarpActionExecution> {
+  ): Promise<WarpActionExecutionResult> {
     if (!tx) {
       return this.createFailedExecution(warp, actionIndex)
     }
@@ -51,9 +51,9 @@ export class WarpEvmResults implements AdapterWarpResults {
     return this.handleTransactionReceipt(warp, actionIndex, tx as ethers.TransactionReceipt)
   }
 
-  private createFailedExecution(warp: Warp, actionIndex: WarpActionIndex): WarpActionExecution {
+  private createFailedExecution(warp: Warp, actionIndex: WarpActionIndex): WarpActionExecutionResult {
     return {
-      success: false,
+      status: 'error',
       warp,
       action: actionIndex,
       user: getWarpWalletAddressFromConfig(this.config, this.chain.name),
@@ -66,7 +66,7 @@ export class WarpEvmResults implements AdapterWarpResults {
     }
   }
 
-  private handleWarpChainAction(warp: Warp, actionIndex: WarpActionIndex, tx: WarpChainAction): WarpActionExecution {
+  private handleWarpChainAction(warp: Warp, actionIndex: WarpActionIndex, tx: WarpChainAction): WarpActionExecutionResult {
     const success = tx.status === 'success'
     const transactionHash = tx.id || tx.tx?.hash || ''
     const gasUsed = tx.tx?.gasLimit || '0'
@@ -77,7 +77,7 @@ export class WarpEvmResults implements AdapterWarpResults {
     const stringValues = rawValues.map(String)
 
     return {
-      success,
+      status: success ? 'success' : 'error',
       warp,
       action: actionIndex,
       user: getWarpWalletAddressFromConfig(this.config, this.chain.name),
@@ -90,7 +90,7 @@ export class WarpEvmResults implements AdapterWarpResults {
     }
   }
 
-  private handleTransactionReceipt(warp: Warp, actionIndex: WarpActionIndex, tx: ethers.TransactionReceipt): WarpActionExecution {
+  private handleTransactionReceipt(warp: Warp, actionIndex: WarpActionIndex, tx: ethers.TransactionReceipt): WarpActionExecutionResult {
     const success = tx.status === 1
     const gasUsed = tx.gasUsed?.toString() || '0'
     const gasPrice = tx.gasPrice?.toString() || '0'
@@ -110,7 +110,7 @@ export class WarpEvmResults implements AdapterWarpResults {
     const stringValues = rawValues.map(String)
 
     return {
-      success,
+      status: success ? 'success' : 'error',
       warp,
       action: actionIndex,
       user: getWarpWalletAddressFromConfig(this.config, this.chain.name),

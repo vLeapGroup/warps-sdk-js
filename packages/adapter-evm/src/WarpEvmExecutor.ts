@@ -5,7 +5,7 @@ import {
   getProviderConfig,
   getWarpActionByIndex,
   getWarpWalletAddressFromConfig,
-  WarpActionExecution,
+  WarpActionExecutionResult,
   WarpChainAssetValue,
   WarpChainInfo,
   WarpClientConfig,
@@ -156,7 +156,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
     return this.estimateGasAndSetDefaults(tx, userWallet)
   }
 
-  async executeQuery(executable: WarpExecutable): Promise<WarpActionExecution> {
+  async executeQuery(executable: WarpExecutable): Promise<WarpActionExecutionResult> {
     const action = getWarpActionByIndex(executable.warp, executable.action) as WarpQueryAction
     if (action.type !== 'query') throw new Error(`WarpEvmExecutor: Invalid action type for executeQuery: ${action.type}`)
     if (!action.func) throw new Error('WarpEvmExecutor: Query action must have a function name')
@@ -191,7 +191,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
       const next = getNextInfo(this.config, [], executable.warp, executable.action, results)
 
       return {
-        success: isSuccess,
+        status: isSuccess ? 'success' : 'error',
         warp: executable.warp,
         action: executable.action,
         user: getWarpWalletAddressFromConfig(this.config, executable.chain.name),
@@ -204,7 +204,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
       }
     } catch (error) {
       return {
-        success: false,
+        status: 'error',
         warp: executable.warp,
         action: executable.action,
         user: getWarpWalletAddressFromConfig(this.config, executable.chain.name),

@@ -69,7 +69,7 @@ describe('WarpFastsetResults', () => {
       const result = await results.getActionExecution(warp, 1, tx)
 
       expect(result).toEqual({
-        success: true,
+        status: 'success',
         warp,
         action: 0,
         user: 'fs1testaddress123456789',
@@ -121,7 +121,7 @@ describe('WarpFastsetResults', () => {
 
       const result = await results.getActionExecution(warp, 1, tx)
 
-      expect(result.success).toBe(false)
+      expect(result.status).toBe('error')
       expect(result.txHash).toBe('0x123456789abcdef')
     })
 
@@ -141,7 +141,7 @@ describe('WarpFastsetResults', () => {
 
       const result = await results.getActionExecution(warp, 1, tx)
 
-      expect(result.success).toBe(true)
+      expect(result.status).toBe('success')
       expect(result.values.string).toEqual(['0x123456789abcdef', '0', expect.any(String)])
       expect(result.values.native).toEqual(['0x123456789abcdef', '0', expect.any(String)])
     })
@@ -161,8 +161,8 @@ describe('WarpFastsetResults', () => {
       const result1 = await results.getActionExecution(warp, 1, tx1)
       const result2 = await results.getActionExecution(warp, 1, tx2)
 
-      expect(result1.success).toBe(true)
-      expect(result2.success).toBe(true)
+      expect(result1.status).toBe('success')
+      expect(result2.status).toBe('success')
     })
   })
 

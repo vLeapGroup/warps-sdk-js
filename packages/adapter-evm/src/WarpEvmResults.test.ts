@@ -52,7 +52,7 @@ describe('WarpEvmResults', () => {
 
       const result = await results.getActionExecution(warp, 1, mockReceipt)
 
-      expect(result.success).toBe(true)
+      expect(result.status).toBe('success')
       expect(result.warp).toBe(warp)
       expect(result.action).toBe(1)
       expect(result.user).toBe(mockConfig.user?.wallets?.ethereum)
@@ -83,7 +83,7 @@ describe('WarpEvmResults', () => {
 
       const result = await results.getActionExecution(warp, 1, mockReceipt)
 
-      expect(result.success).toBe(false)
+      expect(result.status).toBe('error')
       expect(result.values.string).toEqual(expect.arrayContaining(['0x1234567890abcdef', '12345', '21000', '20000000000']))
       expect(result.values.native).toEqual(expect.arrayContaining(['0x1234567890abcdef', '12345', '21000', '20000000000']))
     })
@@ -104,7 +104,7 @@ describe('WarpEvmResults', () => {
 
       const result = await results.getActionExecution(warp, 1, mockReceipt)
 
-      expect(result.success).toBe(true)
+      expect(result.status).toBe('success')
       expect(result.values.string).toEqual(expect.arrayContaining(['0x1234567890abcdef', '0', '0', '0']))
       expect(result.values.native).toEqual(expect.arrayContaining(['0x1234567890abcdef', '0', '0', '0']))
     })
@@ -119,7 +119,7 @@ describe('WarpEvmResults', () => {
 
       const result = await results.getActionExecution(warp, 1, null)
 
-      expect(result.success).toBe(false)
+      expect(result.status).toBe('error')
       expect(result.warp).toBe(warp)
       expect(result.action).toBe(1)
       expect(result.user).toBe(mockConfig.user?.wallets?.ethereum)

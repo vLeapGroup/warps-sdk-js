@@ -11,7 +11,7 @@ import {
   AdapterWarpSerializer,
   AdapterWarpWallet,
   Warp,
-  WarpActionExecution,
+  WarpActionExecutionResult,
   WarpAdapterGenericRemoteTransaction,
   WarpAdapterGenericTransaction,
   WarpCacheConfig,
@@ -63,7 +63,7 @@ export class WarpClient {
   ): Promise<{
     txs: WarpAdapterGenericTransaction[]
     chain: WarpChainInfo | null
-    immediateExecutions: WarpActionExecution[]
+    immediateExecutions: WarpActionExecutionResult[]
     evaluateResults: (remoteTxs: WarpAdapterGenericRemoteTransaction[]) => Promise<void>
   }> {
     const isWarp = typeof warpOrIdentifierOrUrl === 'object'

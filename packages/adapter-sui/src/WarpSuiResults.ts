@@ -9,7 +9,7 @@ import {
   parseResultsOutIndex,
   ResolvedInput,
   Warp,
-  WarpActionExecution,
+  WarpActionExecutionResult,
   WarpActionIndex,
   WarpAdapterGenericRemoteTransaction,
   WarpChainInfo,
@@ -36,12 +36,12 @@ export class WarpSuiResults implements AdapterWarpResults {
     warp: Warp,
     actionIndex: WarpActionIndex,
     tx: WarpAdapterGenericRemoteTransaction
-  ): Promise<WarpActionExecution> {
+  ): Promise<WarpActionExecutionResult> {
     const results = await this.extractContractResults(warp, actionIndex, tx, [])
     const next = getNextInfo(this.config, [], warp, actionIndex, results)
     const messages = applyResultsToMessages(warp, results.results)
     return {
-      success: tx.effects?.status?.status === 'success',
+      status: tx.effects?.status?.status === 'success' ? 'success' : 'error',
       warp,
       action: actionIndex,
       user: getWarpWalletAddressFromConfig(this.config, this.chain.name),

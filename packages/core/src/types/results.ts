@@ -1,8 +1,10 @@
 import { WarpAdapterGenericTransaction } from './config'
 import { Warp, WarpMessageName, WarpNativeValue, WarpResultName } from './warp'
 
-export type WarpActionExecution = {
-  success: boolean
+export type WarpActionExecutionStatus = 'success' | 'error' | 'unhandled'
+
+export type WarpActionExecutionResult = {
+  status: WarpActionExecutionStatus
   warp: Warp
   action: number
   user: string | null

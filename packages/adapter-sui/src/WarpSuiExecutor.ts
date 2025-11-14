@@ -7,7 +7,7 @@ import {
   getProviderConfig,
   getWarpActionByIndex,
   getWarpWalletAddressFromConfig,
-  WarpActionExecution,
+  WarpActionExecutionResult,
   WarpChainInfo,
   WarpClientConfig,
   WarpContractAction,
@@ -123,7 +123,7 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
     return tx
   }
 
-  async executeQuery(executable: WarpExecutable): Promise<WarpActionExecution> {
+  async executeQuery(executable: WarpExecutable): Promise<WarpActionExecutionResult> {
     const action = getWarpActionByIndex(executable.warp, executable.action) as WarpQueryAction
     if (action.type !== 'query') throw new Error(`WarpSuiExecutor: Invalid action type for executeQuery: ${action.type}`)
     const result = await this.client.getObject({ id: executable.destination, options: { showContent: true } })
@@ -136,7 +136,7 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
     )
     const next = getNextInfo(this.config, [], executable.warp, executable.action, results)
     return {
-      success: true,
+      status: 'success',
       warp: executable.warp,
       action: executable.action,
       user: this.userWallet,

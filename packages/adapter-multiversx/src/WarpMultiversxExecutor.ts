@@ -15,7 +15,7 @@ import {
   getNextInfo,
   getWarpActionByIndex,
   getWarpWalletAddressFromConfig,
-  WarpActionExecution,
+  WarpActionExecutionResult,
   WarpChainAssetValue,
   WarpChainInfo,
   WarpClientConfig,
@@ -102,7 +102,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
     })
   }
 
-  async executeQuery(executable: WarpExecutable): Promise<WarpActionExecution> {
+  async executeQuery(executable: WarpExecutable): Promise<WarpActionExecutionResult> {
     const action = getWarpActionByIndex(executable.warp, executable.action) as WarpQueryAction
     if (action.type !== 'query') throw new Error(`WarpMultiversxExecutor: Invalid action type for executeQuery: ${action.type}`)
     const abi = await this.abi.getAbiForAction(action)
@@ -126,7 +126,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
     const next = getNextInfo(this.config, [], executable.warp, executable.action, results)
 
     return {
-      success: isSuccess,
+      status: isSuccess ? 'success' : 'error',
       warp: executable.warp,
       action: executable.action,
       user: getWarpWalletAddressFromConfig(this.config, executable.chain.name),

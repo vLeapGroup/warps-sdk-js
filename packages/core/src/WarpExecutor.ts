@@ -14,7 +14,7 @@ import {
   Adapter,
   ResolvedInput,
   Warp,
-  WarpActionExecution,
+  WarpActionExecutionResult,
   WarpActionIndex,
   WarpAdapterGenericTransaction,
   WarpChainAction,
@@ -31,13 +31,19 @@ import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
 
 export type ExecutionHandlers = {
-  onExecuted?: (result: WarpActionExecution) => void | Promise<void>
+  onExecuted?: (result: WarpActionExecutionResult) => void | Promise<void>
   onError?: (params: { message: string }) => void
   onSignRequest?: (params: { message: string; chain: WarpChainInfo }) => string | Promise<string>
   onActionExecuted?: (params: {
     action: WarpActionIndex
     chain: WarpChainInfo | null
-    execution: WarpActionExecution | null
+    execution: WarpActionExecutionResult | null
+    tx: WarpAdapterGenericTransaction | null
+  }) => void
+  onActionUnhandled?: (params: {
+    action: WarpActionIndex
+    chain: WarpChainInfo | null
+    execution: WarpActionExecutionResult | null
     tx: WarpAdapterGenericTransaction | null
   }) => void
 }
@@ -61,11 +67,11 @@ export class WarpExecutor {
   ): Promise<{
     txs: WarpAdapterGenericTransaction[]
     chain: WarpChainInfo | null
-    immediateExecutions: WarpActionExecution[]
+    immediateExecutions: WarpActionExecutionResult[]
   }> {
     let txs: WarpAdapterGenericTransaction[] = []
     let chainInfo: WarpChainInfo | null = null
-    let immediateExecutions: WarpActionExecution[] = []
+    let immediateExecutions: WarpActionExecutionResult[] = []
 
     for (let index = 1; index <= warp.actions.length; index++) {
       const action = getWarpActionByIndex(warp, index)
@@ -93,7 +99,11 @@ export class WarpExecutor {
     actionIndex: WarpActionIndex,
     inputs: string[],
     meta: { envs?: Record<string, any>; queries?: Record<string, any> } = {}
-  ): Promise<{ tx: WarpAdapterGenericTransaction | null; chain: WarpChainInfo | null; immediateExecution: WarpActionExecution | null }> {
+  ): Promise<{
+    tx: WarpAdapterGenericTransaction | null
+    chain: WarpChainInfo | null
+    immediateExecution: WarpActionExecutionResult | null
+  }> {
     const action = getWarpActionByIndex(warp, actionIndex)
 
     if (action.type === 'link') {
@@ -113,8 +123,11 @@ export class WarpExecutor {
 
     if (action.type === 'collect') {
       const result = await this.executeCollect(executable)
-      if (result.success) {
+      if (result.status === 'success') {
         await this.callHandler(() => this.handlers?.onActionExecuted?.({ action: actionIndex, chain: null, execution: result, tx: null }))
+        return { tx: null, chain: null, immediateExecution: result }
+      } else if (result.status === 'unhandled') {
+        await this.callHandler(() => this.handlers?.onActionUnhandled?.({ action: actionIndex, chain: null, execution: result, tx: null }))
         return { tx: null, chain: null, immediateExecution: result }
       } else {
         this.handlers?.onError?.({ message: JSON.stringify(result.values) })
@@ -126,7 +139,7 @@ export class WarpExecutor {
 
     if (action.type === 'query') {
       const result = await adapter.executor.executeQuery(executable)
-      if (result.success) {
+      if (result.status === 'success') {
         await this.callHandler(() =>
           this.handlers?.onActionExecuted?.({ action: actionIndex, chain: executable.chain, execution: result, tx: null })
         )
@@ -158,7 +171,7 @@ export class WarpExecutor {
           const currentActionIndex = index + 1
           const result = await adapter.results.getActionExecution(warp, currentActionIndex, chainAction)
 
-          if (result.success) {
+          if (result.status === 'success') {
             await this.callHandler(() =>
               this.handlers?.onActionExecuted?.({
                 action: currentActionIndex,
@@ -176,7 +189,7 @@ export class WarpExecutor {
       )
     ).filter((r) => r !== null)
 
-    if (results.every((r) => r.success)) {
+    if (results.every((r) => r.status === 'success')) {
       const lastResult = results[results.length - 1]
       await this.callHandler(() => this.handlers?.onExecuted?.(lastResult))
     } else {
@@ -184,7 +197,7 @@ export class WarpExecutor {
     }
   }
 
-  private async executeCollect(executable: WarpExecutable, extra?: Record<string, any>): Promise<WarpActionExecution> {
+  private async executeCollect(executable: WarpExecutable, extra?: Record<string, any>): Promise<WarpActionExecutionResult> {
     const wallet = getWarpWalletAddressFromConfig(this.config, executable.chain.name)
     const collectAction = getWarpActionByIndex(executable.warp, executable.action) as WarpCollectAction
 
@@ -214,14 +227,14 @@ export class WarpExecutor {
       }
     })
 
-    if (typeof executable.destination === 'object' && 'url' in executable.destination) {
-      return await this.doHttpRequest(executable, executable.destination, wallet, payload, extra)
+    if (collectAction.destination && typeof collectAction.destination === 'object' && 'url' in collectAction.destination) {
+      return await this.doHttpRequest(executable, collectAction.destination, wallet, payload, extra)
     }
 
     const results = {}
 
     return {
-      success: true,
+      status: 'unhandled',
       warp: executable.warp,
       action: executable.action,
       user: getWarpWalletAddressFromConfig(this.config, executable.chain.name),
@@ -240,7 +253,7 @@ export class WarpExecutor {
     wallet: string | null,
     payload: any,
     extra: Record<string, any> | undefined
-  ): Promise<WarpActionExecution> {
+  ): Promise<WarpActionExecutionResult> {
     const interpolator = new WarpInterpolator(this.config, findWarpAdapterForChain(executable.chain.name, this.adapters))
 
     const headers = new Headers()
@@ -266,7 +279,7 @@ export class WarpExecutor {
 
     const httpMethod = destination.method || 'GET'
     const body = httpMethod === 'GET' ? undefined : JSON.stringify({ ...payload, ...extra })
-    const url = executable.destination
+    const url = interpolator.applyInputs(destination.url, executable.resolvedInputs, this.factory.getSerializer())
 
     WarpLogger.debug('WarpExecutor: Executing HTTP collect', { url, method: httpMethod, headers, body })
 
@@ -286,7 +299,7 @@ export class WarpExecutor {
       const next = getNextInfo(this.config, this.adapters, executable.warp, executable.action, results)
 
       return {
-        success: response.ok,
+        status: response.ok ? 'success' : 'error',
         warp: executable.warp,
         action: executable.action,
         user: getWarpWalletAddressFromConfig(this.config, executable.chain.name),
@@ -300,7 +313,7 @@ export class WarpExecutor {
     } catch (error) {
       WarpLogger.error('WarpActionExecutor: Error executing collect', error)
       return {
-        success: false,
+        status: 'error',
         warp: executable.warp,
         action: executable.action,
         user: wallet,

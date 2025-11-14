@@ -552,6 +552,90 @@ describe('WarpExecutor', () => {
         })
       )
     })
+
+    it('should return unhandled status when collect action destination object has no URL property', async () => {
+      const unhandledWarp = {
+        ...warp,
+        chain: 'multiversx',
+        actions: [
+          {
+            type: 'collect' as const,
+            label: 'Collect without Destination URL',
+            destination: { method: 'POST' } as any,
+            inputs: [
+              {
+                name: 'destination',
+                type: 'string',
+                source: 'field' as const,
+                position: 'destination' as const,
+              },
+              {
+                name: 'data',
+                type: 'string',
+                source: 'field' as const,
+              },
+            ],
+          } as WarpCollectAction,
+        ],
+      }
+
+      const inputs = ['string:dummy-destination', 'string:test-data']
+      const result = await executor.execute(unhandledWarp, inputs)
+
+      expect(result).toBeDefined()
+      expect(result.immediateExecutions).toHaveLength(1)
+      expect(result.immediateExecutions[0].status).toBe('unhandled')
+      expect(result.immediateExecutions[0].warp).toEqual(unhandledWarp)
+      expect(result.immediateExecutions[0].action).toBe(1)
+      expect(result.immediateExecutions[0].results).toEqual({})
+      expect(mockFetch).not.toHaveBeenCalled()
+      expect(handlers.onExecuted).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'unhandled',
+          warp: unhandledWarp,
+          action: 1,
+        })
+      )
+    })
+
+    it('should return unhandled status when collect action destination is a string without URL', async () => {
+      const unhandledWarp = {
+        ...warp,
+        chain: 'multiversx',
+        actions: [
+          {
+            type: 'collect' as const,
+            label: 'Collect with String Destination',
+            destination: 'some-string-destination' as any,
+            inputs: [
+              {
+                name: 'data',
+                type: 'string',
+                source: 'field' as const,
+              },
+            ],
+          } as WarpCollectAction,
+        ],
+      }
+
+      const inputs = ['string:test-data']
+      const result = await executor.execute(unhandledWarp, inputs)
+
+      expect(result).toBeDefined()
+      expect(result.immediateExecutions).toHaveLength(1)
+      expect(result.immediateExecutions[0].status).toBe('unhandled')
+      expect(result.immediateExecutions[0].warp).toEqual(unhandledWarp)
+      expect(result.immediateExecutions[0].action).toBe(1)
+      expect(result.immediateExecutions[0].results).toEqual({})
+      expect(mockFetch).not.toHaveBeenCalled()
+      expect(handlers.onExecuted).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'unhandled',
+          warp: unhandledWarp,
+          action: 1,
+        })
+      )
+    })
   })
 
   describe('multi-action execution', () => {
@@ -690,7 +774,7 @@ describe('WarpExecutor', () => {
 
       expect(syncHandler).toHaveBeenCalledWith(
         expect.objectContaining({
-          success: true,
+          status: 'success',
           warp: collectWarp,
           action: 1,
         })
@@ -735,7 +819,7 @@ describe('WarpExecutor', () => {
 
       expect(asyncHandler).toHaveBeenCalledWith(
         expect.objectContaining({
-          success: true,
+          status: 'success',
           warp: collectWarp,
           action: 1,
         })
@@ -784,7 +868,7 @@ describe('WarpExecutor', () => {
 
       expect(syncExecutedHandler).toHaveBeenCalledWith(
         expect.objectContaining({
-          success: true,
+          status: 'success',
           warp: collectWarp,
           action: 1,
         })

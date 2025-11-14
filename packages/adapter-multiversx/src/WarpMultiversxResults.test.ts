@@ -560,7 +560,7 @@ describe('Result Helpers', () => {
       // Patch executeCollect and executeQuery to always return a full WarpExecution object
       const mockExecutor = {
         executeCollect: async (warpArg: any, actionIndex: any, actionInputs: any, meta: any) => ({
-          success: true,
+          status: 'success',
           warp: warpArg,
           action: actionIndex,
           user: testConfig.user?.wallets?.MULTIVERSX || null,
@@ -578,7 +578,7 @@ describe('Result Helpers', () => {
           messages: {},
         }),
         executeQuery: async (warpArg: any, actionIndex: any, actionInputs: any) => ({
-          success: true,
+          status: 'success',
           warp,
           action: 1,
           user: testConfig.user?.wallets?.MULTIVERSX || null,
@@ -602,7 +602,7 @@ describe('Result Helpers', () => {
       const finalResults = await evaluateResultsCommon(warp, result.results, 1, [], new WarpSerializer(), testConfig)
 
       // The result should be from the entry action (1)
-      expect(result.success).toBe(true)
+      expect(result.status).toBe('success')
       expect(result.action).toBe(1)
 
       // It should include all results
@@ -689,7 +689,7 @@ describe('Result Helpers', () => {
       // Patch executeCollect and executeQuery to always return a full WarpExecution object
       const mockExecutor = {
         executeCollect: async (warpArg: any, actionIndex: any, actionInputs: any, meta: any) => ({
-          success: true,
+          status: 'success',
           warp: warpArg,
           action: actionIndex,
           user: testConfig.user?.wallets?.MULTIVERSX || null,
@@ -707,7 +707,7 @@ describe('Result Helpers', () => {
           messages: {},
         }),
         executeQuery: async (warpArg: any, actionIndex: any, actionInputs: any) => ({
-          success: true,
+          status: 'success',
           warp,
           action: 1,
           user: testConfig.user?.wallets?.MULTIVERSX || null,
@@ -731,7 +731,7 @@ describe('Result Helpers', () => {
       const finalResults = await evaluateResultsCommon(warp, result.results, 1, [], new WarpSerializer(), testConfig)
 
       // The result should be from the entry action (1)
-      expect(result.success).toBe(true)
+      expect(result.status).toBe('success')
       expect(result.action).toBe(1)
 
       // It should include all results

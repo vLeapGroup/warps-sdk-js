@@ -5,7 +5,7 @@ import { WarpChainAccount, WarpChainAction, WarpChainAsset } from './chain'
 import { WarpChainEnv } from './general'
 import { WarpLocale } from './i18n'
 import { WarpRegistryConfigInfo, WarpRegistryInfo } from './registry'
-import { WarpActionExecution } from './results'
+import { WarpActionExecutionResult } from './results'
 import { ClientIndexConfig } from './search'
 import { ClientTransformConfig } from './transform'
 import {
@@ -143,11 +143,11 @@ export interface AdapterWarpBrandBuilder {
 
 export interface AdapterWarpExecutor {
   createTransaction(executable: WarpExecutable): Promise<WarpAdapterGenericTransaction>
-  executeQuery(executable: WarpExecutable): Promise<WarpActionExecution>
+  executeQuery(executable: WarpExecutable): Promise<WarpActionExecutionResult>
 }
 
 export interface AdapterWarpResults {
-  getActionExecution(warp: Warp, actionIndex: WarpActionIndex, tx: WarpAdapterGenericRemoteTransaction): Promise<WarpActionExecution>
+  getActionExecution(warp: Warp, actionIndex: WarpActionIndex, tx: WarpAdapterGenericRemoteTransaction): Promise<WarpActionExecutionResult>
 }
 
 export interface AdapterWarpSerializer {

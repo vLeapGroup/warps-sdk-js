@@ -96,7 +96,7 @@ export const createMockAdapter = () => ({
     },
     executeQuery(executable: any) {
       return Promise.resolve({
-        success: true,
+        status: 'success',
         warp: { protocol: '', name: '', title: '', description: '', actions: [] },
         action: 0,
         user: null,
@@ -112,7 +112,7 @@ export const createMockAdapter = () => ({
   results: {
     getTransactionExecutionResults() {
       return Promise.resolve({
-        success: true,
+        status: 'success',
         warp: { protocol: '', name: '', title: '', description: '', actions: [] },
         action: 0,
         user: null,
@@ -282,7 +282,7 @@ export const createMockWarp = () => ({
 })
 
 export const createMockExecutionResults = () => ({
-  success: true,
+  status: 'success',
   warp: createMockWarp(),
   action: 0,
   user: null,
