@@ -108,15 +108,19 @@ export type WarpCollectAction = {
   type: WarpActionType
   label: WarpText
   description?: WarpText | null
-  destination: {
-    url: string
-    method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
-    headers?: Record<string, string>
-  }
+  destination?: WarpCollectDestination
   inputs?: WarpActionInput[]
   primary?: boolean
   auto?: boolean
   next?: string
+}
+
+export type WarpCollectDestination = WarpCollectDestinationHttp | string
+
+export type WarpCollectDestinationHttp = {
+  url: string
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  headers?: Record<string, string>
 }
 
 export type WarpLinkAction = {
@@ -161,6 +165,7 @@ export type WarpActionInputPosition =
   | 'data'
   | 'chain'
   | `payload:${string}`
+  | 'destination'
 
 export type WarpActionInputModifier = 'scale'
 

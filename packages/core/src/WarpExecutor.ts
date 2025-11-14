@@ -22,6 +22,7 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpCollectAction,
+  WarpCollectDestinationHttp,
   WarpExecutable,
   WarpLinkAction,
 } from './types'
@@ -200,6 +201,48 @@ export class WarpExecutor {
       }
     }
 
+    let payload: any = {}
+    executable.resolvedInputs.forEach((resolvedInput: any) => {
+      const fieldName = resolvedInput.input.as || resolvedInput.input.name
+      const value = toInputPayloadValue(resolvedInput)
+      if (resolvedInput.input.position && resolvedInput.input.position.startsWith(WarpConstants.Position.Payload)) {
+        const nestedPayload = buildNestedPayload(resolvedInput.input.position, fieldName, value)
+        payload = mergeNestedPayload(payload, nestedPayload)
+      } else {
+        // Use flat structure when position is not set
+        payload[fieldName] = value
+      }
+    })
+
+    if (typeof executable.destination === 'object' && 'url' in executable.destination) {
+      return await this.doHttpRequest(executable, executable.destination, wallet, payload, extra)
+    }
+
+    const results = {}
+
+    return {
+      success: true,
+      warp: executable.warp,
+      action: executable.action,
+      user: getWarpWalletAddressFromConfig(this.config, executable.chain.name),
+      txHash: null,
+      tx: null,
+      next: null,
+      values: { string: [], native: [] },
+      results,
+      messages: applyResultsToMessages(executable.warp, results),
+    }
+  }
+
+  private async doHttpRequest(
+    executable: WarpExecutable,
+    destination: WarpCollectDestinationHttp,
+    wallet: string | null,
+    payload: any,
+    extra: Record<string, any> | undefined
+  ): Promise<WarpActionExecution> {
+    const interpolator = new WarpInterpolator(this.config, findWarpAdapterForChain(executable.chain.name, this.adapters))
+
     const headers = new Headers()
     headers.set('Content-Type', 'application/json')
     headers.set('Accept', 'application/json')
@@ -214,29 +257,18 @@ export class WarpExecutor {
       }
     }
 
-    const interpolator = new WarpInterpolator(this.config, findWarpAdapterForChain(executable.chain.name, this.adapters))
-    Object.entries(collectAction.destination.headers || {}).forEach(([key, value]) => {
-      const interpolatedValue = interpolator.applyInputs(value as string, executable.resolvedInputs, this.factory.getSerializer())
-      headers.set(key, interpolatedValue)
-    })
+    if (destination.headers) {
+      Object.entries(destination.headers).forEach(([key, value]) => {
+        const interpolatedValue = interpolator.applyInputs(value as string, executable.resolvedInputs, this.factory.getSerializer())
+        headers.set(key, interpolatedValue)
+      })
+    }
 
-    let payload: any = {}
-    executable.resolvedInputs.forEach((resolvedInput: any) => {
-      const fieldName = resolvedInput.input.as || resolvedInput.input.name
-      const value = toInputPayloadValue(resolvedInput)
-      if (resolvedInput.input.position && resolvedInput.input.position.startsWith(WarpConstants.Position.Payload)) {
-        const nestedPayload = buildNestedPayload(resolvedInput.input.position, fieldName, value)
-        payload = mergeNestedPayload(payload, nestedPayload)
-      } else {
-        // Use flat structure when position is not set
-        payload[fieldName] = value
-      }
-    })
-    const httpMethod = collectAction.destination.method || 'GET'
+    const httpMethod = destination.method || 'GET'
     const body = httpMethod === 'GET' ? undefined : JSON.stringify({ ...payload, ...extra })
     const url = executable.destination
 
-    WarpLogger.debug('Executing collect', { url, method: httpMethod, headers, body })
+    WarpLogger.debug('WarpExecutor: Executing HTTP collect', { url, method: httpMethod, headers, body })
 
     try {
       const response = await fetch(url, { method: httpMethod, headers, body })

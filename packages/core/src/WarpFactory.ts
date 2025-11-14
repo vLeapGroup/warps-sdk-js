@@ -59,12 +59,10 @@ export class WarpFactory {
     const resolvedInputs = await this.getResolvedInputs(chain.name, preparedAction, typedInputs)
     const modifiedInputs = this.getModifiedInputs(resolvedInputs)
 
-    const destinationInput = modifiedInputs.find((i) => i.input.position === 'receiver')?.value
+    const destinationInput = modifiedInputs.find((i) => i.input.position === 'receiver' || i.input.position === 'destination')?.value
     const destinationInAction = this.getDestinationFromAction(preparedAction)
     let destination = destinationInput ? (this.serializer.stringToNative(destinationInput)[1] as string) : destinationInAction
-    if (destination) {
-      destination = interpolator.applyInputs(destination, modifiedInputs, this.serializer)
-    }
+    if (destination) destination = interpolator.applyInputs(destination, modifiedInputs, this.serializer)
     if (!destination) throw new Error('WarpActionExecutor: Destination/Receiver not provided')
 
     let args = this.getPreparedArgs(preparedAction, modifiedInputs)
@@ -222,7 +220,10 @@ export class WarpFactory {
 
   private getDestinationFromAction(action: WarpAction): string | null {
     if ('address' in action && action.address) return action.address
-    if ('destination' in action && action.destination?.url) return action.destination.url
+    if ('destination' in action && action.destination) {
+      if (typeof action.destination === 'string') return action.destination
+      if (typeof action.destination === 'object' && 'url' in action.destination) return action.destination.url
+    }
     return null
   }
 
