@@ -69,7 +69,7 @@ const evaluateInputOutput = (
   const actionInputs = getWarpActionByIndex(warp, actionIndex)?.inputs || []
 
   for (const [key, value] of Object.entries(modifiable)) {
-    if (typeof value === 'string' && value.startsWith('input.')) {
+    if (typeof value === 'string' && value.startsWith('in.')) {
       const inputName = value.split('.')[1]
       const inputIndex = actionInputs.findIndex((i) => i.as === inputName || i.name === inputName)
       const valueAtIndex = inputIndex !== -1 ? inputs[inputIndex]?.value : null

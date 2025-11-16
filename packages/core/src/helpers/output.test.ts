@@ -26,8 +26,8 @@ describe('Output Helpers', () => {
         },
       ],
       output: {
-        FOO: 'input.foo',
-        BAR: 'input.bar',
+        FOO: 'in.foo',
+        BAR: 'in.bar',
       },
     } as any
     const response = { data: { some: 'value' } }
@@ -55,7 +55,7 @@ describe('Output Helpers', () => {
         },
       ],
       output: {
-        FOO: 'input.FOO_ALIAS',
+        FOO: 'in.FOO_ALIAS',
       },
     } as any
     const response = { data: { some: 'value' } }
@@ -79,7 +79,7 @@ describe('Output Helpers', () => {
         },
       ],
       output: {
-        BAR: 'input.bar',
+        BAR: 'in.bar',
       },
     } as any
     const response = { data: { some: 'value' } }

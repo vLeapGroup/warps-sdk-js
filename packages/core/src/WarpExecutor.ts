@@ -233,18 +233,16 @@ export class WarpExecutor {
 
     console.log('Unhandled collect: executable', executable, payload)
 
-    return {
-      status: 'unhandled',
-      warp: executable.warp,
-      action: executable.action,
-      user: getWarpWalletAddressFromConfig(this.config, executable.chain.name),
-      txHash: null,
-      tx: null,
-      next: null,
-      values: { string: [], native: [] },
-      output: payload,
-      messages: applyOutputToMessages(executable.warp, payload),
-    }
+    const { values, output } = await extractCollectOutput(
+      executable.warp,
+      payload,
+      executable.action,
+      executable.resolvedInputs,
+      this.factory.getSerializer(),
+      this.config
+    )
+
+    return this.buildCollectResult(executable, wallet, 'unhandled', values, output)
   }
 
   private async doHttpRequest(
@@ -296,20 +294,15 @@ export class WarpExecutor {
         this.factory.getSerializer(),
         this.config
       )
-      const next = getNextInfo(this.config, this.adapters, executable.warp, executable.action, output)
 
-      return {
-        status: response.ok ? 'success' : 'error',
-        warp: executable.warp,
-        action: executable.action,
-        user: getWarpWalletAddressFromConfig(this.config, executable.chain.name),
-        txHash: null,
-        tx: null,
-        next,
+      return this.buildCollectResult(
+        executable,
+        getWarpWalletAddressFromConfig(this.config, executable.chain.name),
+        response.ok ? 'success' : 'error',
         values,
-        output: { ...output, _DATA: content },
-        messages: applyOutputToMessages(executable.warp, output),
-      }
+        output,
+        content
+      )
     } catch (error) {
       WarpLogger.error('WarpActionExecutor: Error executing collect', error)
       return {
@@ -324,6 +317,30 @@ export class WarpExecutor {
         output: { _DATA: error },
         messages: {},
       }
+    }
+  }
+
+  private buildCollectResult(
+    executable: WarpExecutable,
+    wallet: string | null,
+    status: 'success' | 'error' | 'unhandled',
+    values: { string: string[]; native: any[] },
+    output: any,
+    rawData?: any
+  ): WarpActionExecutionResult {
+    const next = getNextInfo(this.config, this.adapters, executable.warp, executable.action, output)
+
+    return {
+      status,
+      warp: executable.warp,
+      action: executable.action,
+      user: wallet || getWarpWalletAddressFromConfig(this.config, executable.chain.name),
+      txHash: null,
+      tx: null,
+      next,
+      values,
+      output: rawData ? { ...output, _DATA: rawData } : output,
+      messages: applyOutputToMessages(executable.warp, output),
     }
   }
 

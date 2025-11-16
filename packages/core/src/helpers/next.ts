@@ -15,13 +15,14 @@ export const getNextInfo = (
   actionIndex: number,
   output: WarpExecutionOutput
 ): WarpExecutionNextInfo | null => {
-  const next = (warp.actions?.[actionIndex] as { next?: string })?.next || warp.next || null
+  const next = (warp.actions?.[actionIndex - 1] as { next?: string })?.next || warp.next || null
   if (!next) return null
   if (next.startsWith(URL_PREFIX)) return [{ identifier: null, url: next }]
 
   const [baseIdentifier, queryWithPlaceholders] = next.split('?')
   if (!queryWithPlaceholders) {
-    return [{ identifier: baseIdentifier, url: buildNextUrl(adapters, baseIdentifier, config) }]
+    const interpolatedIdentifier = replacePlaceholders(baseIdentifier, { ...warp.vars, ...output })
+    return [{ identifier: interpolatedIdentifier, url: buildNextUrl(adapters, interpolatedIdentifier, config) }]
   }
 
   // Find all array placeholders like {{DELEGATIONS[].contract}}

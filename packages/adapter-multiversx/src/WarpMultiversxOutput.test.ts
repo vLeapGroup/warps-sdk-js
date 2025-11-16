@@ -119,8 +119,8 @@ describe('Result Helpers', () => {
           },
         ],
         output: {
-          FOO: 'input.foo',
-          BAR: 'input.bar',
+          FOO: 'in.foo',
+          BAR: 'in.bar',
         },
       } as any
       const typedValues: TypedValue[] = []
@@ -150,7 +150,7 @@ describe('Result Helpers', () => {
           },
         ],
         output: {
-          FOO: 'input.FOO_ALIAS',
+          FOO: 'in.FOO_ALIAS',
         },
       } as any
       const typedValues: TypedValue[] = []
@@ -176,7 +176,7 @@ describe('Result Helpers', () => {
           },
         ],
         output: {
-          BAR: 'input.bar',
+          BAR: 'in.bar',
         },
       } as any
       const typedValues: TypedValue[] = []
@@ -203,8 +203,8 @@ describe('Result Helpers', () => {
           },
         ],
         output: {
-          FOO: 'input.foo',
-          BAR: 'input.bar',
+          FOO: 'in.foo',
+          BAR: 'in.bar',
         },
       } as any
       const response = { data: { some: 'value' } }
@@ -232,7 +232,7 @@ describe('Result Helpers', () => {
           },
         ],
         output: {
-          FOO: 'input.FOO_ALIAS',
+          FOO: 'in.FOO_ALIAS',
         },
       } as any
       const response = { data: { some: 'value' } }
@@ -256,7 +256,7 @@ describe('Result Helpers', () => {
           },
         ],
         output: {
-          BAR: 'input.bar',
+          BAR: 'in.bar',
         },
       } as any
       const response = { data: { some: 'value' } }
@@ -288,8 +288,8 @@ describe('Result Helpers', () => {
           },
         ],
         output: {
-          FOO: 'input.foo',
-          BAR: 'input.bar',
+          FOO: 'in.foo',
+          BAR: 'in.bar',
         },
       } as any
       const action = warp.actions[0]
@@ -321,7 +321,7 @@ describe('Result Helpers', () => {
           },
         ],
         output: {
-          FOO: 'input.FOO_ALIAS',
+          FOO: 'in.FOO_ALIAS',
         },
       } as any
       const action = warp.actions[0]
@@ -349,7 +349,7 @@ describe('Result Helpers', () => {
           },
         ],
         output: {
-          BAR: 'input.bar',
+          BAR: 'in.bar',
         },
       } as any
       const action = warp.actions[0]

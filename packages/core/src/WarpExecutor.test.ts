@@ -636,6 +636,96 @@ describe('WarpExecutor', () => {
         })
       )
     })
+
+    it('should evaluate output correctly for unhandled collect', async () => {
+      const unhandledWarp = {
+        ...warp,
+        chain: 'multiversx',
+        actions: [
+          {
+            type: 'collect' as const,
+            label: 'Unhandled Collect with Output',
+            destination: 'some-destination' as any,
+            inputs: [
+              {
+                name: 'username',
+                type: 'string',
+                source: 'field' as const,
+              },
+              {
+                name: 'userId',
+                as: 'ID',
+                type: 'string',
+                source: 'field' as const,
+              },
+              {
+                name: 'user',
+                as: 'name',
+                type: 'string',
+                source: 'field' as const,
+                position: 'payload:data.user' as const,
+              },
+            ],
+            next: '{{STATUS}}',
+          } as WarpCollectAction,
+        ],
+        output: {
+          USERNAME: 'out.username',
+          USERNAME_INPUT: 'in.username',
+          USER_ID: 'in.ID',
+          USER_NAME: 'out.data.user.name',
+          STATUS: 'out.username',
+        },
+      }
+
+      const inputs = ['string:john_doe', 'string:user123', 'string:Alice']
+      const result = await executor.execute(unhandledWarp, inputs)
+
+      expect(result.immediateExecutions).toHaveLength(1)
+      const execution = result.immediateExecutions[0]
+      expect(execution.status).toBe('unhandled')
+      expect(execution.output.USERNAME).toBe('john_doe')
+      expect(execution.output.USERNAME_INPUT).toBe('john_doe')
+      expect(execution.output.USER_ID).toBe('user123')
+      expect(execution.output.USER_NAME).toBe('Alice')
+      expect(execution.output.STATUS).toBe('john_doe')
+      expect(execution.values.string.length).toBeGreaterThan(0)
+      expect(execution.values.native.length).toBeGreaterThan(0)
+      expect(execution.next).toBeDefined()
+      expect(execution.next).toHaveLength(1)
+      expect(execution.next?.[0]?.identifier).toBeDefined()
+    })
+
+    it('should handle unhandled collect with no output configuration', async () => {
+      const unhandledWarp = {
+        ...warp,
+        chain: 'multiversx',
+        actions: [
+          {
+            type: 'collect' as const,
+            label: 'Unhandled Collect No Output',
+            destination: 'some-destination' as any,
+            inputs: [
+              {
+                name: 'data',
+                type: 'string',
+                source: 'field' as const,
+              },
+            ],
+          } as WarpCollectAction,
+        ],
+      }
+
+      const inputs = ['string:test-data']
+      const result = await executor.execute(unhandledWarp, inputs)
+
+      expect(result.immediateExecutions).toHaveLength(1)
+      const execution = result.immediateExecutions[0]
+      expect(execution.status).toBe('unhandled')
+      expect(execution.output).toEqual({})
+      expect(execution.values.string).toEqual([])
+      expect(execution.values.native).toEqual([])
+    })
   })
 
   describe('multi-action execution', () => {
