@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.151
+
+### Minor Changes
+
+- 90d2716: add query to warp meta
+
 ## 3.0.0-alpha.150
 
 ### Patch Changes
