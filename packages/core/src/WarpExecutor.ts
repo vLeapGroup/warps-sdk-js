@@ -231,8 +231,6 @@ export class WarpExecutor {
       return await this.doHttpRequest(executable, collectAction.destination, wallet, payload, extra)
     }
 
-    console.log('Unhandled collect: executable', executable, payload)
-
     const { values, output } = await extractCollectOutput(
       executable.warp,
       payload,
