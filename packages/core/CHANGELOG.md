@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.150
+
+### Patch Changes
+
+- 472039c: update io evaluations
+
 ## 3.0.0-alpha.149
 
 ### Patch Changes
