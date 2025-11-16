@@ -67,6 +67,7 @@ export class WarpMultiversxAbiBuilder implements AdapterWarpAbiBuilder {
     abi.meta = {
       chain: this.chain.name,
       identifier: createWarpIdentifier(this.chain.name, 'hash', tx.hash),
+      query: null,
       hash: tx.hash,
       creator: tx.sender.toBech32(),
       createdAt: new Date(tx.timestamp * 1000).toISOString(),

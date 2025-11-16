@@ -279,6 +279,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
       const brand = JSON.parse(tx.data.toString()) as WarpBrand
 
       brand.meta = {
+        query: null,
         chain: this.chain.name,
         identifier: createWarpIdentifier(this.chain.name, 'hash', hash),
         hash: tx.hash,

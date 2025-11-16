@@ -1,4 +1,10 @@
-import { createWarpIdentifier, extractIdentifierInfoFromUrl, getWarpInfoFromIdentifier } from './identifier'
+import {
+  createWarpIdentifier,
+  extractIdentifierInfoFromUrl,
+  extractQueryStringFromIdentifier,
+  extractQueryStringFromUrl,
+  getWarpInfoFromIdentifier,
+} from './identifier'
 
 describe('createWarpIdentifier', () => {
   it('creates alias identifier with @ prefix and no alias type', () => {
@@ -472,5 +478,100 @@ describe('extractIdentifierInfoFromUrl', () => {
       identifier: 'mywarp',
       identifierBase: 'mywarp',
     })
+  })
+})
+
+describe('extractQueryStringFromUrl', () => {
+  it('extracts query string from URL excluding warp parameter', () => {
+    const url = 'https://example.com/?warp=hash:123&param1=value1&param2=value2'
+    expect(extractQueryStringFromUrl(url)).toBe('param1=value1&param2=value2')
+  })
+
+  it('returns null when only warp parameter exists', () => {
+    const url = 'https://example.com/?warp=hash:123'
+    expect(extractQueryStringFromUrl(url)).toBeNull()
+  })
+
+  it('returns null when no query parameters exist', () => {
+    const url = 'https://example.com/'
+    expect(extractQueryStringFromUrl(url)).toBeNull()
+  })
+
+  it('handles multiple query parameters', () => {
+    const url = 'https://example.com/?warp=hash:123&foo=bar&baz=qux&test=123'
+    expect(extractQueryStringFromUrl(url)).toBe('foo=bar&baz=qux&test=123')
+  })
+
+  it('handles URL encoded query parameters', () => {
+    const url = 'https://example.com/?warp=hash:123&param=value%20with%20spaces'
+    expect(extractQueryStringFromUrl(url)).toBe('param=value+with+spaces')
+  })
+
+  it('handles empty query parameter values', () => {
+    const url = 'https://example.com/?warp=hash:123&empty=&filled=value'
+    expect(extractQueryStringFromUrl(url)).toBe('empty=&filled=value')
+  })
+
+  it('returns null for invalid URL', () => {
+    const url = 'not-a-valid-url'
+    expect(extractQueryStringFromUrl(url)).toBeNull()
+  })
+
+  it('handles warp parameter in different positions', () => {
+    const url = 'https://example.com/?param1=value1&warp=hash:123&param2=value2'
+    expect(extractQueryStringFromUrl(url)).toBe('param1=value1&param2=value2')
+  })
+})
+
+describe('extractQueryStringFromIdentifier', () => {
+  it('extracts query string from identifier', () => {
+    const identifier = 'hash:abc123?param1=value1&param2=value2'
+    expect(extractQueryStringFromIdentifier(identifier)).toBe('param1=value1&param2=value2')
+  })
+
+  it('returns null when no query string exists', () => {
+    const identifier = 'hash:abc123'
+    expect(extractQueryStringFromIdentifier(identifier)).toBeNull()
+  })
+
+  it('returns null when query marker is at the end', () => {
+    const identifier = 'hash:abc123?'
+    expect(extractQueryStringFromIdentifier(identifier)).toBeNull()
+  })
+
+  it('handles single query parameter', () => {
+    const identifier = 'alias:mywarp?param=value'
+    expect(extractQueryStringFromIdentifier(identifier)).toBe('param=value')
+  })
+
+  it('handles multiple query parameters', () => {
+    const identifier = 'hash:abc123?foo=bar&baz=qux&test=123'
+    expect(extractQueryStringFromIdentifier(identifier)).toBe('foo=bar&baz=qux&test=123')
+  })
+
+  it('handles query string with special characters', () => {
+    const identifier = 'hash:abc123?param=value%20with%20spaces&other=test'
+    expect(extractQueryStringFromIdentifier(identifier)).toBe('param=value%20with%20spaces&other=test')
+  })
+
+  it('handles empty query parameter values', () => {
+    const identifier = 'hash:abc123?empty=&filled=value'
+    expect(extractQueryStringFromIdentifier(identifier)).toBe('empty=&filled=value')
+  })
+
+  it('handles 64-character hash with query string', () => {
+    const hash = 'a'.repeat(64)
+    const identifier = `${hash}?param=value`
+    expect(extractQueryStringFromIdentifier(identifier)).toBe('param=value')
+  })
+
+  it('returns null for empty string after query marker', () => {
+    const identifier = 'hash:abc123?'
+    expect(extractQueryStringFromIdentifier(identifier)).toBeNull()
+  })
+
+  it('handles query string at the start of identifier', () => {
+    const identifier = '?param=value'
+    expect(extractQueryStringFromIdentifier(identifier)).toBe('param=value')
   })
 })

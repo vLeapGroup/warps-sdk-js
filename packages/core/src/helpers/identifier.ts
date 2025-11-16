@@ -141,3 +141,22 @@ const splitBySeparators = (str: string): string[] => {
   const remainingParts = splitBySeparators(remaining)
   return [firstPart, ...remainingParts]
 }
+
+export const extractQueryStringFromUrl = (url: string): string | null => {
+  try {
+    const urlObj = new URL(url)
+    const searchParams = new URLSearchParams(urlObj.search)
+    searchParams.delete(WarpConstants.IdentifierParamName)
+    const queryString = searchParams.toString()
+    return queryString || null
+  } catch {
+    return null
+  }
+}
+
+export const extractQueryStringFromIdentifier = (identifier: string): string | null => {
+  const queryIndex = identifier.indexOf('?')
+  if (queryIndex === -1 || queryIndex === identifier.length - 1) return null
+  const queryString = identifier.substring(queryIndex + 1)
+  return queryString.length > 0 ? queryString : null
+}

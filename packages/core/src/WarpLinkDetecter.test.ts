@@ -15,14 +15,18 @@ const minimalWarp = {
 
 const mockWarp: Warp = createMockWarp()
 
+const createMockBuilder = () => ({
+  createInscriptionTransaction: jest.fn(),
+  createFromTransaction: jest.fn().mockResolvedValue(mockWarp),
+  createFromTransactionHash: jest.fn().mockResolvedValue(mockWarp),
+})
+
+const mockBuilder = createMockBuilder()
+
 const mockAdapter = {
   ...createMockAdapter(),
   chain: 'devnet',
-  builder: {
-    createInscriptionTransaction: jest.fn(),
-    createFromTransaction: jest.fn().mockResolvedValue(mockWarp),
-    createFromTransactionHash: jest.fn().mockResolvedValue(mockWarp),
-  },
+  builder: () => mockBuilder,
   registry: {
     createWarpRegisterTransaction: jest.fn(),
     createWarpUnregisterTransaction: jest.fn(),
@@ -83,15 +87,14 @@ describe('WarpLinkDetecter', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     // Reset all mocks to default behavior
-    mockAdapter.builder.createFromTransactionHash = jest.fn().mockResolvedValue(mockWarp)
-    mockAdapter.builder.createFromTransaction = jest.fn().mockResolvedValue(mockWarp)
+    Object.assign(mockBuilder, createMockBuilder())
     mockAdapter.registry.getInfoByHash = jest.fn().mockResolvedValue({ registryInfo: null, brand: null })
     mockAdapter.registry.getInfoByAlias = jest.fn().mockResolvedValue({ registryInfo: null, brand: null })
   })
 
   it('detects warp links with hash', async () => {
     // Ensure builder returns mockWarp for hash detection
-    mockAdapter.builder.createFromTransactionHash = jest.fn().mockResolvedValue(mockWarp)
+    mockBuilder.createFromTransactionHash = jest.fn().mockResolvedValue(mockWarp)
     const link = new WarpLinkDetecter(Config, [mockAdapter] as any)
     const result = await link.detect('https://anyclient.com?warp=hash:123')
     expect(result).toEqual({
@@ -120,7 +123,7 @@ describe('WarpLinkDetecter', () => {
       registryInfo: mockRegistryInfo,
       brand: null,
     })
-    mockAdapter.builder.createFromTransactionHash = jest.fn().mockResolvedValue(mockWarp)
+    mockBuilder.createFromTransactionHash = jest.fn().mockResolvedValue(mockWarp)
 
     const link = new WarpLinkDetecter(Config, [mockAdapter] as any)
     const result = await link.detect('https://anyclient.com?warp=mywarp')
@@ -136,7 +139,7 @@ describe('WarpLinkDetecter', () => {
 
   it('handles null registry info for hash', async () => {
     mockAdapter.registry.getInfoByHash = jest.fn().mockResolvedValue({ registryInfo: null, brand: null })
-    mockAdapter.builder.createFromTransactionHash = jest.fn().mockResolvedValue(mockWarp)
+    mockBuilder.createFromTransactionHash = jest.fn().mockResolvedValue(mockWarp)
     const link = new WarpLinkDetecter(Config, [mockAdapter] as any)
     const result = await link.detect('https://anyclient.com?warp=hash:123')
     expect(result).toEqual({
@@ -165,7 +168,8 @@ describe('WarpLinkDetecter', () => {
   })
 
   it('handles null warp creation', async () => {
-    mockAdapter.builder.createFromTransactionHash = jest.fn().mockResolvedValue(null)
+    const builder = mockAdapter.builder()
+    builder.createFromTransactionHash = jest.fn().mockResolvedValue(null)
     const link = new WarpLinkDetecter(Config, [mockAdapter] as any)
     const result = await link.detect('https://anyclient.com?warp=hash:123')
     expect(result).toEqual({
@@ -220,7 +224,7 @@ describe('WarpLinkDetecter', () => {
       registryInfo: mockRegistryInfo,
       brand: mockBrand,
     })
-    mockAdapter.builder.createFromTransactionHash = jest.fn().mockResolvedValue(mockWarp)
+    mockBuilder.createFromTransactionHash = jest.fn().mockResolvedValue(mockWarp)
     const link = new WarpLinkDetecter(Config, [mockAdapter] as any)
     const result = await link.detect('https://anyclient.com?warp=hash:123')
     expect(result).toEqual({
@@ -231,5 +235,47 @@ describe('WarpLinkDetecter', () => {
       registryInfo: null,
       brand: null,
     })
+  })
+
+  it('extracts query string from identifier with query params', async () => {
+    const hash64 = 'a'.repeat(64)
+    const warpWithMeta = { ...mockWarp, meta: { chain: 'multiversx', identifier: hash64, query: null, hash: hash64, creator: 'erd1...', createdAt: '2024-01-01' } }
+    mockBuilder.createFromTransactionHash = jest.fn().mockResolvedValue(warpWithMeta)
+    const link = new WarpLinkDetecter(Config, [mockAdapter] as any)
+    const result = await link.detect(`${hash64}?queryA=valueA&queryB=valueB`)
+
+    expect(mockBuilder.createFromTransactionHash).toHaveBeenCalledWith(hash64, undefined)
+    expect(result.warp?.meta?.query).toBe('queryA=valueA&queryB=valueB')
+  })
+
+  it('extracts query string from hash identifier format with query params', async () => {
+    const warpWithMeta = { ...mockWarp, meta: { chain: 'multiversx', identifier: 'hash:abc123', query: null, hash: 'abc123', creator: 'erd1...', createdAt: '2024-01-01' } }
+    mockBuilder.createFromTransactionHash = jest.fn().mockResolvedValue(warpWithMeta)
+    const link = new WarpLinkDetecter(Config, [mockAdapter] as any)
+    const result = await link.detect('hash:abc123?queryA=valueA&queryB=valueB')
+
+    expect(mockBuilder.createFromTransactionHash).toHaveBeenCalledWith('abc123', undefined)
+    expect(result.warp?.meta?.query).toBe('queryA=valueA&queryB=valueB')
+  })
+
+  it('extracts query string from URL with additional query params', async () => {
+    const warpWithMeta = { ...mockWarp, meta: { chain: 'multiversx', identifier: 'hash:123', query: null, hash: '123', creator: 'erd1...', createdAt: '2024-01-01' } }
+    mockBuilder.createFromTransactionHash = jest.fn().mockResolvedValue(warpWithMeta)
+    const link = new WarpLinkDetecter(Config, [mockAdapter] as any)
+    const result = await link.detect('https://anyclient.com?warp=hash:123&param1=value1&param2=value2')
+
+    expect(mockBuilder.createFromTransactionHash).toHaveBeenCalledWith('123', undefined)
+    expect(result.warp?.meta?.query).toBe('param1=value1&param2=value2')
+  })
+
+  it('sets query to null when no query string exists', async () => {
+    const hash64 = 'a'.repeat(64)
+    const warpWithMeta = { ...mockWarp, meta: { chain: 'multiversx', identifier: hash64, query: null, hash: hash64, creator: 'erd1...', createdAt: '2024-01-01' } }
+    mockBuilder.createFromTransactionHash = jest.fn().mockResolvedValue(warpWithMeta)
+    const link = new WarpLinkDetecter(Config, [mockAdapter] as any)
+    const result = await link.detect(hash64)
+
+    expect(mockBuilder.createFromTransactionHash).toHaveBeenCalledWith(hash64, undefined)
+    expect(result.warp?.meta?.query).toBeNull()
   })
 })

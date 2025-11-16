@@ -1,5 +1,12 @@
 import { WarpConstants } from './constants'
-import { createWarpIdentifier, extractIdentifierInfoFromUrl, findWarpAdapterForChain, getWarpInfoFromIdentifier } from './helpers'
+import {
+  createWarpIdentifier,
+  extractIdentifierInfoFromUrl,
+  extractQueryStringFromIdentifier,
+  extractQueryStringFromUrl,
+  findWarpAdapterForChain,
+  getWarpInfoFromIdentifier,
+} from './helpers'
 import { Adapter, Warp, WarpBrand, WarpCacheConfig, WarpChain, WarpClientConfig, WarpRegistryInfo } from './types'
 import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
@@ -67,12 +74,15 @@ export class WarpLinkDetecter {
 
       const adapter = findWarpAdapterForChain(identifierResult.chain, this.adapters)
 
+      const queryString = urlOrId.startsWith(WarpConstants.HttpProtocolPrefix)
+        ? extractQueryStringFromUrl(urlOrId)
+        : extractQueryStringFromIdentifier(identifierResult.identifier)
+
       if (type === 'hash') {
         warp = await adapter.builder().createFromTransactionHash(identifierBase, cache)
         const result = await adapter.registry.getInfoByHash(identifierBase, cache)
         registryInfo = result.registryInfo
         brand = result.brand
-        if (warp) modifyWarpMetaIdentifier(warp, adapter.chainInfo.name, registryInfo, identifierResult.identifier)
       } else if (type === 'alias') {
         const result = await adapter.registry.getInfoByAlias(identifierBase, cache)
         registryInfo = result.registryInfo
@@ -80,7 +90,11 @@ export class WarpLinkDetecter {
         if (result.registryInfo) {
           warp = await adapter.builder().createFromTransactionHash(result.registryInfo.hash, cache)
         }
-        if (warp) modifyWarpMetaIdentifier(warp, adapter.chainInfo.name, registryInfo, identifierResult.identifier)
+      }
+
+      if (warp && warp.meta) {
+        modifyWarpMetaIdentifier(warp, adapter.chainInfo.name, registryInfo, identifierResult.identifier)
+        warp.meta.query = queryString
       }
 
       const preparedWarp = warp ? await new WarpInterpolator(this.config, adapter).apply(this.config, warp) : null

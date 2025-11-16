@@ -40,6 +40,7 @@ export class WarpMultiversxBrandBuilder {
     const brand = await this.core.createFromRaw(tx.data.toString(), validateSchema)
 
     brand.meta = {
+      query: null,
       chain: this.chain.name,
       identifier: createWarpIdentifier(this.chain.name, 'hash', tx.hash),
       hash: tx.hash,
