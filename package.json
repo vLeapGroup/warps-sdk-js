@@ -17,7 +17,7 @@
     "@typescript-eslint/eslint-plugin": "^8.46.4",
     "@typescript-eslint/parser": "^8.46.4",
     "eslint": "^9.39.1",
-    "eslint-config-custom": "*",
+    "eslint-config-custom": "0.0.1-alpha.0",
     "prettier": "^3.6.2",
     "ts-json-schema-generator": "^2.4.0",
     "ts-node": "^10.9.2",
