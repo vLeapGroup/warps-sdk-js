@@ -1,12 +1,12 @@
 import { safeWindow, WarpConstants } from './constants'
 import {
-  applyOutputToMessages,
   extractCollectOutput,
   findWarpAdapterForChain,
   getNextInfo,
   getWarpActionByIndex,
   isWarpActionAutoExecute,
 } from './helpers'
+import { applyOutputToMessages } from './helpers/messages'
 import { buildNestedPayload, mergeNestedPayload } from './helpers/payload'
 import { createAuthHeaders, createAuthMessage } from './helpers/signing'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
@@ -338,7 +338,7 @@ export class WarpExecutor {
       next,
       values,
       output: rawData ? { ...output, _DATA: rawData } : output,
-      messages: applyOutputToMessages(executable.warp, output),
+      messages: applyOutputToMessages(executable.warp, output, this.config),
     }
   }
 
