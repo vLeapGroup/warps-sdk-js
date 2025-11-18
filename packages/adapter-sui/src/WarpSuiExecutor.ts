@@ -146,7 +146,7 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
       next,
       values: extractedValues,
       output: { ...output, _DATA: result },
-      messages: applyOutputToMessages(executable.warp, output),
+      messages: applyOutputToMessages(executable.warp, output, this.config),
     }
   }
 

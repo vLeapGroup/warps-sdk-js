@@ -39,7 +39,7 @@ export class WarpSuiOutput implements AdapterWarpOutput {
   ): Promise<WarpActionExecutionResult> {
     const output = await this.extractContractOutput(warp, actionIndex, tx, [])
     const next = getNextInfo(this.config, [], warp, actionIndex, output.output)
-    const messages = applyOutputToMessages(warp, output.output)
+    const messages = applyOutputToMessages(warp, output.output, this.config)
     return {
       status: tx.effects?.status?.status === 'success' ? 'success' : 'error',
       warp,

@@ -55,7 +55,7 @@ export class WarpMultiversxOutput implements AdapterWarpOutput {
 
     const output = await this.extractContractOutput(warp, actionIndex, tx, inputs)
     const next = getNextInfo(this.config, [], warp, actionIndex, output.output)
-    const messages = applyOutputToMessages(warp, output.output)
+    const messages = applyOutputToMessages(warp, output.output, this.config)
 
     return {
       status: tx.status.isSuccessful() ? 'success' : 'error',

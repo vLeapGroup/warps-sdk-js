@@ -200,7 +200,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         next,
         values,
         output: { ...output, _DATA: decodedResult },
-        messages: applyOutputToMessages(executable.warp, output),
+        messages: applyOutputToMessages(executable.warp, output, this.config),
       }
     } catch (error) {
       return {

@@ -138,7 +138,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
       next,
       values,
       output: { ...output, _DATA: typedValues },
-      messages: applyOutputToMessages(executable.warp, output),
+      messages: applyOutputToMessages(executable.warp, output, this.config),
     }
   }
 
