@@ -63,7 +63,7 @@ export class WarpFactory {
     const destinationInAction = this.getDestinationFromAction(preparedAction)
     let destination = destinationInput ? (this.serializer.stringToNative(destinationInput)[1] as string) : destinationInAction
     if (destination) destination = interpolator.applyInputs(destination, modifiedInputs, this.serializer)
-    if (!destination) throw new Error('WarpActionExecutor: Destination/Receiver not provided')
+    if (!destination && action.type !== 'collect') throw new Error('WarpActionExecutor: Destination/Receiver not provided')
 
     let args = this.getPreparedArgs(preparedAction, modifiedInputs)
     args = args.map((arg) => interpolator.applyInputs(arg, modifiedInputs, this.serializer))

@@ -124,6 +124,7 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
   }
 
   async executeQuery(executable: WarpExecutable): Promise<WarpActionExecutionResult> {
+    if (!executable.destination) throw new Error('WarpSuiExecutor: executeQuery - destination not set')
     const action = getWarpActionByIndex(executable.warp, executable.action) as WarpQueryAction
     if (action.type !== 'query') throw new Error(`WarpSuiExecutor: Invalid action type for executeQuery: ${action.type}`)
     const result = await this.client.getObject({ id: executable.destination, options: { showContent: true } })

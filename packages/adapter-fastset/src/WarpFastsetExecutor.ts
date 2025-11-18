@@ -31,6 +31,7 @@ export class WarpFastsetExecutor implements AdapterWarpExecutor {
   }
 
   async createTransferTransaction(executable: WarpExecutable): Promise<WarpAdapterGenericTransaction> {
+    if (!executable.destination) throw new Error('WarpFastsetExecutor: createTransfer - destination not set')
     const userWallet = getWarpWalletAddressFromConfig(this.config, executable.chain.name)
     if (!userWallet) throw new Error('WarpFastsetExecutor: createTransfer - user address not set')
     const senderPubKey = FastsetClient.decodeBech32Address(userWallet)

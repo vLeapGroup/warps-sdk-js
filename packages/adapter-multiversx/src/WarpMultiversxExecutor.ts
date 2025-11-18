@@ -65,6 +65,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
   }
 
   async createTransferTransaction(executable: WarpExecutable): Promise<Transaction> {
+    if (!executable.destination) throw new Error('WarpMultiversxExecutor: createTransfer - destination not set')
     const userWallet = getWarpWalletAddressFromConfig(this.config, executable.chain.name)
     if (!userWallet) throw new Error('WarpMultiversxExecutor: createTransfer - user address not set')
     const sender = Address.newFromBech32(userWallet)
@@ -86,6 +87,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
   }
 
   async createContractCallTransaction(executable: WarpExecutable): Promise<Transaction> {
+    if (!executable.destination) throw new Error('WarpMultiversxExecutor: createContractCall - destination not set')
     const userWallet = getWarpWalletAddressFromConfig(this.config, executable.chain.name)
     if (!userWallet) throw new Error('WarpMultiversxExecutor: createContractCall - user address not set')
     const action = getWarpActionByIndex(executable.warp, executable.action)
@@ -103,6 +105,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
   }
 
   async executeQuery(executable: WarpExecutable): Promise<WarpActionExecutionResult> {
+    if (!executable.destination) throw new Error('WarpMultiversxExecutor: executeQuery - destination not set')
     const action = getWarpActionByIndex(executable.warp, executable.action) as WarpQueryAction
     if (action.type !== 'query') throw new Error(`WarpMultiversxExecutor: Invalid action type for executeQuery: ${action.type}`)
     const abi = await this.abi.getAbiForAction(action)

@@ -209,7 +209,7 @@ export type WarpExecutable = {
   chain: WarpChainInfo
   warp: Warp
   action: number
-  destination: string
+  destination: string | null
   args: string[]
   value: bigint
   transfers: WarpChainAssetValue[]
