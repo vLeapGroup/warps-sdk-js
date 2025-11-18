@@ -7,7 +7,8 @@ export const cleanWarpIdentifier = (identifier: string): string => {
     : identifier
 }
 
-export const isEqualWarpIdentifier = (identifier1: string, identifier2: string): boolean => {
+export const isEqualWarpIdentifier = (identifier1: string | null | undefined, identifier2: string | null | undefined): boolean => {
+  if (!identifier1 || !identifier2) return false
   return cleanWarpIdentifier(identifier1) === cleanWarpIdentifier(identifier2)
 }
 
