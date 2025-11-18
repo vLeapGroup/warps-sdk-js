@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-beta.53
+
+### Patch Changes
+
+- 4f0d6a7: further message localization updates
+- Updated dependencies [4f0d6a7]
+  - @vleap/warps@3.0.0-beta.153
+
 ## 0.2.0-alpha.52
 
 ### Patch Changes

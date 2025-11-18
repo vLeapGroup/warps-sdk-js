@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.153
+
+### Patch Changes
+
+- 4f0d6a7: further message localization updates
+
 ## 3.0.0-alpha.152
 
 ### Minor Changes

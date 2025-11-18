@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-beta.77
+
+### Patch Changes
+
+- 4f0d6a7: further message localization updates
+- Updated dependencies [4f0d6a7]
+  - @vleap/warps@3.0.0-beta.153
+
 ## 0.2.0-alpha.76
 
 ### Patch Changes
