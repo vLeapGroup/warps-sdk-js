@@ -1,10 +1,18 @@
 import { WarpConstants } from '../constants'
 import { WarpChain, WarpIdentifierType } from '../types'
 
-export const createWarpIdentifier = (chain: WarpChain, type: WarpIdentifierType, identifier: string) => {
-  const cleanIdentifier = identifier.startsWith(WarpConstants.IdentifierAliasMarker)
+export const cleanWarpIdentifier = (identifier: string): string => {
+  return identifier.startsWith(WarpConstants.IdentifierAliasMarker)
     ? identifier.replace(WarpConstants.IdentifierAliasMarker, '')
     : identifier
+}
+
+export const isEqualWarpIdentifier = (identifier1: string, identifier2: string): boolean => {
+  return cleanWarpIdentifier(identifier1) === cleanWarpIdentifier(identifier2)
+}
+
+export const createWarpIdentifier = (chain: WarpChain, type: WarpIdentifierType, identifier: string) => {
+  const cleanIdentifier = cleanWarpIdentifier(identifier)
   if (type === WarpConstants.IdentifierType.Alias) {
     return WarpConstants.IdentifierAliasMarker + chain + WarpConstants.IdentifierParamSeparator + cleanIdentifier
   }
@@ -15,7 +23,7 @@ export const getWarpInfoFromIdentifier = (
   prefixedIdentifier: string
 ): { chain: WarpChain; type: WarpIdentifierType; identifier: string; identifierBase: string } | null => {
   const decoded = decodeURIComponent(prefixedIdentifier).trim()
-  const identifierWithoutAliasMarker = decoded.replace(WarpConstants.IdentifierAliasMarker, '')
+  const identifierWithoutAliasMarker = cleanWarpIdentifier(decoded)
   const base = identifierWithoutAliasMarker.split('?')[0]
   const parts = splitBySeparators(base)
 

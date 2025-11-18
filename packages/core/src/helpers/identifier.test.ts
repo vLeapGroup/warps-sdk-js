@@ -1,10 +1,79 @@
 import {
+  cleanWarpIdentifier,
   createWarpIdentifier,
   extractIdentifierInfoFromUrl,
   extractQueryStringFromIdentifier,
   extractQueryStringFromUrl,
   getWarpInfoFromIdentifier,
+  isEqualWarpIdentifier,
 } from './identifier'
+
+describe('cleanWarpIdentifier', () => {
+  it('removes @ prefix from identifier', () => {
+    expect(cleanWarpIdentifier('@mywarp')).toBe('mywarp')
+  })
+
+  it('returns identifier unchanged if no @ prefix', () => {
+    expect(cleanWarpIdentifier('mywarp')).toBe('mywarp')
+  })
+
+  it('removes only the first @ prefix', () => {
+    expect(cleanWarpIdentifier('@my@warp')).toBe('my@warp')
+  })
+
+  it('handles empty string', () => {
+    expect(cleanWarpIdentifier('')).toBe('')
+  })
+
+  it('handles identifier with only @', () => {
+    expect(cleanWarpIdentifier('@')).toBe('')
+  })
+
+  it('handles complex identifier with @ prefix', () => {
+    expect(cleanWarpIdentifier('@sui:alias:mywarp')).toBe('sui:alias:mywarp')
+  })
+})
+
+describe('isEqualWarpIdentifier', () => {
+  it('returns true for identical identifiers without @', () => {
+    expect(isEqualWarpIdentifier('mywarp', 'mywarp')).toBe(true)
+  })
+
+  it('returns true for identical identifiers with @ prefix', () => {
+    expect(isEqualWarpIdentifier('@mywarp', '@mywarp')).toBe(true)
+  })
+
+  it('returns true when one has @ prefix and other does not', () => {
+    expect(isEqualWarpIdentifier('@mywarp', 'mywarp')).toBe(true)
+    expect(isEqualWarpIdentifier('mywarp', '@mywarp')).toBe(true)
+  })
+
+  it('returns false for different identifiers', () => {
+    expect(isEqualWarpIdentifier('mywarp', 'otherwarp')).toBe(false)
+  })
+
+  it('returns false when one has @ prefix and identifiers differ', () => {
+    expect(isEqualWarpIdentifier('@mywarp', 'otherwarp')).toBe(false)
+    expect(isEqualWarpIdentifier('mywarp', '@otherwarp')).toBe(false)
+  })
+
+  it('handles empty strings', () => {
+    expect(isEqualWarpIdentifier('', '')).toBe(true)
+    expect(isEqualWarpIdentifier('@', '')).toBe(true)
+    expect(isEqualWarpIdentifier('', '@')).toBe(true)
+  })
+
+  it('handles complex identifiers with separators', () => {
+    expect(isEqualWarpIdentifier('@sui:alias:mywarp', 'sui:alias:mywarp')).toBe(true)
+    expect(isEqualWarpIdentifier('sui:alias:mywarp', '@sui:alias:mywarp')).toBe(true)
+    expect(isEqualWarpIdentifier('@sui:alias:mywarp', '@sui:alias:mywarp')).toBe(true)
+  })
+
+  it('handles identifiers with query parameters', () => {
+    expect(isEqualWarpIdentifier('@mywarp?param=1', 'mywarp?param=1')).toBe(true)
+    expect(isEqualWarpIdentifier('mywarp?param=1', '@mywarp?param=1')).toBe(true)
+  })
+})
 
 describe('createWarpIdentifier', () => {
   it('creates alias identifier with @ prefix and no alias type', () => {
