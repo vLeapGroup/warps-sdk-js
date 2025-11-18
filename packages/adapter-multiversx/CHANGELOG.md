@@ -1,5 +1,14 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-alpha.76
+
+### Patch Changes
+
+- 4731910: update opt dest
+- Updated dependencies [4731910]
+- Updated dependencies [38bb15f]
+  - @vleap/warps@3.0.0-alpha.152
+
 ## 0.2.0-alpha.75
 
 ### Minor Changes

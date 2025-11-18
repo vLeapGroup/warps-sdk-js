@@ -1,5 +1,14 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-alpha.52
+
+### Patch Changes
+
+- 4731910: update opt dest
+- Updated dependencies [4731910]
+- Updated dependencies [38bb15f]
+  - @vleap/warps@3.0.0-alpha.152
+
 ## 0.2.0-alpha.51
 
 ### Minor Changes

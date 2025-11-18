@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-alpha.152
+
+### Minor Changes
+
+- 38bb15f: add localized messages
+
+### Patch Changes
+
+- 4731910: update opt dest
+
 ## 3.0.0-alpha.151
 
 ### Minor Changes

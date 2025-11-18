@@ -1,11 +1,5 @@
 import { safeWindow, WarpConstants } from './constants'
-import {
-  extractCollectOutput,
-  findWarpAdapterForChain,
-  getNextInfo,
-  getWarpActionByIndex,
-  isWarpActionAutoExecute,
-} from './helpers'
+import { extractCollectOutput, findWarpAdapterForChain, getNextInfo, getWarpActionByIndex, isWarpActionAutoExecute } from './helpers'
 import { applyOutputToMessages } from './helpers/messages'
 import { buildNestedPayload, mergeNestedPayload } from './helpers/payload'
 import { createAuthHeaders, createAuthMessage } from './helpers/signing'
