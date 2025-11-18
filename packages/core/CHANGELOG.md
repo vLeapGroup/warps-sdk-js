@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.154
+
+### Patch Changes
+
+- ca86180: add identifier utilities
+
 ## 3.0.0-beta.153
 
 ### Patch Changes
