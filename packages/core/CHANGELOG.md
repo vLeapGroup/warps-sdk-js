@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.155
+
+### Patch Changes
+
+- 80d0af8: update identifier util
+
 ## 3.0.0-beta.154
 
 ### Patch Changes
