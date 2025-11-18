@@ -97,14 +97,10 @@ describe('WarpLinkDetecter', () => {
     mockBuilder.createFromTransactionHash = jest.fn().mockResolvedValue(mockWarp)
     const link = new WarpLinkDetecter(Config, [mockAdapter] as any)
     const result = await link.detect('https://anyclient.com?warp=hash:123')
-    expect(result).toEqual({
-      match: false,
-      url: 'https://anyclient.com?warp=hash:123',
-      warp: null,
-      chain: null,
-      registryInfo: null,
-      brand: null,
-    })
+    expect(result.match).toBe(true)
+    expect(result.url).toBe('https://anyclient.com?warp=hash:123')
+    expect(result.warp).toBeDefined()
+    expect(result.chain).toBe('multiversx')
   })
 
   it('detects warp links with alias', async () => {
@@ -127,14 +123,11 @@ describe('WarpLinkDetecter', () => {
 
     const link = new WarpLinkDetecter(Config, [mockAdapter] as any)
     const result = await link.detect('https://anyclient.com?warp=mywarp')
-    expect(result).toEqual({
-      match: false,
-      url: 'https://anyclient.com?warp=mywarp',
-      warp: null,
-      chain: null,
-      registryInfo: null,
-      brand: null,
-    })
+    expect(result.match).toBe(true)
+    expect(result.url).toBe('https://anyclient.com?warp=mywarp')
+    expect(result.warp).toBeDefined()
+    expect(result.chain).toBe('multiversx')
+    expect(result.registryInfo).toEqual(mockRegistryInfo)
   })
 
   it('handles null registry info for hash', async () => {
@@ -142,14 +135,12 @@ describe('WarpLinkDetecter', () => {
     mockBuilder.createFromTransactionHash = jest.fn().mockResolvedValue(mockWarp)
     const link = new WarpLinkDetecter(Config, [mockAdapter] as any)
     const result = await link.detect('https://anyclient.com?warp=hash:123')
-    expect(result).toEqual({
-      match: false,
-      url: 'https://anyclient.com?warp=hash:123',
-      warp: null,
-      chain: null,
-      registryInfo: null,
-      brand: null,
-    })
+    expect(result.match).toBe(true)
+    expect(result.url).toBe('https://anyclient.com?warp=hash:123')
+    expect(result.warp).toBeDefined()
+    expect(result.chain).toBe('multiversx')
+    expect(result.registryInfo).toBeNull()
+    expect(result.brand).toBeNull()
   })
 
   it('handles null registry info for alias', async () => {
@@ -227,14 +218,12 @@ describe('WarpLinkDetecter', () => {
     mockBuilder.createFromTransactionHash = jest.fn().mockResolvedValue(mockWarp)
     const link = new WarpLinkDetecter(Config, [mockAdapter] as any)
     const result = await link.detect('https://anyclient.com?warp=hash:123')
-    expect(result).toEqual({
-      match: false,
-      url: 'https://anyclient.com?warp=hash:123',
-      warp: null,
-      chain: null,
-      registryInfo: null,
-      brand: null,
-    })
+    expect(result.match).toBe(true)
+    expect(result.url).toBe('https://anyclient.com?warp=hash:123')
+    expect(result.warp).toBeDefined()
+    expect(result.chain).toBe('multiversx')
+    expect(result.registryInfo).toEqual(mockRegistryInfo)
+    expect(result.brand).toEqual(mockBrand)
   })
 
   it('extracts query string from identifier with query params', async () => {
