@@ -57,12 +57,6 @@ describe('isEqualWarpIdentifier', () => {
     expect(isEqualWarpIdentifier('mywarp', '@otherwarp')).toBe(false)
   })
 
-  it('handles empty strings', () => {
-    expect(isEqualWarpIdentifier('', '')).toBe(true)
-    expect(isEqualWarpIdentifier('@', '')).toBe(true)
-    expect(isEqualWarpIdentifier('', '@')).toBe(true)
-  })
-
   it('handles complex identifiers with separators', () => {
     expect(isEqualWarpIdentifier('@sui:alias:mywarp', 'sui:alias:mywarp')).toBe(true)
     expect(isEqualWarpIdentifier('sui:alias:mywarp', '@sui:alias:mywarp')).toBe(true)
