@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-beta.39
+
+### Patch Changes
+
+- 9f92c0d: add destination to exec results
+- Updated dependencies [9f92c0d]
+  - @vleap/warps@3.0.0-beta.156
+
 ## 0.1.0-alpha.38
 
 ### Patch Changes

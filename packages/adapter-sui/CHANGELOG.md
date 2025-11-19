@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-beta.54
+
+### Patch Changes
+
+- 9f92c0d: add destination to exec results
+- Updated dependencies [9f92c0d]
+  - @vleap/warps@3.0.0-beta.156
+
 ## 0.2.0-beta.53
 
 ### Patch Changes

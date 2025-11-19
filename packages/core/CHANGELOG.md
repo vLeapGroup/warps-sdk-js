@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.156
+
+### Patch Changes
+
+- 9f92c0d: add destination to exec results
+
 ## 3.0.0-beta.155
 
 ### Patch Changes
