@@ -308,8 +308,16 @@ export class WarpExecutor {
         values: { string: [], native: [] },
         output: { _DATA: error },
         messages: {},
+        destination: this.getDestinationFromResolvedInputs(executable),
       }
     }
+  }
+
+  private getDestinationFromResolvedInputs(executable: WarpExecutable): string | null {
+    const destinationInput = executable.resolvedInputs.find(
+      (i) => i.input.position === 'receiver' || i.input.position === 'destination'
+    )
+    return destinationInput?.value || executable.destination
   }
 
   private buildCollectResult(
@@ -333,6 +341,7 @@ export class WarpExecutor {
       values,
       output: rawData ? { ...output, _DATA: rawData } : output,
       messages: applyOutputToMessages(executable.warp, output, this.config),
+      destination: this.getDestinationFromResolvedInputs(executable),
     }
   }
 

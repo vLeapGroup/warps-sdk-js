@@ -51,6 +51,7 @@ export class WarpSuiOutput implements AdapterWarpOutput {
       values: output.values,
       output: output.output,
       messages,
+      destination: null,
     }
   }
 

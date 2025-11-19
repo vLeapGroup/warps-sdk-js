@@ -61,6 +61,7 @@ export class WarpEvmOutput implements AdapterWarpOutput {
       values: { string: [], native: [] },
       output: {},
       messages: {},
+      destination: null,
     }
   }
 
@@ -85,6 +86,7 @@ export class WarpEvmOutput implements AdapterWarpOutput {
       values: { string: stringValues, native: rawValues },
       output: {},
       messages: {},
+      destination: null,
     }
   }
 
@@ -118,6 +120,7 @@ export class WarpEvmOutput implements AdapterWarpOutput {
       values: { string: stringValues, native: rawValues },
       output: {},
       messages: {},
+      destination: null,
     }
   }
 

@@ -98,6 +98,7 @@ describe('WarpFastsetOutput', () => {
         },
         output: {},
         messages: {},
+        destination: null,
       })
     })
 

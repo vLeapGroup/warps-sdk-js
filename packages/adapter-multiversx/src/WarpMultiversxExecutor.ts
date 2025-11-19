@@ -128,6 +128,11 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
     )
     const next = getNextInfo(this.config, [], executable.warp, executable.action, output)
 
+    const destinationInput = executable.resolvedInputs.find(
+      (i) => i.input.position === 'receiver' || i.input.position === 'destination'
+    )
+    const destination = destinationInput?.value || executable.destination
+
     return {
       status: isSuccess ? 'success' : 'error',
       warp: executable.warp,
@@ -139,6 +144,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
       values,
       output: { ...output, _DATA: typedValues },
       messages: applyOutputToMessages(executable.warp, output, this.config),
+      destination,
     }
   }
 

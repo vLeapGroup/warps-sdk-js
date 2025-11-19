@@ -136,6 +136,12 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
       executable.resolvedInputs
     )
     const next = getNextInfo(this.config, [], executable.warp, executable.action, output)
+
+    const destinationInput = executable.resolvedInputs.find(
+      (i) => i.input.position === 'receiver' || i.input.position === 'destination'
+    )
+    const destination = destinationInput?.value || executable.destination
+
     return {
       status: 'success',
       warp: executable.warp,
@@ -147,6 +153,7 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
       values: extractedValues,
       output: { ...output, _DATA: result },
       messages: applyOutputToMessages(executable.warp, output, this.config),
+      destination,
     }
   }
 

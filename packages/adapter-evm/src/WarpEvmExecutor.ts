@@ -190,6 +190,11 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
 
       const next = getNextInfo(this.config, [], executable.warp, executable.action, output)
 
+      const destinationInput = executable.resolvedInputs.find(
+        (i) => i.input.position === 'receiver' || i.input.position === 'destination'
+      )
+      const destination = destinationInput?.value || executable.destination
+
       return {
         status: isSuccess ? 'success' : 'error',
         warp: executable.warp,
@@ -201,8 +206,14 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         values,
         output: { ...output, _DATA: decodedResult },
         messages: applyOutputToMessages(executable.warp, output, this.config),
+        destination,
       }
     } catch (error) {
+      const destinationInput = executable.resolvedInputs.find(
+        (i) => i.input.position === 'receiver' || i.input.position === 'destination'
+      )
+      const destination = destinationInput?.value || executable.destination
+
       return {
         status: 'error',
         warp: executable.warp,
@@ -214,6 +225,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         values: { string: [], native: [] },
         output: { _DATA: error },
         messages: {},
+        destination,
       }
     }
   }

@@ -49,6 +49,7 @@ export class WarpFastsetOutput implements AdapterWarpOutput {
       values: { string: stringValues, native: rawValues },
       output: {},
       messages: {},
+      destination: null,
     }
   }
 

@@ -68,6 +68,7 @@ export class WarpMultiversxOutput implements AdapterWarpOutput {
       values: output.values,
       output: output.output,
       messages,
+      destination: null,
     }
   }
 

@@ -696,6 +696,45 @@ describe('WarpExecutor', () => {
       expect(execution.next?.[0]?.identifier).toBeDefined()
     })
 
+    it('sets destination in WarpActionExecutionResult from input with position destination', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: 'test data' }),
+      })
+
+      const collectWarp = {
+        ...warp,
+        chain: 'multiversx',
+        actions: [
+          {
+            type: 'collect' as const,
+            label: 'Collect Data',
+            destination: {
+              url: 'https://api.example.com/collect',
+              method: 'POST' as const,
+            },
+            inputs: [
+              {
+                name: 'destination',
+                type: 'address',
+                source: 'field' as const,
+                position: 'destination' as const,
+              },
+            ],
+          } as WarpCollectAction,
+        ],
+      }
+
+      const inputs = ['address:erd1destination123456789']
+      const result = await executor.execute(collectWarp, inputs)
+
+      expect(result.immediateExecutions).toHaveLength(1)
+      expect(result.immediateExecutions[0].destination).toBe('address:erd1destination123456789')
+      expect(handlers.onExecuted).toHaveBeenCalled()
+      const executionResult = handlers.onExecuted.mock.calls[0][0]
+      expect(executionResult.destination).toBe('address:erd1destination123456789')
+    })
+
     it('should handle unhandled collect with no output configuration', async () => {
       const unhandledWarp = {
         ...warp,

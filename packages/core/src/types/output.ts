@@ -14,6 +14,7 @@ export type WarpActionExecutionResult = {
   values: { string: string[]; native: WarpNativeValue[] }
   output: WarpExecutionOutput
   messages: WarpExecutionMessages
+  destination: string | null
 }
 
 export type WarpExecutionNextInfo = { identifier: string | null; url: string }[]
