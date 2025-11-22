@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-beta.40
+
+### Patch Changes
+
+- 0378c4e: update collect exec payloads
+- Updated dependencies [0378c4e]
+  - @vleap/warps@3.0.0-beta.157
+
 ## 0.1.0-beta.39
 
 ### Patch Changes

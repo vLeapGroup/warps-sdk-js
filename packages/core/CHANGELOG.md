@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.157
+
+### Patch Changes
+
+- 0378c4e: update collect exec payloads
+
 ## 3.0.0-beta.156
 
 ### Patch Changes

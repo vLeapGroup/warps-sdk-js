@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-beta.45
+
+### Patch Changes
+
+- 0378c4e: update collect exec payloads
+- Updated dependencies [0378c4e]
+  - @vleap/warps@3.0.0-beta.157
+
 ## 0.2.0-beta.44
 
 ### Patch Changes
