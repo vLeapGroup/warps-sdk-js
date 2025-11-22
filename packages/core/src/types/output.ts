@@ -11,7 +11,7 @@ export type WarpActionExecutionResult = {
   txHash: string | null
   tx: WarpAdapterGenericTransaction | null
   next: WarpExecutionNextInfo | null
-  values: { string: string[]; native: WarpNativeValue[] }
+  values: { string: string[]; native: WarpNativeValue[]; mapped: Record<string, any> }
   output: WarpExecutionOutput
   messages: WarpExecutionMessages
   destination: string | null

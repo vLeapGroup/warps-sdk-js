@@ -58,7 +58,7 @@ export class WarpEvmOutput implements AdapterWarpOutput {
       txHash: '',
       tx: null,
       next: null,
-      values: { string: [], native: [] },
+      values: { string: [], native: [], mapped: {} },
       output: {},
       messages: {},
       destination: null,
@@ -83,7 +83,7 @@ export class WarpEvmOutput implements AdapterWarpOutput {
       txHash: transactionHash,
       tx,
       next: null,
-      values: { string: stringValues, native: rawValues },
+      values: { string: stringValues, native: rawValues, mapped: {} },
       output: {},
       messages: {},
       destination: null,
@@ -117,7 +117,7 @@ export class WarpEvmOutput implements AdapterWarpOutput {
       txHash: transactionHash,
       tx,
       next: null,
-      values: { string: stringValues, native: rawValues },
+      values: { string: stringValues, native: rawValues, mapped: {} },
       output: {},
       messages: {},
       destination: null,
@@ -129,10 +129,10 @@ export class WarpEvmOutput implements AdapterWarpOutput {
     typedValues: unknown[],
     actionIndex: number,
     inputs: ResolvedInput[]
-  ): Promise<{ values: { string: string[]; native: WarpNativeValue[] }; output: WarpExecutionOutput }> {
+  ): Promise<{ values: { string: string[]; native: WarpNativeValue[]; mapped: Record<string, any> }; output: WarpExecutionOutput }> {
     const stringValues = typedValues.map((t) => this.serializer.typedToString(t))
     const nativeValues = typedValues.map((t) => this.serializer.typedToNative(t)[1])
-    const values = { string: stringValues, native: nativeValues }
+    const values = { string: stringValues, native: nativeValues, mapped: {} }
     let output: WarpExecutionOutput = {}
 
     if (!warp.output) return { values, output }
@@ -196,4 +196,3 @@ export class WarpEvmOutput implements AdapterWarpOutput {
     }
   }
 }
-

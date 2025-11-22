@@ -95,6 +95,7 @@ describe('WarpFastsetOutput', () => {
         values: {
           string: ['0x123456789abcdef', '12345', expect.any(String)],
           native: ['0x123456789abcdef', '12345', expect.any(String)],
+          mapped: {},
         },
         output: {},
         messages: {},

@@ -222,7 +222,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         txHash: null,
         tx: null,
         next: null,
-        values: { string: [], native: [] },
+        values: { string: [], native: [], mapped: {} },
         output: { _DATA: error },
         messages: {},
         destination,

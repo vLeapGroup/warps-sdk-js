@@ -3,6 +3,7 @@ import { ResolvedInput, TransformRunner, Warp, WarpClientConfig } from '../types
 import { WarpExecutionOutput } from '../types/output'
 import { WarpLogger } from '../WarpLogger'
 import { WarpSerializer } from '../WarpSerializer'
+import { buildMappedOutput } from './payload'
 import { getWarpActionByIndex } from './general'
 
 export const extractCollectOutput = async (
@@ -12,7 +13,7 @@ export const extractCollectOutput = async (
   inputs: ResolvedInput[],
   serializer: WarpSerializer,
   config: WarpClientConfig
-): Promise<{ values: { string: string[]; native: any[] }; output: WarpExecutionOutput }> => {
+): Promise<{ values: { string: string[]; native: any[]; mapped: Record<string, any> }; output: WarpExecutionOutput }> => {
   const stringValues: string[] = []
   const nativeValues: any[] = []
   let output: WarpExecutionOutput = {}
@@ -37,8 +38,11 @@ export const extractCollectOutput = async (
       output[outputName] = outputPath
     }
   }
+
+  const mapped = buildMappedOutput(inputs, serializer)
+
   return {
-    values: { string: stringValues, native: nativeValues },
+    values: { string: stringValues, native: nativeValues, mapped },
     output: await evaluateOutputCommon(warp, output, actionIndex, inputs, serializer, config),
   }
 }
@@ -114,4 +118,3 @@ export const parseOutputOutIndex = (outputPath: string): number | null => {
   if (outputPath.startsWith('out.') || outputPath.startsWith('event.')) return null
   return null
 }
-

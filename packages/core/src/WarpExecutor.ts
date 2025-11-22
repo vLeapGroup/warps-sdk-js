@@ -1,18 +1,16 @@
-import { safeWindow, WarpConstants } from './constants'
+import { safeWindow } from './constants'
 import { extractCollectOutput, findWarpAdapterForChain, getNextInfo, getWarpActionByIndex, isWarpActionAutoExecute } from './helpers'
 import { applyOutputToMessages } from './helpers/messages'
-import { buildNestedPayload, mergeNestedPayload } from './helpers/payload'
+import { buildMappedOutput } from './helpers/payload'
 import { createAuthHeaders, createAuthMessage } from './helpers/signing'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
 import {
   Adapter,
-  ResolvedInput,
   Warp,
   WarpActionExecutionResult,
   WarpActionIndex,
   WarpAdapterGenericTransaction,
   WarpChainAction,
-  WarpChainAssetValue,
   WarpChainInfo,
   WarpClientConfig,
   WarpCollectAction,
@@ -195,31 +193,8 @@ export class WarpExecutor {
     const wallet = getWarpWalletAddressFromConfig(this.config, executable.chain.name)
     const collectAction = getWarpActionByIndex(executable.warp, executable.action) as WarpCollectAction
 
-    const toInputPayloadValue = (resolvedInput: ResolvedInput) => {
-      if (!resolvedInput.value) return null
-      const value = this.factory.getSerializer().stringToNative(resolvedInput.value)[1]
-      if (resolvedInput.input.type === 'biguint') {
-        return (value as bigint).toString()
-      } else if (resolvedInput.input.type === 'asset') {
-        const { identifier, amount } = value as WarpChainAssetValue
-        return { identifier, amount: amount.toString() }
-      } else {
-        return value
-      }
-    }
-
-    let payload: any = {}
-    executable.resolvedInputs.forEach((resolvedInput: any) => {
-      const fieldName = resolvedInput.input.as || resolvedInput.input.name
-      const value = toInputPayloadValue(resolvedInput)
-      if (resolvedInput.input.position && resolvedInput.input.position.startsWith(WarpConstants.Position.Payload)) {
-        const nestedPayload = buildNestedPayload(resolvedInput.input.position, fieldName, value)
-        payload = mergeNestedPayload(payload, nestedPayload)
-      } else {
-        // Use flat structure when position is not set
-        payload[fieldName] = value
-      }
-    })
+    const serializer = this.factory.getSerializer()
+    const payload = buildMappedOutput(executable.resolvedInputs, serializer)
 
     if (collectAction.destination && typeof collectAction.destination === 'object' && 'url' in collectAction.destination) {
       return await this.doHttpRequest(executable, collectAction.destination, wallet, payload, extra)
@@ -230,7 +205,7 @@ export class WarpExecutor {
       payload,
       executable.action,
       executable.resolvedInputs,
-      this.factory.getSerializer(),
+      serializer,
       this.config
     )
 
@@ -305,7 +280,7 @@ export class WarpExecutor {
         txHash: null,
         tx: null,
         next: null,
-        values: { string: [], native: [] },
+        values: { string: [], native: [], mapped: {} },
         output: { _DATA: error },
         messages: {},
         destination: this.getDestinationFromResolvedInputs(executable),
@@ -314,9 +289,7 @@ export class WarpExecutor {
   }
 
   private getDestinationFromResolvedInputs(executable: WarpExecutable): string | null {
-    const destinationInput = executable.resolvedInputs.find(
-      (i) => i.input.position === 'receiver' || i.input.position === 'destination'
-    )
+    const destinationInput = executable.resolvedInputs.find((i) => i.input.position === 'receiver' || i.input.position === 'destination')
     return destinationInput?.value || executable.destination
   }
 
@@ -324,7 +297,7 @@ export class WarpExecutor {
     executable: WarpExecutable,
     wallet: string | null,
     status: 'success' | 'error' | 'unhandled',
-    values: { string: string[]; native: any[] },
+    values: { string: string[]; native: any[]; mapped: Record<string, any> },
     output: any,
     rawData?: any
   ): WarpActionExecutionResult {

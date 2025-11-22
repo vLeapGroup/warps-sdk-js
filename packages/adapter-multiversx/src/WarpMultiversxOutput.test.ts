@@ -374,7 +374,7 @@ describe('Result Helpers', () => {
 
       const { values, output } = await subject.extractContractOutput(warp, 1, tx, [])
 
-      expect(values).toEqual({ string: [], native: [] })
+      expect(values).toEqual({ string: [], native: [], mapped: {} })
       expect(output).toEqual({})
     })
 
@@ -489,7 +489,7 @@ describe('Result Helpers', () => {
       ;(tx as any).typedValues = typedValues
       const { values, output } = await subject.extractQueryOutput(warp, typedValues, 1, [])
 
-      expect(values).toEqual({ string: [], native: [] })
+      expect(values).toEqual({ string: [], native: [], mapped: {} })
       expect(output).toEqual({})
     })
   })
@@ -566,7 +566,7 @@ describe('Result Helpers', () => {
           user: testConfig.user?.wallets?.MULTIVERSX || null,
           txHash: '',
           next: null,
-          values: { string: [], native: [] },
+          values: { string: [], native: [], mapped: {} },
           output: {
             USER_ID: '12345',
             USERNAME: 'testuser',
@@ -584,7 +584,7 @@ describe('Result Helpers', () => {
           user: testConfig.user?.wallets?.MULTIVERSX || null,
           txHash: '',
           next: null,
-          values: { string: [], native: [] },
+          values: { string: [], native: [], mapped: {} },
           output: {},
           messages: {},
         }),
@@ -695,7 +695,7 @@ describe('Result Helpers', () => {
           user: testConfig.user?.wallets?.MULTIVERSX || null,
           txHash: '',
           next: null,
-          values: { string: [], native: [] },
+          values: { string: [], native: [], mapped: {} },
           output: {
             USER_ID: '12345',
             USERNAME: 'testuser',
@@ -713,7 +713,7 @@ describe('Result Helpers', () => {
           user: testConfig.user?.wallets?.MULTIVERSX || null,
           txHash: '',
           next: null,
-          values: { string: [], native: [] },
+          values: { string: [], native: [], mapped: {} },
           output: {},
           messages: {},
         }),

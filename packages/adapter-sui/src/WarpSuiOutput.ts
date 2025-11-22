@@ -60,12 +60,12 @@ export class WarpSuiOutput implements AdapterWarpOutput {
     actionIndex: WarpActionIndex,
     tx: any,
     inputs: ResolvedInput[]
-  ): Promise<{ values: { string: string[]; native: any[] }; output: WarpExecutionOutput }> {
+  ): Promise<{ values: { string: string[]; native: any[]; mapped: Record<string, any> }; output: WarpExecutionOutput }> {
     // SUI: extract results from tx effects or return values
     let stringValues: string[] = []
     let nativeValues: any[] = []
     let output: WarpExecutionOutput = {}
-    if (!warp.output) return { values: { string: stringValues, native: nativeValues }, output }
+    if (!warp.output) return { values: { string: stringValues, native: nativeValues, mapped: {} }, output }
     for (const [resultName, resultPath] of Object.entries(warp.output)) {
       if (resultPath.startsWith(WarpConstants.Transform.Prefix)) continue
       if (resultPath.startsWith('input.')) {
@@ -89,7 +89,7 @@ export class WarpSuiOutput implements AdapterWarpOutput {
       }
     }
     return {
-      values: { string: stringValues, native: nativeValues },
+      values: { string: stringValues, native: nativeValues, mapped: {} },
       output: await evaluateOutputCommon(warp, output, actionIndex, inputs, this.serializer.coreSerializer, this.config),
     }
   }
@@ -99,11 +99,11 @@ export class WarpSuiOutput implements AdapterWarpOutput {
     typedValues: any[],
     actionIndex: number,
     inputs: ResolvedInput[]
-  ): Promise<{ values: { string: string[]; native: any[] }; output: WarpExecutionOutput }> {
+  ): Promise<{ values: { string: string[]; native: any[]; mapped: Record<string, any> }; output: WarpExecutionOutput }> {
     // SUI: typedValues are direct query results
     const stringValues = typedValues.map((native) => String(native))
     const nativeValues = typedValues
-    const values = { string: stringValues, native: nativeValues }
+    const values = { string: stringValues, native: nativeValues, mapped: {} }
     let output: WarpExecutionOutput = {}
     if (!warp.output) return { values, output }
     for (const [key, path] of Object.entries(warp.output)) {

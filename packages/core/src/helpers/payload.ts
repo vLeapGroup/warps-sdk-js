@@ -1,4 +1,6 @@
 import { WarpConstants } from '../constants'
+import { ResolvedInput, WarpChainAssetValue } from '../types'
+import { WarpSerializer } from '../WarpSerializer'
 
 /**
  * Builds a nested payload object from a position string and field value.
@@ -41,4 +43,47 @@ export function mergeNestedPayload(target: any, source: any): any {
   })
 
   return result
+}
+
+/**
+ * Converts a resolved input to a payload value, handling special types like biguint and asset.
+ *
+ * @param resolvedInput - The resolved input to convert
+ * @param serializer - The serializer to use for conversion
+ * @returns The converted value, or null if the input has no value
+ */
+export function toInputPayloadValue(resolvedInput: ResolvedInput, serializer: WarpSerializer): any {
+  if (!resolvedInput.value) return null
+  const value = serializer.stringToNative(resolvedInput.value)[1]
+  if (resolvedInput.input.type === 'biguint') {
+    return (value as bigint).toString()
+  } else if (resolvedInput.input.type === 'asset') {
+    const { identifier, amount } = value as WarpChainAssetValue
+    return { identifier, amount: amount.toString() }
+  } else {
+    return value
+  }
+}
+
+/**
+ * Builds a mapped output object from resolved inputs, using input name or "as" property as key.
+ * This is the same structure as the payload, but used for output mapping.
+ *
+ * @param inputs - The resolved inputs to build the mapped output from
+ * @param serializer - The serializer to use for value conversion
+ * @returns A mapped object with input names/aliases as keys and converted values
+ */
+export function buildMappedOutput(inputs: ResolvedInput[], serializer: WarpSerializer): Record<string, any> {
+  let mapped: Record<string, any> = {}
+  inputs.forEach((resolvedInput) => {
+    const fieldName = resolvedInput.input.as || resolvedInput.input.name
+    const value = toInputPayloadValue(resolvedInput, serializer)
+    if (resolvedInput.input.position && resolvedInput.input.position.startsWith(WarpConstants.Position.Payload)) {
+      const nestedPayload = buildNestedPayload(resolvedInput.input.position, fieldName, value)
+      mapped = mergeNestedPayload(mapped, nestedPayload)
+    } else {
+      mapped[fieldName] = value
+    }
+  })
+  return mapped
 }

@@ -102,7 +102,7 @@ describe('extractCollectOutput', () => {
 
     const { values, output } = await extractCollectOutput(warp, response, 1, [], new WarpSerializer(), testConfig)
 
-    expect(values).toEqual({ string: [], native: [] })
+    expect(values).toEqual({ string: [], native: [], mapped: {} })
     expect(output).toEqual({})
   })
 
@@ -204,6 +204,189 @@ describe('extractCollectOutput', () => {
       expect(output.USERS_FROM_ACTION1).toBeNull()
       expect(output.BALANCE_FROM_ACTION2).toBeNull()
       expect(output.CURRENT_ACTION_DATA).toBe('current-action-data')
+    })
+  })
+
+  describe('extractCollectOutput mapped field', () => {
+    it('maps inputs by name when no inputs provided', async () => {
+      const warp = {
+        protocol: 'test',
+        name: 'test',
+        title: 'test',
+        description: 'test',
+        actions: [],
+      } as Warp
+      const response = {}
+
+      const { values } = await extractCollectOutput(warp, response, 1, [], new WarpSerializer(), testConfig)
+
+      expect(values.mapped).toEqual({})
+    })
+
+    it('maps inputs by name', async () => {
+      const warp = {
+        protocol: 'test',
+        name: 'test',
+        title: 'test',
+        description: 'test',
+        actions: [
+          {
+            type: 'collect',
+            inputs: [
+              { name: 'amount', type: 'string', source: 'field' },
+              { name: 'recipient', type: 'address', source: 'field' },
+            ],
+          },
+        ],
+      } as any
+      const response = {}
+      const inputs = [
+        { input: warp.actions[0].inputs[0], value: 'string:100' },
+        { input: warp.actions[0].inputs[1], value: 'address:0x123' },
+      ]
+
+      const { values } = await extractCollectOutput(warp, response, 1, inputs, new WarpSerializer(), testConfig)
+
+      expect(values.mapped).toEqual({
+        amount: '100',
+        recipient: '0x123',
+      })
+    })
+
+    it('maps inputs by "as" alias when provided', async () => {
+      const warp = {
+        protocol: 'test',
+        name: 'test',
+        title: 'test',
+        description: 'test',
+        actions: [
+          {
+            type: 'collect',
+            inputs: [{ name: 'amount', as: 'AMOUNT', type: 'string', source: 'field' }],
+          },
+        ],
+      } as any
+      const response = {}
+      const inputs = [{ input: warp.actions[0].inputs[0], value: 'string:500' }]
+
+      const { values } = await extractCollectOutput(warp, response, 1, inputs, new WarpSerializer(), testConfig)
+
+      expect(values.mapped).toEqual({
+        AMOUNT: '500',
+      })
+    })
+
+    it('handles nested payload structures', async () => {
+      const warp = {
+        protocol: 'test',
+        name: 'test',
+        title: 'test',
+        description: 'test',
+        actions: [
+          {
+            type: 'collect',
+            inputs: [
+              { name: 'email', type: 'string', source: 'field', position: 'payload:data.customer' },
+              { name: 'name', type: 'string', source: 'field', position: 'payload:data.customer' },
+            ],
+          },
+        ],
+      } as any
+      const response = {}
+      const inputs = [
+        { input: warp.actions[0].inputs[0], value: 'string:test@example.com' },
+        { input: warp.actions[0].inputs[1], value: 'string:John Doe' },
+      ]
+
+      const { values } = await extractCollectOutput(warp, response, 1, inputs, new WarpSerializer(), testConfig)
+
+      expect(values.mapped).toEqual({
+        data: {
+          customer: {
+            email: 'test@example.com',
+            name: 'John Doe',
+          },
+        },
+      })
+    })
+
+    it('handles biguint type conversion', async () => {
+      const warp = {
+        protocol: 'test',
+        name: 'test',
+        title: 'test',
+        description: 'test',
+        actions: [
+          {
+            type: 'collect',
+            inputs: [{ name: 'amount', type: 'biguint', source: 'field' }],
+          },
+        ],
+      } as any
+      const response = {}
+      const inputs = [{ input: warp.actions[0].inputs[0], value: 'biguint:1000000000000000000' }]
+
+      const { values } = await extractCollectOutput(warp, response, 1, inputs, new WarpSerializer(), testConfig)
+
+      expect(values.mapped).toEqual({
+        amount: '1000000000000000000',
+      })
+    })
+
+    it('handles asset type conversion', async () => {
+      const warp = {
+        protocol: 'test',
+        name: 'test',
+        title: 'test',
+        description: 'test',
+        actions: [
+          {
+            type: 'collect',
+            inputs: [{ name: 'token', type: 'asset', source: 'field' }],
+          },
+        ],
+      } as any
+      const response = {}
+      const inputs = [{ input: warp.actions[0].inputs[0], value: 'asset:EGLD|1000000000000000000' }]
+
+      const { values } = await extractCollectOutput(warp, response, 1, inputs, new WarpSerializer(), testConfig)
+
+      expect(values.mapped).toEqual({
+        token: {
+          identifier: 'EGLD',
+          amount: '1000000000000000000',
+        },
+      })
+    })
+
+    it('handles null input values', async () => {
+      const warp = {
+        protocol: 'test',
+        name: 'test',
+        title: 'test',
+        description: 'test',
+        actions: [
+          {
+            type: 'collect',
+            inputs: [
+              { name: 'amount', type: 'string', source: 'field' },
+              { name: 'optional', type: 'string', source: 'field' },
+            ],
+          },
+        ],
+      } as any
+      const response = {}
+      const inputs = [
+        { input: warp.actions[0].inputs[0], value: 'string:100' },
+        { input: warp.actions[0].inputs[1], value: null },
+      ]
+
+      const { values } = await extractCollectOutput(warp, response, 1, inputs, new WarpSerializer(), testConfig)
+
+      expect(values.mapped).toEqual({
+        amount: '100',
+        optional: null,
+      })
     })
   })
 })

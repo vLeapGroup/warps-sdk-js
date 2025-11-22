@@ -77,13 +77,13 @@ export class WarpMultiversxOutput implements AdapterWarpOutput {
     actionIndex: WarpActionIndex,
     tx: TransactionOnNetwork,
     inputs: ResolvedInput[]
-  ): Promise<{ values: { string: string[]; native: any[] }; output: WarpExecutionOutput }> {
+  ): Promise<{ values: { string: string[]; native: any[]; mapped: Record<string, any> }; output: WarpExecutionOutput }> {
     const action = getWarpActionByIndex(warp, actionIndex) as WarpContractAction
     let stringValues: string[] = []
     let nativeValues: any[] = []
     let output: WarpExecutionOutput = {}
     if (!warp.output || action.type !== 'contract') {
-      return { values: { string: stringValues, native: nativeValues }, output }
+      return { values: { string: stringValues, native: nativeValues, mapped: {} }, output }
     }
     const needsAbi = Object.values(warp.output).some((resultPath) => resultPath.includes('out') || resultPath.includes('event'))
     if (!needsAbi) {
@@ -91,7 +91,7 @@ export class WarpMultiversxOutput implements AdapterWarpOutput {
         output[resultName] = resultPath
       }
       return {
-        values: { string: stringValues, native: nativeValues },
+        values: { string: stringValues, native: nativeValues, mapped: {} },
         output: await evaluateOutputCommon(warp, output, actionIndex, inputs, this.serializer.coreSerializer, this.config),
       }
     }
@@ -138,7 +138,7 @@ export class WarpMultiversxOutput implements AdapterWarpOutput {
       }
     }
     return {
-      values: { string: stringValues, native: nativeValues },
+      values: { string: stringValues, native: nativeValues, mapped: {} },
       output: await evaluateOutputCommon(warp, output, actionIndex, inputs, this.serializer.coreSerializer, this.config),
     }
   }
@@ -148,10 +148,10 @@ export class WarpMultiversxOutput implements AdapterWarpOutput {
     typedValues: TypedValue[],
     actionIndex: number,
     inputs: ResolvedInput[]
-  ): Promise<{ values: { string: string[]; native: any[] }; output: WarpExecutionOutput }> {
+  ): Promise<{ values: { string: string[]; native: any[]; mapped: Record<string, any> }; output: WarpExecutionOutput }> {
     const stringValues = typedValues.map((t) => this.serializer.typedToString(t))
     const nativeValues = typedValues.map((t) => this.serializer.typedToNative(t)[1])
-    const values = { string: stringValues, native: nativeValues }
+    const values = { string: stringValues, native: nativeValues, mapped: {} }
     let output: WarpExecutionOutput = {}
     if (!warp.output) return { values, output }
     const getNestedValue = (path: string): unknown => {
