@@ -59,7 +59,7 @@ export class WarpFactory {
     const chain = await this.getChainInfoForWarp(warp, inputs)
     const adapter = findWarpAdapterForChain(chain.name, this.adapters)
     const interpolator = new WarpInterpolator(this.config, adapter)
-    const preparedWarp = await interpolator.apply(this.config, warp, meta)
+    const preparedWarp = await interpolator.apply(warp, meta)
     const preparedAction = getWarpActionByIndex(preparedWarp, actionIndex) as WarpTransferAction | WarpContractAction | WarpCollectAction
 
     const { action: primaryAction, index: primaryIndex } = getWarpPrimaryAction(preparedWarp)

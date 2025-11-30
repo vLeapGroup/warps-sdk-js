@@ -67,7 +67,7 @@ describe('WarpInterpolator', () => {
     it('interpolates basic warp', async () => {
       const warp = createMockWarp()
       const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
-      const result = await interpolator.apply(testConfig, warp)
+      const result = await interpolator.apply(warp)
       expect(result).toBeDefined()
     })
 
@@ -89,7 +89,7 @@ describe('WarpInterpolator', () => {
         ],
       }
       const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
-      const result = await interpolator.apply(testConfig, warp)
+      const result = await interpolator.apply(warp)
       expect((result.actions[0] as WarpTransferAction).address).toBe('erd1...')
       expect((result.actions[0] as WarpTransferAction).value).toBe('1000')
     })
@@ -133,7 +133,7 @@ describe('WarpInterpolator', () => {
       }
 
       const interpolator = new WarpInterpolator(testConfig, mockRepository)
-      const result = await interpolator.apply(testConfig, warp)
+      const result = await interpolator.apply(warp)
 
       expect((result.actions[0] as WarpTransferAction).address).toBe('erd...')
       expect((result.actions[1] as WarpTransferAction).address).toBe('erd...')
@@ -155,7 +155,7 @@ describe('WarpInterpolator', () => {
       }
 
       const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
-      const result = await interpolator.apply(testConfig, warp)
+      const result = await interpolator.apply(warp)
       expect(result).toBeDefined()
     })
 
@@ -184,7 +184,7 @@ describe('WarpInterpolator', () => {
       }
 
       const interpolator = new WarpInterpolator(configWithSecrets, createMockAdapter())
-      const result = await interpolator.apply(configWithSecrets, warp)
+      const result = await interpolator.apply(warp)
       expect((result.actions[0] as WarpTransferAction).value).toBe('secret-api-key-123')
     })
 
@@ -210,7 +210,7 @@ describe('WarpInterpolator', () => {
       }
 
       const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
-      const result = await interpolator.apply(testConfig, warp, { envs: secrets })
+      const result = await interpolator.apply(warp, { envs: secrets })
       expect((result.actions[0] as WarpTransferAction).value).toBe('secret-api-key-from-secrets-456')
     })
 
@@ -239,7 +239,7 @@ describe('WarpInterpolator', () => {
       }
 
       const interpolator = new WarpInterpolator(configWithSecrets, createMockAdapter())
-      const result = await interpolator.apply(configWithSecrets, warp)
+      const result = await interpolator.apply(warp)
       expect((result.actions[0] as WarpTransferAction).value).toBe('simple-api-key-789')
     })
 
@@ -268,7 +268,7 @@ describe('WarpInterpolator', () => {
       }
 
       const interpolator = new WarpInterpolator(configWithSecrets, createMockAdapter())
-      const result = await interpolator.apply(configWithSecrets, warp)
+      const result = await interpolator.apply(warp)
       expect((result.actions[0] as WarpTransferAction).value).toBe('multi-pipe-api-key')
     })
 
@@ -297,7 +297,7 @@ describe('WarpInterpolator', () => {
       }
 
       const interpolator = new WarpInterpolator(configWithSecrets, createMockAdapter())
-      const result = await interpolator.apply(configWithSecrets, warp)
+      const result = await interpolator.apply(warp)
       expect((result.actions[0] as WarpTransferAction).value).toBe('empty-desc-api-key')
     })
   })
@@ -329,7 +329,7 @@ describe('WarpInterpolator', () => {
       }
 
       const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
-      const result = await interpolator.apply(testConfig, warp, meta)
+      const result = await interpolator.apply(warp, meta)
       expect((result.actions[0] as WarpTransferAction).value).toBe('0x1234567890abcdef')
     })
 
@@ -362,7 +362,7 @@ describe('WarpInterpolator', () => {
       }
 
       const interpolator = new WarpInterpolator(configWithUrl, createMockAdapter())
-      const result = await interpolator.apply(configWithUrl, warp, meta)
+      const result = await interpolator.apply(warp, meta)
       expect((result.actions[0] as WarpTransferAction).value).toBe('meta-token-value')
     })
 
@@ -389,7 +389,7 @@ describe('WarpInterpolator', () => {
       }
 
       const interpolator = new WarpInterpolator(configWithUrl, createMockAdapter())
-      const result = await interpolator.apply(configWithUrl, warp)
+      const result = await interpolator.apply(warp)
       expect((result.actions[0] as WarpTransferAction).value).toBe('url-token-value')
     })
 
@@ -417,7 +417,7 @@ describe('WarpInterpolator', () => {
       }
 
       const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
-      const result = await interpolator.apply(testConfig, warp, meta)
+      const result = await interpolator.apply(warp, meta)
       expect((result.actions[0] as WarpTransferAction).value).toBe('{{TOKEN_ADDRESS}}')
     })
 
@@ -445,7 +445,7 @@ describe('WarpInterpolator', () => {
       }
 
       const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
-      const result = await interpolator.apply(testConfig, warp, meta)
+      const result = await interpolator.apply(warp, meta)
       expect((result.actions[0] as WarpTransferAction).value).toBe('0x1234567890abcdef')
     })
   })
@@ -495,7 +495,7 @@ describe('WarpInterpolator per-action chain info', () => {
     }
 
     const interpolator = new WarpInterpolator(testConfig, mockRepository)
-    const result = await interpolator.apply(testConfig, warp)
+    const result = await interpolator.apply(warp)
 
     expect((result.actions[0] as WarpTransferAction).address).toBe('erd...')
     expect((result.actions[1] as WarpTransferAction).address).toBe('erd...')

@@ -10,27 +10,23 @@ export class WarpInterpolator {
     private adapter: Adapter
   ) {}
 
-  async apply(
-    config: WarpClientConfig,
-    warp: Warp,
-    meta: { envs?: Record<string, any>; queries?: Record<string, any> } = {}
-  ): Promise<Warp> {
-    const modifiable = this.applyVars(config, warp, meta)
-    return await this.applyGlobals(config, modifiable)
+  async apply(warp: Warp, meta: { envs?: Record<string, any>; queries?: Record<string, any> } = {}): Promise<Warp> {
+    const modifiable = this.applyVars(warp, meta)
+    return await this.applyGlobals(modifiable)
   }
 
-  async applyGlobals(config: WarpClientConfig, warp: Warp): Promise<Warp> {
+  async applyGlobals(warp: Warp): Promise<Warp> {
     let modifiable = { ...warp }
-    modifiable.actions = await Promise.all(modifiable.actions.map(async (action) => await this.applyActionGlobals(action)))
+    modifiable.actions = await Promise.all((modifiable.actions || []).map(async (action) => await this.applyActionGlobals(action)))
 
-    modifiable = await this.applyRootGlobals(modifiable, config)
+    modifiable = await this.applyRootGlobals(modifiable)
 
     return modifiable
   }
 
-  applyVars(config: WarpClientConfig, warp: Warp, meta: { envs?: Record<string, any>; queries?: Record<string, any> } = {}): Warp {
+  applyVars(warp: Warp, meta: { envs?: Record<string, any>; queries?: Record<string, any> } = {}): Warp {
     if (!warp?.vars) return warp
-    const wallet = getWarpWalletAddressFromConfig(config, this.adapter.chainInfo.name)
+    const wallet = getWarpWalletAddressFromConfig(this.config, this.adapter.chainInfo.name)
     let modifiable = JSON.stringify(warp)
 
     const modify = (placeholder: string, value: string | number) => {
@@ -43,14 +39,14 @@ export class WarpInterpolator {
       } else if (value.startsWith(WarpConstants.Vars.Query + WarpConstants.ArgParamsSeparator)) {
         const queryVar = value.slice(WarpConstants.Vars.Query.length + 1)
         const [queryName, _queryDescription] = queryVar.split(WarpConstants.ArgCompositeSeparator)
-        const queryValueInUrl = config.currentUrl ? new URLSearchParams(config.currentUrl.split('?')[1]).get(queryName) : null
+        const queryValueInUrl = this.config.currentUrl ? new URLSearchParams(this.config.currentUrl.split('?')[1]).get(queryName) : null
         const queryValueInMeta = meta.queries?.[queryName] || null
         const queryValue = queryValueInMeta || queryValueInUrl
         if (queryValue) modify(placeholder, queryValue)
       } else if (value.startsWith(WarpConstants.Vars.Env + WarpConstants.ArgParamsSeparator)) {
         const envVar = value.slice(WarpConstants.Vars.Env.length + 1)
         const [envVarName, _envVarDescription] = envVar.split(WarpConstants.ArgCompositeSeparator)
-        const combinedEnvs = { ...config.vars, ...meta.envs }
+        const combinedEnvs = { ...this.config.vars, ...meta.envs }
         const envVarValue = combinedEnvs?.[envVarName]
         if (envVarValue) modify(placeholder, envVarValue)
       } else if (value === WarpConstants.Source.UserWallet && wallet) {
@@ -63,11 +59,11 @@ export class WarpInterpolator {
     return JSON.parse(modifiable)
   }
 
-  private async applyRootGlobals(warp: Warp, config: WarpClientConfig): Promise<Warp> {
+  private async applyRootGlobals(warp: Warp): Promise<Warp> {
     let modifiable = JSON.stringify(warp)
 
     const rootBag: InterpolationBag = {
-      config,
+      config: this.config,
       adapter: this.adapter,
     }
 
