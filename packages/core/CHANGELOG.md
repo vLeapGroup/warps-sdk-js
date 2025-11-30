@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.160
+
+### Minor Changes
+
+- 62f31d0: add asset object positions + nested primary references
+
+### Patch Changes
+
+- e13b84e: expose resolved inputs
+
 ## 3.0.0-beta.159
 
 ### Minor Changes
