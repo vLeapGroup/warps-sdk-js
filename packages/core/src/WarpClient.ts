@@ -65,6 +65,7 @@ export class WarpClient {
     chain: WarpChainInfo | null
     immediateExecutions: WarpActionExecutionResult[]
     evaluateOutput: (remoteTxs: WarpAdapterGenericRemoteTransaction[]) => Promise<void>
+    resolvedInputs: string[]
   }> {
     const isWarp = typeof warpOrIdentifierOrUrl === 'object'
     const isUrl = !isWarp && warpOrIdentifierOrUrl.startsWith('http') && warpOrIdentifierOrUrl.endsWith('.json')
@@ -84,7 +85,7 @@ export class WarpClient {
     if (!warp) throw new Error('Warp not found')
 
     const executor = this.createExecutor(handlers)
-    const { txs, chain, immediateExecutions } = await executor.execute(warp, inputs, {
+    const { txs, chain, immediateExecutions, resolvedInputs } = await executor.execute(warp, inputs, {
       queries: params.queries,
     })
 
@@ -92,7 +93,7 @@ export class WarpClient {
       await executor.evaluateOutput(warp, actions)
     }
 
-    return { txs, chain, immediateExecutions, evaluateOutput }
+    return { txs, chain, immediateExecutions, evaluateOutput, resolvedInputs }
   }
 
   async createInscriptionTransaction(chain: WarpChain, warp: Warp): Promise<WarpAdapterGenericTransaction> {

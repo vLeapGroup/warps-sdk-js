@@ -1,5 +1,5 @@
 import { safeWindow } from './constants'
-import { extractCollectOutput, findWarpAdapterForChain, getNextInfo, getWarpActionByIndex, isWarpActionAutoExecute } from './helpers'
+import { extractCollectOutput, findWarpAdapterForChain, getNextInfo, getWarpActionByIndex, getWarpPrimaryAction, isWarpActionAutoExecute } from './helpers'
 import { applyOutputToMessages } from './helpers/messages'
 import { buildMappedOutput } from './helpers/payload'
 import { createAuthHeaders, createAuthMessage } from './helpers/signing'
@@ -60,18 +60,27 @@ export class WarpExecutor {
     txs: WarpAdapterGenericTransaction[]
     chain: WarpChainInfo | null
     immediateExecutions: WarpActionExecutionResult[]
+    resolvedInputs: string[]
   }> {
     let txs: WarpAdapterGenericTransaction[] = []
     let chainInfo: WarpChainInfo | null = null
     let immediateExecutions: WarpActionExecutionResult[] = []
+    let resolvedInputs: string[] = []
+
+    const { action: primaryAction, index: primaryIndex } = getWarpPrimaryAction(warp)
 
     for (let index = 1; index <= warp.actions.length; index++) {
       const action = getWarpActionByIndex(warp, index)
       if (!isWarpActionAutoExecute(action, warp)) continue
-      const { tx, chain, immediateExecution } = await this.executeAction(warp, index, inputs, meta)
+      const { tx, chain, immediateExecution, executable } = await this.executeAction(warp, index, inputs, meta)
       if (tx) txs.push(tx)
       if (chain) chainInfo = chain
       if (immediateExecution) immediateExecutions.push(immediateExecution)
+
+      // Extract resolved inputs from primary action's executable
+      if (executable && index === primaryIndex + 1 && executable.resolvedInputs) {
+        resolvedInputs = executable.resolvedInputs.map((ri) => ri.value || '').filter((v) => v !== '')
+      }
     }
 
     if (!chainInfo && txs.length > 0) throw new Error(`WarpExecutor: Chain not found for ${txs.length} transactions`)
@@ -83,7 +92,7 @@ export class WarpExecutor {
       await this.callHandler(() => this.handlers?.onExecuted?.(lastImmediateExecution))
     }
 
-    return { txs, chain: chainInfo, immediateExecutions }
+    return { txs, chain: chainInfo, immediateExecutions, resolvedInputs }
   }
 
   async executeAction(
@@ -95,6 +104,7 @@ export class WarpExecutor {
     tx: WarpAdapterGenericTransaction | null
     chain: WarpChainInfo | null
     immediateExecution: WarpActionExecutionResult | null
+    executable: WarpExecutable | null
   }> {
     const action = getWarpActionByIndex(warp, actionIndex)
 
@@ -108,7 +118,7 @@ export class WarpExecutor {
         }
       })
 
-      return { tx: null, chain: null, immediateExecution: null }
+      return { tx: null, chain: null, immediateExecution: null, executable: null }
     }
 
     const executable = await this.factory.createExecutable(warp, actionIndex, inputs, meta)
@@ -117,14 +127,14 @@ export class WarpExecutor {
       const result = await this.executeCollect(executable)
       if (result.status === 'success') {
         await this.callHandler(() => this.handlers?.onActionExecuted?.({ action: actionIndex, chain: null, execution: result, tx: null }))
-        return { tx: null, chain: null, immediateExecution: result }
+        return { tx: null, chain: null, immediateExecution: result, executable }
       } else if (result.status === 'unhandled') {
         await this.callHandler(() => this.handlers?.onActionUnhandled?.({ action: actionIndex, chain: null, execution: result, tx: null }))
-        return { tx: null, chain: null, immediateExecution: result }
+        return { tx: null, chain: null, immediateExecution: result, executable }
       } else {
         this.handlers?.onError?.({ message: JSON.stringify(result.values) })
       }
-      return { tx: null, chain: null, immediateExecution: null }
+      return { tx: null, chain: null, immediateExecution: null, executable }
     }
 
     const adapter = findWarpAdapterForChain(executable.chain.name, this.adapters)
@@ -138,12 +148,12 @@ export class WarpExecutor {
       } else {
         this.handlers?.onError?.({ message: JSON.stringify(result.values) })
       }
-      return { tx: null, chain: executable.chain, immediateExecution: result }
+      return { tx: null, chain: executable.chain, immediateExecution: result, executable }
     }
 
     const tx = await adapter.executor.createTransaction(executable)
 
-    return { tx, chain: executable.chain, immediateExecution: null }
+    return { tx, chain: executable.chain, immediateExecution: null, executable }
   }
 
   async evaluateOutput(warp: Warp, actions: WarpChainAction[]): Promise<void> {
