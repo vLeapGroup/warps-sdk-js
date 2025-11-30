@@ -21,10 +21,18 @@ export const EthereumSepoliaTokens: WarpChainAsset[] = [
   },
   {
     chain: EthereumChain,
-    identifier: '0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9',
+    identifier: '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14',
     name: 'Wrapped Ether',
     symbol: 'WETH',
     decimals: 18,
     logoUrl: 'https://assets.coingecko.com/coins/images/2518/small/weth.png',
+  },
+  {
+    chain: EthereumChain,
+    identifier: '0xC6d2Bd6437655FBc6689Bfc987E09846aC4367Ed',
+    name: 'Wrapped SET',
+    symbol: 'WSET',
+    decimals: 18,
+    logoUrl: 'https://vleap.ai/images/tokens/set.svg',
   },
 ]

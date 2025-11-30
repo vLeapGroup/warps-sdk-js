@@ -1,5 +1,6 @@
 import { WarpChain, WarpChainAsset, WarpChainEnv } from '@vleap/warps'
 import { ArbitrumTokens } from './tokens/arbitrum'
+import { ArbitrumSepoliaTokens } from './tokens/arbitrum-sepolia'
 import { BaseTokens } from './tokens/base'
 import { BaseSepoliaTokens } from './tokens/base-sepolia'
 import { EthereumTokens } from './tokens/ethereum'
@@ -18,6 +19,8 @@ export const KnownTokens: Record<WarpChain, Record<string, WarpChainAsset[]>> = 
   },
   arbitrum: {
     mainnet: ArbitrumTokens,
+    testnet: ArbitrumSepoliaTokens,
+    devnet: ArbitrumSepoliaTokens,
   },
 }
 
