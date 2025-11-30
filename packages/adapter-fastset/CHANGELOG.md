@@ -1,5 +1,17 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-beta.42
+
+### Minor Changes
+
+- 6a4249c: add wallet public key method
+
+### Patch Changes
+
+- Updated dependencies [6a4249c]
+- Updated dependencies [7173aa3]
+  - @vleap/warps@3.0.0-beta.159
+
 ## 0.1.0-beta.41
 
 ### Patch Changes

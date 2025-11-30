@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.159
+
+### Minor Changes
+
+- 6a4249c: add wallet public key method
+
+### Patch Changes
+
+- 7173aa3: add wallet pub key global
+
 ## 3.0.0-beta.158
 
 ### Minor Changes
