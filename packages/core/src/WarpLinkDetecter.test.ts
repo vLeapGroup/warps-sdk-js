@@ -267,4 +267,40 @@ describe('WarpLinkDetecter', () => {
     expect(mockBuilder.createFromTransactionHash).toHaveBeenCalledWith(hash64, undefined)
     expect(result.warp?.meta?.query).toBeNull()
   })
+
+  it('returns warp chain when warp has different chain than storage chain', async () => {
+    const ethereumAdapter = {
+      ...createMockAdapter(),
+      chainInfo: {
+        name: 'ethereum',
+        displayName: 'Ethereum',
+        chainId: '1',
+        blockTime: 12000,
+        addressHrp: '0x',
+        defaultApiUrl: 'https://eth-mainnet.g.alchemy.com/v2',
+        explorerUrl: 'https://etherscan.io',
+        nativeToken: {
+          chain: 'ethereum',
+          identifier: 'ETH',
+          name: 'Ethereum',
+          symbol: 'ETH',
+          decimals: 18,
+          logoUrl: 'https://example.com/eth-logo.png',
+        },
+      },
+    }
+
+    const warpWithEthereumChain = {
+      ...mockWarp,
+      chain: 'ethereum',
+    }
+
+    mockBuilder.createFromTransactionHash = jest.fn().mockResolvedValue(warpWithEthereumChain)
+    const link = new WarpLinkDetecter(Config, [mockAdapter, ethereumAdapter] as any)
+    const result = await link.detect('https://anyclient.com?warp=multiversx:hash:123')
+
+    expect(result.match).toBe(true)
+    expect(result.chain).toBe('ethereum')
+    expect(result.warp).toBeDefined()
+  })
 })

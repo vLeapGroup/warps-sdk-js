@@ -8,7 +8,6 @@ import {
   getWarpInfoFromIdentifier,
 } from './helpers'
 import { Adapter, Warp, WarpBrand, WarpCacheConfig, WarpChain, WarpClientConfig, WarpRegistryInfo } from './types'
-import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
 
 export type DetectionResult = {
@@ -97,11 +96,13 @@ export class WarpLinkDetecter {
         warp.meta.query = queryString
       }
 
-      const preparedWarp = warp ? await new WarpInterpolator(this.config, adapter).apply(this.config, warp) : null
+      if (!warp) {
+        return emptyResult
+      }
 
-      return preparedWarp
-        ? { match: true, url: urlOrId, warp: preparedWarp, chain: adapter.chainInfo.name, registryInfo, brand }
-        : emptyResult
+      const warpChain = warp.chain || adapter.chainInfo.name
+
+      return { match: true, url: urlOrId, warp, chain: warpChain, registryInfo, brand }
     } catch (e) {
       WarpLogger.error('Error detecting warp link', e)
       return emptyResult
