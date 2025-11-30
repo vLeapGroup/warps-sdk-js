@@ -250,19 +250,19 @@ export class WarpFactory {
 
   /**
    * Builds a context object containing all previous evaluated inputs for use in transform modifiers.
-   * 
+   *
    * The context object provides access to inputs by their `as` field (if present) or `name` field.
    * For asset-type inputs, additional properties are available:
    * - `{key}` - The full asset object with `identifier` and `amount` properties
    * - `{key}.token` - The asset identifier as a string
    * - `{key}.amount` - The asset amount as a string
    * - `{key}.identifier` - Alias for `{key}.token`
-   * 
+   *
    * @example
    * // Given inputs:
    * // - { name: 'Asset', as: 'asset', type: 'asset', value: 'asset:ETH|1000000000000000000' }
    * // - { name: 'Amount', type: 'uint256', value: 'uint256:500' }
-   * 
+   *
    * // The context will be:
    * {
    *   asset: { identifier: 'ETH', amount: 1000000000000000000n },
@@ -271,10 +271,10 @@ export class WarpFactory {
    *   'asset.identifier': 'ETH',
    *   Amount: 500n
    * }
-   * 
+   *
    * // Usage in transform modifier:
    * // "modifier": "transform:(inputs) => inputs.asset?.identifier === 'ETH' ? {...} : inputs.asset"
-   * 
+   *
    * @param inputs - Array of all resolved inputs
    * @param currentIndex - Index of the current input being processed
    * @param currentInput - The current input being transformed (optional, included in context)
