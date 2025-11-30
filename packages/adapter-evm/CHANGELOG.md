@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-beta.48
+
+### Patch Changes
+
+- 9d28cff: update wallet pub key fns
+
 ## 0.2.0-beta.47
 
 ### Minor Changes

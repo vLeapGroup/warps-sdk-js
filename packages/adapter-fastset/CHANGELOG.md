@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-beta.43
+
+### Patch Changes
+
+- 9d28cff: update wallet pub key fns
+
 ## 0.1.0-beta.42
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-beta.81
+
+### Patch Changes
+
+- 9d28cff: update wallet pub key fns
+
 ## 0.2.0-beta.80
 
 ### Minor Changes
