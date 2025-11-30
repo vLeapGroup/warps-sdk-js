@@ -3,7 +3,7 @@ import { WarpChainAsset } from '@vleap/warps'
 export const FastsetTokens: WarpChainAsset[] = [
   {
     chain: 'fastset',
-    identifier: '08413efc81f99e5b8e03b852b3756674083110c6b65e6b7836b39a26e3908d3c',
+    identifier: '0x37bb8861c49c6f59d869634557245b8640c2de6a2d3dffd6ad4065f6f67989f1',
     name: 'Ethereum',
     symbol: 'ETH',
     decimals: 18,
@@ -35,6 +35,15 @@ export const FastsetTokens: WarpChainAsset[] = [
     symbol: 'USDC',
     decimals: 6,
     logoUrl: 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png',
+    amount: 0n,
+  },
+  {
+    chain: 'fastset',
+    identifier: '0xfa575e7000000000000000000000000000000000000000000000000000000000',
+    name: 'Wrapped SET',
+    symbol: 'WSET',
+    decimals: 18,
+    logoUrl: 'https://vleap.ai/images/tokens/set.svg',
     amount: 0n,
   },
 ]
