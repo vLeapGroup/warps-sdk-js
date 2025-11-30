@@ -369,6 +369,7 @@ describe('WarpEvmExecutor', () => {
         output: expect.objectContaining({ _DATA: expect.any(Error) }),
         messages: {},
         destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+        resolvedInputs: [],
       })
     })
 
@@ -406,6 +407,7 @@ describe('WarpEvmExecutor', () => {
         output: expect.objectContaining({ _DATA: expect.any(Error) }),
         messages: {},
         destination: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+        resolvedInputs: [],
       })
     })
   })
