@@ -49,12 +49,26 @@ export class FastsetClient {
   }
 
   async request(url: string, method: string, params: any): Promise<any> {
-    const request = this.buildJsonRpcRequest(id++, method, params)
+    const requestId = id++
+    const request = this.buildJsonRpcRequest(requestId, method, params)
     const headers = { 'Content-Type': 'application/json' }
     const body = this.jsonSerialize(request)
-    const response = await fetch(url, { method: 'POST', headers, body })
-    const json = await response.json()
-    return json
+
+    try {
+      const response = await fetch(url, { method: 'POST', headers, body })
+
+      if (!response.ok) {
+        return { jsonrpc: '2.0', id: requestId, error: { code: response.status, message: response.statusText } }
+      }
+
+      try {
+        return await response.json()
+      } catch {
+        return { jsonrpc: '2.0', id: requestId, error: { code: -32700, message: 'Parse error' } }
+      }
+    } catch {
+      return { jsonrpc: '2.0', id: requestId, error: { code: -32603, message: 'Internal error' } }
+    }
   }
 
   private buildJsonRpcRequest(id: number, method: string, params: any) {
