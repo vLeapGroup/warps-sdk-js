@@ -99,18 +99,25 @@ export class WarpInterpolator {
     return JSON.parse(modifiable)
   }
 
-  applyInputs(text: string, resolvedInputs: ResolvedInput[], serializer: WarpSerializer): string {
+  applyInputs(text: string, resolvedInputs: ResolvedInput[], serializer: WarpSerializer, primaryInputs?: ResolvedInput[]): string {
     if (!text || typeof text !== 'string') return text
 
     const bag: Record<string, string> = {}
     resolvedInputs.forEach((resolvedInput) => {
       if (!resolvedInput.value) return
-      if (!resolvedInput.input.as) return
-      const key = resolvedInput.input.as
-      if (key !== key.toUpperCase()) return
+      const key = resolvedInput.input.as || resolvedInput.input.name
       const [, nativeValue] = serializer.stringToNative(resolvedInput.value)
       bag[key] = String(nativeValue)
     })
+
+    if (primaryInputs) {
+      primaryInputs.forEach((resolvedInput) => {
+        if (!resolvedInput.value) return
+        const key = resolvedInput.input.as || resolvedInput.input.name
+        const [, nativeValue] = serializer.stringToNative(resolvedInput.value)
+        bag[`primary.${key}`] = String(nativeValue)
+      })
+    }
 
     return replacePlaceholders(text, bag)
   }

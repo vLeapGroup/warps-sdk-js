@@ -501,3 +501,173 @@ describe('WarpInterpolator per-action chain info', () => {
     expect((result.actions[1] as WarpTransferAction).address).toBe('erd...')
   })
 })
+
+describe('WarpInterpolator applyInputs with primary inputs', () => {
+  const serializer = {
+    stringToNative: (value: string) => {
+      const [type, val] = value.split(':')
+      if (type === 'address') return [type, val]
+      if (type === 'uint256') return [type, val]
+      if (type === 'biguint') return [type, val]
+      return [type, val]
+    },
+  } as any
+
+  it('interpolates primary input references', () => {
+    const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+    const resolvedInputs: any[] = []
+    const primaryInputs: any[] = [
+      {
+        input: { name: 'Amount', as: 'AMOUNT', type: 'uint256' },
+        value: 'uint256:1000',
+      },
+      {
+        input: { name: 'Token', as: 'TOKEN', type: 'address' },
+        value: 'address:erd1token',
+      },
+    ]
+
+    const result = interpolator.applyInputs('{{primary.AMOUNT}}', resolvedInputs, serializer, primaryInputs)
+    expect(result).toBe('1000')
+  })
+
+  it('interpolates multiple primary input references', () => {
+    const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+    const resolvedInputs: any[] = []
+    const primaryInputs: any[] = [
+      {
+        input: { name: 'Amount', as: 'AMOUNT', type: 'uint256' },
+        value: 'uint256:1000',
+      },
+      {
+        input: { name: 'Token', as: 'TOKEN', type: 'address' },
+        value: 'address:erd1token',
+      },
+    ]
+
+    const result = interpolator.applyInputs('address:{{BRIDGE}},amount:{{primary.AMOUNT}},token:{{primary.TOKEN}}', resolvedInputs, serializer, primaryInputs)
+    expect(result).toBe('address:,amount:1000,token:erd1token')
+  })
+
+  it('interpolates both regular and primary input references', () => {
+    const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+    const resolvedInputs: any[] = [
+      {
+        input: { name: 'Bridge', as: 'BRIDGE', type: 'address' },
+        value: 'address:erd1bridge',
+      },
+    ]
+    const primaryInputs: any[] = [
+      {
+        input: { name: 'Amount', as: 'AMOUNT', type: 'uint256' },
+        value: 'uint256:1000',
+      },
+    ]
+
+    const result = interpolator.applyInputs('{{BRIDGE}},{{primary.AMOUNT}}', resolvedInputs, serializer, primaryInputs)
+    expect(result).toBe('erd1bridge,1000')
+  })
+
+  it('handles primary input references when primary inputs are not provided', () => {
+    const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+    const resolvedInputs: any[] = []
+
+    const result = interpolator.applyInputs('{{primary.AMOUNT}}', resolvedInputs, serializer)
+    expect(result).toBe('')
+  })
+
+  it('interpolates primary input by name when as is not present', () => {
+    const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+    const resolvedInputs: any[] = []
+    const primaryInputs: any[] = [
+      {
+        input: { name: 'Amount', type: 'uint256' },
+        value: 'uint256:1000',
+      },
+    ]
+
+    const result = interpolator.applyInputs('{{primary.Amount}}', resolvedInputs, serializer, primaryInputs)
+    expect(result).toBe('1000')
+  })
+
+  it('handles primary input with null value', () => {
+    const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+    const resolvedInputs: any[] = []
+    const primaryInputs: any[] = [
+      {
+        input: { name: 'Amount', as: 'AMOUNT', type: 'uint256' },
+        value: null,
+      },
+    ]
+
+    const result = interpolator.applyInputs('{{primary.AMOUNT}}', resolvedInputs, serializer, primaryInputs)
+    expect(result).toBe('')
+  })
+
+  it('interpolates primary input by name when as is not present', () => {
+    const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+    const resolvedInputs: any[] = []
+    const primaryInputs: any[] = [
+      {
+        input: { name: 'AMOUNT', type: 'uint256' },
+        value: 'uint256:1000',
+      },
+    ]
+
+    const result = interpolator.applyInputs('{{primary.AMOUNT}}', resolvedInputs, serializer, primaryInputs)
+    expect(result).toBe('1000')
+  })
+
+  it('prefers as over name when both are present', () => {
+    const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+    const resolvedInputs: any[] = []
+    const primaryInputs: any[] = [
+      {
+        input: { name: 'Amount', as: 'TOKEN_AMOUNT', type: 'uint256' },
+        value: 'uint256:1000',
+      },
+    ]
+
+    const result = interpolator.applyInputs('{{primary.TOKEN_AMOUNT}}', resolvedInputs, serializer, primaryInputs)
+    expect(result).toBe('1000')
+  })
+
+  it('interpolates regular input by name when as is not present', () => {
+    const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+    const resolvedInputs: any[] = [
+      {
+        input: { name: 'AMOUNT', type: 'uint256' },
+        value: 'uint256:500',
+      },
+    ]
+
+    const result = interpolator.applyInputs('{{AMOUNT}}', resolvedInputs, serializer)
+    expect(result).toBe('500')
+  })
+
+  it('interpolates regular input with lowercase as field', () => {
+    const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+    const resolvedInputs: any[] = [
+      {
+        input: { name: 'Amount', as: 'amount', type: 'uint256' },
+        value: 'uint256:500',
+      },
+    ]
+
+    const result = interpolator.applyInputs('{{amount}}', resolvedInputs, serializer)
+    expect(result).toBe('500')
+  })
+
+  it('interpolates with mixed case', () => {
+    const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+    const resolvedInputs: any[] = [
+      {
+        input: { name: 'Amount', as: 'TokenAmount', type: 'uint256' },
+        value: 'uint256:500',
+      },
+    ]
+
+    const result = interpolator.applyInputs('{{TokenAmount}}', resolvedInputs, serializer)
+    expect(result).toBe('500')
+  })
+})

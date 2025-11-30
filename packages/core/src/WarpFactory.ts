@@ -1,5 +1,5 @@
 import { WarpConstants } from './constants'
-import { findWarpAdapterForChain, getWarpActionByIndex, shiftBigintBy, splitInput } from './helpers'
+import { findWarpAdapterForChain, getWarpActionByIndex, getWarpPrimaryAction, shiftBigintBy, splitInput } from './helpers'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
 import {
   Adapter,
@@ -55,37 +55,45 @@ export class WarpFactory {
     const preparedWarp = await interpolator.apply(this.config, warp, meta)
     const preparedAction = getWarpActionByIndex(preparedWarp, actionIndex) as WarpTransferAction | WarpContractAction | WarpCollectAction
 
-    const typedInputs = this.getStringTypedInputs(preparedAction, inputs)
-    const resolvedInputs = await this.getResolvedInputs(chain.name, preparedAction, typedInputs)
-    const modifiedInputs = this.getModifiedInputs(resolvedInputs)
+    const { action: primaryAction, index: primaryIndex } = getWarpPrimaryAction(preparedWarp)
+    const primaryTypedInputs = this.getStringTypedInputs(primaryAction, inputs)
+    const primaryResolved = await this.getResolvedInputs(chain.name, primaryAction, primaryTypedInputs)
+    const primaryResolvedInputs = this.getModifiedInputs(primaryResolved)
+
+    let resolvedInputs: ResolvedInput[] = []
+    let modifiedInputs: ResolvedInput[] = []
+    if (primaryIndex === actionIndex - 1) {
+      resolvedInputs = primaryResolved
+      modifiedInputs = primaryResolvedInputs
+    }
 
     const destinationInput = modifiedInputs.find((i) => i.input.position === 'receiver' || i.input.position === 'destination')?.value
     const destinationInAction = this.getDestinationFromAction(preparedAction)
     let destination = destinationInput ? (this.serializer.stringToNative(destinationInput)[1] as string) : destinationInAction
-    if (destination) destination = interpolator.applyInputs(destination, modifiedInputs, this.serializer)
+    if (destination) destination = interpolator.applyInputs(destination, modifiedInputs, this.serializer, primaryResolvedInputs)
     if (!destination && action.type !== 'collect') throw new Error('WarpActionExecutor: Destination/Receiver not provided')
 
     let args = this.getPreparedArgs(preparedAction, modifiedInputs)
-    args = args.map((arg) => interpolator.applyInputs(arg, modifiedInputs, this.serializer))
+    args = args.map((arg) => interpolator.applyInputs(arg, modifiedInputs, this.serializer, primaryResolvedInputs))
 
     const valueInput = modifiedInputs.find((i) => i.input.position === 'value')?.value || null
     const valueInAction = 'value' in preparedAction ? preparedAction.value : null
     const valueString = valueInput?.split(WarpConstants.ArgParamsSeparator)[1] || valueInAction || '0'
-    const interpolatedValueString = interpolator.applyInputs(valueString, modifiedInputs, this.serializer)
+    const interpolatedValueString = interpolator.applyInputs(valueString, modifiedInputs, this.serializer, primaryResolvedInputs)
     let value = BigInt(interpolatedValueString)
 
     const transferInputs = modifiedInputs.filter((i) => i.input.position === 'transfer' && i.value).map((i) => i.value) as string[]
     const transfersInAction = 'transfers' in preparedAction ? preparedAction.transfers : []
     const transfersMerged = [...(transfersInAction || []), ...(transferInputs || [])]
     const transfers = transfersMerged.map((t) => {
-      const interpolated = interpolator.applyInputs(t, modifiedInputs, this.serializer)
+      const interpolated = interpolator.applyInputs(t, modifiedInputs, this.serializer, primaryResolvedInputs)
       return this.serializer.stringToNative(interpolated)[1]
     }) as WarpChainAssetValue[]
 
     const dataInput = modifiedInputs.find((i) => i.input.position === 'data')?.value
     const dataInAction = 'data' in preparedAction ? preparedAction.data || '' : null
     const dataString = dataInput || dataInAction || null
-    const data = dataString ? interpolator.applyInputs(dataString, modifiedInputs, this.serializer) : null
+    const data = dataString ? interpolator.applyInputs(dataString, modifiedInputs, this.serializer, primaryResolvedInputs) : null
 
     const executable: WarpExecutable = {
       warp: preparedWarp,
