@@ -1,5 +1,14 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-beta.44
+
+### Patch Changes
+
+- c3b3728: add resolved inputs to exec results
+- 187ac9e: add fastset err handling
+- Updated dependencies [c3b3728]
+  - @vleap/warps@3.0.0-beta.161
+
 ## 0.1.0-beta.43
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-beta.49
+
+### Patch Changes
+
+- c3b3728: add resolved inputs to exec results
+- Updated dependencies [c3b3728]
+  - @vleap/warps@3.0.0-beta.161
+
 ## 0.2.0-beta.48
 
 ### Patch Changes

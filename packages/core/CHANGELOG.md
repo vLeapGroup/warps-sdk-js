@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.161
+
+### Patch Changes
+
+- c3b3728: add resolved inputs to exec results
+
 ## 3.0.0-beta.160
 
 ### Minor Changes
