@@ -5,6 +5,14 @@ const ArbitrumChain: WarpChain = WarpChainName.Arbitrum
 export const ArbitrumSepoliaTokens: WarpChainAsset[] = [
   {
     chain: ArbitrumChain,
+    identifier: '0x0000000000000000000000000000000000000000',
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+    logoUrl: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
+  },
+  {
+    chain: ArbitrumChain,
     identifier: '0x980B62Da83eFf3D4576C647993b0c1D7faf17c73',
     name: 'Wrapped Ether',
     symbol: 'WETH',

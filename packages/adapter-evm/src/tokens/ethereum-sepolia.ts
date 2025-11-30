@@ -5,6 +5,14 @@ const EthereumChain: WarpChain = WarpChainName.Ethereum
 export const EthereumSepoliaTokens: WarpChainAsset[] = [
   {
     chain: EthereumChain,
+    identifier: '0x0000000000000000000000000000000000000000',
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+    logoUrl: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
+  },
+  {
+    chain: EthereumChain,
     identifier: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
     name: 'USD Coin',
     symbol: 'USDC',

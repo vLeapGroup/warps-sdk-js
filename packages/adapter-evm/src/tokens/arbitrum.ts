@@ -5,6 +5,14 @@ const ArbitrumChain: WarpChain = WarpChainName.Arbitrum
 export const ArbitrumTokens: WarpChainAsset[] = [
   {
     chain: ArbitrumChain,
+    identifier: '0x0000000000000000000000000000000000000000',
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+    logoUrl: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
+  },
+  {
+    chain: ArbitrumChain,
     identifier: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
     name: 'USD Coin',
     symbol: 'USDC',

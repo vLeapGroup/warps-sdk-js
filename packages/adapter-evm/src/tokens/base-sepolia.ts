@@ -5,6 +5,14 @@ const BaseChain: WarpChain = WarpChainName.Base
 export const BaseSepoliaTokens: WarpChainAsset[] = [
   {
     chain: BaseChain,
+    identifier: '0x0000000000000000000000000000000000000000',
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+    logoUrl: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
+  },
+  {
+    chain: BaseChain,
     identifier: '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
     name: 'USD',
     symbol: 'USDC',

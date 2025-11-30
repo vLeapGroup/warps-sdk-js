@@ -5,6 +5,14 @@ const BaseChain: WarpChain = WarpChainName.Base
 export const BaseTokens: WarpChainAsset[] = [
   {
     chain: BaseChain,
+    identifier: '0x0000000000000000000000000000000000000000',
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+    logoUrl: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
+  },
+  {
+    chain: BaseChain,
     identifier: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
     name: 'USD Coin',
     symbol: 'USDC',
