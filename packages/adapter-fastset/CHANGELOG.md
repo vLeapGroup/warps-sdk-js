@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-beta.41
+
+### Patch Changes
+
+- 7f140bc: update tokens
+- Updated dependencies [ad9af2a]
+  - @vleap/warps@3.0.0-beta.158
+
 ## 0.1.0-beta.40
 
 ### Patch Changes

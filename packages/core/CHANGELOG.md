@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.158
+
+### Minor Changes
+
+- ad9af2a: add primary input references
+
 ## 3.0.0-beta.157
 
 ### Patch Changes

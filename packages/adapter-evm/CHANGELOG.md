@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-beta.46
+
+### Patch Changes
+
+- 7f140bc: update tokens
+- Updated dependencies [ad9af2a]
+  - @vleap/warps@3.0.0-beta.158
+
 ## 0.2.0-beta.45
 
 ### Patch Changes
