@@ -68,7 +68,7 @@ export class WarpInterpolator {
 
     const rootBag: InterpolationBag = {
       config,
-      chain: this.adapter.chainInfo,
+      adapter: this.adapter,
     }
 
     Object.values(WarpConstants.Globals).forEach((global) => {
@@ -86,7 +86,7 @@ export class WarpInterpolator {
 
     const bag: InterpolationBag = {
       config: this.config,
-      chain: this.adapter.chainInfo,
+      adapter: this.adapter,
     }
 
     Object.values(WarpConstants.Globals).forEach((global) => {
