@@ -174,7 +174,7 @@ export type WarpActionInputPositionAssetObject = {
   amount: `arg:${string}`
 }
 
-export type WarpActionInputModifier = 'scale'
+export type WarpActionInputModifier = 'scale' | 'transform'
 
 export type WarpActionInput = {
   name: string

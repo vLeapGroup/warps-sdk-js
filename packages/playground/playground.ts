@@ -3,6 +3,7 @@ import { getAllEvmAdapters } from '@vleap/warps-adapter-evm'
 import { getFastsetAdapter } from '@vleap/warps-adapter-fastset'
 import { getAllMultiversxAdapters, getMultiversxAdapter } from '@vleap/warps-adapter-multiversx'
 import { getSuiAdapter } from '@vleap/warps-adapter-sui'
+import { createNodeTransformRunner } from '@vleap/warps-vm-node'
 import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
@@ -15,7 +16,7 @@ const QueryItems = {
   receiver: '0x5A92C4763dDAc3119a65f8882a53234C9988Efd9',
 }
 const WarpInputs: string[] = [
-  'asset:0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238|1', // Asset input: USDC with amount 1 (will be converted to 1000000 with 6 decimals)
+  'asset:ETH|0.002', // Asset input: USDC with amount 1 (will be converted to 1000000 with 6 decimals)
 ]
 
 const __filename = fileURLToPath(import.meta.url)
@@ -35,6 +36,7 @@ const runWarp = async (warpFile: string) => {
     env: 'devnet',
     currentUrl: 'https://usewarp.to',
     user: { wallets: { [Chain]: { ...walletData, privateKey } } },
+    transform: { runner: createNodeTransformRunner() },
   }
 
   const client = new WarpClient(config, [
@@ -52,7 +54,7 @@ const runWarp = async (warpFile: string) => {
 
   const warp = await client.createBuilder(Chain).createFromRaw(warpRaw, false)
 
-  const { txs, chain, evaluateOutput } = await client.executeWarp(
+  const { txs, chain, evaluateOutput, resolvedInputs } = await client.executeWarp(
     warp,
     WarpInputs,
     {
@@ -62,6 +64,8 @@ const runWarp = async (warpFile: string) => {
     },
     { queries: QueryItems }
   )
+
+  console.log('Resolved inputs:', resolvedInputs)
 
   const signedTxs = await client.getWallet(chain.name).signTransactions(txs)
   const hashes = await client.getWallet(chain.name).sendTransactions(signedTxs)

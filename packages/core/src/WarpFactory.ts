@@ -65,7 +65,7 @@ export class WarpFactory {
     const { action: primaryAction, index: primaryIndex } = getWarpPrimaryAction(preparedWarp)
     const primaryTypedInputs = this.getStringTypedInputs(primaryAction, inputs)
     const primaryResolved = await this.getResolvedInputs(chain.name, primaryAction, primaryTypedInputs, interpolator)
-    const primaryResolvedInputs = this.getModifiedInputs(primaryResolved)
+    const primaryResolvedInputs = await this.getModifiedInputs(primaryResolved)
 
     let resolvedInputs: ResolvedInput[] = []
     let modifiedInputs: ResolvedInput[] = []
@@ -194,14 +194,18 @@ export class WarpFactory {
     })
   }
 
-  public getModifiedInputs(inputs: ResolvedInput[]): ResolvedInput[] {
+  public async getModifiedInputs(inputs: ResolvedInput[]): Promise<ResolvedInput[]> {
     // Note: 'scale' modifier means that the value is multiplied by 10^modifier; the modifier can also be the name of another input field
     // Example: 'scale:10' means that the value is multiplied by 10^10
     // Example 2: 'scale:{amount}' means that the value is multiplied by the value of the 'amount' input field
+    // Note: 'transform' modifier allows transforming the value using a transform runner
+    // Example: 'transform:() => inputs.asset.includes("ETH") ? "0x0000000000000000000000000000000000000000" : inputs.asset'
 
-    // TODO: refactor once more modifiers are added
+    const results: ResolvedInput[] = []
 
-    return inputs.map((resolved, index) => {
+    for (let index = 0; index < inputs.length; index++) {
+      const resolved = inputs[index]
+
       if (resolved.input.modifier?.startsWith('scale:')) {
         const [, exponent] = resolved.input.modifier.split(':')
         if (isNaN(Number(exponent))) {
@@ -211,18 +215,108 @@ export class WarpFactory {
           const scalableVal = resolved.value?.split(':')[1]
           if (!scalableVal) throw new Error('WarpActionExecutor: Scalable value not found')
           const scaledVal = shiftBigintBy(scalableVal, +exponentVal)
-          return { ...resolved, value: `${resolved.input.type}:${scaledVal}` }
+          results.push({ ...resolved, value: `${resolved.input.type}:${scaledVal}` })
         } else {
           // Scale by fixed amount
           const scalableVal = resolved.value?.split(':')[1]
           if (!scalableVal) throw new Error('WarpActionExecutor: Scalable value not found')
           const scaledVal = shiftBigintBy(scalableVal, +exponent)
-          return { ...resolved, value: `${resolved.input.type}:${scaledVal}` }
+          results.push({ ...resolved, value: `${resolved.input.type}:${scaledVal}` })
+        }
+      } else if (resolved.input.modifier?.startsWith(WarpConstants.Transform.Prefix)) {
+        const code = resolved.input.modifier.substring(WarpConstants.Transform.Prefix.length)
+        const transformRunner = this.config.transform?.runner
+
+        if (!transformRunner || typeof transformRunner.run !== 'function') {
+          throw new Error('Transform modifier is defined but no transform runner is configured. Provide a runner via config.transform.runner.')
+        }
+
+        const inputsContext = this.buildInputContext(inputs, index, resolved)
+        const transformedValue = await transformRunner.run(code, inputsContext)
+
+        if (transformedValue === null || transformedValue === undefined) {
+          results.push(resolved)
+        } else {
+          const transformedString = this.serializer.nativeToString(resolved.input.type, transformedValue)
+          results.push({ ...resolved, value: transformedString })
         }
       } else {
-        return resolved
+        results.push(resolved)
       }
-    })
+    }
+
+    return results
+  }
+
+  /**
+   * Builds a context object containing all previous evaluated inputs for use in transform modifiers.
+   * 
+   * The context object provides access to inputs by their `as` field (if present) or `name` field.
+   * For asset-type inputs, additional properties are available:
+   * - `{key}` - The full asset object with `identifier` and `amount` properties
+   * - `{key}.token` - The asset identifier as a string
+   * - `{key}.amount` - The asset amount as a string
+   * - `{key}.identifier` - Alias for `{key}.token`
+   * 
+   * @example
+   * // Given inputs:
+   * // - { name: 'Asset', as: 'asset', type: 'asset', value: 'asset:ETH|1000000000000000000' }
+   * // - { name: 'Amount', type: 'uint256', value: 'uint256:500' }
+   * 
+   * // The context will be:
+   * {
+   *   asset: { identifier: 'ETH', amount: 1000000000000000000n },
+   *   'asset.token': 'ETH',
+   *   'asset.amount': '1000000000000000000',
+   *   'asset.identifier': 'ETH',
+   *   Amount: 500n
+   * }
+   * 
+   * // Usage in transform modifier:
+   * // "modifier": "transform:(inputs) => inputs.asset?.identifier === 'ETH' ? {...} : inputs.asset"
+   * 
+   * @param inputs - Array of all resolved inputs
+   * @param currentIndex - Index of the current input being processed
+   * @param currentInput - The current input being transformed (optional, included in context)
+   * @returns Context object with all previous inputs accessible by name/as
+   */
+  private buildInputContext(inputs: ResolvedInput[], currentIndex: number, currentInput?: ResolvedInput): Record<string, any> {
+    const inputsObj: Record<string, any> = {}
+
+    for (let i = 0; i < currentIndex; i++) {
+      const resolvedInput = inputs[i]
+      if (!resolvedInput.value) continue
+
+      const key = resolvedInput.input.as || resolvedInput.input.name
+      const [, nativeValue] = this.serializer.stringToNative(resolvedInput.value)
+      inputsObj[key] = nativeValue
+
+      if (resolvedInput.input.type === 'asset' && typeof nativeValue === 'object' && nativeValue !== null) {
+        const asset = nativeValue as { identifier?: string; amount?: bigint }
+        if ('identifier' in asset && 'amount' in asset) {
+          inputsObj[`${key}.token`] = String(asset.identifier)
+          inputsObj[`${key}.amount`] = String(asset.amount)
+          inputsObj[`${key}.identifier`] = String(asset.identifier)
+        }
+      }
+    }
+
+    if (currentInput && currentInput.value) {
+      const key = currentInput.input.as || currentInput.input.name
+      const [, nativeValue] = this.serializer.stringToNative(currentInput.value)
+      inputsObj[key] = nativeValue
+
+      if (currentInput.input.type === 'asset' && typeof nativeValue === 'object' && nativeValue !== null) {
+        const asset = nativeValue as { identifier?: string; amount?: bigint }
+        if ('identifier' in asset && 'amount' in asset) {
+          inputsObj[`${key}.token`] = String(asset.identifier)
+          inputsObj[`${key}.amount`] = String(asset.amount)
+          inputsObj[`${key}.identifier`] = String(asset.identifier)
+        }
+      }
+    }
+
+    return inputsObj
   }
 
   public async preprocessInput(chain: WarpChain, input: string): Promise<string> {

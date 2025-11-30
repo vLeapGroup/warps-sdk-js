@@ -1,7 +1,7 @@
 import { WarpConstants } from './constants'
 import { getNextInfo } from './helpers'
 import { createMockAdapter, createMockConfig, createMockWarp } from './test-utils/sharedMocks'
-import { WarpAction, WarpChainInfo, WarpClientConfig, WarpContractAction } from './types'
+import { TransformRunner, WarpAction, WarpChainInfo, WarpClientConfig, WarpContractAction } from './types'
 import { WarpFactory } from './WarpFactory'
 
 const testConfig: WarpClientConfig = {
@@ -228,11 +228,122 @@ describe('WarpFactory', () => {
     expect(result[1].value).toBe('address:erd1testwallet')
   })
 
-  it('getModifiedInputs applies scale modifier', () => {
+  it('getModifiedInputs applies scale modifier', async () => {
     const factory = new WarpFactory(config, [createMockAdapter()])
     const inputs = [{ input: { name: 'amount', type: 'biguint', modifier: 'scale:2' }, value: 'biguint:5' }]
-    const result = factory.getModifiedInputs(inputs as any)
+    const result = await factory.getModifiedInputs(inputs as any)
     expect(result[0].value).toBe('biguint:500')
+  })
+
+  describe('getModifiedInputs with transform modifier', () => {
+    const createMockTransformRunner = (): TransformRunner => ({
+      run: async (code: string, context: any) => {
+        const fn = eval(code)
+        return typeof fn === 'function' ? fn(context) : fn
+      },
+    })
+
+    it('applies transform modifier for simple math multiplication', async () => {
+      const transformRunner = createMockTransformRunner()
+      const configWithTransform = createMockConfig({ transform: { runner: transformRunner } })
+      const factory = new WarpFactory(configWithTransform, [createMockAdapter()])
+
+      const inputs = [
+        {
+          input: { name: 'Value', type: 'uint256', modifier: 'transform:(inputs) => inputs.Value ? inputs.Value * 3n : 0n' },
+          value: 'uint256:10',
+        },
+      ]
+
+      const result = await factory.getModifiedInputs(inputs as any)
+      expect(result[0].value).toBe('uint256:30')
+    })
+
+    it('applies transform modifier to asset input', async () => {
+      const transformRunner = createMockTransformRunner()
+      const configWithTransform = createMockConfig({ transform: { runner: transformRunner } })
+      const factory = new WarpFactory(configWithTransform, [createMockAdapter()])
+
+      const inputs = [
+        {
+          input: { name: 'Asset', as: 'asset', type: 'asset', modifier: 'transform:(inputs) => inputs.asset?.identifier === "ETH" ? {identifier: "0x0000000000000000000000000000000000000000", amount: inputs.asset.amount} : inputs.asset' },
+          value: 'asset:ETH|1000000000000000000',
+        },
+      ]
+
+      const result = await factory.getModifiedInputs(inputs as any)
+      expect(result[0].value).toBe('asset:0x0000000000000000000000000000000000000000|1000000000000000000')
+    })
+
+    it('applies transform modifier accessing previous inputs', async () => {
+      const transformRunner = createMockTransformRunner()
+      const configWithTransform = createMockConfig({ transform: { runner: transformRunner } })
+      const factory = new WarpFactory(configWithTransform, [createMockAdapter()])
+
+      const inputs = [
+        {
+          input: { name: 'Amount', type: 'uint256' },
+          value: 'uint256:100',
+        },
+        {
+          input: { name: 'Multiplier', type: 'uint256', modifier: 'transform:(inputs) => inputs.Amount ? inputs.Amount * 2n : 1n' },
+          value: 'uint256:5',
+        },
+      ]
+
+      const result = await factory.getModifiedInputs(inputs as any)
+      expect(result[1].value).toBe('uint256:200')
+    })
+
+    it('applies transform modifier to non-ETH asset without modification', async () => {
+      const transformRunner = createMockTransformRunner()
+      const configWithTransform = createMockConfig({ transform: { runner: transformRunner } })
+      const factory = new WarpFactory(configWithTransform, [createMockAdapter()])
+
+      const inputs = [
+        {
+          input: { name: 'Asset', as: 'asset', type: 'asset', modifier: 'transform:(inputs) => inputs.asset?.identifier === "ETH" ? {identifier: "0x0000000000000000000000000000000000000000", amount: inputs.asset.amount} : inputs.asset' },
+          value: 'asset:USDC-123|1000000',
+        },
+      ]
+
+      const result = await factory.getModifiedInputs(inputs as any)
+      expect(result[0].value).toBe('asset:USDC-123|1000000')
+    })
+
+    it('throws error when transform modifier is used without transform runner', async () => {
+      const factory = new WarpFactory(config, [createMockAdapter()])
+      const inputs = [
+        {
+          input: { name: 'Asset', type: 'asset', modifier: 'transform:(inputs) => inputs.asset' },
+          value: 'asset:ETH|1000000000000000000',
+        },
+      ]
+
+      await expect(factory.getModifiedInputs(inputs as any)).rejects.toThrow(
+        'Transform modifier is defined but no transform runner is configured'
+      )
+    })
+
+    it('applies transform modifier accessing asset token property', async () => {
+      const transformRunner = createMockTransformRunner()
+      const configWithTransform = createMockConfig({ transform: { runner: transformRunner } })
+      const factory = new WarpFactory(configWithTransform, [createMockAdapter()])
+
+      const inputs = [
+        {
+          input: { name: 'Asset', as: 'asset', type: 'asset' },
+          value: 'asset:ETH|1000000000000000000',
+        },
+        {
+          input: { name: 'TokenAddress', type: 'address', modifier: 'transform:(inputs) => inputs["asset.token"] === "ETH" ? "0x0000000000000000000000000000000000000000" : inputs["asset.token"]' },
+          value: 'address:0x123',
+        },
+      ]
+
+      const result = await factory.getModifiedInputs(inputs as any)
+      expect(result[1].value).toBe('address:0x0000000000000000000000000000000000000000')
+    })
   })
 
   it('preprocessInput returns input as-is for non-asset', async () => {
