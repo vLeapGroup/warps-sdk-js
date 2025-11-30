@@ -83,9 +83,20 @@ export class WarpFastsetWallet implements AdapterWarpWallet {
 
   getPublicKey(): string | null {
     const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
-    if (!privateKey) return null
-    const privateKeyBytes = hexToUint8Array(privateKey)
-    const publicKey = ed.getPublicKey(privateKeyBytes)
-    return uint8ArrayToHex(publicKey)
+    if (privateKey) {
+      const privateKeyBytes = hexToUint8Array(privateKey)
+      const publicKey = ed.getPublicKey(privateKeyBytes)
+      return uint8ArrayToHex(publicKey)
+    }
+
+    const address = getWarpWalletAddressFromConfig(this.config, this.chain.name)
+    if (!address) return null
+
+    try {
+      const addressBytes = FastsetClient.decodeBech32Address(address)
+      return uint8ArrayToHex(addressBytes)
+    } catch {
+      return null
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { Account, INetworkProvider, Message, Mnemonic, NetworkEntrypoint, UserSecretKey } from '@multiversx/sdk-core'
+import { Account, Address, INetworkProvider, Message, Mnemonic, NetworkEntrypoint, UserSecretKey } from '@multiversx/sdk-core'
 import {
   AdapterWarpWallet,
   CacheTtl,
@@ -96,10 +96,21 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
 
   getPublicKey(): string | null {
     const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
-    if (!privateKey) return null
-    const isPrivateKeyPem = privateKey.startsWith('-----')
-    const secretKey = isPrivateKeyPem ? UserSecretKey.fromPem(privateKey) : UserSecretKey.fromString(privateKey)
-    const pubKey = secretKey.generatePublicKey()
-    return pubKey.hex()
+    if (privateKey) {
+      const isPrivateKeyPem = privateKey.startsWith('-----')
+      const secretKey = isPrivateKeyPem ? UserSecretKey.fromPem(privateKey) : UserSecretKey.fromString(privateKey)
+      const pubKey = secretKey.generatePublicKey()
+      return pubKey.hex()
+    }
+
+    const address = getWarpWalletAddressFromConfig(this.config, this.chain.name)
+    if (!address) return null
+
+    try {
+      const addressObj = Address.newFromBech32(address)
+      return addressObj.toHex()
+    } catch {
+      return null
+    }
   }
 }
