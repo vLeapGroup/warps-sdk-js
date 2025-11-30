@@ -670,4 +670,128 @@ describe('WarpInterpolator applyInputs with primary inputs', () => {
     const result = interpolator.applyInputs('{{TokenAmount}}', resolvedInputs, serializer)
     expect(result).toBe('500')
   })
+
+  it('interpolates nested asset properties token and amount', () => {
+    const assetSerializer = {
+      stringToNative: (value: string) => {
+        const [type, val] = value.split(':')
+        if (type === 'asset') {
+          const [identifier, amount] = val.split('|')
+          return [type, { identifier, amount: BigInt(amount) }]
+        }
+        return [type, val]
+      },
+      nativeToString: (type: string, value: any) => {
+        if (type === 'address') return `address:${value}`
+        if (type === 'uint256') return `uint256:${String(value)}`
+        return `${type}:${String(value)}`
+      },
+    } as any
+
+    const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+    const resolvedInputs: any[] = []
+    const primaryInputs: any[] = [
+      {
+        input: {
+          name: 'Asset',
+          as: 'asset',
+          type: 'asset',
+          position: { token: 'arg:1', amount: 'arg:2' },
+        },
+        value: 'asset:EGLD|1',
+      },
+    ]
+
+    const result = interpolator.applyInputs(
+      '{{primary.asset.token}},{{primary.asset.amount}}',
+      resolvedInputs,
+      assetSerializer,
+      primaryInputs
+    )
+    expect(result).toBe('EGLD,1')
+  })
+
+  it('interpolates nested asset properties with different alias', () => {
+    const assetSerializer = {
+      stringToNative: (value: string) => {
+        const [type, val] = value.split(':')
+        if (type === 'asset') {
+          const [identifier, amount] = val.split('|')
+          return [type, { identifier, amount: BigInt(amount) }]
+        }
+        return [type, val]
+      },
+      nativeToString: (type: string, value: any) => {
+        if (type === 'address') return `address:${value}`
+        if (type === 'uint256') return `uint256:${String(value)}`
+        return `${type}:${String(value)}`
+      },
+    } as any
+
+    const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+    const resolvedInputs: any[] = []
+    const primaryInputs: any[] = [
+      {
+        input: {
+          name: 'Asset',
+          as: 'ASSET',
+          type: 'asset',
+          position: { token: 'arg:1', amount: 'arg:2' },
+        },
+        value: 'asset:USDC|500000000',
+      },
+    ]
+
+    const result = interpolator.applyInputs(
+      '{{primary.ASSET.token}},{{primary.ASSET.amount}}',
+      resolvedInputs,
+      assetSerializer,
+      primaryInputs
+    )
+    expect(result).toBe('USDC,500000000')
+  })
+
+  it('does not add nested properties for non-asset types', () => {
+    const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+    const resolvedInputs: any[] = []
+    const primaryInputs: any[] = [
+      {
+        input: { name: 'Amount', as: 'AMOUNT', type: 'uint256' },
+        value: 'uint256:1000',
+      },
+    ]
+
+    const result = interpolator.applyInputs('{{primary.AMOUNT.token}}', resolvedInputs, serializer, primaryInputs)
+    expect(result).toBe('')
+  })
+
+  it('does not add nested properties for asset without object position', () => {
+    const assetSerializer = {
+      stringToNative: (value: string) => {
+        const [type, val] = value.split(':')
+        if (type === 'asset') {
+          const [identifier, amount] = val.split('|')
+          return [type, { identifier, amount: BigInt(amount) }]
+        }
+        return [type, val]
+      },
+    } as any
+
+    const interpolator = new WarpInterpolator(testConfig, createMockAdapter())
+    const resolvedInputs: any[] = []
+    const primaryInputs: any[] = [
+      {
+        input: {
+          name: 'Asset',
+          as: 'asset',
+          type: 'asset',
+          position: 'arg:1',
+        },
+        value: 'asset:EGLD|1',
+      },
+    ]
+
+    const result = interpolator.applyInputs('{{primary.asset.token}}', resolvedInputs, assetSerializer, primaryInputs)
+    expect(result).toBe('')
+  })
 })

@@ -57,7 +57,7 @@ export class WarpFactory {
 
     const { action: primaryAction, index: primaryIndex } = getWarpPrimaryAction(preparedWarp)
     const primaryTypedInputs = this.getStringTypedInputs(primaryAction, inputs)
-    const primaryResolved = await this.getResolvedInputs(chain.name, primaryAction, primaryTypedInputs)
+    const primaryResolved = await this.getResolvedInputs(chain.name, primaryAction, primaryTypedInputs, interpolator)
     const primaryResolvedInputs = this.getModifiedInputs(primaryResolved)
 
     let resolvedInputs: ResolvedInput[] = []
@@ -143,7 +143,12 @@ export class WarpFactory {
     })
   }
 
-  public async getResolvedInputs(chain: WarpChain, action: WarpAction, inputArgs: string[]): Promise<ResolvedInput[]> {
+  public async getResolvedInputs(
+    chain: WarpChain,
+    action: WarpAction,
+    inputArgs: string[],
+    interpolator?: WarpInterpolator
+  ): Promise<ResolvedInput[]> {
     const argInputs = action.inputs || []
     const preprocessed = await Promise.all(inputArgs.map((arg) => this.preprocessInput(chain, arg)))
 
@@ -157,8 +162,11 @@ export class WarpFactory {
         if (!wallet) return null
         return this.serializer.nativeToString('address', wallet)
       } else if (input.source === 'hidden') {
-        // Hidden inputs always use their default value
-        return input.default !== undefined ? this.serializer.nativeToString(input.type, input.default) : null
+        if (input.default === undefined) return null
+        const defaultValue = interpolator
+          ? interpolator.applyInputs(String(input.default), [], this.serializer)
+          : String(input.default)
+        return this.serializer.nativeToString(input.type, defaultValue)
       } else {
         return preprocessed[index] || null
       }
@@ -166,9 +174,15 @@ export class WarpFactory {
 
     return argInputs.map((input: WarpActionInput, index: number) => {
       const value = toValueByType(input, index)
+      const fallbackDefault =
+        input.default !== undefined
+          ? interpolator
+            ? interpolator.applyInputs(String(input.default), [], this.serializer)
+            : String(input.default)
+          : undefined
       return {
         input,
-        value: value || (input.default !== undefined ? this.serializer.nativeToString(input.type, input.default) : null),
+        value: value || (fallbackDefault !== undefined ? this.serializer.nativeToString(input.type, fallbackDefault) : null),
       }
     })
   }
@@ -237,14 +251,44 @@ export class WarpFactory {
 
   private getPreparedArgs(action: WarpAction, resolvedInputs: ResolvedInput[]): string[] {
     let args = 'args' in action ? action.args || [] : []
+    const inserts: Array<{ index: number; value: string }> = []
+
     resolvedInputs.forEach(({ input, value }) => {
-      if (!value) return
-      if (!input.position?.startsWith('arg:')) return
-      const argIndex = Number(input.position.split(':')[1]) - 1
-      args.splice(argIndex, 0, value)
+      if (!value || !input.position) return
+
+      if (typeof input.position === 'object') {
+        if (input.type !== 'asset') {
+          throw new Error(`WarpFactory: Object position is only supported for asset type. Input "${input.name}" has type "${input.type}"`)
+        }
+        if (!input.position.token?.startsWith('arg:') || !input.position.amount?.startsWith('arg:')) {
+          throw new Error(`WarpFactory: Object position must have token and amount as arg:N. Input "${input.name}"`)
+        }
+
+        const [_, assetValue] = this.serializer.stringToNative(value)
+        const asset = assetValue as WarpChainAssetValue
+        if (!asset || typeof asset !== 'object' || !('identifier' in asset) || !('amount' in asset)) {
+          throw new Error(`WarpFactory: Invalid asset value for input "${input.name}"`)
+        }
+
+        const tokenIndex = Number(input.position.token.split(':')[1]) - 1
+        const amountIndex = Number(input.position.amount.split(':')[1]) - 1
+
+        inserts.push({ index: tokenIndex, value: this.serializer.nativeToString('address', asset.identifier) })
+        inserts.push({ index: amountIndex, value: this.serializer.nativeToString('uint256', asset.amount) })
+      } else if (input.position.startsWith('arg:')) {
+        const argIndex = Number(input.position.split(':')[1]) - 1
+        inserts.push({ index: argIndex, value })
+      }
     })
 
-    return args
+    inserts.forEach(({ index, value }) => {
+      while (args.length <= index) {
+        args.push(undefined as any)
+      }
+      args[index] = value
+    })
+
+    return args.filter((arg) => arg !== undefined)
   }
 
   private async tryGetChainFromInputs(warp: Warp, inputs: string[]): Promise<WarpChainInfo | null> {

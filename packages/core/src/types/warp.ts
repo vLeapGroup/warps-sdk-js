@@ -167,6 +167,12 @@ export type WarpActionInputPosition =
   | 'chain'
   | `payload:${string}`
   | 'destination'
+  | WarpActionInputPositionAssetObject
+
+export type WarpActionInputPositionAssetObject = {
+  token: `arg:${string}`
+  amount: `arg:${string}`
+}
 
 export type WarpActionInputModifier = 'scale'
 

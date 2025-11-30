@@ -161,6 +161,25 @@ export class WarpExecutor {
           if (action.type !== 'transfer' && action.type !== 'contract') return null
           const chainAction = actions[index]
           const currentActionIndex = index + 1
+
+          if (!chainAction) {
+            const errorResult: WarpActionExecutionResult = {
+              status: 'error',
+              warp,
+              action: currentActionIndex,
+              user: getWarpWalletAddressFromConfig(this.config, chain.name),
+              txHash: null,
+              tx: null,
+              next: null,
+              values: { string: [], native: [], mapped: {} },
+              output: {},
+              messages: {},
+              destination: null,
+            }
+            await this.callHandler(() => this.handlers?.onError?.({ message: `Action ${currentActionIndex} failed: Transaction not found` }))
+            return errorResult
+          }
+
           const result = await adapter.output.getActionExecution(warp, currentActionIndex, chainAction)
 
           if (result.status === 'success') {

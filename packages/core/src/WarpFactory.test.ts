@@ -608,6 +608,49 @@ describe('WarpFactory', () => {
       expect(result.args[0]).toBe('address:erd1bridge')
       expect(result.args[1]).toBe('1000')
     })
+
+    it('interpolates nested asset properties in non-primary action', async () => {
+      const factory = new WarpFactory(config, [createMockAdapter()])
+      const warp: any = {
+        meta: { hash: 'abc' },
+        actions: [
+          {
+            type: 'contract',
+            label: 'Approve',
+            address: '{{primary.asset.token}}',
+            func: 'approve',
+            args: ['address:{{BRIDGE}}', 'uint256:{{primary.asset.amount}}'],
+            gasLimit: 200000,
+            primary: false,
+          } as WarpContractAction,
+          {
+            type: 'contract',
+            label: 'Deposit',
+            address: '{{BRIDGE}}',
+            func: 'deposit',
+            args: [],
+            gasLimit: 200000,
+            primary: true,
+            inputs: [
+              {
+                name: 'Asset',
+                as: 'asset',
+                type: 'asset',
+                position: { token: 'arg:1', amount: 'arg:2' },
+                source: 'field',
+              },
+            ],
+          } as WarpContractAction,
+        ],
+        vars: {
+          BRIDGE: 'erd1bridge',
+        },
+      }
+      const result = await factory.createExecutable(warp, 1, ['asset:EGLD|1'])
+      expect(result.destination).toBe('EGLD')
+      expect(result.args[0]).toBe('address:erd1bridge')
+      expect(result.args[1]).toBe('uint256:1000000000000000000')
+    })
   })
 })
 
@@ -791,5 +834,204 @@ describe('getChainInfoForAction', () => {
     const chainInfo = await factory.getChainInfoForWarp(warp)
 
     expect(chainInfo.displayName).toBe('MultiversX') // Default chain name from config
+  })
+
+  describe('asset object position notation', () => {
+    it('maps asset token and amount to separate argument positions', async () => {
+      const factory = new WarpFactory(createMockConfig(), [createMockAdapter()])
+      const warp: any = {
+        meta: { hash: 'abc' },
+        actions: [
+          {
+            type: 'contract',
+            label: 'Deposit',
+            address: 'erd1bridge',
+            func: 'deposit',
+            args: [],
+            gasLimit: 200000,
+            inputs: [
+              {
+                name: 'Asset',
+                type: 'asset',
+                position: { token: 'arg:1', amount: 'arg:2' },
+                source: 'field',
+              },
+              { name: 'Receiver', type: 'string', position: 'arg:3', source: 'field' },
+            ],
+          } as WarpContractAction,
+        ],
+      }
+      const result = await factory.createExecutable(warp, 1, ['asset:EGLD|1', 'string:erd1receiver'])
+      expect(result.args[0]).toBe('address:EGLD')
+      expect(result.args[1]).toBe('uint256:1000000000000000000')
+      expect(result.args[2]).toBe('string:erd1receiver')
+    })
+
+    it('maintains backward compatibility with string positions', async () => {
+      const factory = new WarpFactory(createMockConfig(), [createMockAdapter()])
+      const warp: any = {
+        meta: { hash: 'abc' },
+        actions: [
+          {
+            type: 'contract',
+            label: 'Test',
+            address: 'erd1contract',
+            func: 'test',
+            args: [],
+            gasLimit: 200000,
+            inputs: [
+              { name: 'Token', type: 'address', position: 'arg:1', source: 'field' },
+              { name: 'Amount', type: 'uint256', position: 'arg:2', source: 'field' },
+            ],
+          } as WarpContractAction,
+        ],
+      }
+      const result = await factory.createExecutable(warp, 1, ['address:erd1token', 'uint256:1000'])
+      expect(result.args[0]).toBe('address:erd1token')
+      expect(result.args[1]).toBe('uint256:1000')
+    })
+
+    it('throws error when object position is used with non-asset type', async () => {
+      const factory = new WarpFactory(createMockConfig(), [createMockAdapter()])
+      const warp: any = {
+        meta: { hash: 'abc' },
+        actions: [
+          {
+            type: 'contract',
+            label: 'Test',
+            address: 'erd1contract',
+            func: 'test',
+            args: [],
+            gasLimit: 200000,
+            inputs: [
+              {
+                name: 'Token',
+                type: 'address',
+                position: { token: 'arg:1', amount: 'arg:2' },
+                source: 'field',
+              },
+            ],
+          } as WarpContractAction,
+        ],
+      }
+      await expect(factory.createExecutable(warp, 1, ['address:erd1token'])).rejects.toThrow(
+        'Object position is only supported for asset type'
+      )
+    })
+
+    it('throws error when object position has invalid token or amount', async () => {
+      const factory = new WarpFactory(createMockConfig(), [createMockAdapter()])
+      const warp: any = {
+        meta: { hash: 'abc' },
+        actions: [
+          {
+            type: 'contract',
+            label: 'Test',
+            address: 'erd1contract',
+            func: 'test',
+            args: [],
+            gasLimit: 200000,
+            inputs: [
+              {
+                name: 'Asset',
+                type: 'asset',
+                position: { token: 'invalid', amount: 'arg:2' },
+                source: 'field',
+              },
+            ],
+          } as WarpContractAction,
+        ],
+      }
+      await expect(factory.createExecutable(warp, 1, ['asset:EGLD|1000'])).rejects.toThrow(
+        'Object position must have token and amount as arg:N'
+      )
+    })
+
+    it('throws error when object position is missing token or amount', async () => {
+      const factory = new WarpFactory(createMockConfig(), [createMockAdapter()])
+      const warp: any = {
+        meta: { hash: 'abc' },
+        actions: [
+          {
+            type: 'contract',
+            label: 'Test',
+            address: 'erd1contract',
+            func: 'test',
+            args: [],
+            gasLimit: 200000,
+            inputs: [
+              {
+                name: 'Asset',
+                type: 'asset',
+                position: { token: 'arg:1' } as any,
+                source: 'field',
+              },
+            ],
+          } as WarpContractAction,
+        ],
+      }
+      await expect(factory.createExecutable(warp, 1, ['asset:EGLD|1000'])).rejects.toThrow(
+        'Object position must have token and amount as arg:N'
+      )
+    })
+
+    it('handles asset with object position in different order', async () => {
+      const factory = new WarpFactory(createMockConfig(), [createMockAdapter()])
+      const warp: any = {
+        meta: { hash: 'abc' },
+        actions: [
+          {
+            type: 'contract',
+            label: 'Deposit',
+            address: 'erd1bridge',
+            func: 'deposit',
+            args: [],
+            gasLimit: 200000,
+            inputs: [
+              { name: 'Receiver', type: 'string', position: 'arg:1', source: 'field' },
+              {
+                name: 'Asset',
+                type: 'asset',
+                position: { token: 'arg:2', amount: 'arg:3' },
+                source: 'field',
+              },
+            ],
+          } as WarpContractAction,
+        ],
+      }
+      const result = await factory.createExecutable(warp, 1, ['string:erd1receiver', 'asset:EGLD|1'])
+      expect(result.args[0]).toBe('string:erd1receiver')
+      expect(result.args[1]).toBe('address:EGLD')
+      expect(result.args[2]).toBe('uint256:1000000000000000000')
+    })
+
+    it('supports higher argument positions beyond 10', async () => {
+      const factory = new WarpFactory(createMockConfig(), [createMockAdapter()])
+      const warp: any = {
+        meta: { hash: 'abc' },
+        actions: [
+          {
+            type: 'contract',
+            label: 'Deposit',
+            address: 'erd1bridge',
+            func: 'deposit',
+            args: [],
+            gasLimit: 200000,
+            inputs: [
+              {
+                name: 'Asset',
+                type: 'asset',
+                position: { token: 'arg:3', amount: 'arg:5' },
+                source: 'field',
+              },
+            ],
+          } as WarpContractAction,
+        ],
+      }
+      const result = await factory.createExecutable(warp, 1, ['asset:EGLD|1'])
+      expect(result.args).toContain('address:EGLD')
+      expect(result.args).toContain('uint256:1000000000000000000')
+      expect(result.args.length).toBe(2)
+    })
   })
 })

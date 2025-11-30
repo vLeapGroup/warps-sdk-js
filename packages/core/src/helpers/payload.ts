@@ -78,7 +78,11 @@ export function buildMappedOutput(inputs: ResolvedInput[], serializer: WarpSeria
   inputs.forEach((resolvedInput) => {
     const fieldName = resolvedInput.input.as || resolvedInput.input.name
     const value = toInputPayloadValue(resolvedInput, serializer)
-    if (resolvedInput.input.position && resolvedInput.input.position.startsWith(WarpConstants.Position.Payload)) {
+    if (
+      resolvedInput.input.position &&
+      typeof resolvedInput.input.position === 'string' &&
+      resolvedInput.input.position.startsWith(WarpConstants.Position.Payload)
+    ) {
       const nestedPayload = buildNestedPayload(resolvedInput.input.position, fieldName, value)
       mapped = mergeNestedPayload(mapped, nestedPayload)
     } else {

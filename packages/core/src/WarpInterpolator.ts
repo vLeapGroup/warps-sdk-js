@@ -101,8 +101,41 @@ export class WarpInterpolator {
 
   applyInputs(text: string, resolvedInputs: ResolvedInput[], serializer: WarpSerializer, primaryInputs?: ResolvedInput[]): string {
     if (!text || typeof text !== 'string') return text
+    if (!text.includes('{{')) return text
 
+    let result = this.applyGlobalsToText(text)
+    const bag = this.buildInputBag(resolvedInputs, serializer, primaryInputs)
+    return replacePlaceholders(result, bag)
+  }
+
+  private applyGlobalsToText(text: string): string {
+    const globalPlaceholders = Object.values(WarpConstants.Globals).map((g) => g.Placeholder)
+    const hasGlobalPlaceholder = globalPlaceholders.some((placeholder) => text.includes(`{{${placeholder}}}`))
+    if (!hasGlobalPlaceholder) return text
+
+    const rootBag: InterpolationBag = {
+      config: this.config,
+      adapter: this.adapter,
+    }
+
+    let result = text
+    Object.values(WarpConstants.Globals).forEach((global) => {
+      const value = global.Accessor(rootBag)
+      if (value !== undefined && value !== null) {
+        result = result.replace(new RegExp(`{{${global.Placeholder}}}`, 'g'), value.toString())
+      }
+    })
+
+    return result
+  }
+
+  private buildInputBag(
+    resolvedInputs: ResolvedInput[],
+    serializer: WarpSerializer,
+    primaryInputs?: ResolvedInput[]
+  ): Record<string, string> {
     const bag: Record<string, string> = {}
+
     resolvedInputs.forEach((resolvedInput) => {
       if (!resolvedInput.value) return
       const key = resolvedInput.input.as || resolvedInput.input.name
@@ -116,9 +149,17 @@ export class WarpInterpolator {
         const key = resolvedInput.input.as || resolvedInput.input.name
         const [, nativeValue] = serializer.stringToNative(resolvedInput.value)
         bag[`primary.${key}`] = String(nativeValue)
+
+        if (resolvedInput.input.type === 'asset' && typeof resolvedInput.input.position === 'object') {
+          const asset = nativeValue as { identifier: string; amount: bigint }
+          if (asset && typeof asset === 'object' && 'identifier' in asset && 'amount' in asset) {
+            bag[`primary.${key}.token`] = String(asset.identifier)
+            bag[`primary.${key}.amount`] = String(asset.amount)
+          }
+        }
       })
     }
 
-    return replacePlaceholders(text, bag)
+    return bag
   }
 }

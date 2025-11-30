@@ -8,16 +8,14 @@ import * as path from 'path'
 import { fileURLToPath } from 'url'
 
 const Chain = 'ethereum'
-const WarpToTest = 'deposit.json'
+const WarpToTest = 'omniset-deposit-ethereum.json'
 const QueryItems = {
   token: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
   amount: '100000',
   receiver: '0x5A92C4763dDAc3119a65f8882a53234C9988Efd9',
 }
 const WarpInputs: string[] = [
-  'address:0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238', // USDC token address
-  'uint256:100000', // 1 USDC (6 decimals)
-  'address:0x5A92C4763dDAc3119a65f8882a53234C9988Efd9', // receiver address
+  'asset:0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238|1', // Asset input: USDC with amount 1 (will be converted to 1000000 with 6 decimals)
 ]
 
 const __filename = fileURLToPath(import.meta.url)
@@ -54,7 +52,7 @@ const runWarp = async (warpFile: string) => {
 
   const warp = await client.createBuilder(Chain).createFromRaw(warpRaw, false)
 
-  const { txs, chain, evaluateResults } = await client.executeWarp(
+  const { txs, chain, evaluateOutput } = await client.executeWarp(
     warp,
     WarpInputs,
     {
@@ -69,7 +67,7 @@ const runWarp = async (warpFile: string) => {
   const hashes = await client.getWallet(chain.name).sendTransactions(signedTxs)
   const remoteTxs = await client.getActions(chain.name, hashes, true)
 
-  await evaluateResults(remoteTxs)
+  await evaluateOutput(remoteTxs)
 }
 
 const listWarps = () => fs.readdirSync(warpsDir).filter((f) => f.endsWith('.ts') || f.endsWith('.js') || f.endsWith('.json'))
