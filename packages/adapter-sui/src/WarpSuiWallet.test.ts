@@ -77,4 +77,28 @@ describe('WarpSuiWallet', () => {
       await expect(wallet.sendTransaction('invalid' as any)).rejects.toThrow('Invalid transaction object')
     })
   })
+
+  describe('getPublicKey', () => {
+    it('should return public key as hex string when wallet is initialized', () => {
+      const publicKey = wallet.getPublicKey()
+      expect(publicKey).toBeDefined()
+      expect(typeof publicKey).toBe('string')
+      expect(publicKey).toMatch(/^[0-9a-f]+$/)
+      expect(publicKey.length).toBeGreaterThan(0)
+    })
+
+    it('should return null when wallet is not initialized', () => {
+      const walletWithoutConfig = new WarpSuiWallet(
+        {
+          env: 'testnet',
+          user: {
+            wallets: {},
+          },
+        },
+        chain
+      )
+      const publicKey = walletWithoutConfig.getPublicKey()
+      expect(publicKey).toBeNull()
+    })
+  })
 })

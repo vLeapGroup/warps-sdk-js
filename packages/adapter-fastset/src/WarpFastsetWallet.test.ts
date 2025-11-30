@@ -6,10 +6,10 @@ import { WarpFastsetWallet } from './WarpFastsetWallet'
 jest.mock('./helpers', () => ({
   encoder: new TextEncoder(),
   decoder: new TextDecoder(),
-  uint8ArrayToHex: (arr: Uint8Array) => Buffer.from(arr).toString('hex'),
-  hexToUint8Array: (hex: string) => new Uint8Array(Buffer.from(hex, 'hex')),
-  uint8ArrayToString: (arr: Uint8Array) => Buffer.from(arr).toString('utf8'),
-  stringToUint8Array: (str: string) => new Uint8Array(Buffer.from(str, 'utf8')),
+  uint8ArrayToHex: jest.fn((arr: Uint8Array) => Buffer.from(arr).toString('hex')),
+  hexToUint8Array: jest.fn((hex: string) => new Uint8Array(Buffer.from(hex, 'hex'))),
+  uint8ArrayToString: jest.fn((arr: Uint8Array) => Buffer.from(arr).toString('utf8')),
+  stringToUint8Array: jest.fn((str: string) => new Uint8Array(Buffer.from(str, 'utf8'))),
   getConfiguredFastsetClient: jest.fn(() => ({
     request: jest.fn().mockResolvedValue({ result: 'mock-tx-hash' }),
     submitTransaction: jest.fn().mockResolvedValue({ result: 'mock-certificate' }),
@@ -90,10 +90,24 @@ describe('WarpFastsetWallet', () => {
   let wallet: WarpFastsetWallet
 
   beforeEach(() => {
+    // Mock private key to be available by default - set this before clearAllMocks
+    ;(getWarpWalletPrivateKeyFromConfig as jest.MockedFunction<typeof getWarpWalletPrivateKeyFromConfig>).mockImplementation(
+      (config, chainName) => {
+        if (chainName === 'fastset') {
+          return '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+        }
+        return null
+      }
+    )
     jest.clearAllMocks()
-    // Mock private key to be available by default
-    ;(getWarpWalletPrivateKeyFromConfig as jest.MockedFunction<typeof getWarpWalletPrivateKeyFromConfig>).mockReturnValue(
-      '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+    // Re-set the mock implementation after clearAllMocks
+    ;(getWarpWalletPrivateKeyFromConfig as jest.MockedFunction<typeof getWarpWalletPrivateKeyFromConfig>).mockImplementation(
+      (config, chainName) => {
+        if (chainName === 'fastset') {
+          return '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+        }
+        return null
+      }
     )
     wallet = new WarpFastsetWallet(mockConfig, mockChain)
     // Ensure client has request and submitTransaction methods
@@ -267,6 +281,38 @@ describe('WarpFastsetWallet', () => {
 
       expect(typeof result).toBe('string')
       expect(result).toBe('TODO')
+    })
+  })
+
+  describe('getPublicKey', () => {
+    beforeEach(() => {
+      ;(getWarpWalletPrivateKeyFromConfig as jest.MockedFunction<typeof getWarpWalletPrivateKeyFromConfig>).mockReset()
+    })
+
+    test('should return public key as hex string when wallet is initialized', () => {
+      const privateKeyHex = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+      ;(getWarpWalletPrivateKeyFromConfig as jest.MockedFunction<typeof getWarpWalletPrivateKeyFromConfig>).mockReturnValue(
+        privateKeyHex
+      )
+      const testWallet = new WarpFastsetWallet(mockConfig, mockChain)
+      const publicKey = testWallet.getPublicKey()
+      expect(getWarpWalletPrivateKeyFromConfig).toHaveBeenCalledWith(mockConfig, 'fastset')
+      expect(publicKey).toBeDefined()
+      expect(publicKey).not.toBeNull()
+      if (publicKey !== null) {
+        expect(typeof publicKey).toBe('string')
+        expect(publicKey).toMatch(/^[0-9a-f]+$/)
+        expect(publicKey.length).toBe(64)
+      }
+    })
+
+    test('should return null when wallet is not initialized', () => {
+      ;(getWarpWalletPrivateKeyFromConfig as jest.MockedFunction<typeof getWarpWalletPrivateKeyFromConfig>).mockReturnValue(
+        null
+      )
+      const walletWithoutConfig = new WarpFastsetWallet({ env: 'testnet' }, mockChain)
+      const publicKey = walletWithoutConfig.getPublicKey()
+      expect(publicKey).toBeNull()
     })
   })
 

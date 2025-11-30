@@ -4,8 +4,8 @@ import { ClientCacheConfig } from './cache'
 import { WarpChainAccount, WarpChainAction, WarpChainAsset } from './chain'
 import { WarpChainEnv } from './general'
 import { WarpLocale } from './i18n'
-import { WarpRegistryConfigInfo, WarpRegistryInfo } from './registry'
 import { WarpActionExecutionResult } from './output'
+import { WarpRegistryConfigInfo, WarpRegistryInfo } from './registry'
 import { ClientIndexConfig } from './search'
 import { ClientTransformConfig } from './transform'
 import {
@@ -205,4 +205,5 @@ export interface AdapterWarpWallet {
   create(mnemonic: string): WarpWalletDetails
   generate(): WarpWalletDetails
   getAddress(): string | null
+  getPublicKey(): string | null
 }

@@ -93,4 +93,13 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
   getAddress(): string | null {
     return getWarpWalletAddressFromConfig(this.config, this.chain.name)
   }
+
+  getPublicKey(): string | null {
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
+    if (!privateKey) return null
+    const isPrivateKeyPem = privateKey.startsWith('-----')
+    const secretKey = isPrivateKeyPem ? UserSecretKey.fromPem(privateKey) : UserSecretKey.fromString(privateKey)
+    const pubKey = secretKey.generatePublicKey()
+    return pubKey.hex()
+  }
 }

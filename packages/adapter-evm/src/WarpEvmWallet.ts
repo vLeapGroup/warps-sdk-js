@@ -126,6 +126,16 @@ export class WarpEvmWallet implements AdapterWarpWallet {
     return wallet.address
   }
 
+  getPublicKey(): string | null {
+    try {
+      const wallet = this.getWallet()
+      const publicKey = wallet.signingKey.publicKey
+      return publicKey.startsWith('0x') ? publicKey.slice(2) : publicKey
+    } catch {
+      return null
+    }
+  }
+
   private getWallet(): ethers.Wallet {
     const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
     if (privateKey) return new ethers.Wallet(privateKey)

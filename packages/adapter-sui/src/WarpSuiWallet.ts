@@ -77,6 +77,16 @@ export class WarpSuiWallet implements AdapterWarpWallet {
     return getWarpWalletAddressFromConfig(this.config, this.chain.name)
   }
 
+  getPublicKey(): string | null {
+    try {
+      const keypair = this.getKeypairFromConfig()
+      const publicKey = keypair.getPublicKey()
+      return Buffer.from(publicKey.toRawBytes()).toString('hex')
+    } catch {
+      return null
+    }
+  }
+
   private getKeypairFromConfig(): Ed25519Keypair {
     const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
     if (!privateKey) throw new Error('Wallet not initialized - no private key provided')

@@ -121,4 +121,45 @@ describe('WarpMultiversxWallet', () => {
       await expect(wallet.sendTransaction('invalid' as any)).rejects.toThrow('Invalid transaction object')
     })
   })
+
+  describe('getPublicKey', () => {
+    it('should return public key as hex string when wallet is initialized', () => {
+      const publicKey = wallet.getPublicKey()
+      expect(publicKey).toBeDefined()
+      expect(typeof publicKey).toBe('string')
+      expect(publicKey).toMatch(/^[0-9a-f]+$/)
+      expect(publicKey.length).toBeGreaterThan(0)
+    })
+
+    it('should return null when wallet is not initialized', () => {
+      const walletWithoutConfig = new WarpMultiversxWallet(
+        {
+          env: 'devnet',
+          cache: { type: 'memory' },
+          user: {
+            wallets: {},
+          },
+        },
+        {
+          name: 'multiversx',
+          displayName: 'MultiversX',
+          chainId: 'D',
+          blockTime: 6000,
+          addressHrp: 'erd',
+          defaultApiUrl: 'https://api.multiversx.com',
+          logoUrl: 'https://example.com/multiversx-logo.png',
+          nativeToken: {
+            chain: 'multiversx',
+            identifier: 'EGLD',
+            name: 'MultiversX',
+            symbol: 'EGLD',
+            decimals: 18,
+            logoUrl: 'https://example.com/egld-logo.png',
+          },
+        }
+      )
+      const publicKey = walletWithoutConfig.getPublicKey()
+      expect(publicKey).toBeNull()
+    })
+  })
 })
