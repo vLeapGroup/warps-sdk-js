@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.164
+
+### Patch Changes
+
+- 36f2e89: update detecter
+
 ## 3.0.0-beta.163
 
 ### Patch Changes
