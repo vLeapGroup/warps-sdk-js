@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.162
+
+### Minor Changes
+
+- ea6a310: add input transform modifier
+
 ## 3.0.0-beta.161
 
 ### Patch Changes

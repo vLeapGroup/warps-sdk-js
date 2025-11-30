@@ -1,5 +1,16 @@
 # @warps/playground
 
+## 0.2.0-beta.113
+
+### Minor Changes
+
+- ea6a310: add input transform modifier
+
+### Patch Changes
+
+- Updated dependencies [ea6a310]
+  - @vleap/warps@3.0.0-beta.162
+
 ## 0.2.0-beta.112
 
 ### Patch Changes
