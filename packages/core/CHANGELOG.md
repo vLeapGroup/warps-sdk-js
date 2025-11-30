@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.163
+
+### Patch Changes
+
+- ece9c33: fix warp detector resolved chain
+
 ## 3.0.0-beta.162
 
 ### Minor Changes
