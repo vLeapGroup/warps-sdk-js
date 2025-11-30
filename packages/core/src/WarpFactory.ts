@@ -1,4 +1,5 @@
 import { WarpConstants } from './constants'
+import { extractResolvedInputValues } from './helpers/payload'
 import { findWarpAdapterForChain, getWarpActionByIndex, getWarpPrimaryAction, shiftBigintBy, splitInput } from './helpers'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
 import {
@@ -9,6 +10,7 @@ import {
   WarpActionInput,
   WarpChain,
   WarpChainAssetValue,
+  WarpChainEnv,
   WarpChainInfo,
   WarpClientConfig,
   WarpCollectAction,
@@ -39,6 +41,11 @@ export class WarpFactory {
 
   getSerializer(): WarpSerializer {
     return this.serializer
+  }
+
+  getResolvedInputsFromCache(env: WarpChainEnv, warpHash: string | undefined, actionIndex: number): string[] {
+    const cachedInputs = this.cache.get<ResolvedInput[]>(WarpCacheKey.WarpExecutable(env, warpHash || '', actionIndex)) || []
+    return extractResolvedInputValues(cachedInputs)
   }
 
   async createExecutable(

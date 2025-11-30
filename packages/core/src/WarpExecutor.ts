@@ -1,4 +1,5 @@
 import { safeWindow } from './constants'
+import { extractResolvedInputValues } from './helpers/payload'
 import { extractCollectOutput, findWarpAdapterForChain, getNextInfo, getWarpActionByIndex, getWarpPrimaryAction, isWarpActionAutoExecute } from './helpers'
 import { applyOutputToMessages } from './helpers/messages'
 import { buildMappedOutput } from './helpers/payload'
@@ -6,6 +7,7 @@ import { createAuthHeaders, createAuthMessage } from './helpers/signing'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
 import {
   Adapter,
+  ResolvedInput,
   Warp,
   WarpActionExecutionResult,
   WarpActionIndex,
@@ -18,6 +20,7 @@ import {
   WarpExecutable,
   WarpLinkAction,
 } from './types'
+import { WarpCacheKey } from './WarpCache'
 import { WarpFactory } from './WarpFactory'
 import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
@@ -79,7 +82,7 @@ export class WarpExecutor {
 
       // Extract resolved inputs from primary action's executable
       if (executable && index === primaryIndex + 1 && executable.resolvedInputs) {
-        resolvedInputs = executable.resolvedInputs.map((ri) => ri.value || '').filter((v) => v !== '')
+        resolvedInputs = extractResolvedInputValues(executable.resolvedInputs)
       }
     }
 
@@ -173,6 +176,8 @@ export class WarpExecutor {
           const currentActionIndex = index + 1
 
           if (!chainAction) {
+            const resolvedInputs = this.factory.getResolvedInputsFromCache(this.config.env, warp.meta?.hash, currentActionIndex)
+
             const errorResult: WarpActionExecutionResult = {
               status: 'error',
               warp,
@@ -185,6 +190,7 @@ export class WarpExecutor {
               output: {},
               messages: {},
               destination: null,
+              resolvedInputs,
             }
             await this.callHandler(() => this.handlers?.onError?.({ message: `Action ${currentActionIndex} failed: Transaction not found` }))
             return errorResult
@@ -301,6 +307,7 @@ export class WarpExecutor {
       )
     } catch (error) {
       WarpLogger.error('WarpActionExecutor: Error executing collect', error)
+      const resolvedInputs = extractResolvedInputValues(executable.resolvedInputs)
       return {
         status: 'error',
         warp: executable.warp,
@@ -313,6 +320,7 @@ export class WarpExecutor {
         output: { _DATA: error },
         messages: {},
         destination: this.getDestinationFromResolvedInputs(executable),
+        resolvedInputs,
       }
     }
   }
@@ -332,6 +340,7 @@ export class WarpExecutor {
   ): WarpActionExecutionResult {
     const next = getNextInfo(this.config, this.adapters, executable.warp, executable.action, output)
 
+    const resolvedInputs = extractResolvedInputValues(executable.resolvedInputs)
     return {
       status,
       warp: executable.warp,
@@ -344,6 +353,7 @@ export class WarpExecutor {
       output: rawData ? { ...output, _DATA: rawData } : output,
       messages: applyOutputToMessages(executable.warp, output, this.config),
       destination: this.getDestinationFromResolvedInputs(executable),
+      resolvedInputs,
     }
   }
 

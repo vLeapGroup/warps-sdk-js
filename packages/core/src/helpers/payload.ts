@@ -66,6 +66,16 @@ export function toInputPayloadValue(resolvedInput: ResolvedInput, serializer: Wa
 }
 
 /**
+ * Extracts non-empty string values from resolved inputs.
+ *
+ * @param inputs - The resolved inputs to extract values from
+ * @returns An array of non-empty string values
+ */
+export function extractResolvedInputValues(inputs: ResolvedInput[]): string[] {
+  return inputs.map((ri) => ri.value).filter((v): v is string => v != null && v !== '')
+}
+
+/**
  * Builds a mapped output object from resolved inputs, using input name or "as" property as key.
  * This is the same structure as the payload, but used for output mapping.
  *

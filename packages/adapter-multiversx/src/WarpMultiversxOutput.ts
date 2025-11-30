@@ -10,6 +10,7 @@ import {
   AdapterWarpOutput,
   applyOutputToMessages,
   evaluateOutputCommon,
+  extractResolvedInputValues,
   getNextInfo,
   getWarpActionByIndex,
   getWarpWalletAddressFromConfig,
@@ -57,6 +58,7 @@ export class WarpMultiversxOutput implements AdapterWarpOutput {
     const next = getNextInfo(this.config, [], warp, actionIndex, output.output)
     const messages = applyOutputToMessages(warp, output.output, this.config)
 
+    const resolvedInputs = extractResolvedInputValues(inputs)
     return {
       status: tx.status.isSuccessful() ? 'success' : 'error',
       warp,
@@ -69,6 +71,7 @@ export class WarpMultiversxOutput implements AdapterWarpOutput {
       output: output.output,
       messages,
       destination: null,
+      resolvedInputs,
     }
   }
 

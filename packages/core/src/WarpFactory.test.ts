@@ -1034,4 +1034,145 @@ describe('getChainInfoForAction', () => {
       expect(result.args.length).toBe(2)
     })
   })
+
+  describe('destination/receiver with globals', () => {
+    it('resolves destination from hidden input with global placeholder for transfer and contract actions', async () => {
+      const mockAdapter = createMockAdapter()
+      const mockWallet = {
+        getPublicKey: () => 'erd1testwallet123',
+      }
+      mockAdapter.wallet = mockWallet as any
+
+      const config = createMockConfig()
+      config.user = {
+        wallets: {
+          multiversx: 'erd1testwallet123',
+        },
+      }
+
+      const factory = new WarpFactory(config, [mockAdapter])
+
+      // Test transfer action
+      const transferWarp: any = {
+        meta: { hash: 'abc' },
+        actions: [
+          {
+            type: 'transfer',
+            label: 'Test Transfer',
+            value: '0',
+            inputs: [
+              {
+                name: 'Receiver',
+                type: 'string',
+                position: 'receiver',
+                source: 'hidden',
+                default: '{{USER_WALLET_PUBLICKEY}}',
+              },
+            ],
+          },
+        ],
+      }
+      const transferResult = await factory.createExecutable(transferWarp, 1, [])
+      expect(transferResult.destination).toBe('erd1testwallet123')
+
+      // Test contract action
+      const contractWarp: any = {
+        meta: { hash: 'abc' },
+        actions: [
+          {
+            type: 'contract',
+            label: 'Test Contract',
+            func: 'transfer',
+            args: [],
+            gasLimit: 1000000,
+            inputs: [
+              {
+                name: 'Contract Address',
+                type: 'address',
+                position: 'destination',
+                source: 'hidden',
+                default: '{{USER_WALLET_PUBLICKEY}}',
+              },
+            ],
+          } as WarpContractAction,
+        ],
+      }
+      const contractResult = await factory.createExecutable(contractWarp, 1, [])
+      expect(contractResult.destination).toBe('erd1testwallet123')
+    })
+
+    it('resolves destination from action address and input value with global placeholder', async () => {
+      const mockAdapter = createMockAdapter()
+      const mockWallet = {
+        getPublicKey: () => 'erd1testwallet456',
+      }
+      mockAdapter.wallet = mockWallet as any
+
+      const config = createMockConfig()
+      config.user = {
+        wallets: {
+          multiversx: 'erd1testwallet456',
+        },
+      }
+
+      const factory = new WarpFactory(config, [mockAdapter])
+
+      // Test action address
+      const addressWarp: any = {
+        meta: { hash: 'abc' },
+        actions: [
+          {
+            type: 'transfer',
+            label: 'Test Transfer',
+            address: '{{USER_WALLET_PUBLICKEY}}',
+            value: '0',
+          },
+        ],
+      }
+      const addressResult = await factory.createExecutable(addressWarp, 1, [])
+      expect(addressResult.destination).toBe('erd1testwallet456')
+
+      // Test input value
+      const inputWarp: any = {
+        meta: { hash: 'abc' },
+        actions: [
+          {
+            type: 'transfer',
+            label: 'Test Transfer',
+            value: '0',
+            inputs: [
+              {
+                name: 'Receiver',
+                type: 'string',
+                position: 'receiver',
+                source: 'field',
+              },
+            ],
+          },
+        ],
+      }
+      const inputResult = await factory.createExecutable(inputWarp, 1, ['string:{{USER_WALLET_PUBLICKEY}}'])
+      expect(inputResult.destination).toBe('erd1testwallet456')
+    })
+
+    it('throws error when destination with global placeholder cannot be resolved', async () => {
+      const mockAdapter = createMockAdapter()
+      mockAdapter.wallet = null as any
+
+      const config = createMockConfig()
+      const factory = new WarpFactory(config, [mockAdapter])
+      const warp: any = {
+        meta: { hash: 'abc' },
+        actions: [
+          {
+            type: 'transfer',
+            label: 'Test Transfer',
+            address: '{{USER_WALLET_PUBLICKEY}}',
+            value: '0',
+          },
+        ],
+      }
+      await expect(factory.createExecutable(warp, 1, [])).rejects.toThrow('WarpActionExecutor: Destination/Receiver not provided')
+    })
+  })
 })

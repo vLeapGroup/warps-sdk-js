@@ -1,6 +1,7 @@
 import {
   AdapterWarpOutput,
   evaluateOutputCommon,
+  extractResolvedInputValues,
   getProviderConfig,
   getWarpWalletAddressFromConfig,
   parseOutputOutIndex,
@@ -15,6 +16,8 @@ import {
   WarpConstants,
   WarpExecutionOutput,
   WarpNativeValue,
+  WarpCache,
+  WarpCacheKey,
 } from '@vleap/warps'
 import { ethers } from 'ethers'
 import { WarpEvmSerializer } from './WarpEvmSerializer'
@@ -22,6 +25,7 @@ import { WarpEvmSerializer } from './WarpEvmSerializer'
 export class WarpEvmOutput implements AdapterWarpOutput {
   private readonly serializer: WarpEvmSerializer
   private readonly provider: ethers.JsonRpcProvider
+  private readonly cache: WarpCache
 
   constructor(
     private readonly config: WarpClientConfig,
@@ -31,6 +35,7 @@ export class WarpEvmOutput implements AdapterWarpOutput {
     const providerConfig = getProviderConfig(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
     const network = new ethers.Network(this.chain.name, parseInt(this.chain.chainId))
     this.provider = new ethers.JsonRpcProvider(providerConfig.url, network)
+    this.cache = new WarpCache(config.cache?.type)
   }
 
   async getActionExecution(
@@ -38,18 +43,22 @@ export class WarpEvmOutput implements AdapterWarpOutput {
     actionIndex: WarpActionIndex,
     tx: WarpAdapterGenericRemoteTransaction
   ): Promise<WarpActionExecutionResult> {
+    // Restore inputs via cache as transactions are broadcasted and processed asynchronously
+    const inputs: ResolvedInput[] = this.cache.get(WarpCacheKey.WarpExecutable(this.config.env, warp.meta?.hash || '', actionIndex)) ?? []
+    const resolvedInputs = extractResolvedInputValues(inputs)
+
     if (!tx) {
-      return this.createFailedExecution(warp, actionIndex)
+      return this.createFailedExecution(warp, actionIndex, resolvedInputs)
     }
 
     if ('status' in tx && typeof tx.status === 'string') {
-      return this.handleWarpChainAction(warp, actionIndex, tx as WarpChainAction)
+      return this.handleWarpChainAction(warp, actionIndex, tx as WarpChainAction, resolvedInputs)
     }
 
-    return this.handleTransactionReceipt(warp, actionIndex, tx as ethers.TransactionReceipt)
+    return this.handleTransactionReceipt(warp, actionIndex, tx as ethers.TransactionReceipt, resolvedInputs)
   }
 
-  private createFailedExecution(warp: Warp, actionIndex: WarpActionIndex): WarpActionExecutionResult {
+  private createFailedExecution(warp: Warp, actionIndex: WarpActionIndex, resolvedInputs: string[] = []): WarpActionExecutionResult {
     return {
       status: 'error',
       warp,
@@ -62,10 +71,11 @@ export class WarpEvmOutput implements AdapterWarpOutput {
       output: {},
       messages: {},
       destination: null,
+      resolvedInputs,
     }
   }
 
-  private handleWarpChainAction(warp: Warp, actionIndex: WarpActionIndex, tx: WarpChainAction): WarpActionExecutionResult {
+  private handleWarpChainAction(warp: Warp, actionIndex: WarpActionIndex, tx: WarpChainAction, resolvedInputs: string[] = []): WarpActionExecutionResult {
     const success = tx.status === 'success'
     const transactionHash = tx.id || tx.tx?.hash || ''
     const gasUsed = tx.tx?.gasLimit || '0'
@@ -87,10 +97,11 @@ export class WarpEvmOutput implements AdapterWarpOutput {
       output: {},
       messages: {},
       destination: null,
+      resolvedInputs,
     }
   }
 
-  private handleTransactionReceipt(warp: Warp, actionIndex: WarpActionIndex, tx: ethers.TransactionReceipt): WarpActionExecutionResult {
+  private handleTransactionReceipt(warp: Warp, actionIndex: WarpActionIndex, tx: ethers.TransactionReceipt, resolvedInputs: string[] = []): WarpActionExecutionResult {
     const success = tx.status === 1
     const gasUsed = tx.gasUsed?.toString() || '0'
     const gasPrice = tx.gasPrice?.toString() || '0'
@@ -121,6 +132,7 @@ export class WarpEvmOutput implements AdapterWarpOutput {
       output: {},
       messages: {},
       destination: null,
+      resolvedInputs,
     }
   }
 

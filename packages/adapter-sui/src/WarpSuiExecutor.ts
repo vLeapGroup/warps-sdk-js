@@ -3,6 +3,7 @@ import { Transaction } from '@mysten/sui/transactions'
 import {
   AdapterWarpExecutor,
   applyOutputToMessages,
+  extractResolvedInputValues,
   getNextInfo,
   getProviderConfig,
   getWarpActionByIndex,
@@ -142,6 +143,7 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
     )
     const destination = destinationInput?.value || executable.destination
 
+    const resolvedInputs = extractResolvedInputValues(executable.resolvedInputs)
     return {
       status: 'success',
       warp: executable.warp,
@@ -152,6 +154,7 @@ export class WarpSuiExecutor implements AdapterWarpExecutor {
       next,
       values: extractedValues,
       output: { ...output, _DATA: result },
+      resolvedInputs,
       messages: applyOutputToMessages(executable.warp, output, this.config),
       destination,
     }

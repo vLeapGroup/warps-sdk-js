@@ -12,6 +12,7 @@ import {
 import {
   AdapterWarpExecutor,
   applyOutputToMessages,
+  extractResolvedInputValues,
   getNextInfo,
   getWarpActionByIndex,
   getWarpWalletAddressFromConfig,
@@ -132,6 +133,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
       (i) => i.input.position === 'receiver' || i.input.position === 'destination'
     )
     const destination = destinationInput?.value || executable.destination
+    const resolvedInputs = extractResolvedInputValues(executable.resolvedInputs)
 
     return {
       status: isSuccess ? 'success' : 'error',
@@ -145,6 +147,7 @@ export class WarpMultiversxExecutor implements AdapterWarpExecutor {
       output: { ...output, _DATA: typedValues },
       messages: applyOutputToMessages(executable.warp, output, this.config),
       destination,
+      resolvedInputs,
     }
   }
 

@@ -50,6 +50,7 @@ export class WarpFastsetOutput implements AdapterWarpOutput {
       output: {},
       messages: {},
       destination: null,
+      resolvedInputs: [] as string[],
     }
   }
 
