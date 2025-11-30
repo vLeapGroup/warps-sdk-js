@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-beta.50
+
+### Patch Changes
+
+- 637cae2: add evm base tokens
+
 ## 0.2.0-beta.49
 
 ### Patch Changes
