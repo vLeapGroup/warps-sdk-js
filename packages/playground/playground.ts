@@ -43,6 +43,7 @@ const runWarp = async (warpFile: string) => {
     ...getAllMultiversxAdapters(config),
     ...getAllEvmAdapters(config, getMultiversxAdapter(config)),
     getSuiAdapter(config),
+    getSolanaAdapter(config, getMultiversxAdapter(config)),
     getFastsetAdapter(config, getMultiversxAdapter(config)),
   ])
 

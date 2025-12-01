@@ -16,6 +16,7 @@
     "@vleap/warps-adapter-evm": "0.2.0-beta.51",
     "@vleap/warps-adapter-fastset": "0.1.0-beta.44",
     "@vleap/warps-adapter-multiversx": "^0.2.0-beta.82",
+    "@vleap/warps-adapter-solana": "workspace:*",
     "@vleap/warps-adapter-sui": "^0.2.0-beta.57",
     "@vleap/warps-vm-node": "0.1.0-alpha.8"
   },
