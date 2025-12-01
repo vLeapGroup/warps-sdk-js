@@ -83,6 +83,7 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
 
   async getAsset(identifier: string): Promise<WarpChainAsset | null> {
     try {
+      console.log('WarpEvmDataLoader.getAsset', identifier)
       if (identifier === this.chain.nativeToken.identifier) {
         return this.chain.nativeToken
       }
@@ -93,6 +94,7 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
         return cachedAsset
       }
 
+      console.log('WarpEvmDataLoader.getAsset: findKnownTokenById', this.chain.name, this.config.env, identifier)
       const knownToken = findKnownTokenById(this.chain.name, this.config.env, identifier)
 
       if (knownToken) {
@@ -116,7 +118,7 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
         symbol: metadata.symbol,
         amount: 0n,
         decimals: metadata.decimals,
-        logoUrl: metadata.logoUrl || '',
+        logoUrl: metadata.logoUrl,
       }
 
       this.cache.set(cacheKey, asset, CacheTtl.OneHour)
