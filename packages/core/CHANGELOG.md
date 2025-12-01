@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.165
+
+### Patch Changes
+
+- 3d5fb6c: add chain-specific wallet globals
+
 ## 3.0.0-beta.164
 
 ### Patch Changes

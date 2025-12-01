@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-beta.51
+
+### Patch Changes
+
+- fa7fc83: update evm data loader
+- Updated dependencies [3d5fb6c]
+  - @vleap/warps@3.0.0-beta.165
+
 ## 0.2.0-beta.50
 
 ### Patch Changes
