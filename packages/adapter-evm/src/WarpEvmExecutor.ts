@@ -90,12 +90,18 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         iface = new ethers.Interface([action.abi as string])
       }
 
-      const nativeArgs = executable.args.map((arg) => this.serializer.coreSerializer.stringToNative(arg)[1])
+      const funcFragment = iface.getFunction(action.func)
+      if (!funcFragment) throw new Error(`WarpEvmExecutor: Function ${action.func} not found in ABI`)
+      const nativeArgs = this.prepareNativeArgs(executable.args, funcFragment)
       const encodedData = iface.encodeFunctionData(action.func, nativeArgs)
+      const value = this.getPayableValue(executable, funcFragment)
+
+      console.log('Encoded data:', encodedData)
+      console.log('Value:', value)
 
       const tx: ethers.TransactionRequest = {
         to: executable.destination,
-        value: executable.value,
+        value,
         data: encodedData,
       }
 
@@ -171,7 +177,9 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         iface = new ethers.Interface([action.abi as string])
       }
 
-      const nativeArgs = executable.args.map((arg) => this.serializer.coreSerializer.stringToNative(arg)[1])
+      const funcFragment = iface.getFunction(action.func)
+      if (!funcFragment) throw new Error(`WarpEvmExecutor: Function ${action.func} not found in ABI`)
+      const nativeArgs = this.prepareNativeArgs(executable.args, funcFragment)
       const encodedData = iface.encodeFunctionData(action.func, nativeArgs)
 
       const result = await this.provider.call({
@@ -191,9 +199,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
 
       const next = getNextInfo(this.config, [], executable.warp, executable.action, output)
 
-      const destinationInput = executable.resolvedInputs.find(
-        (i) => i.input.position === 'receiver' || i.input.position === 'destination'
-      )
+      const destinationInput = executable.resolvedInputs.find((i) => i.input.position === 'receiver' || i.input.position === 'destination')
       const destination = destinationInput?.value || executable.destination
 
       const resolvedInputs = extractResolvedInputValues(executable.resolvedInputs)
@@ -212,9 +218,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
         resolvedInputs,
       }
     } catch (error) {
-      const destinationInput = executable.resolvedInputs.find(
-        (i) => i.input.position === 'receiver' || i.input.position === 'destination'
-      )
+      const destinationInput = executable.resolvedInputs.find((i) => i.input.position === 'receiver' || i.input.position === 'destination')
       const destination = destinationInput?.value || executable.destination
 
       const resolvedInputs = extractResolvedInputValues(executable.resolvedInputs)
@@ -307,5 +311,61 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
     } catch (error) {
       throw new Error(`Failed to verify message: ${error}`)
     }
+  }
+
+  private getPayableValue(executable: WarpExecutable, funcFragment: ethers.FunctionFragment): bigint {
+    if (funcFragment.stateMutability !== 'payable') {
+      return executable.value
+    }
+
+    const nativeTokenId = this.chain.nativeToken?.identifier
+    const zeroAddress = '0x0000000000000000000000000000000000000000'
+
+    const nativeTokenTransfer = nativeTokenId
+      ? executable.transfers.find((transfer) => transfer.identifier === nativeTokenId || transfer.identifier === zeroAddress)
+      : undefined
+    if (nativeTokenTransfer) {
+      return nativeTokenTransfer.amount
+    }
+
+    const nativeTokenAsset = this.findNativeTokenAsset(executable.resolvedInputs, nativeTokenId, zeroAddress)
+    if (nativeTokenAsset) {
+      return nativeTokenAsset.amount
+    }
+
+    return executable.value
+  }
+
+  private findNativeTokenAsset(resolvedInputs: any[], nativeTokenId: string | undefined, zeroAddress: string): WarpChainAssetValue | null {
+    for (const input of resolvedInputs) {
+      if (input.input.type === 'asset' && input.value) {
+        const [, assetValue] = this.serializer.coreSerializer.stringToNative(input.value)
+        const asset = assetValue as WarpChainAssetValue
+        if (asset && 'amount' in asset) {
+          if (asset.identifier === nativeTokenId || asset.identifier === zeroAddress) {
+            return asset
+          }
+        }
+      }
+    }
+    return null
+  }
+
+  private prepareNativeArgs(args: string[], funcFragment: ethers.FunctionFragment): any[] {
+    return args.map((arg, index) => {
+      const nativeValue = this.serializer.coreSerializer.stringToNative(arg)[1]
+      const paramType = funcFragment.inputs[index]?.type
+      if (paramType === 'bytes32' && typeof nativeValue === 'string') {
+        let hexValue = nativeValue
+        if (!hexValue.startsWith('0x')) {
+          hexValue = '0x' + hexValue
+        }
+        if (hexValue.length !== 66) {
+          hexValue = ethers.zeroPadValue(hexValue, 32)
+        }
+        return hexValue
+      }
+      return nativeValue
+    })
   }
 }

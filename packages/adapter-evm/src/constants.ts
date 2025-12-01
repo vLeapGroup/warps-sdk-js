@@ -9,7 +9,7 @@ export const WarpEvmConstants = {
     Swap: 200000,
   },
   GasPrice: {
-    Default: '20000000000',
+    Default: '1200010',
   },
   Validation: {
     MinGasLimit: 21000,
