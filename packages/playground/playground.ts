@@ -2,6 +2,7 @@ import { WarpClient } from '@vleap/warps'
 import { getAllEvmAdapters } from '@vleap/warps-adapter-evm'
 import { getFastsetAdapter } from '@vleap/warps-adapter-fastset'
 import { getAllMultiversxAdapters, getMultiversxAdapter } from '@vleap/warps-adapter-multiversx'
+import { getSolanaAdapter } from '@vleap/warps-adapter-solana'
 import { getSuiAdapter } from '@vleap/warps-adapter-sui'
 import { createNodeTransformRunner } from '@vleap/warps-vm-node'
 import * as fs from 'fs'
@@ -15,9 +16,7 @@ const QueryItems = {
   amount: '100000',
   receiver: '0x5A92C4763dDAc3119a65f8882a53234C9988Efd9',
 }
-const WarpInputs: string[] = [
-  'asset:ETH|0.002', // Asset input: USDC with amount 1 (will be converted to 1000000 with 6 decimals)
-]
+const WarpInputs: string[] = ['asset:ETH|0.002']
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -27,17 +26,18 @@ const runWarp = async (warpFile: string) => {
   const warpPath = path.join(warpsDir, warpFile)
   if (!warpFile.endsWith('.json')) return
   const warpRaw = fs.readFileSync(warpPath, 'utf-8')
-  const walletData = await loadWallet(Chain)
-  const privateKey = walletData.privateKey || (await loadFile(Chain))
 
-  console.log('🔑 Wallet data loaded:', { address: walletData?.address, privateKey })
+  const allWallets = await loadAllWallets()
+  console.log('🔑 All wallets loaded:', Object.keys(allWallets))
 
   const config: any = {
     env: 'devnet',
     currentUrl: 'https://usewarp.to',
-    user: { wallets: { [Chain]: { ...walletData, privateKey } } },
+    user: { wallets: allWallets },
     transform: { runner: createNodeTransformRunner() },
   }
+
+  console.log('🔑 Config:', config)
 
   const client = new WarpClient(config, [
     ...getAllMultiversxAdapters(config),
@@ -88,6 +88,25 @@ const loadFile = async (chain: string): Promise<string | null> => {
   if (!fs.existsSync(filePath)) return null
   const file = await fs.promises.readFile(filePath, { encoding: 'utf8' })
   return file || null
+}
+
+const loadAllWallets = async (): Promise<Record<string, any>> => {
+  const walletsDir = path.join(__dirname, 'wallets')
+  const walletFiles = fs.readdirSync(walletsDir).filter((f) => f.endsWith('.json'))
+  const wallets: Record<string, any> = {}
+
+  for (const walletFile of walletFiles) {
+    const chainName = walletFile.replace('.json', '')
+    try {
+      const walletData = await loadWallet(chainName)
+      const privateKey = walletData.privateKey || (await loadFile(chainName))
+      wallets[chainName] = { ...walletData, privateKey }
+    } catch (error) {
+      console.warn(`⚠️  Failed to load wallet for ${chainName}:`, error)
+    }
+  }
+
+  return wallets
 }
 
 const warps = listWarps()
