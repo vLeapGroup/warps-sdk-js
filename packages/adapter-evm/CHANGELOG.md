@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-beta.52
+
+### Patch Changes
+
+- a295257: update evm executor
+
 ## 0.2.0-beta.51
 
 ### Patch Changes

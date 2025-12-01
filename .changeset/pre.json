@@ -12,7 +12,8 @@
     "@vleap/warps-vm-browser": "0.0.0",
     "@vleap/warps-vm-node": "0.0.0",
     "@vleap/warps-adapter-evm": "0.2.0-alpha.1",
-    "@vleap/warps-adapter-fastset": "0.1.0-alpha.1"
+    "@vleap/warps-adapter-fastset": "0.1.0-alpha.1",
+    "@vleap/warps-adapter-solana": "0.1.0-beta.1"
   },
   "changesets": [
     "afraid-dogs-joke",
@@ -179,6 +180,7 @@
     "rare-peas-help",
     "rare-shrimps-cheer",
     "ready-carrots-wear",
+    "ready-women-repair",
     "real-ideas-marry",
     "real-mails-float",
     "rich-ends-win",
