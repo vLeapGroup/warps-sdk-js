@@ -73,6 +73,8 @@ const runWarp = async (warpFile: string) => {
   const remoteTxs = await client.getActions(chain.name, hashes, true)
 
   await evaluateOutput(remoteTxs)
+
+  console.log('Remote transactions:', remoteTxs)
 }
 
 const listWarps = () => fs.readdirSync(warpsDir).filter((f) => f.endsWith('.ts') || f.endsWith('.js') || f.endsWith('.json'))
