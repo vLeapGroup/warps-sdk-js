@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.166
+
+### Minor Changes
+
+- ea04086: add action conditionals
+
 ## 3.0.0-beta.165
 
 ### Patch Changes
