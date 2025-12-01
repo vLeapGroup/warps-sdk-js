@@ -72,6 +72,7 @@ export type WarpTransferAction = {
   primary?: boolean
   auto?: boolean
   next?: string
+  when?: string
 }
 
 export type WarpContractAction = {
@@ -89,6 +90,7 @@ export type WarpContractAction = {
   primary?: boolean
   auto?: boolean
   next?: string
+  when?: string
 }
 
 export type WarpQueryAction = {
@@ -103,6 +105,7 @@ export type WarpQueryAction = {
   primary?: boolean
   auto?: boolean
   next?: string
+  when?: string
 }
 
 export type WarpCollectAction = {
@@ -114,6 +117,7 @@ export type WarpCollectAction = {
   primary?: boolean
   auto?: boolean
   next?: string
+  when?: string
 }
 
 export type WarpCollectDestination = WarpCollectDestinationHttp | string
@@ -132,6 +136,7 @@ export type WarpLinkAction = {
   inputs?: WarpActionInput[]
   primary?: boolean
   auto?: boolean
+  when?: string
 }
 
 export type WarpActionInputSource = 'field' | 'query' | 'user:wallet' | 'hidden'

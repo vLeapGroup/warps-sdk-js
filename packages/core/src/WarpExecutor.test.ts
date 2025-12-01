@@ -1032,4 +1032,183 @@ describe('WarpExecutor', () => {
       expect(mockWindowOpen).toHaveBeenCalledWith('https://example.com', '_blank')
     })
   })
+
+  describe('when property', () => {
+    it('should skip action when when condition evaluates to false', async () => {
+      const contractWarp = {
+        ...warp,
+        chain: 'multiversx',
+        actions: [
+          {
+            type: 'contract' as const,
+            label: 'Approve',
+            address: 'erd1token',
+            func: 'approve',
+            args: ['address:erd1bridge', 'uint256:1000'],
+            gasLimit: 200000,
+            primary: true,
+            inputs: [
+              {
+                name: 'Token',
+                as: 'TOKEN',
+                type: 'address',
+                source: 'field' as const,
+                position: 'arg:1' as const,
+              },
+            ],
+          },
+          {
+            type: 'contract' as const,
+            label: 'Deposit',
+            address: 'erd1bridge',
+            func: 'deposit',
+            args: [],
+            gasLimit: 200000,
+            when: "{{primary.TOKEN}} === '0x0000000000000000000000000000000000000000'",
+          },
+        ],
+      }
+
+      const result = await executor.execute(contractWarp, ['address:erd1token'])
+      expect(result.txs.length).toBe(1)
+    })
+
+    it('should execute action when when condition evaluates to true', async () => {
+      const contractWarp = {
+        ...warp,
+        chain: 'multiversx',
+        actions: [
+          {
+            type: 'contract' as const,
+            label: 'Approve',
+            address: 'erd1token',
+            func: 'approve',
+            args: ['address:erd1bridge', 'uint256:1000'],
+            gasLimit: 200000,
+            primary: true,
+            inputs: [
+              {
+                name: 'Token',
+                as: 'TOKEN',
+                type: 'address',
+                source: 'field' as const,
+                position: 'arg:1' as const,
+              },
+            ],
+          },
+          {
+            type: 'contract' as const,
+            label: 'Deposit',
+            address: 'erd1bridge',
+            func: 'deposit',
+            args: [],
+            gasLimit: 200000,
+            when: "{{primary.TOKEN}} === 'erd1token'",
+          },
+        ],
+      }
+
+      const result = await executor.execute(contractWarp, ['address:erd1token'])
+      expect(result.txs.length).toBe(2)
+    })
+
+    it('should execute action when when property is not present', async () => {
+      const contractWarp = {
+        ...warp,
+        chain: 'multiversx',
+        actions: [
+          {
+            type: 'contract' as const,
+            label: 'Deposit',
+            address: 'erd1bridge',
+            func: 'deposit',
+            args: [],
+            gasLimit: 200000,
+          },
+        ],
+      }
+
+      const result = await executor.execute(contractWarp, [])
+      expect(result.txs.length).toBe(1)
+    })
+
+    it('should handle when condition with primary asset properties', async () => {
+      const contractWarp = {
+        ...warp,
+        chain: 'multiversx',
+        actions: [
+          {
+            type: 'contract' as const,
+            label: 'Deposit',
+            address: 'erd1bridge',
+            func: 'deposit',
+            args: [],
+            gasLimit: 200000,
+            primary: true,
+            inputs: [
+              {
+                name: 'Asset',
+                as: 'asset',
+                type: 'asset',
+                source: 'field' as const,
+                position: { token: 'arg:1' as const, amount: 'arg:2' as const },
+              },
+            ],
+          },
+          {
+            type: 'contract' as const,
+            label: 'Approve',
+            address: '{{primary.asset.token}}',
+            func: 'approve',
+            args: ['address:erd1bridge', 'uint256:{{primary.asset.amount}}'],
+            gasLimit: 200000,
+            when: "{{primary.asset.token}} === 'EGLD'",
+          },
+        ],
+      }
+
+      const result = await executor.execute(contractWarp, ['asset:EGLD|1000'])
+      expect(result.txs.length).toBe(2)
+    })
+
+    it('should skip link action when when condition evaluates to false', async () => {
+      const { safeWindow } = require('./constants')
+      const mockWindowOpen = safeWindow.open as jest.Mock
+      mockWindowOpen.mockClear()
+
+      const linkWarp = {
+        ...warp,
+        chain: 'multiversx',
+        actions: [
+          {
+            type: 'contract' as const,
+            label: 'Deposit',
+            address: 'erd1bridge',
+            func: 'deposit',
+            args: [],
+            gasLimit: 200000,
+            primary: true,
+            inputs: [
+              {
+                name: 'Token',
+                as: 'TOKEN',
+                type: 'address',
+                source: 'field' as const,
+                position: 'arg:1' as const,
+              },
+            ],
+          },
+          {
+            type: 'link' as const,
+            label: 'External Link',
+            url: 'https://example.com',
+            when: "{{primary.TOKEN}} === '0x0000000000000000000000000000000000000000'",
+          },
+        ],
+      }
+
+      await executor.execute(linkWarp, ['address:erd1token'])
+      expect(mockWindowOpen).not.toHaveBeenCalled()
+    })
+  })
 })

@@ -1,5 +1,5 @@
 import { Warp, WarpAction, WarpActionType, WarpMeta } from '../types'
-import { getWarpPrimaryAction, isWarpActionAutoExecute } from './general'
+import { evaluateWhenCondition, getWarpPrimaryAction, isWarpActionAutoExecute } from './general'
 
 describe('getWarpPrimaryAction', () => {
   const createMockWarp = (actions: WarpAction[], meta?: Partial<WarpMeta>): Warp => ({
@@ -290,5 +290,38 @@ describe('isWarpActionAutoExecute', () => {
 
       expect(isWarpActionAutoExecute(collectAction, warp)).toBe(true)
     })
+  })
+})
+
+describe('evaluateWhenCondition', () => {
+  it('should return true for truthy expressions', () => {
+    expect(evaluateWhenCondition('true')).toBe(true)
+    expect(evaluateWhenCondition('1 === 1')).toBe(true)
+    expect(evaluateWhenCondition('"test" !== ""')).toBe(true)
+    expect(evaluateWhenCondition('5 > 3')).toBe(true)
+  })
+
+  it('should return false for falsy expressions', () => {
+    expect(evaluateWhenCondition('false')).toBe(false)
+    expect(evaluateWhenCondition('1 === 2')).toBe(false)
+    expect(evaluateWhenCondition('"" !== ""')).toBe(false)
+    expect(evaluateWhenCondition('5 < 3')).toBe(false)
+  })
+
+  it('should handle string comparisons', () => {
+    expect(evaluateWhenCondition("'test' === 'test'")).toBe(true)
+    expect(evaluateWhenCondition("'test' !== 'other'")).toBe(true)
+    expect(evaluateWhenCondition("'0x0000000000000000000000000000000000000000' !== '0x0000000000000000000000000000000000000000'")).toBe(false)
+  })
+
+  it('should handle complex expressions', () => {
+    expect(evaluateWhenCondition('(1 + 1) === 2')).toBe(true)
+    expect(evaluateWhenCondition('true && false')).toBe(false)
+    expect(evaluateWhenCondition('true || false')).toBe(true)
+  })
+
+  it('should throw error for invalid expressions', () => {
+    expect(() => evaluateWhenCondition('invalid syntax !!!')).toThrow()
+    expect(() => evaluateWhenCondition('undefinedFunction()')).toThrow()
   })
 })

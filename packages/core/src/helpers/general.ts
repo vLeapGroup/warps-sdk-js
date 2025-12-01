@@ -78,3 +78,25 @@ export const toPreviewText = (text: string, maxChars = 100) => {
 
 export const replacePlaceholders = (message: string, bag: Record<string, any>) =>
   message.replace(/\{\{([^}]+)\}\}/g, (match, p1) => bag[p1] || '')
+
+export const replacePlaceholdersInWhenExpression = (expression: string, bag: Record<string, any>): string => {
+  return expression.replace(/\{\{([^}]+)\}\}/g, (match, p1) => {
+    const value = bag[p1]
+    if (value === undefined || value === null) return ''
+    if (typeof value === 'string') {
+      return `'${value.replace(/'/g, "\\'")}'`
+    }
+    return String(value)
+  })
+}
+
+export const evaluateWhenCondition = (expression: string): boolean => {
+  if (!expression || typeof expression !== 'string') return true
+
+  try {
+    const result = new Function(`return ${expression}`)()
+    return Boolean(result)
+  } catch (error) {
+    throw new Error(`Failed to evaluate 'when' condition: ${expression}. Error: ${error}`)
+  }
+}

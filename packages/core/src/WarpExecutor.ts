@@ -1,14 +1,23 @@
 import { safeWindow } from './constants'
-import { extractResolvedInputValues } from './helpers/payload'
-import { extractCollectOutput, findWarpAdapterForChain, getNextInfo, getWarpActionByIndex, getWarpPrimaryAction, isWarpActionAutoExecute } from './helpers'
+import {
+  evaluateWhenCondition,
+  extractCollectOutput,
+  findWarpAdapterForChain,
+  getNextInfo,
+  getWarpActionByIndex,
+  getWarpPrimaryAction,
+  isWarpActionAutoExecute,
+  replacePlaceholdersInWhenExpression,
+} from './helpers'
 import { applyOutputToMessages } from './helpers/messages'
-import { buildMappedOutput } from './helpers/payload'
+import { buildMappedOutput, extractResolvedInputValues } from './helpers/payload'
 import { createAuthHeaders, createAuthMessage } from './helpers/signing'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
 import {
   Adapter,
   ResolvedInput,
   Warp,
+  WarpAction,
   WarpActionExecutionResult,
   WarpActionIndex,
   WarpAdapterGenericTransaction,
@@ -20,7 +29,6 @@ import {
   WarpExecutable,
   WarpLinkAction,
 } from './types'
-import { WarpCacheKey } from './WarpCache'
 import { WarpFactory } from './WarpFactory'
 import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
@@ -112,6 +120,13 @@ export class WarpExecutor {
     const action = getWarpActionByIndex(warp, actionIndex)
 
     if (action.type === 'link') {
+      if (action.when) {
+        const shouldExecute = await this.evaluateWhenCondition(warp, action, inputs, meta)
+        if (!shouldExecute) {
+          return { tx: null, chain: null, immediateExecution: null, executable: null }
+        }
+      }
+
       await this.callHandler(async () => {
         const url = (action as WarpLinkAction).url
         if (this.config.interceptors?.openLink) {
@@ -125,6 +140,13 @@ export class WarpExecutor {
     }
 
     const executable = await this.factory.createExecutable(warp, actionIndex, inputs, meta)
+
+    if (action.when) {
+      const shouldExecute = await this.evaluateWhenCondition(warp, action, inputs, meta, executable.resolvedInputs, executable.chain.name)
+      if (!shouldExecute) {
+        return { tx: null, chain: null, immediateExecution: null, executable: null }
+      }
+    }
 
     if (action.type === 'collect') {
       const result = await this.executeCollect(executable)
@@ -192,7 +214,9 @@ export class WarpExecutor {
               destination: null,
               resolvedInputs,
             }
-            await this.callHandler(() => this.handlers?.onError?.({ message: `Action ${currentActionIndex} failed: Transaction not found` }))
+            await this.callHandler(() =>
+              this.handlers?.onError?.({ message: `Action ${currentActionIndex} failed: Transaction not found` })
+            )
             return errorResult
           }
 
@@ -360,5 +384,41 @@ export class WarpExecutor {
   private async callHandler<T>(handler: (() => T | Promise<T>) | undefined): Promise<T | undefined> {
     if (!handler) return undefined
     return await handler()
+  }
+
+  private async evaluateWhenCondition(
+    warp: Warp,
+    action: WarpAction,
+    inputs: string[],
+    meta: { envs?: Record<string, any>; queries?: Record<string, any> },
+    resolvedInputs?: ResolvedInput[],
+    chainName?: string
+  ): Promise<boolean> {
+    if (!action.when) return true
+
+    const chain = chainName ? ({ name: chainName } as WarpChainInfo) : await this.factory.getChainInfoForWarp(warp, inputs)
+    const adapter = findWarpAdapterForChain(chain.name, this.adapters)
+    const interpolator = new WarpInterpolator(this.config, adapter, this.adapters)
+    const { action: primaryAction } = getWarpPrimaryAction(warp)
+    const primaryTypedInputs = this.factory.getStringTypedInputs(primaryAction, inputs)
+    const primaryResolved = await this.factory.getResolvedInputs(chain.name, primaryAction, primaryTypedInputs, interpolator)
+    const primaryResolvedInputs = await this.factory.getModifiedInputs(primaryResolved)
+
+    let actionResolvedInputs: ResolvedInput[]
+    if (resolvedInputs) {
+      actionResolvedInputs = resolvedInputs
+    } else {
+      const actionResolved = await this.factory.getResolvedInputs(
+        chain.name,
+        action,
+        this.factory.getStringTypedInputs(action, inputs),
+        interpolator
+      )
+      actionResolvedInputs = await this.factory.getModifiedInputs(actionResolved)
+    }
+
+    const bag = interpolator.buildInputBag(actionResolvedInputs, this.factory.getSerializer(), primaryResolvedInputs)
+    const interpolatedWhen = replacePlaceholdersInWhenExpression(action.when, bag)
+    return evaluateWhenCondition(interpolatedWhen)
   }
 }

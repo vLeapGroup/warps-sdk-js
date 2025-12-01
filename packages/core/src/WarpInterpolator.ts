@@ -156,7 +156,7 @@ export class WarpInterpolator {
     })
   }
 
-  private buildInputBag(
+  buildInputBag(
     resolvedInputs: ResolvedInput[],
     serializer: WarpSerializer,
     primaryInputs?: ResolvedInput[]
