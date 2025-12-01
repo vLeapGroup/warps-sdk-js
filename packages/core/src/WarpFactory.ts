@@ -58,7 +58,7 @@ export class WarpFactory {
     if (!action) throw new Error('WarpFactory: Action not found')
     const chain = await this.getChainInfoForWarp(warp, inputs)
     const adapter = findWarpAdapterForChain(chain.name, this.adapters)
-    const interpolator = new WarpInterpolator(this.config, adapter)
+    const interpolator = new WarpInterpolator(this.config, adapter, this.adapters)
     const preparedWarp = await interpolator.apply(warp, meta)
     const preparedAction = getWarpActionByIndex(preparedWarp, actionIndex) as WarpTransferAction | WarpContractAction | WarpCollectAction
 

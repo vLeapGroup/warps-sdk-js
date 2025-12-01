@@ -254,7 +254,7 @@ export class WarpExecutor {
     payload: any,
     extra: Record<string, any> | undefined
   ): Promise<WarpActionExecutionResult> {
-    const interpolator = new WarpInterpolator(this.config, findWarpAdapterForChain(executable.chain.name, this.adapters))
+    const interpolator = new WarpInterpolator(this.config, findWarpAdapterForChain(executable.chain.name, this.adapters), this.adapters)
 
     const headers = new Headers()
     headers.set('Content-Type', 'application/json')

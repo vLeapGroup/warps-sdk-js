@@ -103,7 +103,7 @@ export class WarpLinkDetecter {
 
       const warpChain = warp.chain || adapter.chainInfo.name
       const warpAdapter = findWarpAdapterForChain(warpChain, this.adapters)
-      const preparedWarp = await new WarpInterpolator(this.config, warpAdapter).apply(warp)
+      const preparedWarp = await new WarpInterpolator(this.config, warpAdapter, this.adapters).apply(warp)
 
       return { match: true, url: urlOrId, warp: preparedWarp, chain: warpChain, registryInfo, brand }
     } catch (e) {

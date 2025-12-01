@@ -795,3 +795,162 @@ describe('WarpInterpolator applyInputs with primary inputs', () => {
     expect(result).toBe('')
   })
 })
+
+describe('WarpInterpolator chain-specific placeholders', () => {
+  beforeEach(() => {
+    new WarpCache('memory').clear()
+  })
+
+  const createMockAdapterForChain = (chainName: string, walletAddress?: string, publicKey?: string) => {
+    const adapter = createMockAdapter()
+    adapter.chainInfo = createMockChainInfo(chainName)
+    adapter.chainInfo.name = chainName
+    if (walletAddress) {
+      adapter.wallet = {
+        ...adapter.wallet,
+        getAddress: () => walletAddress,
+        getPublicKey: () => publicKey || walletAddress,
+      } as any
+    }
+    return adapter
+  }
+
+  it('interpolates USER_WALLET without chain argument', async () => {
+    const config = createMockConfig({
+      user: {
+        wallets: {
+          multiversx: 'erd1multiversx',
+        },
+      },
+    })
+    const adapter = createMockAdapterForChain('multiversx')
+    const adapters = [adapter]
+
+    const warp = {
+      ...createMockWarp(),
+      actions: [
+        {
+          type: 'transfer' as const,
+          label: 'Transfer',
+          address: '{{USER_WALLET}}',
+          value: '0',
+          inputs: [],
+        } as WarpTransferAction,
+      ],
+    }
+
+    const interpolator = new WarpInterpolator(config, adapter, adapters)
+    const result = await interpolator.apply(warp)
+    expect((result.actions[0] as WarpTransferAction).address).toBe('erd1multiversx')
+  })
+
+  it('interpolates USER_WALLET with chain argument', async () => {
+    const config = createMockConfig({
+      user: {
+        wallets: {
+          multiversx: 'erd1multiversx',
+          fastset: 'erd1fastset',
+        },
+      },
+    })
+    const multiversxAdapter = createMockAdapterForChain('multiversx')
+    const fastsetAdapter = createMockAdapterForChain('fastset')
+    const adapters = [multiversxAdapter, fastsetAdapter]
+
+    const warp = {
+      ...createMockWarp(),
+      actions: [
+        {
+          type: 'transfer' as const,
+          label: 'Transfer',
+          address: '{{USER_WALLET:fastset}}',
+          value: '0',
+          inputs: [],
+        } as WarpTransferAction,
+      ],
+    }
+
+    const interpolator = new WarpInterpolator(config, multiversxAdapter, adapters)
+    const result = await interpolator.apply(warp)
+    expect((result.actions[0] as WarpTransferAction).address).toBe('erd1fastset')
+  })
+
+  it('interpolates USER_WALLET_PUBLICKEY without chain argument', async () => {
+    const config = createMockConfig()
+    const adapter = createMockAdapterForChain('multiversx', 'erd1address', 'erd1publickey')
+    const adapters = [adapter]
+
+    const warp = {
+      ...createMockWarp(),
+      actions: [
+        {
+          type: 'transfer' as const,
+          label: 'Transfer',
+          address: '{{USER_WALLET_PUBLICKEY}}',
+          value: '0',
+          inputs: [],
+        } as WarpTransferAction,
+      ],
+    }
+
+    const interpolator = new WarpInterpolator(config, adapter, adapters)
+    const result = await interpolator.apply(warp)
+    expect((result.actions[0] as WarpTransferAction).address).toBe('erd1publickey')
+  })
+
+  it('interpolates USER_WALLET_PUBLICKEY with chain argument', async () => {
+    const config = createMockConfig()
+    const multiversxAdapter = createMockAdapterForChain('multiversx', 'erd1multiversx', 'erd1multiversxkey')
+    const fastsetAdapter = createMockAdapterForChain('fastset', 'erd1fastset', 'erd1fastsetkey')
+    const adapters = [multiversxAdapter, fastsetAdapter]
+
+    const warp = {
+      ...createMockWarp(),
+      actions: [
+        {
+          type: 'transfer' as const,
+          label: 'Transfer',
+          address: '{{USER_WALLET_PUBLICKEY:fastset}}',
+          value: '0',
+          inputs: [],
+        } as WarpTransferAction,
+      ],
+    }
+
+    const interpolator = new WarpInterpolator(config, multiversxAdapter, adapters)
+    const result = await interpolator.apply(warp)
+    expect((result.actions[0] as WarpTransferAction).address).toBe('erd1fastsetkey')
+  })
+
+  it('interpolates multiple chain-specific placeholders in same action', async () => {
+    const config = createMockConfig({
+      user: {
+        wallets: {
+          multiversx: 'erd1multiversx',
+          fastset: 'erd1fastset',
+        },
+      },
+    })
+    const multiversxAdapter = createMockAdapterForChain('multiversx', 'erd1multiversx', 'erd1multiversxkey')
+    const fastsetAdapter = createMockAdapterForChain('fastset', 'erd1fastset', 'erd1fastsetkey')
+    const adapters = [multiversxAdapter, fastsetAdapter]
+
+    const warp = {
+      ...createMockWarp(),
+      actions: [
+        {
+          type: 'transfer' as const,
+          label: 'Transfer',
+          address: '{{USER_WALLET:fastset}}',
+          value: '{{USER_WALLET_PUBLICKEY:multiversx}}',
+          inputs: [],
+        } as WarpTransferAction,
+      ],
+    }
+
+    const interpolator = new WarpInterpolator(config, multiversxAdapter, adapters)
+    const result = await interpolator.apply(warp)
+    expect((result.actions[0] as WarpTransferAction).address).toBe('erd1fastset')
+    expect((result.actions[0] as WarpTransferAction).value).toBe('erd1multiversxkey')
+  })
+})
