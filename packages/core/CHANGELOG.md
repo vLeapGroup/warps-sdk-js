@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.167
+
+### Patch Changes
+
+- 1f7ba22: update solana - wip
+
 ## 3.0.0-beta.166
 
 ### Minor Changes

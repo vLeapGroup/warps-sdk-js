@@ -1,8 +1,17 @@
 # Changelog
 
+## 0.1.0-beta.2
+
+### Patch Changes
+
+- 1f7ba22: update solana - wip
+- Updated dependencies [1f7ba22]
+  - @vleap/warps@3.0.0-beta.167
+
 ## [0.2.0-beta.1] - 2024-01-01
 
 ### Added
+
 - Initial Solana adapter implementation
 - WarpSolanaWallet for transaction signing and wallet management
 - WarpSolanaExecutor for transaction creation and execution

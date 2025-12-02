@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-beta.53
+
+### Patch Changes
+
+- 18898ed: update evm serialization
+- Updated dependencies [1f7ba22]
+  - @vleap/warps@3.0.0-beta.167
+
 ## 0.2.0-beta.52
 
 ### Patch Changes
