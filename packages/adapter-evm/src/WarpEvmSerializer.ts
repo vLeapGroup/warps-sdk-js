@@ -79,7 +79,8 @@ export class WarpEvmSerializer implements AdapterWarpSerializer {
       case 'address':
         return String(value)
       case 'hex':
-        return String(value)
+        const hexValue = String(value)
+        return hexValue.startsWith('0x') ? hexValue : `0x${hexValue}`
       default:
         if (type.startsWith('list:')) {
           const [, itemType, itemsStr] = type.split(':')
@@ -135,7 +136,7 @@ export class WarpEvmSerializer implements AdapterWarpSerializer {
       case 'address':
         return stringValue
       case 'hex':
-        return stringValue
+        return stringValue.startsWith('0x') ? stringValue : `0x${stringValue}`
       default:
         if (type.startsWith('list:')) {
           const [, itemType, itemsStr] = type.split(':')

@@ -77,6 +77,11 @@ describe('WarpEvmSerializer', () => {
       const hex = '0x1234567890abcdef'
       expect(serializer.stringToTyped(`hex:${hex}`)).toBe(hex)
     })
+
+    it('should add 0x prefix to hex values without prefix', () => {
+      const hexWithoutPrefix = '1234567890abcdef'
+      expect(serializer.stringToTyped(`hex:${hexWithoutPrefix}`)).toBe(`0x${hexWithoutPrefix}`)
+    })
   })
 
   describe('nativeToTyped', () => {
@@ -87,6 +92,13 @@ describe('WarpEvmSerializer', () => {
       expect(serializer.nativeToTyped('address', '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6')).toBe(
         '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6'
       )
+    })
+
+    it('should add 0x prefix to hex values without prefix', () => {
+      const hexWithPrefix = '0x1234567890abcdef'
+      const hexWithoutPrefix = '1234567890abcdef'
+      expect(serializer.nativeToTyped('hex', hexWithPrefix)).toBe(hexWithPrefix)
+      expect(serializer.nativeToTyped('hex', hexWithoutPrefix)).toBe(`0x${hexWithoutPrefix}`)
     })
   })
 

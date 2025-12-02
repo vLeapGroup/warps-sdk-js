@@ -93,6 +93,7 @@ export class WarpEvmExecutor implements AdapterWarpExecutor {
       const funcFragment = iface.getFunction(action.func)
       if (!funcFragment) throw new Error(`WarpEvmExecutor: Function ${action.func} not found in ABI`)
       const nativeArgs = this.prepareNativeArgs(executable.args, funcFragment)
+      console.log('Native args:', nativeArgs)
       const encodedData = iface.encodeFunctionData(action.func, nativeArgs)
       const value = this.getPayableValue(executable, funcFragment)
 
