@@ -1,4 +1,4 @@
-import { WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { WarpChainEnv, WarpChainInfo, WarpChainName, WarpClientConfig } from '@vleap/warps'
 import { WarpSolanaDataLoader } from './WarpSolanaDataLoader'
 import { NativeTokenSol } from './chains/solana'
 
@@ -9,7 +9,7 @@ describe('WarpSolanaDataLoader', () => {
   }
 
   const mockChainInfo: WarpChainInfo = {
-    name: 'solana',
+    name: WarpChainName.Solana,
     displayName: 'Solana',
     chainId: '101',
     blockTime: 400,
@@ -38,7 +38,7 @@ describe('WarpSolanaDataLoader', () => {
         const result = await dataLoader.getAccount(address)
         expect(result).toBeDefined()
         expect(result.address).toBe(address)
-        expect(result.chain).toBe('solana')
+        expect(result.chain).toBe(WarpChainName.Solana)
         expect(typeof result.balance).toBe('bigint')
       } catch (error) {
         // Expected to fail in test environment without real RPC
@@ -58,7 +58,7 @@ describe('WarpSolanaDataLoader', () => {
         const result = await dataLoader.getAccountAssets(address)
         expect(Array.isArray(result)).toBe(true)
         result.forEach((asset) => {
-          expect(asset.chain).toBe('solana')
+          expect(asset.chain).toBe(WarpChainName.Solana)
           expect(asset.identifier).toBeDefined()
           expect(typeof asset.amount).toBe('bigint')
         })

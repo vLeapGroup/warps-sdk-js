@@ -1,3 +1,4 @@
+import { WarpChainName } from '@vleap/warps'
 import { WarpSolanaExplorer } from './WarpSolanaExplorer'
 
 describe('WarpSolanaExplorer', () => {
@@ -7,7 +8,7 @@ describe('WarpSolanaExplorer', () => {
 
   beforeEach(() => {
     chain = {
-      name: 'solana',
+      name: WarpChainName.Solana,
       displayName: 'Solana',
     }
     config = {

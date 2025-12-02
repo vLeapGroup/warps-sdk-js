@@ -1,8 +1,8 @@
-import { AdapterFactory, WarpChainAsset } from '@vleap/warps'
+import { AdapterFactory, WarpChainAsset, WarpChainName } from '@vleap/warps'
 import { createSolanaAdapter } from './common'
 
 export const NativeTokenSol: WarpChainAsset = {
-  chain: 'solana',
+  chain: WarpChainName.Solana,
   identifier: 'SOL',
   symbol: 'SOL',
   name: 'Solana',
@@ -10,9 +10,9 @@ export const NativeTokenSol: WarpChainAsset = {
   logoUrl: 'https://vleap.ai/images/tokens/sol.svg',
 }
 
-export const getSolanaAdapter: AdapterFactory = createSolanaAdapter('solana', {
+export const getSolanaAdapter: AdapterFactory = createSolanaAdapter(WarpChainName.Solana, {
   mainnet: {
-    name: 'solana',
+    name: WarpChainName.Solana,
     displayName: 'Solana Mainnet',
     chainId: '101',
     blockTime: 400,
@@ -22,7 +22,7 @@ export const getSolanaAdapter: AdapterFactory = createSolanaAdapter('solana', {
     nativeToken: NativeTokenSol,
   },
   testnet: {
-    name: 'solana',
+    name: WarpChainName.Solana,
     displayName: 'Solana Testnet',
     chainId: '103',
     blockTime: 400,
@@ -32,7 +32,7 @@ export const getSolanaAdapter: AdapterFactory = createSolanaAdapter('solana', {
     nativeToken: NativeTokenSol,
   },
   devnet: {
-    name: 'solana',
+    name: WarpChainName.Solana,
     displayName: 'Solana Devnet',
     chainId: '103',
     blockTime: 400,

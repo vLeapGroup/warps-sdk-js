@@ -1,4 +1,4 @@
-import { WarpChainInfo, WarpClientConfig, WarpExecutable } from '@vleap/warps'
+import { WarpChainInfo, WarpChainName, WarpClientConfig, WarpExecutable } from '@vleap/warps'
 import { WarpSolanaExecutor } from './WarpSolanaExecutor'
 import { NativeTokenSol } from './chains/solana'
 
@@ -13,13 +13,13 @@ describe('WarpSolanaExecutor', () => {
       env: 'testnet',
       user: {
         wallets: {
-          solana: '5KJvsngHeMoo424rH3Y1bVhjKM2f7jNsN1Tsp9i6F9XHj8qJ7vK',
+          [WarpChainName.Solana]: '5KJvsngHeMoo424rH3Y1bVhjKM2f7jNsN1Tsp9i6F9XHj8qJ7vK',
         },
       },
     } as WarpClientConfig
 
     mockChainInfo = {
-      name: 'solana',
+      name: WarpChainName.Solana,
       displayName: 'Solana Testnet',
       chainId: '103',
       blockTime: 400,

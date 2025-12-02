@@ -9,6 +9,7 @@ export enum WarpChainName {
   Arbitrum = 'arbitrum',
   Somnia = 'somnia',
   Fastset = 'fastset',
+  Solana = 'solana',
 }
 
 export const WarpConstants = {

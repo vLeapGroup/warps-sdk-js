@@ -1,3 +1,4 @@
+import { WarpChainName } from '@vleap/warps'
 import { WarpSolanaWallet } from './WarpSolanaWallet'
 
 describe('WarpSolanaWallet', () => {
@@ -8,7 +9,7 @@ describe('WarpSolanaWallet', () => {
 
   beforeEach(() => {
     chain = {
-      name: 'solana',
+      name: WarpChainName.Solana,
       defaultApiUrl: 'https://api.testnet.solana.com',
       addressHrp: '',
     }
