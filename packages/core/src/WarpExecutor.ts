@@ -35,7 +35,7 @@ import { WarpLogger } from './WarpLogger'
 
 export type ExecutionHandlers = {
   onExecuted?: (result: WarpActionExecutionResult) => void | Promise<void>
-  onError?: (params: { message: string }) => void
+  onError?: (params: { message: string; result: WarpActionExecutionResult }) => void
   onSignRequest?: (params: { message: string; chain: WarpChainInfo }) => string | Promise<string>
   onActionExecuted?: (params: {
     action: WarpActionIndex
@@ -157,7 +157,7 @@ export class WarpExecutor {
         await this.callHandler(() => this.handlers?.onActionUnhandled?.({ action: actionIndex, chain: null, execution: result, tx: null }))
         return { tx: null, chain: null, immediateExecution: result, executable }
       } else {
-        this.handlers?.onError?.({ message: JSON.stringify(result.values) })
+        this.handlers?.onError?.({ message: JSON.stringify(result.output._DATA), result })
       }
       return { tx: null, chain: null, immediateExecution: null, executable }
     }
@@ -171,7 +171,7 @@ export class WarpExecutor {
           this.handlers?.onActionExecuted?.({ action: actionIndex, chain: executable.chain, execution: result, tx: null })
         )
       } else {
-        this.handlers?.onError?.({ message: JSON.stringify(result.values) })
+        this.handlers?.onError?.({ message: JSON.stringify(result.output._DATA), result })
       }
       return { tx: null, chain: executable.chain, immediateExecution: result, executable }
     }
@@ -215,7 +215,7 @@ export class WarpExecutor {
               resolvedInputs,
             }
             await this.callHandler(() =>
-              this.handlers?.onError?.({ message: `Action ${currentActionIndex} failed: Transaction not found` })
+              this.handlers?.onError?.({ message: `Action ${currentActionIndex} failed: Transaction not found`, result: errorResult })
             )
             return errorResult
           }
@@ -232,7 +232,7 @@ export class WarpExecutor {
               })
             )
           } else {
-            await this.callHandler(() => this.handlers?.onError?.({ message: 'Action failed: ' + JSON.stringify(result.values) }))
+            await this.callHandler(() => this.handlers?.onError?.({ message: 'Action failed: ' + JSON.stringify(result.values), result }))
           }
 
           return result
@@ -244,7 +244,8 @@ export class WarpExecutor {
       const lastOutput = outputs[outputs.length - 1]
       await this.callHandler(() => this.handlers?.onExecuted?.(lastOutput))
     } else {
-      await this.callHandler(() => this.handlers?.onError?.({ message: `Warp failed: ${JSON.stringify(outputs.map((r) => r.values))}` }))
+      const result = outputs.find((r) => r.status !== 'success')!
+      await this.callHandler(() => this.handlers?.onError?.({ message: `Warp failed: ${JSON.stringify(outputs)}`, result }))
     }
   }
 

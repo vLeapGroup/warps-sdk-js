@@ -1,5 +1,5 @@
 import { createMockAdapter, createMockWarp } from './test-utils/sharedMocks'
-import { Warp, WarpClientConfig, WarpCollectAction } from './types'
+import { Warp, WarpClientConfig, WarpCollectAction, WarpQueryAction } from './types'
 import { WarpExecutor } from './WarpExecutor'
 
 // Mock fetch globally
@@ -1209,6 +1209,84 @@ describe('WarpExecutor', () => {
 
       await executor.execute(linkWarp, ['address:erd1token'])
       expect(mockWindowOpen).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('error handling', () => {
+    it('should call onError with result.output._DATA for collect action errors', async () => {
+      const errorData = { error: 'Collect failed', code: 500 }
+      mockFetch.mockResolvedValueOnce({ ok: false, status: 500, json: async () => errorData })
+
+      const collectWarp = {
+        ...warp,
+        chain: 'multiversx',
+        actions: [
+          {
+            type: 'collect',
+            label: 'Collect Data',
+            destination: { url: 'https://api.example.com/collect', method: 'POST' },
+            inputs: [{ name: 'address', type: 'string', source: 'field', position: 'receiver' }],
+          } as WarpCollectAction,
+        ],
+      }
+
+      const inputs = ['address:erd1receiver']
+      await executor.execute(collectWarp, inputs)
+
+      expect(handlers.onError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: JSON.stringify(errorData),
+          result: expect.objectContaining({
+            status: 'error',
+            output: expect.objectContaining({
+              _DATA: errorData,
+            }),
+          }),
+        })
+      )
+    })
+
+    it('should call onError with result.output._DATA for query action errors', async () => {
+      const errorData = { error: 'Query failed', code: 400 }
+      const queryAdapter = createMockAdapter()
+      queryAdapter.chain = 'multiversx'
+      queryAdapter.executor.executeQuery = jest.fn().mockResolvedValue({
+        status: 'error',
+        warp: warp,
+        action: 1,
+        user: 'erd1...',
+        txHash: null,
+        tx: null,
+        next: null,
+        values: { string: [], native: [], mapped: {} },
+        output: { _DATA: errorData },
+        messages: {},
+        destination: null,
+        resolvedInputs: [],
+      })
+
+      const queryHandlers = { onExecuted: jest.fn(), onError: jest.fn() }
+      const queryExecutor = new WarpExecutor(config, [queryAdapter], queryHandlers)
+
+      const queryWarp = {
+        ...warp,
+        chain: 'multiversx',
+        actions: [{ type: 'query', label: 'Query Data', address: 'erd1test', func: 'getAccount', inputs: [] } as WarpQueryAction],
+      } as Warp
+
+      await queryExecutor.execute(queryWarp, [])
+
+      expect(queryHandlers.onError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: JSON.stringify(errorData),
+          result: expect.objectContaining({
+            status: 'error',
+            output: expect.objectContaining({
+              _DATA: errorData,
+            }),
+          }),
+        })
+      )
     })
   })
 })
