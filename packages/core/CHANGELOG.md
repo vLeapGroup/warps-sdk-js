@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.168
+
+### Patch Changes
+
+- 77980a4: update exec error handling
+
 ## 3.0.0-beta.167
 
 ### Patch Changes
