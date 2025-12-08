@@ -84,6 +84,26 @@ describe('WarpEvmExecutor', () => {
       return '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6'
     })
 
+    // Mock Interface class
+    const mockGetFunction = jest.fn().mockImplementation((funcName: string) => {
+      if (funcName === 'transfer' || funcName === 'transfer(address,uint256)') {
+        return {
+          name: 'transfer',
+          inputs: [
+            { name: 'to', type: 'address' },
+            { name: 'amount', type: 'uint256' },
+          ],
+          stateMutability: 'nonpayable',
+        }
+      }
+      return null
+    })
+    const mockEncodeFunctionData = jest.fn().mockReturnValue('0x1234567890abcdef')
+    ;(ethers.Interface as unknown as jest.Mock).mockImplementation(() => ({
+      getFunction: mockGetFunction,
+      encodeFunctionData: mockEncodeFunctionData,
+    }))
+
     executor = new WarpEvmExecutor(mockConfig, mockChainInfo)
   })
 
@@ -288,6 +308,18 @@ describe('WarpEvmExecutor', () => {
             {
               type: 'contract',
               func: 'transfer(address,uint256)',
+              abi: JSON.stringify([
+                {
+                  inputs: [
+                    { name: 'to', type: 'address' },
+                    { name: 'amount', type: 'uint256' },
+                  ],
+                  name: 'transfer',
+                  outputs: [{ type: 'bool' }],
+                  stateMutability: 'nonpayable',
+                  type: 'function',
+                },
+              ]),
             },
           ],
         },
@@ -302,7 +334,7 @@ describe('WarpEvmExecutor', () => {
       expect(tx).toEqual({
         to: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
         value: BigInt(0),
-        data: undefined,
+        data: '0x1234567890abcdef',
         chainId: 11155111,
         gasLimit: BigInt(21000),
         maxFeePerGas: ethers.parseUnits('20', 'gwei'),
@@ -456,6 +488,18 @@ describe('WarpEvmExecutor', () => {
             {
               type: 'contract',
               func: 'transfer(address,uint256)',
+              abi: JSON.stringify([
+                {
+                  inputs: [
+                    { name: 'to', type: 'address' },
+                    { name: 'amount', type: 'uint256' },
+                  ],
+                  name: 'transfer',
+                  outputs: [{ type: 'bool' }],
+                  stateMutability: 'nonpayable',
+                  type: 'function',
+                },
+              ]),
             },
           ],
         },
@@ -470,7 +514,7 @@ describe('WarpEvmExecutor', () => {
       expect(tx).toEqual({
         to: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
         value: BigInt(0),
-        data: undefined,
+        data: '0x1234567890abcdef',
         chainId: 11155111,
         gasLimit: BigInt(21000),
         maxFeePerGas: ethers.parseUnits('20', 'gwei'),
