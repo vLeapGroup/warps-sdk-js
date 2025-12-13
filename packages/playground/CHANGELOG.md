@@ -1,5 +1,24 @@
 # @warps/playground
 
+## 0.2.0-beta.122
+
+### Minor Changes
+
+- 496987c: add mcp
+
+### Patch Changes
+
+- Updated dependencies [6016b18]
+- Updated dependencies [496987c]
+  - @vleap/warps-adapter-evm@0.2.0-beta.54
+  - @vleap/warps-adapter-fastset@0.1.0-beta.45
+  - @vleap/warps-adapter-mcp@1.0.0-beta.0
+  - @vleap/warps-adapter-multiversx@0.2.0-beta.83
+  - @vleap/warps-adapter-solana@0.1.0-beta.3
+  - @vleap/warps-adapter-sui@0.2.0-beta.58
+  - @vleap/warps@3.0.0-beta.169
+  - @vleap/warps-vm-node@0.1.0-beta.9
+
 ## 0.2.0-beta.121
 
 ### Patch Changes

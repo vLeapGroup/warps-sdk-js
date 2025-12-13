@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.169
+
+### Minor Changes
+
+- 496987c: add mcp
+
+### Patch Changes
+
+- 6016b18: upgrade deps
+
 ## 3.0.0-beta.168
 
 ### Patch Changes
