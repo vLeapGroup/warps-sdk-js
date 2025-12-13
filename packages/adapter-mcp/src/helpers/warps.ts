@@ -53,7 +53,7 @@ export const convertMcpToolToWarp = async (
     .setDescription(tool.description ? { en: tool.description } : null)
     .addAction(mcpAction)
     .setOutput(Object.keys(output).length > 0 ? output : null)
-    .build()
+    .build(false)
 }
 
 const convertJsonSchemaTypeToWarpType = (type: string, format?: string): WarpActionInputType => {

@@ -71,13 +71,15 @@ export class WarpBuilder implements BaseWarpBuilder {
     return this
   }
 
-  async build(): Promise<Warp> {
+  async build(validate = true): Promise<Warp> {
     this.ensure(this.pendingWarp.protocol, 'protocol is required')
     this.ensure(this.pendingWarp.name, 'name is required')
     this.ensureWarpText(this.pendingWarp.title, 'title is required')
     this.ensure(this.pendingWarp.actions.length > 0, 'actions are required')
 
-    await this.validate(this.pendingWarp)
+    if (validate) {
+      await this.validate(this.pendingWarp)
+    }
 
     return this.pendingWarp
   }

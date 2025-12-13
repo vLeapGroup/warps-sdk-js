@@ -118,7 +118,7 @@ export interface BaseWarpBuilder {
   setActions(actions: WarpAction[]): BaseWarpBuilder
   addAction(action: WarpAction): BaseWarpBuilder
   setOutput(output: Record<string, string> | null): BaseWarpBuilder
-  build(): Promise<Warp>
+  build(validate?: boolean): Promise<Warp>
 }
 
 export interface AdapterWarpBuilder {
