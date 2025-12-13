@@ -1,7 +1,7 @@
 import { WarpConstants } from './constants'
 import { getNextInfo } from './helpers'
 import { createMockAdapter, createMockConfig, createMockWarp } from './test-utils/sharedMocks'
-import { TransformRunner, WarpAction, WarpChainInfo, WarpClientConfig, WarpContractAction } from './types'
+import { TransformRunner, WarpAction, WarpChainInfo, WarpClientConfig, WarpContractAction, WarpMcpAction } from './types'
 import { WarpFactory } from './WarpFactory'
 
 const testConfig: WarpClientConfig = {
@@ -761,6 +761,69 @@ describe('WarpFactory', () => {
       expect(result.destination).toBe('EGLD')
       expect(result.args[0]).toBe('address:erd1bridge')
       expect(result.args[1]).toBe('uint256:1000000000000000000')
+    })
+  })
+
+  describe('mcp actions', () => {
+    it('resolves inputs for mcp actions', async () => {
+      const factory = new WarpFactory(testConfig, [createMockAdapter()])
+      const warp: any = {
+        meta: { hash: 'abc' },
+        actions: [
+          {
+            type: 'transfer',
+            label: 'Transfer',
+            address: 'erd1dest',
+            value: '0',
+            primary: true,
+          },
+          {
+            type: 'mcp',
+            label: 'MCP Tool',
+            destination: {
+              url: 'https://mcp.example.com',
+              tool: 'test_tool',
+            },
+            inputs: [
+              { name: 'Name', type: 'string', position: 'payload:name', source: 'field' },
+              { name: 'Quantity', type: 'uint256', position: 'payload:quantity', source: 'field' },
+            ],
+            primary: false,
+          } as WarpMcpAction,
+        ],
+      }
+      const result = await factory.createExecutable(warp, 2, ['string:Product', 'uint256:5'])
+
+      expect(result.resolvedInputs).toHaveLength(2)
+      expect(result.resolvedInputs[0].input.name).toBe('Name')
+      expect(result.resolvedInputs[0].input.position).toBe('payload:name')
+      expect(result.resolvedInputs[0].value).toBe('string:Product')
+      expect(result.resolvedInputs[1].input.name).toBe('Quantity')
+      expect(result.resolvedInputs[1].input.position).toBe('payload:quantity')
+      expect(result.resolvedInputs[1].value).toBe('uint256:5')
+    })
+
+    it('allows mcp actions without destination requirement', async () => {
+      const factory = new WarpFactory(testConfig, [createMockAdapter()])
+      const warp: any = {
+        meta: { hash: 'abc' },
+        actions: [
+          {
+            type: 'mcp',
+            label: 'MCP Tool',
+            destination: {
+              url: 'https://mcp.example.com',
+              tool: 'test_tool',
+            },
+            inputs: [],
+            primary: true,
+          } as WarpMcpAction,
+        ],
+      }
+      const result = await factory.createExecutable(warp, 1, [])
+
+      expect(result.destination).toBe('https://mcp.example.com')
+      expect(result.resolvedInputs).toEqual([])
     })
   })
 })

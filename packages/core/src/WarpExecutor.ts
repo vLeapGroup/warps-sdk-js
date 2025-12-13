@@ -28,6 +28,8 @@ import {
   WarpCollectDestinationHttp,
   WarpExecutable,
   WarpLinkAction,
+  WarpMcpAction,
+  WarpMcpDestination,
 } from './types'
 import { WarpFactory } from './WarpFactory'
 import { WarpInterpolator } from './WarpInterpolator'
@@ -160,6 +162,20 @@ export class WarpExecutor {
         this.handlers?.onError?.({ message: JSON.stringify(result.output._DATA), result })
       }
       return { tx: null, chain: null, immediateExecution: null, executable }
+    }
+
+    if (action.type === 'mcp') {
+      const result = await this.executeMcp(executable)
+      if (result.status === 'success') {
+        await this.callHandler(() => this.handlers?.onActionExecuted?.({ action: actionIndex, chain: null, execution: result, tx: null }))
+        return { tx: null, chain: null, immediateExecution: result, executable }
+      } else if (result.status === 'unhandled') {
+        await this.callHandler(() => this.handlers?.onActionUnhandled?.({ action: actionIndex, chain: null, execution: result, tx: null }))
+        return { tx: null, chain: null, immediateExecution: result, executable }
+      } else {
+        this.handlers?.onError?.({ message: JSON.stringify(result.output._DATA), result })
+        return { tx: null, chain: null, immediateExecution: result, executable }
+      }
     }
 
     const adapter = findWarpAdapterForChain(executable.chain.name, this.adapters)
@@ -353,6 +369,168 @@ export class WarpExecutor {
   private getDestinationFromResolvedInputs(executable: WarpExecutable): string | null {
     const destinationInput = executable.resolvedInputs.find((i) => i.input.position === 'receiver' || i.input.position === 'destination')
     return destinationInput?.value || executable.destination
+  }
+
+  private async executeMcp(executable: WarpExecutable, extra?: Record<string, any>): Promise<WarpActionExecutionResult> {
+    const wallet = getWarpWalletAddressFromConfig(this.config, executable.chain.name)
+    const mcpAction = getWarpActionByIndex(executable.warp, executable.action) as WarpMcpAction
+
+    if (!mcpAction.destination) {
+      const resolvedInputs = extractResolvedInputValues(executable.resolvedInputs)
+      return {
+        status: 'error',
+        warp: executable.warp,
+        action: executable.action,
+        user: wallet,
+        txHash: null,
+        tx: null,
+        next: null,
+        values: { string: [], native: [], mapped: {} },
+        output: { _DATA: new Error('WarpExecutor: MCP action requires destination') },
+        messages: {},
+        destination: this.getDestinationFromResolvedInputs(executable),
+        resolvedInputs,
+      }
+    }
+
+    let Client: any
+    let StreamableHTTPClientTransport: any
+    try {
+      const clientModule = await import('@modelcontextprotocol/sdk/client/index.js')
+      Client = clientModule.Client
+      const streamableHttp = await import('@modelcontextprotocol/sdk/client/streamableHttp.js')
+      StreamableHTTPClientTransport = streamableHttp.StreamableHTTPClientTransport
+    } catch (error) {
+      const resolvedInputs = extractResolvedInputValues(executable.resolvedInputs)
+      return {
+        status: 'error',
+        warp: executable.warp,
+        action: executable.action,
+        user: wallet,
+        txHash: null,
+        tx: null,
+        next: null,
+        values: { string: [], native: [], mapped: {} },
+        output: { _DATA: new Error('Please install @modelcontextprotocol/sdk to execute MCP warps or mcp actions') },
+        messages: {},
+        destination: this.getDestinationFromResolvedInputs(executable),
+        resolvedInputs,
+      }
+    }
+
+    const serializer = this.factory.getSerializer()
+    const interpolator = new WarpInterpolator(this.config, findWarpAdapterForChain(executable.chain.name, this.adapters), this.adapters)
+
+    const destination = mcpAction.destination
+    const url = interpolator.applyInputs(destination.url, executable.resolvedInputs, this.factory.getSerializer())
+    const toolName = interpolator.applyInputs(destination.tool, executable.resolvedInputs, this.factory.getSerializer())
+
+    const headers: Record<string, string> = {}
+    if (destination.headers) {
+      Object.entries(destination.headers).forEach(([key, value]) => {
+        const interpolatedValue = interpolator.applyInputs(value as string, executable.resolvedInputs, this.factory.getSerializer())
+        headers[key] = interpolatedValue
+      })
+    }
+
+    WarpLogger.debug('WarpExecutor: Executing MCP', { url, tool: toolName, headers })
+
+    try {
+      const transport = new StreamableHTTPClientTransport(new URL(url), {
+        requestInit: {
+          headers,
+        },
+      })
+
+      const client = new Client(
+        {
+          name: 'warps-mcp-client',
+          version: '1.0.0',
+        },
+        {
+          capabilities: {},
+        }
+      )
+
+      await client.connect(transport)
+
+      const toolArgs: Record<string, any> = {}
+
+      executable.resolvedInputs.forEach(({ input, value }) => {
+        if (value && input.position && typeof input.position === 'string' && input.position.startsWith('payload:')) {
+          const key = input.position.replace('payload:', '')
+          const [type, nativeValue] = serializer.stringToNative(value)
+
+          if (type === 'string') {
+            toolArgs[key] = String(nativeValue)
+          } else if (type === 'bool') {
+            toolArgs[key] = Boolean(nativeValue)
+          } else if (type === 'uint8' || type === 'uint16' || type === 'uint32' || type === 'uint64' || type === 'uint128' || type === 'uint256' || type === 'biguint') {
+            const numValue = typeof nativeValue === 'bigint' ? Number(nativeValue) : Number(nativeValue)
+            toolArgs[key] = Number.isInteger(numValue) ? numValue : numValue
+          } else {
+            toolArgs[key] = nativeValue
+          }
+        }
+      })
+
+      if (extra) {
+        Object.assign(toolArgs, extra)
+      }
+
+      const result = await client.callTool({
+        name: toolName,
+        arguments: toolArgs,
+      })
+
+      await client.close()
+
+      let resultContent: any
+      if (result.content && result.content.length > 0) {
+        const firstContent = result.content[0]
+        if (firstContent.type === 'text') {
+          try {
+            resultContent = JSON.parse(firstContent.text)
+          } catch {
+            resultContent = firstContent.text
+          }
+        } else if (firstContent.type === 'resource') {
+          resultContent = firstContent
+        } else {
+          resultContent = firstContent
+        }
+      } else {
+        resultContent = result
+      }
+
+      const { values, output } = await extractCollectOutput(
+        executable.warp,
+        resultContent,
+        executable.action,
+        executable.resolvedInputs,
+        serializer,
+        this.config
+      )
+
+      return this.buildCollectResult(executable, wallet, 'success', values, output, result)
+    } catch (error) {
+      WarpLogger.error('WarpExecutor: Error executing MCP', error)
+      const resolvedInputs = extractResolvedInputValues(executable.resolvedInputs)
+      return {
+        status: 'error',
+        warp: executable.warp,
+        action: executable.action,
+        user: wallet,
+        txHash: null,
+        tx: null,
+        next: null,
+        values: { string: [], native: [], mapped: {} },
+        output: { _DATA: error },
+        messages: {},
+        destination: this.getDestinationFromResolvedInputs(executable),
+        resolvedInputs,
+      }
+    }
   }
 
   private buildCollectResult(

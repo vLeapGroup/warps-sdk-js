@@ -1,6 +1,6 @@
 import { WarpConstants } from './constants'
-import { extractResolvedInputValues } from './helpers/payload'
 import { findWarpAdapterForChain, getWarpActionByIndex, getWarpPrimaryAction, shiftBigintBy, splitInput } from './helpers'
+import { extractResolvedInputValues } from './helpers/payload'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
 import {
   Adapter,
@@ -16,6 +16,7 @@ import {
   WarpCollectAction,
   WarpContractAction,
   WarpExecutable,
+  WarpMcpAction,
   WarpTransferAction,
 } from './types'
 import { asset } from './utils.codec'
@@ -54,13 +55,17 @@ export class WarpFactory {
     inputs: string[],
     meta: { envs?: Record<string, any>; queries?: Record<string, any> } = {}
   ): Promise<WarpExecutable> {
-    const action = getWarpActionByIndex(warp, actionIndex) as WarpTransferAction | WarpContractAction | WarpCollectAction
+    const action = getWarpActionByIndex(warp, actionIndex) as WarpTransferAction | WarpContractAction | WarpCollectAction | WarpMcpAction
     if (!action) throw new Error('WarpFactory: Action not found')
     const chain = await this.getChainInfoForWarp(warp, inputs)
     const adapter = findWarpAdapterForChain(chain.name, this.adapters)
     const interpolator = new WarpInterpolator(this.config, adapter, this.adapters)
     const preparedWarp = await interpolator.apply(warp, meta)
-    const preparedAction = getWarpActionByIndex(preparedWarp, actionIndex) as WarpTransferAction | WarpContractAction | WarpCollectAction
+    const preparedAction = getWarpActionByIndex(preparedWarp, actionIndex) as
+      | WarpTransferAction
+      | WarpContractAction
+      | WarpCollectAction
+      | WarpMcpAction
 
     const { action: primaryAction, index: primaryIndex } = getWarpPrimaryAction(preparedWarp)
     const primaryTypedInputs = this.getStringTypedInputs(primaryAction, inputs)
@@ -70,15 +75,21 @@ export class WarpFactory {
     let resolvedInputs: ResolvedInput[] = []
     let modifiedInputs: ResolvedInput[] = []
     if (primaryIndex === actionIndex - 1) {
+      // Reuse primary action's resolved inputs for chained actions
       resolvedInputs = primaryResolved
       modifiedInputs = primaryResolvedInputs
+    } else if (this.requiresPayloadInputs(preparedAction)) {
+      // Actions with payload: positions need their own inputs resolved
+      resolvedInputs = await this.resolveActionInputs(chain.name, preparedAction, inputs, interpolator)
+      modifiedInputs = await this.getModifiedInputs(resolvedInputs)
     }
 
     const destinationInput = modifiedInputs.find((i) => i.input.position === 'receiver' || i.input.position === 'destination')?.value
     const destinationInAction = this.getDestinationFromAction(preparedAction)
     let destination = destinationInput ? (this.serializer.stringToNative(destinationInput)[1] as string) : destinationInAction
     if (destination) destination = interpolator.applyInputs(destination, modifiedInputs, this.serializer, primaryResolvedInputs)
-    if (!destination && action.type !== 'collect') throw new Error('WarpActionExecutor: Destination/Receiver not provided')
+    if (!destination && action.type !== 'collect' && action.type !== 'mcp')
+      throw new Error('WarpActionExecutor: Destination/Receiver not provided')
 
     let args = this.getPreparedArgs(preparedAction, modifiedInputs)
     args = args.map((arg) => interpolator.applyInputs(arg, modifiedInputs, this.serializer, primaryResolvedInputs))
@@ -170,9 +181,7 @@ export class WarpFactory {
         return this.serializer.nativeToString('address', wallet)
       } else if (input.source === 'hidden') {
         if (input.default === undefined) return null
-        const defaultValue = interpolator
-          ? interpolator.applyInputs(String(input.default), [], this.serializer)
-          : String(input.default)
+        const defaultValue = interpolator ? interpolator.applyInputs(String(input.default), [], this.serializer) : String(input.default)
         return this.serializer.nativeToString(input.type, defaultValue)
       } else {
         return preprocessed[index] || null
@@ -192,6 +201,20 @@ export class WarpFactory {
         value: value || (fallbackDefault !== undefined ? this.serializer.nativeToString(input.type, fallbackDefault) : null),
       }
     })
+  }
+
+  private requiresPayloadInputs(action: WarpAction): boolean {
+    return action.inputs?.some((input) => typeof input.position === 'string' && input.position.startsWith('payload:')) ?? false
+  }
+
+  private async resolveActionInputs(
+    chainName: string,
+    action: WarpAction,
+    inputs: string[],
+    interpolator: WarpInterpolator
+  ): Promise<ResolvedInput[]> {
+    const actionTypedInputs = this.getStringTypedInputs(action, inputs)
+    return await this.getResolvedInputs(chainName, action, actionTypedInputs, interpolator)
   }
 
   public async getModifiedInputs(inputs: ResolvedInput[]): Promise<ResolvedInput[]> {
@@ -228,7 +251,9 @@ export class WarpFactory {
         const transformRunner = this.config.transform?.runner
 
         if (!transformRunner || typeof transformRunner.run !== 'function') {
-          throw new Error('Transform modifier is defined but no transform runner is configured. Provide a runner via config.transform.runner.')
+          throw new Error(
+            'Transform modifier is defined but no transform runner is configured. Provide a runner via config.transform.runner.'
+          )
         }
 
         const inputsContext = this.buildInputContext(inputs, index, resolved)

@@ -1,5 +1,5 @@
 import { createMockAdapter, createMockWarp } from './test-utils/sharedMocks'
-import { Warp, WarpClientConfig, WarpCollectAction, WarpQueryAction } from './types'
+import { Warp, WarpClientConfig, WarpCollectAction, WarpMcpAction, WarpQueryAction } from './types'
 import { WarpExecutor } from './WarpExecutor'
 
 // Mock fetch globally
@@ -1287,6 +1287,77 @@ describe('WarpExecutor', () => {
           }),
         })
       )
+    })
+  })
+
+  describe('mcp actions', () => {
+    it('handles error when mcp action has no destination', async () => {
+      const mcpWarp: Warp = {
+        ...warp,
+        chain: 'multiversx',
+        actions: [
+          {
+            type: 'mcp' as const,
+            label: 'MCP Tool',
+            destination: undefined,
+            inputs: [],
+            primary: true,
+          } as WarpMcpAction,
+        ],
+      }
+
+      const result = await executor.execute(mcpWarp, [])
+
+      expect(result.immediateExecutions.length).toBe(1)
+      const execution = result.immediateExecutions[0]
+      expect(execution.status).toBe('error')
+      expect(execution.output._DATA).toBeDefined()
+      expect(handlers.onError).toHaveBeenCalled()
+
+      const errorMessage = execution.output._DATA instanceof Error
+        ? execution.output._DATA.message
+        : String(execution.output._DATA)
+      expect(errorMessage).toContain('MCP action requires destination')
+    })
+
+    it('handles error when mcp sdk is not installed or connection fails', async () => {
+      const mcpWarp: Warp = {
+        ...warp,
+        chain: 'multiversx',
+        actions: [
+          {
+            type: 'mcp' as const,
+            label: 'MCP Tool',
+            destination: {
+              url: 'https://mcp.example.com',
+              tool: 'test_tool',
+            },
+            inputs: [
+              {
+                name: 'name',
+                type: 'string',
+                source: 'field' as const,
+                position: 'payload:name',
+              },
+            ],
+            primary: true,
+          } as WarpMcpAction,
+        ],
+      }
+
+      const inputs = ['string:Test Product']
+      const result = await executor.execute(mcpWarp, inputs)
+
+      expect(result.immediateExecutions.length).toBe(1)
+      const execution = result.immediateExecutions[0]
+      expect(execution.status).toBe('error')
+      expect(execution.output._DATA).toBeDefined()
+      expect(handlers.onError).toHaveBeenCalled()
+
+      const errorMessage = execution.output._DATA instanceof Error
+        ? execution.output._DATA.message
+        : String(execution.output._DATA)
+      expect(errorMessage.length).toBeGreaterThan(0)
     })
   })
 })
