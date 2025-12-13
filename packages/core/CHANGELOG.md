@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.171
+
+### Patch Changes
+
+- 9953e4b: update mcp
+
 ## 3.0.0-beta.170
 
 ### Patch Changes
