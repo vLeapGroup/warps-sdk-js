@@ -1,5 +1,5 @@
 ---
-'@vleap/warps-adapter-mcp': patch
+'@vleap/warps-mcp': patch
 ---
 
 update mcp
