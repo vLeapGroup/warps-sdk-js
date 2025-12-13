@@ -1,3 +1,5 @@
+import { createAssociatedTokenAccountInstruction, createTransferInstruction, getAssociatedTokenAddress } from '@solana/spl-token'
+import { ComputeBudgetProgram, Connection, PublicKey, SystemProgram, Transaction, TransactionInstruction } from '@solana/web3.js'
 import {
   AdapterWarpExecutor,
   applyOutputToMessages,
@@ -13,8 +15,6 @@ import {
   WarpExecutable,
   WarpQueryAction,
 } from '@vleap/warps'
-import { Connection, PublicKey, SystemProgram, Transaction, TransactionInstruction, ComputeBudgetProgram } from '@solana/web3.js'
-import { createTransferInstruction, getAssociatedTokenAddress, createAssociatedTokenAccountInstruction } from '@solana/spl-token'
 import { WarpSolanaConstants } from './constants'
 import { WarpSolanaOutput } from './WarpSolanaOutput'
 import { WarpSolanaSerializer } from './WarpSolanaSerializer'
@@ -171,48 +171,48 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
     try {
       const data = Buffer.alloc(8)
       if (instructionDef.discriminator && Buffer.isBuffer(instructionDef.discriminator)) {
-        instructionDef.discriminator.copy(data, 0)
+        data.set(instructionDef.discriminator.subarray(0, Math.min(8, instructionDef.discriminator.length)), 0)
       } else {
-        const hash = Buffer.from(funcName).slice(0, 8)
-        hash.copy(data, 0)
+        const hash = Buffer.from(funcName).subarray(0, 8)
+        data.set(hash, 0)
       }
 
       if (args.length > 0 && instructionDef.args) {
         const encodedArgs = this.encodeArgs(args, instructionDef.args)
-        return Buffer.concat([data, encodedArgs]) as Buffer
+        return Buffer.from([...data, ...encodedArgs])
       }
 
-      return data as Buffer
+      return data
     } catch {
       return this.encodeBasicInstructionData(args, funcName)
     }
   }
 
   private encodeBasicInstructionData(args: any[], funcName: string): Buffer {
-    const funcHash = Buffer.from(funcName).slice(0, 8)
+    const funcHash = Buffer.from(funcName).subarray(0, 8)
     const data = Buffer.alloc(8)
-    funcHash.copy(data, 0)
+    data.set(funcHash, 0)
 
     if (args.length > 0) {
       const encodedArgs = args.map((arg) => {
         if (typeof arg === 'string') {
-          return Buffer.from(arg, 'utf8') as Buffer
+          return Buffer.from(arg, 'utf8')
         } else if (typeof arg === 'number' || typeof arg === 'bigint') {
           const num = typeof arg === 'bigint' ? Number(arg) : arg
           const buf = Buffer.alloc(8)
           buf.writeBigUInt64LE(BigInt(num), 0)
-          return buf as Buffer
+          return buf
         } else if (Buffer.isBuffer(arg)) {
-          return arg as Buffer
+          return arg
         } else if (arg instanceof Uint8Array) {
-          return Buffer.from(arg) as Buffer
+          return Buffer.from(arg)
         }
-        return Buffer.from(String(arg), 'utf8') as Buffer
+        return Buffer.from(String(arg), 'utf8')
       })
-      return Buffer.concat([data, ...encodedArgs]) as Buffer
+      return Buffer.from([...data, ...encodedArgs])
     }
 
-    return data as Buffer
+    return data
   }
 
   private encodeArgs(args: any[], argDefs: any[]): Buffer {
@@ -226,7 +226,7 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
         const size = def.type === 'u128' ? 16 : 8
         const buf = Buffer.alloc(size)
         if (size === 16) {
-          buf.writeBigUInt64LE(num & 0xFFFFFFFFFFFFFFFFn, 0)
+          buf.writeBigUInt64LE(num & 0xffffffffffffffffn, 0)
           buf.writeBigUInt64LE(num >> 64n, 8)
         } else {
           buf.writeBigUInt64LE(num, 0)
@@ -245,7 +245,7 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
         buffers.push(Buffer.from(String(arg), 'utf8'))
       }
     }
-    return Buffer.concat(buffers)
+    return Buffer.from(buffers.flatMap((buf) => Array.from(buf)))
   }
 
   private buildInstructionAccounts(
@@ -289,10 +289,12 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
     if (!this.chain.nativeToken?.identifier) throw new Error('WarpSolanaExecutor: No native token defined for this chain')
 
     const nativeTokenTransfers = executable.transfers.filter(
-      (transfer) => transfer.identifier === this.chain.nativeToken!.identifier || transfer.identifier === WarpSolanaConstants.NativeToken.Identifier
+      (transfer) =>
+        transfer.identifier === this.chain.nativeToken!.identifier || transfer.identifier === WarpSolanaConstants.NativeToken.Identifier
     )
     const splTokenTransfers = executable.transfers.filter(
-      (transfer) => transfer.identifier !== this.chain.nativeToken!.identifier && transfer.identifier !== WarpSolanaConstants.NativeToken.Identifier
+      (transfer) =>
+        transfer.identifier !== this.chain.nativeToken!.identifier && transfer.identifier !== WarpSolanaConstants.NativeToken.Identifier
     )
 
     if (nativeTokenTransfers.length === 1 && splTokenTransfers.length === 0) {
@@ -347,24 +349,10 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
 
     const destinationAccountInfo = await this.connection.getAccountInfo(destinationTokenAccount)
     if (!destinationAccountInfo) {
-      transaction.add(
-        createAssociatedTokenAccountInstruction(
-          fromPubkey,
-          destinationTokenAccount,
-          destinationPubkey,
-          mintAddress
-        )
-      )
+      transaction.add(createAssociatedTokenAccountInstruction(fromPubkey, destinationTokenAccount, destinationPubkey, mintAddress))
     }
 
-    transaction.add(
-      createTransferInstruction(
-        sourceTokenAccount,
-        destinationTokenAccount,
-        fromPubkey,
-        Number(transfer.amount)
-      )
-    )
+    transaction.add(createTransferInstruction(sourceTokenAccount, destinationTokenAccount, fromPubkey, Number(transfer.amount)))
 
     return this.setTransactionDefaults(transaction, fromPubkey as PublicKey)
   }
@@ -430,9 +418,7 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
 
       const next = getNextInfo(this.config, [], executable.warp, executable.action, output)
 
-      const destinationInput = executable.resolvedInputs.find(
-        (i) => i.input.position === 'receiver' || i.input.position === 'destination'
-      )
+      const destinationInput = executable.resolvedInputs.find((i) => i.input.position === 'receiver' || i.input.position === 'destination')
       const destination = destinationInput?.value || executable.destination
 
       const resolvedInputs = extractResolvedInputValues(executable.resolvedInputs)
@@ -452,9 +438,7 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)
-      const destinationInput = executable.resolvedInputs.find(
-        (i) => i.input.position === 'receiver' || i.input.position === 'destination'
-      )
+      const destinationInput = executable.resolvedInputs.find((i) => i.input.position === 'receiver' || i.input.position === 'destination')
       const destination = destinationInput?.value || executable.destination
 
       const resolvedInputs = extractResolvedInputValues(executable.resolvedInputs)
@@ -496,12 +480,8 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
       }
 
       const instructions = transaction.instructions
-      const hasTransfer = instructions.some(
-        (ix) => ix.programId.equals(SystemProgram.programId) && ix.data.length === 4
-      )
-      const hasTokenTransfer = instructions.some(
-        (ix) => ix.programId.toBase58() === WarpSolanaConstants.Programs.TokenProgram
-      )
+      const hasTransfer = instructions.some((ix) => ix.programId.equals(SystemProgram.programId) && ix.data.length === 4)
+      const hasTokenTransfer = instructions.some((ix) => ix.programId.toBase58() === WarpSolanaConstants.Programs.TokenProgram)
 
       let computeUnits = WarpSolanaConstants.ComputeUnitLimit.Default
       if (hasTransfer && !hasTokenTransfer) {

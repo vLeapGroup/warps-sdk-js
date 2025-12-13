@@ -57,7 +57,8 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
     const isPrivateKeyPem = privateKey.startsWith('-----')
     const secretKey = isPrivateKeyPem ? UserSecretKey.fromPem(privateKey) : UserSecretKey.fromString(privateKey)
     const account = new Account(secretKey)
-    const signature = await account.signMessage(new Message({ data: Buffer.from(message) }))
+    const messageData = new TextEncoder().encode(message)
+    const signature = await account.signMessage(new Message({ data: messageData }))
     return Buffer.from(signature).toString('hex')
   }
 

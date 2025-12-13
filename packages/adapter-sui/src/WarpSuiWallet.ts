@@ -100,11 +100,11 @@ export class WarpSuiWallet implements AdapterWarpWallet {
       if (privateKeyBytes.length === 70) {
         // Extract the 32-byte secret key from the middle of the 70-byte format
         // The format is typically: magic(3) + version(1) + key_type(1) + secret_key(32) + checksum(33)
-        const secretKey32 = privateKeyBytes.subarray(1, 33) // Skip magic byte, take 32 bytes
+        const secretKey32 = new Uint8Array(privateKeyBytes.subarray(1, 33)) // Skip magic byte, take 32 bytes
         return Ed25519Keypair.fromSecretKey(secretKey32)
       } else if (privateKeyBytes.length === 32) {
         // If it's already 32 bytes, use it directly
-        return Ed25519Keypair.fromSecretKey(privateKeyBytes)
+        return Ed25519Keypair.fromSecretKey(new Uint8Array(privateKeyBytes))
       } else {
         throw new Error(`Unsupported private key length: ${privateKeyBytes.length} bytes`)
       }

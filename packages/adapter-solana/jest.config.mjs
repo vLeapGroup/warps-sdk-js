@@ -11,14 +11,21 @@ export default {
         useESM: true,
       },
     ],
+    '^.+\\.js$': [
+      'ts-jest',
+      {
+        useESM: true,
+      },
+    ],
   },
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
     '^@vleap/warps$': '<rootDir>/../core/src/index.ts',
+    '^@scure/bip39/wordlists/(.*)$': '@scure/bip39/wordlists/$1.js',
   },
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts'],
   globalSetup: '<rootDir>/jest.globalsetup.ts',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
-  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$|@solana/.*))'],
+  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$|@solana/.*|@scure/.*|@noble/.*))'],
   testPathIgnorePatterns: ['<rootDir>/dist/'],
 }
