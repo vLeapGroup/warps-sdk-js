@@ -113,10 +113,11 @@ export interface BaseWarpBuilder {
   createFromUrl(url: string): Promise<Warp>
   setName(name: string): BaseWarpBuilder
   setTitle(title: string): BaseWarpBuilder
-  setDescription(description: string): BaseWarpBuilder
+  setDescription(description: string | null): BaseWarpBuilder
   setPreview(preview: string): BaseWarpBuilder
   setActions(actions: WarpAction[]): BaseWarpBuilder
   addAction(action: WarpAction): BaseWarpBuilder
+  setOutput(output: Record<string, string> | null): BaseWarpBuilder
   build(): Promise<Warp>
 }
 

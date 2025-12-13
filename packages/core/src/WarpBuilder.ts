@@ -46,7 +46,7 @@ export class WarpBuilder implements BaseWarpBuilder {
     return this
   }
 
-  setDescription(description: WarpText): WarpBuilder {
+  setDescription(description: WarpText | null): WarpBuilder {
     this.pendingWarp.description = description
     return this
   }
@@ -63,6 +63,11 @@ export class WarpBuilder implements BaseWarpBuilder {
 
   addAction(action: WarpAction): WarpBuilder {
     this.pendingWarp.actions.push(action)
+    return this
+  }
+
+  setOutput(output: Record<string, string> | null): WarpBuilder {
+    this.pendingWarp.output = output ?? undefined
     return this
   }
 
