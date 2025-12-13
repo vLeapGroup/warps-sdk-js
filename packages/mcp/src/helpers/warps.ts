@@ -19,7 +19,7 @@ export const convertMcpToolToWarp = async (
       const inputDef: WarpActionInput = {
         name: key,
         label: value.title || { en: key },
-        description: value.description ? { en: value.description } : null,
+        description: value.description ? { en: value.description.trim() } : null,
         type: inputType,
         position: `payload:${key}`,
         source: 'field',
@@ -42,7 +42,7 @@ export const convertMcpToolToWarp = async (
   const mcpAction: WarpMcpAction = {
     type: 'mcp',
     label: { en: tool.name },
-    description: tool.description ? { en: tool.description } : null,
+    description: tool.description ? { en: tool.description.trim() } : null,
     destination: { url, tool: tool.name, headers },
     inputs,
   }
@@ -50,7 +50,7 @@ export const convertMcpToolToWarp = async (
   return await new WarpBuilder(config)
     .setName(tool.name)
     .setTitle({ en: tool.name })
-    .setDescription(tool.description ? { en: tool.description } : null)
+    .setDescription(tool.description ? { en: tool.description.trim() } : null)
     .addAction(mcpAction)
     .setOutput(Object.keys(output).length > 0 ? output : null)
     .build(false)
