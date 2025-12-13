@@ -2,6 +2,7 @@ import { WarpActionInputType } from '@vleap/warps'
 import { convertMcpToolToWarp } from './warps'
 
 describe('convertMcpToolToWarp', () => {
+  const mockConfig = { env: 'mainnet' as const }
   const mockUrl = 'https://mcp.example.com'
   const mockHeaders = { Authorization: 'Bearer test-token' }
 
@@ -17,7 +18,7 @@ describe('convertMcpToolToWarp', () => {
       },
     }
 
-    const warp = await convertMcpToolToWarp(tool, mockUrl, mockHeaders)
+    const warp = await convertMcpToolToWarp(mockConfig, tool, mockUrl, mockHeaders)
 
     expect(warp.protocol).toBe('mcp')
     expect(warp.name).toBe('test_tool')
@@ -45,7 +46,7 @@ describe('convertMcpToolToWarp', () => {
       },
     }
 
-    const warp = await convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(mockConfig, tool, mockUrl)
 
     expect(warp.actions[0].inputs).toHaveLength(4)
 
@@ -86,7 +87,7 @@ describe('convertMcpToolToWarp', () => {
       },
     }
 
-    const warp = await convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(mockConfig, tool, mockUrl)
     const inputs = warp.actions[0].inputs || []
 
     expect(inputs.find((i) => i.name === 'str')?.type).toBe('string')
@@ -112,7 +113,7 @@ describe('convertMcpToolToWarp', () => {
       },
     }
 
-    const warp = await convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(mockConfig, tool, mockUrl)
     const inputs = warp.actions[0].inputs || []
 
     expect(inputs.find((i) => i.name === 'name')?.default).toBe('default-name')
@@ -126,7 +127,7 @@ describe('convertMcpToolToWarp', () => {
       description: 'Tool with no inputs',
     }
 
-    const warp = await convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(mockConfig, tool, mockUrl)
 
     expect(warp.actions[0].inputs).toEqual([])
   })
@@ -140,7 +141,7 @@ describe('convertMcpToolToWarp', () => {
       },
     }
 
-    const warp = await convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(mockConfig, tool, mockUrl)
 
     expect(warp.actions[0].inputs).toEqual([])
   })
@@ -159,7 +160,7 @@ describe('convertMcpToolToWarp', () => {
       },
     }
 
-    const warp = await convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(mockConfig, tool, mockUrl)
 
     expect(warp.output).toBeDefined()
     expect(warp.output?.id).toBe('out.id')
@@ -178,7 +179,7 @@ describe('convertMcpToolToWarp', () => {
       },
     }
 
-    const warp = await convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(mockConfig, tool, mockUrl)
 
     expect(warp.output).toBeUndefined()
   })
@@ -192,7 +193,7 @@ describe('convertMcpToolToWarp', () => {
       },
     }
 
-    const warp = await convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(mockConfig, tool, mockUrl)
 
     expect(warp.output).toBeUndefined()
   })
@@ -202,7 +203,7 @@ describe('convertMcpToolToWarp', () => {
       name: 'no_description_tool',
     }
 
-    const warp = await convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(mockConfig, tool, mockUrl)
 
     expect(warp.description).toBeNull()
     expect(warp.actions[0].description).toBeNull()
@@ -219,7 +220,7 @@ describe('convertMcpToolToWarp', () => {
       },
     }
 
-    const warp = await convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(mockConfig, tool, mockUrl)
     const input = warp.actions[0].inputs?.find((i) => i.name === 'fieldWithoutTitle')
 
     expect(input?.label).toEqual({ en: 'fieldWithoutTitle' })
@@ -236,7 +237,7 @@ describe('convertMcpToolToWarp', () => {
       },
     }
 
-    const warp = await convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(mockConfig, tool, mockUrl)
     const input = warp.actions[0].inputs?.find((i) => i.name === 'name')
 
     expect(input?.description).toBeNull()
@@ -247,7 +248,7 @@ describe('convertMcpToolToWarp', () => {
       name: 'test_tool',
     }
 
-    const warp = await convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(mockConfig, tool, mockUrl)
 
     expect(warp.actions[0].destination?.headers).toBeUndefined()
   })
