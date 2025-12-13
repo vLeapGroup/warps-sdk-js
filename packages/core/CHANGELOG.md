@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.170
+
+### Patch Changes
+
+- 68ef882: update warp builder
+
 ## 3.0.0-beta.169
 
 ### Minor Changes

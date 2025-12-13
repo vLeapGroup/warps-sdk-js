@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-mcp
 
+## 1.0.0-beta.1
+
+### Patch Changes
+
+- 5eadd0f: update mcp
+- Updated dependencies [68ef882]
+  - @vleap/warps@3.0.0-beta.170
+
 ## 1.0.0-beta.0
 
 ### Minor Changes
