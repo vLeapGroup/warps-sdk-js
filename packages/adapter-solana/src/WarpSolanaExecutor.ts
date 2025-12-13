@@ -179,7 +179,8 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
 
       if (args.length > 0 && instructionDef.args) {
         const encodedArgs = this.encodeArgs(args, instructionDef.args)
-        return Buffer.from([...data, ...encodedArgs])
+        // @ts-expect-error - Buffer.concat accepts Buffer[] which extends Uint8Array[]
+        return Buffer.concat([data, encodedArgs])
       }
 
       return data
@@ -209,7 +210,8 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
         }
         return Buffer.from(String(arg), 'utf8')
       })
-      return Buffer.from([...data, ...encodedArgs])
+      // @ts-expect-error - Buffer.concat accepts Buffer[] which extends Uint8Array[]
+      return Buffer.concat([data, ...encodedArgs])
     }
 
     return data
@@ -245,7 +247,8 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
         buffers.push(Buffer.from(String(arg), 'utf8'))
       }
     }
-    return Buffer.from(buffers.flatMap((buf) => Array.from(buf)))
+    // @ts-expect-error - Buffer.concat accepts Buffer[] which extends Uint8Array[]
+    return Buffer.concat(buffers)
   }
 
   private buildInstructionAccounts(
@@ -492,17 +495,15 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
         computeUnits = WarpSolanaConstants.ComputeUnitLimit.ContractCall
       }
 
-      transaction.add(
-        ComputeBudgetProgram.setComputeUnitLimit({
-          units: computeUnits,
-        })
-      )
+      const computeUnitLimitIx = ComputeBudgetProgram.setComputeUnitLimit({
+        units: computeUnits,
+      })
 
-      transaction.add(
-        ComputeBudgetProgram.setComputeUnitPrice({
-          microLamports: WarpSolanaConstants.PriorityFee.Default,
-        })
-      )
+      const computeUnitPriceIx = ComputeBudgetProgram.setComputeUnitPrice({
+        microLamports: WarpSolanaConstants.PriorityFee.Default,
+      })
+
+      transaction.instructions = [computeUnitLimitIx, computeUnitPriceIx, ...transaction.instructions]
 
       return transaction
     } catch (error) {

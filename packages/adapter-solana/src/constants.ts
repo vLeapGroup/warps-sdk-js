@@ -44,10 +44,10 @@ export const SolanaExplorerMap = {
 export const ExplorerUrls: Record<ExplorerName, string> = {
   [SolanaExplorers.Solscan]: 'https://solscan.io',
   [SolanaExplorers.SolscanMainnet]: 'https://solscan.io',
-  [SolanaExplorers.SolscanDevnet]: 'https://solscan.io/?cluster=devnet',
+  [SolanaExplorers.SolscanDevnet]: 'https://solscan.io',
   [SolanaExplorers.SolanaExplorer]: 'https://explorer.solana.com',
   [SolanaExplorers.SolanaExplorerMainnet]: 'https://explorer.solana.com',
-  [SolanaExplorers.SolanaExplorerDevnet]: 'https://explorer.solana.com/?cluster=devnet',
+  [SolanaExplorers.SolanaExplorerDevnet]: 'https://explorer.solana.com',
 }
 
 export const SolanaExplorerNames = {

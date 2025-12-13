@@ -40,30 +40,50 @@ export class WarpSolanaExplorer implements AdapterWarpExplorer {
 
   getAccountUrl(address: string, explorer?: ExplorerName): string {
     const baseUrl = this.getExplorerUrlByName(explorer)
+    if (baseUrl.includes('?')) {
+      const cluster = this.config.env === 'mainnet' ? '' : `&cluster=${this.config.env}`
+      return `${baseUrl}/account/${address}${cluster}`
+    }
     const cluster = this.config.env === 'mainnet' ? '' : `?cluster=${this.config.env}`
     return `${baseUrl}/account/${address}${cluster}`
   }
 
   getTransactionUrl(hash: string, explorer?: ExplorerName): string {
     const baseUrl = this.getExplorerUrlByName(explorer)
+    if (baseUrl.includes('?')) {
+      const cluster = this.config.env === 'mainnet' ? '' : `&cluster=${this.config.env}`
+      return `${baseUrl}/tx/${hash}${cluster}`
+    }
     const cluster = this.config.env === 'mainnet' ? '' : `?cluster=${this.config.env}`
     return `${baseUrl}/tx/${hash}${cluster}`
   }
 
   getBlockUrl(blockNumber: string | number, explorer?: ExplorerName): string {
     const baseUrl = this.getExplorerUrlByName(explorer)
+    if (baseUrl.includes('?')) {
+      const cluster = this.config.env === 'mainnet' ? '' : `&cluster=${this.config.env}`
+      return `${baseUrl}/block/${blockNumber}${cluster}`
+    }
     const cluster = this.config.env === 'mainnet' ? '' : `?cluster=${this.config.env}`
     return `${baseUrl}/block/${blockNumber}${cluster}`
   }
 
   getAssetUrl(identifier: string, explorer?: ExplorerName): string {
     const baseUrl = this.getExplorerUrlByName(explorer)
+    if (baseUrl.includes('?')) {
+      const cluster = this.config.env === 'mainnet' ? '' : `&cluster=${this.config.env}`
+      return `${baseUrl}/token/${identifier}${cluster}`
+    }
     const cluster = this.config.env === 'mainnet' ? '' : `?cluster=${this.config.env}`
     return `${baseUrl}/token/${identifier}${cluster}`
   }
 
   getContractUrl(address: string, explorer?: ExplorerName): string {
     const baseUrl = this.getExplorerUrlByName(explorer)
+    if (baseUrl.includes('?')) {
+      const cluster = this.config.env === 'mainnet' ? '' : `&cluster=${this.config.env}`
+      return `${baseUrl}/account/${address}${cluster}`
+    }
     const cluster = this.config.env === 'mainnet' ? '' : `?cluster=${this.config.env}`
     return `${baseUrl}/account/${address}${cluster}`
   }

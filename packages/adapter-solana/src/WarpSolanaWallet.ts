@@ -9,7 +9,7 @@ import {
 } from '@vleap/warps'
 import { Connection, Keypair, Transaction, VersionedTransaction } from '@solana/web3.js'
 import * as bip39 from '@scure/bip39'
-import { wordlist } from '@scure/bip39/wordlists/english'
+import { wordlist } from '@scure/bip39/wordlists/english.js'
 import bs58 from 'bs58'
 
 export class WarpSolanaWallet implements AdapterWarpWallet {
