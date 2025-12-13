@@ -72,12 +72,12 @@ describe('WarpMcp', () => {
     expect(mockClient.close).toHaveBeenCalled()
     expect(warps).toHaveLength(2)
     expect(warps[0].name).toBe('tool1')
-    expect(warps[0].protocol).toBe('mcp')
+    expect(warps[0].protocol).toBe('warp:3.0.0')
     expect(warps[0].actions[0].type).toBe('mcp')
     expect(warps[0].actions[0].destination?.url).toBe(mockUrl)
     expect(warps[0].actions[0].destination?.tool).toBe('tool1')
     expect(warps[1].name).toBe('tool2')
-    expect(warps[1].protocol).toBe('mcp')
+    expect(warps[1].protocol).toBe('warp:3.0.0')
   })
 
   it('handles connection without headers', async () => {

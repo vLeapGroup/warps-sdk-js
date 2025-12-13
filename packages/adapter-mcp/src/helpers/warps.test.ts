@@ -20,7 +20,7 @@ describe('convertMcpToolToWarp', () => {
 
     const warp = await convertMcpToolToWarp(mockConfig, tool, mockUrl, mockHeaders)
 
-    expect(warp.protocol).toBe('mcp')
+    expect(warp.protocol).toBe('warp:3.0.0')
     expect(warp.name).toBe('test_tool')
     expect(warp.title.en).toBe('test_tool')
     expect(warp.description?.en).toBe('Test tool description')
