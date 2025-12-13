@@ -1,4 +1,4 @@
-# @vleap/warps-adapter-mcp
+# @vleap/warps-mcp
 
 ## 1.0.0-beta.2
 

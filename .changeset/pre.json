@@ -14,7 +14,7 @@
     "@vleap/warps-adapter-evm": "0.2.0-alpha.1",
     "@vleap/warps-adapter-fastset": "0.1.0-alpha.1",
     "@vleap/warps-adapter-solana": "0.1.0-beta.1",
-    "@vleap/warps-adapter-mcp": "0.1.0"
+    "@vleap/warps-mcp": "0.1.0"
   },
   "changesets": [
     "afraid-dogs-joke",
