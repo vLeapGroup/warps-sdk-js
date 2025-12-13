@@ -5,7 +5,7 @@ describe('convertMcpToolToWarp', () => {
   const mockUrl = 'https://mcp.example.com'
   const mockHeaders = { Authorization: 'Bearer test-token' }
 
-  it('converts basic MCP tool to Warp', () => {
+  it('converts basic MCP tool to Warp', async () => {
     const tool = {
       name: 'test_tool',
       description: 'Test tool description',
@@ -17,7 +17,7 @@ describe('convertMcpToolToWarp', () => {
       },
     }
 
-    const warp = convertMcpToolToWarp(tool, mockUrl, mockHeaders)
+    const warp = await convertMcpToolToWarp(tool, mockUrl, mockHeaders)
 
     expect(warp.protocol).toBe('mcp')
     expect(warp.name).toBe('test_tool')
@@ -30,7 +30,7 @@ describe('convertMcpToolToWarp', () => {
     expect(warp.actions[0].destination?.headers).toEqual(mockHeaders)
   })
 
-  it('converts input schema properties correctly', () => {
+  it('converts input schema properties correctly', async () => {
     const tool = {
       name: 'test_tool',
       inputSchema: {
@@ -45,7 +45,7 @@ describe('convertMcpToolToWarp', () => {
       },
     }
 
-    const warp = convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(tool, mockUrl)
 
     expect(warp.actions[0].inputs).toHaveLength(4)
 
@@ -68,7 +68,7 @@ describe('convertMcpToolToWarp', () => {
     expect(priceInput?.type).toBe('uint256')
   })
 
-  it('converts all JSON Schema types correctly', () => {
+  it('converts all JSON Schema types correctly', async () => {
     const tool = {
       name: 'type_test',
       inputSchema: {
@@ -86,7 +86,7 @@ describe('convertMcpToolToWarp', () => {
       },
     }
 
-    const warp = convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(tool, mockUrl)
     const inputs = warp.actions[0].inputs || []
 
     expect(inputs.find((i) => i.name === 'str')?.type).toBe('string')
@@ -99,7 +99,7 @@ describe('convertMcpToolToWarp', () => {
     expect(inputs.find((i) => i.name === 'datetime')?.type).toBe('string')
   })
 
-  it('handles default values', () => {
+  it('handles default values', async () => {
     const tool = {
       name: 'test_tool',
       inputSchema: {
@@ -112,7 +112,7 @@ describe('convertMcpToolToWarp', () => {
       },
     }
 
-    const warp = convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(tool, mockUrl)
     const inputs = warp.actions[0].inputs || []
 
     expect(inputs.find((i) => i.name === 'name')?.default).toBe('default-name')
@@ -120,18 +120,18 @@ describe('convertMcpToolToWarp', () => {
     expect(inputs.find((i) => i.name === 'active')?.default).toBe(true)
   })
 
-  it('handles tool without inputSchema', () => {
+  it('handles tool without inputSchema', async () => {
     const tool = {
       name: 'no_inputs_tool',
       description: 'Tool with no inputs',
     }
 
-    const warp = convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(tool, mockUrl)
 
     expect(warp.actions[0].inputs).toEqual([])
   })
 
-  it('handles tool with empty inputSchema', () => {
+  it('handles tool with empty inputSchema', async () => {
     const tool = {
       name: 'empty_inputs_tool',
       inputSchema: {
@@ -140,12 +140,12 @@ describe('convertMcpToolToWarp', () => {
       },
     }
 
-    const warp = convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(tool, mockUrl)
 
     expect(warp.actions[0].inputs).toEqual([])
   })
 
-  it('converts output schema to warp output', () => {
+  it('converts output schema to warp output', async () => {
     const tool = {
       name: 'output_test',
       outputSchema: {
@@ -159,7 +159,7 @@ describe('convertMcpToolToWarp', () => {
       },
     }
 
-    const warp = convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(tool, mockUrl)
 
     expect(warp.output).toBeDefined()
     expect(warp.output?.id).toBe('out.id')
@@ -167,7 +167,7 @@ describe('convertMcpToolToWarp', () => {
     expect(warp.output?.count).toBe('out.count')
   })
 
-  it('handles tool without outputSchema', () => {
+  it('handles tool without outputSchema', async () => {
     const tool = {
       name: 'no_output_tool',
       inputSchema: {
@@ -178,12 +178,12 @@ describe('convertMcpToolToWarp', () => {
       },
     }
 
-    const warp = convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(tool, mockUrl)
 
     expect(warp.output).toBeUndefined()
   })
 
-  it('handles tool with empty outputSchema', () => {
+  it('handles tool with empty outputSchema', async () => {
     const tool = {
       name: 'empty_output_tool',
       outputSchema: {
@@ -192,23 +192,23 @@ describe('convertMcpToolToWarp', () => {
       },
     }
 
-    const warp = convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(tool, mockUrl)
 
     expect(warp.output).toBeUndefined()
   })
 
-  it('handles tool without description', () => {
+  it('handles tool without description', async () => {
     const tool = {
       name: 'no_description_tool',
     }
 
-    const warp = convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(tool, mockUrl)
 
     expect(warp.description).toBeNull()
     expect(warp.actions[0].description).toBeNull()
   })
 
-  it('uses key as label when title is not provided', () => {
+  it('uses key as label when title is not provided', async () => {
     const tool = {
       name: 'test_tool',
       inputSchema: {
@@ -219,13 +219,13 @@ describe('convertMcpToolToWarp', () => {
       },
     }
 
-    const warp = convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(tool, mockUrl)
     const input = warp.actions[0].inputs?.find((i) => i.name === 'fieldWithoutTitle')
 
     expect(input?.label).toEqual({ en: 'fieldWithoutTitle' })
   })
 
-  it('handles input without description', () => {
+  it('handles input without description', async () => {
     const tool = {
       name: 'test_tool',
       inputSchema: {
@@ -236,18 +236,18 @@ describe('convertMcpToolToWarp', () => {
       },
     }
 
-    const warp = convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(tool, mockUrl)
     const input = warp.actions[0].inputs?.find((i) => i.name === 'name')
 
     expect(input?.description).toBeNull()
   })
 
-  it('handles tool without headers', () => {
+  it('handles tool without headers', async () => {
     const tool = {
       name: 'test_tool',
     }
 
-    const warp = convertMcpToolToWarp(tool, mockUrl)
+    const warp = await convertMcpToolToWarp(tool, mockUrl)
 
     expect(warp.actions[0].destination?.headers).toBeUndefined()
   })

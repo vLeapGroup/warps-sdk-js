@@ -1,10 +1,11 @@
-import { Warp, WarpActionInput, WarpActionInputType, WarpMcpAction } from '@vleap/warps'
+import { Warp, WarpActionInput, WarpActionInputType, WarpBuilder, WarpClientConfig, WarpMcpAction } from '@vleap/warps'
 
-export const convertMcpToolToWarp = (
+export const convertMcpToolToWarp = async (
+  config: WarpClientConfig,
   tool: { name: string; description?: string; inputSchema?: any; outputSchema?: any },
   url: string,
   headers?: Record<string, string>
-): Warp => {
+): Promise<Warp> => {
   const inputs: WarpActionInput[] = []
 
   if (tool.inputSchema && tool.inputSchema.properties) {
@@ -46,16 +47,13 @@ export const convertMcpToolToWarp = (
     inputs,
   }
 
-  const warp: Warp = {
-    protocol: 'mcp',
-    name: tool.name,
-    title: { en: tool.name },
-    description: tool.description ? { en: tool.description } : null,
-    actions: [mcpAction],
-    output: Object.keys(output).length > 0 ? output : undefined,
-  }
-
-  return warp
+  return await new WarpBuilder(config)
+    .setName(tool.name)
+    .setTitle({ en: tool.name })
+    .setDescription(tool.description ? { en: tool.description } : null)
+    .addAction(mcpAction)
+    .setOutput(Object.keys(output).length > 0 ? output : null)
+    .build()
 }
 
 const convertJsonSchemaTypeToWarpType = (type: string, format?: string): WarpActionInputType => {

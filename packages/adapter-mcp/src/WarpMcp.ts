@@ -1,9 +1,11 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
-import { Warp } from '@vleap/warps'
+import { Warp, WarpClientConfig } from '@vleap/warps'
 import { convertMcpToolToWarp } from './helpers/warps'
 
 export class WarpMcp {
+  constructor(private readonly config: WarpClientConfig) {}
+
   async getWarpsFromTools(url: string, headers?: Record<string, string>): Promise<Warp[]> {
     const transport = new StreamableHTTPClientTransport(new URL(url), {
       requestInit: { headers: headers || {} },
@@ -18,7 +20,7 @@ export class WarpMcp {
 
       await client.close()
 
-      return tools.tools.map((tool) => convertMcpToolToWarp(tool, url, headers))
+      return await Promise.all(tools.tools.map((tool) => convertMcpToolToWarp(this.config, tool, url, headers)))
     } catch (error) {
       await client.close().catch(() => {})
       throw error
