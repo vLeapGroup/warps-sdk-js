@@ -2,4 +2,4 @@
 '@vleap/warps': minor
 ---
 
-add structs + complex type fixes
+add structs and complex type fixes
