@@ -2,6 +2,7 @@ import { WarpClient } from '@vleap/warps'
 import { getAllEvmAdapters } from '@vleap/warps-adapter-evm'
 import { getFastsetAdapter } from '@vleap/warps-adapter-fastset'
 import { getAllMultiversxAdapters, getMultiversxAdapter } from '@vleap/warps-adapter-multiversx'
+import { getNearAdapter } from '@vleap/warps-adapter-near'
 import { getSolanaAdapter } from '@vleap/warps-adapter-solana'
 import { getSuiAdapter } from '@vleap/warps-adapter-sui'
 import { createNodeTransformRunner } from '@vleap/warps-vm-node'
@@ -44,6 +45,7 @@ const runWarp = async (warpFile: string) => {
     ...getAllEvmAdapters(config, getMultiversxAdapter(config)),
     getSuiAdapter(config),
     getSolanaAdapter(config, getMultiversxAdapter(config)),
+    getNearAdapter(config, getMultiversxAdapter(config)),
     getFastsetAdapter(config, getMultiversxAdapter(config)),
   ])
 
