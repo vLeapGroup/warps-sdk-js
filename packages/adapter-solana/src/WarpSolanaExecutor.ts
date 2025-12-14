@@ -57,7 +57,12 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
     const userWallet = getWarpWalletAddressFromConfig(this.config, executable.chain.name)
     if (!userWallet) throw new Error('WarpSolanaExecutor: createTransfer - user address not set')
     if (!executable.destination) throw new Error('WarpSolanaExecutor: Destination address is required')
-    const destinationPubkey = new PublicKey(executable.destination)
+    let destinationPubkey: PublicKey
+    try {
+      destinationPubkey = new PublicKey(executable.destination)
+    } catch (error) {
+      throw new Error('WarpSolanaExecutor: Invalid destination address')
+    }
 
     if (executable.transfers && executable.transfers.length > 0) {
       return this.createTokenTransferTransaction(executable, userWallet, destinationPubkey)
