@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-near
 
+## 0.1.0-beta.4
+
+### Patch Changes
+
+- c2b2159: update near
+
 ## 0.1.0-beta.3
 
 ### Patch Changes
