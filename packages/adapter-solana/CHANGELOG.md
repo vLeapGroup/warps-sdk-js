@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.0-beta.4
+
+### Patch Changes
+
+- ec843d9: update solana
+- cea5da8: update solana
+- Updated dependencies [5d02aa5]
+  - @vleap/warps@3.0.0-beta.172
+
 ## 0.1.0-beta.3
 
 ### Patch Changes

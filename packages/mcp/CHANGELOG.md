@@ -1,5 +1,13 @@
 # @vleap/warps-mcp
 
+## 1.0.0-beta.4
+
+### Patch Changes
+
+- cea5da8: update mcp
+- Updated dependencies [5d02aa5]
+  - @vleap/warps@3.0.0-beta.172
+
 ## 1.0.0-beta.3
 
 ### Minor Changes

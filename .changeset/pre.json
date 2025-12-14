@@ -14,7 +14,8 @@
     "@vleap/warps-adapter-evm": "0.2.0-alpha.1",
     "@vleap/warps-adapter-fastset": "0.1.0-alpha.1",
     "@vleap/warps-adapter-solana": "0.1.0-beta.1",
-    "@vleap/warps-mcp": "0.1.0"
+    "@vleap/warps-mcp": "0.1.0",
+    "@vleap/warps-adapter-near": "0.1.0-beta.1"
   },
   "changesets": [
     "afraid-dogs-joke",
@@ -34,7 +35,9 @@
     "bright-crabs-fall",
     "bright-paths-thank",
     "bright-tables-jog",
+    "brown-symbols-doubt",
     "bumpy-taxis-cough",
+    "calm-jobs-sing",
     "calm-lights-open",
     "chilly-frogs-report",
     "chilly-kiwis-move",
@@ -183,6 +186,7 @@
     "purple-pugs-design",
     "quick-bananas-create",
     "quick-rooms-add",
+    "quiet-worms-pay",
     "rare-meals-smell",
     "rare-peas-help",
     "rare-shrimps-cheer",
@@ -238,6 +242,7 @@
     "soft-bars-buy",
     "solid-ants-live",
     "solid-rules-wish",
+    "some-adults-grin",
     "some-yaks-lie",
     "spotty-candles-clap",
     "spotty-chicken-fly",

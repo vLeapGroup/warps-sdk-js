@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.172
+
+### Minor Changes
+
+- 5d02aa5: add near adapter
+
 ## 3.0.0-beta.171
 
 ### Patch Changes
