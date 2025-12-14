@@ -1,3 +1,4 @@
+import { keyToImplicitAddress } from '@near-js/crypto'
 import * as bip39 from '@scure/bip39'
 import { wordlist } from '@scure/bip39/wordlists/english.js'
 import {
@@ -99,7 +100,7 @@ export class WarpNearWallet implements AdapterWarpWallet {
     const seed = bip39.mnemonicToSeedSync(mnemonic)
     const keyPair = KeyPair.fromRandom('ed25519')
     const publicKey = keyPair.getPublicKey()
-    const accountId = publicKey.toString().split(':')[1] || publicKey.toString()
+    const accountId = keyToImplicitAddress(publicKey.toString())
 
     return {
       address: accountId,
@@ -113,7 +114,7 @@ export class WarpNearWallet implements AdapterWarpWallet {
     const seed = bip39.mnemonicToSeedSync(mnemonic)
     const keyPair = KeyPair.fromRandom('ed25519')
     const publicKey = keyPair.getPublicKey()
-    const accountId = publicKey.toString().split(':')[1] || publicKey.toString()
+    const accountId = keyToImplicitAddress(publicKey.toString())
 
     return {
       address: accountId,
@@ -124,12 +125,20 @@ export class WarpNearWallet implements AdapterWarpWallet {
 
   getAddress(): string | null {
     try {
+      const wallet = this.config.user?.wallets?.[this.chain.name]
+      if (wallet && typeof wallet === 'object' && 'address' in wallet) {
+        return wallet.address
+      }
+      if (wallet && typeof wallet === 'string') {
+        return wallet
+      }
+
       const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
       if (privateKey) {
         try {
           const keyPair = KeyPair.fromString(privateKey as any)
           const publicKey = keyPair.getPublicKey()
-          return publicKey.toString().split(':')[1] || publicKey.toString()
+          return keyToImplicitAddress(publicKey.toString())
         } catch {
           return null
         }
@@ -140,15 +149,7 @@ export class WarpNearWallet implements AdapterWarpWallet {
         const seed = bip39.mnemonicToSeedSync(mnemonic)
         const keyPair = KeyPair.fromRandom('ed25519')
         const publicKey = keyPair.getPublicKey()
-        return publicKey.toString().split(':')[1] || publicKey.toString()
-      }
-
-      const wallet = this.config.user?.wallets?.[this.chain.name]
-      if (wallet && typeof wallet === 'object' && 'address' in wallet) {
-        return wallet.address
-      }
-      if (wallet && typeof wallet === 'string') {
-        return wallet
+        return keyToImplicitAddress(publicKey.toString())
       }
 
       return null
