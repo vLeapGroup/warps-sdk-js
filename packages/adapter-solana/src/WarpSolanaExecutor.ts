@@ -56,14 +56,8 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
   async createTransferTransaction(executable: WarpExecutable): Promise<Transaction> {
     const userWallet = getWarpWalletAddressFromConfig(this.config, executable.chain.name)
     if (!userWallet) throw new Error('WarpSolanaExecutor: createTransfer - user address not set')
-
-    let destinationPubkey: PublicKey
-    try {
-      if (!executable.destination) throw new Error('WarpSolanaExecutor: Destination address is required')
-      destinationPubkey = new PublicKey(executable.destination)
-    } catch {
-      throw new Error(`WarpSolanaExecutor: Invalid destination address: ${executable.destination}`)
-    }
+    if (!executable.destination) throw new Error('WarpSolanaExecutor: Destination address is required')
+    const destinationPubkey = new PublicKey(executable.destination)
 
     if (executable.transfers && executable.transfers.length > 0) {
       return this.createTokenTransferTransaction(executable, userWallet, destinationPubkey)
@@ -73,13 +67,7 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
     const transaction = new Transaction()
 
     if (executable.value > 0n) {
-      transaction.add(
-        SystemProgram.transfer({
-          fromPubkey,
-          toPubkey: destinationPubkey,
-          lamports: Number(executable.value),
-        })
-      )
+      transaction.add(SystemProgram.transfer({ fromPubkey, toPubkey: destinationPubkey, lamports: Number(executable.value) }))
     }
 
     if (executable.data) {
@@ -107,14 +95,8 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
 
     const action = getWarpActionByIndex(executable.warp, executable.action)
     if (!action || !('func' in action) || !action.func) throw new Error('WarpSolanaExecutor: Contract action must have a function name')
-
-    let programId: PublicKey
-    try {
-      if (!executable.destination) throw new Error('WarpSolanaExecutor: Contract address is required')
-      programId = new PublicKey(executable.destination)
-    } catch {
-      throw new Error(`WarpSolanaExecutor: Invalid contract address: ${executable.destination}`)
-    }
+    if (!executable.destination) throw new Error('WarpSolanaExecutor: Contract address is required')
+    const programId = new PublicKey(executable.destination)
 
     const fromPubkey = new PublicKey(userWallet)
     const transaction = new Transaction()
@@ -151,13 +133,7 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
       transaction.add(instruction)
 
       if (executable.value > 0n) {
-        transaction.add(
-          SystemProgram.transfer({
-            fromPubkey,
-            toPubkey: programId,
-            lamports: Number(executable.value),
-          })
-        )
+        transaction.add(SystemProgram.transfer({ fromPubkey, toPubkey: programId, lamports: Number(executable.value) }))
       }
 
       return this.setTransactionDefaults(transaction, fromPubkey)
