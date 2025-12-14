@@ -7,7 +7,7 @@ export const NativeTokenEth: WarpChainAsset = {
   symbol: 'ETH',
   name: 'Ether',
   decimals: 18,
-  logoUrl: 'https://joai.ai/images/tokens/eth-color.svg',
+  logoUrl: 'https://joai.ai/images/tokens/eth.svg',
 }
 
 export const getEthereumAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Ethereum, {
@@ -18,7 +18,7 @@ export const getEthereumAdapter: AdapterFactory = createEvmAdapter(WarpChainName
     blockTime: 12000,
     addressHrp: '0x',
     defaultApiUrl: 'https://ethereum-rpc.publicnode.com',
-    logoUrl: 'https://joai.ai/images/chains/ethereum-color.svg',
+    logoUrl: 'https://joai.ai/images/chains/ethereum.svg',
     nativeToken: NativeTokenEth,
   },
   testnet: {
@@ -28,7 +28,7 @@ export const getEthereumAdapter: AdapterFactory = createEvmAdapter(WarpChainName
     blockTime: 12000,
     addressHrp: '0x',
     defaultApiUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
-    logoUrl: 'https://joai.ai/images/chains/ethereum-color.svg',
+    logoUrl: 'https://joai.ai/images/chains/ethereum.svg',
     nativeToken: NativeTokenEth,
   },
   devnet: {
@@ -38,7 +38,7 @@ export const getEthereumAdapter: AdapterFactory = createEvmAdapter(WarpChainName
     blockTime: 12000,
     addressHrp: '0x',
     defaultApiUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
-    logoUrl: 'https://joai.ai/images/chains/ethereum-color.svg',
+    logoUrl: 'https://joai.ai/images/chains/ethereum.svg',
     nativeToken: NativeTokenEth,
   },
 })

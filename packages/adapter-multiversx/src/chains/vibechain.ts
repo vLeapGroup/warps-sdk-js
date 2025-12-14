@@ -7,7 +7,7 @@ export const NativeTokenVibe: WarpChainAsset = {
   name: 'VIBE',
   symbol: 'VIBE',
   decimals: 18,
-  logoUrl: 'https://joai.ai/images/tokens/vibe-color.svg',
+  logoUrl: 'https://joai.ai/images/tokens/vibe.svg',
 }
 
 const chainInfo: WarpChainInfo = {
@@ -17,7 +17,7 @@ const chainInfo: WarpChainInfo = {
   blockTime: 600,
   addressHrp: 'vibe',
   defaultApiUrl: 'https://vibeox-api.multiversx.com',
-  logoUrl: 'https://joai.ai/images/chains/vibechain-color.svg',
+  logoUrl: 'https://joai.ai/images/chains/vibechain.svg',
   nativeToken: NativeTokenVibe,
 }
 

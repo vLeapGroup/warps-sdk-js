@@ -7,7 +7,7 @@ export const NativeTokenSol: WarpChainAsset = {
   symbol: 'SOL',
   name: 'Solana',
   decimals: 9,
-  logoUrl: 'https://joai.ai/images/tokens/sol-color.svg',
+  logoUrl: 'https://joai.ai/images/tokens/sol.svg',
 }
 
 export const getSolanaAdapter: AdapterFactory = createSolanaAdapter(WarpChainName.Solana, {
@@ -18,7 +18,7 @@ export const getSolanaAdapter: AdapterFactory = createSolanaAdapter(WarpChainNam
     blockTime: 400,
     addressHrp: '',
     defaultApiUrl: 'https://api.mainnet-beta.solana.com',
-    logoUrl: 'https://joai.ai/images/chains/solana-color.svg',
+    logoUrl: 'https://joai.ai/images/chains/solana.svg',
     nativeToken: NativeTokenSol,
   },
   testnet: {
@@ -28,7 +28,7 @@ export const getSolanaAdapter: AdapterFactory = createSolanaAdapter(WarpChainNam
     blockTime: 400,
     addressHrp: '',
     defaultApiUrl: 'https://api.testnet.solana.com',
-    logoUrl: 'https://joai.ai/images/chains/solana-color.svg',
+    logoUrl: 'https://joai.ai/images/chains/solana.svg',
     nativeToken: NativeTokenSol,
   },
   devnet: {
@@ -38,7 +38,7 @@ export const getSolanaAdapter: AdapterFactory = createSolanaAdapter(WarpChainNam
     blockTime: 400,
     addressHrp: '',
     defaultApiUrl: 'https://api.devnet.solana.com',
-    logoUrl: 'https://joai.ai/images/chains/solana-color.svg',
+    logoUrl: 'https://joai.ai/images/chains/solana.svg',
     nativeToken: NativeTokenSol,
   },
 })
