@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-near
 
+## 0.1.0-beta.3
+
+### Patch Changes
+
+- ac459b0: update logo urls
+
 ## 0.1.0-beta.2
 
 ### Minor Changes

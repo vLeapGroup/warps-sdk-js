@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-beta.84
+
+### Patch Changes
+
+- ac459b0: update logo urls
+
 ## 0.2.0-beta.83
 
 ### Patch Changes

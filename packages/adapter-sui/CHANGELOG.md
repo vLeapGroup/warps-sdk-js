@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-beta.59
+
+### Patch Changes
+
+- ac459b0: update logo urls
+
 ## 0.2.0-beta.58
 
 ### Patch Changes

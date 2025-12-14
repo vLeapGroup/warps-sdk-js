@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-beta.55
+
+### Patch Changes
+
+- ac459b0: update logo urls
+
 ## 0.2.0-beta.54
 
 ### Patch Changes

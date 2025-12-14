@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-beta.46
+
+### Patch Changes
+
+- ac459b0: update logo urls
+
 ## 0.1.0-beta.45
 
 ### Patch Changes
