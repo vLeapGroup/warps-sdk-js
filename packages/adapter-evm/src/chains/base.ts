@@ -7,7 +7,7 @@ export const NativeTokenBase: WarpChainAsset = {
   name: 'Ether',
   symbol: 'ETH',
   decimals: 18,
-  logoUrl: 'https://vleap.ai/images/tokens/eth.svg',
+  logoUrl: 'https://joai.ai/images/tokens/eth-color.svg',
 }
 
 export const getBaseAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Base, {
@@ -18,7 +18,7 @@ export const getBaseAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Bas
     blockTime: 2000,
     addressHrp: '0x',
     defaultApiUrl: 'https://mainnet.base.org',
-    logoUrl: 'https://vleap.ai/images/chains/base.svg',
+    logoUrl: 'https://joai.ai/images/chains/base-color.svg',
     nativeToken: NativeTokenBase,
   },
   testnet: {
@@ -28,7 +28,7 @@ export const getBaseAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Bas
     blockTime: 2000,
     addressHrp: '0x',
     defaultApiUrl: 'https://sepolia.base.org',
-    logoUrl: 'https://vleap.ai/images/chains/base.svg',
+    logoUrl: 'https://joai.ai/images/chains/base-color.svg',
     nativeToken: NativeTokenBase,
   },
   devnet: {
@@ -38,7 +38,7 @@ export const getBaseAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Bas
     blockTime: 2000,
     addressHrp: '0x',
     defaultApiUrl: 'https://sepolia.base.org',
-    logoUrl: 'https://vleap.ai/images/chains/base.svg',
+    logoUrl: 'https://joai.ai/images/chains/base-color.svg',
     nativeToken: NativeTokenBase,
   },
 })

@@ -43,7 +43,7 @@ export const FastsetTokens: WarpChainAsset[] = [
     name: 'Wrapped SET',
     symbol: 'WSET',
     decimals: 18,
-    logoUrl: 'https://vleap.ai/images/tokens/set.svg',
+    logoUrl: 'https://joai.ai/images/tokens/set-black.svg',
     amount: 0n,
   },
 ]

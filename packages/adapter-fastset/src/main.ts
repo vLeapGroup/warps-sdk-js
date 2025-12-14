@@ -21,7 +21,7 @@ export const NativeTokenSet: WarpChainAsset = {
   name: 'SET',
   symbol: 'SET',
   decimals: 0,
-  logoUrl: 'https://vleap.ai/images/tokens/set.svg',
+  logoUrl: 'https://joai.ai/images/tokens/set-black.svg',
 }
 
 function createFastsetAdapter(chainName: WarpChain, chainInfos: Record<WarpChainEnv, WarpChainInfo>): AdapterFactory {
@@ -55,7 +55,7 @@ export const getFastsetAdapter: AdapterFactory = createFastsetAdapter(WarpChainN
     blockTime: 1000,
     addressHrp: 'set',
     defaultApiUrl: 'https://proxy.fastset.xyz',
-    logoUrl: 'https://vleap.ai/images/chains/fastset.svg',
+    logoUrl: 'https://joai.ai/images/chains/fastset-black.svg',
     nativeToken: NativeTokenSet,
   },
   testnet: {
@@ -65,7 +65,7 @@ export const getFastsetAdapter: AdapterFactory = createFastsetAdapter(WarpChainN
     blockTime: 1000,
     addressHrp: 'set',
     defaultApiUrl: 'https://proxy.fastset.xyz',
-    logoUrl: 'https://vleap.ai/images/chains/fastset.svg',
+    logoUrl: 'https://joai.ai/images/chains/fastset-black.svg',
     nativeToken: NativeTokenSet,
   },
   devnet: {
@@ -75,7 +75,7 @@ export const getFastsetAdapter: AdapterFactory = createFastsetAdapter(WarpChainN
     blockTime: 1000,
     addressHrp: 'set',
     defaultApiUrl: 'https://proxy.fastset.xyz',
-    logoUrl: 'https://vleap.ai/images/chains/fastset.svg',
+    logoUrl: 'https://joai.ai/images/chains/fastset-black.svg',
     nativeToken: NativeTokenSet,
   },
 })

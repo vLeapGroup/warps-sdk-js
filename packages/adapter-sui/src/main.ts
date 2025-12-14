@@ -14,8 +14,8 @@ import { WarpSuiBuilder } from './WarpSuiBuilder'
 import { WarpSuiDataLoader } from './WarpSuiDataLoader'
 import { WarpSuiExecutor } from './WarpSuiExecutor'
 import { WarpSuiExplorer } from './WarpSuiExplorer'
-import { WarpSuiRegistry } from './WarpSuiRegistry'
 import { WarpSuiOutput } from './WarpSuiOutput'
+import { WarpSuiRegistry } from './WarpSuiRegistry'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
 import { WarpSuiWallet } from './WarpSuiWallet'
 
@@ -57,7 +57,7 @@ export const getSuiAdapter: AdapterFactory = createSuiAdapter(WarpChainName.Sui,
     blockTime: 3000,
     addressHrp: 'sui',
     defaultApiUrl: 'https://fullnode.mainnet.sui.io',
-    logoUrl: 'https://vleap.ai/images/chains/sui.svg',
+    logoUrl: 'https://joai.ai/images/chains/sui-color.svg',
     nativeToken: NativeTokenSui,
   },
   testnet: {
@@ -67,7 +67,7 @@ export const getSuiAdapter: AdapterFactory = createSuiAdapter(WarpChainName.Sui,
     blockTime: 3000,
     addressHrp: 'sui',
     defaultApiUrl: 'https://fullnode.testnet.sui.io',
-    logoUrl: 'https://vleap.ai/images/chains/sui.svg',
+    logoUrl: 'https://joai.ai/images/chains/sui-color.svg',
     nativeToken: NativeTokenSui,
   },
   devnet: {
@@ -77,7 +77,7 @@ export const getSuiAdapter: AdapterFactory = createSuiAdapter(WarpChainName.Sui,
     blockTime: 3000,
     addressHrp: 'sui',
     defaultApiUrl: 'https://fullnode.devnet.sui.io',
-    logoUrl: 'https://vleap.ai/images/chains/sui.svg',
+    logoUrl: 'https://joai.ai/images/chains/sui-color.svg',
     nativeToken: NativeTokenSui,
   },
 })

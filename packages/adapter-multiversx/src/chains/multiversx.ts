@@ -7,7 +7,7 @@ export const NativeTokenEgld: WarpChainAsset = {
   name: 'eGold',
   symbol: 'EGLD',
   decimals: 18,
-  logoUrl: 'https://vleap.ai/images/tokens/egld.svg',
+  logoUrl: 'https://joai.ai/images/tokens/egld-color.svg',
 }
 
 export const getMultiversxAdapter = createMultiversxAdapter(WarpChainName.Multiversx, {
@@ -18,7 +18,7 @@ export const getMultiversxAdapter = createMultiversxAdapter(WarpChainName.Multiv
     blockTime: 6000,
     addressHrp: 'erd',
     defaultApiUrl: 'https://api.multiversx.com',
-    logoUrl: 'https://vleap.ai/images/chains/multiversx.svg',
+    logoUrl: 'https://joai.ai/images/chains/multiversx-color.svg',
     nativeToken: NativeTokenEgld,
   },
   testnet: {
@@ -28,7 +28,7 @@ export const getMultiversxAdapter = createMultiversxAdapter(WarpChainName.Multiv
     blockTime: 6000,
     addressHrp: 'erd',
     defaultApiUrl: 'https://testnet-api.multiversx.com',
-    logoUrl: 'https://vleap.ai/images/chains/multiversx.svg',
+    logoUrl: 'https://joai.ai/images/chains/multiversx-color.svg',
     nativeToken: NativeTokenEgld,
   },
   devnet: {
@@ -38,7 +38,7 @@ export const getMultiversxAdapter = createMultiversxAdapter(WarpChainName.Multiv
     blockTime: 6000,
     addressHrp: 'erd',
     defaultApiUrl: 'https://devnet-api.multiversx.com',
-    logoUrl: 'https://vleap.ai/images/chains/multiversx.svg',
+    logoUrl: 'https://joai.ai/images/chains/multiversx-color.svg',
     nativeToken: NativeTokenEgld,
   },
 })

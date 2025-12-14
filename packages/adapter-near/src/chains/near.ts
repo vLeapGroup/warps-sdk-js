@@ -7,7 +7,7 @@ export const NativeTokenNear: WarpChainAsset = {
   symbol: 'NEAR',
   name: 'NEAR',
   decimals: 24,
-  logoUrl: 'https://vleap.ai/images/tokens/near.svg',
+  logoUrl: 'https://joai.ai/images/tokens/near-black.svg',
 }
 
 export const getNearAdapter: AdapterFactory = createNearAdapter('near' as WarpChain, {
@@ -18,7 +18,7 @@ export const getNearAdapter: AdapterFactory = createNearAdapter('near' as WarpCh
     blockTime: 1200,
     addressHrp: '',
     defaultApiUrl: 'https://rpc.mainnet.near.org',
-    logoUrl: 'https://vleap.ai/images/chains/near.svg',
+    logoUrl: 'https://joai.ai/images/chains/near-black.svg',
     nativeToken: NativeTokenNear,
   },
   testnet: {
@@ -28,7 +28,7 @@ export const getNearAdapter: AdapterFactory = createNearAdapter('near' as WarpCh
     blockTime: 1200,
     addressHrp: '',
     defaultApiUrl: 'https://rpc.testnet.near.org',
-    logoUrl: 'https://vleap.ai/images/chains/near.svg',
+    logoUrl: 'https://joai.ai/images/chains/near-black.svg',
     nativeToken: NativeTokenNear,
   },
   devnet: {
@@ -38,7 +38,7 @@ export const getNearAdapter: AdapterFactory = createNearAdapter('near' as WarpCh
     blockTime: 1200,
     addressHrp: '',
     defaultApiUrl: 'https://rpc.testnet.near.org',
-    logoUrl: 'https://vleap.ai/images/chains/near.svg',
+    logoUrl: 'https://joai.ai/images/chains/near-black.svg',
     nativeToken: NativeTokenNear,
   },
 })

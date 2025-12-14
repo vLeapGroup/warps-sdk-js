@@ -7,7 +7,7 @@ export const NativeTokenArb: WarpChainAsset = {
   symbol: 'ARB',
   name: 'Arbitrum',
   decimals: 18,
-  logoUrl: 'https://vleap.ai/images/tokens/arb.svg',
+  logoUrl: 'https://joai.ai/images/tokens/arb-color.svg',
 }
 
 export const getArbitrumAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Arbitrum, {
@@ -18,7 +18,7 @@ export const getArbitrumAdapter: AdapterFactory = createEvmAdapter(WarpChainName
     blockTime: 1000,
     addressHrp: '0x',
     defaultApiUrl: 'https://arb1.arbitrum.io/rpc',
-    logoUrl: 'https://vleap.ai/images/chains/arbitrum.svg',
+    logoUrl: 'https://joai.ai/images/chains/arbitrum-color.svg',
     nativeToken: NativeTokenArb,
   },
   testnet: {
@@ -28,7 +28,7 @@ export const getArbitrumAdapter: AdapterFactory = createEvmAdapter(WarpChainName
     blockTime: 1000,
     addressHrp: '0x',
     defaultApiUrl: 'https://sepolia-rollup.arbitrum.io/rpc',
-    logoUrl: 'https://vleap.ai/images/chains/arbitrum.svg',
+    logoUrl: 'https://joai.ai/images/chains/arbitrum-color.svg',
     nativeToken: NativeTokenArb,
   },
   devnet: {
@@ -38,7 +38,7 @@ export const getArbitrumAdapter: AdapterFactory = createEvmAdapter(WarpChainName
     blockTime: 1000,
     addressHrp: '0x',
     defaultApiUrl: 'https://sepolia-rollup.arbitrum.io/rpc',
-    logoUrl: 'https://vleap.ai/images/chains/arbitrum.svg',
+    logoUrl: 'https://joai.ai/images/chains/arbitrum-color.svg',
     nativeToken: NativeTokenArb,
   },
 })
