@@ -300,7 +300,6 @@ describe('convertWarpToMcpCapabilities', () => {
     const result = convertWarpToMcpCapabilities(warp)
 
     expect(result.tools).toHaveLength(1)
-    expect(result.resources).toHaveLength(0)
     expect(result.tools[0].name).toBe('test_tool')
     expect(result.tools[0].description).toBe('Test tool description')
     expect(result.tools[0].url).toBe(mockUrl)
@@ -620,7 +619,6 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toEqual([])
-    expect(result.resources).toEqual([])
   })
 
   it('skips MCP action when it has no destination', () => {
@@ -639,7 +637,6 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toEqual([])
-    expect(result.resources).toEqual([])
   })
 
   it('converts all Warp input types to JSON Schema types', () => {
@@ -726,9 +723,9 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toHaveLength(1)
-    expect(result.resources).toHaveLength(0)
     expect(result.tools[0].name).toBe('transfer_test_0')
     expect(result.tools[0].description).toBe('Transfer action')
+    expect(result.tools[0].readonly).toBe(false)
   })
 
   it('converts contract action to tool', () => {
@@ -758,11 +755,11 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toHaveLength(1)
-    expect(result.resources).toHaveLength(0)
     expect(result.tools[0].name).toBe('contract_test_0')
+    expect(result.tools[0].readonly).toBe(false)
   })
 
-  it('converts query action to resource', () => {
+  it('converts query action to readonly tool', () => {
     const warp: Warp = {
       protocol: 'warp:3.0.0',
       name: 'query_test',
@@ -779,11 +776,11 @@ describe('convertWarpToMcpCapabilities', () => {
     }
 
     const result = convertWarpToMcpCapabilities(warp)
-    expect(result.tools).toHaveLength(0)
-    expect(result.resources).toHaveLength(1)
-    expect(result.resources[0].name).toBe('query_test_0')
-    expect(result.resources[0].uri).toBe('erd1query')
-    expect(result.resources[0].description).toBe('Query action')
+    expect(result.tools).toHaveLength(1)
+    expect(result.tools[0].name).toBe('query_test_0')
+    expect(result.tools[0].url).toBe('erd1query')
+    expect(result.tools[0].description).toBe('Query action')
+    expect(result.tools[0].readonly).toBe(true)
   })
 
   it('converts collect action with POST to tool', () => {
@@ -815,10 +812,10 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toHaveLength(1)
-    expect(result.resources).toHaveLength(0)
     expect(result.tools[0].name).toBe('collect_post_test_0')
     expect(result.tools[0].url).toBe('https://api.example.com/collect')
     expect(result.tools[0].headers).toEqual({ 'Content-Type': 'application/json' })
+    expect(result.tools[0].readonly).toBe(false)
   })
 
   it('converts collect action with PUT to tool', () => {
@@ -841,7 +838,6 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toHaveLength(1)
-    expect(result.resources).toHaveLength(0)
   })
 
   it('converts collect action with DELETE to tool', () => {
@@ -864,10 +860,9 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toHaveLength(1)
-    expect(result.resources).toHaveLength(0)
   })
 
-  it('converts collect action with GET to resource', () => {
+  it('converts collect action with GET to readonly tool', () => {
     const warp: Warp = {
       protocol: 'warp:3.0.0',
       name: 'collect_get_test',
@@ -887,16 +882,15 @@ describe('convertWarpToMcpCapabilities', () => {
     }
 
     const result = convertWarpToMcpCapabilities(warp)
-    expect(result.tools).toHaveLength(0)
-    expect(result.resources).toHaveLength(1)
-    expect(result.resources[0].name).toBe('collect_get_test_0')
-    expect(result.resources[0].uri).toBe('https://api.example.com/data')
-    expect(result.resources[0].mimeType).toBe('application/json')
-    expect(result.resources[0].headers).toEqual({ Accept: 'application/json' })
-    expect(result.resources[0].description).toBe('Collect GET action')
+    expect(result.tools).toHaveLength(1)
+    expect(result.tools[0].name).toBe('collect_get_test_0')
+    expect(result.tools[0].url).toBe('https://api.example.com/data')
+    expect(result.tools[0].headers).toEqual({ Accept: 'application/json' })
+    expect(result.tools[0].description).toBe('Collect GET action')
+    expect(result.tools[0].readonly).toBe(true)
   })
 
-  it('converts collect action without method (defaults to GET) to resource', () => {
+  it('converts collect action without method (defaults to GET) to readonly tool', () => {
     const warp: Warp = {
       protocol: 'warp:3.0.0',
       name: 'collect_no_method_test',
@@ -914,12 +908,12 @@ describe('convertWarpToMcpCapabilities', () => {
     }
 
     const result = convertWarpToMcpCapabilities(warp)
-    expect(result.tools).toHaveLength(0)
-    expect(result.resources).toHaveLength(1)
-    expect(result.resources[0].uri).toBe('https://api.example.com/data')
+    expect(result.tools).toHaveLength(1)
+    expect(result.tools[0].url).toBe('https://api.example.com/data')
+    expect(result.tools[0].readonly).toBe(true)
   })
 
-  it('converts collect action with string destination to resource', () => {
+  it('converts collect action with string destination to readonly tool', () => {
     const warp: Warp = {
       protocol: 'warp:3.0.0',
       name: 'collect_string_test',
@@ -935,9 +929,9 @@ describe('convertWarpToMcpCapabilities', () => {
     }
 
     const result = convertWarpToMcpCapabilities(warp)
-    expect(result.tools).toHaveLength(0)
-    expect(result.resources).toHaveLength(1)
-    expect(result.resources[0].uri).toBe('https://api.example.com/data')
+    expect(result.tools).toHaveLength(1)
+    expect(result.tools[0].url).toBe('https://api.example.com/data')
+    expect(result.tools[0].readonly).toBe(true)
   })
 
   it('handles multiple actions of different types', () => {
@@ -977,12 +971,15 @@ describe('convertWarpToMcpCapabilities', () => {
     }
 
     const result = convertWarpToMcpCapabilities(warp)
-    expect(result.tools).toHaveLength(2)
-    expect(result.resources).toHaveLength(2)
+    expect(result.tools).toHaveLength(4)
     expect(result.tools[0].name).toBe('multiple_actions_test_0')
-    expect(result.tools[1].name).toBe('multiple_actions_test_2')
-    expect(result.resources[0].name).toBe('multiple_actions_test_1')
-    expect(result.resources[1].name).toBe('multiple_actions_test_3')
+    expect(result.tools[0].readonly).toBe(false)
+    expect(result.tools[1].name).toBe('multiple_actions_test_1')
+    expect(result.tools[1].readonly).toBe(true)
+    expect(result.tools[2].name).toBe('multiple_actions_test_2')
+    expect(result.tools[2].readonly).toBe(false)
+    expect(result.tools[3].name).toBe('multiple_actions_test_3')
+    expect(result.tools[3].readonly).toBe(true)
   })
 
   it('sanitizes tool names with spaces and colons', () => {
@@ -1006,7 +1003,7 @@ describe('convertWarpToMcpCapabilities', () => {
     expect(result.tools[0].name).toMatch(/^[A-Za-z0-9_.-]+$/)
   })
 
-  it('sanitizes resource names with invalid characters', () => {
+  it('sanitizes tool names with invalid characters for query actions', () => {
     const warp: Warp = {
       protocol: 'warp:3.0.0',
       name: 'Query: Get Balance (Test)',
@@ -1023,8 +1020,9 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
 
-    expect(result.resources[0].name).toBe('Query_Get_Balance_Test_0')
-    expect(result.resources[0].name).toMatch(/^[A-Za-z0-9_.-]+$/)
+    expect(result.tools[0].name).toBe('Query_Get_Balance_Test_0')
+    expect(result.tools[0].name).toMatch(/^[A-Za-z0-9_.-]+$/)
+    expect(result.tools[0].readonly).toBe(true)
   })
 
   it('sanitizes MCP tool names with special characters', () => {

@@ -67,9 +67,8 @@ export const convertMcpToolToWarp = async (
     .build(false)
 }
 
-export const convertWarpToMcpCapabilities = (warp: Warp): { tools: any[]; resources: any[] } => {
+export const convertWarpToMcpCapabilities = (warp: Warp): { tools: any[] } => {
   const tools: any[] = []
-  const resources: any[] = []
 
   const description = warp.description && typeof warp.description === 'object' && 'en' in warp.description ? warp.description.en : undefined
 
@@ -95,38 +94,33 @@ export const convertWarpToMcpCapabilities = (warp: Warp): { tools: any[]; resour
 
     const finalDescription = description || actionDescription || undefined
 
-    if (action.type === 'transfer' || action.type === 'contract') {
-      const tool = convertActionToTool(warp, action, finalDescription, hasOutput ? outputSchema : undefined, index)
+    let isReadonly = false
+
+    if (action.type === 'query') {
+      isReadonly = true
+      const tool = convertActionToTool(warp, action, finalDescription, hasOutput ? outputSchema : undefined, index, isReadonly)
       tools.push(tool)
-    } else if (action.type === 'query') {
-      const resource = convertActionToResource(warp, action, finalDescription, index)
-      resources.push(resource)
     } else if (action.type === 'collect') {
       const collectAction = action as WarpCollectAction
-      if (
-        collectAction.destination &&
-        typeof collectAction.destination === 'object' &&
-        'method' in collectAction.destination &&
-        (collectAction.destination.method === 'POST' ||
-          collectAction.destination.method === 'PUT' ||
-          collectAction.destination.method === 'DELETE')
-      ) {
-        const tool = convertActionToTool(warp, action, finalDescription, hasOutput ? outputSchema : undefined, index)
-        tools.push(tool)
-      } else {
-        const resource = convertActionToResource(warp, action, finalDescription, index)
-        resources.push(resource)
-      }
+      const method = collectAction.destination && typeof collectAction.destination === 'object' && 'method' in collectAction.destination
+        ? collectAction.destination.method
+        : 'GET'
+      isReadonly = method === 'GET'
+      const tool = convertActionToTool(warp, action, finalDescription, hasOutput ? outputSchema : undefined, index, isReadonly)
+      tools.push(tool)
+    } else if (action.type === 'transfer' || action.type === 'contract') {
+      const tool = convertActionToTool(warp, action, finalDescription, hasOutput ? outputSchema : undefined, index, isReadonly)
+      tools.push(tool)
     } else if (action.type === 'mcp') {
       const mcpAction = action as WarpMcpAction
       if (mcpAction.destination) {
-        const tool = convertMcpActionToTool(warp, mcpAction, finalDescription, hasOutput ? outputSchema : undefined)
+        const tool = convertMcpActionToTool(warp, mcpAction, finalDescription, hasOutput ? outputSchema : undefined, isReadonly)
         tools.push(tool)
       }
     }
   })
 
-  return { tools, resources }
+  return { tools }
 }
 
 const sanitizeMcpName = (name: string): string => {
@@ -140,10 +134,11 @@ const sanitizeMcpName = (name: string): string => {
 
 const convertActionToTool = (
   warp: Warp,
-  action: WarpTransferAction | WarpContractAction | WarpCollectAction,
+  action: WarpTransferAction | WarpContractAction | WarpCollectAction | WarpQueryAction,
   description: string | undefined,
   outputSchema: any | undefined,
-  index: number
+  index: number,
+  readonly: boolean = false
 ): any => {
   const inputSchema = buildInputSchema(action.inputs || [])
   const name = sanitizeMcpName(`${warp.name}_${index}`)
@@ -153,9 +148,18 @@ const convertActionToTool = (
 
   if (action.type === 'collect') {
     const collectAction = action as WarpCollectAction
-    if (collectAction.destination && typeof collectAction.destination === 'object' && 'url' in collectAction.destination) {
-      url = collectAction.destination.url
-      headers = collectAction.destination.headers
+    if (collectAction.destination) {
+      if (typeof collectAction.destination === 'string') {
+        url = collectAction.destination
+      } else if (typeof collectAction.destination === 'object' && 'url' in collectAction.destination) {
+        url = collectAction.destination.url
+        headers = collectAction.destination.headers
+      }
+    }
+  } else if (action.type === 'query') {
+    const queryAction = action as WarpQueryAction
+    if (queryAction.address) {
+      url = queryAction.address
     }
   }
 
@@ -166,48 +170,11 @@ const convertActionToTool = (
     outputSchema,
     url,
     headers,
+    readonly,
   }
 }
 
-const convertActionToResource = (
-  warp: Warp,
-  action: WarpQueryAction | WarpCollectAction,
-  description: string | undefined,
-  index: number
-): any => {
-  const name = sanitizeMcpName(`${warp.name}_${index}`)
-  let uri: string | undefined
-  let mimeType: string | undefined
-  let headers: Record<string, string> | undefined
-
-  if (action.type === 'query') {
-    const queryAction = action as WarpQueryAction
-    if (queryAction.address) {
-      uri = queryAction.address
-    }
-  } else if (action.type === 'collect') {
-    const collectAction = action as WarpCollectAction
-    if (collectAction.destination) {
-      if (typeof collectAction.destination === 'string') {
-        uri = collectAction.destination
-      } else if (typeof collectAction.destination === 'object' && 'url' in collectAction.destination) {
-        uri = collectAction.destination.url
-        headers = collectAction.destination.headers
-        mimeType = 'application/json'
-      }
-    }
-  }
-
-  return {
-    uri: uri || name,
-    name,
-    description,
-    mimeType,
-    headers,
-  }
-}
-
-const convertMcpActionToTool = (warp: Warp, action: WarpMcpAction, description: string | undefined, outputSchema: any | undefined): any => {
+const convertMcpActionToTool = (warp: Warp, action: WarpMcpAction, description: string | undefined, outputSchema: any | undefined, readonly: boolean = false): any => {
   const inputSchema = buildInputSchema(action.inputs || [])
   const { url, tool: toolName, headers } = action.destination!
 
@@ -218,6 +185,7 @@ const convertMcpActionToTool = (warp: Warp, action: WarpMcpAction, description: 
     outputSchema,
     url,
     headers,
+    readonly,
   }
 }
 
