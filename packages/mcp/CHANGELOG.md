@@ -1,5 +1,11 @@
 # @vleap/warps-mcp
 
+## 1.0.0-beta.8
+
+### Patch Changes
+
+- cfaf851: update mcp
+
 ## 1.0.0-beta.7
 
 ### Patch Changes
