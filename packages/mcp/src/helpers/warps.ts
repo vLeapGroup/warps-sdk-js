@@ -129,6 +129,15 @@ export const convertWarpToMcpCapabilities = (warp: Warp): { tools: any[]; resour
   return { tools, resources }
 }
 
+const sanitizeMcpName = (name: string): string => {
+  return name
+    .replace(/\s+/g, '_')
+    .replace(/:/g, '_')
+    .replace(/[^A-Za-z0-9_.-]/g, '_')
+    .replace(/^[^A-Za-z0-9]+|[^A-Za-z0-9]+$/g, '')
+    .replace(/_+/g, '_')
+}
+
 const convertActionToTool = (
   warp: Warp,
   action: WarpTransferAction | WarpContractAction | WarpCollectAction,
@@ -137,7 +146,7 @@ const convertActionToTool = (
   index: number
 ): any => {
   const inputSchema = buildInputSchema(action.inputs || [])
-  const name = `${warp.name}_${index}`
+  const name = sanitizeMcpName(`${warp.name}_${index}`)
 
   let url: string | undefined
   let headers: Record<string, string> | undefined
@@ -166,7 +175,7 @@ const convertActionToResource = (
   description: string | undefined,
   index: number
 ): any => {
-  const name = `${warp.name}_${index}`
+  const name = sanitizeMcpName(`${warp.name}_${index}`)
   let uri: string | undefined
   let mimeType: string | undefined
   let headers: Record<string, string> | undefined
@@ -203,7 +212,7 @@ const convertMcpActionToTool = (warp: Warp, action: WarpMcpAction, description: 
   const { url, tool: toolName, headers } = action.destination!
 
   return {
-    name: toolName,
+    name: sanitizeMcpName(toolName),
     description,
     inputSchema: Object.keys(inputSchema.properties).length > 0 ? inputSchema : undefined,
     outputSchema,

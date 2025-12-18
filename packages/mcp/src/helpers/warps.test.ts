@@ -984,4 +984,91 @@ describe('convertWarpToMcpCapabilities', () => {
     expect(result.resources[0].name).toBe('multiple_actions_test_1')
     expect(result.resources[1].name).toBe('multiple_actions_test_3')
   })
+
+  it('sanitizes tool names with spaces and colons', () => {
+    const warp: Warp = {
+      protocol: 'warp:3.0.0',
+      name: 'MultiversX Staking: Delegate',
+      title: { en: 'MultiversX Staking: Delegate' },
+      description: null,
+      actions: [
+        {
+          type: 'transfer',
+          label: { en: 'Delegate' },
+          address: 'erd1test',
+        },
+      ],
+    }
+
+    const result = convertWarpToMcpCapabilities(warp)
+
+    expect(result.tools[0].name).toBe('MultiversX_Staking_Delegate_0')
+    expect(result.tools[0].name).toMatch(/^[A-Za-z0-9_.-]+$/)
+  })
+
+  it('sanitizes resource names with invalid characters', () => {
+    const warp: Warp = {
+      protocol: 'warp:3.0.0',
+      name: 'Query: Get Balance (Test)',
+      title: { en: 'Query: Get Balance (Test)' },
+      description: null,
+      actions: [
+        {
+          type: 'query',
+          label: { en: 'Get Balance' },
+          address: 'erd1query',
+        },
+      ],
+    }
+
+    const result = convertWarpToMcpCapabilities(warp)
+
+    expect(result.resources[0].name).toBe('Query_Get_Balance_Test_0')
+    expect(result.resources[0].name).toMatch(/^[A-Za-z0-9_.-]+$/)
+  })
+
+  it('sanitizes MCP tool names with special characters', () => {
+    const warp: Warp = {
+      protocol: 'warp:3.0.0',
+      name: 'Test Tool',
+      title: { en: 'Test Tool' },
+      description: null,
+      actions: [
+        {
+          type: 'mcp',
+          label: { en: 'Test Tool' },
+          destination: {
+            url: 'https://mcp.example.com',
+            tool: 'test-tool:with:colons',
+          },
+        },
+      ],
+    }
+
+    const result = convertWarpToMcpCapabilities(warp)
+
+    expect(result.tools[0].name).toBe('test-tool_with_colons')
+    expect(result.tools[0].name).toMatch(/^[A-Za-z0-9_.-]+$/)
+  })
+
+  it('handles names with multiple consecutive invalid characters', () => {
+    const warp: Warp = {
+      protocol: 'warp:3.0.0',
+      name: 'Tool   With   Spaces',
+      title: { en: 'Tool   With   Spaces' },
+      description: null,
+      actions: [
+        {
+          type: 'transfer',
+          label: { en: 'Transfer' },
+          address: 'erd1test',
+        },
+      ],
+    }
+
+    const result = convertWarpToMcpCapabilities(warp)
+
+    expect(result.tools[0].name).toBe('Tool_With_Spaces_0')
+    expect(result.tools[0].name).not.toContain('__')
+  })
 })
