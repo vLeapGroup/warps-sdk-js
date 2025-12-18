@@ -1,5 +1,6 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
+import { WarpMcpAction } from '@vleap/warps'
 import { WarpMcp } from './WarpMcp'
 
 jest.mock('@modelcontextprotocol/sdk/client/index.js')
@@ -29,7 +30,7 @@ describe('WarpMcp', () => {
       () => mockTransport
     )
 
-    warpMcp = new WarpMcp()
+    warpMcp = new WarpMcp({ env: 'mainnet' })
   })
 
   it('connects to MCP server and lists tools', async () => {
@@ -74,8 +75,9 @@ describe('WarpMcp', () => {
     expect(warps[0].name).toBe('tool1')
     expect(warps[0].protocol).toBe('warp:3.0.0')
     expect(warps[0].actions[0].type).toBe('mcp')
-    expect(warps[0].actions[0].destination?.url).toBe(mockUrl)
-    expect(warps[0].actions[0].destination?.tool).toBe('tool1')
+    const mcpAction = warps[0].actions[0] as WarpMcpAction
+    expect(mcpAction.destination?.url).toBe(mockUrl)
+    expect(mcpAction.destination?.tool).toBe('tool1')
     expect(warps[1].name).toBe('tool2')
     expect(warps[1].protocol).toBe('warp:3.0.0')
   })
@@ -98,7 +100,8 @@ describe('WarpMcp', () => {
       requestInit: { headers: {} },
     })
     expect(warps).toHaveLength(1)
-    expect(warps[0].actions[0].destination?.headers).toBeUndefined()
+    const mcpAction = warps[0].actions[0] as WarpMcpAction
+    expect(mcpAction.destination?.headers).toBeUndefined()
   })
 
   it('closes client on error', async () => {
