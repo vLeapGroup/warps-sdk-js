@@ -1,5 +1,11 @@
 # @vleap/warps-mcp
 
+## 1.0.0-beta.5
+
+### Patch Changes
+
+- 155602e: add warps to mcp conversion
+
 ## 1.0.0-beta.4
 
 ### Patch Changes
