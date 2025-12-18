@@ -302,8 +302,6 @@ describe('convertWarpToMcpCapabilities', () => {
     expect(result.tools).toHaveLength(1)
     expect(result.tools[0].name).toBe('test_tool')
     expect(result.tools[0].description).toBe('Test tool description')
-    expect(result.tools[0].url).toBe(mockUrl)
-    expect(result.tools[0].headers).toEqual(mockHeaders)
     expect(result.tools[0].inputSchema).toBeDefined()
     expect(result.tools[0].inputSchema.properties.name).toBeDefined()
     expect(result.tools[0].inputSchema.properties.name.type).toBe('string')
@@ -387,11 +385,8 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
 
-    expect(result.tools[0].outputSchema).toBeDefined()
-    expect(result.tools[0].outputSchema.properties.id).toBeDefined()
-    expect(result.tools[0].outputSchema.properties.name).toBeDefined()
-    expect(result.tools[0].outputSchema.properties.count).toBeDefined()
-    expect(result.tools[0].outputSchema.properties.id.type).toBe('string')
+    expect(result.tools[0].name).toBe('output_test')
+    expect(result.tools[0].inputSchema).toBeUndefined()
   })
 
   it('handles Warp without inputs', () => {
@@ -567,7 +562,6 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
 
-    expect(result.tools[0].headers).toBeUndefined()
   })
 
   it('filters out inputs that are not payload inputs', () => {
@@ -725,7 +719,6 @@ describe('convertWarpToMcpCapabilities', () => {
     expect(result.tools).toHaveLength(1)
     expect(result.tools[0].name).toBe('transfer_test_0')
     expect(result.tools[0].description).toBe('Transfer action')
-    expect(result.tools[0].readonly).toBe(false)
   })
 
   it('converts contract action to tool', () => {
@@ -756,10 +749,9 @@ describe('convertWarpToMcpCapabilities', () => {
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toHaveLength(1)
     expect(result.tools[0].name).toBe('contract_test_0')
-    expect(result.tools[0].readonly).toBe(false)
   })
 
-  it('converts query action to readonly tool', () => {
+  it('converts query action to tool', () => {
     const warp: Warp = {
       protocol: 'warp:3.0.0',
       name: 'query_test',
@@ -778,9 +770,7 @@ describe('convertWarpToMcpCapabilities', () => {
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toHaveLength(1)
     expect(result.tools[0].name).toBe('query_test_0')
-    expect(result.tools[0].url).toBe('erd1query')
     expect(result.tools[0].description).toBe('Query action')
-    expect(result.tools[0].readonly).toBe(true)
   })
 
   it('converts collect action with POST to tool', () => {
@@ -813,9 +803,6 @@ describe('convertWarpToMcpCapabilities', () => {
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toHaveLength(1)
     expect(result.tools[0].name).toBe('collect_post_test_0')
-    expect(result.tools[0].url).toBe('https://api.example.com/collect')
-    expect(result.tools[0].headers).toEqual({ 'Content-Type': 'application/json' })
-    expect(result.tools[0].readonly).toBe(false)
   })
 
   it('converts collect action with PUT to tool', () => {
@@ -862,7 +849,7 @@ describe('convertWarpToMcpCapabilities', () => {
     expect(result.tools).toHaveLength(1)
   })
 
-  it('converts collect action with GET to readonly tool', () => {
+  it('converts collect action with GET to tool', () => {
     const warp: Warp = {
       protocol: 'warp:3.0.0',
       name: 'collect_get_test',
@@ -884,13 +871,10 @@ describe('convertWarpToMcpCapabilities', () => {
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toHaveLength(1)
     expect(result.tools[0].name).toBe('collect_get_test_0')
-    expect(result.tools[0].url).toBe('https://api.example.com/data')
-    expect(result.tools[0].headers).toEqual({ Accept: 'application/json' })
     expect(result.tools[0].description).toBe('Collect GET action')
-    expect(result.tools[0].readonly).toBe(true)
   })
 
-  it('converts collect action without method (defaults to GET) to readonly tool', () => {
+  it('converts collect action without method to tool', () => {
     const warp: Warp = {
       protocol: 'warp:3.0.0',
       name: 'collect_no_method_test',
@@ -909,11 +893,10 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toHaveLength(1)
-    expect(result.tools[0].url).toBe('https://api.example.com/data')
-    expect(result.tools[0].readonly).toBe(true)
+    expect(result.tools[0].name).toBe('collect_no_method_test_0')
   })
 
-  it('converts collect action with string destination to readonly tool', () => {
+  it('converts collect action with string destination to tool', () => {
     const warp: Warp = {
       protocol: 'warp:3.0.0',
       name: 'collect_string_test',
@@ -930,8 +913,7 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toHaveLength(1)
-    expect(result.tools[0].url).toBe('https://api.example.com/data')
-    expect(result.tools[0].readonly).toBe(true)
+    expect(result.tools[0].name).toBe('collect_string_test_0')
   })
 
   it('handles multiple actions of different types', () => {
@@ -973,13 +955,9 @@ describe('convertWarpToMcpCapabilities', () => {
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toHaveLength(4)
     expect(result.tools[0].name).toBe('multiple_actions_test_0')
-    expect(result.tools[0].readonly).toBe(false)
     expect(result.tools[1].name).toBe('multiple_actions_test_1')
-    expect(result.tools[1].readonly).toBe(true)
     expect(result.tools[2].name).toBe('multiple_actions_test_2')
-    expect(result.tools[2].readonly).toBe(false)
     expect(result.tools[3].name).toBe('multiple_actions_test_3')
-    expect(result.tools[3].readonly).toBe(true)
   })
 
   it('sanitizes tool names with spaces and colons', () => {
@@ -1022,7 +1000,6 @@ describe('convertWarpToMcpCapabilities', () => {
 
     expect(result.tools[0].name).toBe('Query_Get_Balance_Test_0')
     expect(result.tools[0].name).toMatch(/^[A-Za-z0-9_.-]+$/)
-    expect(result.tools[0].readonly).toBe(true)
   })
 
   it('sanitizes MCP tool names with special characters', () => {
@@ -1068,5 +1045,188 @@ describe('convertWarpToMcpCapabilities', () => {
 
     expect(result.tools[0].name).toBe('Tool_With_Spaces_0')
     expect(result.tools[0].name).not.toContain('__')
+  })
+
+  it('maps min and max constraints to JSON Schema', () => {
+    const warp: Warp = {
+      protocol: 'warp:3.0.0',
+      name: 'constraints_test',
+      title: { en: 'Constraints Test' },
+      description: null,
+      actions: [
+        {
+          type: 'mcp',
+          label: { en: 'Constraints Test' },
+          destination: {
+            url: mockUrl,
+            tool: 'constraints_test',
+          },
+          inputs: [
+            {
+              name: 'amount',
+              type: 'uint256',
+              position: 'payload:amount',
+              source: 'field',
+              min: 1,
+              max: 1000,
+            },
+          ],
+        },
+      ],
+    }
+
+    const result = convertWarpToMcpCapabilities(warp)
+
+    expect(result.tools[0].inputSchema.properties.amount.minimum).toBe(1)
+    expect(result.tools[0].inputSchema.properties.amount.maximum).toBe(1000)
+  })
+
+  it('maps pattern and patternDescription to JSON Schema', () => {
+    const warp: Warp = {
+      protocol: 'warp:3.0.0',
+      name: 'pattern_test',
+      title: { en: 'Pattern Test' },
+      description: null,
+      actions: [
+        {
+          type: 'mcp',
+          label: { en: 'Pattern Test' },
+          destination: {
+            url: mockUrl,
+            tool: 'pattern_test',
+          },
+          inputs: [
+            {
+              name: 'email',
+              type: 'string',
+              position: 'payload:email',
+              source: 'field',
+              pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$',
+              patternDescription: { en: 'Must be a valid email address' },
+            },
+          ],
+        },
+      ],
+    }
+
+    const result = convertWarpToMcpCapabilities(warp)
+
+    expect(result.tools[0].inputSchema.properties.email.pattern).toBe('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$')
+    expect(result.tools[0].inputSchema.properties.email.description).toContain('Must be a valid email address')
+  })
+
+  it('maps options to enum in JSON Schema', () => {
+    const warp: Warp = {
+      protocol: 'warp:3.0.0',
+      name: 'options_test',
+      title: { en: 'Options Test' },
+      description: null,
+      actions: [
+        {
+          type: 'mcp',
+          label: { en: 'Options Test' },
+          destination: {
+            url: mockUrl,
+            tool: 'options_test',
+          },
+          inputs: [
+            {
+              name: 'status',
+              type: 'string',
+              position: 'payload:status',
+              source: 'field',
+              options: ['active', 'inactive', 'pending'],
+            },
+          ],
+        },
+      ],
+    }
+
+    const result = convertWarpToMcpCapabilities(warp)
+
+    expect(result.tools[0].inputSchema.properties.status.enum).toEqual(['active', 'inactive', 'pending'])
+  })
+
+  it('maps options object to enum with keys', () => {
+    const warp: Warp = {
+      protocol: 'warp:3.0.0',
+      name: 'options_object_test',
+      title: { en: 'Options Object Test' },
+      description: null,
+      actions: [
+        {
+          type: 'mcp',
+          label: { en: 'Options Object Test' },
+          destination: {
+            url: mockUrl,
+            tool: 'options_object_test',
+          },
+          inputs: [
+            {
+              name: 'choice',
+              type: 'string',
+              position: 'payload:choice',
+              source: 'field',
+              options: {
+                option1: { en: 'Option 1' },
+                option2: { en: 'Option 2' },
+              },
+            },
+          ],
+        },
+      ],
+    }
+
+    const result = convertWarpToMcpCapabilities(warp)
+
+    expect(result.tools[0].inputSchema.properties.choice.enum).toEqual(['option1', 'option2'])
+  })
+
+  it('maps all input properties together', () => {
+    const warp: Warp = {
+      protocol: 'warp:3.0.0',
+      name: 'full_mapping_test',
+      title: { en: 'Full Mapping Test' },
+      description: null,
+      actions: [
+        {
+          type: 'mcp',
+          label: { en: 'Full Mapping Test' },
+          destination: {
+            url: mockUrl,
+            tool: 'full_mapping_test',
+          },
+          inputs: [
+            {
+              name: 'full_input',
+              type: 'uint256',
+              position: 'payload:full_input',
+              source: 'field',
+              label: { en: 'Full Input Label' },
+              description: { en: 'Full input description' },
+              patternDescription: { en: 'Pattern description' },
+              required: true,
+              default: 10,
+              min: 1,
+              max: 100,
+              pattern: '^\\d+$',
+              options: ['1', '10', '100'],
+            },
+          ],
+        },
+      ],
+    }
+
+    const result = convertWarpToMcpCapabilities(warp)
+
+    const property = result.tools[0].inputSchema.properties.full_input
+    expect(property.title).toBe('Full Input Label')
+    expect(property.description).toBe('Full input description. Pattern description')
+    expect(property.default).toBe(10)
+    expect(property.minimum).toBe(1)
+    expect(property.maximum).toBe(100)
+    expect(property.pattern).toBe('^\\d+$')
+    expect(property.enum).toEqual(['1', '10', '100'])
+    expect(result.tools[0].inputSchema.required).toContain('full_input')
   })
 })

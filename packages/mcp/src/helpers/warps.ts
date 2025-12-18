@@ -8,6 +8,7 @@ import {
   WarpContractAction,
   WarpMcpAction,
   WarpQueryAction,
+  WarpText,
   WarpTransferAction,
 } from '@vleap/warps'
 
@@ -19,7 +20,7 @@ export const convertMcpToolToWarp = async (
 ): Promise<Warp> => {
   const inputs: WarpActionInput[] = []
 
-  if (tool.inputSchema && tool.inputSchema.properties) {
+  if (tool.inputSchema?.properties) {
     const properties = tool.inputSchema.properties
     const required = tool.inputSchema.required || []
 
@@ -43,9 +44,8 @@ export const convertMcpToolToWarp = async (
   }
 
   const output: Record<string, string> = {}
-  if (tool.outputSchema && tool.outputSchema.properties) {
-    const properties = tool.outputSchema.properties
-    Object.keys(properties).forEach((key) => {
+  if (tool.outputSchema?.properties) {
+    Object.keys(tool.outputSchema.properties).forEach((key) => {
       output[key] = `out.${key}`
     })
   }
@@ -69,58 +69,154 @@ export const convertMcpToolToWarp = async (
 
 export const convertWarpToMcpCapabilities = (warp: Warp): { tools: any[] } => {
   const tools: any[] = []
-
-  const description = warp.description && typeof warp.description === 'object' && 'en' in warp.description ? warp.description.en : undefined
-
-  const outputSchema: any = {
-    type: 'object',
-    properties: {},
-  }
-
-  if (warp.output && Object.keys(warp.output).length > 0) {
-    Object.keys(warp.output).forEach((key) => {
-      outputSchema.properties[key] = {
-        type: 'string',
-        description: `Output field ${key}`,
-      }
-    })
-  }
-
-  const hasOutput = Object.keys(outputSchema.properties).length > 0
+  const warpDescription = extractText(warp.description)
 
   warp.actions.forEach((action, index) => {
-    const actionDescription =
-      action.description && typeof action.description === 'object' && 'en' in action.description ? action.description.en : undefined
+    const actionDescription = extractText(action.description)
+    const description = warpDescription || actionDescription
 
-    const finalDescription = description || actionDescription || undefined
-
-    let isReadonly = false
-
-    if (action.type === 'query') {
-      isReadonly = true
-      const tool = convertActionToTool(warp, action, finalDescription, hasOutput ? outputSchema : undefined, index, isReadonly)
-      tools.push(tool)
-    } else if (action.type === 'collect') {
-      const collectAction = action as WarpCollectAction
-      const method = collectAction.destination && typeof collectAction.destination === 'object' && 'method' in collectAction.destination
-        ? collectAction.destination.method
-        : 'GET'
-      isReadonly = method === 'GET'
-      const tool = convertActionToTool(warp, action, finalDescription, hasOutput ? outputSchema : undefined, index, isReadonly)
-      tools.push(tool)
-    } else if (action.type === 'transfer' || action.type === 'contract') {
-      const tool = convertActionToTool(warp, action, finalDescription, hasOutput ? outputSchema : undefined, index, isReadonly)
-      tools.push(tool)
-    } else if (action.type === 'mcp') {
+    if (action.type === 'mcp') {
       const mcpAction = action as WarpMcpAction
       if (mcpAction.destination) {
-        const tool = convertMcpActionToTool(warp, mcpAction, finalDescription, hasOutput ? outputSchema : undefined, isReadonly)
+        const tool = convertMcpActionToTool(mcpAction, description)
         tools.push(tool)
       }
+    } else {
+      const tool = convertActionToTool(warp, action, description, index)
+      tools.push(tool)
     }
   })
 
   return { tools }
+}
+
+const extractText = (text: WarpText | null | undefined): string | undefined => {
+  if (!text) return undefined
+  if (typeof text === 'string') return text
+  if (typeof text === 'object' && 'en' in text) return text.en
+  return undefined
+}
+
+const convertActionToTool = (
+  warp: Warp,
+  action: WarpTransferAction | WarpContractAction | WarpCollectAction | WarpQueryAction,
+  description: string | undefined,
+  index: number
+): any => {
+  const inputSchema = buildInputSchema(action.inputs || [])
+  const name = sanitizeMcpName(`${warp.name}_${index}`)
+
+  return {
+    name,
+    description,
+    inputSchema: hasProperties(inputSchema) ? inputSchema : undefined,
+  }
+}
+
+const convertMcpActionToTool = (action: WarpMcpAction, description: string | undefined): any => {
+  const inputSchema = buildInputSchema(action.inputs || [])
+  const toolName = action.destination!.tool
+
+  return {
+    name: sanitizeMcpName(toolName),
+    description,
+    inputSchema: hasProperties(inputSchema) ? inputSchema : undefined,
+  }
+}
+
+const buildInputSchema = (inputs: WarpActionInput[]): any => {
+  const schema: any = {
+    type: 'object',
+    properties: {},
+    required: [],
+  }
+
+  inputs.forEach((input) => {
+    if (!isPayloadInput(input)) return
+
+    const key = extractPayloadKey(input.position as string)
+    const property = buildPropertySchema(input)
+
+    schema.properties[key] = property
+
+    if (input.required) {
+      schema.required.push(key)
+    }
+  })
+
+  return schema
+}
+
+const isPayloadInput = (input: WarpActionInput): boolean => {
+  return typeof input.position === 'string' && input.position.startsWith('payload:')
+}
+
+const extractPayloadKey = (position: string): string => {
+  return position.replace('payload:', '')
+}
+
+const buildPropertySchema = (input: WarpActionInput): any => {
+  const jsonSchemaType = convertWarpTypeToJsonSchemaType(input.type)
+  const property: any = {
+    type: jsonSchemaType.type,
+  }
+
+  if (jsonSchemaType.format) {
+    property.format = jsonSchemaType.format
+  }
+
+  const title = extractText(input.label) || input.name
+  if (title) {
+    property.title = title
+  }
+
+  const description = buildDescription(input)
+  if (description) {
+    property.description = description
+  }
+
+  if (input.default !== undefined) {
+    property.default = input.default
+  }
+
+  if (typeof input.min === 'number') {
+    property.minimum = input.min
+  }
+
+  if (typeof input.max === 'number') {
+    property.maximum = input.max
+  }
+
+  if (input.pattern) {
+    property.pattern = input.pattern
+  }
+
+  const enumValues = extractEnumValues(input.options)
+  if (enumValues) {
+    property.enum = enumValues
+  }
+
+  return property
+}
+
+const buildDescription = (input: WarpActionInput): string | undefined => {
+  const description = extractText(input.description)
+  const patternDesc = extractText(input.patternDescription)
+
+  if (!description && !patternDesc) return undefined
+  if (description && patternDesc) return `${description}. ${patternDesc}`
+  return description || patternDesc
+}
+
+const extractEnumValues = (options: string[] | { [key: string]: WarpText } | undefined): string[] | undefined => {
+  if (!options) return undefined
+  if (Array.isArray(options)) return options
+  if (typeof options === 'object') return Object.keys(options)
+  return undefined
+}
+
+const hasProperties = (schema: any): boolean => {
+  return schema && schema.properties && Object.keys(schema.properties).length > 0
 }
 
 const sanitizeMcpName = (name: string): string => {
@@ -130,106 +226,6 @@ const sanitizeMcpName = (name: string): string => {
     .replace(/[^A-Za-z0-9_.-]/g, '_')
     .replace(/^[^A-Za-z0-9]+|[^A-Za-z0-9]+$/g, '')
     .replace(/_+/g, '_')
-}
-
-const convertActionToTool = (
-  warp: Warp,
-  action: WarpTransferAction | WarpContractAction | WarpCollectAction | WarpQueryAction,
-  description: string | undefined,
-  outputSchema: any | undefined,
-  index: number,
-  readonly: boolean = false
-): any => {
-  const inputSchema = buildInputSchema(action.inputs || [])
-  const name = sanitizeMcpName(`${warp.name}_${index}`)
-
-  let url: string | undefined
-  let headers: Record<string, string> | undefined
-
-  if (action.type === 'collect') {
-    const collectAction = action as WarpCollectAction
-    if (collectAction.destination) {
-      if (typeof collectAction.destination === 'string') {
-        url = collectAction.destination
-      } else if (typeof collectAction.destination === 'object' && 'url' in collectAction.destination) {
-        url = collectAction.destination.url
-        headers = collectAction.destination.headers
-      }
-    }
-  } else if (action.type === 'query') {
-    const queryAction = action as WarpQueryAction
-    if (queryAction.address) {
-      url = queryAction.address
-    }
-  }
-
-  return {
-    name,
-    description,
-    inputSchema: Object.keys(inputSchema.properties).length > 0 ? inputSchema : undefined,
-    outputSchema,
-    url,
-    headers,
-    readonly,
-  }
-}
-
-const convertMcpActionToTool = (warp: Warp, action: WarpMcpAction, description: string | undefined, outputSchema: any | undefined, readonly: boolean = false): any => {
-  const inputSchema = buildInputSchema(action.inputs || [])
-  const { url, tool: toolName, headers } = action.destination!
-
-  return {
-    name: sanitizeMcpName(toolName),
-    description,
-    inputSchema: Object.keys(inputSchema.properties).length > 0 ? inputSchema : undefined,
-    outputSchema,
-    url,
-    headers,
-    readonly,
-  }
-}
-
-const buildInputSchema = (inputs: WarpActionInput[]): any => {
-  const inputSchema: any = {
-    type: 'object',
-    properties: {},
-    required: [],
-  }
-
-  inputs.forEach((input) => {
-    if (input.position && typeof input.position === 'string' && input.position.startsWith('payload:')) {
-      const key = input.position.replace('payload:', '')
-      const jsonSchemaType = convertWarpTypeToJsonSchemaType(input.type)
-
-      const property: any = {
-        type: jsonSchemaType.type,
-      }
-
-      if (jsonSchemaType.format) {
-        property.format = jsonSchemaType.format
-      }
-
-      if (input.label && typeof input.label === 'object' && 'en' in input.label) {
-        property.title = input.label.en
-      }
-
-      if (input.description && typeof input.description === 'object' && 'en' in input.description) {
-        property.description = input.description.en
-      }
-
-      if (input.default !== undefined) {
-        property.default = input.default
-      }
-
-      inputSchema.properties[key] = property
-
-      if (input.required) {
-        inputSchema.required.push(key)
-      }
-    }
-  })
-
-  return inputSchema
 }
 
 const convertJsonSchemaTypeToWarpType = (type: string, format?: string): WarpActionInputType => {
