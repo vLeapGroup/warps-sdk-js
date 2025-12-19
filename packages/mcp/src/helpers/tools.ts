@@ -27,6 +27,8 @@ const sanitizeMcpName = (name: string): string => {
     .replace(/:/g, '_')
     .replace(/[^a-z0-9_.-]/g, '_')
     .replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, '')
+    .replace(/_-_/g, '_')
+    .replace(/-_-/g, '_')
     .replace(/_+/g, '_')
 }
 
@@ -142,7 +144,9 @@ export const convertActionToTool = (
     inputSchema,
   }
 
-  const meta: Record<string, string> = {}
+  const meta: Record<string, string | boolean> = {
+    'openai/widgetAccessible': true,
+  }
   if (outputTemplateUri) {
     meta['openai/outputTemplate'] = outputTemplateUri
   }
@@ -158,9 +162,7 @@ export const convertActionToTool = (
     }
   }
 
-  if (Object.keys(meta).length > 0) {
-    tool._meta = meta
-  }
+  tool._meta = meta
 
   return tool
 }
@@ -183,7 +185,9 @@ export const convertMcpActionToTool = (
     inputSchema,
   }
 
-  const meta: Record<string, string> = {}
+  const meta: Record<string, string | boolean> = {
+    'openai/widgetAccessible': true,
+  }
   if (outputTemplateUri) {
     meta['openai/outputTemplate'] = outputTemplateUri
   }
@@ -199,9 +203,7 @@ export const convertMcpActionToTool = (
     }
   }
 
-  if (Object.keys(meta).length > 0) {
-    tool._meta = meta
-  }
+  tool._meta = meta
 
   return tool
 }
