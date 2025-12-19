@@ -2,6 +2,8 @@ import { Warp } from '@vleap/warps'
 import fetchMock from 'jest-fetch-mock'
 import { createAppResource } from './ui'
 
+const mockConfig = { env: 'mainnet' as const }
+
 describe('createAppResource', () => {
   beforeEach(() => {
     fetchMock.resetMocks()
@@ -26,7 +28,7 @@ describe('createAppResource', () => {
     const mockHtml = '<html><head></head><body>Test Content</body></html>'
     fetchMock.mockResponseOnce(mockHtml)
 
-    const result = await createAppResource(warp, warp.ui!)
+    const result = await createAppResource(warp, warp.ui!, mockConfig)
 
     expect(result).toBeDefined()
     expect(result!.name).toBe('ui://widget/test_app')
@@ -60,7 +62,7 @@ describe('createAppResource', () => {
 
     fetchMock.mockResponseOnce(mockHtml).mockResponseOnce(mockCss)
 
-    const result = await createAppResource(warp, warp.ui!)
+    const result = await createAppResource(warp, warp.ui!, mockConfig)
 
     expect(result).toBeDefined()
     const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
@@ -90,7 +92,7 @@ describe('createAppResource', () => {
 
     fetchMock.mockResponseOnce(mockHtml).mockResponseOnce(mockJs)
 
-    const result = await createAppResource(warp, warp.ui!)
+    const result = await createAppResource(warp, warp.ui!, mockConfig)
 
     expect(result).toBeDefined()
     const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
@@ -120,7 +122,7 @@ describe('createAppResource', () => {
 
     fetchMock.mockResponseOnce(mockHtml).mockResponseOnce(mockCss)
 
-    const result = await createAppResource(warp, warp.ui!)
+    const result = await createAppResource(warp, warp.ui!, mockConfig)
 
     expect(result).toBeDefined()
     const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
@@ -150,7 +152,7 @@ describe('createAppResource', () => {
 
     fetchMock.mockResponseOnce(mockHtml).mockResponseOnce('', { status: 404 })
 
-    const result = await createAppResource(warp, warp.ui!)
+    const result = await createAppResource(warp, warp.ui!, mockConfig)
 
     expect(result).toBeDefined()
     const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
@@ -185,7 +187,7 @@ describe('createAppResource', () => {
       .mockResponseOnce("console.log('app1');")
       .mockResponseOnce("console.log('app2');")
 
-    const result = await createAppResource(warp, warp.ui!)
+    const result = await createAppResource(warp, warp.ui!, mockConfig)
 
     expect(result).toBeDefined()
     const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
@@ -214,7 +216,7 @@ describe('createAppResource', () => {
     const mockHtml = '<html><head><style>body { margin: 0; }</style></head><body><div>Content</div></body></html>'
     fetchMock.mockResponseOnce(mockHtml)
 
-    const result = await createAppResource(warp, warp.ui!)
+    const result = await createAppResource(warp, warp.ui!, mockConfig)
 
     expect(result).toBeDefined()
     const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
@@ -241,7 +243,7 @@ describe('createAppResource', () => {
 
     fetchMock.mockResponseOnce('', { status: 404 })
 
-    const result = await createAppResource(warp, warp.ui!)
+    const result = await createAppResource(warp, warp.ui!, mockConfig)
 
     expect(result).toBeNull()
   })
@@ -265,7 +267,7 @@ describe('createAppResource', () => {
     const mockHtml = '<html><head></head><body>Test</body></html>'
     fetchMock.mockResponseOnce(mockHtml)
 
-    const result = await createAppResource(warp, warp.ui!)
+    const result = await createAppResource(warp, warp.ui!, mockConfig)
 
     expect(result).toBeDefined()
     const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({

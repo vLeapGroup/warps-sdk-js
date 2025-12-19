@@ -1,12 +1,6 @@
-import { Warp, WarpText } from '@vleap/warps'
+import { Warp, WarpClientConfig } from '@vleap/warps'
 import type { McpResource } from '../types'
-
-const extractText = (text: WarpText | null | undefined): string | undefined => {
-  if (!text) return undefined
-  if (typeof text === 'string') return text
-  if (typeof text === 'object' && 'en' in text) return text.en
-  return undefined
-}
+import { extractText } from './warps'
 
 const downloadApp = async (url: string): Promise<string> => {
   const res = await fetch(url)
@@ -74,12 +68,12 @@ const injectData = (html: string, data: Record<string, any>): string => {
   return `${script}\n${stripped}`
 }
 
-export const createAppResource = async (warp: Warp, appUrl: string): Promise<McpResource | null> => {
+export const createAppResource = async (warp: Warp, appUrl: string, config: WarpClientConfig): Promise<McpResource | null> => {
   try {
     let html = await downloadApp(appUrl)
     html = await inlineResources(html, appUrl)
     const data = {
-      warp: { name: warp.name, title: extractText(warp.title), description: extractText(warp.description) },
+      warp: { name: warp.name, title: extractText(warp.title, config), description: extractText(warp.description, config) },
     }
     return {
       name: `ui://widget/${warp.name}`,
