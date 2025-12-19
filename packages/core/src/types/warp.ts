@@ -40,6 +40,7 @@ export type Warp = {
   next?: string
   output?: Record<WarpOutputName, WarpResulutionPath>
   messages?: Record<WarpMessageName, WarpText>
+  ui?: string
   alerts?: WarpAlerts
   related?: string[]
   meta?: WarpMeta

@@ -25,13 +25,17 @@ export const createMcpServerFromWarps = (
 
     tools?.forEach((tool) => {
       const inputSchema = processInputSchema(tool.inputSchema)
-      server.registerTool(tool.name, { description: tool.description || '', inputSchema }, async (args: any) => {
+      const toolDefinition: any = { description: tool.description || '', inputSchema }
+      if (tool._meta) {
+        toolDefinition._meta = tool._meta
+      }
+      server.registerTool(tool.name, toolDefinition, async (args: any) => {
         if (defaultExecutor) {
           const inputs = convertMcpArgsToWarpInputs(warp, args || {})
           const result = await defaultExecutor(warp, inputs)
           return result
         }
-        return { content: [{ type: 'text' as const, text: `Tool ${tool.name} executed successfully` }] }
+        return { content: [{ type: 'text', text: `Tool ${tool.name} executed successfully` }] }
       })
     })
 
@@ -41,7 +45,7 @@ export const createMcpServerFromWarps = (
         resource.uri,
         { description: resource.description, mimeType: resource.mimeType },
         async () => ({
-          contents: [{ uri: resource.uri, mimeType: resource.mimeType || 'text/plain', text: 'Resource content' }],
+          contents: [{ uri: resource.uri, mimeType: resource.mimeType || 'text/plain', text: resource.content || 'Resource content' }],
         })
       )
     })

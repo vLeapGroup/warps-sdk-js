@@ -5,6 +5,7 @@ export type McpTool = {
   description?: string
   inputSchema?: any
   outputSchema?: any
+  _meta?: Record<string, any>
 }
 
 export type McpResource = {
@@ -12,6 +13,7 @@ export type McpResource = {
   uri: string
   description?: string
   mimeType?: string
+  content?: string
 }
 
 export type McpCapabilities = {
