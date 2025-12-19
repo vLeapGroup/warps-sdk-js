@@ -1,5 +1,14 @@
 # @vleap/warps-mcp
 
+## 1.0.0-beta.14
+
+### Patch Changes
+
+- 91f4117: update mcp
+- 91f4117: add warp uis"
+- Updated dependencies [91f4117]
+  - @vleap/warps@3.0.0-beta.173
+
 ## 1.0.0-beta.13
 
 ### Patch Changes

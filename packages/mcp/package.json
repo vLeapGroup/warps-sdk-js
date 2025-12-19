@@ -1,6 +1,6 @@
 {
   "name": "@vleap/warps-mcp",
-  "version": "1.0.0-beta.13",
+  "version": "1.0.0-beta.14",
   "description": "MCP adapter for Warps SDK",
   "type": "module",
   "types": "./dist/index.d.ts",
@@ -42,6 +42,6 @@
     "zod": "^4.1.13"
   },
   "peerDependencies": {
-    "@vleap/warps": "^3.0.0-beta.172"
+    "@vleap/warps": "^3.0.0-beta.173"
   }
 }
