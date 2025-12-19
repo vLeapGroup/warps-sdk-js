@@ -1,5 +1,12 @@
 # @vleap/warps-mcp
 
+## 1.0.0-beta.16
+
+### Patch Changes
+
+- 1effbd5: update mcp
+- update mcp
+
 ## 1.0.0-beta.15
 
 ### Patch Changes

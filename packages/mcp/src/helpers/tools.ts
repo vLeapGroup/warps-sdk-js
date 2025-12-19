@@ -154,15 +154,12 @@ export const convertActionToTool = (
   if (warp.messages) {
     const invoking = extractText(warp.messages.invoking, config)
     const invoked = extractText(warp.messages.invoked, config)
-    if (invoking) {
-      meta['openai/toolInvocation/invoking'] = invoking
-    }
-    if (invoked) {
-      meta['openai/toolInvocation/invoked'] = invoked
-    }
+    if (invoking) meta['openai/toolInvocation/invoking'] = invoking
+    if (invoked) meta['openai/toolInvocation/invoked'] = invoked
   }
 
   tool._meta = meta
+  console.log(`[MCP] convertActionToTool - tool: ${name}, meta:`, JSON.stringify(meta, null, 2))
 
   return tool
 }
@@ -195,15 +192,12 @@ export const convertMcpActionToTool = (
   if (warp.messages) {
     const invoking = extractText(warp.messages.invoking, config)
     const invoked = extractText(warp.messages.invoked, config)
-    if (invoking) {
-      meta['openai/toolInvocation/invoking'] = invoking
-    }
-    if (invoked) {
-      meta['openai/toolInvocation/invoked'] = invoked
-    }
+    if (invoking) meta['openai/toolInvocation/invoking'] = invoking
+    if (invoked) meta['openai/toolInvocation/invoked'] = invoked
   }
 
   tool._meta = meta
+  console.log(`[MCP] convertMcpActionToTool - tool: ${sanitizeMcpName(toolName)}, meta:`, JSON.stringify(meta, null, 2))
 
   return tool
 }
