@@ -11,4 +11,5 @@ export default defineConfig({
   clean: true,
   skipNodeModulesBundle: true,
   target: 'es2020',
+  external: ['@modelcontextprotocol/sdk'],
 })

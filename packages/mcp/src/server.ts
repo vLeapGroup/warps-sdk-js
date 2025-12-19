@@ -1,5 +1,5 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp'
-import { normalizeObjectSchema } from '@modelcontextprotocol/sdk/server/zod-compat'
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import { normalizeObjectSchema } from '@modelcontextprotocol/sdk/server/zod-compat.js'
 import { Warp } from '@vleap/warps'
 import { convertMcpArgsToWarpInputs } from './helpers/execution'
 import { McpCapabilities, McpServerConfig, WarpExecutor } from './types'
