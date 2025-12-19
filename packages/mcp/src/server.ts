@@ -10,12 +10,7 @@ const processInputSchema = (inputSchema: any): any => {
   return normalizeObjectSchema(inputSchema) || inputSchema
 }
 
-export const createMcpServerFromWarps = (
-  config: McpServerConfig,
-  warps: Warp[],
-  capabilities: McpCapabilities[],
-  executor?: WarpExecutor
-): McpServer => {
+export const createMcpServerFromWarps = (config: McpServerConfig, warps: Warp[], capabilities: McpCapabilities[], executor?: WarpExecutor): McpServer => {
   const server = new McpServer({ name: config.name, version: config.version || '1.0.0' })
   const defaultExecutor = config.executor || executor
 
@@ -40,14 +35,9 @@ export const createMcpServerFromWarps = (
     })
 
     resources?.forEach((resource) => {
-      server.registerResource(
-        resource.name || resource.uri,
-        resource.uri,
-        { description: resource.description, mimeType: resource.mimeType },
-        async () => ({
-          contents: [{ uri: resource.uri, mimeType: resource.mimeType || 'text/plain', text: resource.content || 'Resource content' }],
-        })
-      )
+      server.registerResource(resource.name || resource.uri, resource.uri, { description: resource.description, mimeType: resource.mimeType }, async () => ({
+        contents: [{ uri: resource.uri, mimeType: resource.mimeType || 'text/plain', text: resource.content || 'Resource content' }],
+      }))
     })
   }
 

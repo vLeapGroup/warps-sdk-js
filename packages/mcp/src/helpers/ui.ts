@@ -69,6 +69,7 @@ const injectData = (html: string, data: Record<string, any>): string => {
 }
 
 export const createAppResource = async (warp: Warp, appUrl: string, config: WarpClientConfig): Promise<McpResource | null> => {
+  if (!warp.meta?.identifier) return null
   try {
     let html = await downloadApp(appUrl)
     html = await inlineResources(html, appUrl)
@@ -76,8 +77,8 @@ export const createAppResource = async (warp: Warp, appUrl: string, config: Warp
       warp: { name: warp.name, title: extractText(warp.title, config), description: extractText(warp.description, config) },
     }
     return {
-      name: `ui://widget/${warp.name}`,
-      uri: `ui://widget/${warp.name}`,
+      name: warp.name,
+      uri: `ui://widget/${warp.meta.identifier}`,
       description: `ChatGPT app for ${warp.name}`,
       mimeType: 'text/html+skybridge',
       content: injectData(html, data),

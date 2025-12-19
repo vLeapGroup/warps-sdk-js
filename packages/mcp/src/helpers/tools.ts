@@ -20,16 +20,14 @@ const extractEnumValues = (options: string[] | { [key: string]: WarpText } | und
 }
 
 const sanitizeMcpName = (name: string): string => {
-  const nameAfterColon = name.includes(':') ? name.split(':').slice(1).join(':').trim() : name
-  return nameAfterColon
+  return (name.includes(':') ? name.split(':').slice(1).join(':') : name)
+    .trim()
     .toLowerCase()
     .replace(/\s+/g, '_')
     .replace(/:/g, '_')
     .replace(/[^a-z0-9_.-]/g, '_')
     .replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, '')
-    .replace(/_-_/g, '_')
-    .replace(/-_-/g, '_')
-    .replace(/_+/g, '_')
+    .replace(/[_-]+/g, '_')
 }
 
 const buildZodSchemaFromInput = (input: WarpActionInput, config: WarpClientConfig): z.ZodTypeAny => {
@@ -147,6 +145,7 @@ export const convertActionToTool = (
   const meta: Record<string, string | boolean> = {
     'openai/widgetAccessible': true,
   }
+
   if (outputTemplateUri) {
     meta['openai/outputTemplate'] = outputTemplateUri
   }

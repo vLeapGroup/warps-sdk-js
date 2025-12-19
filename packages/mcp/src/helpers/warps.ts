@@ -18,10 +18,7 @@ export const extractText = (text: WarpText | null | undefined, config: WarpClien
   return resolved || undefined
 }
 
-export const convertWarpToMcpCapabilities = async (
-  warp: Warp,
-  config: WarpClientConfig
-): Promise<{ tools: any[]; resources?: McpResource[] }> => {
+export const convertWarpToMcpCapabilities = async (warp: Warp, config: WarpClientConfig): Promise<{ tools: any[]; resources?: McpResource[] }> => {
   const tools: any[] = []
   let appResource: McpResource | null = null
 
@@ -53,10 +50,7 @@ export const convertWarpToMcpCapabilities = async (
   }
 }
 
-export const convertWarpsToMcpCapabilities = async (
-  warps: Warp[],
-  config: WarpClientConfig
-): Promise<{ tools: any[]; resources?: McpResource[] }[]> => {
+export const convertWarpsToMcpCapabilities = async (warps: Warp[], config: WarpClientConfig): Promise<{ tools: any[]; resources?: McpResource[] }[]> => {
   return Promise.all(warps.map((warp) => convertWarpToMcpCapabilities(warp, config)))
 }
 
