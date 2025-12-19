@@ -1,6 +1,6 @@
 {
   "name": "@vleap/warps-mcp",
-  "version": "1.0.0-beta.8",
+  "version": "1.0.0-beta.9",
   "description": "MCP adapter for Warps SDK",
   "type": "module",
   "types": "./dist/index.d.ts",
