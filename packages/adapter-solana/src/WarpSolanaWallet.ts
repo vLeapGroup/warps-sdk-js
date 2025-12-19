@@ -1,105 +1,54 @@
+import * as bip39 from '@scure/bip39'
+import { wordlist } from '@scure/bip39/wordlists/english.js'
+import { Connection, Keypair, Transaction, VersionedTransaction } from '@solana/web3.js'
 import {
   AdapterWarpWallet,
   getProviderConfig,
-  getWarpWalletMnemonicFromConfig,
-  getWarpWalletPrivateKeyFromConfig,
+  initializeWalletCache,
+  WalletProvider,
   WarpAdapterGenericTransaction,
   WarpChainInfo,
   WarpClientConfig,
 } from '@vleap/warps'
-import { Connection, Keypair, Transaction, VersionedTransaction } from '@solana/web3.js'
-import * as bip39 from '@scure/bip39'
-import { wordlist } from '@scure/bip39/wordlists/english.js'
 import bs58 from 'bs58'
+import { SolanaWalletProvider } from './providers/SolanaWalletProvider'
 
 export class WarpSolanaWallet implements AdapterWarpWallet {
   private connection: Connection
+  private walletProvider: WalletProvider
+  private cachedAddress: string | null = null
+  private cachedPublicKey: string | null = null
 
   constructor(
     private config: WarpClientConfig,
-    private chain: WarpChainInfo
+    private chain: WarpChainInfo,
+    walletProvider?: WalletProvider
   ) {
     const providerConfig = getProviderConfig(config, chain.name, config.env, chain.defaultApiUrl)
     this.connection = new Connection(providerConfig.url, 'confirmed')
+    this.walletProvider = walletProvider || new SolanaWalletProvider(config, chain, this.connection)
+    this.initializeCache()
+  }
+
+  private initializeCache() {
+    initializeWalletCache(this.walletProvider).then((cache: { address: string | null; publicKey: string | null }) => {
+      this.cachedAddress = cache.address
+      this.cachedPublicKey = cache.publicKey
+    })
   }
 
   async signTransaction(tx: WarpAdapterGenericTransaction): Promise<WarpAdapterGenericTransaction> {
     if (!tx || typeof tx !== 'object') throw new Error('Invalid transaction object')
-
-    const keypair = this.getKeypair()
-
-    if (tx instanceof VersionedTransaction) {
-      tx.sign([keypair])
-      return tx
-    }
-
-    if (tx instanceof Transaction) {
-      tx.sign(keypair)
-      return tx
-    }
-
-    if (tx.transaction) {
-      if (tx.transaction instanceof Transaction) {
-        tx.transaction.sign(keypair)
-        return { ...tx, transaction: tx.transaction.serialize() }
-      }
-      if (typeof tx.transaction === 'object') {
-        try {
-          const transaction = Transaction.from(tx.transaction)
-          transaction.sign(keypair)
-          return { ...tx, transaction: transaction.serialize(), signature: transaction.signature }
-        } catch {
-          throw new Error('Invalid transaction format')
-        }
-      }
-    }
-
-    throw new Error('Invalid transaction format')
+    return await this.walletProvider.signTransaction(tx)
   }
 
   async signTransactions(txs: WarpAdapterGenericTransaction[]): Promise<WarpAdapterGenericTransaction[]> {
     if (txs.length === 0) return []
-
-    const keypair = this.getKeypair()
-
-    return Promise.all(
-      txs.map(async (tx) => {
-        if (tx instanceof VersionedTransaction) {
-          tx.sign([keypair])
-          return tx
-        }
-
-        if (tx instanceof Transaction) {
-          tx.sign(keypair)
-          return tx
-        }
-
-        if (tx.transaction && typeof tx.transaction === 'object') {
-          const transaction = Transaction.from(tx.transaction)
-          transaction.sign(keypair)
-          return { ...tx, transaction: transaction.serialize() }
-        }
-
-        throw new Error('Invalid transaction format')
-      })
-    )
+    return Promise.all(txs.map(async (tx) => this.signTransaction(tx)))
   }
 
   async signMessage(message: string): Promise<string> {
-    const keypair = this.getKeypair()
-    const messageBytes = new TextEncoder().encode(message)
-    const nacl = await import('tweetnacl')
-    const secretKey = keypair.secretKey
-    if (secretKey.length !== 64) {
-      throw new Error(`Invalid secret key length: expected 64, got ${secretKey.length}`)
-    }
-    const privateKeySlice = secretKey.slice(0, 32)
-    const privateKeyBytes = new Uint8Array(privateKeySlice)
-    if (privateKeyBytes.length !== 32) {
-      throw new Error(`Invalid private key length: expected 32, got ${privateKeyBytes.length}`)
-    }
-    const signature = nacl.sign.detached(messageBytes, privateKeyBytes)
-    return bs58.encode(signature)
+    return await this.walletProvider.signMessage(message)
   }
 
   async sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string> {
@@ -165,49 +114,10 @@ export class WarpSolanaWallet implements AdapterWarpWallet {
   }
 
   getAddress(): string | null {
-    try {
-      const keypair = this.getKeypair()
-      return keypair.publicKey.toBase58()
-    } catch {
-      return null
-    }
+    return this.cachedAddress
   }
 
   getPublicKey(): string | null {
-    try {
-      const keypair = this.getKeypair()
-      return keypair.publicKey.toBase58()
-    } catch {
-      return null
-    }
-  }
-
-  private getKeypair(): Keypair {
-    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
-    if (privateKey) {
-      try {
-        const secretKey = bs58.decode(privateKey)
-        if (secretKey.length === 64) {
-          return Keypair.fromSecretKey(secretKey)
-        } else if (secretKey.length === 32) {
-          return Keypair.fromSeed(secretKey)
-        } else {
-          throw new Error(`Invalid private key length: expected 32 or 64 bytes, got ${secretKey.length}`)
-        }
-      } catch (error) {
-        if (error instanceof Error) {
-          throw new Error(`Invalid private key format: ${error.message}`)
-        }
-        throw new Error('Invalid private key format')
-      }
-    }
-
-    const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
-    if (mnemonic) {
-      const seed = bip39.mnemonicToSeedSync(mnemonic)
-      return Keypair.fromSeed(seed.slice(0, 32))
-    }
-
-    throw new Error('No private key or mnemonic provided')
+    return this.cachedPublicKey
   }
 }

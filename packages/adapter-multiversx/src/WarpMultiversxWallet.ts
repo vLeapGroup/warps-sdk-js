@@ -1,49 +1,91 @@
-import { Account, Address, INetworkProvider, Message, Mnemonic, NetworkEntrypoint, UserSecretKey } from '@multiversx/sdk-core'
+import { Address, Mnemonic, NetworkEntrypoint } from '@multiversx/sdk-core'
 import {
   AdapterWarpWallet,
   CacheTtl,
-  getWarpWalletAddressFromConfig,
+  getWarpWalletMnemonicFromConfig,
   getWarpWalletPrivateKeyFromConfig,
+  initializeWalletCache,
+  WalletProvider,
   WarpAdapterGenericTransaction,
   WarpCache,
   WarpChainInfo,
   WarpClientConfig,
 } from '@vleap/warps'
 import { getMultiversxEntrypoint } from './helpers/general'
+import { MnemonicWalletProvider } from './providers/MnemonicWalletProvider'
+import { PrivateKeyWalletProvider } from './providers/PrivateKeyWalletProvider'
 
 export class WarpMultiversxWallet implements AdapterWarpWallet {
   private entry: NetworkEntrypoint
-  private provider: INetworkProvider
   private cache: WarpCache
+  private walletProvider: WalletProvider | null
+  private cachedAddress: string | null = null
+  private cachedPublicKey: string | null = null
 
   constructor(
     private config: WarpClientConfig,
-    private chain: WarpChainInfo
+    private chain: WarpChainInfo,
+    walletProvider?: WalletProvider
   ) {
     this.entry = getMultiversxEntrypoint(chain, config.env, config)
-    this.provider = this.entry.createNetworkProvider()
     this.cache = new WarpCache(config.cache?.type)
+    this.walletProvider = walletProvider || this.createDefaultProvider()
+    this.initializeCache()
+  }
+
+  private createDefaultProvider(): WalletProvider | null {
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
+    if (privateKey) {
+      return new PrivateKeyWalletProvider(this.config, this.chain)
+    }
+
+    const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
+    if (mnemonic) {
+      return new MnemonicWalletProvider(this.config, this.chain)
+    }
+
+    return null
+  }
+
+  private initializeCache() {
+    initializeWalletCache(this.walletProvider).then((cache: { address: string | null; publicKey: string | null }) => {
+      this.cachedAddress = cache.address
+      this.cachedPublicKey = cache.publicKey
+    })
   }
 
   async signTransaction(tx: WarpAdapterGenericTransaction): Promise<WarpAdapterGenericTransaction> {
     if (!tx || typeof tx !== 'object') throw new Error('Invalid transaction object')
-    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
-    if (!privateKey) throw new Error('Wallet not initialized - no private key provided')
-    const isPrivateKeyPem = privateKey.startsWith('-----')
-    const secretKey = isPrivateKeyPem ? UserSecretKey.fromPem(privateKey) : UserSecretKey.fromString(privateKey)
-    const account = new Account(secretKey)
-    if (tx.nonce === 0n) {
-      const nonceOnNetwork = await this.entry.recallAccountNonce(account.address)
-      const nonceInCache = this.cache.get<number>(`nonce:${account.address.toBech32()}`) || 0
+    if (!this.walletProvider) throw new Error('No wallet provider available')
+
+    if (this.walletProvider instanceof PrivateKeyWalletProvider || this.walletProvider instanceof MnemonicWalletProvider) {
+      const account = this.walletProvider.getAccountInstance()
+      if (tx.nonce === 0n) {
+        const nonceOnNetwork = await this.entry.recallAccountNonce(account.address)
+        const nonceInCache = this.cache.get<number>(`nonce:${account.address.toBech32()}`) || 0
+        const highestNonce = BigInt(Math.max(nonceInCache, Number(nonceOnNetwork)))
+        tx.nonce = highestNonce
+      }
+    } else if (tx.nonce === 0n && this.cachedAddress) {
+      const address = Address.newFromBech32(this.cachedAddress)
+      const nonceOnNetwork = await this.entry.recallAccountNonce(address)
+      const nonceInCache = this.cache.get<number>(`nonce:${this.cachedAddress}`) || 0
       const highestNonce = BigInt(Math.max(nonceInCache, Number(nonceOnNetwork)))
       tx.nonce = highestNonce
     }
-    tx.signature = await account.signTransaction(tx)
 
-    const newNonce = Number(account.nonce) + 1
-    this.cache.set(`nonce:${account.address.toBech32()}`, newNonce, CacheTtl.OneMinute)
+    const signedTx = await this.walletProvider.signTransaction(tx)
 
-    return tx
+    if (this.walletProvider instanceof PrivateKeyWalletProvider || this.walletProvider instanceof MnemonicWalletProvider) {
+      const account = this.walletProvider.getAccountInstance()
+      const newNonce = Number(account.nonce) + 1
+      this.cache.set(`nonce:${account.address.toBech32()}`, newNonce, CacheTtl.OneMinute)
+    } else if (this.cachedAddress) {
+      const currentNonce = tx.nonce ? Number(tx.nonce) : 0
+      this.cache.set(`nonce:${this.cachedAddress}`, currentNonce + 1, CacheTtl.OneMinute)
+    }
+
+    return signedTx
   }
 
   async signTransactions(txs: WarpAdapterGenericTransaction[]): Promise<WarpAdapterGenericTransaction[]> {
@@ -51,15 +93,8 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
   }
 
   async signMessage(message: string): Promise<string> {
-    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
-    if (!privateKey) throw new Error('Wallet not initialized - no private key provided')
-
-    const isPrivateKeyPem = privateKey.startsWith('-----')
-    const secretKey = isPrivateKeyPem ? UserSecretKey.fromPem(privateKey) : UserSecretKey.fromString(privateKey)
-    const account = new Account(secretKey)
-    const messageData = new TextEncoder().encode(message)
-    const signature = await account.signMessage(new Message({ data: messageData }))
-    return Buffer.from(signature).toString('hex')
+    if (!this.walletProvider) throw new Error('No wallet provider available')
+    return await this.walletProvider.signMessage(message)
   }
 
   async sendTransactions(txs: WarpAdapterGenericTransaction[]): Promise<string[]> {
@@ -92,26 +127,10 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
   }
 
   getAddress(): string | null {
-    return getWarpWalletAddressFromConfig(this.config, this.chain.name)
+    return this.cachedAddress
   }
 
   getPublicKey(): string | null {
-    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
-    if (privateKey) {
-      const isPrivateKeyPem = privateKey.startsWith('-----')
-      const secretKey = isPrivateKeyPem ? UserSecretKey.fromPem(privateKey) : UserSecretKey.fromString(privateKey)
-      const pubKey = secretKey.generatePublicKey()
-      return pubKey.hex()
-    }
-
-    const address = getWarpWalletAddressFromConfig(this.config, this.chain.name)
-    if (!address) return null
-
-    try {
-      const addressObj = Address.newFromBech32(address)
-      return addressObj.toHex()
-    } catch {
-      return null
-    }
+    return this.cachedPublicKey
   }
 }
