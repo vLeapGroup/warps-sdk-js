@@ -1,10 +1,10 @@
-import { Client } from '@modelcontextprotocol/sdk/client/index.js'
-import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
+import { Client } from '@modelcontextprotocol/sdk/client/index'
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp'
 import { WarpMcpAction } from '@vleap/warps'
 import { WarpMcp } from './WarpMcp'
 
-jest.mock('@modelcontextprotocol/sdk/client/index.js')
-jest.mock('@modelcontextprotocol/sdk/client/streamableHttp.js')
+jest.mock('@modelcontextprotocol/sdk/client/index')
+jest.mock('@modelcontextprotocol/sdk/client/streamableHttp')
 
 describe('WarpMcp', () => {
   const mockUrl = 'https://mcp.example.com'
@@ -24,11 +24,8 @@ describe('WarpMcp', () => {
     } as any
 
     mockTransport = {} as any
-
     ;(Client as jest.MockedClass<typeof Client>).mockImplementation(() => mockClient)
-    ;(StreamableHTTPClientTransport as jest.MockedClass<typeof StreamableHTTPClientTransport>).mockImplementation(
-      () => mockTransport
-    )
+    ;(StreamableHTTPClientTransport as jest.MockedClass<typeof StreamableHTTPClientTransport>).mockImplementation(() => mockTransport)
 
     warpMcp = new WarpMcp({ env: 'mainnet' })
   })
@@ -61,10 +58,7 @@ describe('WarpMcp', () => {
 
     const warps = await warpMcp.getWarpsFromTools(mockUrl, mockHeaders)
 
-    expect(Client).toHaveBeenCalledWith(
-      { name: 'warps-mcp-client', version: '1.0.0' },
-      { capabilities: {} }
-    )
+    expect(Client).toHaveBeenCalledWith({ name: 'warps-mcp-client', version: '1.0.0' }, { capabilities: {} })
     expect(StreamableHTTPClientTransport).toHaveBeenCalledWith(new URL(mockUrl), {
       requestInit: { headers: mockHeaders },
     })

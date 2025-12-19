@@ -641,7 +641,7 @@ describe('convertWarpToMcpCapabilities', () => {
 
     expect(result.tools[0].inputSchema).toBeDefined()
     expect(result.tools[0].inputSchema).toHaveProperty('payload_input')
-    expect(result.tools[0].inputSchema).not.toHaveProperty('non_payload_input')
+    expect(result.tools[0].inputSchema).toHaveProperty('non_payload_input')
   })
 
   it('returns empty arrays when Warp has no actions', () => {

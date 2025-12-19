@@ -69,7 +69,7 @@ export const convertMcpToolToWarp = async (
     .build(false)
 }
 
-export const convertWarpToMcpCapabilities = (warp: Warp): { tools: any[] } => {
+export const convertWarpToMcpCapabilities = (warp: Warp): { tools: any[]; resources?: any[] } => {
   const tools: any[] = []
   const warpDescription = extractText(warp.description)
 
@@ -77,7 +77,9 @@ export const convertWarpToMcpCapabilities = (warp: Warp): { tools: any[] } => {
   try {
     const { action: primaryAction } = getWarpPrimaryAction(warp)
     primaryActionInputs = primaryAction.inputs
-  } catch {
+    console.log(`[MCP] Warp ${warp.name} - primaryActionInputs:`, primaryActionInputs?.length || 0, primaryActionInputs?.map(i => ({ name: i.name, source: i.source, position: i.position })))
+  } catch (error) {
+    console.log(`[MCP] Warp ${warp.name} - failed to get primary action:`, error)
     primaryActionInputs = undefined
   }
 
@@ -97,7 +99,8 @@ export const convertWarpToMcpCapabilities = (warp: Warp): { tools: any[] } => {
     }
   })
 
-  return { tools }
+  console.log(`[MCP] convertWarpToMcpCapabilities - warp: ${warp.name}, tools: ${tools.length}, tools with schema:`, tools.filter(t => t.inputSchema).length)
+  return { tools, resources: [] }
 }
 
 const extractText = (text: WarpText | null | undefined): string | undefined => {
@@ -202,12 +205,13 @@ const buildZodInputSchema = (inputs: WarpActionInput[]): Record<string, z.ZodTyp
 
   for (const input of inputs) {
     if (input.source === 'hidden') continue
-    if (!isPayloadInput(input)) continue
+    if (input.source !== 'field') continue
 
     const key = input.as || input.name
     shape[key] = buildZodSchemaFromInput(input)
   }
 
+  console.log('[MCP] buildZodInputSchema - inputs:', inputs.length, 'shape keys:', Object.keys(shape))
   return Object.keys(shape).length > 0 ? shape : undefined
 }
 
@@ -221,6 +225,8 @@ const convertActionToTool = (
   const inputsToUse = primaryActionInputs || action.inputs || []
   const inputSchema = buildZodInputSchema(inputsToUse)
   const name = sanitizeMcpName(`${warp.name}_${index}`)
+
+  console.log(`[MCP] convertActionToTool - tool: ${name}, inputsToUse: ${inputsToUse.length}, inputSchema keys:`, inputSchema ? Object.keys(inputSchema) : 'undefined')
 
   return {
     name,
@@ -241,9 +247,6 @@ const convertMcpActionToTool = (action: WarpMcpAction, description: string | und
   }
 }
 
-const isPayloadInput = (input: WarpActionInput): boolean => {
-  return typeof input.position === 'string' && input.position.startsWith('payload:')
-}
 
 const extractEnumValues = (options: string[] | { [key: string]: WarpText } | undefined): string[] | undefined => {
   if (!options) return undefined

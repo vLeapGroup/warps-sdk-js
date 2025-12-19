@@ -1,5 +1,5 @@
-import { Client } from '@modelcontextprotocol/sdk/client/index.js'
-import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
+import { Client } from '@modelcontextprotocol/sdk/client/index'
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp'
 import { Warp, WarpClientConfig } from '@vleap/warps'
 import { convertMcpToolToWarp } from './helpers/warps'
 
