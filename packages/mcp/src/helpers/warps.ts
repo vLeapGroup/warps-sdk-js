@@ -73,33 +73,36 @@ export const convertWarpToMcpCapabilities = (warp: Warp): { tools: any[]; resour
   const tools: any[] = []
   const warpDescription = extractText(warp.description)
 
-  let primaryActionInputs: WarpActionInput[] | undefined
   try {
     const { action: primaryAction } = getWarpPrimaryAction(warp)
-    primaryActionInputs = primaryAction.inputs
-    console.log(`[MCP] Warp ${warp.name} - primaryActionInputs:`, primaryActionInputs?.length || 0, primaryActionInputs?.map(i => ({ name: i.name, source: i.source, position: i.position })))
-  } catch (error) {
-    console.log(`[MCP] Warp ${warp.name} - failed to get primary action:`, error)
-    primaryActionInputs = undefined
-  }
-
-  warp.actions.forEach((action, index) => {
-    const actionDescription = extractText(action.description)
+    const primaryActionInputs = primaryAction.inputs
+    const actionDescription = extractText(primaryAction.description)
     const description = warpDescription || actionDescription
 
-    if (action.type === 'mcp') {
-      const mcpAction = action as WarpMcpAction
+    console.log(
+      `[MCP] Warp ${warp.name} - primaryActionInputs:`,
+      primaryActionInputs?.length || 0,
+      primaryActionInputs?.map((i) => ({ name: i.name, source: i.source, position: i.position }))
+    )
+
+    if (primaryAction.type === 'mcp') {
+      const mcpAction = primaryAction as WarpMcpAction
       if (mcpAction.destination) {
         const tool = convertMcpActionToTool(mcpAction, description, primaryActionInputs)
         tools.push(tool)
       }
     } else {
-      const tool = convertActionToTool(warp, action, description, index, primaryActionInputs)
+      const tool = convertActionToTool(warp, primaryAction, description, primaryActionInputs)
       tools.push(tool)
     }
-  })
+  } catch (error) {
+    console.log(`[MCP] Warp ${warp.name} - failed to get primary action:`, error)
+  }
 
-  console.log(`[MCP] convertWarpToMcpCapabilities - warp: ${warp.name}, tools: ${tools.length}, tools with schema:`, tools.filter(t => t.inputSchema).length)
+  console.log(
+    `[MCP] convertWarpToMcpCapabilities - warp: ${warp.name}, tools: ${tools.length}, tools with schema:`,
+    tools.filter((t) => t.inputSchema).length
+  )
   return { tools, resources: [] }
 }
 
@@ -219,14 +222,16 @@ const convertActionToTool = (
   warp: Warp,
   action: WarpTransferAction | WarpContractAction | WarpCollectAction | WarpQueryAction,
   description: string | undefined,
-  index: number,
   primaryActionInputs?: WarpActionInput[]
 ): any => {
   const inputsToUse = primaryActionInputs || action.inputs || []
   const inputSchema = buildZodInputSchema(inputsToUse)
-  const name = sanitizeMcpName(`${warp.name}_${index}`)
+  const name = sanitizeMcpName(warp.name)
 
-  console.log(`[MCP] convertActionToTool - tool: ${name}, inputsToUse: ${inputsToUse.length}, inputSchema keys:`, inputSchema ? Object.keys(inputSchema) : 'undefined')
+  console.log(
+    `[MCP] convertActionToTool - tool: ${name}, inputsToUse: ${inputsToUse.length}, inputSchema keys:`,
+    inputSchema ? Object.keys(inputSchema) : 'undefined'
+  )
 
   return {
     name,
@@ -247,7 +252,6 @@ const convertMcpActionToTool = (action: WarpMcpAction, description: string | und
   }
 }
 
-
 const extractEnumValues = (options: string[] | { [key: string]: WarpText } | undefined): string[] | undefined => {
   if (!options) return undefined
   if (Array.isArray(options)) return options
@@ -256,7 +260,8 @@ const extractEnumValues = (options: string[] | { [key: string]: WarpText } | und
 }
 
 const sanitizeMcpName = (name: string): string => {
-  return name
+  const nameAfterColon = name.includes(':') ? name.split(':').slice(1).join(':').trim() : name
+  return nameAfterColon
     .replace(/\s+/g, '_')
     .replace(/:/g, '_')
     .replace(/[^A-Za-z0-9_.-]/g, '_')

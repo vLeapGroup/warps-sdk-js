@@ -760,7 +760,7 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toHaveLength(1)
-    expect(result.tools[0].name).toBe('transfer_test_0')
+    expect(result.tools[0].name).toBe('transfer_test')
     expect(result.tools[0].description).toBe('Transfer action')
   })
 
@@ -791,7 +791,7 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toHaveLength(1)
-    expect(result.tools[0].name).toBe('contract_test_0')
+    expect(result.tools[0].name).toBe('contract_test')
   })
 
   it('converts query action to tool', () => {
@@ -812,7 +812,7 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toHaveLength(1)
-    expect(result.tools[0].name).toBe('query_test_0')
+    expect(result.tools[0].name).toBe('query_test')
     expect(result.tools[0].description).toBe('Query action')
   })
 
@@ -845,7 +845,7 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toHaveLength(1)
-    expect(result.tools[0].name).toBe('collect_post_test_0')
+    expect(result.tools[0].name).toBe('collect_post_test')
   })
 
   it('converts collect action with PUT to tool', () => {
@@ -913,7 +913,7 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toHaveLength(1)
-    expect(result.tools[0].name).toBe('collect_get_test_0')
+    expect(result.tools[0].name).toBe('collect_get_test')
     expect(result.tools[0].description).toBe('Collect GET action')
   })
 
@@ -936,7 +936,7 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toHaveLength(1)
-    expect(result.tools[0].name).toBe('collect_no_method_test_0')
+    expect(result.tools[0].name).toBe('collect_no_method_test')
   })
 
   it('converts collect action with string destination to tool', () => {
@@ -956,7 +956,7 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
     expect(result.tools).toHaveLength(1)
-    expect(result.tools[0].name).toBe('collect_string_test_0')
+    expect(result.tools[0].name).toBe('collect_string_test')
   })
 
   it('handles multiple actions of different types', () => {
@@ -996,11 +996,8 @@ describe('convertWarpToMcpCapabilities', () => {
     }
 
     const result = convertWarpToMcpCapabilities(warp)
-    expect(result.tools).toHaveLength(4)
-    expect(result.tools[0].name).toBe('multiple_actions_test_0')
-    expect(result.tools[1].name).toBe('multiple_actions_test_1')
-    expect(result.tools[2].name).toBe('multiple_actions_test_2')
-    expect(result.tools[3].name).toBe('multiple_actions_test_3')
+    expect(result.tools).toHaveLength(1)
+    expect(result.tools[0].name).toBe('multiple_actions_test')
   })
 
   it('sanitizes tool names with spaces and colons', () => {
@@ -1020,7 +1017,7 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
 
-    expect(result.tools[0].name).toBe('MultiversX_Staking_Delegate_0')
+    expect(result.tools[0].name).toBe('Delegate')
     expect(result.tools[0].name).toMatch(/^[A-Za-z0-9_.-]+$/)
   })
 
@@ -1041,7 +1038,7 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
 
-    expect(result.tools[0].name).toBe('Query_Get_Balance_Test_0')
+    expect(result.tools[0].name).toBe('Get_Balance_Test')
     expect(result.tools[0].name).toMatch(/^[A-Za-z0-9_.-]+$/)
   })
 
@@ -1065,7 +1062,7 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
 
-    expect(result.tools[0].name).toBe('test-tool_with_colons')
+    expect(result.tools[0].name).toBe('with_colons')
     expect(result.tools[0].name).toMatch(/^[A-Za-z0-9_.-]+$/)
   })
 
@@ -1086,7 +1083,7 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = convertWarpToMcpCapabilities(warp)
 
-    expect(result.tools[0].name).toBe('Tool_With_Spaces_0')
+    expect(result.tools[0].name).toBe('Tool_With_Spaces')
     expect(result.tools[0].name).not.toContain('__')
   })
 
