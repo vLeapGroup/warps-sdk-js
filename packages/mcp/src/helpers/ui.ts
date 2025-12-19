@@ -4,7 +4,7 @@ import { extractText } from './warps'
 
 const downloadApp = async (url: string): Promise<string> => {
   const res = await fetch(url)
-  if (!res.ok) throw new Error(`Failed: ${res.status}`)
+  if (!res.ok) throw new Error(`Failed to download app from ${url}: HTTP ${res.status} ${res.statusText}`)
   return res.text()
 }
 
@@ -83,7 +83,12 @@ export const createAppResource = async (warp: Warp, appUrl: string, config: Warp
       content: injectData(html, data),
     }
   } catch (error) {
-    console.error(`[MCP] Failed to create app resource for ${warp.name}:`, error)
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorStack = error instanceof Error ? error.stack : undefined
+    console.error(`[MCP] Failed to create app resource for warp "${warp.name}" (url: ${appUrl}):`, errorMessage)
+    if (errorStack) {
+      console.error(`[MCP] Error stack:`, errorStack)
+    }
     return null
   }
 }
