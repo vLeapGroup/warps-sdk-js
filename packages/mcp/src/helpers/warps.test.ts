@@ -1298,6 +1298,9 @@ describe('convertWarpToMcpCapabilities', () => {
           },
         ],
         ui: 'https://example.com/app.html',
+        meta: {
+          identifier: 'app_test',
+        },
       }
 
       const mockHtml = '<html><head></head><body>Test App</body></html>'
@@ -1308,7 +1311,7 @@ describe('convertWarpToMcpCapabilities', () => {
       expect(result.tools).toHaveLength(1)
       expect(result.resources).toBeDefined()
       expect(result.resources).toHaveLength(1)
-      expect(result.resources![0].name).toBe('ui://widget/app_test')
+      expect(result.resources![0].name).toBe('app_test')
       expect(result.resources![0].uri).toBe('ui://widget/app_test')
       expect(result.resources![0].mimeType).toBe('text/html+skybridge')
       const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
@@ -1331,6 +1334,9 @@ describe('convertWarpToMcpCapabilities', () => {
           },
         ],
         ui: 'https://example.com/app.html',
+        meta: {
+          identifier: 'css_test',
+        },
       }
 
       const mockHtml = '<html><head><link rel="stylesheet" href="styles.css"></head><body></body></html>'
@@ -1362,6 +1368,9 @@ describe('convertWarpToMcpCapabilities', () => {
           },
         ],
         ui: 'https://example.com/app.html',
+        meta: {
+          identifier: 'js_test',
+        },
       }
 
       const mockHtml = '<html><head></head><body><script src="app.js"></script></body></html>'
@@ -1393,6 +1402,9 @@ describe('convertWarpToMcpCapabilities', () => {
           },
         ],
         ui: 'https://example.com/path/app.html',
+        meta: {
+          identifier: 'relative_url_test',
+        },
       }
 
       const mockHtml = '<html><head><link rel="stylesheet" href="../styles.css"></head><body></body></html>'
@@ -1425,6 +1437,9 @@ describe('convertWarpToMcpCapabilities', () => {
           },
         ],
         ui: 'https://example.com/app.html',
+        meta: {
+          identifier: 'failed_resource_test',
+        },
       }
 
       const mockHtml = '<html><head><link rel="stylesheet" href="missing.css"></head><body></body></html>'
@@ -1502,6 +1517,9 @@ describe('convertWarpToMcpCapabilities', () => {
           },
         ],
         ui: 'https://example.com/app.html',
+        meta: {
+          identifier: 'metadata_test',
+        },
       }
 
       const mockHtml = '<html><head></head><body>Test</body></html>'
@@ -1529,6 +1547,9 @@ describe('convertWarpToMcpCapabilities', () => {
           },
         ],
         ui: 'https://example.com/app.html',
+        meta: {
+          identifier: 'multiple_resources_test',
+        },
       }
 
       const mockHtml =

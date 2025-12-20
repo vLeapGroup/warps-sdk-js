@@ -27,7 +27,8 @@ const sanitizeMcpName = (name: string): string => {
     .replace(/:/g, '_')
     .replace(/[^a-z0-9_.-]/g, '_')
     .replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, '')
-    .replace(/[_-]+/g, '_')
+    .replace(/[_-]+/g, (match) => (match.includes('_') ? '_' : match))
+    .replace(/_+/g, '_')
 }
 
 const buildZodSchemaFromInput = (input: WarpActionInput, config: WarpClientConfig): z.ZodTypeAny => {

@@ -23,6 +23,9 @@ describe('createAppResource', () => {
         },
       ],
       ui: 'https://example.com/app.html',
+      meta: {
+        identifier: 'test_app',
+      },
     }
 
     const mockHtml = '<html><head></head><body>Test Content</body></html>'
@@ -31,7 +34,7 @@ describe('createAppResource', () => {
     const result = await createAppResource(warp, warp.ui!, mockConfig)
 
     expect(result).toBeDefined()
-    expect(result!.name).toBe('ui://widget/test_app')
+    expect(result!.name).toBe('test_app')
     expect(result!.uri).toBe('ui://widget/test_app')
     expect(result!.mimeType).toBe('text/html+skybridge')
     expect(result!.description).toBe('ChatGPT app for test_app')
@@ -55,6 +58,9 @@ describe('createAppResource', () => {
         },
       ],
       ui: 'https://example.com/app.html',
+      meta: {
+        identifier: 'css_test',
+      },
     }
 
     const mockHtml = '<html><head><link rel="stylesheet" href="styles.css"></head><body></body></html>'
@@ -85,6 +91,9 @@ describe('createAppResource', () => {
         },
       ],
       ui: 'https://example.com/app.html',
+      meta: {
+        identifier: 'js_test',
+      },
     }
 
     const mockHtml = '<html><head></head><body><script src="app.js"></script></body></html>'
@@ -115,6 +124,9 @@ describe('createAppResource', () => {
         },
       ],
       ui: 'https://example.com/path/app.html',
+      meta: {
+        identifier: 'relative_url_test',
+      },
     }
 
     const mockHtml = '<html><head><link rel="stylesheet" href="../styles.css"></head><body></body></html>'
@@ -146,6 +158,9 @@ describe('createAppResource', () => {
         },
       ],
       ui: 'https://example.com/app.html',
+      meta: {
+        identifier: 'failed_resource_test',
+      },
     }
 
     const mockHtml = '<html><head><link rel="stylesheet" href="missing.css"></head><body></body></html>'
@@ -175,6 +190,9 @@ describe('createAppResource', () => {
         },
       ],
       ui: 'https://example.com/app.html',
+      meta: {
+        identifier: 'multiple_resources_test',
+      },
     }
 
     const mockHtml =
@@ -211,6 +229,9 @@ describe('createAppResource', () => {
         },
       ],
       ui: 'https://example.com/app.html',
+      meta: {
+        identifier: 'strip_test',
+      },
     }
 
     const mockHtml = '<html><head><style>body { margin: 0; }</style></head><body><div>Content</div></body></html>'
@@ -262,6 +283,9 @@ describe('createAppResource', () => {
         },
       ],
       ui: 'https://example.com/app.html',
+      meta: {
+        identifier: 'metadata_test',
+      },
     }
 
     const mockHtml = '<html><head></head><body>Test</body></html>'
