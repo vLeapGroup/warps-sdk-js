@@ -20,6 +20,7 @@ import {
   WarpExplorerName,
   WarpNativeValue,
 } from './warp'
+import { WalletProviderFactory } from './wallet-provider'
 
 export type WarpWalletDetails = { address: string; mnemonic?: string | null; privateKey?: string | null }
 
@@ -55,6 +56,7 @@ export type WarpClientConfig = {
   interceptors?: {
     openLink?: (url: string) => Promise<void>
   }
+  walletProviders?: Record<WarpChain, WalletProviderFactory>
 }
 
 export type WarpCacheConfig = {

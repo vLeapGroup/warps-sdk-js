@@ -1,110 +1,120 @@
 import {
-  AdapterWarpWallet,
-  getProviderConfig,
-  getWarpWalletMnemonicFromConfig,
-  getWarpWalletPrivateKeyFromConfig,
-  WarpAdapterGenericTransaction,
-  WarpChainInfo,
-  WarpClientConfig,
+    AdapterWarpWallet,
+    getProviderConfig,
+    getWarpWalletMnemonicFromConfig,
+    getWarpWalletPrivateKeyFromConfig,
+    initializeWalletCache,
+    WalletProvider,
+    WarpAdapterGenericTransaction,
+    WarpChainInfo,
+    WarpClientConfig,
 } from '@vleap/warps'
 import { ethers } from 'ethers'
+import { MnemonicWalletProvider } from './providers/MnemonicWalletProvider'
+import { PrivateKeyWalletProvider } from './providers/PrivateKeyWalletProvider'
 
 export class WarpEvmWallet implements AdapterWarpWallet {
   private provider: ethers.JsonRpcProvider
+  private walletProvider: WalletProvider | null
+  private cachedAddress: string | null = null
+  private cachedPublicKey: string | null = null
 
   constructor(
     private config: WarpClientConfig,
-    private chain: WarpChainInfo
+    private chain: WarpChainInfo,
+    walletProvider?: WalletProvider
   ) {
     const providerConfig = getProviderConfig(config, chain.name, config.env, chain.defaultApiUrl)
     this.provider = new ethers.JsonRpcProvider(providerConfig.url)
+    this.walletProvider = walletProvider || this.createDefaultProvider()
+    this.initializeCache()
+  }
+
+  private createDefaultProvider(): WalletProvider | null {
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
+    if (privateKey) {
+      return new PrivateKeyWalletProvider(this.config, this.chain, this.provider)
+    }
+
+    const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
+    if (mnemonic) {
+      return new MnemonicWalletProvider(this.config, this.chain, this.provider)
+    }
+
+    return null
+  }
+
+  private initializeCache() {
+    initializeWalletCache(this.walletProvider).then((cache: { address: string | null; publicKey: string | null }) => {
+      this.cachedAddress = cache.address
+      this.cachedPublicKey = cache.publicKey
+    })
   }
 
   async signTransaction(tx: WarpAdapterGenericTransaction): Promise<WarpAdapterGenericTransaction> {
     if (!tx || typeof tx !== 'object') throw new Error('Invalid transaction object')
-
-    const wallet = this.getWallet()
-
-    const txRequest = {
-      to: tx.to,
-      data: tx.data,
-      value: tx.value || 0,
-      gasLimit: tx.gasLimit,
-      maxFeePerGas: tx.maxFeePerGas,
-      maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
-      nonce: tx.nonce,
-      chainId: tx.chainId,
-    }
-
-    const signedTx = await wallet.signTransaction(txRequest)
-    return { ...tx, signature: signedTx }
+    if (!this.walletProvider) throw new Error('No wallet provider available')
+    return await this.walletProvider.signTransaction(tx)
   }
 
   async signTransactions(txs: WarpAdapterGenericTransaction[]): Promise<WarpAdapterGenericTransaction[]> {
     if (txs.length === 0) return []
+    if (!this.walletProvider) throw new Error('No wallet provider available')
 
-    // For multiple transactions, set sequential nonces and give earlier transactions higher priority
-    if (txs.length > 1) {
-      const wallet = this.getWallet()
+    if (this.walletProvider instanceof PrivateKeyWalletProvider || this.walletProvider instanceof MnemonicWalletProvider) {
+      const wallet = this.walletProvider.getWalletInstance()
       const address = wallet.address
 
-      // Get current nonce from blockchain
-      const currentNonce = await this.provider.getTransactionCount(address, 'pending')
+      if (txs.length > 1) {
+        const currentNonce = await this.provider.getTransactionCount(address, 'pending')
+        const signedTxs = []
+        for (let i = 0; i < txs.length; i++) {
+          const tx = { ...txs[i] }
+          tx.nonce = currentNonce + i
 
-      const signedTxs = []
-      for (let i = 0; i < txs.length; i++) {
-        const tx = { ...txs[i] }
+          if (i > 0) {
+            const priorityReduction = BigInt(i * 1000000000)
+            const minGasPrice = BigInt(1000000000)
 
-        // Set sequential nonce
-        tx.nonce = currentNonce + i
-
-        // Give earlier transactions higher gas price for priority
-        if (i > 0) {
-          const priorityReduction = BigInt(i * 1000000000) // 1 gwei per transaction
-          const minGasPrice = BigInt(1000000000) // 1 gwei minimum
-
-          if (tx.maxFeePerGas && tx.maxPriorityFeePerGas) {
-            tx.maxFeePerGas = tx.maxFeePerGas > priorityReduction ? tx.maxFeePerGas - priorityReduction : minGasPrice
-            tx.maxPriorityFeePerGas =
-              tx.maxPriorityFeePerGas > priorityReduction ? tx.maxPriorityFeePerGas - priorityReduction : minGasPrice
-            // Remove gasPrice if it exists to avoid EIP-1559 conflict
-            delete tx.gasPrice
-          } else if (tx.gasPrice) {
-            tx.gasPrice = tx.gasPrice > priorityReduction ? tx.gasPrice - priorityReduction : minGasPrice
-            // Remove EIP-1559 fields if they exist to avoid conflict
-            delete tx.maxFeePerGas
-            delete tx.maxPriorityFeePerGas
+            if (tx.maxFeePerGas && tx.maxPriorityFeePerGas) {
+              tx.maxFeePerGas = tx.maxFeePerGas > priorityReduction ? tx.maxFeePerGas - priorityReduction : minGasPrice
+              tx.maxPriorityFeePerGas =
+                tx.maxPriorityFeePerGas > priorityReduction ? tx.maxPriorityFeePerGas - priorityReduction : minGasPrice
+              delete tx.gasPrice
+            } else if (tx.gasPrice) {
+              tx.gasPrice = tx.gasPrice > priorityReduction ? tx.gasPrice - priorityReduction : minGasPrice
+              delete tx.maxFeePerGas
+              delete tx.maxPriorityFeePerGas
+            }
           }
+
+          signedTxs.push(await this.signTransaction(tx))
         }
-
-        const signedTx = await this.signTransaction(tx)
-        signedTxs.push(signedTx)
+        return signedTxs
       }
-
-      return signedTxs
     }
 
-    // Single transaction - use existing logic
     return Promise.all(txs.map(async (tx) => this.signTransaction(tx)))
   }
 
   async signMessage(message: string): Promise<string> {
-    const wallet = this.getWallet()
-    const signature = await wallet.signMessage(message)
-
-    return signature
+    if (!this.walletProvider) throw new Error('No wallet provider available')
+    return await this.walletProvider.signMessage(message)
   }
 
   async sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string> {
     if (!tx || typeof tx !== 'object') throw new Error('Invalid transaction object')
     if (!tx.signature) throw new Error('Transaction must be signed before sending')
+    if (!this.walletProvider) throw new Error('No wallet provider available')
 
-    const wallet = this.getWallet()
-    if (!wallet) throw new Error('Wallet not initialized - no private key provided')
+    if (this.walletProvider instanceof PrivateKeyWalletProvider || this.walletProvider instanceof MnemonicWalletProvider) {
+      const wallet = this.walletProvider.getWalletInstance()
+      const connectedWallet = wallet.connect(this.provider)
+      const txResponse = await connectedWallet.sendTransaction(tx as any)
+      return txResponse.hash
+    }
 
-    const connectedWallet = wallet.connect(this.provider)
-    const txResponse = await connectedWallet.sendTransaction(tx as any)
-    return txResponse.hash
+    throw new Error('Wallet provider does not support sending transactions')
   }
 
   async sendTransactions(txs: WarpAdapterGenericTransaction[]): Promise<string[]> {
@@ -122,27 +132,10 @@ export class WarpEvmWallet implements AdapterWarpWallet {
   }
 
   getAddress(): string | null {
-    const wallet = this.getWallet()
-    return wallet.address
+    return this.cachedAddress
   }
 
   getPublicKey(): string | null {
-    try {
-      const wallet = this.getWallet()
-      const publicKey = wallet.signingKey.publicKey
-      return publicKey.startsWith('0x') ? publicKey.slice(2) : publicKey
-    } catch {
-      return null
-    }
-  }
-
-  private getWallet(): ethers.Wallet {
-    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
-    if (privateKey) return new ethers.Wallet(privateKey)
-
-    const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
-    if (mnemonic) return ethers.Wallet.fromPhrase(mnemonic) as unknown as ethers.Wallet
-
-    throw new Error('No private key or mnemonic provided')
+    return this.cachedPublicKey
   }
 }

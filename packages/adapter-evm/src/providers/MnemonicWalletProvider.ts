@@ -1,0 +1,71 @@
+import { WalletProvider } from '@vleap/warps'
+import { ethers } from 'ethers'
+import { getWarpWalletMnemonicFromConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+
+export class MnemonicWalletProvider implements WalletProvider {
+  private wallet: ethers.Wallet | null = null
+
+  constructor(
+    private config: WarpClientConfig,
+    private chain: WarpChainInfo,
+    private rpcProvider: ethers.JsonRpcProvider
+  ) {}
+
+  async getAddress(): Promise<string | null> {
+    try {
+      const wallet = this.getWallet()
+      return wallet.address
+    } catch {
+      return null
+    }
+  }
+
+  async getPublicKey(): Promise<string | null> {
+    try {
+      const wallet = this.getWallet()
+      const publicKey = wallet.signingKey.publicKey
+      return publicKey.startsWith('0x') ? publicKey.slice(2) : publicKey
+    } catch {
+      return null
+    }
+  }
+
+  async signTransaction(tx: any): Promise<any> {
+    const wallet = this.getWallet()
+
+    const txRequest = {
+      to: tx.to,
+      data: tx.data,
+      value: tx.value || 0,
+      gasLimit: tx.gasLimit,
+      maxFeePerGas: tx.maxFeePerGas,
+      maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
+      nonce: tx.nonce,
+      chainId: tx.chainId,
+    }
+
+    const signedTx = await wallet.signTransaction(txRequest)
+    return { ...tx, signature: signedTx }
+  }
+
+  async signMessage(message: string): Promise<string> {
+    const wallet = this.getWallet()
+    return await wallet.signMessage(message)
+  }
+
+  getWalletInstance(): ethers.Wallet {
+    return this.getWallet()
+  }
+
+  private getWallet(): ethers.Wallet {
+    if (this.wallet) return this.wallet
+
+    const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
+    if (!mnemonic) {
+      throw new Error('No mnemonic provided')
+    }
+
+    this.wallet = ethers.Wallet.fromPhrase(mnemonic) as unknown as ethers.Wallet
+    return this.wallet
+  }
+}
