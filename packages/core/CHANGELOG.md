@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.174
+
+### Minor Changes
+
+- 90f1a05: add wallet providers
+
 ## 3.0.0-beta.173
 
 ### Patch Changes

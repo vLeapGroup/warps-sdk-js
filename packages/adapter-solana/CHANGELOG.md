@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.0-beta.6
+
+### Minor Changes
+
+- 90f1a05: add wallet providers
+
+### Patch Changes
+
+- Updated dependencies [90f1a05]
+  - @vleap/warps@3.0.0-beta.174
+
 ## 0.1.0-beta.5
 
 ### Patch Changes

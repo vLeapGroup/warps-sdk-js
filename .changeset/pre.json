@@ -15,7 +15,9 @@
     "@vleap/warps-adapter-fastset": "0.1.0-alpha.1",
     "@vleap/warps-adapter-solana": "0.1.0-beta.1",
     "@vleap/warps-mcp": "0.1.0",
-    "@vleap/warps-adapter-near": "0.1.0-beta.1"
+    "@vleap/warps-adapter-near": "0.1.0-beta.1",
+    "@vleap/warps-wallet-gaupa": "0.1.0",
+    "@vleap/warps-wallet-privy": "0.1.0"
   },
   "changesets": [
     "afraid-dogs-joke",
@@ -220,6 +222,7 @@
     "shaggy-deer-ask",
     "shaggy-melons-battle",
     "shaggy-regions-work",
+    "sharp-goats-marry",
     "sharp-turtles-see",
     "shiny-banks-occur",
     "shiny-ghosts-do",

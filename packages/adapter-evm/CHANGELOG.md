@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-beta.56
+
+### Minor Changes
+
+- 90f1a05: add wallet providers
+
+### Patch Changes
+
+- Updated dependencies [90f1a05]
+  - @vleap/warps@3.0.0-beta.174
+
 ## 0.2.0-beta.55
 
 ### Patch Changes

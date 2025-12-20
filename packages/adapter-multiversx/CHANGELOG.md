@@ -1,5 +1,16 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-beta.85
+
+### Minor Changes
+
+- 90f1a05: add wallet providers
+
+### Patch Changes
+
+- Updated dependencies [90f1a05]
+  - @vleap/warps@3.0.0-beta.174
+
 ## 0.2.0-beta.84
 
 ### Patch Changes
