@@ -1,31 +1,13 @@
 import { Transaction } from '@multiversx/sdk-core'
-import {
-  getWarpWalletProviderIdFromConfigOrFail,
-  WalletProvider,
-  WalletProviderFactory,
-  WarpChainInfo,
-  WarpClientConfig,
-  WarpWalletDetails,
-  WarpWalletProvider,
-} from '@vleap/warps'
-
-export interface GaupaWalletProviderConfig {
-  apiKey: string
-}
-
-const ProviderId: WarpWalletProvider = 'gaupa'
-
-export const createGaupaWalletProvider = (gaupaConfig: GaupaWalletProviderConfig): WalletProviderFactory => {
-  return (config: WarpClientConfig, chain: WarpChainInfo) => {
-    return new GaupaWalletProvider(config, chain, gaupaConfig)
-  }
-}
+import { getWarpWalletProviderIdFromConfigOrFail, WalletProvider, WarpChainInfo, WarpClientConfig, WarpWalletDetails } from '@vleap/warps'
+import { GaupaWalletProviderId } from './constants'
+import { ProviderConfig } from './types'
 
 export class GaupaWalletProvider implements WalletProvider {
   constructor(
     private readonly config: WarpClientConfig,
     private readonly chain: WarpChainInfo,
-    private readonly gaupaConfig: GaupaWalletProviderConfig
+    private readonly gaupaConfig: ProviderConfig
   ) {}
 
   async getAddress(): Promise<string | null> {
@@ -63,7 +45,7 @@ export class GaupaWalletProvider implements WalletProvider {
     const providerId = 'TODO'
     const address = 'TODO'
 
-    return { provider: ProviderId, address, providerId }
+    return { provider: GaupaWalletProviderId, address, providerId }
   }
 
   generate(): WarpWalletDetails {
@@ -73,6 +55,6 @@ export class GaupaWalletProvider implements WalletProvider {
     const providerId = 'TODO'
     const address = 'TODO'
 
-    return { provider: ProviderId, address, providerId }
+    return { provider: GaupaWalletProviderId, address, providerId }
   }
 }
