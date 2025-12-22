@@ -6,11 +6,14 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpWalletDetails,
+  WarpWalletProvider,
 } from '@vleap/warps'
 
 export interface GaupaWalletProviderConfig {
   apiKey: string
 }
+
+const ProviderId: WarpWalletProvider = 'gaupa'
 
 export const createGaupaWalletProvider = (gaupaConfig: GaupaWalletProviderConfig): WalletProviderFactory => {
   return (config: WarpClientConfig, chain: WarpChainInfo) => {
@@ -54,10 +57,20 @@ export class GaupaWalletProvider implements WalletProvider {
   }
 
   create(mnemonic: string): WarpWalletDetails {
-    throw new Error('GaupaWalletProvider: create not yet implemented - Gaupa SDK in private beta')
+    throw new Error('GaupaWalletProvider: create not yet implemented')
+
+    const providerId = 'TODO'
+    const address = 'TODO'
+
+    return { provider: ProviderId, address, providerId }
   }
 
   generate(): WarpWalletDetails {
-    throw new Error('GaupaWalletProvider: generate not yet implemented - Gaupa SDK in private beta')
+    throw new Error('GaupaWalletProvider: generate not yet implemented')
+
+    const providerId = 'TODO'
+    const address = 'TODO'
+
+    return { provider: ProviderId, address, providerId }
   }
 }
