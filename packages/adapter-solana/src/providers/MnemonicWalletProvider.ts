@@ -1,15 +1,17 @@
 import * as bip39 from '@scure/bip39'
+import { wordlist } from '@scure/bip39/wordlists/english.js'
 import { Connection, Keypair, Transaction, VersionedTransaction } from '@solana/web3.js'
 import {
+  getWarpWalletAddressFromConfig,
   getWarpWalletMnemonicFromConfig,
-  getWarpWalletPrivateKeyFromConfig,
   WalletProvider,
   WarpChainInfo,
   WarpClientConfig,
+  WarpWalletDetails,
 } from '@vleap/warps'
 import bs58 from 'bs58'
 
-export class SolanaWalletProvider implements WalletProvider {
+export class MnemonicWalletProvider implements WalletProvider {
   private keypair: Keypair | null = null
 
   constructor(
@@ -19,6 +21,9 @@ export class SolanaWalletProvider implements WalletProvider {
   ) {}
 
   async getAddress(): Promise<string | null> {
+    const address = getWarpWalletAddressFromConfig(this.config, this.chain.name)
+    if (address) return address
+
     try {
       const keypair = this.getKeypair()
       return keypair.publicKey.toBase58()
@@ -89,35 +94,37 @@ export class SolanaWalletProvider implements WalletProvider {
     return this.getKeypair()
   }
 
+  create(mnemonic: string): WarpWalletDetails {
+    const seed = bip39.mnemonicToSeedSync(mnemonic)
+    const keypair = Keypair.fromSeed(seed.slice(0, 32))
+    return {
+      provider: 'mnemonic',
+      address: keypair.publicKey.toBase58(),
+      privateKey: bs58.encode(keypair.secretKey),
+      mnemonic,
+    }
+  }
+
+  generate(): WarpWalletDetails {
+    const keypair = Keypair.generate()
+    const entropy = keypair.secretKey.slice(0, 16)
+    const mnemonic = bip39.entropyToMnemonic(entropy, wordlist)
+    return {
+      provider: 'mnemonic',
+      address: keypair.publicKey.toBase58(),
+      privateKey: bs58.encode(keypair.secretKey),
+      mnemonic,
+    }
+  }
+
   private getKeypair(): Keypair {
     if (this.keypair) return this.keypair
 
-    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
-    if (privateKey) {
-      try {
-        const secretKey = bs58.decode(privateKey)
-        if (secretKey.length === 64) {
-          this.keypair = Keypair.fromSecretKey(secretKey)
-          return this.keypair
-        } else if (secretKey.length === 32) {
-          this.keypair = Keypair.fromSeed(secretKey)
-          return this.keypair
-        } else {
-          throw new Error(`Invalid private key length: expected 32 or 64 bytes, got ${secretKey.length}`)
-        }
-      } catch (error) {
-        if (error instanceof Error) throw new Error(`Invalid private key format: ${error.message}`)
-        throw new Error('Invalid private key format')
-      }
-    }
-
     const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
-    if (mnemonic) {
-      const seed = bip39.mnemonicToSeedSync(mnemonic)
-      this.keypair = Keypair.fromSeed(seed.slice(0, 32))
-      return this.keypair
-    }
+    if (!mnemonic) throw new Error('No mnemonic provided')
 
-    throw new Error('No private key or mnemonic provided')
+    const seed = bip39.mnemonicToSeedSync(mnemonic)
+    this.keypair = Keypair.fromSeed(seed.slice(0, 32))
+    return this.keypair
   }
 }

@@ -8,6 +8,7 @@ import { WarpActionExecutionResult } from './output'
 import { WarpRegistryConfigInfo, WarpRegistryInfo } from './registry'
 import { ClientIndexConfig } from './search'
 import { ClientTransformConfig } from './transform'
+import { WalletProviderFactory } from './wallet-provider'
 import {
   BaseWarpActionInputType,
   Warp,
@@ -20,9 +21,14 @@ import {
   WarpExplorerName,
   WarpNativeValue,
 } from './warp'
-import { WalletProviderFactory } from './wallet-provider'
 
-export type WarpWalletDetails = { address: string; mnemonic?: string | null; privateKey?: string | null }
+export type WarpWalletProvider = 'mnemonic' | 'privateKey' | 'privy' | 'gaupa'
+
+export type WarpWalletDetails = {
+  address: string
+  mnemonic?: string | null
+  privateKey?: string | null
+}
 
 export type WarpUserWallets = Record<WarpChain, WarpWalletDetails | string | null>
 
@@ -209,4 +215,5 @@ export interface AdapterWarpWallet {
   generate(): WarpWalletDetails
   getAddress(): string | null
   getPublicKey(): string | null
+  registerX402Handlers?(client: unknown): Promise<Record<string, () => void>>
 }

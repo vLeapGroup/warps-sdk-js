@@ -7,20 +7,21 @@
   "main": "playground.ts",
   "scripts": {
     "start": "ts-node playground.ts",
-    "fetchdata": "ts-node fetch-data.ts",
-    "fetchaccount": "ts-node fetch-account.ts",
-    "fetchtokens": "ts-node fetch-tokens.ts"
+    "x402": "ts-node x402-demo.ts"
   },
   "dependencies": {
-    "@vleap/warps": "3.0.0-beta.174",
-    "@vleap/warps-adapter-evm": "0.2.0-beta.56",
-    "@vleap/warps-adapter-fastset": "0.1.0-beta.46",
-    "@vleap/warps-mcp": "^1.0.0-beta.18",
-    "@vleap/warps-near": "^0.1.0-beta.4",
-    "@vleap/warps-adapter-multiversx": "^0.2.0-beta.85",
-    "@vleap/warps-adapter-solana": "workspace:*",
-    "@vleap/warps-adapter-sui": "^0.2.0-beta.60",
-    "@vleap/warps-vm-node": "0.1.0-beta.9"
+    "@vleap/warps": "*",
+    "@vleap/warps-adapter-evm": "*",
+    "@vleap/warps-adapter-fastset": "*",
+    "@vleap/warps-mcp": "*",
+    "@vleap/warps-near": "*",
+    "@vleap/warps-adapter-multiversx": "*",
+    "@vleap/warps-adapter-solana": "*",
+    "@vleap/warps-adapter-sui": "*",
+    "@vleap/warps-vm-node": "*",
+    "@x402/core": "^2.0.0",
+    "@x402/evm": "^2.0.0",
+    "ethers": "^6.16.0"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",

@@ -1,4 +1,4 @@
-import { Address, Mnemonic, NetworkEntrypoint } from '@multiversx/sdk-core'
+import { Address, NetworkEntrypoint } from '@multiversx/sdk-core'
 import {
   AdapterWarpWallet,
   CacheTtl,
@@ -10,6 +10,7 @@ import {
   WarpCache,
   WarpChainInfo,
   WarpClientConfig,
+  WarpWalletDetails,
 } from '@vleap/warps'
 import { getMultiversxEntrypoint } from './helpers/general'
 import { MnemonicWalletProvider } from './providers/MnemonicWalletProvider'
@@ -24,25 +25,20 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
 
   constructor(
     private config: WarpClientConfig,
-    private chain: WarpChainInfo,
-    walletProvider?: WalletProvider
+    private chain: WarpChainInfo
   ) {
     this.entry = getMultiversxEntrypoint(chain, config.env, config)
     this.cache = new WarpCache(config.cache?.type)
-    this.walletProvider = walletProvider || this.createDefaultProvider()
+    this.walletProvider = this.createProvider()
     this.initializeCache()
   }
 
-  private createDefaultProvider(): WalletProvider | null {
+  private createProvider(): WalletProvider | null {
     const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
-    if (privateKey) {
-      return new PrivateKeyWalletProvider(this.config, this.chain)
-    }
+    if (privateKey) return new PrivateKeyWalletProvider(this.config, this.chain)
 
     const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
-    if (mnemonic) {
-      return new MnemonicWalletProvider(this.config, this.chain)
-    }
+    if (mnemonic) return new MnemonicWalletProvider(this.config, this.chain)
 
     return null
   }
@@ -107,23 +103,14 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
     return await this.entry.sendTransaction(tx)
   }
 
-  create(mnemonic: string): { address: string; privateKey: string; mnemonic: string } {
-    const mnemonicObj = Mnemonic.fromString(mnemonic)
-    const privateKey = mnemonicObj.deriveKey(0)
-    const privateKeyHex = privateKey.hex()
-    const pubKey = privateKey.generatePublicKey()
-    const address = pubKey.toAddress(this.chain.addressHrp).toBech32()
-    return { address, privateKey: privateKeyHex, mnemonic }
+  create(mnemonic: string): WarpWalletDetails {
+    if (!this.walletProvider) throw new Error('No wallet provider available')
+    return this.walletProvider.create(mnemonic)
   }
 
-  generate(): { address: string; privateKey: string; mnemonic: string } {
-    const mnemonic = Mnemonic.generate()
-    const mnemonicWords = mnemonic.toString()
-    const privateKey = mnemonic.deriveKey(0)
-    const privateKeyHex = privateKey.hex()
-    const pubKey = privateKey.generatePublicKey()
-    const address = pubKey.toAddress(this.chain.addressHrp).toBech32()
-    return { address, privateKey: privateKeyHex, mnemonic: mnemonicWords }
+  generate(): WarpWalletDetails {
+    if (!this.walletProvider) throw new Error('No wallet provider available')
+    return this.walletProvider.generate()
   }
 
   getAddress(): string | null {

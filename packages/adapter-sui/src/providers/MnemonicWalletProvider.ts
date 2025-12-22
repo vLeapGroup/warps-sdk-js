@@ -1,14 +1,9 @@
+import { WalletProvider, WarpWalletDetails } from '@vleap/warps'
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519'
-import {
-  getWarpWalletAddressFromConfig,
-  getWarpWalletPrivateKeyFromConfig,
-  WalletProvider,
-  WarpChainInfo,
-  WarpClientConfig,
-  WarpWalletDetails,
-} from '@vleap/warps'
+import { getWarpWalletAddressFromConfig, getWarpWalletMnemonicFromConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import * as bip39 from '@scure/bip39'
 
-export class PrivateKeyWalletProvider implements WalletProvider {
+export class MnemonicWalletProvider implements WalletProvider {
   private keypair: Ed25519Keypair | null = null
 
   constructor(
@@ -53,7 +48,7 @@ export class PrivateKeyWalletProvider implements WalletProvider {
     const address = keypair.getPublicKey().toSuiAddress()
     const privateKey = Buffer.from(keypair.getSecretKey()).toString('hex')
     return {
-      provider: 'privateKey',
+      provider: 'mnemonic',
       address,
       privateKey,
       mnemonic,
@@ -65,7 +60,7 @@ export class PrivateKeyWalletProvider implements WalletProvider {
     const address = keypair.getPublicKey().toSuiAddress()
     const privateKey = Buffer.from(keypair.getSecretKey()).toString('hex')
     return {
-      provider: 'privateKey',
+      provider: 'mnemonic',
       address,
       privateKey,
       mnemonic: null,
@@ -75,24 +70,10 @@ export class PrivateKeyWalletProvider implements WalletProvider {
   private getKeypair(): Ed25519Keypair {
     if (this.keypair) return this.keypair
 
-    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
-    if (!privateKey) throw new Error('Wallet not initialized - no private key provided')
+    const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
+    if (!mnemonic) throw new Error('No mnemonic provided')
 
-    try {
-      const privateKeyBytes = Buffer.from(privateKey, 'hex')
-
-      if (privateKeyBytes.length === 70) {
-        const secretKey32 = new Uint8Array(privateKeyBytes.subarray(1, 33))
-        this.keypair = Ed25519Keypair.fromSecretKey(secretKey32)
-        return this.keypair
-      } else if (privateKeyBytes.length === 32) {
-        this.keypair = Ed25519Keypair.fromSecretKey(new Uint8Array(privateKeyBytes))
-        return this.keypair
-      } else {
-        throw new Error(`Unsupported private key length: ${privateKeyBytes.length} bytes`)
-      }
-    } catch (error) {
-      throw error
-    }
+    this.keypair = Ed25519Keypair.deriveKeypair(mnemonic.trim())
+    return this.keypair
   }
 }

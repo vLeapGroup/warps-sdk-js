@@ -6,7 +6,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "skipLibCheck": true,
-    "moduleResolution": "node"
+    "moduleResolution": "bundler"
   },
   "include": ["src"],
   "exclude": ["dist", "build", "node_modules"]

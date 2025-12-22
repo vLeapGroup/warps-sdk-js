@@ -1,15 +1,19 @@
 import {
-    AdapterWarpWallet,
-    getProviderConfig,
-    getWarpWalletMnemonicFromConfig,
-    getWarpWalletPrivateKeyFromConfig,
-    initializeWalletCache,
-    WalletProvider,
-    WarpAdapterGenericTransaction,
-    WarpChainInfo,
-    WarpClientConfig,
+  AdapterWarpWallet,
+  getProviderConfig,
+  getWarpWalletMnemonicFromConfig,
+  getWarpWalletPrivateKeyFromConfig,
+  initializeWalletCache,
+  WalletProvider,
+  WarpAdapterGenericTransaction,
+  WarpChainInfo,
+  WarpClientConfig,
+  WarpWalletDetails,
 } from '@vleap/warps'
+import { registerExactEvmScheme } from '@x402/evm/exact/client'
 import { ethers } from 'ethers'
+import { privateKeyToAccount } from 'viem/accounts'
+import { SupportedEvmChainIds } from './constants'
 import { MnemonicWalletProvider } from './providers/MnemonicWalletProvider'
 import { PrivateKeyWalletProvider } from './providers/PrivateKeyWalletProvider'
 
@@ -21,25 +25,20 @@ export class WarpEvmWallet implements AdapterWarpWallet {
 
   constructor(
     private config: WarpClientConfig,
-    private chain: WarpChainInfo,
-    walletProvider?: WalletProvider
+    private chain: WarpChainInfo
   ) {
     const providerConfig = getProviderConfig(config, chain.name, config.env, chain.defaultApiUrl)
     this.provider = new ethers.JsonRpcProvider(providerConfig.url)
-    this.walletProvider = walletProvider || this.createDefaultProvider()
+    this.walletProvider = this.createProvider()
     this.initializeCache()
   }
 
-  private createDefaultProvider(): WalletProvider | null {
+  private createProvider(): WalletProvider | null {
     const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
-    if (privateKey) {
-      return new PrivateKeyWalletProvider(this.config, this.chain, this.provider)
-    }
+    if (privateKey) return new PrivateKeyWalletProvider(this.config, this.chain, this.provider)
 
     const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
-    if (mnemonic) {
-      return new MnemonicWalletProvider(this.config, this.chain, this.provider)
-    }
+    if (mnemonic) return new MnemonicWalletProvider(this.config, this.chain, this.provider)
 
     return null
   }
@@ -121,14 +120,14 @@ export class WarpEvmWallet implements AdapterWarpWallet {
     return Promise.all(txs.map(async (tx) => this.sendTransaction(tx)))
   }
 
-  create(mnemonic: string): { address: string; privateKey: string; mnemonic: string } {
-    const wallet = ethers.Wallet.fromPhrase(mnemonic)
-    return { address: wallet.address, privateKey: wallet.privateKey, mnemonic }
+  create(mnemonic: string): WarpWalletDetails {
+    if (!this.walletProvider) throw new Error('No wallet provider available')
+    return this.walletProvider.create(mnemonic)
   }
 
-  generate(): { address: string; privateKey: string; mnemonic: string } {
-    const wallet = ethers.Wallet.createRandom()
-    return { address: wallet.address, privateKey: wallet.privateKey, mnemonic: wallet.mnemonic?.phrase || '' }
+  generate(): WarpWalletDetails {
+    if (!this.walletProvider) throw new Error('No wallet provider available')
+    return this.walletProvider.generate()
   }
 
   getAddress(): string | null {
@@ -137,5 +136,28 @@ export class WarpEvmWallet implements AdapterWarpWallet {
 
   getPublicKey(): string | null {
     return this.cachedPublicKey
+  }
+
+  async registerX402Handlers(client: unknown): Promise<Record<string, () => void>> {
+    if (!this.walletProvider) throw new Error('No wallet provider available')
+
+    const provider = this.walletProvider as unknown as Record<string, unknown>
+    const getInstance = provider.getWalletInstance as (() => ethers.Wallet) | undefined
+
+    if (typeof getInstance !== 'function') throw new Error('Wallet provider does not have getWalletInstance method')
+
+    const wallet = getInstance()
+    if (!wallet || !wallet.privateKey) throw new Error('Wallet instance does not have private key')
+
+    const signer = privateKeyToAccount(wallet.privateKey as `0x${string}`)
+    const handlers: Record<string, () => void> = {}
+
+    for (const chainId of SupportedEvmChainIds) {
+      handlers[`eip155:${chainId}`] = () => {
+        registerExactEvmScheme(client as Parameters<typeof registerExactEvmScheme>[0], { signer })
+      }
+    }
+
+    return handlers
   }
 }

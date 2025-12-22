@@ -1,33 +1,49 @@
 import * as bip39 from '@scure/bip39'
 import { wordlist } from '@scure/bip39/wordlists/english.js'
+import { createKeyPairSignerFromBytes } from '@solana/kit'
 import { Connection, Keypair, Transaction, VersionedTransaction } from '@solana/web3.js'
 import {
   AdapterWarpWallet,
   getProviderConfig,
+  getWarpWalletMnemonicFromConfig,
+  getWarpWalletPrivateKeyFromConfig,
   initializeWalletCache,
   WalletProvider,
   WarpAdapterGenericTransaction,
   WarpChainInfo,
   WarpClientConfig,
+  WarpWalletDetails,
 } from '@vleap/warps'
+import { registerExactSvmScheme } from '@x402/svm/exact/client'
 import bs58 from 'bs58'
-import { SolanaWalletProvider } from './providers/SolanaWalletProvider'
+import { SupportedX402SolanaNetworks } from './constants'
+import { MnemonicWalletProvider } from './providers/MnemonicWalletProvider'
+import { PrivateKeyWalletProvider } from './providers/PrivateKeyWalletProvider'
 
 export class WarpSolanaWallet implements AdapterWarpWallet {
   private connection: Connection
-  private walletProvider: WalletProvider
+  private walletProvider: WalletProvider | null
   private cachedAddress: string | null = null
   private cachedPublicKey: string | null = null
 
   constructor(
     private config: WarpClientConfig,
-    private chain: WarpChainInfo,
-    walletProvider?: WalletProvider
+    private chain: WarpChainInfo
   ) {
     const providerConfig = getProviderConfig(config, chain.name, config.env, chain.defaultApiUrl)
     this.connection = new Connection(providerConfig.url, 'confirmed')
-    this.walletProvider = walletProvider || new SolanaWalletProvider(config, chain, this.connection)
+    this.walletProvider = this.createProvider()
     this.initializeCache()
+  }
+
+  private createProvider(): WalletProvider | null {
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
+    if (privateKey) return new PrivateKeyWalletProvider(this.config, this.chain, this.connection)
+
+    const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
+    if (mnemonic) return new MnemonicWalletProvider(this.config, this.chain, this.connection)
+
+    return null
   }
 
   private initializeCache() {
@@ -39,6 +55,7 @@ export class WarpSolanaWallet implements AdapterWarpWallet {
 
   async signTransaction(tx: WarpAdapterGenericTransaction): Promise<WarpAdapterGenericTransaction> {
     if (!tx || typeof tx !== 'object') throw new Error('Invalid transaction object')
+    if (!this.walletProvider) throw new Error('No wallet provider available')
     return await this.walletProvider.signTransaction(tx)
   }
 
@@ -48,6 +65,7 @@ export class WarpSolanaWallet implements AdapterWarpWallet {
   }
 
   async signMessage(message: string): Promise<string> {
+    if (!this.walletProvider) throw new Error('No wallet provider available')
     return await this.walletProvider.signMessage(message)
   }
 
@@ -92,25 +110,14 @@ export class WarpSolanaWallet implements AdapterWarpWallet {
     return Promise.all(txs.map(async (tx) => this.sendTransaction(tx)))
   }
 
-  create(mnemonic: string): { address: string; privateKey: string; mnemonic: string } {
-    const seed = bip39.mnemonicToSeedSync(mnemonic)
-    const keypair = Keypair.fromSeed(seed.slice(0, 32))
-    return {
-      address: keypair.publicKey.toBase58(),
-      privateKey: bs58.encode(keypair.secretKey),
-      mnemonic,
-    }
+  create(mnemonic: string): WarpWalletDetails {
+    if (!this.walletProvider) throw new Error('No wallet provider available')
+    return this.walletProvider.create(mnemonic)
   }
 
-  generate(): { address: string; privateKey: string; mnemonic: string } {
-    const keypair = Keypair.generate()
-    const entropy = keypair.secretKey.slice(0, 16)
-    const mnemonic = bip39.entropyToMnemonic(entropy, wordlist)
-    return {
-      address: keypair.publicKey.toBase58(),
-      privateKey: bs58.encode(keypair.secretKey),
-      mnemonic,
-    }
+  generate(): WarpWalletDetails {
+    if (!this.walletProvider) throw new Error('No wallet provider available')
+    return this.walletProvider.generate()
   }
 
   getAddress(): string | null {
@@ -120,4 +127,28 @@ export class WarpSolanaWallet implements AdapterWarpWallet {
   getPublicKey(): string | null {
     return this.cachedPublicKey
   }
+
+  async registerX402Handlers(client: unknown): Promise<Record<string, () => void>> {
+    if (!this.walletProvider) return {}
+
+    const provider = this.walletProvider as unknown as Record<string, unknown>
+    const getKeypair = provider.getKeypairInstance as (() => Keypair) | undefined
+
+    if (typeof getKeypair !== 'function') return {}
+
+    const keypair = getKeypair()
+    if (!keypair || !keypair.secretKey) return {}
+
+    const signer = await createKeyPairSignerFromBytes(keypair.secretKey)
+    const handlers: Record<string, () => void> = {}
+
+    for (const network of SupportedX402SolanaNetworks) {
+      handlers[network] = () => {
+        registerExactSvmScheme(client as Parameters<typeof registerExactSvmScheme>[0], { signer })
+      }
+    }
+
+    return handlers
+  }
+
 }

@@ -1,4 +1,4 @@
-import { WalletProvider } from '@vleap/warps'
+import { WalletProvider, WarpWalletDetails } from '@vleap/warps'
 import { ethers } from 'ethers'
 import { getWarpWalletPrivateKeyFromConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 
@@ -57,13 +57,31 @@ export class PrivateKeyWalletProvider implements WalletProvider {
     return this.getWallet()
   }
 
+  create(mnemonic: string): WarpWalletDetails {
+    const wallet = ethers.Wallet.fromPhrase(mnemonic)
+    return {
+      provider: 'privateKey',
+      address: wallet.address,
+      privateKey: wallet.privateKey,
+      mnemonic,
+    }
+  }
+
+  generate(): WarpWalletDetails {
+    const wallet = ethers.Wallet.createRandom()
+    return {
+      provider: 'privateKey',
+      address: wallet.address,
+      privateKey: wallet.privateKey,
+      mnemonic: wallet.mnemonic?.phrase || null,
+    }
+  }
+
   private getWallet(): ethers.Wallet {
     if (this.wallet) return this.wallet
 
     const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
-    if (!privateKey) {
-      throw new Error('No private key provided')
-    }
+    if (!privateKey) throw new Error('No private key provided')
 
     this.wallet = new ethers.Wallet(privateKey)
     return this.wallet

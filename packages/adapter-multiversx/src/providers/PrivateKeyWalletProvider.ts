@@ -1,5 +1,5 @@
-import { WalletProvider } from '@vleap/warps'
-import { Account, Message, Transaction, UserSecretKey } from '@multiversx/sdk-core'
+import { WalletProvider, WarpWalletDetails } from '@vleap/warps'
+import { Account, Mnemonic, Message, Transaction, UserSecretKey } from '@multiversx/sdk-core'
 import { getWarpWalletAddressFromConfig, getWarpWalletPrivateKeyFromConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 
 export class PrivateKeyWalletProvider implements WalletProvider {
@@ -50,13 +50,40 @@ export class PrivateKeyWalletProvider implements WalletProvider {
     return this.getAccount()
   }
 
+  create(mnemonic: string): WarpWalletDetails {
+    const mnemonicObj = Mnemonic.fromString(mnemonic)
+    const privateKey = mnemonicObj.deriveKey(0)
+    const privateKeyHex = privateKey.hex()
+    const pubKey = privateKey.generatePublicKey()
+    const address = pubKey.toAddress(this.chain.addressHrp).toBech32()
+    return {
+      provider: 'privateKey',
+      address,
+      privateKey: privateKeyHex,
+      mnemonic,
+    }
+  }
+
+  generate(): WarpWalletDetails {
+    const mnemonic = Mnemonic.generate()
+    const mnemonicWords = mnemonic.toString()
+    const privateKey = mnemonic.deriveKey(0)
+    const privateKeyHex = privateKey.hex()
+    const pubKey = privateKey.generatePublicKey()
+    const address = pubKey.toAddress(this.chain.addressHrp).toBech32()
+    return {
+      provider: 'privateKey',
+      address,
+      privateKey: privateKeyHex,
+      mnemonic: mnemonicWords,
+    }
+  }
+
   private getAccount(): Account {
     if (this.account) return this.account
 
     const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
-    if (!privateKey) {
-      throw new Error('No private key provided')
-    }
+    if (!privateKey) throw new Error('No private key provided')
 
     const isPrivateKeyPem = privateKey.startsWith('-----')
     const secretKey = isPrivateKeyPem ? UserSecretKey.fromPem(privateKey) : UserSecretKey.fromString(privateKey)

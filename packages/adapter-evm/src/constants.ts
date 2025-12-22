@@ -76,3 +76,55 @@ export const ExplorerUrls: Record<ExplorerName, string> = {
   [BaseExplorers.BlockscoutBase]: 'https://base.blockscout.com',
   [BaseExplorers.BlockscoutBaseSepolia]: 'https://sepolia.blockscout.com',
 }
+
+export const EvmChainIds = {
+  Ethereum: {
+    Mainnet: 1,
+    Goerli: 5,
+    Sepolia: 11155111,
+  },
+  Polygon: {
+    Mainnet: 137,
+    Mumbai: 80001,
+  },
+  Arbitrum: {
+    Mainnet: 42161,
+    Sepolia: 421614,
+  },
+  Base: {
+    Mainnet: 8453,
+    Sepolia: 84532,
+  },
+  Optimism: {
+    Mainnet: 10,
+    Sepolia: 11155420,
+  },
+} as const
+
+export const EvmChainIdMap: Record<string, number> = {
+  'ethereum:mainnet': EvmChainIds.Ethereum.Mainnet,
+  'ethereum:goerli': EvmChainIds.Ethereum.Goerli,
+  'ethereum:sepolia': EvmChainIds.Ethereum.Sepolia,
+  'polygon:mainnet': EvmChainIds.Polygon.Mainnet,
+  'polygon:mumbai': EvmChainIds.Polygon.Mumbai,
+  'arbitrum:mainnet': EvmChainIds.Arbitrum.Mainnet,
+  'arbitrum:sepolia': EvmChainIds.Arbitrum.Sepolia,
+  'base:mainnet': EvmChainIds.Base.Mainnet,
+  'base:sepolia': EvmChainIds.Base.Sepolia,
+  'optimism:mainnet': EvmChainIds.Optimism.Mainnet,
+  'optimism:sepolia': EvmChainIds.Optimism.Sepolia,
+}
+
+export const SupportedEvmChainIds: number[] = [
+  EvmChainIds.Ethereum.Mainnet,
+  EvmChainIds.Ethereum.Goerli,
+  EvmChainIds.Ethereum.Sepolia,
+  EvmChainIds.Polygon.Mainnet,
+  EvmChainIds.Polygon.Mumbai,
+  EvmChainIds.Arbitrum.Mainnet,
+  EvmChainIds.Arbitrum.Sepolia,
+  EvmChainIds.Base.Mainnet,
+  EvmChainIds.Base.Sepolia,
+  EvmChainIds.Optimism.Mainnet,
+  EvmChainIds.Optimism.Sepolia,
+]

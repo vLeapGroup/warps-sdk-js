@@ -114,6 +114,7 @@ export class WarpFactory {
     const data = dataString ? interpolator.applyInputs(dataString, modifiedInputs, this.serializer, primaryResolvedInputs) : null
 
     const executable: WarpExecutable = {
+      adapter,
       warp: preparedWarp,
       chain,
       action: actionIndex,

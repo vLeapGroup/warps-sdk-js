@@ -13,6 +13,7 @@ import { applyOutputToMessages } from './helpers/messages'
 import { buildMappedOutput, extractResolvedInputValues } from './helpers/payload'
 import { createAuthHeaders, createAuthMessage } from './helpers/signing'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
+import { handleX402Payment } from './helpers/x402'
 import {
   Adapter,
   ResolvedInput,
@@ -325,8 +326,14 @@ export class WarpExecutor {
     WarpLogger.debug('WarpExecutor: Executing HTTP collect', { url, method: httpMethod, headers, body })
 
     try {
-      const response = await fetch(url, { method: httpMethod, headers, body })
+      const fetchOptions: RequestInit = { method: httpMethod, headers, body }
+      let response = await fetch(url, fetchOptions)
       WarpLogger.debug('Collect response status', { status: response.status })
+
+      if (response.status === 402) {
+        response = await handleX402Payment(response, url, httpMethod, body, this.adapters)
+      }
+
       const content = await response.json()
       WarpLogger.debug('Collect response content', { content })
       const { values, output } = await extractCollectOutput(

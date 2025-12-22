@@ -1,6 +1,12 @@
-import { WalletProvider } from '@vleap/warps'
-import { Account, Mnemonic, Message, Transaction } from '@multiversx/sdk-core'
-import { getWarpWalletAddressFromConfig, getWarpWalletMnemonicFromConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { Account, Message, Mnemonic, Transaction } from '@multiversx/sdk-core'
+import {
+  getWarpWalletAddressFromConfig,
+  getWarpWalletMnemonicFromConfig,
+  WalletProvider,
+  WarpChainInfo,
+  WarpClientConfig,
+  WarpWalletDetails,
+} from '@vleap/warps'
 
 export class MnemonicWalletProvider implements WalletProvider {
   private account: Account | null = null
@@ -50,13 +56,40 @@ export class MnemonicWalletProvider implements WalletProvider {
     return this.getAccount()
   }
 
+  create(mnemonic: string): WarpWalletDetails {
+    const mnemonicObj = Mnemonic.fromString(mnemonic)
+    const privateKey = mnemonicObj.deriveKey(0)
+    const privateKeyHex = privateKey.hex()
+    const pubKey = privateKey.generatePublicKey()
+    const address = pubKey.toAddress(this.chain.addressHrp).toBech32()
+    return {
+      provider: 'mnemonic',
+      address,
+      privateKey: privateKeyHex,
+      mnemonic,
+    }
+  }
+
+  generate(): WarpWalletDetails {
+    const mnemonic = Mnemonic.generate()
+    const mnemonicWords = mnemonic.toString()
+    const privateKey = mnemonic.deriveKey(0)
+    const privateKeyHex = privateKey.hex()
+    const pubKey = privateKey.generatePublicKey()
+    const address = pubKey.toAddress(this.chain.addressHrp).toBech32()
+    return {
+      provider: 'mnemonic',
+      address,
+      privateKey: privateKeyHex,
+      mnemonic: mnemonicWords,
+    }
+  }
+
   private getAccount(): Account {
     if (this.account) return this.account
 
     const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
-    if (!mnemonic) {
-      throw new Error('No mnemonic provided')
-    }
+    if (!mnemonic) throw new Error('No mnemonic provided')
 
     const mnemonicObj = Mnemonic.fromString(mnemonic)
     const secretKey = mnemonicObj.deriveKey(0)
