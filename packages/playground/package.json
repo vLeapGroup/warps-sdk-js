@@ -6,8 +6,7 @@
   "type": "module",
   "main": "playground.ts",
   "scripts": {
-    "start": "ts-node playground.ts",
-    "x402": "ts-node x402-demo.ts"
+    "start": "ts-node playground.ts"
   },
   "dependencies": {
     "@vleap/warps": "*",
