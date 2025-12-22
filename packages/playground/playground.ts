@@ -38,11 +38,6 @@ const runWarp = async (warpFile: string) => {
     user: {
       wallets: {
         ...allWallets,
-        multiversx: {
-          provider: 'gaupa',
-          address: '',
-          providerId: 'gaupa-demo',
-        },
       },
     },
     walletProviders: {
