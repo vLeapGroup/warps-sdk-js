@@ -73,7 +73,7 @@ const runWarp = async (warpFile: string) => {
     warp,
     WarpInputs,
     {
-      onActionExecuted: (result) => console.log('Singe action executed:', result),
+      onActionExecuted: (result) => console.log('Single action executed:', result),
       onExecuted: (result) => console.log('Warp executed:', result),
       onError: (result) => console.log('Error:', result),
     },
