@@ -1,5 +1,18 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-beta.57
+
+### Minor Changes
+
+- e97ec34: add x402 + update wallet management
+
+### Patch Changes
+
+- 552fe5e: improve external wallet provider support
+- Updated dependencies [552fe5e]
+- Updated dependencies [e97ec34]
+  - @vleap/warps@3.0.0-beta.175
+
 ## 0.2.0-beta.56
 
 ### Minor Changes

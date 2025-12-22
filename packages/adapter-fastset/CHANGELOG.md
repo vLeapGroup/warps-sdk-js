@@ -1,5 +1,14 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-beta.47
+
+### Patch Changes
+
+- 552fe5e: improve external wallet provider support
+- Updated dependencies [552fe5e]
+- Updated dependencies [e97ec34]
+  - @vleap/warps@3.0.0-beta.175
+
 ## 0.1.0-beta.46
 
 ### Patch Changes

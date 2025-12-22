@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.175
+
+### Minor Changes
+
+- e97ec34: add x402 + update wallet management
+
+### Patch Changes
+
+- 552fe5e: improve external wallet provider support
+
 ## 3.0.0-beta.174
 
 ### Minor Changes

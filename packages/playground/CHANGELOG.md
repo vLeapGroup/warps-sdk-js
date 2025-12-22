@@ -1,5 +1,24 @@
 # @warps/playground
 
+## 0.2.0-beta.142
+
+### Minor Changes
+
+- e97ec34: add x402 + update wallet management
+
+### Patch Changes
+
+- 552fe5e: improve external wallet provider support
+- Updated dependencies [552fe5e]
+- Updated dependencies [e97ec34]
+  - @vleap/warps-adapter-multiversx@0.2.0-beta.86
+  - @vleap/warps-adapter-fastset@0.1.0-beta.47
+  - @vleap/warps-adapter-solana@0.1.0-beta.7
+  - @vleap/warps-adapter-evm@0.2.0-beta.57
+  - @vleap/warps-adapter-sui@0.2.0-beta.61
+  - @vleap/warps@3.0.0-beta.175
+  - @vleap/warps-mcp@1.0.0-beta.19
+
 ## 0.2.0-beta.141
 
 ### Patch Changes

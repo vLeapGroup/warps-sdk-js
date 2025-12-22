@@ -1,6 +1,6 @@
 {
   "name": "@vleap/warps-adapter-solana",
-  "version": "0.1.0-beta.6",
+  "version": "0.1.0-beta.7",
   "description": "Solana adapter for Warps SDK",
   "type": "module",
   "types": "./dist/index.d.ts",
@@ -41,7 +41,7 @@
     "@solana/kit": "^1.0.0",
     "@solana/spl-token": "^0.4.14",
     "@solana/web3.js": "^1.98.4",
-    "@vleap/warps": "^3.0.0-beta.174",
+    "@vleap/warps": "^3.0.0-beta.175",
     "@x402/svm": "^2.0.0",
     "bs58": "^6.0.0",
     "tweetnacl": "^1.0.3"
