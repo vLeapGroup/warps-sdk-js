@@ -1,4 +1,4 @@
-import { WarpClient, WarpClientConfig, withAdapter } from '@vleap/warps'
+import { WarpClient, WarpClientConfig, withAdapterFallback } from '@vleap/warps'
 import { getAllEvmAdapters } from '@vleap/warps-adapter-evm'
 import { FastsetAdapter } from '@vleap/warps-adapter-fastset'
 import { getAllMultiversxAdapters, MultiversxAdapter } from '@vleap/warps-adapter-multiversx'
@@ -54,10 +54,10 @@ const runWarp = async (warpFile: string) => {
     chains: [
       ...getAllMultiversxAdapters(),
       ...getAllEvmAdapters(MultiversxAdapter),
-      withAdapter(SuiAdapter, MultiversxAdapter),
-      withAdapter(SolanaAdapter, MultiversxAdapter),
-      withAdapter(NearAdapter, MultiversxAdapter),
-      withAdapter(FastsetAdapter, MultiversxAdapter),
+      withAdapterFallback(SuiAdapter, MultiversxAdapter),
+      withAdapterFallback(SolanaAdapter, MultiversxAdapter),
+      withAdapterFallback(NearAdapter, MultiversxAdapter),
+      withAdapterFallback(FastsetAdapter, MultiversxAdapter),
     ],
   })
 
