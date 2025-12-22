@@ -41,3 +41,9 @@ export const getWarpWalletMnemonicFromConfig = (config: WarpClientConfig, chain:
 
 export const getWarpWalletProviderIdFromConfig = (config: WarpClientConfig, chain: WarpChain) =>
   getWarpWalletProviderId(config.user?.wallets?.[chain] || null)?.trim() || null
+
+export const getWarpWalletProviderIdFromConfigOrFail = (config: WarpClientConfig, chain: WarpChain) => {
+  const providerId = getWarpWalletProviderIdFromConfig(config, chain)
+  if (!providerId) throw new Error(`No provider ID configured for wallet onchain ${chain}`)
+  return providerId
+}

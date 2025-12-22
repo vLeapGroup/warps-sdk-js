@@ -1,5 +1,12 @@
 import { Transaction } from '@multiversx/sdk-core'
-import { WalletProvider, WalletProviderFactory, WarpChainInfo, WarpClientConfig, WarpWalletDetails } from '@vleap/warps'
+import {
+  getWarpWalletProviderIdFromConfigOrFail,
+  WalletProvider,
+  WalletProviderFactory,
+  WarpChainInfo,
+  WarpClientConfig,
+  WarpWalletDetails,
+} from '@vleap/warps'
 
 export interface GaupaWalletProviderConfig {
   apiKey: string
@@ -19,22 +26,29 @@ export class GaupaWalletProvider implements WalletProvider {
   ) {}
 
   async getAddress(): Promise<string | null> {
-    // const providerId = getWarpWalletProviderIdFromConfig(this.config, 'multiversx')
+    const _providerId = getWarpWalletProviderIdFromConfigOrFail(this.config, this.chain.name)
+
     // TODO: Implement
     throw new Error('GaupaWalletProvider: getAddress not yet implemented')
   }
 
   async getPublicKey(): Promise<string | null> {
+    const _providerId = getWarpWalletProviderIdFromConfigOrFail(this.config, this.chain.name)
+
     // TODO: Implement
     throw new Error('GaupaWalletProvider: getPublicKey not yet implemented')
   }
 
   async signTransaction(tx: Transaction): Promise<Transaction> {
+    const _providerId = getWarpWalletProviderIdFromConfigOrFail(this.config, this.chain.name)
+
     // TODO: Implement
     throw new Error('GaupaWalletProvider: signTransaction not yet implemented')
   }
 
   async signMessage(message: string): Promise<string> {
+    const _providerId = getWarpWalletProviderIdFromConfigOrFail(this.config, this.chain.name)
+
     // TODO: Implement
     throw new Error('GaupaWalletProvider: signMessage not yet implemented')
   }
