@@ -1,4 +1,4 @@
-import { AdapterFactory, WarpChainAsset, WarpChainName } from '@vleap/warps'
+import { ChainAdapterFactory, WarpChainAsset, WarpChainName } from '@vleap/warps'
 import { createEvmAdapter } from './common'
 
 export const NativeTokenBase: WarpChainAsset = {
@@ -10,7 +10,7 @@ export const NativeTokenBase: WarpChainAsset = {
   logoUrl: 'https://joai.ai/images/tokens/eth.svg',
 }
 
-export const getBaseAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Base, {
+export const BaseAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainName.Base, {
   mainnet: {
     name: WarpChainName.Base,
     displayName: 'Base',

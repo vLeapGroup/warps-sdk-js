@@ -6,7 +6,13 @@ export default defineConfig({
   outExtension: ({ format }) => ({
     js: format === 'esm' ? '.mjs' : '.js',
   }),
-  dts: true,
+  dts: {
+    compilerOptions: {
+      skipLibCheck: true,
+      moduleResolution: 'bundler',
+    },
+  },
+  tsconfig: './tsconfig.json',
   splitting: false,
   sourcemap: true,
   clean: true,

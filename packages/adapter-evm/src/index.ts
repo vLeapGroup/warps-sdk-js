@@ -1,6 +1,6 @@
 export * from './chains'
 export * from './constants'
-export * from './providers'
+export * from './adapters'
 export * from './tokens'
 export * from './types'
 export * from './WarpEvmDataLoader'

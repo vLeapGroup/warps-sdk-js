@@ -1,4 +1,4 @@
-import { AdapterFactory, WarpChainAsset, WarpChainName } from '@vleap/warps'
+import { ChainAdapterFactory, WarpChainAsset, WarpChainName } from '@vleap/warps'
 import { createEvmAdapter } from './common'
 
 export const NativeTokenArb: WarpChainAsset = {
@@ -10,7 +10,7 @@ export const NativeTokenArb: WarpChainAsset = {
   logoUrl: 'https://joai.ai/images/tokens/arb.svg',
 }
 
-export const getArbitrumAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Arbitrum, {
+export const ArbitrumAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainName.Arbitrum, {
   mainnet: {
     name: WarpChainName.Arbitrum,
     displayName: 'Arbitrum',

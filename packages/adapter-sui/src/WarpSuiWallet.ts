@@ -9,10 +9,6 @@ import {
   WarpClientConfig,
   WarpWalletDetails,
 } from '@vleap/warps'
-import {
-  getWarpWalletMnemonicFromConfig,
-  getWarpWalletPrivateKeyFromConfig,
-} from '@vleap/warps'
 import { getConfiguredSuiClient } from './helpers'
 import { MnemonicWalletProvider } from './providers/MnemonicWalletProvider'
 import { PrivateKeyWalletProvider } from './providers/SuiWalletProvider'
@@ -33,13 +29,17 @@ export class WarpSuiWallet implements AdapterWarpWallet {
   }
 
   private createProvider(): WalletProvider | null {
-    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
-    if (privateKey) return new PrivateKeyWalletProvider(this.config, this.chain)
+    const wallet = this.config.user?.wallets?.[this.chain.name]
+    if (!wallet) return null
+    if (typeof wallet === 'string') throw new Error(`Wallet can not be used for signing: ${wallet}`)
 
-    const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
-    if (mnemonic) return new MnemonicWalletProvider(this.config, this.chain)
+    const customWalletProviders = this.config.walletProviders?.[this.chain.name]
+    const providerFactory = customWalletProviders?.[wallet.provider]
+    if (providerFactory) return providerFactory(this.config, this.chain)
 
-    return null
+    if (wallet.provider === 'privateKey') return new PrivateKeyWalletProvider(this.config, this.chain)
+    if (wallet.provider === 'mnemonic') return new MnemonicWalletProvider(this.config, this.chain)
+    throw new Error(`Unsupported wallet provider for ${this.chain.name}: ${wallet.provider}`)
   }
 
   private initializeCache() {

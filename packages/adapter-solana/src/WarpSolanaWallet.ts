@@ -1,13 +1,9 @@
-import * as bip39 from '@scure/bip39'
-import { wordlist } from '@scure/bip39/wordlists/english.js'
+/// <reference path="./types.d.ts" />
 import { createKeyPairSignerFromBytes } from '@solana/kit'
 import { Connection, Keypair, Transaction, VersionedTransaction } from '@solana/web3.js'
-import { registerExactSvmScheme } from '@x402/svm/exact/client'
 import {
   AdapterWarpWallet,
   getProviderConfig,
-  getWarpWalletMnemonicFromConfig,
-  getWarpWalletPrivateKeyFromConfig,
   initializeWalletCache,
   WalletProvider,
   WarpAdapterGenericTransaction,
@@ -15,7 +11,7 @@ import {
   WarpClientConfig,
   WarpWalletDetails,
 } from '@vleap/warps'
-import bs58 from 'bs58'
+import { registerExactSvmScheme } from '@x402/svm/exact/client'
 import { SupportedX402SolanaNetworks } from './constants'
 import { MnemonicWalletProvider } from './providers/MnemonicWalletProvider'
 import { PrivateKeyWalletProvider } from './providers/PrivateKeyWalletProvider'
@@ -37,13 +33,17 @@ export class WarpSolanaWallet implements AdapterWarpWallet {
   }
 
   private createProvider(): WalletProvider | null {
-    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
-    if (privateKey) return new PrivateKeyWalletProvider(this.config, this.chain, this.connection)
+    const wallet = this.config.user?.wallets?.[this.chain.name]
+    if (!wallet) return null
+    if (typeof wallet === 'string') throw new Error(`Wallet can not be used for signing: ${wallet}`)
 
-    const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
-    if (mnemonic) return new MnemonicWalletProvider(this.config, this.chain, this.connection)
+    const customWalletProviders = this.config.walletProviders?.[this.chain.name]
+    const providerFactory = customWalletProviders?.[wallet.provider]
+    if (providerFactory) return providerFactory(this.config, this.chain)
 
-    return null
+    if (wallet.provider === 'privateKey') return new PrivateKeyWalletProvider(this.config, this.chain, this.connection)
+    if (wallet.provider === 'mnemonic') return new MnemonicWalletProvider(this.config, this.chain, this.connection)
+    throw new Error(`Unsupported wallet provider for ${this.chain.name}: ${wallet.provider}`)
   }
 
   private initializeCache() {
@@ -150,5 +150,4 @@ export class WarpSolanaWallet implements AdapterWarpWallet {
 
     return handlers
   }
-
 }

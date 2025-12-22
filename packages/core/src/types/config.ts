@@ -8,6 +8,7 @@ import { WarpActionExecutionResult } from './output'
 import { WarpRegistryConfigInfo, WarpRegistryInfo } from './registry'
 import { ClientIndexConfig } from './search'
 import { ClientTransformConfig } from './transform'
+import { WalletProviderFactory } from './wallet-provider'
 import {
   BaseWarpActionInputType,
   Warp,
@@ -24,9 +25,11 @@ import {
 export type WarpWalletProvider = 'mnemonic' | 'privateKey' | 'privy' | 'gaupa'
 
 export type WarpWalletDetails = {
+  provider: WarpWalletProvider
   address: string
   mnemonic?: string | null
   privateKey?: string | null
+  providerId?: string | null
 }
 
 export type WarpUserWallets = Record<WarpChain, WarpWalletDetails | string | null>
@@ -51,6 +54,8 @@ export type WarpClientConfig = {
     explorers?: Record<WarpChain, WarpExplorerName>
     providers?: Record<WarpChain, WarpProviderPreferences>
   }
+  walletProviders?: Record<WarpChain, Partial<Record<WarpWalletProvider, WalletProviderFactory>>>
+  fallback?: WarpChain
   schema?: {
     warp?: string
     brand?: string
@@ -67,7 +72,7 @@ export type WarpCacheConfig = {
   ttl?: number
 }
 
-export type AdapterFactory = (config: WarpClientConfig, fallback?: ChainAdapter) => ChainAdapter
+export type ChainAdapterFactory = (config: WarpClientConfig, fallback?: ChainAdapter | undefined) => ChainAdapter
 
 export type ChainAdapter = {
   chainInfo: WarpChainInfo

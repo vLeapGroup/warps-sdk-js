@@ -1,4 +1,4 @@
-import { AdapterFactory, WarpChain, WarpChainAsset, WarpChainName } from '@vleap/warps'
+import { ChainAdapterFactory, WarpChain, WarpChainAsset, WarpChainName } from '@vleap/warps'
 import { createNearAdapter } from './common'
 
 export const NativeTokenNear: WarpChainAsset = {
@@ -10,7 +10,7 @@ export const NativeTokenNear: WarpChainAsset = {
   logoUrl: 'https://joai.ai/images/tokens/near-black.svg',
 }
 
-export const getNearAdapter: AdapterFactory = createNearAdapter('near' as WarpChain, {
+export const NearAdapter: ChainAdapterFactory = createNearAdapter('near' as WarpChain, {
   mainnet: {
     name: 'near' as WarpChainName,
     displayName: 'NEAR Mainnet',

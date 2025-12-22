@@ -17,7 +17,10 @@ describe('WarpSolanaWallet', () => {
       env: 'testnet',
       user: {
         wallets: {
-          [chain.name]: { privateKey },
+          [chain.name]: {
+            provider: 'privateKey',
+            privateKey,
+          },
         },
       },
     }

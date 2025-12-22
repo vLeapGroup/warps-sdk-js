@@ -16,7 +16,10 @@ describe('WarpSuiWallet', () => {
       env: 'testnet',
       user: {
         wallets: {
-          [chain.name]: '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+          [chain.name]: {
+            provider: 'privateKey',
+            privateKey: '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+          },
         },
       },
     }

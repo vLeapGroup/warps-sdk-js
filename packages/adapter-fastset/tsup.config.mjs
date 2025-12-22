@@ -10,5 +10,6 @@ export default defineConfig({
   splitting: false,
   sourcemap: true,
   clean: true,
-  noExternal: ['@noble/hashes', '@mysten/bcs', '@noble/ed25519'],
+  noExternal: ['@noble/hashes', '@mysten/bcs'],
+  external: ['@noble/ed25519', '@noble/utils', '@noble/abstract'],
 })

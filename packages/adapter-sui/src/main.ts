@@ -1,6 +1,6 @@
 import {
-  Adapter,
-  AdapterFactory,
+  ChainAdapter,
+  ChainAdapterFactory,
   WarpChain,
   WarpChainAsset,
   WarpChainEnv,
@@ -28,8 +28,8 @@ export const NativeTokenSui: WarpChainAsset = {
   logoUrl: 'https://assets.coingecko.com/coins/images/26375/standard/sui-ocean-square.png?1727791290',
 }
 
-function createSuiAdapter(chainName: WarpChain, chainInfos: Record<WarpChainEnv, WarpChainInfo>): AdapterFactory {
-  return (config: WarpClientConfig, fallback?: Adapter) => {
+function createSuiAdapter(chainName: WarpChain, chainInfos: Record<WarpChainEnv, WarpChainInfo>): ChainAdapterFactory {
+  return (config: WarpClientConfig, fallback?: ChainAdapter) => {
     const chainInfo = chainInfos[config.env]
     if (!chainInfo) throw new Error(`SuiAdapter: chain info not found for chain ${chainName}`)
 
@@ -49,7 +49,7 @@ function createSuiAdapter(chainName: WarpChain, chainInfos: Record<WarpChainEnv,
   }
 }
 
-export const getSuiAdapter: AdapterFactory = createSuiAdapter(WarpChainName.Sui, {
+export const SuiAdapter: ChainAdapterFactory = createSuiAdapter(WarpChainName.Sui, {
   mainnet: {
     name: WarpChainName.Sui,
     displayName: 'Sui',

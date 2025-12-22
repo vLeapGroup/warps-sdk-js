@@ -35,7 +35,11 @@ describe('WarpMultiversxWallet', () => {
         cache: { type: 'memory' },
         user: {
           wallets: {
-            multiversx: '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+            multiversx: {
+              provider: 'privateKey',
+              address: 'erd1test',
+              privateKey: '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+            },
           },
         },
       },

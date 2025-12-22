@@ -1,43 +1,49 @@
-import { WalletProvider } from '@vleap/warps'
 import { Transaction } from '@multiversx/sdk-core'
+import { WalletProvider, WalletProviderFactory, WarpChainInfo, WarpClientConfig, WarpWalletDetails } from '@vleap/warps'
 
 export interface GaupaWalletProviderConfig {
-  // Configuration for Gaupa SDK initialization
-  // TODO: Define actual configuration interface once Gaupa SDK is available
-  config?: any
+  apiKey: string
+}
+
+export const createGaupaWalletProvider = (gaupaConfig: GaupaWalletProviderConfig): WalletProviderFactory => {
+  return (config: WarpClientConfig, chain: WarpChainInfo) => {
+    return new GaupaWalletProvider(config, chain, gaupaConfig)
+  }
 }
 
 export class GaupaWalletProvider implements WalletProvider {
   constructor(
-    private config: GaupaWalletProviderConfig
+    private readonly config: WarpClientConfig,
+    private readonly chain: WarpChainInfo,
+    private readonly gaupaConfig: GaupaWalletProviderConfig
   ) {}
 
   async getAddress(): Promise<string | null> {
-    // TODO: Implement getAddress using actual Gaupa SDK
-    // Gaupa is currently in private beta - implementation pending
-    throw new Error('GaupaWalletProvider: getAddress not yet implemented - Gaupa SDK in private beta')
+    // const providerId = getWarpWalletProviderIdFromConfig(this.config, 'multiversx')
+    // TODO: Implement
+    throw new Error('GaupaWalletProvider: getAddress not yet implemented')
   }
 
   async getPublicKey(): Promise<string | null> {
-    // TODO: Implement getPublicKey using actual Gaupa SDK
-    // Gaupa is currently in private beta - implementation pending
-    throw new Error('GaupaWalletProvider: getPublicKey not yet implemented - Gaupa SDK in private beta')
+    // TODO: Implement
+    throw new Error('GaupaWalletProvider: getPublicKey not yet implemented')
   }
 
   async signTransaction(tx: Transaction): Promise<Transaction> {
-    // TODO: Implement signTransaction using actual Gaupa SDK
-    // Gaupa is currently in private beta - implementation pending
-    // Expected flow:
-    // 1. Initialize Gaupa client with config
-    // 2. Call Gaupa SDK to sign transaction
-    // 3. Apply signature to transaction (convert hex string to Uint8Array)
-    // 4. Return signed transaction
-    throw new Error('GaupaWalletProvider: signTransaction not yet implemented - Gaupa SDK in private beta')
+    // TODO: Implement
+    throw new Error('GaupaWalletProvider: signTransaction not yet implemented')
   }
 
   async signMessage(message: string): Promise<string> {
-    // TODO: Implement signMessage using actual Gaupa SDK
-    // Gaupa is currently in private beta - implementation pending
-    throw new Error('GaupaWalletProvider: signMessage not yet implemented - Gaupa SDK in private beta')
+    // TODO: Implement
+    throw new Error('GaupaWalletProvider: signMessage not yet implemented')
+  }
+
+  create(mnemonic: string): WarpWalletDetails {
+    throw new Error('GaupaWalletProvider: create not yet implemented - Gaupa SDK in private beta')
+  }
+
+  generate(): WarpWalletDetails {
+    throw new Error('GaupaWalletProvider: generate not yet implemented - Gaupa SDK in private beta')
   }
 }

@@ -21,7 +21,7 @@ const chainInfo: WarpChainInfo = {
   nativeToken: NativeTokenVibe,
 }
 
-export const getVibechainAdapter = createMultiversxAdapter(WarpChainName.Vibechain, {
+export const VibechainAdapter = createMultiversxAdapter(WarpChainName.Vibechain, {
   mainnet: chainInfo,
   testnet: chainInfo,
   devnet: chainInfo,

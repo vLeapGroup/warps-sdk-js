@@ -6,7 +6,23 @@ import { WarpEvmDataLoader } from './WarpEvmDataLoader'
 jest.mock('ethers')
 
 // Mock UniswapService
-jest.mock('./providers/UniswapService')
+jest.mock('./providers/UniswapService', () => {
+  const mockGetTokenMetadata = jest.fn()
+  const mockFindToken = jest.fn()
+  const mockGetTokenList = jest.fn()
+  const mockGetBridgeInfo = jest.fn()
+
+  class MockUniswapService {
+    getTokenMetadata = mockGetTokenMetadata
+    findToken = mockFindToken
+    getTokenList = mockGetTokenList
+    getBridgeInfo = mockGetBridgeInfo
+  }
+
+  return {
+    UniswapService: jest.fn().mockImplementation(() => new MockUniswapService()),
+  }
+})
 
 describe('WarpEvmDataLoader', () => {
   const mockConfig: WarpClientConfig = {
@@ -36,7 +52,7 @@ describe('WarpEvmDataLoader', () => {
   let mockContract: any
   let mockUniswapService: any
 
-  const UniswapTokenListServiceMock = require('./providers/UniswapService').UniswapService
+  const { UniswapService: UniswapServiceMock } = require('./providers/UniswapService')
 
   beforeEach(() => {
     // Mock provider
@@ -73,7 +89,7 @@ describe('WarpEvmDataLoader', () => {
       getTokenMetadataByAddress: jest.fn().mockResolvedValue(null),
       getBridgeInfoByAddress: jest.fn().mockResolvedValue(null),
     }
-    ;(UniswapTokenListServiceMock as jest.Mock).mockImplementation((cache: any) => mockUniswapService)
+    ;(UniswapServiceMock as jest.Mock).mockImplementation(() => mockUniswapService)
 
     dataLoader = new WarpEvmDataLoader(mockConfig, mockChainInfo)
   })

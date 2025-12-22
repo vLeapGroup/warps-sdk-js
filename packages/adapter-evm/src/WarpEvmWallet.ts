@@ -1,8 +1,6 @@
 import {
   AdapterWarpWallet,
   getProviderConfig,
-  getWarpWalletMnemonicFromConfig,
-  getWarpWalletPrivateKeyFromConfig,
   initializeWalletCache,
   WalletProvider,
   WarpAdapterGenericTransaction,
@@ -34,13 +32,17 @@ export class WarpEvmWallet implements AdapterWarpWallet {
   }
 
   private createProvider(): WalletProvider | null {
-    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
-    if (privateKey) return new PrivateKeyWalletProvider(this.config, this.chain, this.provider)
+    const wallet = this.config.user?.wallets?.[this.chain.name]
+    if (!wallet) return null
+    if (typeof wallet === 'string') throw new Error(`Wallet can not be used for signing: ${wallet}`)
 
-    const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
-    if (mnemonic) return new MnemonicWalletProvider(this.config, this.chain, this.provider)
+    const customWalletProviders = this.config.walletProviders?.[this.chain.name]
+    const providerFactory = customWalletProviders?.[wallet.provider]
+    if (providerFactory) return providerFactory(this.config, this.chain)
 
-    return null
+    if (wallet.provider === 'privateKey') return new PrivateKeyWalletProvider(this.config, this.chain, this.provider)
+    if (wallet.provider === 'mnemonic') return new MnemonicWalletProvider(this.config, this.chain, this.provider)
+    throw new Error(`Unsupported wallet provider for ${this.chain.name}: ${wallet.provider}`)
   }
 
   private initializeCache() {

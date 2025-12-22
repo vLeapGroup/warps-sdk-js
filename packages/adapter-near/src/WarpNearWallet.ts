@@ -1,8 +1,6 @@
 import {
   AdapterWarpWallet,
   getProviderConfig,
-  getWarpWalletMnemonicFromConfig,
-  getWarpWalletPrivateKeyFromConfig,
   initializeWalletCache,
   WalletProvider,
   WarpAdapterGenericTransaction,
@@ -10,9 +8,7 @@ import {
   WarpClientConfig,
   WarpWalletDetails,
 } from '@vleap/warps'
-import { keyToImplicitAddress } from '@near-js/crypto'
-import bs58 from 'bs58'
-import { connect, KeyPair, keyStores } from 'near-api-js'
+import { connect, keyStores } from 'near-api-js'
 import { MnemonicWalletProvider } from './providers/MnemonicWalletProvider'
 import { PrivateKeyWalletProvider } from './providers/PrivateKeyWalletProvider'
 
@@ -38,13 +34,17 @@ export class WarpNearWallet implements AdapterWarpWallet {
   }
 
   private createProvider(): WalletProvider | null {
-    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
-    if (privateKey) return new PrivateKeyWalletProvider(this.config, this.chain)
+    const wallet = this.config.user?.wallets?.[this.chain.name]
+    if (!wallet) return null
+    if (typeof wallet === 'string') throw new Error(`Wallet can not be used for signing: ${wallet}`)
 
-    const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
-    if (mnemonic) return new MnemonicWalletProvider(this.config, this.chain)
+    const customWalletProviders = this.config.walletProviders?.[this.chain.name]
+    const providerFactory = customWalletProviders?.[wallet.provider]
+    if (providerFactory) return providerFactory(this.config, this.chain)
 
-    return null
+    if (wallet.provider === 'privateKey') return new PrivateKeyWalletProvider(this.config, this.chain)
+    if (wallet.provider === 'mnemonic') return new MnemonicWalletProvider(this.config, this.chain)
+    throw new Error(`Unsupported wallet provider for ${this.chain.name}: ${wallet.provider}`)
   }
 
   private initializeCache() {

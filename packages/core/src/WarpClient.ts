@@ -10,6 +10,7 @@ import {
   AdapterWarpSerializer,
   AdapterWarpWallet,
   ChainAdapter,
+  ChainAdapterFactory,
   Warp,
   WarpActionExecutionResult,
   WarpAdapterGenericRemoteTransaction,
@@ -28,25 +29,29 @@ import { WarpLinkBuilder } from './WarpLinkBuilder'
 import { DetectionResult, WarpLinkDetecter } from './WarpLinkDetecter'
 
 type WarpClientOptions = {
-  chains: ChainAdapter[]
+  chains: ChainAdapterFactory[]
 }
 
 export class WarpClient {
+  private readonly chains: ChainAdapter[]
+
   constructor(
     private readonly config: WarpClientConfig,
     private readonly options: WarpClientOptions
-  ) {}
+  ) {
+    this.chains = options.chains.map((factory) => factory(this.config))
+  }
 
   getConfig(): WarpClientConfig {
     return this.config
   }
 
   createExecutor(handlers?: ExecutionHandlers): WarpExecutor {
-    return new WarpExecutor(this.config, this.options.chains, handlers)
+    return new WarpExecutor(this.config, this.chains, handlers)
   }
 
   async detectWarp(urlOrId: string, cache?: WarpCacheConfig): Promise<DetectionResult> {
-    const detecter = new WarpLinkDetecter(this.config, this.options.chains)
+    const detecter = new WarpLinkDetecter(this.config, this.chains)
     return detecter.detect(urlOrId, cache)
   }
 
@@ -92,17 +97,17 @@ export class WarpClient {
   }
 
   async createInscriptionTransaction(chain: WarpChain, warp: Warp): Promise<WarpAdapterGenericTransaction> {
-    return await findWarpAdapterForChain(chain, this.options.chains).builder().createInscriptionTransaction(warp)
+    return await findWarpAdapterForChain(chain, this.chains).builder().createInscriptionTransaction(warp)
   }
 
   async createFromTransaction(chain: WarpChain, tx: WarpAdapterGenericRemoteTransaction, validate = false): Promise<Warp> {
-    return findWarpAdapterForChain(chain, this.options.chains).builder().createFromTransaction(tx, validate)
+    return findWarpAdapterForChain(chain, this.chains).builder().createFromTransaction(tx, validate)
   }
 
   async createFromTransactionHash(hash: string, cache?: WarpCacheConfig): Promise<Warp | null> {
     const identifierInfo = getWarpInfoFromIdentifier(hash)
     if (!identifierInfo) throw new Error('WarpClient: createFromTransactionHash - invalid hash')
-    const adapter = findWarpAdapterForChain(identifierInfo.chain, this.options.chains)
+    const adapter = findWarpAdapterForChain(identifierInfo.chain, this.chains)
     return adapter.builder().createFromTransactionHash(hash, cache)
   }
 
@@ -110,7 +115,7 @@ export class WarpClient {
     const walletAddress = getWarpWalletAddressFromConfig(this.config, chain)
     if (!walletAddress) throw new Error(`No wallet configured for chain ${chain}`)
 
-    const adapter = findWarpAdapterForChain(chain, this.options.chains)
+    const adapter = findWarpAdapterForChain(chain, this.chains)
     return adapter.wallet.signMessage(message)
   }
 
@@ -121,29 +126,29 @@ export class WarpClient {
   }
 
   getExplorer(chain: WarpChain): AdapterWarpExplorer {
-    return findWarpAdapterForChain(chain, this.options.chains).explorer
+    return findWarpAdapterForChain(chain, this.chains).explorer
   }
 
   getOutput(chain: WarpChain): AdapterWarpOutput {
-    return findWarpAdapterForChain(chain, this.options.chains).output
+    return findWarpAdapterForChain(chain, this.chains).output
   }
 
   async getRegistry(chain: WarpChain): Promise<AdapterWarpRegistry> {
-    const registry = findWarpAdapterForChain(chain, this.options.chains).registry
+    const registry = findWarpAdapterForChain(chain, this.chains).registry
     await registry.init()
     return registry
   }
 
   getDataLoader(chain: WarpChain): AdapterWarpDataLoader {
-    return findWarpAdapterForChain(chain, this.options.chains).dataLoader
+    return findWarpAdapterForChain(chain, this.chains).dataLoader
   }
 
   getWallet(chain: WarpChain): AdapterWarpWallet {
-    return findWarpAdapterForChain(chain, this.options.chains).wallet
+    return findWarpAdapterForChain(chain, this.chains).wallet
   }
 
   get factory(): WarpFactory {
-    return new WarpFactory(this.config, this.options.chains)
+    return new WarpFactory(this.config, this.chains)
   }
 
   get index(): WarpIndex {
@@ -151,23 +156,23 @@ export class WarpClient {
   }
 
   get linkBuilder(): WarpLinkBuilder {
-    return new WarpLinkBuilder(this.config, this.options.chains)
+    return new WarpLinkBuilder(this.config, this.chains)
   }
 
   createBuilder(chain: WarpChain) {
-    return findWarpAdapterForChain(chain, this.options.chains).builder()
+    return findWarpAdapterForChain(chain, this.chains).builder()
   }
 
   createAbiBuilder(chain: WarpChain) {
-    return findWarpAdapterForChain(chain, this.options.chains).abiBuilder()
+    return findWarpAdapterForChain(chain, this.chains).abiBuilder()
   }
 
   createBrandBuilder(chain: WarpChain) {
-    return findWarpAdapterForChain(chain, this.options.chains).brandBuilder()
+    return findWarpAdapterForChain(chain, this.chains).brandBuilder()
   }
 
   createSerializer(chain: WarpChain): AdapterWarpSerializer {
-    return findWarpAdapterForChain(chain, this.options.chains).serializer
+    return findWarpAdapterForChain(chain, this.chains).serializer
   }
 
   resolveText(warpText: WarpText): string {

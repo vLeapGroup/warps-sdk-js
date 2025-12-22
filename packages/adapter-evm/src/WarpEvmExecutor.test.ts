@@ -19,7 +19,11 @@ describe('WarpEvmExecutor', () => {
       env: 'testnet',
       user: {
         wallets: {
-          ethereum: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+          ethereum: {
+            provider: 'privateKey',
+            address: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+            privateKey: '0x1234567890123456789012345678901234567890123456789012345678901234',
+          },
         },
       },
     } as WarpClientConfig

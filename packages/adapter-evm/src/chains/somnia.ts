@@ -1,4 +1,4 @@
-import { AdapterFactory, WarpChainAsset, WarpChainName } from '@vleap/warps'
+import { ChainAdapterFactory, WarpChainAsset, WarpChainName } from '@vleap/warps'
 import { createEvmAdapter } from './common'
 
 export const NativeTokenSomi: WarpChainAsset = {
@@ -19,7 +19,7 @@ export const NativeTokenStt: WarpChainAsset = {
   logoUrl: 'https://assets.coingecko.com/coins/images/68061/standard/somniacg.png?1754641117',
 }
 
-export const getSomniaAdapter: AdapterFactory = createEvmAdapter(WarpChainName.Somnia, {
+export const SomniaAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainName.Somnia, {
   mainnet: {
     name: WarpChainName.Somnia,
     displayName: 'Somnia Mainnet',

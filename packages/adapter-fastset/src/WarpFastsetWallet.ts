@@ -67,14 +67,14 @@ export class WarpFastsetWallet implements AdapterWarpWallet {
     const privateKey = seed.slice(0, 32) // Use first 32 bytes of seed as private key
     const publicKey = ed.getPublicKey(privateKey)
     const address = FastsetClient.encodeBech32Address(publicKey)
-    return { address, privateKey: uint8ArrayToHex(privateKey), mnemonic }
+    return { provider: 'privateKey', address, privateKey: uint8ArrayToHex(privateKey), mnemonic }
   }
 
   generate(): WarpWalletDetails {
     const privateKey = ed.utils.randomSecretKey()
     const publicKey = ed.getPublicKey(privateKey)
     const address = FastsetClient.encodeBech32Address(publicKey)
-    return { address, privateKey: uint8ArrayToHex(privateKey), mnemonic: null }
+    return { provider: 'privateKey', address, privateKey: uint8ArrayToHex(privateKey), mnemonic: null }
   }
 
   getAddress(): string | null {

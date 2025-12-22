@@ -1,6 +1,6 @@
 import {
-  Adapter,
-  AdapterFactory,
+  ChainAdapter,
+  ChainAdapterFactory,
   WarpChain,
   WarpChainAsset,
   WarpChainEnv,
@@ -24,11 +24,10 @@ export const NativeTokenSet: WarpChainAsset = {
   logoUrl: 'https://joai.ai/images/tokens/set-black.svg',
 }
 
-function createFastsetAdapter(chainName: WarpChain, chainInfos: Record<WarpChainEnv, WarpChainInfo>): AdapterFactory {
-  return (config: WarpClientConfig, fallback?: Adapter) => {
+function createFastsetAdapter(chainName: WarpChain, chainInfos: Record<WarpChainEnv, WarpChainInfo>): ChainAdapterFactory {
+  return (config: WarpClientConfig, fallback?: ChainAdapter) => {
     const chainInfo = chainInfos[config.env]
     if (!chainInfo) throw new Error(`FastsetAdapter: chain info not found for chain ${chainName}`)
-
     if (!fallback) throw new Error('Fastset adapter requires a fallback adapter')
 
     return {
@@ -47,7 +46,7 @@ function createFastsetAdapter(chainName: WarpChain, chainInfos: Record<WarpChain
   }
 }
 
-export const getFastsetAdapter: AdapterFactory = createFastsetAdapter(WarpChainName.Fastset, {
+export const FastsetAdapter: ChainAdapterFactory = createFastsetAdapter(WarpChainName.Fastset, {
   mainnet: {
     name: WarpChainName.Fastset,
     displayName: 'FastSet',

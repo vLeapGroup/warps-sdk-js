@@ -1,4 +1,4 @@
-import { AdapterFactory, WarpChainAsset, WarpChainName } from '@vleap/warps'
+import { ChainAdapterFactory, WarpChainAsset, WarpChainName } from '@vleap/warps'
 import { createSolanaAdapter } from './common'
 
 export const NativeTokenSol: WarpChainAsset = {
@@ -10,7 +10,7 @@ export const NativeTokenSol: WarpChainAsset = {
   logoUrl: 'https://joai.ai/images/tokens/sol.svg',
 }
 
-export const getSolanaAdapter: AdapterFactory = createSolanaAdapter(WarpChainName.Solana, {
+export const SolanaAdapter: ChainAdapterFactory = createSolanaAdapter(WarpChainName.Solana, {
   mainnet: {
     name: WarpChainName.Solana,
     displayName: 'Solana Mainnet',

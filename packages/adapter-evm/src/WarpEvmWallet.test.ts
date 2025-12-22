@@ -16,9 +16,12 @@ describe('WarpEvmWallet', () => {
       env: 'testnet',
       user: {
         wallets: {
-          [chain.name]: privateKey
-        }
-      }
+          [chain.name]: {
+            provider: 'privateKey',
+            privateKey,
+          },
+        },
+      },
     }
     wallet = new WarpEvmWallet(config, chain)
   })

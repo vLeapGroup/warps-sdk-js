@@ -1,11 +1,12 @@
-import { WarpClient, WarpClientConfig } from '@vleap/warps'
+import { WarpClient, WarpClientConfig, withAdapter } from '@vleap/warps'
 import { getAllEvmAdapters } from '@vleap/warps-adapter-evm'
-import { getFastsetAdapter } from '@vleap/warps-adapter-fastset'
-import { getAllMultiversxAdapters, getMultiversxAdapter } from '@vleap/warps-adapter-multiversx'
-import { getNearAdapter } from '@vleap/warps-adapter-near'
-import { getSolanaAdapter } from '@vleap/warps-adapter-solana'
-import { getSuiAdapter } from '@vleap/warps-adapter-sui'
+import { FastsetAdapter } from '@vleap/warps-adapter-fastset'
+import { getAllMultiversxAdapters, MultiversxAdapter } from '@vleap/warps-adapter-multiversx'
+import { NearAdapter } from '@vleap/warps-adapter-near'
+import { SolanaAdapter } from '@vleap/warps-adapter-solana'
+import { SuiAdapter } from '@vleap/warps-adapter-sui'
 import { createNodeTransformRunner } from '@vleap/warps-vm-node'
+import { createGaupaWalletProvider } from '@vleap/warps-wallet-gaupa'
 import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
@@ -34,7 +35,21 @@ const runWarp = async (warpFile: string) => {
   const config: WarpClientConfig = {
     env: 'devnet',
     currentUrl: 'https://usewarp.to',
-    user: { wallets: allWallets },
+    user: {
+      wallets: {
+        ...allWallets,
+        multiversx: {
+          provider: 'gaupa',
+          address: '',
+          providerId: 'gaupa-demo',
+        },
+      },
+    },
+    walletProviders: {
+      multiversx: {
+        gaupa: createGaupaWalletProvider({ apiKey: 'demo-api-key' }),
+      },
+    },
     transform: { runner: createNodeTransformRunner() },
   }
 
@@ -42,12 +57,12 @@ const runWarp = async (warpFile: string) => {
 
   const client = new WarpClient(config, {
     chains: [
-      ...getAllMultiversxAdapters(config),
-      ...getAllEvmAdapters(config, getMultiversxAdapter(config)),
-      getSuiAdapter(config),
-      getSolanaAdapter(config, getMultiversxAdapter(config)),
-      getNearAdapter(config, getMultiversxAdapter(config)),
-      getFastsetAdapter(config, getMultiversxAdapter(config)),
+      ...getAllMultiversxAdapters(),
+      ...getAllEvmAdapters(MultiversxAdapter),
+      withAdapter(SuiAdapter, MultiversxAdapter),
+      withAdapter(SolanaAdapter, MultiversxAdapter),
+      withAdapter(NearAdapter, MultiversxAdapter),
+      withAdapter(FastsetAdapter, MultiversxAdapter),
     ],
   })
 

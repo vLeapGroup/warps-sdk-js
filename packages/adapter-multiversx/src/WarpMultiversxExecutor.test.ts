@@ -1,15 +1,16 @@
 import { Warp, WarpChainEnv, WarpClientConfig as WarpConfig, WarpTransferAction, WarpTypeRegistry } from '@vleap/warps'
 import { promises as fs, PathLike } from 'fs'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
-import { getMultiversxAdapter } from './chains'
+import { MultiversxAdapter } from './chains'
 
 const testConfig: WarpConfig = {
   env: 'devnet' as WarpChainEnv,
-  user: { wallets: { multiversx: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8' } },
+  user: { wallets: { multiversx: { provider: 'privateKey', address: 'erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8', privateKey: 'test' } } },
   currentUrl: 'https://example.com',
 }
 
-const testChainInfo = getMultiversxAdapter(testConfig).chainInfo
+const testAdapterFactory = MultiversxAdapter
+const testChainInfo = testAdapterFactory(testConfig).chainInfo
 
 describe('WarpMultiversxExecutor', () => {
   it('createTransactionForExecute - creates a native transfer with message', async () => {

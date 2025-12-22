@@ -10,7 +10,6 @@ import {
   WarpClientConfig,
   WarpWalletDetails,
 } from '@vleap/warps'
-import { getWalletFromConfigOrFail } from '@vleap/warps/src/helpers'
 import { getMultiversxEntrypoint } from './helpers/general'
 import { MnemonicWalletProvider } from './providers/MnemonicWalletProvider'
 import { PrivateKeyWalletProvider } from './providers/PrivateKeyWalletProvider'
@@ -33,8 +32,13 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
   }
 
   private createProvider(): WalletProvider | null {
-    const wallet = getWalletFromConfigOrFail(this.config, this.chain.name)
+    const wallet = this.config.user?.wallets?.[this.chain.name]
+    if (!wallet) return null
     if (typeof wallet === 'string') throw new Error(`Wallet can not be used for signing: ${wallet}`)
+
+    const customWalletProviders = this.config.walletProviders?.[this.chain.name]
+    const providerFactory = customWalletProviders?.[wallet.provider]
+    if (providerFactory) return providerFactory(this.config, this.chain)
 
     if (wallet.provider === 'privateKey') return new PrivateKeyWalletProvider(this.config, this.chain)
     if (wallet.provider === 'mnemonic') return new MnemonicWalletProvider(this.config, this.chain)
