@@ -7,7 +7,7 @@ import {
   findWarpAdapterForChain,
   getWarpInfoFromIdentifier,
 } from './helpers'
-import { Adapter, Warp, WarpBrand, WarpCacheConfig, WarpChain, WarpClientConfig, WarpRegistryInfo } from './types'
+import { ChainAdapter, Warp, WarpBrand, WarpCacheConfig, WarpChain, WarpClientConfig, WarpRegistryInfo } from './types'
 import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
 
@@ -33,7 +33,7 @@ export type DetectionResultFromHtml = {
 export class WarpLinkDetecter {
   constructor(
     private config: WarpClientConfig,
-    private adapters: Adapter[]
+    private adapters: ChainAdapter[]
   ) {}
 
   isValid(url: string): boolean {

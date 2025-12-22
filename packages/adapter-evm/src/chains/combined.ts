@@ -1,10 +1,10 @@
-import { Adapter, WarpChain, WarpChainName, WarpClientConfig } from '@vleap/warps'
+import { ChainAdapter, WarpChain, WarpChainName, WarpClientConfig } from '@vleap/warps'
 import { getArbitrumAdapter } from './arbitrum'
 import { getBaseAdapter } from './base'
 import { getEthereumAdapter } from './ethereum'
 import { getSomniaAdapter } from './somnia'
 
-export const getAllEvmAdapters = (config: WarpClientConfig, fallback?: Adapter): Adapter[] => [
+export const getAllEvmAdapters = (config: WarpClientConfig, fallback?: ChainAdapter): ChainAdapter[] => [
   getEthereumAdapter(config, fallback),
   getBaseAdapter(config, fallback),
   getArbitrumAdapter(config, fallback),

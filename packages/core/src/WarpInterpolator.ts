@@ -2,14 +2,14 @@ import { WarpConstants } from './constants'
 import { findWarpAdapterForChain } from './helpers'
 import { replacePlaceholders } from './helpers/general'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
-import { Adapter, InterpolationBag, ResolvedInput, Warp, WarpAction, WarpChain, WarpClientConfig } from './types'
+import { ChainAdapter, InterpolationBag, ResolvedInput, Warp, WarpAction, WarpChain, WarpClientConfig } from './types'
 import { WarpSerializer } from './WarpSerializer'
 
 export class WarpInterpolator {
   constructor(
     private config: WarpClientConfig,
-    private adapter: Adapter,
-    private adapters?: Adapter[]
+    private adapter: ChainAdapter,
+    private adapters?: ChainAdapter[]
   ) {}
 
   async apply(warp: Warp, meta: { envs?: Record<string, any>; queries?: Record<string, any> } = {}): Promise<Warp> {
@@ -110,7 +110,9 @@ export class WarpInterpolator {
 
   private applyGlobalsToText(text: string): string {
     const globalPlaceholders = Object.values(WarpConstants.Globals).map((g) => g.Placeholder)
-    const hasGlobalPlaceholder = globalPlaceholders.some((placeholder) => text.includes(`{{${placeholder}}}`) || text.includes(`{{${placeholder}:`))
+    const hasGlobalPlaceholder = globalPlaceholders.some(
+      (placeholder) => text.includes(`{{${placeholder}}}`) || text.includes(`{{${placeholder}:`)
+    )
     if (!hasGlobalPlaceholder) return text
 
     const rootBag: InterpolationBag = {
@@ -156,11 +158,7 @@ export class WarpInterpolator {
     })
   }
 
-  buildInputBag(
-    resolvedInputs: ResolvedInput[],
-    serializer: WarpSerializer,
-    primaryInputs?: ResolvedInput[]
-  ): Record<string, string> {
+  buildInputBag(resolvedInputs: ResolvedInput[], serializer: WarpSerializer, primaryInputs?: ResolvedInput[]): Record<string, string> {
     const bag: Record<string, string> = {}
 
     resolvedInputs.forEach((resolvedInput) => {

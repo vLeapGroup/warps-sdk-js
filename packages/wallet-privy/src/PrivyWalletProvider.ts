@@ -1,4 +1,4 @@
-import { WalletProvider } from '@vleap/warps'
+import { WalletProvider, WarpWalletDetails } from '@vleap/warps'
 
 export interface PrivyClient {
   getAddress(): Promise<string | null>
@@ -12,9 +12,7 @@ export interface PrivyWalletProviderConfig {
 }
 
 export class PrivyWalletProvider implements WalletProvider {
-  constructor(
-    private config: PrivyWalletProviderConfig
-  ) {}
+  constructor(private config: PrivyWalletProviderConfig) {}
 
   async getAddress(): Promise<string | null> {
     try {
@@ -45,5 +43,13 @@ export class PrivyWalletProvider implements WalletProvider {
     } catch (error) {
       throw new Error(`Failed to sign message: ${error}`)
     }
+  }
+
+  create(mnemonic: string): WarpWalletDetails {
+    throw new Error('PrivyWalletProvider: create not supported - Privy manages wallets externally')
+  }
+
+  generate(): WarpWalletDetails {
+    throw new Error('PrivyWalletProvider: generate not supported - Privy manages wallets externally')
   }
 }

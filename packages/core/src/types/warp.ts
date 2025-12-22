@@ -1,6 +1,6 @@
 import { WarpAlerts } from './alerts'
 import { WarpChainAsset, WarpChainAssetValue } from './chain'
-import { Adapter } from './config'
+import { ChainAdapter } from './config'
 import { WarpText } from './i18n'
 
 export type WarpChain = string
@@ -237,7 +237,7 @@ export type WarpContractVerification = {
 }
 
 export type WarpExecutable = {
-  adapter: Adapter
+  adapter: ChainAdapter
   chain: WarpChainInfo
   warp: Warp
   action: number

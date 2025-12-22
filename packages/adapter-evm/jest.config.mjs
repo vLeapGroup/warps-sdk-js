@@ -18,6 +18,6 @@ export default {
   },
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
-  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$|@x402/.*|viem/.*|@scure/.*|@noble/.*))'],
+  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$|@x402/.*|viem/.*|@scure/.*|@noble/.*|abitype/.*|ox/.*))'],
   testPathIgnorePatterns: ['<rootDir>/dist/'],
 }

@@ -15,7 +15,7 @@ import { createAuthHeaders, createAuthMessage } from './helpers/signing'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
 import { handleX402Payment } from './helpers/x402'
 import {
-  Adapter,
+  ChainAdapter,
   ResolvedInput,
   Warp,
   WarpAction,
@@ -30,7 +30,6 @@ import {
   WarpExecutable,
   WarpLinkAction,
   WarpMcpAction,
-  WarpMcpDestination,
 } from './types'
 import { WarpFactory } from './WarpFactory'
 import { WarpInterpolator } from './WarpInterpolator'
@@ -59,7 +58,7 @@ export class WarpExecutor {
 
   constructor(
     private config: WarpClientConfig,
-    private adapters: Adapter[],
+    private adapters: ChainAdapter[],
     private handlers?: ExecutionHandlers
   ) {
     this.handlers = handlers

@@ -1,5 +1,5 @@
 import { WarpConstants } from '../constants'
-import { Adapter, WarpClientConfig } from '../types'
+import { ChainAdapter, WarpClientConfig } from '../types'
 import { WarpExecutionNextInfo, WarpExecutionOutput } from '../types/output'
 import { Warp } from '../types/warp'
 import { WarpLinkBuilder } from '../WarpLinkBuilder'
@@ -10,7 +10,7 @@ const URL_PREFIX = 'https://'
 
 export const getNextInfo = (
   config: WarpClientConfig,
-  adapters: Adapter[],
+  adapters: ChainAdapter[],
   warp: Warp,
   actionIndex: number,
   output: WarpExecutionOutput
@@ -76,7 +76,7 @@ export const getNextInfo = (
   return nextLinks
 }
 
-const buildNextUrl = (adapters: Adapter[], identifier: string, config: WarpClientConfig): string => {
+const buildNextUrl = (adapters: ChainAdapter[], identifier: string, config: WarpClientConfig): string => {
   const [rawId, queryString] = identifier.split('?')
   const info = getWarpInfoFromIdentifier(rawId) || {
     chain: WarpConstants.IdentifierChainDefault,

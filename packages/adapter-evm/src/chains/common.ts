@@ -1,4 +1,4 @@
-import { Adapter, AdapterFactory, WarpChain, WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { ChainAdapter, AdapterFactory, WarpChain, WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 import { WarpEvmDataLoader } from '../WarpEvmDataLoader'
 import { WarpEvmExecutor } from '../WarpEvmExecutor'
 import { WarpEvmExplorer } from '../WarpEvmExplorer'
@@ -7,7 +7,7 @@ import { WarpEvmSerializer } from '../WarpEvmSerializer'
 import { WarpEvmWallet } from '../WarpEvmWallet'
 
 export const createEvmAdapter = (chainName: WarpChain, chainInfos: Record<WarpChainEnv, WarpChainInfo>): AdapterFactory => {
-  return (config: WarpClientConfig, fallback?: Adapter) => {
+  return (config: WarpClientConfig, fallback?: ChainAdapter) => {
     if (!fallback) throw new Error(`${chainName} adapter requires a fallback adapter`)
 
     return {

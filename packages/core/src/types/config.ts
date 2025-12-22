@@ -8,7 +8,6 @@ import { WarpActionExecutionResult } from './output'
 import { WarpRegistryConfigInfo, WarpRegistryInfo } from './registry'
 import { ClientIndexConfig } from './search'
 import { ClientTransformConfig } from './transform'
-import { WalletProviderFactory } from './wallet-provider'
 import {
   BaseWarpActionInputType,
   Warp,
@@ -62,16 +61,15 @@ export type WarpClientConfig = {
   interceptors?: {
     openLink?: (url: string) => Promise<void>
   }
-  walletProviders?: Record<WarpChain, WalletProviderFactory>
 }
 
 export type WarpCacheConfig = {
   ttl?: number
 }
 
-export type AdapterFactory = (config: WarpClientConfig, fallback?: Adapter) => Adapter
+export type AdapterFactory = (config: WarpClientConfig, fallback?: ChainAdapter) => ChainAdapter
 
-export type Adapter = {
+export type ChainAdapter = {
   chainInfo: WarpChainInfo
   builder: () => CombinedWarpBuilder
   executor: AdapterWarpExecutor

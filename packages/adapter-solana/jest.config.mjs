@@ -21,13 +21,14 @@ export default {
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
     '^@vleap/warps$': '<rootDir>/../core/src/index.ts',
-    '^@solana/kit$': '<rootDir>/../../node_modules/@solana/kit',
+    '^@solana/kit$': '<rootDir>/jest.setup.ts',
+    '^@x402/svm/exact/client$': '<rootDir>/jest.setup.ts',
     '^@scure/bip39/wordlists/(.*)\\.js$': '@scure/bip39/wordlists/$1.js',
     '^@scure/bip39/wordlists/(.*)$': '@scure/bip39/wordlists/$1',
   },
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts'],
   globalSetup: '<rootDir>/jest.globalsetup.ts',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
-  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$|@solana/.*|@scure/.*|@noble/.*))'],
+  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$|@solana/.*|@scure/.*|@noble/.*|@x402/.*))'],
   testPathIgnorePatterns: ['<rootDir>/dist/'],
 }

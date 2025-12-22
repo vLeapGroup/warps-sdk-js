@@ -2,6 +2,7 @@ import * as bip39 from '@scure/bip39'
 import { wordlist } from '@scure/bip39/wordlists/english.js'
 import { createKeyPairSignerFromBytes } from '@solana/kit'
 import { Connection, Keypair, Transaction, VersionedTransaction } from '@solana/web3.js'
+import { registerExactSvmScheme } from '@x402/svm/exact/client'
 import {
   AdapterWarpWallet,
   getProviderConfig,
@@ -14,7 +15,6 @@ import {
   WarpClientConfig,
   WarpWalletDetails,
 } from '@vleap/warps'
-import { registerExactSvmScheme } from '@x402/svm/exact/client'
 import bs58 from 'bs58'
 import { SupportedX402SolanaNetworks } from './constants'
 import { MnemonicWalletProvider } from './providers/MnemonicWalletProvider'

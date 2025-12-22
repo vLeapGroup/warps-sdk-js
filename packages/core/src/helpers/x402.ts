@@ -1,6 +1,6 @@
 import { x402Client } from '@x402/core/client'
 import { x402HTTPClient } from '@x402/core/http'
-import { Adapter } from '../types'
+import { ChainAdapter } from '../types'
 import { WarpLogger } from '../WarpLogger'
 
 export async function handleX402Payment(
@@ -8,7 +8,7 @@ export async function handleX402Payment(
   url: string,
   method: string,
   body: string | undefined,
-  adapters: Adapter[]
+  adapters: ChainAdapter[]
 ): Promise<Response> {
   const paymentHeaders = await processX402Payment(response, adapters)
   if (!paymentHeaders) return response
@@ -26,7 +26,7 @@ export async function handleX402Payment(
   return retryResponse
 }
 
-const processX402Payment = async (response: Response, adapters: Adapter[]): Promise<Record<string, string> | null> => {
+const processX402Payment = async (response: Response, adapters: ChainAdapter[]): Promise<Record<string, string> | null> => {
   const responseBody = await parseResponseBody(response)
   const client = new x402HTTPClient(new x402Client())
 

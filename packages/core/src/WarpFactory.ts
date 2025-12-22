@@ -3,7 +3,7 @@ import { findWarpAdapterForChain, getWarpActionByIndex, getWarpPrimaryAction, sh
 import { extractResolvedInputValues } from './helpers/payload'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
 import {
-  Adapter,
+  ChainAdapter,
   ResolvedInput,
   Warp,
   WarpAction,
@@ -32,7 +32,7 @@ export class WarpFactory {
 
   constructor(
     private config: WarpClientConfig,
-    private adapters: Adapter[]
+    private adapters: ChainAdapter[]
   ) {
     if (!config.currentUrl) throw new Error('WarpFactory: currentUrl config not set')
     this.url = new URL(config.currentUrl)

@@ -1,5 +1,5 @@
-import { WarpChainInfo } from './warp'
 import { WarpClientConfig, WarpWalletDetails } from './config'
+import { WarpChainInfo } from './warp'
 
 export interface WalletProvider {
   getAddress(): Promise<string | null>

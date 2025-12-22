@@ -1,4 +1,4 @@
-import { WarpClient } from '@vleap/warps'
+import { WarpClient, WarpClientConfig } from '@vleap/warps'
 import { getAllEvmAdapters } from '@vleap/warps-adapter-evm'
 import { getFastsetAdapter } from '@vleap/warps-adapter-fastset'
 import { getAllMultiversxAdapters, getMultiversxAdapter } from '@vleap/warps-adapter-multiversx'
@@ -31,7 +31,7 @@ const runWarp = async (warpFile: string) => {
   const allWallets = await loadAllWallets()
   console.log('🔑 All wallets loaded:', Object.keys(allWallets))
 
-  const config: any = {
+  const config: WarpClientConfig = {
     env: 'devnet',
     currentUrl: 'https://usewarp.to',
     user: { wallets: allWallets },
@@ -40,14 +40,16 @@ const runWarp = async (warpFile: string) => {
 
   console.log('🔑 Config:', config)
 
-  const client = new WarpClient(config, [
-    ...getAllMultiversxAdapters(config),
-    ...getAllEvmAdapters(config, getMultiversxAdapter(config)),
-    getSuiAdapter(config),
-    getSolanaAdapter(config, getMultiversxAdapter(config)),
-    getNearAdapter(config, getMultiversxAdapter(config)),
-    getFastsetAdapter(config, getMultiversxAdapter(config)),
-  ])
+  const client = new WarpClient(config, {
+    chains: [
+      ...getAllMultiversxAdapters(config),
+      ...getAllEvmAdapters(config, getMultiversxAdapter(config)),
+      getSuiAdapter(config),
+      getSolanaAdapter(config, getMultiversxAdapter(config)),
+      getNearAdapter(config, getMultiversxAdapter(config)),
+      getFastsetAdapter(config, getMultiversxAdapter(config)),
+    ],
+  })
 
   const address = client.getWallet(Chain).getAddress()
   const dataLoader = client.getDataLoader(Chain)

@@ -5,9 +5,5 @@ export function createDefaultWalletProvider(
   chain: WarpChainInfo,
   rpcProvider?: any
 ): WalletProvider | null {
-  if (config.walletProviders?.[chain.name]) {
-    return config.walletProviders[chain.name](config, chain)
-  }
-
   return null
 }

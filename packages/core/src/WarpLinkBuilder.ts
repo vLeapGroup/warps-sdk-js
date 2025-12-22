@@ -3,14 +3,14 @@ import { WarpConfig } from './config'
 import { WarpConstants } from './constants'
 import { findWarpAdapterForChain } from './helpers'
 import { extractIdentifierInfoFromUrl, getWarpInfoFromIdentifier } from './helpers/identifier'
-import { Adapter, WarpChain, WarpClientConfig, WarpIdentifierType } from './types'
+import { ChainAdapter, WarpChain, WarpClientConfig, WarpIdentifierType } from './types'
 
 // Example Link (Transaction Hash as ID): https://usewarp.to/to?warp=hash.<MYHASH>
 // Example Link (Alias as ID): https://usewarp.to/to?warp=alias.<MYALIAS>
 export class WarpLinkBuilder {
   constructor(
     private readonly config: WarpClientConfig,
-    private readonly adapters: Adapter[]
+    private readonly adapters: ChainAdapter[]
   ) {}
 
   isValid(url: string): boolean {
