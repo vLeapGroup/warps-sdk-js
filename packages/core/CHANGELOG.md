@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.176
+
+### Patch Changes
+
+- b7bd1d6: upgrade deps
+
 ## 3.0.0-beta.175
 
 ### Minor Changes

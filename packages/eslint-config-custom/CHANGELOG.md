@@ -1,5 +1,11 @@
 # eslint-config-custom
 
+## 0.0.1-beta.2
+
+### Patch Changes
+
+- b7bd1d6: upgrade deps
+
 ## 0.0.1-beta.1
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.0-beta.8
+
+### Patch Changes
+
+- b7bd1d6: upgrade deps
+- Updated dependencies [b7bd1d6]
+  - @vleap/warps@3.0.0-beta.176
+
 ## 0.1.0-beta.7
 
 ### Minor Changes

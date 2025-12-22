@@ -1,5 +1,15 @@
 # @warps/playground
 
+## 0.2.0-beta.143
+
+### Patch Changes
+
+- b7bd1d6: upgrade deps
+- Updated dependencies [b7bd1d6]
+  - @vleap/warps-adapter-solana@0.1.0-beta.8
+  - @vleap/warps@3.0.0-beta.176
+  - @vleap/warps-mcp@1.0.0-beta.20
+
 ## 0.2.0-beta.142
 
 ### Minor Changes

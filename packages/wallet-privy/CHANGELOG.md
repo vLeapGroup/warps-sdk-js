@@ -1,5 +1,13 @@
 # @vleap/warps-wallet-privy
 
+## 1.0.0-beta.2
+
+### Patch Changes
+
+- b7bd1d6: upgrade deps
+- Updated dependencies [b7bd1d6]
+  - @vleap/warps@3.0.0-beta.176
+
 ## 1.0.0-beta.1
 
 ### Patch Changes
