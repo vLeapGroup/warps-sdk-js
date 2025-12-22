@@ -57,6 +57,7 @@ export class GaupaWalletProvider implements WalletProvider {
   }
 
   create(mnemonic: string): WarpWalletDetails {
+    // TODO: Implement
     throw new Error('GaupaWalletProvider: create not yet implemented')
 
     const providerId = 'TODO'
@@ -66,6 +67,7 @@ export class GaupaWalletProvider implements WalletProvider {
   }
 
   generate(): WarpWalletDetails {
+    // TODO: Implement
     throw new Error('GaupaWalletProvider: generate not yet implemented')
 
     const providerId = 'TODO'
