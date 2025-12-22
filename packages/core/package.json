@@ -40,7 +40,7 @@
   "dependencies": {
     "@x402/core": "^2.0.0",
     "ajv": "^8.17.1",
-    "protobufjs": "^7.5.4",
+    "protobufjs": "^8.0.0",
     "qr-code-styling": "^1.9.2"
   }
 }
