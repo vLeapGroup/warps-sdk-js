@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-beta.88
+
+### Patch Changes
+
+- 9a4d7b7: further wallet updates
+- Updated dependencies [9a4d7b7]
+  - @vleap/warps@3.0.0-beta.179
+
 ## 0.2.0-beta.87
 
 ### Patch Changes

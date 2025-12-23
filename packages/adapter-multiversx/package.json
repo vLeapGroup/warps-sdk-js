@@ -1,6 +1,6 @@
 {
   "name": "@vleap/warps-adapter-multiversx",
-  "version": "0.2.0-beta.87",
+  "version": "0.2.0-beta.88",
   "description": "",
   "type": "module",
   "types": "./dist/index.d.ts",
@@ -38,6 +38,6 @@
   },
   "dependencies": {
     "@multiversx/sdk-core": "^15.3.1",
-    "@vleap/warps": "^3.0.0-beta.178"
+    "@vleap/warps": "^3.0.0-beta.179"
   }
 }
