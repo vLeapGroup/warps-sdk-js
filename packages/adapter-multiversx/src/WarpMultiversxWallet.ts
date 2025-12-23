@@ -92,7 +92,7 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
     return await this.entry.sendTransaction(tx)
   }
 
-  create(mnemonic: string, provider: WarpWalletProvider): WarpWalletDetails {
+  create(provider: WarpWalletProvider, mnemonic: string): WarpWalletDetails {
     const walletProvider = this.createProviderForOperation(provider)
     return walletProvider.create(mnemonic)
   }
