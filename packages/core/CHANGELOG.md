@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.177
+
+### Patch Changes
+
+- ace8d3e: set client chains property to public
+
 ## 3.0.0-beta.176
 
 ### Patch Changes
