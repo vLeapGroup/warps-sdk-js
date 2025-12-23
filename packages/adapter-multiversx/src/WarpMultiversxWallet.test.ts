@@ -166,4 +166,75 @@ describe('WarpMultiversxWallet', () => {
       expect(publicKey).toBeNull()
     })
   })
+
+  describe('read-only wallet', () => {
+    const readOnlyAddress = 'erd1test123456789012345678901234567890123456789012345678901234567890'
+    let readOnlyWallet: WarpMultiversxWallet
+
+    beforeEach(() => {
+      const readOnlyConfig = {
+        env: 'devnet',
+        cache: { type: 'memory' },
+        user: {
+          wallets: {
+            multiversx: readOnlyAddress,
+          },
+        },
+      }
+      readOnlyWallet = new WarpMultiversxWallet(readOnlyConfig, {
+        name: 'multiversx',
+        displayName: 'MultiversX',
+        chainId: 'D',
+        blockTime: 6000,
+        addressHrp: 'erd',
+        defaultApiUrl: 'https://api.multiversx.com',
+        logoUrl: 'https://example.com/multiversx-logo.png',
+        nativeToken: {
+          chain: 'multiversx',
+          identifier: 'EGLD',
+          name: 'MultiversX',
+          symbol: 'EGLD',
+          decimals: 18,
+          logoUrl: 'https://example.com/egld-logo.png',
+        },
+      })
+    })
+
+    it('should initialize read-only wallet without errors', () => {
+      expect(readOnlyWallet).toBeDefined()
+    })
+
+    it('should return address for read-only wallet', () => {
+      const address = readOnlyWallet.getAddress()
+      expect(address).toBe(readOnlyAddress)
+    })
+
+    it('should throw error when trying to sign transaction with read-only wallet', async () => {
+      const tx = {
+        nonce: 0n,
+        value: 0n,
+        receiver: readOnlyAddress,
+        sender: readOnlyAddress,
+        gasPrice: 1000000000n,
+        gasLimit: 70000n,
+        data: '',
+        chainId: 'D',
+        version: 1,
+      }
+
+      await expect(readOnlyWallet.signTransaction(tx)).rejects.toThrow('Wallet (multiversx) is read-only')
+    })
+
+    it('should throw error when trying to sign message with read-only wallet', async () => {
+      await expect(readOnlyWallet.signMessage('Hello')).rejects.toThrow('Wallet (multiversx) is read-only')
+    })
+
+    it('should throw error when trying to create wallet with read-only wallet', () => {
+      expect(() => readOnlyWallet.create('test mnemonic')).toThrow('Wallet (multiversx) is read-only')
+    })
+
+    it('should throw error when trying to generate wallet with read-only wallet', () => {
+      expect(() => readOnlyWallet.generate()).toThrow('Wallet (multiversx) is read-only')
+    })
+  })
 })

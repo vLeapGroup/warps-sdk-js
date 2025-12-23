@@ -102,4 +102,57 @@ describe('WarpEvmWallet', () => {
       expect(publicKey).toBeNull()
     })
   })
+
+  describe('read-only wallet', () => {
+    const readOnlyAddress = '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6'
+    let readOnlyWallet: WarpEvmWallet
+
+    beforeEach(() => {
+      const readOnlyConfig = {
+        env: 'testnet',
+        user: {
+          wallets: {
+            [chain.name]: readOnlyAddress,
+          },
+        },
+      }
+      readOnlyWallet = new WarpEvmWallet(readOnlyConfig, chain)
+    })
+
+    it('should initialize read-only wallet without errors', () => {
+      expect(readOnlyWallet).toBeDefined()
+    })
+
+    it('should return address for read-only wallet', () => {
+      const address = readOnlyWallet.getAddress()
+      expect(address).toBe(readOnlyAddress)
+    })
+
+    it('should throw error when trying to sign transaction with read-only wallet', async () => {
+      const tx = {
+        to: '0x1234567890123456789012345678901234567890',
+        data: '0x',
+        value: 0,
+        gasLimit: 21000,
+        maxFeePerGas: 20000000000n,
+        maxPriorityFeePerGas: 1000000000n,
+        nonce: 0,
+        chainId: 11155111,
+      }
+
+      await expect(readOnlyWallet.signTransaction(tx)).rejects.toThrow(`Wallet (${chain.name}) is read-only`)
+    })
+
+    it('should throw error when trying to sign message with read-only wallet', async () => {
+      await expect(readOnlyWallet.signMessage('Hello')).rejects.toThrow(`Wallet (${chain.name}) is read-only`)
+    })
+
+    it('should throw error when trying to create wallet with read-only wallet', () => {
+      expect(() => readOnlyWallet.create('test mnemonic')).toThrow(`Wallet (${chain.name}) is read-only`)
+    })
+
+    it('should throw error when trying to generate wallet with read-only wallet', () => {
+      expect(() => readOnlyWallet.generate()).toThrow(`Wallet (${chain.name}) is read-only`)
+    })
+  })
 })

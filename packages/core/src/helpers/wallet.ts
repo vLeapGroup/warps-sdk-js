@@ -47,3 +47,7 @@ export const getWarpWalletProviderIdFromConfigOrFail = (config: WarpClientConfig
   if (!providerId) throw new Error(`No provider ID configured for wallet onchain ${chain}`)
   return providerId
 }
+
+export const isWarpWalletReadOnly = (wallet: WarpWalletDetails | string | null | undefined): boolean => {
+  return typeof wallet === 'string'
+}

@@ -13,6 +13,7 @@ import {
 import { getMultiversxEntrypoint } from './helpers/general'
 import { MnemonicWalletProvider } from './providers/MnemonicWalletProvider'
 import { PrivateKeyWalletProvider } from './providers/PrivateKeyWalletProvider'
+import { ReadOnlyWalletProvider } from './providers/ReadOnlyWalletProvider'
 
 export class WarpMultiversxWallet implements AdapterWarpWallet {
   private entry: NetworkEntrypoint
@@ -34,7 +35,7 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
   private createProvider(): WalletProvider | null {
     const wallet = this.config.user?.wallets?.[this.chain.name]
     if (!wallet) return null
-    if (typeof wallet === 'string') throw new Error(`Wallet can not be used for signing: ${wallet}`)
+    if (typeof wallet === 'string') return new ReadOnlyWalletProvider(this.config, this.chain)
 
     const customWalletProviders = this.config.walletProviders?.[this.chain.name]
     const providerFactory = customWalletProviders?.[wallet.provider]
@@ -55,6 +56,7 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
   async signTransaction(tx: WarpAdapterGenericTransaction): Promise<WarpAdapterGenericTransaction> {
     if (!tx || typeof tx !== 'object') throw new Error('Invalid transaction object')
     if (!this.walletProvider) throw new Error('No wallet provider available')
+    if (this.walletProvider instanceof ReadOnlyWalletProvider) throw new Error(`Wallet (${this.chain.name}) is read-only`)
 
     if (this.walletProvider instanceof PrivateKeyWalletProvider || this.walletProvider instanceof MnemonicWalletProvider) {
       const account = this.walletProvider.getAccountInstance()
@@ -87,11 +89,16 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
   }
 
   async signTransactions(txs: WarpAdapterGenericTransaction[]): Promise<WarpAdapterGenericTransaction[]> {
-    return Promise.all(txs.map(async (tx) => this.signTransaction(tx)))
+    const signedTxs = []
+    for (const tx of txs) {
+      signedTxs.push(await this.signTransaction(tx))
+    }
+    return signedTxs
   }
 
   async signMessage(message: string): Promise<string> {
     if (!this.walletProvider) throw new Error('No wallet provider available')
+    if (this.walletProvider instanceof ReadOnlyWalletProvider) throw new Error(`Wallet (${this.chain.name}) is read-only`)
     return await this.walletProvider.signMessage(message)
   }
 
@@ -107,11 +114,13 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
 
   create(mnemonic: string): WarpWalletDetails {
     if (!this.walletProvider) throw new Error('No wallet provider available')
+    if (this.walletProvider instanceof ReadOnlyWalletProvider) throw new Error(`Wallet (${this.chain.name}) is read-only`)
     return this.walletProvider.create(mnemonic)
   }
 
   generate(): WarpWalletDetails {
     if (!this.walletProvider) throw new Error('No wallet provider available')
+    if (this.walletProvider instanceof ReadOnlyWalletProvider) throw new Error(`Wallet (${this.chain.name}) is read-only`)
     return this.walletProvider.generate()
   }
 
