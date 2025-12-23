@@ -11,5 +11,5 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   noExternal: ['@noble/hashes', '@mysten/bcs'],
-  external: ['@noble/ed25519', '@noble/utils', '@noble/abstract'],
+  external: ['@noble/ed25519', '@noble/utils', '@noble/abstract', '@scure/bip39'],
 })

@@ -10,4 +10,5 @@ export default defineConfig({
   minify: true,
   clean: true,
   skipNodeModulesBundle: true,
+  external: ['@scure/bip39'],
 })
