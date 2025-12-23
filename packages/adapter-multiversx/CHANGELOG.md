@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-beta.87
+
+### Patch Changes
+
+- b66881b: add readonly wallets
+- Updated dependencies [b66881b]
+  - @vleap/warps@3.0.0-beta.178
+
 ## 0.2.0-beta.86
 
 ### Minor Changes

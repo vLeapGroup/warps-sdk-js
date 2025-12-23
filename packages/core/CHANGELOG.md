@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.178
+
+### Patch Changes
+
+- b66881b: add readonly wallets
+
 ## 3.0.0-beta.177
 
 ### Patch Changes

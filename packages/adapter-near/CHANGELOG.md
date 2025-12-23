@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-near
 
+## 0.1.0-beta.6
+
+### Patch Changes
+
+- b66881b: add readonly wallets
+- Updated dependencies [b66881b]
+  - @vleap/warps@3.0.0-beta.178
+
 ## 0.1.0-beta.5
 
 ### Minor Changes
