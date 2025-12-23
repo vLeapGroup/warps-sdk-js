@@ -33,7 +33,7 @@ type WarpClientOptions = {
 }
 
 export class WarpClient {
-  private readonly chains: ChainAdapter[]
+  public readonly chains: ChainAdapter[]
 
   constructor(
     private readonly config: WarpClientConfig,
