@@ -22,7 +22,7 @@ export default {
     '^(\\.{1,2}/.*)\\.js$': '$1',
     '^@vleap/warps$': '<rootDir>/../core/src/index.ts',
     '^@scure/bip39/wordlists/(.*)\\.js$': '@scure/bip39/wordlists/$1.js',
-    '^@scure/bip39/wordlists/(.*)$': '@scure/bip39/wordlists/$1',
+    '^@scure/bip39/wordlists/(.*)$': '@scure/bip39/wordlists/$1.js',
   },
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts'],
   globalSetup: '<rootDir>/jest.globalsetup.ts',

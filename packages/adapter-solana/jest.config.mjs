@@ -24,7 +24,7 @@ export default {
     '^@solana/kit$': '<rootDir>/jest.setup.ts',
     '^@x402/svm/exact/client$': '<rootDir>/jest.setup.ts',
     '^@scure/bip39/wordlists/(.*)\\.js$': '@scure/bip39/wordlists/$1.js',
-    '^@scure/bip39/wordlists/(.*)$': '@scure/bip39/wordlists/$1',
+    '^@scure/bip39/wordlists/(.*)$': '@scure/bip39/wordlists/$1.js',
   },
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts'],
   globalSetup: '<rootDir>/jest.globalsetup.ts',

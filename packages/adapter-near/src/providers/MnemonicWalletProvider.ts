@@ -1,7 +1,7 @@
 import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
 import { keyToImplicitAddress } from '@near-js/crypto'
 import * as bip39 from '@scure/bip39'
-import { wordlist } from '@scure/bip39/wordlists/english.js'
+import { wordlist } from '@scure/bip39/wordlists/english'
 import { getWarpWalletAddressFromConfig, getWarpWalletMnemonicFromConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 import bs58 from 'bs58'
 import { KeyPair } from 'near-api-js'
