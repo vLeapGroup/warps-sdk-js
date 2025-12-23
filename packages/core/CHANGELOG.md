@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.181
+
+### Patch Changes
+
+- ba2711c: further wallet updates
+
 ## 3.0.0-beta.180
 
 ### Patch Changes

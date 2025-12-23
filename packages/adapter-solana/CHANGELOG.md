@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.0-beta.13
+
+### Patch Changes
+
+- ba2711c: further wallet updates
+- Updated dependencies [ba2711c]
+  - @vleap/warps@3.0.0-beta.181
+
 ## 0.1.0-beta.12
 
 ### Patch Changes
