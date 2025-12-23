@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-beta.58
+
+### Patch Changes
+
+- 497a36c: update latest deps
+
 ## 0.2.0-beta.57
 
 ### Minor Changes
