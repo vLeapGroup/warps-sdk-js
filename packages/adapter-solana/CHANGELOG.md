@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.0-beta.11
+
+### Patch Changes
+
+- 3cbdf74: further wallet updates
+- Updated dependencies [3cbdf74]
+  - @vleap/warps@3.0.0-beta.180
+
 ## 0.1.0-beta.10
 
 ### Patch Changes
