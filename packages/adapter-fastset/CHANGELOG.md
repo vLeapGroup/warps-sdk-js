@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-beta.50
+
+### Patch Changes
+
+- 4e83cae: fix exports
+
 ## 0.1.0-beta.49
 
 ### Patch Changes

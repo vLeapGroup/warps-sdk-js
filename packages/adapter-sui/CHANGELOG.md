@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-beta.65
+
+### Patch Changes
+
+- 4e83cae: fix exports
+
 ## 0.2.0-beta.64
 
 ### Patch Changes
