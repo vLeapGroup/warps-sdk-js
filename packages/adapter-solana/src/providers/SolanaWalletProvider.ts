@@ -7,6 +7,7 @@ import {
   WarpWalletDetails,
   WarpWalletProvider,
 } from '@vleap/warps'
+import * as bip39 from '@scure/bip39'
 import bs58 from 'bs58'
 
 export class SolanaWalletProvider implements WalletProvider {
@@ -90,7 +91,14 @@ export class SolanaWalletProvider implements WalletProvider {
   }
 
   create(mnemonic: string): WarpWalletDetails {
-    throw new Error('PrivateKeyWalletProvider does not support creating wallets from mnemonics. Use MnemonicWalletProvider instead.')
+    const seed = bip39.mnemonicToSeedSync(mnemonic)
+    const keypair = Keypair.fromSeed(seed.slice(0, 32))
+    return {
+      provider: SolanaWalletProvider.PROVIDER_NAME,
+      address: keypair.publicKey.toBase58(),
+      privateKey: bs58.encode(keypair.secretKey),
+      mnemonic: null,
+    }
   }
 
   generate(): WarpWalletDetails {

@@ -1,5 +1,5 @@
 import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
-import { Account, Message, Transaction, UserSecretKey } from '@multiversx/sdk-core'
+import { Account, Message, Mnemonic, Transaction, UserSecretKey } from '@multiversx/sdk-core'
 import { getWarpWalletAddressFromConfig, getWarpWalletPrivateKeyFromConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 
 export class PrivateKeyWalletProvider implements WalletProvider {
@@ -52,7 +52,17 @@ export class PrivateKeyWalletProvider implements WalletProvider {
   }
 
   create(mnemonic: string): WarpWalletDetails {
-    throw new Error('PrivateKeyWalletProvider does not support creating wallets from mnemonics. Use MnemonicWalletProvider instead.')
+    const mnemonicObj = Mnemonic.fromString(mnemonic)
+    const privateKey = mnemonicObj.deriveKey(0)
+    const privateKeyHex = privateKey.hex()
+    const pubKey = privateKey.generatePublicKey()
+    const address = pubKey.toAddress(this.chain.addressHrp).toBech32()
+    return {
+      provider: PrivateKeyWalletProvider.PROVIDER_NAME,
+      address,
+      privateKey: privateKeyHex,
+      mnemonic: null,
+    }
   }
 
   generate(): WarpWalletDetails {

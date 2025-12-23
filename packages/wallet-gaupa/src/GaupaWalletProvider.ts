@@ -1,6 +1,6 @@
 import { Transaction } from '@multiversx/sdk-core'
 import {
-  getWarpWalletProviderIdFromConfigOrFail,
+  getWarpWalletExternalIdFromConfigOrFail,
   WalletProvider,
   WarpChainInfo,
   WarpClientConfig,
@@ -18,28 +18,28 @@ export class GaupaWalletProvider implements WalletProvider {
   ) {}
 
   async getAddress(): Promise<string | null> {
-    const _providerId = getWarpWalletProviderIdFromConfigOrFail(this.config, this.chain.name)
+    const _externalId = getWarpWalletExternalIdFromConfigOrFail(this.config, this.chain.name)
 
     // TODO: Implement
     throw new Error('GaupaWalletProvider: getAddress not yet implemented')
   }
 
   async getPublicKey(): Promise<string | null> {
-    const _providerId = getWarpWalletProviderIdFromConfigOrFail(this.config, this.chain.name)
+    const _externalId = getWarpWalletExternalIdFromConfigOrFail(this.config, this.chain.name)
 
     // TODO: Implement
     throw new Error('GaupaWalletProvider: getPublicKey not yet implemented')
   }
 
   async signTransaction(tx: Transaction): Promise<Transaction> {
-    const _providerId = getWarpWalletProviderIdFromConfigOrFail(this.config, this.chain.name)
+    const _externalId = getWarpWalletExternalIdFromConfigOrFail(this.config, this.chain.name)
 
     // TODO: Implement
     throw new Error('GaupaWalletProvider: signTransaction not yet implemented')
   }
 
   async signMessage(message: string): Promise<string> {
-    const _providerId = getWarpWalletProviderIdFromConfigOrFail(this.config, this.chain.name)
+    const _externalId = getWarpWalletExternalIdFromConfigOrFail(this.config, this.chain.name)
 
     // TODO: Implement
     throw new Error('GaupaWalletProvider: signMessage not yet implemented')
@@ -49,19 +49,19 @@ export class GaupaWalletProvider implements WalletProvider {
     // TODO: Implement
     throw new Error('GaupaWalletProvider: create not yet implemented')
 
-    const providerId = 'TODO'
+    const externalId = 'TODO'
     const address = 'TODO'
 
-    return { provider: GaupaWalletProvider.PROVIDER_NAME, address, providerId }
+    return { provider: GaupaWalletProvider.PROVIDER_NAME, address, externalId }
   }
 
   generate(): WarpWalletDetails {
     // TODO: Implement
     throw new Error('GaupaWalletProvider: generate not yet implemented')
 
-    const providerId = 'TODO'
+    const externalId = 'TODO'
     const address = 'TODO'
 
-    return { provider: GaupaWalletProvider.PROVIDER_NAME, address, providerId }
+    return { provider: GaupaWalletProvider.PROVIDER_NAME, address, externalId }
   }
 }

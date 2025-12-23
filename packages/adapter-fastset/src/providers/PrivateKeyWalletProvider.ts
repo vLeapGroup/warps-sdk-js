@@ -1,5 +1,6 @@
 import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
 import { getWarpWalletPrivateKeyFromConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import * as bip39 from '@scure/bip39'
 import { hexToUint8Array, uint8ArrayToHex } from '../helpers'
 import { FastsetClient } from '../sdk'
 import { ed } from '../sdk/ed25519-setup'
@@ -54,7 +55,16 @@ export class PrivateKeyWalletProvider implements WalletProvider {
   }
 
   create(mnemonic: string): WarpWalletDetails {
-    throw new Error('PrivateKeyWalletProvider does not support creating wallets from mnemonics. Use MnemonicWalletProvider instead.')
+    const seed = bip39.mnemonicToSeedSync(mnemonic)
+    const privateKey = seed.slice(0, 32)
+    const publicKey = ed.getPublicKey(privateKey)
+    const address = FastsetClient.encodeBech32Address(publicKey)
+    return {
+      provider: PrivateKeyWalletProvider.PROVIDER_NAME,
+      address,
+      privateKey: uint8ArrayToHex(privateKey),
+      mnemonic: null,
+    }
   }
 
   generate(): WarpWalletDetails {

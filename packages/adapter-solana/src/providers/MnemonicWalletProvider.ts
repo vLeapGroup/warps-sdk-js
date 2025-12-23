@@ -107,9 +107,9 @@ export class MnemonicWalletProvider implements WalletProvider {
   }
 
   generate(): WarpWalletDetails {
-    const keypair = Keypair.generate()
-    const entropy = keypair.secretKey.slice(0, 16)
-    const mnemonic = bip39.entropyToMnemonic(entropy, wordlist)
+    const mnemonic = bip39.generateMnemonic(wordlist)
+    const seed = bip39.mnemonicToSeedSync(mnemonic)
+    const keypair = Keypair.fromSeed(seed.slice(0, 32))
     return {
       provider: MnemonicWalletProvider.PROVIDER_NAME,
       address: keypair.publicKey.toBase58(),

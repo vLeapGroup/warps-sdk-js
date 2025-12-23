@@ -1,5 +1,6 @@
 import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
 import { keyToImplicitAddress } from '@near-js/crypto'
+import * as bip39 from '@scure/bip39'
 import { getWarpWalletAddressFromConfig, getWarpWalletPrivateKeyFromConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 import bs58 from 'bs58'
 import { KeyPair } from 'near-api-js'
@@ -54,7 +55,17 @@ export class PrivateKeyWalletProvider implements WalletProvider {
   }
 
   create(mnemonic: string): WarpWalletDetails {
-    throw new Error('PrivateKeyWalletProvider does not support creating wallets from mnemonics. Use MnemonicWalletProvider instead.')
+    const seed = bip39.mnemonicToSeedSync(mnemonic)
+    const secretKey = seed.slice(0, 32)
+    const keyPair = KeyPair.fromString(bs58.encode(secretKey))
+    const publicKey = keyPair.getPublicKey()
+    const accountId = keyToImplicitAddress(publicKey.toString())
+    return {
+      provider: PrivateKeyWalletProvider.PROVIDER_NAME,
+      address: accountId,
+      privateKey: keyPair.toString(),
+      mnemonic: null,
+    }
   }
 
   generate(): WarpWalletDetails {

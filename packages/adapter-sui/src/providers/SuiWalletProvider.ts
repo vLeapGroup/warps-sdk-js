@@ -51,7 +51,15 @@ export class PrivateKeyWalletProvider implements WalletProvider {
   }
 
   create(mnemonic: string): WarpWalletDetails {
-    throw new Error('PrivateKeyWalletProvider does not support creating wallets from mnemonics. Use MnemonicWalletProvider instead.')
+    const keypair = Ed25519Keypair.deriveKeypair(mnemonic.trim())
+    const address = keypair.getPublicKey().toSuiAddress()
+    const privateKey = Buffer.from(keypair.getSecretKey()).toString('hex')
+    return {
+      provider: PrivateKeyWalletProvider.PROVIDER_NAME,
+      address,
+      privateKey,
+      mnemonic: null,
+    }
   }
 
   generate(): WarpWalletDetails {

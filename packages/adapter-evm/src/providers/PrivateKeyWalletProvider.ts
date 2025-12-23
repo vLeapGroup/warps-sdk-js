@@ -58,7 +58,13 @@ export class PrivateKeyWalletProvider implements WalletProvider {
   }
 
   create(mnemonic: string): WarpWalletDetails {
-    throw new Error('PrivateKeyWalletProvider does not support creating wallets from mnemonics. Use MnemonicWalletProvider instead.')
+    const wallet = ethers.Wallet.fromPhrase(mnemonic)
+    return {
+      provider: PrivateKeyWalletProvider.PROVIDER_NAME,
+      address: wallet.address,
+      privateKey: wallet.privateKey,
+      mnemonic: null,
+    }
   }
 
   generate(): WarpWalletDetails {

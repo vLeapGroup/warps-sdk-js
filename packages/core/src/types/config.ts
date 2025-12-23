@@ -29,7 +29,7 @@ export type WarpWalletDetails = {
   address: string
   mnemonic?: string | null
   privateKey?: string | null
-  providerId?: string | null
+  externalId?: string | null
 }
 
 export type WarpUserWallets = Record<WarpChain, WarpWalletDetails | string | null>

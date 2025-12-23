@@ -57,9 +57,9 @@ export class MnemonicWalletProvider implements WalletProvider {
   }
 
   generate(): WarpWalletDetails {
-    const keypair = Ed25519Keypair.generate()
-    const address = keypair.getPublicKey().toSuiAddress()
     const mnemonic = bip39.generateMnemonic(wordlist)
+    const keypair = Ed25519Keypair.deriveKeypair(mnemonic.trim())
+    const address = keypair.getPublicKey().toSuiAddress()
     return {
       provider: MnemonicWalletProvider.PROVIDER_NAME,
       address,

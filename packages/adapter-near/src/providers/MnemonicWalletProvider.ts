@@ -57,7 +57,8 @@ export class MnemonicWalletProvider implements WalletProvider {
 
   create(mnemonic: string): WarpWalletDetails {
     const seed = bip39.mnemonicToSeedSync(mnemonic)
-    const keyPair = KeyPair.fromRandom('ed25519')
+    const secretKey = seed.slice(0, 32)
+    const keyPair = KeyPair.fromString(bs58.encode(secretKey))
     const publicKey = keyPair.getPublicKey()
     const accountId = keyToImplicitAddress(publicKey.toString())
     return {
@@ -71,7 +72,8 @@ export class MnemonicWalletProvider implements WalletProvider {
   generate(): WarpWalletDetails {
     const mnemonic = bip39.generateMnemonic(wordlist)
     const seed = bip39.mnemonicToSeedSync(mnemonic)
-    const keyPair = KeyPair.fromRandom('ed25519')
+    const secretKey = seed.slice(0, 32)
+    const keyPair = KeyPair.fromString(bs58.encode(secretKey))
     const publicKey = keyPair.getPublicKey()
     const accountId = keyToImplicitAddress(publicKey.toString())
     return {
@@ -89,7 +91,8 @@ export class MnemonicWalletProvider implements WalletProvider {
     if (!mnemonic) throw new Error('No mnemonic provided')
 
     const seed = bip39.mnemonicToSeedSync(mnemonic)
-    this.keypair = KeyPair.fromRandom('ed25519')
+    const secretKey = seed.slice(0, 32)
+    this.keypair = KeyPair.fromString(bs58.encode(secretKey))
     return this.keypair
   }
 }
