@@ -1,9 +1,16 @@
 import { Transaction } from '@multiversx/sdk-core'
-import { getWarpWalletProviderIdFromConfigOrFail, WalletProvider, WarpChainInfo, WarpClientConfig, WarpWalletDetails } from '@vleap/warps'
-import { GaupaWalletProviderId } from './constants'
+import {
+  getWarpWalletProviderIdFromConfigOrFail,
+  WalletProvider,
+  WarpChainInfo,
+  WarpClientConfig,
+  WarpWalletDetails,
+  WarpWalletProvider,
+} from '@vleap/warps'
 import { ProviderConfig } from './types'
 
 export class GaupaWalletProvider implements WalletProvider {
+  static readonly PROVIDER_NAME: WarpWalletProvider = 'gaupa'
   constructor(
     private readonly config: WarpClientConfig,
     private readonly chain: WarpChainInfo,
@@ -45,7 +52,7 @@ export class GaupaWalletProvider implements WalletProvider {
     const providerId = 'TODO'
     const address = 'TODO'
 
-    return { provider: GaupaWalletProviderId, address, providerId }
+    return { provider: GaupaWalletProvider.PROVIDER_NAME, address, providerId }
   }
 
   generate(): WarpWalletDetails {
@@ -55,6 +62,6 @@ export class GaupaWalletProvider implements WalletProvider {
     const providerId = 'TODO'
     const address = 'TODO'
 
-    return { provider: GaupaWalletProviderId, address, providerId }
+    return { provider: GaupaWalletProvider.PROVIDER_NAME, address, providerId }
   }
 }

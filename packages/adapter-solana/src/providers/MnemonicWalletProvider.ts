@@ -1,6 +1,6 @@
 import * as bip39 from '@scure/bip39'
 import { wordlist } from '@scure/bip39/wordlists/english.js'
-import { Connection, Keypair, Transaction, VersionedTransaction } from '@solana/web3.js'
+import { Keypair, Transaction, VersionedTransaction } from '@solana/web3.js'
 import {
   getWarpWalletAddressFromConfig,
   getWarpWalletMnemonicFromConfig,
@@ -8,16 +8,17 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpWalletDetails,
+  WarpWalletProvider,
 } from '@vleap/warps'
 import bs58 from 'bs58'
 
 export class MnemonicWalletProvider implements WalletProvider {
+  static readonly PROVIDER_NAME: WarpWalletProvider = 'mnemonic'
   private keypair: Keypair | null = null
 
   constructor(
     private config: WarpClientConfig,
-    private chain: WarpChainInfo,
-    private connection: Connection
+    private chain: WarpChainInfo
   ) {}
 
   async getAddress(): Promise<string | null> {
@@ -98,9 +99,9 @@ export class MnemonicWalletProvider implements WalletProvider {
     const seed = bip39.mnemonicToSeedSync(mnemonic)
     const keypair = Keypair.fromSeed(seed.slice(0, 32))
     return {
-      provider: 'mnemonic',
+      provider: MnemonicWalletProvider.PROVIDER_NAME,
       address: keypair.publicKey.toBase58(),
-      privateKey: bs58.encode(keypair.secretKey),
+      privateKey: null,
       mnemonic,
     }
   }
@@ -110,9 +111,9 @@ export class MnemonicWalletProvider implements WalletProvider {
     const entropy = keypair.secretKey.slice(0, 16)
     const mnemonic = bip39.entropyToMnemonic(entropy, wordlist)
     return {
-      provider: 'mnemonic',
+      provider: MnemonicWalletProvider.PROVIDER_NAME,
       address: keypair.publicKey.toBase58(),
-      privateKey: bs58.encode(keypair.secretKey),
+      privateKey: null,
       mnemonic,
     }
   }

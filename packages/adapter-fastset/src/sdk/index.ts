@@ -1,2 +1,2 @@
 export * from './FastsetClient'
-export { Transaction } from './types'
+export * from './types'

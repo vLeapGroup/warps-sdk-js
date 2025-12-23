@@ -1,4 +1,4 @@
-import { WalletProvider, WarpWalletDetails } from '@vleap/warps'
+import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
 
 export interface PrivyClient {
   getAddress(): Promise<string | null>
@@ -12,6 +12,7 @@ export interface PrivyWalletProviderConfig {
 }
 
 export class PrivyWalletProvider implements WalletProvider {
+  static readonly PROVIDER_NAME: WarpWalletProvider = 'privy'
   constructor(private config: PrivyWalletProviderConfig) {}
 
   async getAddress(): Promise<string | null> {

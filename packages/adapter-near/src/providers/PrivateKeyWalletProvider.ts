@@ -1,12 +1,11 @@
-import { WalletProvider, WarpWalletDetails } from '@vleap/warps'
+import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
 import { keyToImplicitAddress } from '@near-js/crypto'
-import * as bip39 from '@scure/bip39'
-import { wordlist } from '@scure/bip39/wordlists/english.js'
 import { getWarpWalletAddressFromConfig, getWarpWalletPrivateKeyFromConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 import bs58 from 'bs58'
 import { KeyPair } from 'near-api-js'
 
 export class PrivateKeyWalletProvider implements WalletProvider {
+  static readonly PROVIDER_NAME: WarpWalletProvider = 'privateKey'
   private keypair: KeyPair | null = null
 
   constructor(
@@ -55,29 +54,18 @@ export class PrivateKeyWalletProvider implements WalletProvider {
   }
 
   create(mnemonic: string): WarpWalletDetails {
-    const seed = bip39.mnemonicToSeedSync(mnemonic)
-    const keyPair = KeyPair.fromRandom('ed25519')
-    const publicKey = keyPair.getPublicKey()
-    const accountId = keyToImplicitAddress(publicKey.toString())
-    return {
-      provider: 'privateKey',
-      address: accountId,
-      privateKey: keyPair.toString(),
-      mnemonic,
-    }
+    throw new Error('PrivateKeyWalletProvider does not support creating wallets from mnemonics. Use MnemonicWalletProvider instead.')
   }
 
   generate(): WarpWalletDetails {
-    const mnemonic = bip39.generateMnemonic(wordlist)
-    const seed = bip39.mnemonicToSeedSync(mnemonic)
     const keyPair = KeyPair.fromRandom('ed25519')
     const publicKey = keyPair.getPublicKey()
     const accountId = keyToImplicitAddress(publicKey.toString())
     return {
-      provider: 'privateKey',
+      provider: PrivateKeyWalletProvider.PROVIDER_NAME,
       address: accountId,
       privateKey: keyPair.toString(),
-      mnemonic,
+      mnemonic: null,
     }
   }
 

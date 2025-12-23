@@ -64,7 +64,10 @@ describe('WarpFastsetWallet', () => {
     env: 'testnet' as const,
     user: {
       wallets: {
-        fastset: 'set1mockaddress',
+        fastset: {
+          provider: 'privateKey' as const,
+          privateKey: '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+        },
       },
     },
   }
@@ -120,36 +123,56 @@ describe('WarpFastsetWallet', () => {
   describe('Wallet Creation', () => {
     test('create() should create wallet from mnemonic', () => {
       const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
-      const result = wallet.create(mnemonic)
+      const configWithMnemonic = {
+        env: 'testnet' as const,
+        user: {
+          wallets: {
+            fastset: {
+              provider: 'mnemonic' as const,
+              mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+            },
+          },
+        },
+      }
+      const walletWithMnemonic = new WarpFastsetWallet(configWithMnemonic, mockChain)
+      const result = walletWithMnemonic.create(mnemonic, 'mnemonic')
 
       expect(result).toHaveProperty('address')
       expect(result).toHaveProperty('privateKey')
       expect(result.mnemonic).toBe(mnemonic)
       expect(typeof result.address).toBe('string')
-      expect(typeof result.privateKey).toBe('string')
+      expect(result.privateKey).toBe(null)
       expect(result.address).toMatch(/^set1/)
-      expect(result.privateKey).toMatch(/^[0-9a-f]+$/)
     })
 
     test('generate() should generate random wallet', () => {
-      // Create a new wallet instance without config to test generate() independently
-      const walletWithoutConfig = new WarpFastsetWallet({ env: 'testnet' }, mockChain)
-      const result = walletWithoutConfig.generate()
+      const configWithMnemonic = {
+        env: 'testnet' as const,
+        user: {
+          wallets: {
+            fastset: {
+              provider: 'mnemonic' as const,
+              mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+            },
+          },
+        },
+      }
+      const walletWithMnemonic = new WarpFastsetWallet(configWithMnemonic, mockChain)
+      const result = walletWithMnemonic.generate('mnemonic')
 
       expect(result).toHaveProperty('address')
       expect(result).toHaveProperty('privateKey')
-      expect(result.mnemonic).toBeNull()
+      expect(result.mnemonic).not.toBeNull()
       expect(typeof result.address).toBe('string')
-      expect(typeof result.privateKey).toBe('string')
+      expect(result.privateKey).toBe(null)
       expect(result.address).toMatch(/^set1/)
-      expect(result.privateKey).toMatch(/^[0-9a-f]+$/)
     })
   })
 
   describe('Address Management', () => {
     test('getAddress() should return configured address', () => {
       const address = wallet.getAddress()
-      expect(address).toBe('set1mockaddress')
+      expect(address).toBe('set1testaddress123456789')
     })
 
     test('getAddress() should return null when no wallet configured', () => {
@@ -161,16 +184,12 @@ describe('WarpFastsetWallet', () => {
 
   describe('Signing Operations', () => {
     test('signMessage() should throw error when wallet not initialized', async () => {
-      // Mock private key to be undefined for this test
-      ;(getWarpWalletPrivateKeyFromConfig as jest.MockedFunction<typeof getWarpWalletPrivateKeyFromConfig>).mockReturnValueOnce(null as any)
       const walletWithoutConfig = new WarpFastsetWallet({ env: 'testnet' }, mockChain)
 
-      await expect(walletWithoutConfig.signMessage('test')).rejects.toThrow('Wallet not initialized')
+      await expect(walletWithoutConfig.signMessage('test')).rejects.toThrow('No wallet provider available')
     })
 
     test('signTransaction() should throw error when wallet not initialized', async () => {
-      // Mock private key to be undefined for this test
-      ;(getWarpWalletPrivateKeyFromConfig as jest.MockedFunction<typeof getWarpWalletPrivateKeyFromConfig>).mockReturnValueOnce(null as any)
       const walletWithoutConfig = new WarpFastsetWallet({ env: 'testnet' }, mockChain)
       const mockTx = {
         claim: { Transfer: { amount: '1000000000000000000', user_data: null } },
@@ -180,7 +199,7 @@ describe('WarpFastsetWallet', () => {
         timestamp_nanos: BigInt(Date.now() * 1000000),
       }
 
-      await expect(walletWithoutConfig.signTransaction(mockTx as any)).rejects.toThrow('Wallet not initialized')
+      await expect(walletWithoutConfig.signTransaction(mockTx as any)).rejects.toThrow('No wallet provider available')
     })
 
     // Skip actual signing tests due to mocking complexity in test environment
@@ -285,32 +304,23 @@ describe('WarpFastsetWallet', () => {
   })
 
   describe('getPublicKey', () => {
-    beforeEach(() => {
-      ;(getWarpWalletPrivateKeyFromConfig as jest.MockedFunction<typeof getWarpWalletPrivateKeyFromConfig>).mockReset()
-    })
-
-    test('should return public key as hex string when wallet is initialized', () => {
-      const privateKeyHex = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
-      ;(getWarpWalletPrivateKeyFromConfig as jest.MockedFunction<typeof getWarpWalletPrivateKeyFromConfig>).mockReturnValue(
-        privateKeyHex
-      )
+    test('should return public key as hex string when wallet is initialized', async () => {
       const testWallet = new WarpFastsetWallet(mockConfig, mockChain)
+      await new Promise((resolve) => setTimeout(resolve, 100))
       const publicKey = testWallet.getPublicKey()
-      expect(getWarpWalletPrivateKeyFromConfig).toHaveBeenCalledWith(mockConfig, 'fastset')
       expect(publicKey).toBeDefined()
-      expect(publicKey).not.toBeNull()
       if (publicKey !== null) {
         expect(typeof publicKey).toBe('string')
         expect(publicKey).toMatch(/^[0-9a-f]+$/)
         expect(publicKey.length).toBe(64)
+      } else {
+        expect(publicKey).not.toBeNull()
       }
     })
 
-    test('should return null when wallet is not initialized', () => {
-      ;(getWarpWalletPrivateKeyFromConfig as jest.MockedFunction<typeof getWarpWalletPrivateKeyFromConfig>).mockReturnValue(
-        null
-      )
+    test('should return null when wallet is not initialized', async () => {
       const walletWithoutConfig = new WarpFastsetWallet({ env: 'testnet' }, mockChain)
+      await new Promise((resolve) => setTimeout(resolve, 100))
       const publicKey = walletWithoutConfig.getPublicKey()
       expect(publicKey).toBeNull()
     })
@@ -333,10 +343,21 @@ describe('WarpFastsetWallet', () => {
     })
 
     test('should handle different environments gracefully', () => {
-      // Test that we can create wallet without complex dependencies
-      const walletWithoutConfig = new WarpFastsetWallet({ env: 'testnet' }, mockChain)
-      const result = walletWithoutConfig.generate()
+      const configWithMnemonic = {
+        env: 'testnet' as const,
+        user: {
+          wallets: {
+            fastset: {
+              provider: 'mnemonic' as const,
+              mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+            },
+          },
+        },
+      }
+      const walletWithMnemonic = new WarpFastsetWallet(configWithMnemonic, mockChain)
+      const result = walletWithMnemonic.generate('mnemonic')
       expect(result.privateKey).toBeDefined()
+      expect(result.mnemonic).not.toBeNull()
       if (result.privateKey) {
         expect(result.privateKey.length).toBeGreaterThan(0)
         expect(typeof result.privateKey).toBe('string')

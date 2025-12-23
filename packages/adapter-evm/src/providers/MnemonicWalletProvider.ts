@@ -1,14 +1,14 @@
-import { WalletProvider, WarpWalletDetails } from '@vleap/warps'
+import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
 import { ethers } from 'ethers'
 import { getWarpWalletMnemonicFromConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 
 export class MnemonicWalletProvider implements WalletProvider {
+  static readonly PROVIDER_NAME: WarpWalletProvider = 'mnemonic'
   private wallet: ethers.Wallet | null = null
 
   constructor(
     private config: WarpClientConfig,
-    private chain: WarpChainInfo,
-    private rpcProvider: ethers.JsonRpcProvider
+    private chain: WarpChainInfo
   ) {}
 
   async getAddress(): Promise<string | null> {
@@ -60,9 +60,9 @@ export class MnemonicWalletProvider implements WalletProvider {
   create(mnemonic: string): WarpWalletDetails {
     const wallet = ethers.Wallet.fromPhrase(mnemonic)
     return {
-      provider: 'mnemonic',
+      provider: MnemonicWalletProvider.PROVIDER_NAME,
       address: wallet.address,
-      privateKey: wallet.privateKey,
+      privateKey: null,
       mnemonic,
     }
   }
@@ -70,9 +70,9 @@ export class MnemonicWalletProvider implements WalletProvider {
   generate(): WarpWalletDetails {
     const wallet = ethers.Wallet.createRandom()
     return {
-      provider: 'mnemonic',
+      provider: MnemonicWalletProvider.PROVIDER_NAME,
       address: wallet.address,
-      privateKey: wallet.privateKey,
+      privateKey: null,
       mnemonic: wallet.mnemonic?.phrase || null,
     }
   }

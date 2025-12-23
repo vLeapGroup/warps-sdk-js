@@ -6,9 +6,11 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpWalletDetails,
+  WarpWalletProvider,
 } from '@vleap/warps'
 
 export class MnemonicWalletProvider implements WalletProvider {
+  static readonly PROVIDER_NAME: WarpWalletProvider = 'mnemonic'
   private account: Account | null = null
 
   constructor(
@@ -59,13 +61,12 @@ export class MnemonicWalletProvider implements WalletProvider {
   create(mnemonic: string): WarpWalletDetails {
     const mnemonicObj = Mnemonic.fromString(mnemonic)
     const privateKey = mnemonicObj.deriveKey(0)
-    const privateKeyHex = privateKey.hex()
     const pubKey = privateKey.generatePublicKey()
     const address = pubKey.toAddress(this.chain.addressHrp).toBech32()
     return {
-      provider: 'mnemonic',
+      provider: MnemonicWalletProvider.PROVIDER_NAME,
       address,
-      privateKey: privateKeyHex,
+      privateKey: null,
       mnemonic,
     }
   }
@@ -74,13 +75,12 @@ export class MnemonicWalletProvider implements WalletProvider {
     const mnemonic = Mnemonic.generate()
     const mnemonicWords = mnemonic.toString()
     const privateKey = mnemonic.deriveKey(0)
-    const privateKeyHex = privateKey.hex()
     const pubKey = privateKey.generatePublicKey()
     const address = pubKey.toAddress(this.chain.addressHrp).toBech32()
     return {
-      provider: 'mnemonic',
+      provider: MnemonicWalletProvider.PROVIDER_NAME,
       address,
-      privateKey: privateKeyHex,
+      privateKey: null,
       mnemonic: mnemonicWords,
     }
   }

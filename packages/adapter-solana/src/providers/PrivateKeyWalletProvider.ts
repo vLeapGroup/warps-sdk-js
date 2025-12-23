@@ -1,6 +1,4 @@
-import * as bip39 from '@scure/bip39'
-import { wordlist } from '@scure/bip39/wordlists/english.js'
-import { Connection, Keypair, Transaction, VersionedTransaction } from '@solana/web3.js'
+import { Keypair, Transaction, VersionedTransaction } from '@solana/web3.js'
 import {
   getWarpWalletAddressFromConfig,
   getWarpWalletPrivateKeyFromConfig,
@@ -8,16 +6,17 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpWalletDetails,
+  WarpWalletProvider,
 } from '@vleap/warps'
 import bs58 from 'bs58'
 
 export class PrivateKeyWalletProvider implements WalletProvider {
+  static readonly PROVIDER_NAME: WarpWalletProvider = 'privateKey'
   private keypair: Keypair | null = null
 
   constructor(
     private config: WarpClientConfig,
-    private chain: WarpChainInfo,
-    private connection: Connection
+    private chain: WarpChainInfo
   ) {}
 
   async getAddress(): Promise<string | null> {
@@ -95,25 +94,16 @@ export class PrivateKeyWalletProvider implements WalletProvider {
   }
 
   create(mnemonic: string): WarpWalletDetails {
-    const seed = bip39.mnemonicToSeedSync(mnemonic)
-    const keypair = Keypair.fromSeed(seed.slice(0, 32))
-    return {
-      provider: 'privateKey',
-      address: keypair.publicKey.toBase58(),
-      privateKey: bs58.encode(keypair.secretKey),
-      mnemonic,
-    }
+    throw new Error('PrivateKeyWalletProvider does not support creating wallets from mnemonics. Use MnemonicWalletProvider instead.')
   }
 
   generate(): WarpWalletDetails {
     const keypair = Keypair.generate()
-    const entropy = keypair.secretKey.slice(0, 16)
-    const mnemonic = bip39.entropyToMnemonic(entropy, wordlist)
     return {
-      provider: 'privateKey',
+      provider: PrivateKeyWalletProvider.PROVIDER_NAME,
       address: keypair.publicKey.toBase58(),
       privateKey: bs58.encode(keypair.secretKey),
-      mnemonic,
+      mnemonic: null,
     }
   }
 

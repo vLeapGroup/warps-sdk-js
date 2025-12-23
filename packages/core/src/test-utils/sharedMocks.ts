@@ -243,10 +243,10 @@ export const createMockAdapter = () => ({
       return Promise.resolve('mock-tx-hash')
     },
     create(mnemonic: string) {
-      return { address: 'erd1test', privateKey: 'mock-private-key' }
+      return { provider: 'privateKey', address: 'erd1test', privateKey: 'mock-private-key' }
     },
     generate() {
-      return { address: 'erd1test', privateKey: 'mock-private-key' }
+      return { provider: 'privateKey', address: 'erd1test', privateKey: 'mock-private-key' }
     },
     getAddress() {
       return 'erd1test'

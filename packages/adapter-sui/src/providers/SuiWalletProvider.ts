@@ -6,9 +6,11 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpWalletDetails,
+  WarpWalletProvider,
 } from '@vleap/warps'
 
 export class PrivateKeyWalletProvider implements WalletProvider {
+  static readonly PROVIDER_NAME: WarpWalletProvider = 'privateKey'
   private keypair: Ed25519Keypair | null = null
 
   constructor(
@@ -49,15 +51,7 @@ export class PrivateKeyWalletProvider implements WalletProvider {
   }
 
   create(mnemonic: string): WarpWalletDetails {
-    const keypair = Ed25519Keypair.deriveKeypair(mnemonic.trim())
-    const address = keypair.getPublicKey().toSuiAddress()
-    const privateKey = Buffer.from(keypair.getSecretKey()).toString('hex')
-    return {
-      provider: 'privateKey',
-      address,
-      privateKey,
-      mnemonic,
-    }
+    throw new Error('PrivateKeyWalletProvider does not support creating wallets from mnemonics. Use MnemonicWalletProvider instead.')
   }
 
   generate(): WarpWalletDetails {
@@ -65,7 +59,7 @@ export class PrivateKeyWalletProvider implements WalletProvider {
     const address = keypair.getPublicKey().toSuiAddress()
     const privateKey = Buffer.from(keypair.getSecretKey()).toString('hex')
     return {
-      provider: 'privateKey',
+      provider: PrivateKeyWalletProvider.PROVIDER_NAME,
       address,
       privateKey,
       mnemonic: null,

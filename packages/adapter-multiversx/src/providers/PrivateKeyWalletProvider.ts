@@ -1,8 +1,9 @@
-import { WalletProvider, WarpWalletDetails } from '@vleap/warps'
-import { Account, Mnemonic, Message, Transaction, UserSecretKey } from '@multiversx/sdk-core'
+import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
+import { Account, Message, Transaction, UserSecretKey } from '@multiversx/sdk-core'
 import { getWarpWalletAddressFromConfig, getWarpWalletPrivateKeyFromConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 
 export class PrivateKeyWalletProvider implements WalletProvider {
+  static readonly PROVIDER_NAME: WarpWalletProvider = 'privateKey'
   private account: Account | null = null
 
   constructor(
@@ -51,31 +52,19 @@ export class PrivateKeyWalletProvider implements WalletProvider {
   }
 
   create(mnemonic: string): WarpWalletDetails {
-    const mnemonicObj = Mnemonic.fromString(mnemonic)
-    const privateKey = mnemonicObj.deriveKey(0)
-    const privateKeyHex = privateKey.hex()
-    const pubKey = privateKey.generatePublicKey()
-    const address = pubKey.toAddress(this.chain.addressHrp).toBech32()
-    return {
-      provider: 'privateKey',
-      address,
-      privateKey: privateKeyHex,
-      mnemonic,
-    }
+    throw new Error('PrivateKeyWalletProvider does not support creating wallets from mnemonics. Use MnemonicWalletProvider instead.')
   }
 
   generate(): WarpWalletDetails {
-    const mnemonic = Mnemonic.generate()
-    const mnemonicWords = mnemonic.toString()
-    const privateKey = mnemonic.deriveKey(0)
+    const privateKey = UserSecretKey.generate()
     const privateKeyHex = privateKey.hex()
     const pubKey = privateKey.generatePublicKey()
     const address = pubKey.toAddress(this.chain.addressHrp).toBech32()
     return {
-      provider: 'privateKey',
+      provider: PrivateKeyWalletProvider.PROVIDER_NAME,
       address,
       privateKey: privateKeyHex,
-      mnemonic: mnemonicWords,
+      mnemonic: null,
     }
   }
 

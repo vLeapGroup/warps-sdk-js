@@ -8,6 +8,7 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpWalletDetails,
+  WarpWalletProvider,
 } from '@vleap/warps'
 import { getConfiguredSuiClient } from './helpers'
 import { MnemonicWalletProvider } from './providers/MnemonicWalletProvider'
@@ -27,27 +28,6 @@ export class WarpSuiWallet implements AdapterWarpWallet {
     this.client = getConfiguredSuiClient(config, chain)
     this.walletProvider = this.createProvider()
     this.initializeCache()
-  }
-
-  private createProvider(): WalletProvider | null {
-    const wallet = this.config.user?.wallets?.[this.chain.name]
-    if (!wallet) return null
-    if (typeof wallet === 'string') return new ReadOnlyWalletProvider(this.config, this.chain)
-
-    const customWalletProviders = this.config.walletProviders?.[this.chain.name]
-    const providerFactory = customWalletProviders?.[wallet.provider]
-    if (providerFactory) return providerFactory(this.config, this.chain)
-
-    if (wallet.provider === 'privateKey') return new PrivateKeyWalletProvider(this.config, this.chain)
-    if (wallet.provider === 'mnemonic') return new MnemonicWalletProvider(this.config, this.chain)
-    throw new Error(`Unsupported wallet provider for ${this.chain.name}: ${wallet.provider}`)
-  }
-
-  private initializeCache() {
-    initializeWalletCache(this.walletProvider).then((cache: { address: string | null; publicKey: string | null }) => {
-      this.cachedAddress = cache.address
-      this.cachedPublicKey = cache.publicKey
-    })
   }
 
   async signTransaction(tx: WarpAdapterGenericTransaction): Promise<WarpAdapterGenericTransaction> {
@@ -90,16 +70,14 @@ export class WarpSuiWallet implements AdapterWarpWallet {
     return Promise.all(txs.map(async (tx) => this.sendTransaction(tx)))
   }
 
-  create(mnemonic: string): WarpWalletDetails {
-    if (!this.walletProvider) throw new Error('No wallet provider available')
-    if (this.walletProvider instanceof ReadOnlyWalletProvider) throw new Error(`Wallet (${this.chain.name}) is read-only`)
-    return this.walletProvider.create(mnemonic)
+  create(mnemonic: string, provider: WarpWalletProvider): WarpWalletDetails {
+    const walletProvider = this.createProviderForOperation(provider)
+    return walletProvider.create(mnemonic)
   }
 
-  generate(): WarpWalletDetails {
-    if (!this.walletProvider) throw new Error('No wallet provider available')
-    if (this.walletProvider instanceof ReadOnlyWalletProvider) throw new Error(`Wallet (${this.chain.name}) is read-only`)
-    return this.walletProvider.generate()
+  generate(provider: WarpWalletProvider): WarpWalletDetails {
+    const walletProvider = this.createProviderForOperation(provider)
+    return walletProvider.generate()
   }
 
   getAddress(): string | null {
@@ -108,5 +86,33 @@ export class WarpSuiWallet implements AdapterWarpWallet {
 
   getPublicKey(): string | null {
     return this.cachedPublicKey
+  }
+
+  private createProvider(): WalletProvider | null {
+    const wallet = this.config.user?.wallets?.[this.chain.name]
+    if (!wallet) return null
+    if (typeof wallet === 'string') return new ReadOnlyWalletProvider(this.config, this.chain)
+    return this.createProviderForOperation(wallet.provider)
+  }
+
+  private initializeCache() {
+    initializeWalletCache(this.walletProvider).then((cache: { address: string | null; publicKey: string | null }) => {
+      this.cachedAddress = cache.address
+      this.cachedPublicKey = cache.publicKey
+    })
+  }
+
+  private createProviderForOperation(provider: WarpWalletProvider): WalletProvider {
+    const customWalletProviders = this.config.walletProviders?.[this.chain.name]
+    const providerFactory = customWalletProviders?.[provider]
+    if (providerFactory) {
+      const walletProvider = providerFactory(this.config, this.chain)
+      if (!walletProvider) throw new Error(`Custom wallet provider factory returned null for ${provider}`)
+      return walletProvider
+    }
+
+    if (provider === 'privateKey') return new PrivateKeyWalletProvider(this.config, this.chain)
+    if (provider === 'mnemonic') return new MnemonicWalletProvider(this.config, this.chain)
+    throw new Error(`Unsupported wallet provider for ${this.chain.name}: ${provider}`)
   }
 }

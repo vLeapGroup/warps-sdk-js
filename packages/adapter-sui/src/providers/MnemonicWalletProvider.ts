@@ -1,9 +1,11 @@
-import { WalletProvider, WarpWalletDetails } from '@vleap/warps'
+import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519'
 import { getWarpWalletAddressFromConfig, getWarpWalletMnemonicFromConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 import * as bip39 from '@scure/bip39'
+import { wordlist } from '@scure/bip39/wordlists/english.js'
 
 export class MnemonicWalletProvider implements WalletProvider {
+  static readonly PROVIDER_NAME: WarpWalletProvider = 'mnemonic'
   private keypair: Ed25519Keypair | null = null
 
   constructor(
@@ -46,11 +48,10 @@ export class MnemonicWalletProvider implements WalletProvider {
   create(mnemonic: string): WarpWalletDetails {
     const keypair = Ed25519Keypair.deriveKeypair(mnemonic.trim())
     const address = keypair.getPublicKey().toSuiAddress()
-    const privateKey = Buffer.from(keypair.getSecretKey()).toString('hex')
     return {
-      provider: 'mnemonic',
+      provider: MnemonicWalletProvider.PROVIDER_NAME,
       address,
-      privateKey,
+      privateKey: null,
       mnemonic,
     }
   }
@@ -58,12 +59,12 @@ export class MnemonicWalletProvider implements WalletProvider {
   generate(): WarpWalletDetails {
     const keypair = Ed25519Keypair.generate()
     const address = keypair.getPublicKey().toSuiAddress()
-    const privateKey = Buffer.from(keypair.getSecretKey()).toString('hex')
+    const mnemonic = bip39.generateMnemonic(wordlist)
     return {
-      provider: 'mnemonic',
+      provider: MnemonicWalletProvider.PROVIDER_NAME,
       address,
-      privateKey,
-      mnemonic: null,
+      privateKey: null,
+      mnemonic,
     }
   }
 

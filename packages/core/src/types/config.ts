@@ -214,8 +214,8 @@ export interface AdapterWarpWallet {
   signMessage(message: string): Promise<string>
   sendTransactions(txs: WarpAdapterGenericTransaction[]): Promise<string[]>
   sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string>
-  create(mnemonic: string): WarpWalletDetails
-  generate(): WarpWalletDetails
+  create(mnemonic: string, provider: WarpWalletProvider): WarpWalletDetails
+  generate(provider: WarpWalletProvider): WarpWalletDetails
   getAddress(): string | null
   getPublicKey(): string | null
   registerX402Handlers?(client: unknown): Promise<Record<string, () => void>>

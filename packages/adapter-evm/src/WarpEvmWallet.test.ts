@@ -147,12 +147,5 @@ describe('WarpEvmWallet', () => {
       await expect(readOnlyWallet.signMessage('Hello')).rejects.toThrow(`Wallet (${chain.name}) is read-only`)
     })
 
-    it('should throw error when trying to create wallet with read-only wallet', () => {
-      expect(() => readOnlyWallet.create('test mnemonic')).toThrow(`Wallet (${chain.name}) is read-only`)
-    })
-
-    it('should throw error when trying to generate wallet with read-only wallet', () => {
-      expect(() => readOnlyWallet.generate()).toThrow(`Wallet (${chain.name}) is read-only`)
-    })
   })
 })

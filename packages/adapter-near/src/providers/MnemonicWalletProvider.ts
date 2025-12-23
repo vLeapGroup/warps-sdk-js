@@ -1,4 +1,4 @@
-import { WalletProvider, WarpWalletDetails } from '@vleap/warps'
+import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
 import { keyToImplicitAddress } from '@near-js/crypto'
 import * as bip39 from '@scure/bip39'
 import { wordlist } from '@scure/bip39/wordlists/english.js'
@@ -7,6 +7,7 @@ import bs58 from 'bs58'
 import { KeyPair } from 'near-api-js'
 
 export class MnemonicWalletProvider implements WalletProvider {
+  static readonly PROVIDER_NAME: WarpWalletProvider = 'mnemonic'
   private keypair: KeyPair | null = null
 
   constructor(
@@ -60,9 +61,9 @@ export class MnemonicWalletProvider implements WalletProvider {
     const publicKey = keyPair.getPublicKey()
     const accountId = keyToImplicitAddress(publicKey.toString())
     return {
-      provider: 'mnemonic',
+      provider: MnemonicWalletProvider.PROVIDER_NAME,
       address: accountId,
-      privateKey: keyPair.toString(),
+      privateKey: null,
       mnemonic,
     }
   }
@@ -74,9 +75,9 @@ export class MnemonicWalletProvider implements WalletProvider {
     const publicKey = keyPair.getPublicKey()
     const accountId = keyToImplicitAddress(publicKey.toString())
     return {
-      provider: 'mnemonic',
+      provider: MnemonicWalletProvider.PROVIDER_NAME,
       address: accountId,
-      privateKey: keyPair.toString(),
+      privateKey: null,
       mnemonic,
     }
   }
