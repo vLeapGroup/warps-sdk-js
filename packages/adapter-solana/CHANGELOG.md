@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.0-beta.14
+
+### Patch Changes
+
+- 4ce5b8c: add chain + token logo themes
+- Updated dependencies [4ce5b8c]
+  - @vleap/warps@3.0.0-beta.182
+
 ## 0.1.0-beta.13
 
 ### Patch Changes

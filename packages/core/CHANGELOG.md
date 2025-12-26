@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.182
+
+### Patch Changes
+
+- 4ce5b8c: add chain + token logo themes
+
 ## 3.0.0-beta.181
 
 ### Patch Changes
