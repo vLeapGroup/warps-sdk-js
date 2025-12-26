@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.183
+
+### Patch Changes
+
+- d3a902d: update warp theme config
+
 ## 3.0.0-beta.182
 
 ### Patch Changes

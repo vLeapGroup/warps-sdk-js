@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-beta.64
+
+### Patch Changes
+
+- 75c3fc9: update ethereum logos
+- Updated dependencies [d3a902d]
+  - @vleap/warps@3.0.0-beta.183
+
 ## 0.2.0-beta.63
 
 ### Patch Changes
