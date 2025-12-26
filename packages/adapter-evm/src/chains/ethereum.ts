@@ -21,7 +21,10 @@ export const EthereumAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainNa
     blockTime: 12000,
     addressHrp: '0x',
     defaultApiUrl: 'https://ethereum-rpc.publicnode.com',
-    logoUrl: 'https://joai.ai/images/chains/ethereum.svg',
+    logoUrl: {
+      light: 'https://joai.ai/images/chains/ethereum-white.svg',
+      dark: 'https://joai.ai/images/chains/ethereum-black.svg',
+    },
     nativeToken: NativeTokenEth,
   },
   testnet: {
@@ -31,7 +34,10 @@ export const EthereumAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainNa
     blockTime: 12000,
     addressHrp: '0x',
     defaultApiUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
-    logoUrl: 'https://joai.ai/images/chains/ethereum.svg',
+    logoUrl: {
+      light: 'https://joai.ai/images/chains/ethereum-white.svg',
+      dark: 'https://joai.ai/images/chains/ethereum-black.svg',
+    },
     nativeToken: NativeTokenEth,
   },
   devnet: {
@@ -41,7 +47,10 @@ export const EthereumAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainNa
     blockTime: 12000,
     addressHrp: '0x',
     defaultApiUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
-    logoUrl: 'https://joai.ai/images/chains/ethereum.svg',
+    logoUrl: {
+      light: 'https://joai.ai/images/chains/ethereum-white.svg',
+      dark: 'https://joai.ai/images/chains/ethereum-black.svg',
+    },
     nativeToken: NativeTokenEth,
   },
 })
