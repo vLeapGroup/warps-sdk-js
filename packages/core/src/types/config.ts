@@ -51,7 +51,7 @@ export type WarpClientConfig = {
   }
   preferences?: {
     locale?: WarpLocale
-    scheme?: WarpTheme
+    theme?: WarpTheme
     explorers?: Record<WarpChain, WarpExplorerName>
     providers?: Record<WarpChain, WarpProviderPreferences>
   }
