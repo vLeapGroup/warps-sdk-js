@@ -7,7 +7,10 @@ export const FastsetTokens: WarpChainAsset[] = [
     name: 'Ethereum',
     symbol: 'ETH',
     decimals: 18,
-    logoUrl: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
+    logoUrl: {
+      light: 'https://joai.ai/images/tokens/eth-white.svg',
+      dark: 'https://joai.ai/images/tokens/eth-black.svg',
+    },
     amount: 0n,
   },
   {
@@ -25,7 +28,7 @@ export const FastsetTokens: WarpChainAsset[] = [
     name: 'Solana',
     symbol: 'SOL',
     decimals: 9,
-    logoUrl: 'https://assets.coingecko.com/coins/images/4128/small/solana.png',
+    logoUrl: 'https://joai.ai/images/tokens/sol.svg',
     amount: 0n,
   },
   {
@@ -43,7 +46,10 @@ export const FastsetTokens: WarpChainAsset[] = [
     name: 'Wrapped SET',
     symbol: 'WSET',
     decimals: 18,
-    logoUrl: 'https://joai.ai/images/tokens/set-black.svg',
+    logoUrl: {
+      light: 'https://joai.ai/images/tokens/set-white.svg',
+      dark: 'https://joai.ai/images/tokens/set-black.svg',
+    },
     amount: 0n,
   },
 ]

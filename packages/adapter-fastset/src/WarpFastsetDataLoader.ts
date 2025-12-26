@@ -1,5 +1,6 @@
 import {
   AdapterWarpDataLoader,
+  getWarpChainAssetLogoUrl,
   WarpChainAccount,
   WarpChainAction,
   WarpChainAsset,
@@ -51,7 +52,7 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
           symbol: assetInfo.symbol,
           name: assetInfo.name,
           decimals: assetInfo.decimals,
-          logoUrl: assetInfo.logoUrl || '',
+          logoUrl: assetInfo.logoUrl,
           amount,
         })
       }
@@ -77,7 +78,7 @@ export class WarpFastsetDataLoader implements AdapterWarpDataLoader {
       symbol: assetInfo.symbol,
       name: assetInfo.name,
       decimals: assetInfo.decimals,
-      logoUrl: assetInfo.logoUrl || null,
+      logoUrl: assetInfo.logoUrl,
       amount: 0n,
     }
   }

@@ -7,7 +7,10 @@ export const NativeTokenEth: WarpChainAsset = {
   symbol: 'ETH',
   name: 'Ether',
   decimals: 18,
-  logoUrl: 'https://joai.ai/images/tokens/eth.svg',
+  logoUrl: {
+    light: 'https://joai.ai/images/tokens/eth-white.svg',
+    dark: 'https://joai.ai/images/tokens/eth-black.svg',
+  },
 }
 
 export const EthereumAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainName.Ethereum, {

@@ -2,6 +2,7 @@ import {
   AdapterWarpDataLoader,
   CacheTtl,
   getProviderConfig,
+  getWarpChainAssetLogoUrl,
   WarpCache,
   WarpCacheKey,
   WarpChainAccount,
@@ -211,7 +212,7 @@ export class WarpSolanaDataLoader implements AdapterWarpDataLoader {
                 name: knownToken.name,
                 symbol: knownToken.symbol,
                 decimals: knownToken.decimals,
-                logoUrl: knownToken.logoUrl || '',
+                logoUrl: getWarpChainAssetLogoUrl(knownToken, this.config) || '',
               },
             }
           }

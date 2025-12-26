@@ -2,7 +2,7 @@ import { WarpAbiContents } from './abi'
 import { WarpBrand } from './brand'
 import { ClientCacheConfig } from './cache'
 import { WarpChainAccount, WarpChainAction, WarpChainAsset } from './chain'
-import { WarpChainEnv } from './general'
+import { WarpChainEnv, WarpTheme } from './general'
 import { WarpLocale } from './i18n'
 import { WarpActionExecutionResult } from './output'
 import { WarpRegistryConfigInfo, WarpRegistryInfo } from './registry'
@@ -51,6 +51,7 @@ export type WarpClientConfig = {
   }
   preferences?: {
     locale?: WarpLocale
+    scheme?: WarpTheme
     explorers?: Record<WarpChain, WarpExplorerName>
     providers?: Record<WarpChain, WarpProviderPreferences>
   }

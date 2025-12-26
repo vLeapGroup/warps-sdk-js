@@ -7,7 +7,10 @@ export const NativeTokenBase: WarpChainAsset = {
   name: 'Ether',
   symbol: 'ETH',
   decimals: 18,
-  logoUrl: 'https://joai.ai/images/tokens/eth.svg',
+  logoUrl: {
+    light: 'https://joai.ai/images/tokens/eth-white.svg',
+    dark: 'https://joai.ai/images/tokens/eth-black.svg',
+  },
 }
 
 export const BaseAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainName.Base, {
@@ -18,7 +21,10 @@ export const BaseAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainName.B
     blockTime: 2000,
     addressHrp: '0x',
     defaultApiUrl: 'https://mainnet.base.org',
-    logoUrl: 'https://joai.ai/images/chains/base.svg',
+    logoUrl: {
+      light: 'https://joai.ai/images/chains/base-white.svg',
+      dark: 'https://joai.ai/images/chains/base-black.svg',
+    },
     nativeToken: NativeTokenBase,
   },
   testnet: {
@@ -28,7 +34,10 @@ export const BaseAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainName.B
     blockTime: 2000,
     addressHrp: '0x',
     defaultApiUrl: 'https://sepolia.base.org',
-    logoUrl: 'https://joai.ai/images/chains/base.svg',
+    logoUrl: {
+      light: 'https://joai.ai/images/chains/base-white.svg',
+      dark: 'https://joai.ai/images/chains/base-black.svg',
+    },
     nativeToken: NativeTokenBase,
   },
   devnet: {
@@ -38,7 +47,10 @@ export const BaseAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainName.B
     blockTime: 2000,
     addressHrp: '0x',
     defaultApiUrl: 'https://sepolia.base.org',
-    logoUrl: 'https://joai.ai/images/chains/base.svg',
+    logoUrl: {
+      light: 'https://joai.ai/images/chains/base-white.svg',
+      dark: 'https://joai.ai/images/chains/base-black.svg',
+    },
     nativeToken: NativeTokenBase,
   },
 })

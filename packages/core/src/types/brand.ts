@@ -1,3 +1,4 @@
+import { WarpTheme } from './general'
 import { WarpText } from './i18n'
 import { WarpMeta } from './warp'
 
@@ -12,7 +13,7 @@ export type WarpBrand = {
   meta?: WarpMeta
 }
 
-export type WarpBrandLogoThemed = { light: string; dark: string }
+export type WarpBrandLogoThemed = Record<WarpTheme, string>
 export type WarpBrandLogo = string | WarpBrandLogoThemed
 
 export type WarpBrandUrls = {
