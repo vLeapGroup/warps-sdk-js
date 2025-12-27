@@ -55,7 +55,7 @@ export class MnemonicWalletProvider implements WalletProvider {
     return uint8ArrayToHex(signature)
   }
 
-  create(mnemonic: string): WarpWalletDetails {
+  async create(mnemonic: string): Promise<WarpWalletDetails> {
     const seed = bip39.mnemonicToSeedSync(mnemonic)
     const privateKey = seed.slice(0, 32)
     const publicKey = ed.getPublicKey(privateKey)
@@ -68,7 +68,7 @@ export class MnemonicWalletProvider implements WalletProvider {
     }
   }
 
-  generate(): WarpWalletDetails {
+  async generate(): Promise<WarpWalletDetails> {
     const mnemonic = bip39.generateMnemonic(wordlist)
     const seed = bip39.mnemonicToSeedSync(mnemonic)
     const privateKey = seed.slice(0, 32)

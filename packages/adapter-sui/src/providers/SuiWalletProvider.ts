@@ -50,7 +50,7 @@ export class PrivateKeyWalletProvider implements WalletProvider {
     return this.getKeypair()
   }
 
-  create(mnemonic: string): WarpWalletDetails {
+  async create(mnemonic: string): Promise<WarpWalletDetails> {
     const keypair = Ed25519Keypair.deriveKeypair(mnemonic.trim())
     const address = keypair.getPublicKey().toSuiAddress()
     const privateKey = Buffer.from(keypair.getSecretKey()).toString('hex')
@@ -62,7 +62,7 @@ export class PrivateKeyWalletProvider implements WalletProvider {
     }
   }
 
-  generate(): WarpWalletDetails {
+  async generate(): Promise<WarpWalletDetails> {
     const keypair = Ed25519Keypair.generate()
     const address = keypair.getPublicKey().toSuiAddress()
     const privateKey = Buffer.from(keypair.getSecretKey()).toString('hex')

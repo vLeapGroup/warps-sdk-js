@@ -90,7 +90,7 @@ export class SolanaWalletProvider implements WalletProvider {
     return this.getKeypair()
   }
 
-  create(mnemonic: string): WarpWalletDetails {
+  async create(mnemonic: string): Promise<WarpWalletDetails> {
     const seed = bip39.mnemonicToSeedSync(mnemonic)
     const keypair = Keypair.fromSeed(seed.slice(0, 32))
     return {
@@ -101,7 +101,7 @@ export class SolanaWalletProvider implements WalletProvider {
     }
   }
 
-  generate(): WarpWalletDetails {
+  async generate(): Promise<WarpWalletDetails> {
     const keypair = Keypair.generate()
     return {
       provider: SolanaWalletProvider.PROVIDER_NAME,

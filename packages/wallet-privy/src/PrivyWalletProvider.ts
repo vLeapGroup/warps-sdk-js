@@ -46,11 +46,11 @@ export class PrivyWalletProvider implements WalletProvider {
     }
   }
 
-  create(mnemonic: string): WarpWalletDetails {
+  async create(mnemonic: string): Promise<WarpWalletDetails> {
     throw new Error('PrivyWalletProvider: create not supported - Privy manages wallets externally')
   }
 
-  generate(): WarpWalletDetails {
+  async generate(): Promise<WarpWalletDetails> {
     throw new Error('PrivyWalletProvider: generate not supported - Privy manages wallets externally')
   }
 }

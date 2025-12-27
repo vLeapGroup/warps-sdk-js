@@ -81,8 +81,8 @@ describe('WarpSolanaWallet', () => {
   })
 
   describe('generate', () => {
-    it('should generate a new wallet', () => {
-      const result = wallet.generate('privateKey')
+    it('should generate a new wallet', async () => {
+      const result = await wallet.generate('privateKey')
       expect(result).toBeDefined()
       expect(result.address).toBeDefined()
       expect(result.privateKey).toBeDefined()
@@ -127,15 +127,15 @@ describe('WarpSolanaWallet', () => {
       await expect(readOnlyWallet.signMessage('Hello')).rejects.toThrow(`Wallet (${chain.name}) is read-only`)
     })
 
-    it('should create wallet with provider even when wallet is read-only', () => {
-      const result = readOnlyWallet.create('mnemonic', 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+    it('should create wallet with provider even when wallet is read-only', async () => {
+      const result = await readOnlyWallet.create('mnemonic', 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
       expect(result).toBeDefined()
       expect(result.address).toBeDefined()
       expect(result.provider).toBe('mnemonic')
     })
 
-    it('should generate wallet with provider even when wallet is read-only', () => {
-      const result = readOnlyWallet.generate('privateKey')
+    it('should generate wallet with provider even when wallet is read-only', async () => {
+      const result = await readOnlyWallet.generate('privateKey')
       expect(result).toBeDefined()
       expect(result.address).toBeDefined()
       expect(result.provider).toBe('privateKey')

@@ -45,7 +45,7 @@ export class MnemonicWalletProvider implements WalletProvider {
     return this.getKeypair()
   }
 
-  create(mnemonic: string): WarpWalletDetails {
+  async create(mnemonic: string): Promise<WarpWalletDetails> {
     const keypair = Ed25519Keypair.deriveKeypair(mnemonic.trim())
     const address = keypair.getPublicKey().toSuiAddress()
     return {
@@ -56,7 +56,7 @@ export class MnemonicWalletProvider implements WalletProvider {
     }
   }
 
-  generate(): WarpWalletDetails {
+  async generate(): Promise<WarpWalletDetails> {
     const mnemonic = bip39.generateMnemonic(wordlist)
     const keypair = Ed25519Keypair.deriveKeypair(mnemonic.trim())
     const address = keypair.getPublicKey().toSuiAddress()

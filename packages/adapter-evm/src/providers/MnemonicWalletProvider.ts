@@ -57,7 +57,7 @@ export class MnemonicWalletProvider implements WalletProvider {
     return this.getWallet()
   }
 
-  create(mnemonic: string): WarpWalletDetails {
+  async create(mnemonic: string): Promise<WarpWalletDetails> {
     const wallet = ethers.Wallet.fromPhrase(mnemonic)
     return {
       provider: MnemonicWalletProvider.PROVIDER_NAME,
@@ -67,7 +67,7 @@ export class MnemonicWalletProvider implements WalletProvider {
     }
   }
 
-  generate(): WarpWalletDetails {
+  async generate(): Promise<WarpWalletDetails> {
     const wallet = ethers.Wallet.createRandom()
     return {
       provider: MnemonicWalletProvider.PROVIDER_NAME,

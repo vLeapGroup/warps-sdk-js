@@ -121,7 +121,7 @@ describe('WarpFastsetWallet', () => {
   })
 
   describe('Wallet Creation', () => {
-    test('create() should create wallet from mnemonic', () => {
+    test('create() should create wallet from mnemonic', async () => {
       const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
       const configWithMnemonic = {
         env: 'testnet' as const,
@@ -135,7 +135,7 @@ describe('WarpFastsetWallet', () => {
         },
       }
       const walletWithMnemonic = new WarpFastsetWallet(configWithMnemonic, mockChain)
-      const result = walletWithMnemonic.create('mnemonic', mnemonic)
+      const result = await walletWithMnemonic.create('mnemonic', mnemonic)
 
       expect(result).toHaveProperty('address')
       expect(result).toHaveProperty('privateKey')
@@ -145,7 +145,7 @@ describe('WarpFastsetWallet', () => {
       expect(result.address).toMatch(/^set1/)
     })
 
-    test('generate() should generate random wallet', () => {
+    test('generate() should generate random wallet', async () => {
       const configWithMnemonic = {
         env: 'testnet' as const,
         user: {
@@ -158,7 +158,7 @@ describe('WarpFastsetWallet', () => {
         },
       }
       const walletWithMnemonic = new WarpFastsetWallet(configWithMnemonic, mockChain)
-      const result = walletWithMnemonic.generate('mnemonic')
+      const result = await walletWithMnemonic.generate('mnemonic')
 
       expect(result).toHaveProperty('address')
       expect(result).toHaveProperty('privateKey')
@@ -355,7 +355,7 @@ describe('WarpFastsetWallet', () => {
         },
       }
       const walletWithMnemonic = new WarpFastsetWallet(configWithMnemonic, mockChain)
-      const result = walletWithMnemonic.generate('mnemonic')
+      const result = await walletWithMnemonic.generate('mnemonic')
       expect(result.privateKey).toBeDefined()
       expect(result.mnemonic).not.toBeNull()
       if (result.privateKey) {

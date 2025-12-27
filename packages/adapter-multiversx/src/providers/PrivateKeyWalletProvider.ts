@@ -51,7 +51,7 @@ export class PrivateKeyWalletProvider implements WalletProvider {
     return this.getAccount()
   }
 
-  create(mnemonic: string): WarpWalletDetails {
+  async create(mnemonic: string): Promise<WarpWalletDetails> {
     const mnemonicObj = Mnemonic.fromString(mnemonic)
     const privateKey = mnemonicObj.deriveKey(0)
     const privateKeyHex = privateKey.hex()
@@ -65,7 +65,7 @@ export class PrivateKeyWalletProvider implements WalletProvider {
     }
   }
 
-  generate(): WarpWalletDetails {
+  async generate(): Promise<WarpWalletDetails> {
     const privateKey = UserSecretKey.generate()
     const privateKeyHex = privateKey.hex()
     const pubKey = privateKey.generatePublicKey()

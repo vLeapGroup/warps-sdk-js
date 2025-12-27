@@ -22,7 +22,7 @@ import {
   WarpNativeValue,
 } from './warp'
 
-export type WarpWalletProvider = 'mnemonic' | 'privateKey' | 'privy' | 'gaupa'
+export type WarpWalletProvider = 'mnemonic' | 'privateKey' | 'coinbase' | 'privy' | 'gaupa'
 
 export type WarpWalletDetails = {
   provider: WarpWalletProvider
@@ -215,8 +215,8 @@ export interface AdapterWarpWallet {
   signMessage(message: string): Promise<string>
   sendTransactions(txs: WarpAdapterGenericTransaction[]): Promise<string[]>
   sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string>
-  create(provider: WarpWalletProvider, mnemonic: string): WarpWalletDetails
-  generate(provider: WarpWalletProvider): WarpWalletDetails
+  create(provider: WarpWalletProvider, mnemonic: string): Promise<WarpWalletDetails>
+  generate(provider: WarpWalletProvider): Promise<WarpWalletDetails>
   getAddress(): string | null
   getPublicKey(): string | null
   registerX402Handlers?(client: unknown): Promise<Record<string, () => void>>

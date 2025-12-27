@@ -93,11 +93,11 @@ export class PrivateKeyWalletProvider implements WalletProvider {
     return this.getKeypair()
   }
 
-  create(mnemonic: string): WarpWalletDetails {
+  async create(mnemonic: string): Promise<WarpWalletDetails> {
     throw new Error('PrivateKeyWalletProvider does not support creating wallets from mnemonics. Use MnemonicWalletProvider instead.')
   }
 
-  generate(): WarpWalletDetails {
+  async generate(): Promise<WarpWalletDetails> {
     const keypair = Keypair.generate()
     return {
       provider: PrivateKeyWalletProvider.PROVIDER_NAME,

@@ -6,8 +6,8 @@ export interface WalletProvider {
   getPublicKey(): Promise<string | null>
   signTransaction(tx: any): Promise<any>
   signMessage(message: string): Promise<string>
-  create(mnemonic: string): WarpWalletDetails
-  generate(): WarpWalletDetails
+  create(mnemonic: string): Promise<WarpWalletDetails>
+  generate(): Promise<WarpWalletDetails>
 }
 
 export type WalletProviderFactory = (config: WarpClientConfig, chain: WarpChainInfo) => WalletProvider | null

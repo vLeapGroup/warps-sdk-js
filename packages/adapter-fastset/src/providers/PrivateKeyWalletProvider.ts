@@ -54,7 +54,7 @@ export class PrivateKeyWalletProvider implements WalletProvider {
     return uint8ArrayToHex(signature)
   }
 
-  create(mnemonic: string): WarpWalletDetails {
+  async create(mnemonic: string): Promise<WarpWalletDetails> {
     const seed = bip39.mnemonicToSeedSync(mnemonic)
     const privateKey = seed.slice(0, 32)
     const publicKey = ed.getPublicKey(privateKey)
@@ -67,7 +67,7 @@ export class PrivateKeyWalletProvider implements WalletProvider {
     }
   }
 
-  generate(): WarpWalletDetails {
+  async generate(): Promise<WarpWalletDetails> {
     const privateKey = ed.utils.randomSecretKey()
     const publicKey = ed.getPublicKey(privateKey)
     const address = FastsetClient.encodeBech32Address(publicKey)

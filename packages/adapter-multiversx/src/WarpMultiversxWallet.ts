@@ -92,14 +92,14 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
     return await this.entry.sendTransaction(tx)
   }
 
-  create(provider: WarpWalletProvider, mnemonic: string): WarpWalletDetails {
+  async create(provider: WarpWalletProvider, mnemonic: string): Promise<WarpWalletDetails> {
     const walletProvider = this.createProviderForOperation(provider)
-    return walletProvider.create(mnemonic)
+    return await walletProvider.create(mnemonic)
   }
 
-  generate(provider: WarpWalletProvider): WarpWalletDetails {
+  async generate(provider: WarpWalletProvider): Promise<WarpWalletDetails> {
     const walletProvider = this.createProviderForOperation(provider)
-    return walletProvider.generate()
+    return await walletProvider.generate()
   }
 
   getAddress(): string | null {

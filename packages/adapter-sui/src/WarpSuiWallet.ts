@@ -70,14 +70,14 @@ export class WarpSuiWallet implements AdapterWarpWallet {
     return Promise.all(txs.map(async (tx) => this.sendTransaction(tx)))
   }
 
-  create(provider: WarpWalletProvider, mnemonic: string): WarpWalletDetails {
+  async create(provider: WarpWalletProvider, mnemonic: string): Promise<WarpWalletDetails> {
     const walletProvider = this.createProviderForOperation(provider)
-    return walletProvider.create(mnemonic)
+    return await walletProvider.create(mnemonic)
   }
 
-  generate(provider: WarpWalletProvider): WarpWalletDetails {
+  async generate(provider: WarpWalletProvider): Promise<WarpWalletDetails> {
     const walletProvider = this.createProviderForOperation(provider)
-    return walletProvider.generate()
+    return await walletProvider.generate()
   }
 
   getAddress(): string | null {
