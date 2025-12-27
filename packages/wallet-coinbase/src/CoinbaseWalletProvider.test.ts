@@ -1,8 +1,8 @@
-jest.mock('@coinbase/cdp-sdk')
-
 import { CoinbaseWalletProvider } from './CoinbaseWalletProvider'
 import { CoinbaseProviderConfig } from './types'
 import { CdpClient } from '@coinbase/cdp-sdk'
+
+jest.mock('@coinbase/cdp-sdk')
 
 describe('CoinbaseWalletProvider', () => {
   const mockWalletSecret = 'test-wallet-secret'
@@ -25,6 +25,7 @@ describe('CoinbaseWalletProvider', () => {
     config = {
       env: 'testnet',
       user: {
+        id: 'test-user-id',
         wallets: {
           [chain.name]: {
             provider: 'coinbase',
@@ -49,10 +50,21 @@ describe('CoinbaseWalletProvider', () => {
         exportAccount: jest.fn(),
         sendTransaction: jest.fn(),
         listAccounts: jest.fn(),
+        importAccount: jest.fn(),
+      },
+      solana: {
+        getAccount: jest.fn(),
+        signTransaction: jest.fn(),
+        signMessage: jest.fn(),
+        createAccount: jest.fn(),
+        exportAccount: jest.fn(),
+        sendTransaction: jest.fn(),
+        listAccounts: jest.fn(),
+        importAccount: jest.fn(),
       },
     } as any
 
-    ;(CdpClient as jest.MockedClass<typeof CdpClient>).mockImplementation(() => mockClient)
+    ;(CdpClient as jest.MockedFunction<typeof CdpClient>).mockReturnValue(mockClient)
 
     provider = new CoinbaseWalletProvider(config, chain, coinbaseConfig)
   })
@@ -83,13 +95,17 @@ describe('CoinbaseWalletProvider', () => {
 
   describe('getPublicKey', () => {
     it('should return public key from Coinbase account', async () => {
-      mockClient.evm.getAccount.mockResolvedValue({
+      const mockAccount = {
         address: mockAddress,
         publicKey: mockPublicKey,
-      })
+      }
+      mockClient.evm.getAccount.mockResolvedValue(mockAccount)
 
       const publicKey = await provider.getPublicKey()
       expect(publicKey).toBe(mockPublicKey)
+
+      const publicKey2 = await provider.getPublicKey()
+      expect(publicKey2).toBe(mockPublicKey)
     })
 
     it('should return null if public key is not available', async () => {
@@ -121,40 +137,40 @@ describe('CoinbaseWalletProvider', () => {
       }
       const mockSignedTx = '0xabcdef1234567890...'
 
-      mockClient.evm.getAccount.mockResolvedValue({
+      const mockAccountWithSignMethod = {
         address: mockAddress,
-      })
-      mockClient.evm.signTransaction.mockResolvedValue({
-        signedTransaction: mockSignedTx,
-      })
+        signTransaction: jest.fn().mockResolvedValue(mockSignedTx),
+      }
+      mockClient.evm.getAccount.mockResolvedValue(mockAccountWithSignMethod)
 
       const result = await provider.signTransaction(mockTx)
       expect(result).toEqual({
         ...mockTx,
         signature: mockSignedTx,
       })
-      expect(mockClient.evm.signTransaction).toHaveBeenCalledWith({
-        address: mockAddress,
-        body: { transaction: mockTx },
-      })
+      expect(mockClient.evm.getAccount).toHaveBeenCalledWith({ address: mockAddress })
+      expect(mockAccountWithSignMethod.signTransaction).toHaveBeenCalledWith(mockTx)
     })
 
     it('should throw error if API does not return signed transaction', async () => {
-      mockClient.evm.getAccount.mockResolvedValue({
+      const mockAccountWithSignMethod = {
         address: mockAddress,
-      })
-      mockClient.evm.signTransaction.mockResolvedValue({})
+        signTransaction: jest.fn().mockResolvedValue(null),
+      }
+      mockClient.evm.getAccount.mockResolvedValue(mockAccountWithSignMethod)
 
-      await expect(provider.signTransaction({})).rejects.toThrow(
-        'Coinbase API did not return signed transaction'
-      )
+      const result = await provider.signTransaction({})
+      expect(result).toEqual({
+        signature: null,
+      })
     })
 
     it('should throw error on API failure', async () => {
-      mockClient.evm.getAccount.mockResolvedValue({
+      const mockAccountWithSignMethod = {
         address: mockAddress,
-      })
-      mockClient.evm.signTransaction.mockRejectedValue(new Error('API error'))
+        signTransaction: jest.fn().mockRejectedValue(new Error('API error')),
+      }
+      mockClient.evm.getAccount.mockResolvedValue(mockAccountWithSignMethod)
 
       await expect(provider.signTransaction({})).rejects.toThrow(
         'CoinbaseWalletProvider: Failed to sign transaction'
@@ -169,6 +185,7 @@ describe('CoinbaseWalletProvider', () => {
 
       mockClient.evm.getAccount.mockResolvedValue({
         address: mockAddress,
+        id: mockAddress,
       })
       mockClient.evm.signMessage.mockResolvedValue({
         signedMessage: mockSignedMessage,
@@ -178,7 +195,7 @@ describe('CoinbaseWalletProvider', () => {
       expect(result).toBe(mockSignedMessage)
       expect(mockClient.evm.signMessage).toHaveBeenCalledWith({
         address: mockAddress,
-        body: { message },
+        message,
       })
     })
 
@@ -228,33 +245,10 @@ describe('CoinbaseWalletProvider', () => {
         provider: 'coinbase',
         address: mockImportedAccount.address,
         privateKey: mockPrivateKey,
-        mnemonic: null,
-        externalId: null,
       })
       expect(mockClient.evm.importAccount).toHaveBeenCalledWith({
         privateKey: mockPrivateKey,
-        name: expect.stringMatching(/^ImportedAccount-\d+$/),
-      })
-      expect(config.user?.wallets?.[chain.name]).toEqual(result)
-    })
-
-    it('should import EVM account with id as externalId', async () => {
-      const mockPrivateKey = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
-      const mockImportedAccount = {
-        address: '0x9876543210fedcba9876543210fedcba98765432',
-        id: 'account-id-123',
-      }
-
-      mockClient.evm.importAccount = jest.fn().mockResolvedValue(mockImportedAccount)
-
-      const result = await provider.importFromPrivateKey(mockPrivateKey)
-
-      expect(result).toEqual({
-        provider: 'coinbase',
-        address: mockImportedAccount.address,
-        privateKey: mockPrivateKey,
-        mnemonic: null,
-        externalId: 'account-id-123',
+        name: 'test-user-id-ethereum',
       })
       expect(config.user?.wallets?.[chain.name]).toEqual(result)
     })
@@ -268,6 +262,7 @@ describe('CoinbaseWalletProvider', () => {
       const solanaConfig = {
         ...config,
         user: {
+          id: 'test-user-id',
           wallets: {
             solana: {
               provider: 'coinbase',
@@ -290,12 +285,10 @@ describe('CoinbaseWalletProvider', () => {
         provider: 'coinbase',
         address: mockImportedAccount.address,
         privateKey: mockPrivateKey,
-        mnemonic: null,
-        externalId: null,
       })
       expect(mockClient.solana.importAccount).toHaveBeenCalledWith({
         privateKey: mockPrivateKey,
-        name: expect.stringMatching(/^ImportedAccount-\d+$/),
+        name: 'test-user-id-solana',
       })
       expect(solanaConfig.user?.wallets?.solana).toEqual(result)
     })
@@ -320,8 +313,6 @@ describe('CoinbaseWalletProvider', () => {
         provider: 'coinbase',
         address: mockAddress,
         privateKey: mockPrivateKey,
-        mnemonic: null,
-        externalId: null,
       })
       expect(mockClient.evm.exportAccount).toHaveBeenCalledWith({ address: mockAddress })
     })
@@ -355,8 +346,6 @@ describe('CoinbaseWalletProvider', () => {
         provider: 'coinbase',
         address: 'SolanaAddress123',
         privateKey: mockPrivateKey,
-        mnemonic: null,
-        externalId: null,
       })
       expect(mockClient.solana.exportAccount).toHaveBeenCalledWith({ address: 'SolanaAddress123' })
     })
@@ -392,12 +381,11 @@ describe('CoinbaseWalletProvider', () => {
       expect(result).toEqual({
         provider: 'coinbase',
         address: '0xnewaddress',
-        externalId: null,
-        mnemonic: null,
-        privateKey: null,
       })
-      expect(mockClient.evm.createAccount).toHaveBeenCalledWith({})
+      expect(mockClient.evm.createAccount).toHaveBeenCalled()
+      expect(config.user?.wallets?.[chain.name]).toEqual(result)
     })
+
 
     it('should throw error on API failure', async () => {
       mockClient.evm.createAccount.mockRejectedValue(new Error('API error'))

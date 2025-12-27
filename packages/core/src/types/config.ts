@@ -47,6 +47,7 @@ export type WarpClientConfig = {
   currentUrl?: string
   vars?: Record<string, string | number>
   user?: {
+    id?: string
     wallets?: WarpUserWallets
   }
   preferences?: {
