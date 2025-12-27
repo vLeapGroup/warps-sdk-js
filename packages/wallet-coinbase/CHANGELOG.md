@@ -1,0 +1,21 @@
+# @vleap/warps-wallet-coinbase
+
+## 1.0.0-beta.1
+
+### Minor Changes
+
+- Initial release of Coinbase Server Wallet v2 provider
+
+### Features
+
+- Full support for Coinbase Server Wallet v2 API
+- Account management (get address, public key)
+- Transaction signing for EVM and Solana networks
+- Message signing
+- Multi-network support (Ethereum, Base, Polygon, Arbitrum, Optimism, Solana)
+- Automatic network ID mapping based on chain and environment
+- Secure key management via Coinbase TEE
+
+### Dependencies
+
+- @vleap/warps@^3.0.0-beta.181

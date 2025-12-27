@@ -26,3 +26,7 @@ yarn-error.log*
 warp-schema.json
 *.key
 brand-schema.json
+
+# environment variables
+.env
+.env.local

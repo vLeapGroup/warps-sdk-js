@@ -6,10 +6,17 @@ import { NearAdapter } from '@vleap/warps-adapter-near'
 import { SolanaAdapter } from '@vleap/warps-adapter-solana'
 import { SuiAdapter } from '@vleap/warps-adapter-sui'
 import { createNodeTransformRunner } from '@vleap/warps-vm-node'
+import { createCoinbaseWalletProvider } from '@vleap/warps-wallet-coinbase'
 import { createGaupaWalletProvider } from '@vleap/warps-wallet-gaupa'
 import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+const dotenv = await import('dotenv')
+dotenv.config({ path: path.join(__dirname, '.env') })
 
 const Chain = 'ethereum'
 const WarpToTest = 'omniset-deposit-ethereum.json'
@@ -19,9 +26,6 @@ const QueryItems = {
   receiver: '0x5A92C4763dDAc3119a65f8882a53234C9988Efd9',
 }
 const WarpInputs: string[] = ['asset:ETH|0.002']
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 const warpsDir = path.join(__dirname, 'warps')
 
 const runWarp = async (warpFile: string) => {
@@ -43,6 +47,20 @@ const runWarp = async (warpFile: string) => {
     walletProviders: {
       multiversx: {
         gaupa: createGaupaWalletProvider({ apiKey: 'demo-api-key' }),
+      },
+      ethereum: {
+        coinbase: createCoinbaseWalletProvider({
+          apiKeyId: process.env.COINBASE_API_KEY_ID,
+          apiKeySecret: process.env.COINBASE_API_KEY_SECRET,
+          walletSecret: process.env.COINBASE_WALLET_SECRET,
+        }),
+      },
+      base: {
+        coinbase: createCoinbaseWalletProvider({
+          apiKeyId: process.env.COINBASE_API_KEY_ID,
+          apiKeySecret: process.env.COINBASE_API_KEY_SECRET,
+          walletSecret: process.env.COINBASE_WALLET_SECRET,
+        }),
       },
     },
     transform: { runner: createNodeTransformRunner() },
