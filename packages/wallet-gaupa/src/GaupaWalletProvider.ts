@@ -45,14 +45,16 @@ export class GaupaWalletProvider implements WalletProvider {
     throw new Error('GaupaWalletProvider: signMessage not yet implemented')
   }
 
-  async create(mnemonic: string): Promise<WarpWalletDetails> {
-    // TODO: Implement
-    throw new Error('GaupaWalletProvider: create not yet implemented')
+  async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
+    throw new Error('GaupaWalletProvider: importFromMnemonic not yet implemented')
+  }
 
-    const externalId = 'TODO'
-    const address = 'TODO'
+  async importFromPrivateKey(privateKey: string): Promise<WarpWalletDetails> {
+    throw new Error('GaupaWalletProvider: importFromPrivateKey not yet implemented')
+  }
 
-    return { provider: GaupaWalletProvider.PROVIDER_NAME, address, externalId }
+  async export(): Promise<WarpWalletDetails> {
+    throw new Error('GaupaWalletProvider: export not yet implemented')
   }
 
   async generate(): Promise<WarpWalletDetails> {

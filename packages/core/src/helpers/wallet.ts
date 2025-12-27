@@ -51,3 +51,13 @@ export const getWarpWalletExternalIdFromConfigOrFail = (config: WarpClientConfig
 export const isWarpWalletReadOnly = (wallet: WarpWalletDetails | string | null | undefined): boolean => {
   return typeof wallet === 'string'
 }
+
+export const setWarpWalletInConfig = (config: WarpClientConfig, chain: WarpChain, wallet: WarpWalletDetails): void => {
+  if (!config.user) {
+    config.user = {}
+  }
+  if (!config.user.wallets) {
+    config.user.wallets = {}
+  }
+  config.user.wallets[chain] = wallet
+}

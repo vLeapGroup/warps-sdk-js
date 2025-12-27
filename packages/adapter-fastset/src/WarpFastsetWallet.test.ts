@@ -135,13 +135,14 @@ describe('WarpFastsetWallet', () => {
         },
       }
       const walletWithMnemonic = new WarpFastsetWallet(configWithMnemonic, mockChain)
-      const result = await walletWithMnemonic.create('mnemonic', mnemonic)
+      const result = await walletWithMnemonic.importFromMnemonic('mnemonic', mnemonic)
 
       expect(result).toHaveProperty('address')
       expect(result).toHaveProperty('privateKey')
       expect(result.mnemonic).toBe(mnemonic)
       expect(typeof result.address).toBe('string')
-      expect(result.privateKey).toBe(null)
+      expect(result.privateKey).not.toBeNull()
+      expect(typeof result.privateKey).toBe('string')
       expect(result.address).toMatch(/^set1/)
     })
 
@@ -164,7 +165,7 @@ describe('WarpFastsetWallet', () => {
       expect(result).toHaveProperty('privateKey')
       expect(result.mnemonic).not.toBeNull()
       expect(typeof result.address).toBe('string')
-      expect(result.privateKey).toBe(null)
+      expect(result.privateKey).toBeNull()
       expect(result.address).toMatch(/^set1/)
     })
   })
@@ -342,7 +343,7 @@ describe('WarpFastsetWallet', () => {
       expect(backToBytes).toEqual(testBytes)
     })
 
-    test('should handle different environments gracefully', () => {
+    test('should handle different environments gracefully', async () => {
       const configWithMnemonic = {
         env: 'testnet' as const,
         user: {

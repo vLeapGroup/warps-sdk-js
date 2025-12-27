@@ -4,6 +4,8 @@ import { Keypair, Transaction, VersionedTransaction } from '@solana/web3.js'
 import {
   getWarpWalletAddressFromConfig,
   getWarpWalletMnemonicFromConfig,
+  getWarpWalletPrivateKeyFromConfig,
+  setWarpWalletInConfig,
   WalletProvider,
   WarpChainInfo,
   WarpClientConfig,
@@ -95,14 +97,40 @@ export class MnemonicWalletProvider implements WalletProvider {
     return this.getKeypair()
   }
 
-  async create(mnemonic: string): Promise<WarpWalletDetails> {
+  async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
     const seed = bip39.mnemonicToSeedSync(mnemonic)
     const keypair = Keypair.fromSeed(seed.slice(0, 32))
+    const walletDetails: WarpWalletDetails = {
+      provider: MnemonicWalletProvider.PROVIDER_NAME,
+      address: keypair.publicKey.toBase58(),
+      privateKey: bs58.encode(keypair.secretKey),
+      mnemonic,
+    }
+    setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
+    return walletDetails
+  }
+
+  async importFromPrivateKey(privateKey: string): Promise<WarpWalletDetails> {
+    const keypair = Keypair.fromSecretKey(bs58.decode(privateKey))
+    const walletDetails: WarpWalletDetails = {
+      provider: MnemonicWalletProvider.PROVIDER_NAME,
+      address: keypair.publicKey.toBase58(),
+      privateKey: bs58.encode(keypair.secretKey),
+      mnemonic: null,
+    }
+    setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
+    return walletDetails
+  }
+
+  async export(): Promise<WarpWalletDetails> {
+    const keypair = this.getKeypair()
+    const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
     return {
       provider: MnemonicWalletProvider.PROVIDER_NAME,
       address: keypair.publicKey.toBase58(),
-      privateKey: null,
-      mnemonic,
+      privateKey: privateKey || null,
+      mnemonic: mnemonic || null,
     }
   }
 

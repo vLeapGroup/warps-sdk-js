@@ -1,5 +1,11 @@
 import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
-import { getWarpWalletPrivateKeyFromConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import {
+  getWarpWalletMnemonicFromConfig,
+  getWarpWalletPrivateKeyFromConfig,
+  setWarpWalletInConfig,
+  WarpChainInfo,
+  WarpClientConfig,
+} from '@vleap/warps'
 import * as bip39 from '@scure/bip39'
 import { hexToUint8Array, uint8ArrayToHex } from '../helpers'
 import { FastsetClient } from '../sdk'
@@ -54,16 +60,46 @@ export class PrivateKeyWalletProvider implements WalletProvider {
     return uint8ArrayToHex(signature)
   }
 
-  async create(mnemonic: string): Promise<WarpWalletDetails> {
+  async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
     const seed = bip39.mnemonicToSeedSync(mnemonic)
     const privateKey = seed.slice(0, 32)
+    const publicKey = ed.getPublicKey(privateKey)
+    const address = FastsetClient.encodeBech32Address(publicKey)
+    const walletDetails: WarpWalletDetails = {
+      provider: PrivateKeyWalletProvider.PROVIDER_NAME,
+      address,
+      privateKey: uint8ArrayToHex(privateKey),
+      mnemonic,
+    }
+    setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
+    return walletDetails
+  }
+
+  async importFromPrivateKey(privateKey: string): Promise<WarpWalletDetails> {
+    const privateKeyBytes = hexToUint8Array(privateKey)
+    const publicKey = ed.getPublicKey(privateKeyBytes)
+    const address = FastsetClient.encodeBech32Address(publicKey)
+    const walletDetails: WarpWalletDetails = {
+      provider: PrivateKeyWalletProvider.PROVIDER_NAME,
+      address,
+      privateKey,
+      mnemonic: null,
+    }
+    setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
+    return walletDetails
+  }
+
+  async export(): Promise<WarpWalletDetails> {
+    const privateKey = this.getPrivateKey()
+    const privateKeyHex = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
+    const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
     const publicKey = ed.getPublicKey(privateKey)
     const address = FastsetClient.encodeBech32Address(publicKey)
     return {
       provider: PrivateKeyWalletProvider.PROVIDER_NAME,
       address,
-      privateKey: uint8ArrayToHex(privateKey),
-      mnemonic: null,
+      privateKey: privateKeyHex || null,
+      mnemonic: mnemonic || null,
     }
   }
 

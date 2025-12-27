@@ -46,8 +46,16 @@ export class PrivyWalletProvider implements WalletProvider {
     }
   }
 
-  async create(mnemonic: string): Promise<WarpWalletDetails> {
-    throw new Error('PrivyWalletProvider: create not supported - Privy manages wallets externally')
+  async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
+    throw new Error('PrivyWalletProvider: importFromMnemonic not supported - Privy manages wallets externally')
+  }
+
+  async importFromPrivateKey(privateKey: string): Promise<WarpWalletDetails> {
+    throw new Error('PrivyWalletProvider: importFromPrivateKey not supported - Privy manages wallets externally')
+  }
+
+  async export(): Promise<WarpWalletDetails> {
+    throw new Error('PrivyWalletProvider: export not supported - Privy manages wallets externally')
   }
 
   async generate(): Promise<WarpWalletDetails> {

@@ -215,7 +215,9 @@ export interface AdapterWarpWallet {
   signMessage(message: string): Promise<string>
   sendTransactions(txs: WarpAdapterGenericTransaction[]): Promise<string[]>
   sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string>
-  create(provider: WarpWalletProvider, mnemonic: string): Promise<WarpWalletDetails>
+  importFromMnemonic(provider: WarpWalletProvider, mnemonic: string): Promise<WarpWalletDetails>
+  importFromPrivateKey(provider: WarpWalletProvider, privateKey: string): Promise<WarpWalletDetails>
+  export(provider: WarpWalletProvider): Promise<WarpWalletDetails>
   generate(provider: WarpWalletProvider): Promise<WarpWalletDetails>
   getAddress(): string | null
   getPublicKey(): string | null

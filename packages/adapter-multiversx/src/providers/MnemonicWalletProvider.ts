@@ -2,6 +2,8 @@ import { Account, Message, Mnemonic, Transaction } from '@multiversx/sdk-core'
 import {
   getWarpWalletAddressFromConfig,
   getWarpWalletMnemonicFromConfig,
+  getWarpWalletPrivateKeyFromConfig,
+  setWarpWalletInConfig,
   WalletProvider,
   WarpChainInfo,
   WarpClientConfig,
@@ -58,16 +60,47 @@ export class MnemonicWalletProvider implements WalletProvider {
     return this.getAccount()
   }
 
-  async create(mnemonic: string): Promise<WarpWalletDetails> {
+  async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
     const mnemonicObj = Mnemonic.fromString(mnemonic)
     const privateKey = mnemonicObj.deriveKey(0)
+    const privateKeyHex = privateKey.hex()
     const pubKey = privateKey.generatePublicKey()
     const address = pubKey.toAddress(this.chain.addressHrp).toBech32()
-    return {
+    const walletDetails: WarpWalletDetails = {
       provider: MnemonicWalletProvider.PROVIDER_NAME,
       address,
-      privateKey: null,
+      privateKey: privateKeyHex,
       mnemonic,
+    }
+    setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
+    return walletDetails
+  }
+
+  async importFromPrivateKey(privateKey: string): Promise<WarpWalletDetails> {
+    const { UserSecretKey } = await import('@multiversx/sdk-wallet')
+    const secretKey = UserSecretKey.fromString(privateKey)
+    const privateKeyHex = secretKey.hex()
+    const pubKey = secretKey.generatePublicKey()
+    const address = pubKey.toAddress(this.chain.addressHrp).toBech32()
+    const walletDetails: WarpWalletDetails = {
+      provider: MnemonicWalletProvider.PROVIDER_NAME,
+      address,
+      privateKey: privateKeyHex,
+      mnemonic: null,
+    }
+    setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
+    return walletDetails
+  }
+
+  async export(): Promise<WarpWalletDetails> {
+    const account = this.getAccount()
+    const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
+    return {
+      provider: MnemonicWalletProvider.PROVIDER_NAME,
+      address: account.address.toBech32(),
+      privateKey: privateKey || null,
+      mnemonic: mnemonic || null,
     }
   }
 

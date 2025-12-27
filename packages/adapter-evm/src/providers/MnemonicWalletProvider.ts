@@ -1,6 +1,12 @@
 import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
 import { ethers } from 'ethers'
-import { getWarpWalletMnemonicFromConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import {
+  getWarpWalletMnemonicFromConfig,
+  getWarpWalletPrivateKeyFromConfig,
+  setWarpWalletInConfig,
+  WarpChainInfo,
+  WarpClientConfig,
+} from '@vleap/warps'
 
 export class MnemonicWalletProvider implements WalletProvider {
   static readonly PROVIDER_NAME: WarpWalletProvider = 'mnemonic'
@@ -57,13 +63,39 @@ export class MnemonicWalletProvider implements WalletProvider {
     return this.getWallet()
   }
 
-  async create(mnemonic: string): Promise<WarpWalletDetails> {
+  async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
     const wallet = ethers.Wallet.fromPhrase(mnemonic)
+    const walletDetails: WarpWalletDetails = {
+      provider: MnemonicWalletProvider.PROVIDER_NAME,
+      address: wallet.address,
+      privateKey: wallet.privateKey,
+      mnemonic,
+    }
+    setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
+    return walletDetails
+  }
+
+  async importFromPrivateKey(privateKey: string): Promise<WarpWalletDetails> {
+    const wallet = new ethers.Wallet(privateKey)
+    const walletDetails: WarpWalletDetails = {
+      provider: MnemonicWalletProvider.PROVIDER_NAME,
+      address: wallet.address,
+      privateKey: wallet.privateKey,
+      mnemonic: null,
+    }
+    setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
+    return walletDetails
+  }
+
+  async export(): Promise<WarpWalletDetails> {
+    const wallet = this.getWallet()
+    const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
     return {
       provider: MnemonicWalletProvider.PROVIDER_NAME,
       address: wallet.address,
-      privateKey: null,
-      mnemonic,
+      privateKey: privateKey || null,
+      mnemonic: mnemonic || null,
     }
   }
 

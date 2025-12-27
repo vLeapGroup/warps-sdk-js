@@ -25,7 +25,17 @@ export class ReadOnlyWalletProvider implements WalletProvider {
     throw new Error(`Wallet can not be used for signing: ${address}`)
   }
 
-  async create(mnemonic: string): Promise<WarpWalletDetails> {
+  async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
+    const address = getWarpWalletAddressFromConfig(this.config, this.chain.name)
+    throw new Error(`Wallet can not be used for signing: ${address}`)
+  }
+
+  async importFromPrivateKey(privateKey: string): Promise<WarpWalletDetails> {
+    const address = getWarpWalletAddressFromConfig(this.config, this.chain.name)
+    throw new Error(`Wallet can not be used for signing: ${address}`)
+  }
+
+  async export(): Promise<WarpWalletDetails> {
     const address = getWarpWalletAddressFromConfig(this.config, this.chain.name)
     throw new Error(`Wallet can not be used for signing: ${address}`)
   }

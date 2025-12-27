@@ -1,7 +1,9 @@
 import { Keypair, Transaction, VersionedTransaction } from '@solana/web3.js'
 import {
   getWarpWalletAddressFromConfig,
+  getWarpWalletMnemonicFromConfig,
   getWarpWalletPrivateKeyFromConfig,
+  setWarpWalletInConfig,
   WalletProvider,
   WarpChainInfo,
   WarpClientConfig,
@@ -93,8 +95,32 @@ export class PrivateKeyWalletProvider implements WalletProvider {
     return this.getKeypair()
   }
 
-  async create(mnemonic: string): Promise<WarpWalletDetails> {
-    throw new Error('PrivateKeyWalletProvider does not support creating wallets from mnemonics. Use MnemonicWalletProvider instead.')
+  async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
+    throw new Error('PrivateKeyWalletProvider does not support importing from mnemonics. Use MnemonicWalletProvider instead.')
+  }
+
+  async importFromPrivateKey(privateKey: string): Promise<WarpWalletDetails> {
+    const keypair = Keypair.fromSecretKey(bs58.decode(privateKey))
+    const walletDetails: WarpWalletDetails = {
+      provider: PrivateKeyWalletProvider.PROVIDER_NAME,
+      address: keypair.publicKey.toBase58(),
+      privateKey: bs58.encode(keypair.secretKey),
+      mnemonic: null,
+    }
+    setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
+    return walletDetails
+  }
+
+  async export(): Promise<WarpWalletDetails> {
+    const keypair = this.getKeypair()
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
+    const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
+    return {
+      provider: PrivateKeyWalletProvider.PROVIDER_NAME,
+      address: keypair.publicKey.toBase58(),
+      privateKey: privateKey || null,
+      mnemonic: mnemonic || null,
+    }
   }
 
   async generate(): Promise<WarpWalletDetails> {

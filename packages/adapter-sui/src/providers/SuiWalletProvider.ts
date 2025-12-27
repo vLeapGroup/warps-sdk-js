@@ -1,7 +1,9 @@
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519'
 import {
   getWarpWalletAddressFromConfig,
+  getWarpWalletMnemonicFromConfig,
   getWarpWalletPrivateKeyFromConfig,
+  setWarpWalletInConfig,
   WalletProvider,
   WarpChainInfo,
   WarpClientConfig,
@@ -50,15 +52,51 @@ export class PrivateKeyWalletProvider implements WalletProvider {
     return this.getKeypair()
   }
 
-  async create(mnemonic: string): Promise<WarpWalletDetails> {
+  async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
     const keypair = Ed25519Keypair.deriveKeypair(mnemonic.trim())
     const address = keypair.getPublicKey().toSuiAddress()
     const privateKey = Buffer.from(keypair.getSecretKey()).toString('hex')
-    return {
+    const walletDetails: WarpWalletDetails = {
+      provider: PrivateKeyWalletProvider.PROVIDER_NAME,
+      address,
+      privateKey,
+      mnemonic,
+    }
+    setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
+    return walletDetails
+  }
+
+  async importFromPrivateKey(privateKey: string): Promise<WarpWalletDetails> {
+    const privateKeyBytes = Buffer.from(privateKey, 'hex')
+    let secretKey: Uint8Array
+    if (privateKeyBytes.length === 70) {
+      secretKey = new Uint8Array(privateKeyBytes.subarray(1, 33))
+    } else if (privateKeyBytes.length === 32) {
+      secretKey = new Uint8Array(privateKeyBytes)
+    } else {
+      throw new Error(`Unsupported private key length: ${privateKeyBytes.length} bytes`)
+    }
+    const keypair = Ed25519Keypair.fromSecretKey(secretKey)
+    const address = keypair.getPublicKey().toSuiAddress()
+    const walletDetails: WarpWalletDetails = {
       provider: PrivateKeyWalletProvider.PROVIDER_NAME,
       address,
       privateKey,
       mnemonic: null,
+    }
+    setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
+    return walletDetails
+  }
+
+  async export(): Promise<WarpWalletDetails> {
+    const keypair = this.getKeypair()
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
+    const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
+    return {
+      provider: PrivateKeyWalletProvider.PROVIDER_NAME,
+      address: keypair.getPublicKey().toSuiAddress(),
+      privateKey: privateKey || null,
+      mnemonic: mnemonic || null,
     }
   }
 

@@ -10,7 +10,9 @@ export default {
       },
     ],
   },
-  transformIgnorePatterns: ['node_modules/(?!(uuid|@multiversx|.*\\.mjs$))'],
+  transformIgnorePatterns: [
+    'node_modules/(?!(uuid|@multiversx|@coinbase/cdp-sdk|jose|@scure|.*\\.mjs$))',
+  ],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
     '^@vleap/warps$': '<rootDir>/../../packages/core/src/index.ts',

@@ -1,6 +1,13 @@
 import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
 import { Account, Message, Mnemonic, Transaction, UserSecretKey } from '@multiversx/sdk-core'
-import { getWarpWalletAddressFromConfig, getWarpWalletPrivateKeyFromConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import {
+  getWarpWalletAddressFromConfig,
+  getWarpWalletMnemonicFromConfig,
+  getWarpWalletPrivateKeyFromConfig,
+  setWarpWalletInConfig,
+  WarpChainInfo,
+  WarpClientConfig,
+} from '@vleap/warps'
 
 export class PrivateKeyWalletProvider implements WalletProvider {
   static readonly PROVIDER_NAME: WarpWalletProvider = 'privateKey'
@@ -51,17 +58,47 @@ export class PrivateKeyWalletProvider implements WalletProvider {
     return this.getAccount()
   }
 
-  async create(mnemonic: string): Promise<WarpWalletDetails> {
+  async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
     const mnemonicObj = Mnemonic.fromString(mnemonic)
     const privateKey = mnemonicObj.deriveKey(0)
     const privateKeyHex = privateKey.hex()
     const pubKey = privateKey.generatePublicKey()
     const address = pubKey.toAddress(this.chain.addressHrp).toBech32()
-    return {
+    const walletDetails: WarpWalletDetails = {
+      provider: PrivateKeyWalletProvider.PROVIDER_NAME,
+      address,
+      privateKey: privateKeyHex,
+      mnemonic,
+    }
+    setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
+    return walletDetails
+  }
+
+  async importFromPrivateKey(privateKey: string): Promise<WarpWalletDetails> {
+    const isPrivateKeyPem = privateKey.startsWith('-----')
+    const secretKey = isPrivateKeyPem ? UserSecretKey.fromPem(privateKey) : UserSecretKey.fromString(privateKey)
+    const privateKeyHex = secretKey.hex()
+    const pubKey = secretKey.generatePublicKey()
+    const address = pubKey.toAddress(this.chain.addressHrp).toBech32()
+    const walletDetails: WarpWalletDetails = {
       provider: PrivateKeyWalletProvider.PROVIDER_NAME,
       address,
       privateKey: privateKeyHex,
       mnemonic: null,
+    }
+    setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
+    return walletDetails
+  }
+
+  async export(): Promise<WarpWalletDetails> {
+    const account = this.getAccount()
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
+    const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
+    return {
+      provider: PrivateKeyWalletProvider.PROVIDER_NAME,
+      address: account.address.toBech32(),
+      privateKey: privateKey || null,
+      mnemonic: mnemonic || null,
     }
   }
 

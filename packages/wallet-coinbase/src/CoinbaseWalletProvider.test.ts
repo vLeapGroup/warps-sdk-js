@@ -1,8 +1,8 @@
+jest.mock('@coinbase/cdp-sdk')
+
 import { CoinbaseWalletProvider } from './CoinbaseWalletProvider'
 import { CoinbaseProviderConfig } from './types'
 import { CdpClient } from '@coinbase/cdp-sdk'
-
-jest.mock('@coinbase/cdp-sdk')
 
 describe('CoinbaseWalletProvider', () => {
   const mockWalletSecret = 'test-wallet-secret'
@@ -46,6 +46,7 @@ describe('CoinbaseWalletProvider', () => {
         signTransaction: jest.fn(),
         signMessage: jest.fn(),
         createAccount: jest.fn(),
+        exportAccount: jest.fn(),
         sendTransaction: jest.fn(),
         listAccounts: jest.fn(),
       },
@@ -204,11 +205,180 @@ describe('CoinbaseWalletProvider', () => {
     })
   })
 
-  describe('create', () => {
+  describe('importFromMnemonic', () => {
     it('should throw error indicating mnemonic is not supported', async () => {
-      await expect(provider.create('test mnemonic')).rejects.toThrow(
-        'CoinbaseWalletProvider: create() with mnemonic is not supported'
+      await expect(provider.importFromMnemonic('test mnemonic')).rejects.toThrow(
+        'CoinbaseWalletProvider: importFromMnemonic() is not supported'
       )
+    })
+  })
+
+  describe('importFromPrivateKey', () => {
+    it('should import EVM account from private key', async () => {
+      const mockPrivateKey = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+      const mockImportedAccount = {
+        address: '0x9876543210fedcba9876543210fedcba98765432',
+      }
+
+      mockClient.evm.importAccount = jest.fn().mockResolvedValue(mockImportedAccount)
+
+      const result = await provider.importFromPrivateKey(mockPrivateKey)
+
+      expect(result).toEqual({
+        provider: 'coinbase',
+        address: mockImportedAccount.address,
+        privateKey: mockPrivateKey,
+        mnemonic: null,
+        externalId: null,
+      })
+      expect(mockClient.evm.importAccount).toHaveBeenCalledWith({
+        privateKey: mockPrivateKey,
+        name: expect.stringMatching(/^ImportedAccount-\d+$/),
+      })
+      expect(config.user?.wallets?.[chain.name]).toEqual(result)
+    })
+
+    it('should import EVM account with id as externalId', async () => {
+      const mockPrivateKey = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+      const mockImportedAccount = {
+        address: '0x9876543210fedcba9876543210fedcba98765432',
+        id: 'account-id-123',
+      }
+
+      mockClient.evm.importAccount = jest.fn().mockResolvedValue(mockImportedAccount)
+
+      const result = await provider.importFromPrivateKey(mockPrivateKey)
+
+      expect(result).toEqual({
+        provider: 'coinbase',
+        address: mockImportedAccount.address,
+        privateKey: mockPrivateKey,
+        mnemonic: null,
+        externalId: 'account-id-123',
+      })
+      expect(config.user?.wallets?.[chain.name]).toEqual(result)
+    })
+
+    it('should import Solana account from private key', async () => {
+      const solanaChain = {
+        name: 'solana',
+        defaultApiUrl: 'https://api.mainnet-beta.solana.com',
+        addressHrp: '',
+      }
+      const solanaConfig = {
+        ...config,
+        user: {
+          wallets: {
+            solana: {
+              provider: 'coinbase',
+              address: 'SolanaAddress123',
+            },
+          },
+        },
+      }
+      const solanaProvider = new CoinbaseWalletProvider(solanaConfig, solanaChain, coinbaseConfig)
+      const mockPrivateKey = '4YFq9y5f5hi77Bq8kDCE6VgqoAq...'
+      const mockImportedAccount = {
+        address: 'SolanaImportedAddress123',
+      }
+
+      mockClient.solana.importAccount = jest.fn().mockResolvedValue(mockImportedAccount)
+
+      const result = await solanaProvider.importFromPrivateKey(mockPrivateKey)
+
+      expect(result).toEqual({
+        provider: 'coinbase',
+        address: mockImportedAccount.address,
+        privateKey: mockPrivateKey,
+        mnemonic: null,
+        externalId: null,
+      })
+      expect(mockClient.solana.importAccount).toHaveBeenCalledWith({
+        privateKey: mockPrivateKey,
+        name: expect.stringMatching(/^ImportedAccount-\d+$/),
+      })
+      expect(solanaConfig.user?.wallets?.solana).toEqual(result)
+    })
+
+    it('should throw error on API failure', async () => {
+      const mockPrivateKey = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+      mockClient.evm.importAccount = jest.fn().mockRejectedValue(new Error('API error'))
+
+      await expect(provider.importFromPrivateKey(mockPrivateKey)).rejects.toThrow(
+        'CoinbaseWalletProvider: Failed to import account from private key'
+      )
+    })
+  })
+
+  describe('export', () => {
+    it('should export EVM account private key', async () => {
+      const mockPrivateKey = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+      mockClient.evm.exportAccount = jest.fn().mockResolvedValue(mockPrivateKey)
+
+      const result = await provider.export()
+      expect(result).toEqual({
+        provider: 'coinbase',
+        address: mockAddress,
+        privateKey: mockPrivateKey,
+        mnemonic: null,
+        externalId: null,
+      })
+      expect(mockClient.evm.exportAccount).toHaveBeenCalledWith({ address: mockAddress })
+    })
+
+    it('should export Solana account private key', async () => {
+      const solanaChain = {
+        name: 'solana',
+        defaultApiUrl: 'https://api.mainnet-beta.solana.com',
+        addressHrp: '',
+      }
+      const solanaConfig = {
+        ...config,
+        user: {
+          wallets: {
+            solana: {
+              provider: 'coinbase',
+              address: 'SolanaAddress123',
+            },
+          },
+        },
+      }
+      const solanaProvider = new CoinbaseWalletProvider(solanaConfig, solanaChain, coinbaseConfig)
+      const mockPrivateKey = 'solana-private-key-123'
+      mockClient.solana = {
+        getAccount: jest.fn().mockResolvedValue({ address: 'SolanaAddress123' }),
+        exportAccount: jest.fn().mockResolvedValue(mockPrivateKey),
+      } as any
+
+      const result = await solanaProvider.export()
+      expect(result).toEqual({
+        provider: 'coinbase',
+        address: 'SolanaAddress123',
+        privateKey: mockPrivateKey,
+        mnemonic: null,
+        externalId: null,
+      })
+      expect(mockClient.solana.exportAccount).toHaveBeenCalledWith({ address: 'SolanaAddress123' })
+    })
+
+    it('should throw error when address is not found', async () => {
+      const configWithoutAddress = {
+        ...config,
+        user: {
+          wallets: {},
+        },
+      }
+      const providerWithoutAddress = new CoinbaseWalletProvider(configWithoutAddress, chain, coinbaseConfig)
+
+      await expect(providerWithoutAddress.export()).rejects.toThrow(
+        'CoinbaseWalletProvider: Wallet address not found in config'
+      )
+    })
+
+    it('should throw error on API failure', async () => {
+      mockClient.evm.exportAccount = jest.fn().mockRejectedValue(new Error('API error'))
+
+      await expect(provider.export()).rejects.toThrow('CoinbaseWalletProvider: Failed to export account')
     })
   })
 

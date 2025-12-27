@@ -115,9 +115,19 @@ export class WarpNearWallet implements AdapterWarpWallet {
     return Promise.all(txs.map(async (tx) => this.sendTransaction(tx)))
   }
 
-  async create(provider: WarpWalletProvider, mnemonic: string): Promise<WarpWalletDetails> {
+  async importFromMnemonic(provider: WarpWalletProvider, mnemonic: string): Promise<WarpWalletDetails> {
     const walletProvider = this.createProviderForOperation(provider)
-    return await walletProvider.create(mnemonic)
+    return await walletProvider.importFromMnemonic(mnemonic)
+  }
+
+  async importFromPrivateKey(provider: WarpWalletProvider, privateKey: string): Promise<WarpWalletDetails> {
+    const walletProvider = this.createProviderForOperation(provider)
+    return await walletProvider.importFromPrivateKey(privateKey)
+  }
+
+  async export(provider: WarpWalletProvider): Promise<WarpWalletDetails> {
+    const walletProvider = this.createProviderForOperation(provider)
+    return await walletProvider.export()
   }
 
   async generate(provider: WarpWalletProvider): Promise<WarpWalletDetails> {

@@ -1,12 +1,13 @@
+import { CdpClient } from '@coinbase/cdp-sdk'
 import {
   getWarpWalletAddressFromConfig,
+  setWarpWalletInConfig,
   WalletProvider,
   WarpChainInfo,
   WarpClientConfig,
   WarpWalletDetails,
   WarpWalletProvider,
 } from '@vleap/warps'
-import { CdpClient } from '@coinbase/cdp-sdk'
 import { CoinbaseProviderConfig } from './types'
 
 export class CoinbaseWalletProvider implements WalletProvider {
@@ -27,10 +28,12 @@ export class CoinbaseWalletProvider implements WalletProvider {
     })
   }
 
-
-  private isEvmChain(): boolean {
-    return this.chain.addressHrp === '0x'
+  private isSolanaChain(): boolean {
+    return this.chain.name === 'solana'
   }
+
+  private cachedEvmAccount: any = null
+  private cachedSolanaAccount: any = null
 
   private async getAccount(): Promise<{ id: string; address: string; publicKey?: string }> {
     if (this.cachedAccount) {
@@ -42,18 +45,20 @@ export class CoinbaseWalletProvider implements WalletProvider {
       throw new Error(`CoinbaseWalletProvider: Wallet address not found in config for chain ${this.chain.name}`)
     }
 
-    if (this.isEvmChain()) {
-      const account = await this.client.evm.getAccount({ address: address as `0x${string}` })
-      this.cachedAccount = {
-        id: account.address,
-        address: account.address,
-      }
-    } else {
+    if (this.isSolanaChain()) {
       const account = await this.client.solana.getAccount({ address })
       this.cachedAccount = {
         id: account.address,
         address: account.address,
       }
+      this.cachedSolanaAccount = account
+    } else {
+      const account = await this.client.evm.getAccount({ address: address as `0x${string}` })
+      this.cachedAccount = {
+        id: account.address,
+        address: account.address,
+      }
+      this.cachedEvmAccount = account
     }
 
     return this.cachedAccount
@@ -83,29 +88,7 @@ export class CoinbaseWalletProvider implements WalletProvider {
     try {
       const account = await this.getAccount()
 
-      if (this.isEvmChain()) {
-        const evmAccount = await this.client.evm.getAccount({ address: account.id as `0x${string}` })
-        const txRequest: any = {
-          to: tx.to,
-          data: tx.data || '0x',
-          value: tx.value || 0n,
-          gasLimit: tx.gasLimit,
-          nonce: tx.nonce,
-          chainId: tx.chainId,
-        }
-
-        if (tx.maxFeePerGas && tx.maxPriorityFeePerGas) {
-          txRequest.maxFeePerGas = tx.maxFeePerGas
-          txRequest.maxPriorityFeePerGas = tx.maxPriorityFeePerGas
-          txRequest.type = 'eip1559'
-        } else if (tx.gasPrice) {
-          txRequest.gasPrice = tx.gasPrice
-          txRequest.type = 'legacy'
-        }
-
-        const signedTx = await evmAccount.signTransaction(txRequest)
-        return { ...tx, signature: signedTx }
-      } else {
+      if (this.isSolanaChain()) {
         const result = await this.client.solana.signTransaction({
           address: account.id,
           transaction: tx as any,
@@ -114,10 +97,26 @@ export class CoinbaseWalletProvider implements WalletProvider {
         if ('signedTransaction' in result && result.signedTransaction) {
           return { ...tx, signature: result.signedTransaction }
         }
+      } else {
+        const address = getWarpWalletAddressFromConfig(this.config, this.chain.name)
+        if (!address) {
+          throw new Error(`CoinbaseWalletProvider: Wallet address not found in config for chain ${this.chain.name}`)
+        }
+
+        if (!this.cachedEvmAccount) {
+          this.cachedEvmAccount = await this.client.evm.getAccount({ address: address as `0x${string}` })
+        }
+
+        const account = this.cachedEvmAccount as any
+        const signedTx = await account.signTransaction(tx)
+        return { ...tx, signature: signedTx }
       }
 
       throw new Error('Coinbase API did not return signed transaction')
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.message?.includes('signTransaction is not a function')) {
+        throw new Error(`CoinbaseWalletProvider: Account object missing signTransaction method. This may be a SDK version issue.`)
+      }
       throw new Error(`CoinbaseWalletProvider: Failed to sign transaction: ${error}`)
     }
   }
@@ -125,13 +124,13 @@ export class CoinbaseWalletProvider implements WalletProvider {
   async signMessage(message: string): Promise<string> {
     try {
       const account = await this.getAccount()
-      const result = this.isEvmChain()
-        ? await this.client.evm.signMessage({
-            address: account.id as `0x${string}`,
+      const result = this.isSolanaChain()
+        ? await this.client.solana.signMessage({
+            address: account.id,
             message,
           })
-        : await this.client.solana.signMessage({
-            address: account.id,
+        : await this.client.evm.signMessage({
+            address: account.id as `0x${string}`,
             message,
           })
 
@@ -145,17 +144,73 @@ export class CoinbaseWalletProvider implements WalletProvider {
     }
   }
 
-  async create(mnemonic: string): Promise<WarpWalletDetails> {
+  async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
     throw new Error(
-      'CoinbaseWalletProvider: create() with mnemonic is not supported. Use generate() to create a new account via Coinbase API.'
+      'CoinbaseWalletProvider: importFromMnemonic() is not supported. Use generate() to create a new account via Coinbase API.'
     )
+  }
+
+  async importFromPrivateKey(privateKey: string): Promise<WarpWalletDetails> {
+    try {
+      let account: { address: string; id?: string }
+
+      if (this.isSolanaChain()) {
+        account = await this.client.solana.importAccount({
+          privateKey: privateKey,
+          name: `ImportedAccount-${Date.now()}`,
+        })
+      } else {
+        account = await this.client.evm.importAccount({
+          privateKey: privateKey as `0x${string}`,
+          name: `ImportedAccount-${Date.now()}`,
+        })
+      }
+
+      const walletDetails: WarpWalletDetails = {
+        provider: CoinbaseWalletProvider.PROVIDER_NAME,
+        address: account.address,
+        privateKey: privateKey,
+        mnemonic: null,
+        externalId: account.id || null,
+      }
+
+      setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
+
+      return walletDetails
+    } catch (error) {
+      throw new Error(`CoinbaseWalletProvider: Failed to import account from private key: ${error}`)
+    }
+  }
+
+  async export(): Promise<WarpWalletDetails> {
+    try {
+      const address = getWarpWalletAddressFromConfig(this.config, this.chain.name)
+      if (!address) {
+        throw new Error(`CoinbaseWalletProvider: Wallet address not found in config for chain ${this.chain.name}`)
+      }
+
+      let privateKey: string
+      if (this.isSolanaChain()) {
+        privateKey = await this.client.solana.exportAccount({ address })
+      } else {
+        privateKey = await this.client.evm.exportAccount({ address: address as `0x${string}` })
+      }
+
+      return {
+        provider: CoinbaseWalletProvider.PROVIDER_NAME,
+        address,
+        privateKey,
+        mnemonic: null,
+        externalId: null,
+      }
+    } catch (error) {
+      throw new Error(`CoinbaseWalletProvider: Failed to export account: ${error}`)
+    }
   }
 
   async generate(): Promise<WarpWalletDetails> {
     try {
-      const account = this.isEvmChain()
-        ? await this.client.evm.createAccount()
-        : await this.client.solana.createAccount()
+      const account = this.isSolanaChain() ? await this.client.solana.createAccount() : await this.client.evm.createAccount()
 
       return {
         provider: CoinbaseWalletProvider.PROVIDER_NAME,

@@ -6,7 +6,9 @@ export interface WalletProvider {
   getPublicKey(): Promise<string | null>
   signTransaction(tx: any): Promise<any>
   signMessage(message: string): Promise<string>
-  create(mnemonic: string): Promise<WarpWalletDetails>
+  importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails>
+  importFromPrivateKey(privateKey: string): Promise<WarpWalletDetails>
+  export(): Promise<WarpWalletDetails>
   generate(): Promise<WarpWalletDetails>
 }
 

@@ -1,7 +1,13 @@
 import * as bip39 from '@scure/bip39'
 import { wordlist } from '@scure/bip39/wordlists/english.js'
 import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
-import { getWarpWalletMnemonicFromConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import {
+  getWarpWalletMnemonicFromConfig,
+  getWarpWalletPrivateKeyFromConfig,
+  setWarpWalletInConfig,
+  WarpChainInfo,
+  WarpClientConfig,
+} from '@vleap/warps'
 import { uint8ArrayToHex } from '../helpers'
 import { FastsetClient } from '../sdk'
 import { ed } from '../sdk/ed25519-setup'
@@ -55,16 +61,46 @@ export class MnemonicWalletProvider implements WalletProvider {
     return uint8ArrayToHex(signature)
   }
 
-  async create(mnemonic: string): Promise<WarpWalletDetails> {
+  async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
     const seed = bip39.mnemonicToSeedSync(mnemonic)
     const privateKey = seed.slice(0, 32)
+    const publicKey = ed.getPublicKey(privateKey)
+    const address = FastsetClient.encodeBech32Address(publicKey)
+    const walletDetails: WarpWalletDetails = {
+      provider: MnemonicWalletProvider.PROVIDER_NAME,
+      address,
+      privateKey: uint8ArrayToHex(privateKey),
+      mnemonic,
+    }
+    setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
+    return walletDetails
+  }
+
+  async importFromPrivateKey(privateKey: string): Promise<WarpWalletDetails> {
+    const privateKeyBytes = Buffer.from(privateKey, 'hex')
+    const publicKey = ed.getPublicKey(new Uint8Array(privateKeyBytes))
+    const address = FastsetClient.encodeBech32Address(publicKey)
+    const walletDetails: WarpWalletDetails = {
+      provider: MnemonicWalletProvider.PROVIDER_NAME,
+      address,
+      privateKey,
+      mnemonic: null,
+    }
+    setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
+    return walletDetails
+  }
+
+  async export(): Promise<WarpWalletDetails> {
+    const privateKey = this.getPrivateKey()
+    const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
+    const privateKeyHex = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
     const publicKey = ed.getPublicKey(privateKey)
     const address = FastsetClient.encodeBech32Address(publicKey)
     return {
       provider: MnemonicWalletProvider.PROVIDER_NAME,
       address,
-      privateKey: null,
-      mnemonic,
+      privateKey: privateKeyHex || null,
+      mnemonic: mnemonic || null,
     }
   }
 

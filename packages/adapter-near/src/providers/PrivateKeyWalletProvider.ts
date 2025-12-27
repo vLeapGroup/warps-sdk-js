@@ -1,7 +1,14 @@
 import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
 import { keyToImplicitAddress } from '@near-js/crypto'
 import * as bip39 from '@scure/bip39'
-import { getWarpWalletAddressFromConfig, getWarpWalletPrivateKeyFromConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import {
+  getWarpWalletAddressFromConfig,
+  getWarpWalletMnemonicFromConfig,
+  getWarpWalletPrivateKeyFromConfig,
+  setWarpWalletInConfig,
+  WarpChainInfo,
+  WarpClientConfig,
+} from '@vleap/warps'
 import bs58 from 'bs58'
 import { KeyPair } from 'near-api-js'
 
@@ -54,17 +61,47 @@ export class PrivateKeyWalletProvider implements WalletProvider {
     return this.getKeyPair()
   }
 
-  async create(mnemonic: string): Promise<WarpWalletDetails> {
+  async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
     const seed = bip39.mnemonicToSeedSync(mnemonic)
     const secretKey = seed.slice(0, 32)
     const keyPair = KeyPair.fromString(bs58.encode(secretKey))
     const publicKey = keyPair.getPublicKey()
     const accountId = keyToImplicitAddress(publicKey.toString())
-    return {
+    const walletDetails: WarpWalletDetails = {
+      provider: PrivateKeyWalletProvider.PROVIDER_NAME,
+      address: accountId,
+      privateKey: keyPair.toString(),
+      mnemonic,
+    }
+    setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
+    return walletDetails
+  }
+
+  async importFromPrivateKey(privateKey: string): Promise<WarpWalletDetails> {
+    const keyPair = KeyPair.fromString(privateKey as any)
+    const publicKey = keyPair.getPublicKey()
+    const accountId = keyToImplicitAddress(publicKey.toString())
+    const walletDetails: WarpWalletDetails = {
       provider: PrivateKeyWalletProvider.PROVIDER_NAME,
       address: accountId,
       privateKey: keyPair.toString(),
       mnemonic: null,
+    }
+    setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
+    return walletDetails
+  }
+
+  async export(): Promise<WarpWalletDetails> {
+    const keypair = this.getKeyPair()
+    const privateKey = getWarpWalletPrivateKeyFromConfig(this.config, this.chain.name)
+    const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
+    const publicKey = keypair.getPublicKey()
+    const accountId = keyToImplicitAddress(publicKey.toString())
+    return {
+      provider: PrivateKeyWalletProvider.PROVIDER_NAME,
+      address: accountId,
+      privateKey: privateKey || null,
+      mnemonic: mnemonic || null,
     }
   }
 
