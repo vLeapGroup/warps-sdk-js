@@ -1,5 +1,28 @@
 # @warps/playground
 
+## 0.2.0-beta.152
+
+### Minor Changes
+
+- 3e86317: add wallet import + export
+
+### Patch Changes
+
+- f67aea4: update wallet gen to async
+- Updated dependencies [f67aea4]
+- Updated dependencies [600b777]
+- Updated dependencies [bbfdafb]
+- Updated dependencies [3e86317]
+  - @vleap/warps-adapter-multiversx@0.2.0-beta.91
+  - @vleap/warps-adapter-fastset@0.1.0-beta.53
+  - @vleap/warps-adapter-solana@0.1.0-beta.15
+  - @vleap/warps-adapter-near@0.1.0-beta.12
+  - @vleap/warps-adapter-evm@0.2.0-beta.65
+  - @vleap/warps-adapter-sui@0.2.0-beta.67
+  - @vleap/warps@3.0.0-beta.184
+  - @vleap/warps-wallet-coinbase@1.0.0-beta.2
+  - @vleap/warps-mcp@1.0.0-beta.21
+
 ## 0.2.0-beta.151
 
 ### Patch Changes

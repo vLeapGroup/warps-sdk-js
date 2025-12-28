@@ -71,13 +71,11 @@ const runWarp = async (warpFile: string) => {
   }
   console.log('🔑 All wallets loaded:', Object.keys(filteredWallets))
 
-  const config: WarpClientConfig = {
+  const tempConfig: WarpClientConfig = {
     env: 'devnet',
     currentUrl: 'https://usewarp.to',
     user: {
-      wallets: {
-        ...filteredWallets,
-      },
+      wallets: filteredWallets,
     },
     walletProviders: {
       multiversx: {
@@ -101,7 +99,7 @@ const runWarp = async (warpFile: string) => {
     transform: { runner: createNodeTransformRunner() },
   }
 
-  const client = new WarpClient(config, {
+  const tempClient = new WarpClient(tempConfig, {
     chains: [
       ...getAllMultiversxAdapters(),
       ...getAllEvmAdapters(MultiversxAdapter),
@@ -111,13 +109,31 @@ const runWarp = async (warpFile: string) => {
     ],
   })
 
-  const chainAdapter = client.chains.find((a) => a.chainInfo.name.toLowerCase() === Chain.toLowerCase())
+  const chainAdapter = tempClient.chains.find((a) => a.chainInfo.name.toLowerCase() === Chain.toLowerCase())
   if (!chainAdapter) {
     throw new Error(`Chain adapter not found for: ${Chain}`)
   }
 
-  const coinbaseWallet = await ensureCoinbaseWallet(config, Chain, chainAdapter.chainInfo)
-  config.user!.wallets![Chain as string] = coinbaseWallet
+  const coinbaseWallet = await ensureCoinbaseWallet(tempConfig, Chain, chainAdapter.chainInfo)
+  const config: WarpClientConfig = {
+    ...tempConfig,
+    user: {
+      wallets: {
+        ...filteredWallets,
+        [Chain]: coinbaseWallet,
+      },
+    },
+  }
+
+  const client = new WarpClient(config, {
+    chains: [
+      ...getAllMultiversxAdapters(),
+      ...getAllEvmAdapters(MultiversxAdapter),
+      withAdapterFallback(SuiAdapter, MultiversxAdapter),
+      withAdapterFallback(NearAdapter, MultiversxAdapter),
+      withAdapterFallback(FastsetAdapter, MultiversxAdapter),
+    ],
+  })
 
   console.log(`💰 Wallet address: ${coinbaseWallet.address}`)
   console.log(`📝 Please fund this wallet on Base Sepolia before continuing...`)
@@ -181,6 +197,9 @@ const loadFile = async (chain: string): Promise<string | null> => {
 
 const loadAllWallets = async (): Promise<Record<string, any>> => {
   const walletsDir = path.join(__dirname, 'wallets')
+  if (!fs.existsSync(walletsDir)) {
+    return {}
+  }
   const walletFiles = fs.readdirSync(walletsDir).filter((f) => f.endsWith('.json'))
   const wallets: Record<string, any> = {}
 
@@ -188,8 +207,12 @@ const loadAllWallets = async (): Promise<Record<string, any>> => {
     const chainName = walletFile.replace('.json', '')
     try {
       const walletData = await loadWallet(chainName)
-      const privateKey = walletData.privateKey || (await loadFile(chainName))
-      wallets[chainName] = { ...walletData, privateKey }
+      if (walletData.provider === 'coinbase') {
+        wallets[chainName] = walletData
+      } else {
+        const privateKey = walletData.privateKey || (await loadFile(chainName))
+        wallets[chainName] = { ...walletData, privateKey }
+      }
     } catch (error) {
       console.warn(`⚠️  Failed to load wallet for ${chainName}:`, error)
     }

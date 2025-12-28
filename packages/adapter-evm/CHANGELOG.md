@@ -1,5 +1,19 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-beta.65
+
+### Minor Changes
+
+- 3e86317: add wallet import + export
+
+### Patch Changes
+
+- f67aea4: update wallet gen to async
+- 600b777: update wallets
+- Updated dependencies [f67aea4]
+- Updated dependencies [3e86317]
+  - @vleap/warps@3.0.0-beta.184
+
 ## 0.2.0-beta.64
 
 ### Patch Changes

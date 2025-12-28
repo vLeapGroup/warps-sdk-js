@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.184
+
+### Minor Changes
+
+- 3e86317: add wallet import + export
+
+### Patch Changes
+
+- f67aea4: update wallet gen to async
+
 ## 3.0.0-beta.183
 
 ### Patch Changes

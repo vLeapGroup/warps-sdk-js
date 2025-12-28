@@ -1,5 +1,18 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-beta.91
+
+### Minor Changes
+
+- 3e86317: add wallet import + export
+
+### Patch Changes
+
+- f67aea4: update wallet gen to async
+- Updated dependencies [f67aea4]
+- Updated dependencies [3e86317]
+  - @vleap/warps@3.0.0-beta.184
+
 ## 0.2.0-beta.90
 
 ### Patch Changes
