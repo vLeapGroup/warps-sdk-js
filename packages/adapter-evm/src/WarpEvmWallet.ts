@@ -37,6 +37,14 @@ export class WarpEvmWallet implements AdapterWarpWallet {
     if (!tx || typeof tx !== 'object') throw new Error('Invalid transaction object')
     if (!this.walletProvider) throw new Error('No wallet provider available')
     if (this.walletProvider instanceof ReadOnlyWalletProvider) throw new Error(`Wallet (${this.chain.name}) is read-only`)
+
+    if (tx.nonce === undefined) {
+      const address = this.getAddress()
+      if (address) {
+        tx.nonce = await this.provider.getTransactionCount(address, 'pending')
+      }
+    }
+
     return await this.walletProvider.signTransaction(tx)
   }
 
@@ -44,37 +52,37 @@ export class WarpEvmWallet implements AdapterWarpWallet {
     if (txs.length === 0) return []
     if (!this.walletProvider) throw new Error('No wallet provider available')
 
-    if (this.walletProvider instanceof PrivateKeyWalletProvider || this.walletProvider instanceof MnemonicWalletProvider) {
-      const wallet = this.walletProvider.getWalletInstance()
-      const address = wallet.address
+    const address = this.getAddress()
+    if (!address) throw new Error('No wallet address available')
 
-      if (txs.length > 1) {
-        const currentNonce = await this.provider.getTransactionCount(address, 'pending')
-        const signedTxs = []
-        for (let i = 0; i < txs.length; i++) {
-          const tx = { ...txs[i] }
+    if (txs.length > 1) {
+      const currentNonce = await this.provider.getTransactionCount(address, 'pending')
+      const signedTxs = []
+      for (let i = 0; i < txs.length; i++) {
+        const tx = { ...txs[i] }
+        if (tx.nonce === undefined) {
           tx.nonce = currentNonce + i
-
-          if (i > 0) {
-            const priorityReduction = BigInt(i * 1000000000)
-            const minGasPrice = BigInt(1000000000)
-
-            if (tx.maxFeePerGas && tx.maxPriorityFeePerGas) {
-              tx.maxFeePerGas = tx.maxFeePerGas > priorityReduction ? tx.maxFeePerGas - priorityReduction : minGasPrice
-              tx.maxPriorityFeePerGas =
-                tx.maxPriorityFeePerGas > priorityReduction ? tx.maxPriorityFeePerGas - priorityReduction : minGasPrice
-              delete tx.gasPrice
-            } else if (tx.gasPrice) {
-              tx.gasPrice = tx.gasPrice > priorityReduction ? tx.gasPrice - priorityReduction : minGasPrice
-              delete tx.maxFeePerGas
-              delete tx.maxPriorityFeePerGas
-            }
-          }
-
-          signedTxs.push(await this.signTransaction(tx))
         }
-        return signedTxs
+
+        if (i > 0 && (this.walletProvider instanceof PrivateKeyWalletProvider || this.walletProvider instanceof MnemonicWalletProvider)) {
+          const priorityReduction = BigInt(i * 1000000000)
+          const minGasPrice = BigInt(1000000000)
+
+          if (tx.maxFeePerGas && tx.maxPriorityFeePerGas) {
+            tx.maxFeePerGas = tx.maxFeePerGas > priorityReduction ? tx.maxFeePerGas - priorityReduction : minGasPrice
+            tx.maxPriorityFeePerGas =
+              tx.maxPriorityFeePerGas > priorityReduction ? tx.maxPriorityFeePerGas - priorityReduction : minGasPrice
+            delete tx.gasPrice
+          } else if (tx.gasPrice) {
+            tx.gasPrice = tx.gasPrice > priorityReduction ? tx.gasPrice - priorityReduction : minGasPrice
+            delete tx.maxFeePerGas
+            delete tx.maxPriorityFeePerGas
+          }
+        }
+
+        signedTxs.push(await this.signTransaction(tx))
       }
+      return signedTxs
     }
 
     const signedTxs = []
@@ -94,6 +102,11 @@ export class WarpEvmWallet implements AdapterWarpWallet {
     if (!tx || typeof tx !== 'object') throw new Error('Invalid transaction object')
     if (!tx.signature) throw new Error('Transaction must be signed before sending')
     if (!this.walletProvider) throw new Error('No wallet provider available')
+
+    if (typeof tx.signature === 'string' && tx.signature.startsWith('0x')) {
+      const txResponse = await this.provider.broadcastTransaction(tx.signature)
+      return txResponse.hash
+    }
 
     if (this.walletProvider instanceof PrivateKeyWalletProvider || this.walletProvider instanceof MnemonicWalletProvider) {
       const wallet = this.walletProvider.getWalletInstance()

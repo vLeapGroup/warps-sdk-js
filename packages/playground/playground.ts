@@ -1,9 +1,8 @@
-import { WarpClient, WarpClientConfig, withAdapterFallback } from '@vleap/warps'
+import { ChainAdapter, WarpClient, WarpClientConfig, WarpWalletDetails, withAdapterFallback } from '@vleap/warps'
 import { getAllEvmAdapters } from '@vleap/warps-adapter-evm'
 import { FastsetAdapter } from '@vleap/warps-adapter-fastset'
 import { getAllMultiversxAdapters, MultiversxAdapter } from '@vleap/warps-adapter-multiversx'
 import { NearAdapter } from '@vleap/warps-adapter-near'
-import { SolanaAdapter } from '@vleap/warps-adapter-solana'
 import { SuiAdapter } from '@vleap/warps-adapter-sui'
 import { createNodeTransformRunner } from '@vleap/warps-vm-node'
 import { createCoinbaseWalletProvider } from '@vleap/warps-wallet-coinbase'
@@ -18,15 +17,45 @@ const __dirname = path.dirname(__filename)
 const dotenv = await import('dotenv')
 dotenv.config({ path: path.join(__dirname, '.env') })
 
-const Chain = 'ethereum'
-const WarpToTest = 'omniset-deposit-ethereum.json'
-const QueryItems = {
-  token: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
-  amount: '100000',
-  receiver: '0x5A92C4763dDAc3119a65f8882a53234C9988Efd9',
-}
-const WarpInputs: string[] = ['asset:ETH|0.002']
+const Chain = 'base'
+const WarpToTest = 'transfer.json'
+const TransferReceiver = '0xF752D09aA6b5E525bFbFb14c0FECec444EE82306'
+const WarpInputs: string[] = [Chain, TransferReceiver, 'ETH|0.001']
 const warpsDir = path.join(__dirname, 'warps')
+
+const ensureCoinbaseWallet = async (
+  config: WarpClientConfig,
+  chain: string,
+  chainInfo: ChainAdapter['chainInfo']
+): Promise<WarpWalletDetails> => {
+  const walletPath = path.join(__dirname, 'wallets', `${chain}.json`)
+
+  if (fs.existsSync(walletPath)) {
+    const existingWallet = JSON.parse(fs.readFileSync(walletPath, 'utf-8'))
+    if (existingWallet.provider === 'coinbase' && existingWallet.address) {
+      console.log(`✅ Reusing existing Coinbase wallet: ${existingWallet.address}`)
+      return existingWallet
+    }
+  }
+
+  console.log('🔄 Creating new Coinbase wallet...')
+  const walletProviderFactory = config.walletProviders?.[chain as string]?.coinbase
+  if (!walletProviderFactory) {
+    throw new Error(`Coinbase wallet provider not configured for chain: ${chain}`)
+  }
+
+  const walletProvider = walletProviderFactory(config, chainInfo)
+  if (!walletProvider) {
+    throw new Error(`Failed to create Coinbase wallet provider for chain: ${chain}`)
+  }
+
+  const walletDetails = await walletProvider.generate()
+
+  fs.writeFileSync(walletPath, JSON.stringify(walletDetails, null, 2))
+  console.log(`✅ Created and saved Coinbase wallet: ${walletDetails.address}`)
+
+  return walletDetails
+}
 
 const runWarp = async (warpFile: string) => {
   const warpPath = path.join(warpsDir, warpFile)
@@ -34,14 +63,20 @@ const runWarp = async (warpFile: string) => {
   const warpRaw = fs.readFileSync(warpPath, 'utf-8')
 
   const allWallets = await loadAllWallets()
-  console.log('🔑 All wallets loaded:', Object.keys(allWallets))
+  const filteredWallets: Record<string, any> = {}
+  for (const [chain, wallet] of Object.entries(allWallets)) {
+    if (wallet && wallet.provider) {
+      filteredWallets[chain] = wallet
+    }
+  }
+  console.log('🔑 All wallets loaded:', Object.keys(filteredWallets))
 
   const config: WarpClientConfig = {
     env: 'devnet',
     currentUrl: 'https://usewarp.to',
     user: {
       wallets: {
-        ...allWallets,
+        ...filteredWallets,
       },
     },
     walletProviders: {
@@ -66,47 +101,67 @@ const runWarp = async (warpFile: string) => {
     transform: { runner: createNodeTransformRunner() },
   }
 
-  console.log('🔑 Config:', config)
-
   const client = new WarpClient(config, {
     chains: [
       ...getAllMultiversxAdapters(),
       ...getAllEvmAdapters(MultiversxAdapter),
       withAdapterFallback(SuiAdapter, MultiversxAdapter),
-      withAdapterFallback(SolanaAdapter, MultiversxAdapter),
       withAdapterFallback(NearAdapter, MultiversxAdapter),
       withAdapterFallback(FastsetAdapter, MultiversxAdapter),
     ],
   })
 
+  const chainAdapter = client.chains.find((a) => a.chainInfo.name.toLowerCase() === Chain.toLowerCase())
+  if (!chainAdapter) {
+    throw new Error(`Chain adapter not found for: ${Chain}`)
+  }
+
+  const coinbaseWallet = await ensureCoinbaseWallet(config, Chain, chainAdapter.chainInfo)
+  config.user!.wallets![Chain as string] = coinbaseWallet
+
+  console.log(`💰 Wallet address: ${coinbaseWallet.address}`)
+  console.log(`📝 Please fund this wallet on Base Sepolia before continuing...`)
+  console.log(`   You can use a faucet or send ETH to: ${coinbaseWallet.address}`)
+  console.log(`   Waiting 10 seconds before proceeding...`)
+  await new Promise((resolve) => setTimeout(resolve, 10000))
+
   const address = client.getWallet(Chain).getAddress()
   const dataLoader = client.getDataLoader(Chain)
   const accountAssets = await dataLoader.getAccountAssets(address)
 
-  console.log('Account assets:', accountAssets)
+  console.log('📊 Account assets:', accountAssets)
 
   const warp = await client.createBuilder(Chain).createFromRaw(warpRaw, false)
+  warp.chain = Chain
 
-  const { txs, chain, evaluateOutput, resolvedInputs } = await client.executeWarp(
-    warp,
-    WarpInputs,
-    {
-      onActionExecuted: (result) => console.log('Single action executed:', result),
-      onExecuted: (result) => console.log('Warp executed:', result),
-      onError: (result) => console.log('Error:', result),
-    },
-    { queries: QueryItems }
-  )
+  const {
+    txs,
+    chain: executedChain,
+    evaluateOutput,
+    resolvedInputs,
+  } = await client.executeWarp(warp, WarpInputs, {
+    onActionExecuted: (result) => console.log('✅ Single action executed:', result),
+    onExecuted: (result) => console.log('✅ Warp executed:', result),
+    onError: (result) => console.log('❌ Error:', result),
+  })
 
-  console.log('Resolved inputs:', resolvedInputs)
+  console.log('📋 Resolved inputs:', resolvedInputs)
 
-  const signedTxs = await client.getWallet(chain.name).signTransactions(txs)
-  const hashes = await client.getWallet(chain.name).sendTransactions(signedTxs)
-  const remoteTxs = await client.getActions(chain.name, hashes, true)
+  const signedTxs = await client.getWallet(executedChain.name).signTransactions(txs)
+  const hashes = await client.getWallet(executedChain.name).sendTransactions(signedTxs)
 
+  console.log('📤 Transaction hashes:', hashes)
+
+  const explorer = client.getExplorer(executedChain.name)
+  const explorerUrl = explorer.getTransactionUrl(hashes[0])
+
+  console.log('🔍 Transaction explorer URL:', explorerUrl)
+
+  const remoteTxs = await client.getActions(executedChain.name, hashes, true)
   await evaluateOutput(remoteTxs)
 
-  console.log('Remote transactions:', remoteTxs)
+  console.log('✅ Remote transactions:', remoteTxs)
+  console.log(`\n🎉 Transfer completed! View on explorer: ${explorerUrl}`)
 }
 
 const listWarps = () => fs.readdirSync(warpsDir).filter((f) => f.endsWith('.ts') || f.endsWith('.js') || f.endsWith('.json'))
