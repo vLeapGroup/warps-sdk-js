@@ -44,8 +44,8 @@ export class MnemonicWalletProvider implements WalletProvider {
 
   async signTransaction(tx: Transaction): Promise<Transaction> {
     const account = this.getAccount()
-    // signTransaction signs the transaction in place and returns the signature
-    await account.signTransaction(tx)
+    const signature = await account.signTransaction(tx)
+    tx.signature = signature
     return tx
   }
 
