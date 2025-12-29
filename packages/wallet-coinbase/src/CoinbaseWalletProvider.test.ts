@@ -149,7 +149,15 @@ describe('CoinbaseWalletProvider', () => {
         signature: mockSignedTx,
       })
       expect(mockClient.evm.getAccount).toHaveBeenCalledWith({ address: mockAddress })
-      expect(mockAccountWithSignMethod.signTransaction).toHaveBeenCalledWith(mockTx)
+      expect(mockAccountWithSignMethod.signTransaction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: '0x9876543210987654321098765432109876543210',
+          value: '0xde0b6b3a7640000',
+          data: '0x',
+          maxFeePerGas: '0x3b9aca00',
+          maxPriorityFeePerGas: '0x5f5e100',
+        })
+      )
     })
 
     it('should throw error if API does not return signed transaction', async () => {
