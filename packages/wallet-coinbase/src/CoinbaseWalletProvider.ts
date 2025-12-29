@@ -156,7 +156,7 @@ export class CoinbaseWalletProvider implements WalletProvider {
 
   async importFromPrivateKey(privateKey: string): Promise<WarpWalletDetails> {
     try {
-      const name = this.config.user?.id ? `${this.config.user.id}-${this.chain.name}` : undefined
+      const name = this.getAccountName()
       const account =
         this.chain.name === 'solana'
           ? await this.client.solana.importAccount({ privateKey, ...(name && { name }) })
@@ -196,7 +196,9 @@ export class CoinbaseWalletProvider implements WalletProvider {
 
   async generate(): Promise<WarpWalletDetails> {
     try {
-      const account = this.chain.name === 'solana' ? await this.client.solana.createAccount() : await this.client.evm.createAccount()
+      const name = this.getAccountName()
+      const account =
+        this.chain.name === 'solana' ? await this.client.solana.createAccount({ name }) : await this.client.evm.createAccount({ name })
 
       const walletDetails: WarpWalletDetails = {
         provider: CoinbaseWalletProvider.PROVIDER_NAME,
@@ -209,6 +211,10 @@ export class CoinbaseWalletProvider implements WalletProvider {
     } catch (error) {
       throw new Error(`CoinbaseWalletProvider: Failed to generate account: ${error}`)
     }
+  }
+
+  private getAccountName(): string | undefined {
+    return this.config.user?.id ? `${this.config.user.id}-${this.chain.name}` : undefined
   }
 
   private getWalletAddress(): string {
