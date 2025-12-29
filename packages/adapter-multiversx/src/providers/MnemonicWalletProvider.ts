@@ -1,4 +1,4 @@
-import { Account, Message, Mnemonic, Transaction } from '@multiversx/sdk-core'
+import { Account, Message, Mnemonic, Transaction, UserSecretKey } from '@multiversx/sdk-core'
 import {
   getWarpWalletAddressFromConfig,
   getWarpWalletMnemonicFromConfig,
@@ -77,7 +77,6 @@ export class MnemonicWalletProvider implements WalletProvider {
   }
 
   async importFromPrivateKey(privateKey: string): Promise<WarpWalletDetails> {
-    const { UserSecretKey } = await import('@multiversx/sdk-wallet')
     const secretKey = UserSecretKey.fromString(privateKey)
     const privateKeyHex = secretKey.hex()
     const pubKey = secretKey.generatePublicKey()
