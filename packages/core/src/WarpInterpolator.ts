@@ -2,7 +2,8 @@ import { WarpConstants } from './constants'
 import { findWarpAdapterForChain } from './helpers'
 import { replacePlaceholders } from './helpers/general'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
-import { ChainAdapter, InterpolationBag, ResolvedInput, Warp, WarpAction, WarpChain, WarpClientConfig } from './types'
+import { WarpChainName } from './constants'
+import { ChainAdapter, InterpolationBag, ResolvedInput, Warp, WarpAction, WarpClientConfig } from './types'
 import { WarpSerializer } from './WarpSerializer'
 
 export class WarpInterpolator {
@@ -145,7 +146,7 @@ export class WarpInterpolator {
         return match
       }
       try {
-        const chainAdapter = findWarpAdapterForChain(chain as WarpChain, this.adapters)
+        const chainAdapter = findWarpAdapterForChain(chain as WarpChainName, this.adapters)
         const chainBag: InterpolationBag = {
           config: this.config,
           adapter: chainAdapter,

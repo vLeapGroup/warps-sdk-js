@@ -7,7 +7,8 @@ import {
   findWarpAdapterForChain,
   getWarpInfoFromIdentifier,
 } from './helpers'
-import { ChainAdapter, Warp, WarpBrand, WarpCacheConfig, WarpChain, WarpClientConfig, WarpRegistryInfo } from './types'
+import { WarpChainName } from './constants'
+import { ChainAdapter, Warp, WarpBrand, WarpCacheConfig, WarpClientConfig, WarpRegistryInfo } from './types'
 import { WarpInterpolator } from './WarpInterpolator'
 import { WarpLogger } from './WarpLogger'
 
@@ -15,7 +16,7 @@ export type DetectionResult = {
   match: boolean
   url: string
   warp: Warp | null
-  chain: WarpChain | null
+  chain: WarpChainName | null
   registryInfo: WarpRegistryInfo | null
   brand: WarpBrand | null
 }
@@ -113,7 +114,7 @@ export class WarpLinkDetecter {
   }
 }
 
-const modifyWarpMetaIdentifier = (warp: Warp, chain: WarpChain, registryInfo: WarpRegistryInfo | null, identifier: string) => {
+const modifyWarpMetaIdentifier = (warp: Warp, chain: WarpChainName, registryInfo: WarpRegistryInfo | null, identifier: string) => {
   if (!warp.meta) return
   warp.meta.identifier = registryInfo?.alias
     ? createWarpIdentifier(chain, 'alias', registryInfo.alias)

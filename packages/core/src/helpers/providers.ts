@@ -1,8 +1,9 @@
-import { WarpChain, WarpChainEnv, WarpClientConfig, WarpProviderConfig } from '../types'
+import { WarpChainName } from '../constants'
+import { WarpChainEnv, WarpClientConfig, WarpProviderConfig } from '../types'
 
 export const getProviderConfig = (
   config: WarpClientConfig,
-  chain: WarpChain,
+  chain: WarpChainName,
   env: WarpChainEnv,
   defaultProvider: string
 ): WarpProviderConfig => {

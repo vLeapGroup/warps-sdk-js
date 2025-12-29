@@ -1,4 +1,4 @@
-import { ChainAdapter, ChainAdapterFactory, WarpChain, WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { ChainAdapter, ChainAdapterFactory, WarpChainName, WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 import { WarpSolanaDataLoader } from '../WarpSolanaDataLoader'
 import { WarpSolanaExecutor } from '../WarpSolanaExecutor'
 import { WarpSolanaExplorer } from '../WarpSolanaExplorer'
@@ -6,7 +6,7 @@ import { WarpSolanaOutput } from '../WarpSolanaOutput'
 import { WarpSolanaSerializer } from '../WarpSolanaSerializer'
 import { WarpSolanaWallet } from '../WarpSolanaWallet'
 
-export const createSolanaAdapter = (chainName: WarpChain, chainInfos: Record<WarpChainEnv, WarpChainInfo>): ChainAdapterFactory => {
+export const createSolanaAdapter = (chainName: WarpChainName, chainInfos: Record<WarpChainEnv, WarpChainInfo>): ChainAdapterFactory => {
   return (config: WarpClientConfig, fallback?: ChainAdapter) => {
     if (!fallback) throw new Error(`${chainName} adapter requires a fallback adapter`)
 

@@ -1,11 +1,11 @@
+import { WarpChainName } from './constants'
 import { getLatestProtocolIdentifier, toPreviewText } from './helpers'
-import { BaseWarpBuilder, Warp, WarpAction, WarpChain, WarpClientConfig, WarpText } from './types'
+import { BaseWarpBuilder, Warp, WarpAction, WarpClientConfig, WarpText } from './types'
 import { WarpValidator } from './WarpValidator'
 
 export class WarpBuilder implements BaseWarpBuilder {
   private pendingWarp: Warp = {
     protocol: getLatestProtocolIdentifier('warp'),
-    chain: '',
     name: '',
     title: '',
     description: null,
@@ -31,7 +31,7 @@ export class WarpBuilder implements BaseWarpBuilder {
     return encoded as Warp
   }
 
-  setChain(chain: WarpChain): WarpBuilder {
+  setChain(chain: WarpChainName): WarpBuilder {
     this.pendingWarp.chain = chain
     return this
   }

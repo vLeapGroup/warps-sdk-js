@@ -1,6 +1,7 @@
-import { WarpChain, WarpClientConfig, WarpWalletDetails } from '../types'
+import { WarpChainName } from '../constants'
+import { WarpClientConfig, WarpUserWallets, WarpWalletDetails } from '../types'
 
-export const getWalletFromConfigOrFail = (config: WarpClientConfig, chain: WarpChain): string | WarpWalletDetails => {
+export const getWalletFromConfigOrFail = (config: WarpClientConfig, chain: WarpChainName): string | WarpWalletDetails => {
   const wallet = config.user?.wallets?.[chain] || null
   if (!wallet) throw new Error(`No wallet configured for chain ${chain}`)
   return wallet
@@ -12,7 +13,7 @@ export const getWarpWalletAddress = (wallet: WarpWalletDetails | string | null |
   return wallet.address
 }
 
-export const getWarpWalletAddressFromConfig = (config: WarpClientConfig, chain: WarpChain) =>
+export const getWarpWalletAddressFromConfig = (config: WarpClientConfig, chain: WarpChainName) =>
   getWarpWalletAddress(config.user?.wallets?.[chain] || null)
 
 export const getWarpWalletPrivateKey = (wallet: WarpWalletDetails | string | null | undefined): string | null => {
@@ -33,16 +34,16 @@ export const getWarpWalletExternalId = (wallet: WarpWalletDetails | string | nul
   return wallet.externalId || null
 }
 
-export const getWarpWalletPrivateKeyFromConfig = (config: WarpClientConfig, chain: WarpChain) =>
+export const getWarpWalletPrivateKeyFromConfig = (config: WarpClientConfig, chain: WarpChainName) =>
   getWarpWalletPrivateKey(config.user?.wallets?.[chain] || null)?.trim() || null
 
-export const getWarpWalletMnemonicFromConfig = (config: WarpClientConfig, chain: WarpChain) =>
+export const getWarpWalletMnemonicFromConfig = (config: WarpClientConfig, chain: WarpChainName) =>
   getWarpWalletMnemonic(config.user?.wallets?.[chain] || null)?.trim() || null
 
-export const getWarpWalletExternalIdFromConfig = (config: WarpClientConfig, chain: WarpChain) =>
+export const getWarpWalletExternalIdFromConfig = (config: WarpClientConfig, chain: WarpChainName) =>
   getWarpWalletExternalId(config.user?.wallets?.[chain] || null)?.trim() || null
 
-export const getWarpWalletExternalIdFromConfigOrFail = (config: WarpClientConfig, chain: WarpChain) => {
+export const getWarpWalletExternalIdFromConfigOrFail = (config: WarpClientConfig, chain: WarpChainName) => {
   const externalId = getWarpWalletExternalIdFromConfig(config, chain)
   if (!externalId) throw new Error(`No external ID configured for wallet onchain ${chain}`)
   return externalId
@@ -52,12 +53,12 @@ export const isWarpWalletReadOnly = (wallet: WarpWalletDetails | string | null |
   return typeof wallet === 'string'
 }
 
-export const setWarpWalletInConfig = (config: WarpClientConfig, chain: WarpChain, wallet: WarpWalletDetails): void => {
+export const setWarpWalletInConfig = (config: WarpClientConfig, chain: WarpChainName, wallet: WarpWalletDetails): void => {
   if (!config.user) {
     config.user = {}
   }
   if (!config.user.wallets) {
-    config.user.wallets = {}
+    config.user.wallets = {} as WarpUserWallets
   }
   config.user.wallets[chain] = wallet
 }

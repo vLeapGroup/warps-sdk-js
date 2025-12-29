@@ -1,4 +1,4 @@
-import { ChainAdapter, ChainAdapterFactory, WarpChainEnv, WarpChainInfo, WarpClientConfig, WarpTypeRegistry } from '@vleap/warps'
+import { ChainAdapter, ChainAdapterFactory, WarpChainName, WarpChainEnv, WarpChainInfo, WarpClientConfig, WarpTypeRegistry } from '@vleap/warps'
 import { WarpMultiversxAbiBuilder } from '../WarpMultiversxAbiBuilder'
 import { WarpMultiversxBrandBuilder } from '../WarpMultiversxBrandBuilder'
 import { WarpMultiversxBuilder } from '../WarpMultiversxBuilder'
@@ -10,7 +10,7 @@ import { WarpMultiversxOutput } from '../WarpMultiversxOutput'
 import { WarpMultiversxSerializer } from '../WarpMultiversxSerializer'
 import { WarpMultiversxWallet } from '../WarpMultiversxWallet'
 
-export const createMultiversxAdapter = (chainName: string, chainInfos: Record<WarpChainEnv, WarpChainInfo>): ChainAdapterFactory => {
+export const createMultiversxAdapter = (chainName: WarpChainName, chainInfos: Record<WarpChainEnv, WarpChainInfo>): ChainAdapterFactory => {
   return (config: WarpClientConfig, fallback?: ChainAdapter) => {
     const chainInfo = chainInfos[config.env]
 

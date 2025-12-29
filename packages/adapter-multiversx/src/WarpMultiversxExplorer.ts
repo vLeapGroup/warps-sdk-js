@@ -1,9 +1,9 @@
-import { AdapterWarpExplorer, WarpChain, WarpClientConfig } from '@vleap/warps'
+import { AdapterWarpExplorer, WarpChainName, WarpClientConfig } from '@vleap/warps'
 import { ExplorerName, ExplorerUrls, MultiversxExplorersConfig } from './constants'
 
 export class WarpMultiversxExplorer implements AdapterWarpExplorer {
   constructor(
-    private readonly chain: WarpChain,
+    private readonly chain: WarpChainName,
     private readonly config: WarpClientConfig
   ) {}
 

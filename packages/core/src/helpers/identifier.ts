@@ -1,5 +1,5 @@
-import { WarpConstants } from '../constants'
-import { WarpChain, WarpIdentifierType } from '../types'
+import { WarpChainName, WarpConstants } from '../constants'
+import { WarpIdentifierType } from '../types'
 
 export const cleanWarpIdentifier = (identifier: string): string => {
   return identifier.startsWith(WarpConstants.IdentifierAliasMarker)
@@ -12,7 +12,7 @@ export const isEqualWarpIdentifier = (identifier1: string | null | undefined, id
   return cleanWarpIdentifier(identifier1) === cleanWarpIdentifier(identifier2)
 }
 
-export const createWarpIdentifier = (chain: WarpChain, type: WarpIdentifierType, identifier: string) => {
+export const createWarpIdentifier = (chain: WarpChainName, type: WarpIdentifierType, identifier: string) => {
   const cleanIdentifier = cleanWarpIdentifier(identifier)
   if (type === WarpConstants.IdentifierType.Alias) {
     return WarpConstants.IdentifierAliasMarker + chain + WarpConstants.IdentifierParamSeparator + cleanIdentifier
@@ -22,7 +22,7 @@ export const createWarpIdentifier = (chain: WarpChain, type: WarpIdentifierType,
 
 export const getWarpInfoFromIdentifier = (
   prefixedIdentifier: string
-): { chain: WarpChain; type: WarpIdentifierType; identifier: string; identifierBase: string } | null => {
+): { chain: WarpChainName; type: WarpIdentifierType; identifier: string; identifierBase: string } | null => {
   const decoded = decodeURIComponent(prefixedIdentifier).trim()
   const identifierWithoutAliasMarker = cleanWarpIdentifier(decoded)
   const base = identifierWithoutAliasMarker.split('?')[0]
@@ -51,7 +51,7 @@ export const getWarpInfoFromIdentifier = (
         ? identifier + identifierWithoutAliasMarker.substring(identifierWithoutAliasMarker.indexOf('?'))
         : identifier
       return {
-        chain: chainPrefix,
+        chain: chainPrefix as WarpChainName,
         type: type as WarpIdentifierType,
         identifier: identifierWithQuery,
         identifierBase: identifier,
@@ -87,7 +87,7 @@ export const getWarpInfoFromIdentifier = (
       const identifierType = isHash(identifier, chainPrefix) ? WarpConstants.IdentifierType.Hash : WarpConstants.IdentifierType.Alias
 
       return {
-        chain: chainPrefix,
+        chain: chainPrefix as WarpChainName,
         type: identifierType,
         identifier: identifierWithQuery,
         identifierBase: identifier,
@@ -106,7 +106,7 @@ export const getWarpInfoFromIdentifier = (
 
 export const extractIdentifierInfoFromUrl = (
   url: string
-): { chain: WarpChain; type: WarpIdentifierType; identifier: string; identifierBase: string } | null => {
+): { chain: WarpChainName; type: WarpIdentifierType; identifier: string; identifierBase: string } | null => {
   const urlObj = new URL(url)
   const searchParamValue = urlObj.searchParams.get(WarpConstants.IdentifierParamName)
   let value = searchParamValue

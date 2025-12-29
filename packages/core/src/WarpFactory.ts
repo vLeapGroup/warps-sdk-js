@@ -1,4 +1,4 @@
-import { WarpConstants } from './constants'
+import { WarpChainName, WarpConstants } from './constants'
 import { findWarpAdapterForChain, getWarpActionByIndex, getWarpPrimaryAction, shiftBigintBy, splitInput } from './helpers'
 import { extractResolvedInputValues } from './helpers/payload'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
@@ -8,7 +8,6 @@ import {
   Warp,
   WarpAction,
   WarpActionInput,
-  WarpChain,
   WarpChainAssetValue,
   WarpChainEnv,
   WarpChainInfo,
@@ -163,7 +162,7 @@ export class WarpFactory {
   }
 
   public async getResolvedInputs(
-    chain: WarpChain,
+    chain: WarpChainName,
     action: WarpAction,
     inputArgs: string[],
     interpolator?: WarpInterpolator
@@ -209,7 +208,7 @@ export class WarpFactory {
   }
 
   private async resolveActionInputs(
-    chainName: string,
+    chainName: WarpChainName,
     action: WarpAction,
     inputs: string[],
     interpolator: WarpInterpolator
@@ -345,7 +344,7 @@ export class WarpFactory {
     return inputsObj
   }
 
-  public async preprocessInput(chain: WarpChain, input: string): Promise<string> {
+  public async preprocessInput(chain: WarpChainName, input: string): Promise<string> {
     try {
       const [type, value] = splitInput(input)
       const adapter = findWarpAdapterForChain(chain, this.adapters)
@@ -427,7 +426,7 @@ export class WarpFactory {
     const chainInput = inputs[chainPositionIndex]
     if (!chainInput) throw new Error('Chain input not found')
 
-    const chainValue = this.serializer.stringToNative(chainInput)[1] as WarpChain
+    const chainValue = this.serializer.stringToNative(chainInput)[1] as WarpChainName
     const adapter = findWarpAdapterForChain(chainValue, this.adapters)
 
     return adapter.chainInfo

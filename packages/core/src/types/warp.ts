@@ -1,10 +1,9 @@
+import { WarpChainName } from '../constants'
 import { WarpAlerts } from './alerts'
 import { WarpChainAsset, WarpChainAssetValue } from './chain'
 import { ChainAdapter } from './config'
 import { WarpTheme } from './general'
 import { WarpText } from './i18n'
-
-export type WarpChain = string
 
 export type WarpExplorerName = string
 
@@ -12,7 +11,7 @@ export type WarpChainInfoLogoThemed = Record<WarpTheme, string>
 export type WarpChainInfoLogo = string | WarpChainInfoLogoThemed
 
 export type WarpChainInfo = {
-  name: string
+  name: WarpChainName
   displayName: string
   chainId: string
   blockTime: number
@@ -34,7 +33,7 @@ export type WarpMessageName = string
 
 export type Warp = {
   protocol: string
-  chain?: WarpChain
+  chain?: WarpChainName
   name: string
   title: WarpText
   description: WarpText | null
@@ -52,7 +51,7 @@ export type Warp = {
 }
 
 export type WarpMeta = {
-  chain: WarpChain
+  chain: WarpChainName
   identifier: string
   query: string | null
   hash: string

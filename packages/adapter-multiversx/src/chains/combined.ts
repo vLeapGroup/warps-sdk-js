@@ -1,3 +1,3 @@
-import { WarpChain, WarpChainName } from '@vleap/warps'
+import { WarpChainName } from '@vleap/warps'
 
-export const getAllMultiversxChainNames = (): WarpChain[] => [WarpChainName.Multiversx, WarpChainName.Vibechain]
+export const getAllMultiversxChainNames = (): WarpChainName[] => [WarpChainName.Multiversx, WarpChainName.Vibechain]

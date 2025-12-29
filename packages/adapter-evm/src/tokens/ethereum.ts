@@ -1,6 +1,6 @@
-import { WarpChain, WarpChainAsset, WarpChainName } from '@vleap/warps'
+import { WarpChainAsset, WarpChainName } from '@vleap/warps'
 
-const EthereumChain: WarpChain = WarpChainName.Ethereum
+const EthereumChain = WarpChainName.Ethereum
 
 export const EthereumTokens: WarpChainAsset[] = [
   {

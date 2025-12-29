@@ -1,6 +1,6 @@
-import { WarpChain, WarpChainAsset, WarpChainName } from '@vleap/warps'
+import { WarpChainAsset, WarpChainName } from '@vleap/warps'
 
-const MultiversxChain: WarpChain = WarpChainName.Multiversx
+const MultiversxChain = WarpChainName.Multiversx
 
 export const MultiversxTestnetTokens: WarpChainAsset[] = [
   {

@@ -1,6 +1,6 @@
-import { WarpChain, WarpChainAsset, WarpChainName } from '@vleap/warps'
+import { WarpChainAsset, WarpChainName } from '@vleap/warps'
 
-const ArbitrumChain: WarpChain = WarpChainName.Arbitrum
+const ArbitrumChain = WarpChainName.Arbitrum
 
 export const ArbitrumTokens: WarpChainAsset[] = [
   {

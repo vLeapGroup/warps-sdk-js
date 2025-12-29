@@ -1,4 +1,4 @@
-import { ChainAdapter, ChainAdapterFactory, WarpChain, WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { ChainAdapter, ChainAdapterFactory, WarpChainName, WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
 import { WarpNearDataLoader } from '../WarpNearDataLoader'
 import { WarpNearExecutor } from '../WarpNearExecutor'
 import { WarpNearExplorer } from '../WarpNearExplorer'
@@ -6,7 +6,7 @@ import { WarpNearOutput } from '../WarpNearOutput'
 import { WarpNearSerializer } from '../WarpNearSerializer'
 import { WarpNearWallet } from '../WarpNearWallet'
 
-export const createNearAdapter = (chainName: WarpChain, chainInfos: Record<WarpChainEnv, WarpChainInfo>): ChainAdapterFactory => {
+export const createNearAdapter = (chainName: WarpChainName, chainInfos: Record<WarpChainEnv, WarpChainInfo>): ChainAdapterFactory => {
   return (config: WarpClientConfig, fallback?: ChainAdapter) => {
     if (!fallback) throw new Error(`${chainName} adapter requires a fallback adapter`)
 

@@ -1,4 +1,4 @@
-import { WarpConstants } from '../constants'
+import { WarpChainName, WarpConstants } from '../constants'
 import { ChainAdapter, WarpClientConfig } from '../types'
 import { WarpExecutionNextInfo, WarpExecutionOutput } from '../types/output'
 import { Warp } from '../types/warp'

@@ -20,7 +20,7 @@ export const WarpConstants = {
 
   IdentifierParamSeparator: ':',
 
-  IdentifierChainDefault: 'multiversx',
+  IdentifierChainDefault: WarpChainName.Multiversx,
 
   IdentifierType: {
     Alias: 'alias' as WarpIdentifierType,

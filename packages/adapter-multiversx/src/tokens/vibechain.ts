@@ -1,6 +1,6 @@
-import { WarpChain, WarpChainAsset, WarpChainName } from '@vleap/warps'
+import { WarpChainAsset, WarpChainName } from '@vleap/warps'
 
-const VibechainChain: WarpChain = WarpChainName.Vibechain
+const VibechainChain = WarpChainName.Vibechain
 
 export const VibechainTokens: WarpChainAsset[] = [
   {

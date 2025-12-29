@@ -1,8 +1,8 @@
-import { ChainAdapterFactory, WarpChain, WarpChainAsset, WarpChainName } from '@vleap/warps'
+import { ChainAdapterFactory, WarpChainAsset, WarpChainName } from '@vleap/warps'
 import { createNearAdapter } from './common'
 
 export const NativeTokenNear: WarpChainAsset = {
-  chain: 'near' as WarpChainName,
+  chain: WarpChainName.Near,
   identifier: 'NEAR',
   symbol: 'NEAR',
   name: 'NEAR',
@@ -13,9 +13,9 @@ export const NativeTokenNear: WarpChainAsset = {
   },
 }
 
-export const NearAdapter: ChainAdapterFactory = createNearAdapter('near' as WarpChain, {
+export const NearAdapter: ChainAdapterFactory = createNearAdapter(WarpChainName.Near, {
   mainnet: {
-    name: 'near' as WarpChainName,
+    name: WarpChainName.Near,
     displayName: 'NEAR Mainnet',
     chainId: 'mainnet',
     blockTime: 1200,
@@ -28,7 +28,7 @@ export const NearAdapter: ChainAdapterFactory = createNearAdapter('near' as Warp
     nativeToken: NativeTokenNear,
   },
   testnet: {
-    name: 'near' as WarpChainName,
+    name: WarpChainName.Near,
     displayName: 'NEAR Testnet',
     chainId: 'testnet',
     blockTime: 1200,
@@ -41,7 +41,7 @@ export const NearAdapter: ChainAdapterFactory = createNearAdapter('near' as Warp
     nativeToken: NativeTokenNear,
   },
   devnet: {
-    name: 'near' as WarpChainName,
+    name: WarpChainName.Near,
     displayName: 'NEAR Devnet',
     chainId: 'testnet',
     blockTime: 1200,

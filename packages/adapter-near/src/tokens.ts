@@ -1,20 +1,20 @@
-import { WarpChain, WarpChainAsset, WarpChainEnv } from '@vleap/warps'
+import { WarpChainName, WarpChainAsset, WarpChainEnv } from '@vleap/warps'
 
 export const NearTokens: WarpChainAsset[] = []
 
-export const KnownTokens: Record<WarpChain, Record<string, WarpChainAsset[]>> = {
-  near: {
+export const KnownTokens: Partial<Record<WarpChainName, Record<string, WarpChainAsset[]>>> = {
+  [WarpChainName.Near]: {
     mainnet: NearTokens,
     testnet: NearTokens,
     devnet: NearTokens,
   },
 }
 
-export const findKnownTokenById = (chain: WarpChain, env: WarpChainEnv, id: string): WarpChainAsset | null => {
+export const findKnownTokenById = (chain: WarpChainName, env: WarpChainEnv, id: string): WarpChainAsset | null => {
   const chainTokens = KnownTokens[chain]?.[env] || []
   return chainTokens.find((token) => token.identifier === id) || null
 }
 
-export const getKnownTokensForChain = (chainName: string, env: string = 'mainnet'): WarpChainAsset[] => {
+export const getKnownTokensForChain = (chainName: WarpChainName, env: string = 'mainnet'): WarpChainAsset[] => {
   return KnownTokens[chainName]?.[env] || []
 }

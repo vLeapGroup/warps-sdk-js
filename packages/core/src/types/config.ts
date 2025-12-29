@@ -1,3 +1,4 @@
+import { WarpChainName } from '../constants'
 import { WarpAbiContents } from './abi'
 import { WarpBrand } from './brand'
 import { ClientCacheConfig } from './cache'
@@ -15,7 +16,6 @@ import {
   WarpAction,
   WarpActionIndex,
   WarpActionInputType,
-  WarpChain,
   WarpChainInfo,
   WarpExecutable,
   WarpExplorerName,
@@ -32,7 +32,7 @@ export type WarpWalletDetails = {
   externalId?: string | null
 }
 
-export type WarpUserWallets = Record<WarpChain, WarpWalletDetails | string | null>
+export type WarpUserWallets = Record<WarpChainName, WarpWalletDetails | string | null>
 
 export type WarpProviderPreferences = Partial<Record<WarpChainEnv, string | WarpProviderConfig>>
 
@@ -53,11 +53,11 @@ export type WarpClientConfig = {
   preferences?: {
     locale?: WarpLocale
     theme?: WarpTheme
-    explorers?: Record<WarpChain, WarpExplorerName>
-    providers?: Record<WarpChain, WarpProviderPreferences>
+    explorers?: Partial<Record<WarpChainName, WarpExplorerName>>
+    providers?: Partial<Record<WarpChainName, WarpProviderPreferences>>
   }
-  walletProviders?: Record<WarpChain, Partial<Record<WarpWalletProvider, WalletProviderFactory>>>
-  fallback?: WarpChain
+  walletProviders?: Partial<Record<WarpChainName, Partial<Record<WarpWalletProvider, WalletProviderFactory>>>>
+  fallback?: WarpChainName
   schema?: {
     warp?: string
     brand?: string

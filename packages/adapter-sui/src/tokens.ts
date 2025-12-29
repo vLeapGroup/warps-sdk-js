@@ -1,6 +1,6 @@
-import { WarpChain, WarpChainAsset, WarpChainName } from '@vleap/warps'
+import { WarpChainAsset, WarpChainName } from '@vleap/warps'
 
-const SuiChain: WarpChain = WarpChainName.Sui
+const SuiChain = WarpChainName.Sui
 
 export const KnownTokens: WarpChainAsset[] = [
   {

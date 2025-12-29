@@ -1,9 +1,9 @@
+import { WarpChainName } from '../constants'
 import { WarpAdapterGenericRemoteTransaction } from './config'
 import { WarpTheme } from './general'
-import { WarpChain } from './warp'
 
 export type WarpChainAccount = {
-  chain: WarpChain
+  chain: WarpChainName
   address: string
   balance: bigint
 }
@@ -17,7 +17,7 @@ export type WarpChainAssetLogoThemed = Record<WarpTheme, string>
 export type WarpChainAssetLogo = string | WarpChainAssetLogoThemed | null
 
 export type WarpChainAsset = {
-  chain: WarpChain
+  chain: WarpChainName
   identifier: string
   name: string
   symbol: string
@@ -29,7 +29,7 @@ export type WarpChainAsset = {
 }
 
 export type WarpChainAction = {
-  chain: WarpChain
+  chain: WarpChainName
   id: string
   sender: string
   receiver: string

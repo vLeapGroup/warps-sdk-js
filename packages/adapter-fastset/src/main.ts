@@ -1,7 +1,6 @@
 import {
   ChainAdapter,
   ChainAdapterFactory,
-  WarpChain,
   WarpChainAsset,
   WarpChainEnv,
   WarpChainInfo,
@@ -24,7 +23,7 @@ export const NativeTokenSet: WarpChainAsset = {
   logoUrl: 'https://joai.ai/images/tokens/set-black.svg',
 }
 
-function createFastsetAdapter(chainName: WarpChain, chainInfos: Record<WarpChainEnv, WarpChainInfo>): ChainAdapterFactory {
+function createFastsetAdapter(chainName: WarpChainName, chainInfos: Record<WarpChainEnv, WarpChainInfo>): ChainAdapterFactory {
   return (config: WarpClientConfig, fallback?: ChainAdapter) => {
     const chainInfo = chainInfos[config.env]
     if (!chainInfo) throw new Error(`FastsetAdapter: chain info not found for chain ${chainName}`)

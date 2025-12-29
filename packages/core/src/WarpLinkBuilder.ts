@@ -1,9 +1,9 @@
 import QRCodeStyling from 'qr-code-styling'
 import { WarpConfig } from './config'
-import { WarpConstants } from './constants'
+import { WarpChainName, WarpConstants } from './constants'
 import { findWarpAdapterForChain } from './helpers'
 import { extractIdentifierInfoFromUrl, getWarpInfoFromIdentifier } from './helpers/identifier'
-import { ChainAdapter, WarpChain, WarpClientConfig, WarpIdentifierType } from './types'
+import { ChainAdapter, WarpClientConfig, WarpIdentifierType } from './types'
 
 // Example Link (Transaction Hash as ID): https://usewarp.to/to?warp=hash.<MYHASH>
 // Example Link (Alias as ID): https://usewarp.to/to?warp=alias.<MYALIAS>
@@ -19,7 +19,7 @@ export class WarpLinkBuilder {
     return !!idResult
   }
 
-  build(chain: WarpChain, type: WarpIdentifierType, id: string): string {
+  build(chain: WarpChainName, type: WarpIdentifierType, id: string): string {
     const clientUrl = this.config.clientUrl || WarpConfig.DefaultClientUrl(this.config.env)
     const adapter = findWarpAdapterForChain(chain, this.adapters)
 
@@ -41,7 +41,7 @@ export class WarpLinkBuilder {
   }
 
   generateQrCode(
-    chain: WarpChain,
+    chain: WarpChainName,
     type: WarpIdentifierType,
     id: string,
     size = 512,
