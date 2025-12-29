@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-beta.93
+
+### Patch Changes
+
+- 912ef91: fix import
+
 ## 0.2.0-beta.92
 
 ### Patch Changes
