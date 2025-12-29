@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.185
+
+### Patch Changes
+
+- c390d84: update wallets
+- fcea985: update chain names
+
 ## 3.0.0-beta.184
 
 ### Minor Changes

@@ -1,5 +1,15 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-beta.68
+
+### Patch Changes
+
+- c390d84: update wallets
+- fcea985: update chain names
+- Updated dependencies [c390d84]
+- Updated dependencies [fcea985]
+  - @vleap/warps@3.0.0-beta.185
+
 ## 0.2.0-beta.67
 
 ### Minor Changes

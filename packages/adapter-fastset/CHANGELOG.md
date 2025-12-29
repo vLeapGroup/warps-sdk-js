@@ -1,5 +1,15 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-beta.54
+
+### Patch Changes
+
+- c390d84: update wallets
+- fcea985: update chain names
+- Updated dependencies [c390d84]
+- Updated dependencies [fcea985]
+  - @vleap/warps@3.0.0-beta.185
+
 ## 0.1.0-beta.53
 
 ### Minor Changes
