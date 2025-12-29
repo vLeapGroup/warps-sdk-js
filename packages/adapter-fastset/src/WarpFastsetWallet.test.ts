@@ -135,7 +135,7 @@ describe('WarpFastsetWallet', () => {
         },
       }
       const walletWithMnemonic = new WarpFastsetWallet(configWithMnemonic, mockChain)
-      const result = await walletWithMnemonic.importFromMnemonic('mnemonic', mnemonic)
+      const result = await walletWithMnemonic.importFromMnemonic(mnemonic)
 
       expect(result).toHaveProperty('address')
       expect(result).toHaveProperty('privateKey')

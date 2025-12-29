@@ -70,13 +70,13 @@ export class WarpSuiWallet implements AdapterWarpWallet {
     return Promise.all(txs.map(async (tx) => this.sendTransaction(tx)))
   }
 
-  async importFromMnemonic(provider: WarpWalletProvider, mnemonic: string): Promise<WarpWalletDetails> {
-    const walletProvider = this.createProviderForOperation(provider)
+  async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
+    const walletProvider = this.createProviderForOperation('mnemonic')
     return await walletProvider.importFromMnemonic(mnemonic)
   }
 
-  async importFromPrivateKey(provider: WarpWalletProvider, privateKey: string): Promise<WarpWalletDetails> {
-    const walletProvider = this.createProviderForOperation(provider)
+  async importFromPrivateKey(privateKey: string): Promise<WarpWalletDetails> {
+    const walletProvider = this.createProviderForOperation('privateKey')
     return await walletProvider.importFromPrivateKey(privateKey)
   }
 
