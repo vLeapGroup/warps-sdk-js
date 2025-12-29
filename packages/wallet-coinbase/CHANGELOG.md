@@ -1,5 +1,11 @@
 # @vleap/warps-wallet-coinbase
 
+## 1.0.0-beta.3
+
+### Patch Changes
+
+- fa66a24: update coinbase account names
+
 ## 1.0.0-beta.2
 
 ### Minor Changes
