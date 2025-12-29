@@ -32,7 +32,7 @@ export type WarpWalletDetails = {
   externalId?: string | null
 }
 
-export type WarpUserWallets = Record<WarpChainName, WarpWalletDetails | string | null>
+export type WarpUserWallets = Partial<Record<WarpChainName, WarpWalletDetails | string | null>>
 
 export type WarpProviderPreferences = Partial<Record<WarpChainEnv, string | WarpProviderConfig>>
 
