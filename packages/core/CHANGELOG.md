@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.186
+
+### Patch Changes
+
+- b22adbf: update user wallets type
+
 ## 3.0.0-beta.185
 
 ### Patch Changes
