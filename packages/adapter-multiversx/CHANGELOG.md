@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-beta.94
+
+### Patch Changes
+
+- 0a18156: fix tx signing
+
 ## 0.2.0-beta.93
 
 ### Patch Changes
