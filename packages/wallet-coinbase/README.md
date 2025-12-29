@@ -44,11 +44,15 @@ const config = {
   walletProviders: {
     ethereum: {
       coinbase: createCoinbaseWalletProvider({
+        apiKeyId: process.env.COINBASE_API_KEY_ID,
+        apiKeySecret: process.env.COINBASE_API_KEY_SECRET,
         walletSecret: process.env.COINBASE_WALLET_SECRET,
       }),
     },
     base: {
       coinbase: createCoinbaseWalletProvider({
+        apiKeyId: process.env.COINBASE_API_KEY_ID,
+        apiKeySecret: process.env.COINBASE_API_KEY_SECRET,
         walletSecret: process.env.COINBASE_WALLET_SECRET,
       }),
     },
