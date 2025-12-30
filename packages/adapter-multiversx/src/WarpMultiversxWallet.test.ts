@@ -242,5 +242,17 @@ describe('WarpMultiversxWallet', () => {
       expect(result.address).toBeDefined()
       expect(result.provider).toBe('privateKey')
     })
+
+    it('should generate 24-word mnemonic', async () => {
+      const result = await readOnlyWallet.generate('mnemonic')
+      expect(result).toBeDefined()
+      expect(result.address).toBeDefined()
+      expect(result.mnemonic).not.toBeNull()
+      expect(result.provider).toBe('mnemonic')
+      if (result.mnemonic) {
+        const words = result.mnemonic.split(' ')
+        expect(words.length).toBe(24)
+      }
+    })
   })
 })

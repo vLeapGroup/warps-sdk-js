@@ -135,7 +135,7 @@ export class MnemonicWalletProvider implements WalletProvider {
   }
 
   async generate(): Promise<WarpWalletDetails> {
-    const mnemonic = bip39.generateMnemonic(wordlist)
+    const mnemonic = bip39.generateMnemonic(wordlist, 256)
     const seed = bip39.mnemonicToSeedSync(mnemonic)
     const keypair = Keypair.fromSeed(seed.slice(0, 32))
     return {

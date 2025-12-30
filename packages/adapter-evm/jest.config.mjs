@@ -11,6 +11,12 @@ export default {
         useESM: true,
       },
     ],
+    '^.+\\.js$': [
+      'ts-jest',
+      {
+        useESM: true,
+      },
+    ],
   },
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',

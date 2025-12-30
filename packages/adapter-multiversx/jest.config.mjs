@@ -9,11 +9,21 @@ export default {
         useESM: true,
       },
     ],
+    '^.+\\.js$': [
+      'ts-jest',
+      {
+        useESM: true,
+      },
+    ],
   },
-  transformIgnorePatterns: ['node_modules/(?!(uuid|@multiversx|.*\\.mjs$))'],
+  transformIgnorePatterns: ['node_modules/(?!(uuid|@multiversx|.*\\.mjs$|@scure/.*))'],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
     '^@vleap/warps$': '<rootDir>/../core/src/index.ts',
+    '^@scure/bip39$': '<rootDir>/src/__mocks__/@scure/bip39.ts',
+    '^@scure/bip39/wordlists/english\\.js$': '<rootDir>/src/__mocks__/@scure/bip39/wordlists/english.js',
+    '^@scure/bip39/wordlists/(.*)\\.js$': '<rootDir>/src/__mocks__/@scure/bip39/wordlists/$1.js',
+    '^@scure/bip39/wordlists/(.*)$': '<rootDir>/src/__mocks__/@scure/bip39/wordlists/$1.js',
   },
   testPathIgnorePatterns: ['<rootDir>/dist/'],
 }

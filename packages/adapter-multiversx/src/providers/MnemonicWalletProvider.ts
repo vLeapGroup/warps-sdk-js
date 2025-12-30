@@ -1,4 +1,6 @@
 import { Account, Message, Mnemonic, Transaction, UserSecretKey } from '@multiversx/sdk-core'
+import * as bip39 from '@scure/bip39'
+import { wordlist } from '@scure/bip39/wordlists/english.js'
 import {
   getWarpWalletAddressFromConfig,
   getWarpWalletMnemonicFromConfig,
@@ -104,8 +106,8 @@ export class MnemonicWalletProvider implements WalletProvider {
   }
 
   async generate(): Promise<WarpWalletDetails> {
-    const mnemonic = Mnemonic.generate()
-    const mnemonicWords = mnemonic.toString()
+    const mnemonicWords = bip39.generateMnemonic(wordlist, 256)
+    const mnemonic = Mnemonic.fromString(mnemonicWords)
     const privateKey = mnemonic.deriveKey(0)
     const pubKey = privateKey.generatePublicKey()
     const address = pubKey.toAddress(this.chain.addressHrp).toBech32()

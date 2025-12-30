@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "@multiversx/sdk-core": "^15.3.1",
+    "@scure/bip39": "^2.0.1",
     "@vleap/warps": "^3.0.0-beta.185"
   }
 }

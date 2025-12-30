@@ -88,6 +88,23 @@ describe('WarpSolanaWallet', () => {
       expect(result.privateKey).toBeDefined()
       expect(result.mnemonic).toBeDefined()
     })
+
+    it('should generate a new wallet with mnemonic', async () => {
+      const result = await wallet.generate('mnemonic')
+      expect(result).toBeDefined()
+      expect(result.address).toBeDefined()
+      expect(result.mnemonic).not.toBeNull()
+      expect(result.provider).toBe('mnemonic')
+    })
+
+    it('should generate 24-word mnemonic', async () => {
+      const result = await wallet.generate('mnemonic')
+      expect(result.mnemonic).not.toBeNull()
+      if (result.mnemonic) {
+        const words = result.mnemonic.split(' ')
+        expect(words.length).toBe(24)
+      }
+    })
   })
 
   describe('read-only wallet', () => {

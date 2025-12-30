@@ -168,6 +168,28 @@ describe('WarpFastsetWallet', () => {
       expect(result.privateKey).toBeNull()
       expect(result.address).toMatch(/^set1/)
     })
+
+    test('generate() should generate 24-word mnemonic', async () => {
+      const configWithMnemonic = {
+        env: 'testnet' as const,
+        user: {
+          wallets: {
+            fastset: {
+              provider: 'mnemonic' as const,
+              mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+            },
+          },
+        },
+      }
+      const walletWithMnemonic = new WarpFastsetWallet(configWithMnemonic, mockChain)
+      const result = await walletWithMnemonic.generate('mnemonic')
+
+      expect(result.mnemonic).not.toBeNull()
+      if (result.mnemonic) {
+        const words = result.mnemonic.split(' ')
+        expect(words.length).toBe(24)
+      }
+    })
   })
 
   describe('Address Management', () => {
@@ -362,6 +384,10 @@ describe('WarpFastsetWallet', () => {
       if (result.privateKey) {
         expect(result.privateKey.length).toBeGreaterThan(0)
         expect(typeof result.privateKey).toBe('string')
+      }
+      if (result.mnemonic) {
+        const words = result.mnemonic.split(' ')
+        expect(words.length).toBe(24)
       }
     })
   })

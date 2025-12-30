@@ -1,5 +1,7 @@
 import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
 import { ethers } from 'ethers'
+import * as bip39 from '@scure/bip39'
+import { wordlist } from '@scure/bip39/wordlists/english.js'
 import {
   getWarpWalletMnemonicFromConfig,
   getWarpWalletPrivateKeyFromConfig,
@@ -100,12 +102,13 @@ export class MnemonicWalletProvider implements WalletProvider {
   }
 
   async generate(): Promise<WarpWalletDetails> {
-    const wallet = ethers.Wallet.createRandom()
+    const mnemonic = bip39.generateMnemonic(wordlist, 256)
+    const wallet = ethers.Wallet.fromPhrase(mnemonic)
     return {
       provider: MnemonicWalletProvider.PROVIDER_NAME,
       address: wallet.address,
       privateKey: null,
-      mnemonic: wallet.mnemonic?.phrase || null,
+      mnemonic,
     }
   }
 
