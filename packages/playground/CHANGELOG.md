@@ -1,5 +1,20 @@
 # @warps/playground
 
+## 0.2.0-beta.161
+
+### Patch Changes
+
+- fa98f00: update wallets
+- Updated dependencies [fa98f00]
+  - @vleap/warps-adapter-multiversx@0.2.0-beta.96
+  - @vleap/warps-adapter-fastset@0.1.0-beta.56
+  - @vleap/warps-wallet-coinbase@1.0.0-beta.6
+  - @vleap/warps-adapter-solana@0.1.0-beta.18
+  - @vleap/warps-adapter-near@0.1.0-beta.15
+  - @vleap/warps-adapter-evm@0.2.0-beta.70
+  - @vleap/warps-adapter-sui@0.2.0-beta.70
+  - @vleap/warps@3.0.0-beta.187
+
 ## 0.2.0-beta.160
 
 ### Patch Changes

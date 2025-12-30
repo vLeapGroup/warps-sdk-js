@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-beta.70
+
+### Patch Changes
+
+- fa98f00: update wallets
+- Updated dependencies [fa98f00]
+  - @vleap/warps@3.0.0-beta.187
+
 ## 0.2.0-beta.69
 
 ### Patch Changes

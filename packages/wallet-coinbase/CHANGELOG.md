@@ -1,5 +1,13 @@
 # @vleap/warps-wallet-coinbase
 
+## 1.0.0-beta.6
+
+### Patch Changes
+
+- fa98f00: update wallets
+- Updated dependencies [fa98f00]
+  - @vleap/warps@3.0.0-beta.187
+
 ## 1.0.0-beta.5
 
 ### Patch Changes

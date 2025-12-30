@@ -1,6 +1,6 @@
 {
   "name": "@warps/playground",
-  "version": "0.2.0-beta.160",
+  "version": "0.2.0-beta.161",
   "description": "Playground for testing Warps SDK",
   "private": true,
   "type": "module",
@@ -9,16 +9,16 @@
     "start": "ts-node playground.ts"
   },
   "dependencies": {
-    "@vleap/warps": "3.0.0-beta.186",
-    "@vleap/warps-adapter-evm": "0.2.0-beta.69",
-    "@vleap/warps-adapter-fastset": "0.1.0-beta.55",
+    "@vleap/warps": "3.0.0-beta.187",
+    "@vleap/warps-adapter-evm": "0.2.0-beta.70",
+    "@vleap/warps-adapter-fastset": "0.1.0-beta.56",
     "@vleap/warps-mcp": "1.0.0-beta.21",
-    "@vleap/warps-adapter-near": "0.1.0-beta.14",
-    "@vleap/warps-adapter-multiversx": "0.2.0-beta.95",
-    "@vleap/warps-adapter-solana": "0.1.0-beta.17",
-    "@vleap/warps-adapter-sui": "0.2.0-beta.69",
+    "@vleap/warps-adapter-near": "0.1.0-beta.15",
+    "@vleap/warps-adapter-multiversx": "0.2.0-beta.96",
+    "@vleap/warps-adapter-solana": "0.1.0-beta.18",
+    "@vleap/warps-adapter-sui": "0.2.0-beta.70",
     "@vleap/warps-vm-node": "0.1.0-beta.9",
-    "@vleap/warps-wallet-coinbase": "1.0.0-beta.5",
+    "@vleap/warps-wallet-coinbase": "1.0.0-beta.6",
     "@x402/core": "^2.0.0",
     "@x402/evm": "^2.0.0",
     "ethers": "^6.16.0"

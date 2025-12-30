@@ -3,6 +3,7 @@ import { getAllEvmAdapters } from '@vleap/warps-adapter-evm'
 import { FastsetAdapter } from '@vleap/warps-adapter-fastset'
 import { getAllMultiversxAdapters, MultiversxAdapter } from '@vleap/warps-adapter-multiversx'
 import { NearAdapter } from '@vleap/warps-adapter-near'
+import { SolanaAdapter } from '@vleap/warps-adapter-solana'
 import { SuiAdapter } from '@vleap/warps-adapter-sui'
 import { createNodeTransformRunner } from '@vleap/warps-vm-node'
 import { createCoinbaseWalletProvider } from '@vleap/warps-wallet-coinbase'
@@ -17,10 +18,9 @@ const __dirname = path.dirname(__filename)
 const dotenv = await import('dotenv')
 dotenv.config({ path: path.join(__dirname, '.env') })
 
-const Chain = 'base'
-const WarpToTest = 'transfer.json'
-const TransferReceiver = '0xF752D09aA6b5E525bFbFb14c0FECec444EE82306'
-const WarpInputs: string[] = [Chain, TransferReceiver, 'ETH|0.0005']
+const Chain = 'solana'
+const WarpToTest = 'jito-liquid-stake.json'
+const WarpInputs: string[] = ['SOL|0.1']
 const warpsDir = path.join(__dirname, 'warps')
 
 const ensureCoinbaseWallet = async (
@@ -103,6 +103,7 @@ const runWarp = async (warpFile: string) => {
     chains: [
       ...getAllMultiversxAdapters(),
       ...getAllEvmAdapters(MultiversxAdapter),
+      withAdapterFallback(SolanaAdapter, MultiversxAdapter),
       withAdapterFallback(SuiAdapter, MultiversxAdapter),
       withAdapterFallback(NearAdapter, MultiversxAdapter),
       withAdapterFallback(FastsetAdapter, MultiversxAdapter),
@@ -114,13 +115,20 @@ const runWarp = async (warpFile: string) => {
     throw new Error(`Chain adapter not found for: ${Chain}`)
   }
 
-  const coinbaseWallet = await ensureCoinbaseWallet(tempConfig, Chain, chainAdapter.chainInfo)
+  let walletForChain = filteredWallets[Chain]
+  if (!walletForChain && (Chain === 'ethereum' || Chain === 'base')) {
+    const coinbaseWallet = await ensureCoinbaseWallet(tempConfig, Chain, chainAdapter.chainInfo)
+    walletForChain = coinbaseWallet
+  } else if (!walletForChain) {
+    throw new Error(`Wallet not found for chain: ${Chain}. Please create a wallet file at wallets/${Chain}.json`)
+  }
+
   const config: WarpClientConfig = {
     ...tempConfig,
     user: {
       wallets: {
         ...filteredWallets,
-        [Chain]: coinbaseWallet,
+        [Chain]: walletForChain,
       },
     },
   }
@@ -129,15 +137,17 @@ const runWarp = async (warpFile: string) => {
     chains: [
       ...getAllMultiversxAdapters(),
       ...getAllEvmAdapters(MultiversxAdapter),
+      withAdapterFallback(SolanaAdapter, MultiversxAdapter),
       withAdapterFallback(SuiAdapter, MultiversxAdapter),
       withAdapterFallback(NearAdapter, MultiversxAdapter),
       withAdapterFallback(FastsetAdapter, MultiversxAdapter),
     ],
   })
 
-  console.log(`💰 Wallet address: ${coinbaseWallet.address}`)
-  console.log(`📝 Please fund this wallet on Base Sepolia before continuing...`)
-  console.log(`   You can use a faucet or send ETH to: ${coinbaseWallet.address}`)
+  const walletAddress = walletForChain.address
+  console.log(`💰 Wallet address: ${walletAddress}`)
+  console.log(`📝 Please fund this wallet on Solana ${tempConfig.env} before continuing...`)
+  console.log(`   You can use a faucet or send SOL to: ${walletAddress}`)
   console.log(`   Waiting 10 seconds before proceeding...`)
   await new Promise((resolve) => setTimeout(resolve, 10000))
 
@@ -177,7 +187,7 @@ const runWarp = async (warpFile: string) => {
   await evaluateOutput(remoteTxs)
 
   console.log('✅ Remote transactions:', remoteTxs)
-  console.log(`\n🎉 Transfer completed! View on explorer: ${explorerUrl}`)
+  console.log(`\n🎉 Warp completed! View on explorer: ${explorerUrl}`)
 }
 
 const listWarps = () => fs.readdirSync(warpsDir).filter((f) => f.endsWith('.ts') || f.endsWith('.js') || f.endsWith('.json'))
