@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-beta.67
+
+### Patch Changes
+
+- 1683154: update wallet mnemonics
+
 ## 0.2.0-beta.66
 
 ### Patch Changes

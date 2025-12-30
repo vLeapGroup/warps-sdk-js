@@ -1,6 +1,6 @@
 {
   "name": "@vleap/warps-adapter-fastset",
-  "version": "0.1.0-beta.54",
+  "version": "0.1.0-beta.55",
   "description": "Fastset adapter for Warps SDK",
   "type": "module",
   "types": "./dist/index.d.ts",

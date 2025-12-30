@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-fastset
 
+## 0.1.0-beta.55
+
+### Patch Changes
+
+- 1683154: update wallet mnemonics
+
 ## 0.1.0-beta.54
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0-beta.17
+
+### Patch Changes
+
+- 1683154: update wallet mnemonics
+
 ## 0.1.0-beta.16
 
 ### Patch Changes

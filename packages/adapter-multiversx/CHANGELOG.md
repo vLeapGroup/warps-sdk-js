@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-beta.95
+
+### Patch Changes
+
+- 1683154: update wallet mnemonics
+
 ## 0.2.0-beta.94
 
 ### Patch Changes

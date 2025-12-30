@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-beta.69
+
+### Patch Changes
+
+- 1683154: update wallet mnemonics
+
 ## 0.2.0-beta.68
 
 ### Patch Changes
