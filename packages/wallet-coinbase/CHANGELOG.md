@@ -1,5 +1,11 @@
 # @vleap/warps-wallet-coinbase
 
+## 1.0.0-beta.4
+
+### Patch Changes
+
+- 7bb6f41: fix coinbase txs
+
 ## 1.0.0-beta.3
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-beta.68
+
+### Patch Changes
+
+- 7bb6f41: fix coinbase txs
+
 ## 0.2.0-beta.67
 
 ### Patch Changes
