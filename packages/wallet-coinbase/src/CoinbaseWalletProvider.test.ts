@@ -184,6 +184,35 @@ describe('CoinbaseWalletProvider', () => {
         'CoinbaseWalletProvider: Failed to sign transaction'
       )
     })
+
+    it('should fix invalid fee relationship where maxPriorityFeePerGas > maxFeePerGas', async () => {
+      const mockTx = {
+        to: '0x9876543210987654321098765432109876543210',
+        value: '1000000000000000000',
+        data: '0x',
+        maxFeePerGas: '0x155cc',
+        maxPriorityFeePerGas: '0xf424',
+        chainId: 84532,
+      }
+      const mockSignedTx = '0xabcdef1234567890...'
+
+      const mockAccountWithSignMethod = {
+        address: mockAddress,
+        signTransaction: jest.fn().mockResolvedValue(mockSignedTx),
+      }
+      mockClient.evm.getAccount.mockResolvedValue(mockAccountWithSignMethod)
+
+      const result = await provider.signTransaction(mockTx)
+      expect(result).toEqual({
+        ...mockTx,
+        signature: mockSignedTx,
+      })
+
+      const callArgs = mockAccountWithSignMethod.signTransaction.mock.calls[0][0]
+      const maxFee = BigInt(callArgs.maxFeePerGas)
+      const maxPriorityFee = BigInt(callArgs.maxPriorityFeePerGas)
+      expect(maxPriorityFee <= maxFee).toBe(true)
+    })
   })
 
   describe('signMessage', () => {

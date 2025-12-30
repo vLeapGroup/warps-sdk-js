@@ -72,6 +72,9 @@ export class WarpEvmWallet implements AdapterWarpWallet {
             tx.maxFeePerGas = tx.maxFeePerGas > priorityReduction ? tx.maxFeePerGas - priorityReduction : minGasPrice
             tx.maxPriorityFeePerGas =
               tx.maxPriorityFeePerGas > priorityReduction ? tx.maxPriorityFeePerGas - priorityReduction : minGasPrice
+            if (tx.maxPriorityFeePerGas > tx.maxFeePerGas) {
+              tx.maxPriorityFeePerGas = tx.maxFeePerGas
+            }
             delete tx.gasPrice
           } else if (tx.gasPrice) {
             tx.gasPrice = tx.gasPrice > priorityReduction ? tx.gasPrice - priorityReduction : minGasPrice

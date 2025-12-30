@@ -75,8 +75,10 @@ export class CoinbaseWalletProvider implements WalletProvider {
       const maxFee = typeof tx.maxFeePerGas === 'bigint' ? tx.maxFeePerGas : BigInt(formatBigInt(tx.maxFeePerGas)!)
       const maxPriorityFee =
         typeof tx.maxPriorityFeePerGas === 'bigint' ? tx.maxPriorityFeePerGas : BigInt(formatBigInt(tx.maxPriorityFeePerGas)!)
+      let safePriorityFee = maxPriorityFee <= maxFee ? maxPriorityFee : maxFee / 10n
+      if (safePriorityFee > maxFee) safePriorityFee = maxFee
+      if (safePriorityFee < 1n) safePriorityFee = 1n
       formatted.maxFeePerGas = formatBigInt(maxFee)!
-      const safePriorityFee = maxPriorityFee < maxFee ? maxPriorityFee : maxFee / 10n
       formatted.maxPriorityFeePerGas = formatBigInt(safePriorityFee)!
     } else if (hasLegacyFields) {
       const gasPriceHex = formatBigInt(tx.gasPrice)!
@@ -277,8 +279,10 @@ export class CoinbaseWalletProvider implements WalletProvider {
       const maxFee = typeof tx.maxFeePerGas === 'bigint' ? tx.maxFeePerGas : BigInt(formatBigInt(tx.maxFeePerGas)!)
       const maxPriorityFee =
         typeof tx.maxPriorityFeePerGas === 'bigint' ? tx.maxPriorityFeePerGas : BigInt(formatBigInt(tx.maxPriorityFeePerGas)!)
+      let safePriorityFee = maxPriorityFee <= maxFee ? maxPriorityFee : maxFee / 10n
+      if (safePriorityFee > maxFee) safePriorityFee = maxFee
+      if (safePriorityFee < 1n) safePriorityFee = 1n
       formatted.maxFeePerGas = formatBigInt(maxFee)!
-      const safePriorityFee = maxPriorityFee < maxFee ? maxPriorityFee : maxFee / 10n
       formatted.maxPriorityFeePerGas = formatBigInt(safePriorityFee)!
     } else if (hasLegacyFields) {
       const gasPriceHex = formatBigInt(tx.gasPrice)!
