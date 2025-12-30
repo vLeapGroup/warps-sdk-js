@@ -1,5 +1,11 @@
 # @vleap/warps-wallet-coinbase
 
+## 1.0.0-beta.5
+
+### Patch Changes
+
+- 065ffc8: update evm wallets
+
 ## 1.0.0-beta.4
 
 ### Patch Changes

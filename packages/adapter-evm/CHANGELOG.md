@@ -1,5 +1,11 @@
 # @vleap/warps-adapter-evm
 
+## 0.2.0-beta.69
+
+### Patch Changes
+
+- 065ffc8: update evm wallets
+
 ## 0.2.0-beta.68
 
 ### Patch Changes
