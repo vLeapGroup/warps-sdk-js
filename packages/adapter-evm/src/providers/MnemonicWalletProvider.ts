@@ -5,7 +5,10 @@ import { wordlist } from '@scure/bip39/wordlists/english.js'
 import {
   getWarpWalletMnemonicFromConfig,
   getWarpWalletPrivateKeyFromConfig,
+  normalizeAndValidateMnemonic,
+  normalizeMnemonic,
   setWarpWalletInConfig,
+  validateMnemonicLength,
   WarpChainInfo,
   WarpClientConfig,
 } from '@vleap/warps'
@@ -66,12 +69,13 @@ export class MnemonicWalletProvider implements WalletProvider {
   }
 
   async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
-    const wallet = HDNodeWallet.fromPhrase(mnemonic.trim()) as unknown as ethers.Wallet
+    const trimmedMnemonic = normalizeAndValidateMnemonic(mnemonic)
+    const wallet = HDNodeWallet.fromPhrase(trimmedMnemonic) as unknown as ethers.Wallet
     const walletDetails: WarpWalletDetails = {
       provider: MnemonicWalletProvider.PROVIDER_NAME,
       address: wallet.address,
       privateKey: wallet.privateKey,
-      mnemonic,
+      mnemonic: trimmedMnemonic,
     }
     setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
     return walletDetails
@@ -103,11 +107,9 @@ export class MnemonicWalletProvider implements WalletProvider {
 
   async generate(): Promise<WarpWalletDetails> {
     const mnemonicRaw = bip39.generateMnemonic(wordlist, 256)
-    const mnemonic = typeof mnemonicRaw === 'string' ? mnemonicRaw.trim() : String(mnemonicRaw).trim()
-    const words = mnemonic.split(/\s+/).filter((w) => w.length > 0)
-    if (words.length !== 24) throw new Error(`Failed to generate valid 24-word mnemonic. Got ${words.length} words`)
-    const mnemonicForEthers = words.join(' ')
-    const wallet = HDNodeWallet.fromPhrase(mnemonicForEthers) as unknown as ethers.Wallet
+    const mnemonic = normalizeMnemonic(mnemonicRaw)
+    validateMnemonicLength(mnemonic)
+    const wallet = HDNodeWallet.fromPhrase(mnemonic) as unknown as ethers.Wallet
     return {
       provider: MnemonicWalletProvider.PROVIDER_NAME,
       address: wallet.address,

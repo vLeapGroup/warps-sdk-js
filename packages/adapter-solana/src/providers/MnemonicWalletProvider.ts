@@ -5,7 +5,10 @@ import {
   getWarpWalletAddressFromConfig,
   getWarpWalletMnemonicFromConfig,
   getWarpWalletPrivateKeyFromConfig,
+  normalizeAndValidateMnemonic,
+  normalizeMnemonic,
   setWarpWalletInConfig,
+  validateMnemonicLength,
   WalletProvider,
   WarpChainInfo,
   WarpClientConfig,
@@ -98,13 +101,14 @@ export class MnemonicWalletProvider implements WalletProvider {
   }
 
   async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
-    const seed = bip39.mnemonicToSeedSync(mnemonic)
+    const trimmedMnemonic = normalizeAndValidateMnemonic(mnemonic)
+    const seed = bip39.mnemonicToSeedSync(trimmedMnemonic)
     const keypair = Keypair.fromSeed(seed.slice(0, 32))
     const walletDetails: WarpWalletDetails = {
       provider: MnemonicWalletProvider.PROVIDER_NAME,
       address: keypair.publicKey.toBase58(),
       privateKey: bs58.encode(keypair.secretKey),
-      mnemonic,
+      mnemonic: trimmedMnemonic,
     }
     setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
     return walletDetails
@@ -135,7 +139,9 @@ export class MnemonicWalletProvider implements WalletProvider {
   }
 
   async generate(): Promise<WarpWalletDetails> {
-    const mnemonic = bip39.generateMnemonic(wordlist, 256)
+    const mnemonicRaw = bip39.generateMnemonic(wordlist, 256)
+    const mnemonic = normalizeMnemonic(mnemonicRaw)
+    validateMnemonicLength(mnemonic)
     const seed = bip39.mnemonicToSeedSync(mnemonic)
     const keypair = Keypair.fromSeed(seed.slice(0, 32))
     return {

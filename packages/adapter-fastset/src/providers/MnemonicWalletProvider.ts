@@ -4,7 +4,10 @@ import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/wa
 import {
   getWarpWalletMnemonicFromConfig,
   getWarpWalletPrivateKeyFromConfig,
+  normalizeAndValidateMnemonic,
+  normalizeMnemonic,
   setWarpWalletInConfig,
+  validateMnemonicLength,
   WarpChainInfo,
   WarpClientConfig,
 } from '@vleap/warps'
@@ -62,7 +65,8 @@ export class MnemonicWalletProvider implements WalletProvider {
   }
 
   async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
-    const seed = bip39.mnemonicToSeedSync(mnemonic)
+    const trimmedMnemonic = normalizeAndValidateMnemonic(mnemonic)
+    const seed = bip39.mnemonicToSeedSync(trimmedMnemonic)
     const privateKey = seed.slice(0, 32)
     const publicKey = ed.getPublicKey(privateKey)
     const address = FastsetClient.encodeBech32Address(publicKey)
@@ -70,7 +74,7 @@ export class MnemonicWalletProvider implements WalletProvider {
       provider: MnemonicWalletProvider.PROVIDER_NAME,
       address,
       privateKey: uint8ArrayToHex(privateKey),
-      mnemonic,
+      mnemonic: trimmedMnemonic,
     }
     setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
     return walletDetails
@@ -105,7 +109,9 @@ export class MnemonicWalletProvider implements WalletProvider {
   }
 
   async generate(): Promise<WarpWalletDetails> {
-    const mnemonic = bip39.generateMnemonic(wordlist, 256)
+    const mnemonicRaw = bip39.generateMnemonic(wordlist, 256)
+    const mnemonic = normalizeMnemonic(mnemonicRaw)
+    validateMnemonicLength(mnemonic)
     const seed = bip39.mnemonicToSeedSync(mnemonic)
     const privateKey = seed.slice(0, 32)
     const publicKey = ed.getPublicKey(privateKey)

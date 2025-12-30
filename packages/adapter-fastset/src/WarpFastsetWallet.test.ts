@@ -122,14 +122,14 @@ describe('WarpFastsetWallet', () => {
 
   describe('Wallet Creation', () => {
     test('create() should create wallet from mnemonic', async () => {
-      const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
+      const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art'
       const configWithMnemonic = {
         env: 'testnet' as const,
         user: {
           wallets: {
             fastset: {
               provider: 'mnemonic' as const,
-              mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+              mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art',
             },
           },
         },
@@ -153,7 +153,7 @@ describe('WarpFastsetWallet', () => {
           wallets: {
             fastset: {
               provider: 'mnemonic' as const,
-              mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+              mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art',
             },
           },
         },
@@ -176,7 +176,7 @@ describe('WarpFastsetWallet', () => {
           wallets: {
             fastset: {
               provider: 'mnemonic' as const,
-              mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+              mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art',
             },
           },
         },
@@ -372,7 +372,7 @@ describe('WarpFastsetWallet', () => {
           wallets: {
             fastset: {
               provider: 'mnemonic' as const,
-              mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+              mnemonic: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art',
             },
           },
         },

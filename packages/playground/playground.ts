@@ -20,7 +20,7 @@ dotenv.config({ path: path.join(__dirname, '.env') })
 const Chain = 'base'
 const WarpToTest = 'transfer.json'
 const TransferReceiver = '0xF752D09aA6b5E525bFbFb14c0FECec444EE82306'
-const WarpInputs: string[] = [Chain, TransferReceiver, 'ETH|0.001']
+const WarpInputs: string[] = [Chain, TransferReceiver, 'ETH|0.0005']
 const warpsDir = path.join(__dirname, 'warps')
 
 const ensureCoinbaseWallet = async (

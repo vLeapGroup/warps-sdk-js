@@ -9,6 +9,7 @@ import {
   WarpWalletDetails,
   WarpWalletProvider,
 } from '@vleap/warps'
+import { formatTransactionForCoinbase } from './helpers/evm'
 import { CoinbaseProviderConfig } from './types'
 
 export class CoinbaseWalletProvider implements WalletProvider {
@@ -72,7 +73,8 @@ export class CoinbaseWalletProvider implements WalletProvider {
         this.cachedEvmAccount = { signTransaction: evmAccount.signTransaction as (tx: unknown) => Promise<unknown> }
       }
 
-      const signedTx = await this.cachedEvmAccount.signTransaction(tx)
+      const formattedTx = formatTransactionForCoinbase(tx, this.chain.chainId)
+      const signedTx = await this.cachedEvmAccount.signTransaction(formattedTx)
       return { ...(tx as Record<string, unknown>), signature: signedTx }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)

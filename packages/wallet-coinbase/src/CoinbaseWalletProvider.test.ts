@@ -227,7 +227,9 @@ describe('CoinbaseWalletProvider', () => {
       expect(mockAccountWithSignMethod.signTransaction).toHaveBeenCalled()
       const callArgs = mockAccountWithSignMethod.signTransaction.mock.calls[0][0]
       expect(callArgs.maxFeePerGas).toBe(mockTx.maxFeePerGas)
-      expect(callArgs.maxPriorityFeePerGas).toBe(mockTx.maxPriorityFeePerGas)
+      const maxFee = BigInt(callArgs.maxFeePerGas)
+      const maxPriorityFee = BigInt(callArgs.maxPriorityFeePerGas)
+      expect(maxPriorityFee <= maxFee).toBe(true)
     })
 
     it('should pass through transaction values', async () => {

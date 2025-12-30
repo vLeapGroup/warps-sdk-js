@@ -62,3 +62,21 @@ export const setWarpWalletInConfig = (config: WarpClientConfig, chain: WarpChain
   }
   config.user.wallets[chain] = wallet
 }
+
+export const normalizeMnemonic = (mnemonic: string | undefined | null): string => {
+  if (!mnemonic) throw new Error('Mnemonic is required')
+  return typeof mnemonic === 'string' ? mnemonic.trim() : String(mnemonic).trim()
+}
+
+export const validateMnemonicLength = (mnemonic: string, expectedWords: number = 24): void => {
+  const words = mnemonic.split(/\s+/).filter((w) => w.length > 0)
+  if (words.length !== expectedWords) {
+    throw new Error(`Mnemonic must be ${expectedWords} words. Got ${words.length} words`)
+  }
+}
+
+export const normalizeAndValidateMnemonic = (mnemonic: string, expectedWords: number = 24): string => {
+  const normalized = normalizeMnemonic(mnemonic)
+  validateMnemonicLength(normalized, expectedWords)
+  return normalized
+}

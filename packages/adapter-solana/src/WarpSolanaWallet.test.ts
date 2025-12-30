@@ -145,7 +145,7 @@ describe('WarpSolanaWallet', () => {
     })
 
     it('should create wallet with provider even when wallet is read-only', async () => {
-      const result = await readOnlyWallet.importFromMnemonic('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+      const result = await readOnlyWallet.importFromMnemonic('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art')
       expect(result).toBeDefined()
       expect(result.address).toBeDefined()
       expect(result.provider).toBe('mnemonic')

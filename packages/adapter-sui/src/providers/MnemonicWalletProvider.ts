@@ -5,7 +5,10 @@ import {
   getWarpWalletAddressFromConfig,
   getWarpWalletMnemonicFromConfig,
   getWarpWalletPrivateKeyFromConfig,
+  normalizeAndValidateMnemonic,
+  normalizeMnemonic,
   setWarpWalletInConfig,
+  validateMnemonicLength,
   WalletProvider,
   WarpChainInfo,
   WarpClientConfig,
@@ -55,13 +58,14 @@ export class MnemonicWalletProvider implements WalletProvider {
   }
 
   async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
-    const keypair = Ed25519Keypair.deriveKeypair(mnemonic.trim())
+    const trimmedMnemonic = normalizeAndValidateMnemonic(mnemonic)
+    const keypair = Ed25519Keypair.deriveKeypair(trimmedMnemonic)
     const address = keypair.getPublicKey().toSuiAddress()
     const walletDetails: WarpWalletDetails = {
       provider: MnemonicWalletProvider.PROVIDER_NAME,
       address,
       privateKey: null,
-      mnemonic,
+      mnemonic: trimmedMnemonic,
     }
     setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
     return walletDetails
@@ -102,8 +106,10 @@ export class MnemonicWalletProvider implements WalletProvider {
   }
 
   async generate(): Promise<WarpWalletDetails> {
-    const mnemonic = bip39.generateMnemonic(wordlist, 256)
-    const keypair = Ed25519Keypair.deriveKeypair(mnemonic.trim())
+    const mnemonicRaw = bip39.generateMnemonic(wordlist, 256)
+    const mnemonic = normalizeMnemonic(mnemonicRaw)
+    validateMnemonicLength(mnemonic)
+    const keypair = Ed25519Keypair.deriveKeypair(mnemonic)
     const address = keypair.getPublicKey().toSuiAddress()
     return {
       provider: MnemonicWalletProvider.PROVIDER_NAME,
