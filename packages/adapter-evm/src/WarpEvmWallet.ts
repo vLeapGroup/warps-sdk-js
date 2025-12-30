@@ -45,7 +45,8 @@ export class WarpEvmWallet implements AdapterWarpWallet {
       }
     }
 
-    return await this.walletProvider.signTransaction(tx)
+    const formattedTx = this.needsFormatting() ? this.formatTransaction(tx) : tx
+    return await this.walletProvider.signTransaction(formattedTx)
   }
 
   async signTransactions(txs: WarpAdapterGenericTransaction[]): Promise<WarpAdapterGenericTransaction[]> {
@@ -202,5 +203,67 @@ export class WarpEvmWallet implements AdapterWarpWallet {
     if (provider === 'privateKey') return new PrivateKeyWalletProvider(this.config, this.chain)
     if (provider === 'mnemonic') return new MnemonicWalletProvider(this.config, this.chain)
     throw new Error(`Unsupported wallet provider for ${this.chain.name}: ${provider}`)
+  }
+
+  private formatTransaction(tx: WarpAdapterGenericTransaction): WarpAdapterGenericTransaction {
+    const formatted: any = {
+      ...tx,
+      value: this.formatBigInt(tx.value) || '0x0',
+      data: tx.data || '0x',
+      chainId: typeof tx.chainId === 'number' ? tx.chainId : parseInt(String(tx.chainId || this.chain.chainId)),
+    }
+
+    if (tx.gasLimit) formatted.gas = this.formatBigInt(tx.gasLimit)
+    if (tx.nonce !== undefined)
+      formatted.nonce = typeof tx.nonce === 'number' ? `0x${tx.nonce.toString(16)}` : this.formatBigInt(tx.nonce)
+
+    const hasEip1559Fields = tx.maxFeePerGas !== undefined && tx.maxPriorityFeePerGas !== undefined
+    const hasLegacyFields = tx.gasPrice !== undefined && !hasEip1559Fields
+
+    if (hasEip1559Fields) {
+      const maxFee = this.parseBigInt(tx.maxFeePerGas)!
+      const maxPriorityFee = this.parseBigInt(tx.maxPriorityFeePerGas)!
+      const safePriorityFee = this.normalizePriorityFee(maxFee, maxPriorityFee)
+      formatted.maxFeePerGas = this.formatBigInt(maxFee)!
+      formatted.maxPriorityFeePerGas = this.formatBigInt(safePriorityFee)!
+    } else if (hasLegacyFields) {
+      const gasPrice = this.parseBigInt(tx.gasPrice)!
+      formatted.maxFeePerGas = this.formatBigInt(gasPrice)!
+      const priorityFee = (gasPrice * 9n) / 10n
+      formatted.maxPriorityFeePerGas = this.formatBigInt(priorityFee > 0n ? priorityFee : 1n)!
+    } else {
+      const defaultMaxFee = 1000000000n
+      formatted.maxFeePerGas = this.formatBigInt(defaultMaxFee)!
+      formatted.maxPriorityFeePerGas = this.formatBigInt(defaultMaxFee / 10n)!
+    }
+
+    return formatted
+  }
+
+  private formatBigInt(value: bigint | string | number | undefined): string | undefined {
+    if (value === undefined || value === null) return undefined
+    if (typeof value === 'bigint') return `0x${value.toString(16)}`
+    if (typeof value === 'string' && value.startsWith('0x')) return value
+    return `0x${BigInt(value).toString(16)}`
+  }
+
+  private parseBigInt(value: bigint | string | number | undefined): bigint | undefined {
+    if (value === undefined || value === null) return undefined
+    if (typeof value === 'bigint') return value
+    return BigInt(value)
+  }
+
+  private normalizePriorityFee(maxFee: bigint, maxPriorityFee: bigint): bigint {
+    if (maxPriorityFee <= maxFee) return maxPriorityFee
+    const safeFee = maxFee / 10n
+    if (safeFee < 1n) return 1n
+    if (safeFee > maxFee) return maxFee
+    return safeFee
+  }
+
+  private needsFormatting(): boolean {
+    if (!this.walletProvider) return false
+    const providerName = (this.walletProvider as any).constructor?.PROVIDER_NAME
+    return providerName === 'coinbase'
   }
 }

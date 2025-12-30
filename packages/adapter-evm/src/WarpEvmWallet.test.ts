@@ -1,3 +1,5 @@
+jest.unmock('@scure/bip39')
+
 import { WarpEvmWallet } from './WarpEvmWallet'
 
 describe('WarpEvmWallet', () => {

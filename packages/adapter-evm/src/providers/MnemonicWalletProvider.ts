@@ -1,5 +1,5 @@
 import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
-import { ethers } from 'ethers'
+import { ethers, HDNodeWallet } from 'ethers'
 import * as bip39 from '@scure/bip39'
 import { wordlist } from '@scure/bip39/wordlists/english.js'
 import {
@@ -66,7 +66,7 @@ export class MnemonicWalletProvider implements WalletProvider {
   }
 
   async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
-    const wallet = ethers.Wallet.fromPhrase(mnemonic)
+    const wallet = HDNodeWallet.fromPhrase(mnemonic.trim()) as unknown as ethers.Wallet
     const walletDetails: WarpWalletDetails = {
       provider: MnemonicWalletProvider.PROVIDER_NAME,
       address: wallet.address,
@@ -102,8 +102,12 @@ export class MnemonicWalletProvider implements WalletProvider {
   }
 
   async generate(): Promise<WarpWalletDetails> {
-    const mnemonic = bip39.generateMnemonic(wordlist, 256)
-    const wallet = ethers.Wallet.fromPhrase(mnemonic)
+    const mnemonicRaw = bip39.generateMnemonic(wordlist, 256)
+    const mnemonic = typeof mnemonicRaw === 'string' ? mnemonicRaw.trim() : String(mnemonicRaw).trim()
+    const words = mnemonic.split(/\s+/).filter((w) => w.length > 0)
+    if (words.length !== 24) throw new Error(`Failed to generate valid 24-word mnemonic. Got ${words.length} words`)
+    const mnemonicForEthers = words.join(' ')
+    const wallet = HDNodeWallet.fromPhrase(mnemonicForEthers) as unknown as ethers.Wallet
     return {
       provider: MnemonicWalletProvider.PROVIDER_NAME,
       address: wallet.address,
@@ -112,13 +116,12 @@ export class MnemonicWalletProvider implements WalletProvider {
     }
   }
 
+
   private getWallet(): ethers.Wallet {
     if (this.wallet) return this.wallet
-
     const mnemonic = getWarpWalletMnemonicFromConfig(this.config, this.chain.name)
     if (!mnemonic) throw new Error('No mnemonic provided')
-
-    this.wallet = ethers.Wallet.fromPhrase(mnemonic) as unknown as ethers.Wallet
+    this.wallet = HDNodeWallet.fromPhrase(mnemonic.trim()) as unknown as ethers.Wallet
     return this.wallet
   }
 }

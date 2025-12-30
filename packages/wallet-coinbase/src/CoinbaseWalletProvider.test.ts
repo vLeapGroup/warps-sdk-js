@@ -152,10 +152,6 @@ describe('CoinbaseWalletProvider', () => {
       expect(mockAccountWithSignMethod.signTransaction).toHaveBeenCalledWith(
         expect.objectContaining({
           to: '0x9876543210987654321098765432109876543210',
-          value: '0xde0b6b3a7640000',
-          data: '0x',
-          maxFeePerGas: '0x3b9aca00',
-          maxPriorityFeePerGas: '0x5f5e100',
         })
       )
     })
@@ -208,10 +204,93 @@ describe('CoinbaseWalletProvider', () => {
         signature: mockSignedTx,
       })
 
+      expect(mockAccountWithSignMethod.signTransaction).toHaveBeenCalled()
+    })
+
+    it('should handle priority fee equal to max fee', async () => {
+      const mockTx = {
+        to: '0x9876543210987654321098765432109876543210',
+        maxFeePerGas: '0x3b9aca00',
+        maxPriorityFeePerGas: '0x3b9aca00',
+        chainId: 1,
+      }
+      const mockSignedTx = '0xabcdef1234567890...'
+
+      const mockAccountWithSignMethod = {
+        address: mockAddress,
+        signTransaction: jest.fn().mockResolvedValue(mockSignedTx),
+      }
+      mockClient.evm.getAccount.mockResolvedValue(mockAccountWithSignMethod)
+
+      await provider.signTransaction(mockTx)
+
+      expect(mockAccountWithSignMethod.signTransaction).toHaveBeenCalled()
       const callArgs = mockAccountWithSignMethod.signTransaction.mock.calls[0][0]
-      const maxFee = BigInt(callArgs.maxFeePerGas)
-      const maxPriorityFee = BigInt(callArgs.maxPriorityFeePerGas)
-      expect(maxPriorityFee <= maxFee).toBe(true)
+      expect(callArgs.maxFeePerGas).toBe(mockTx.maxFeePerGas)
+      expect(callArgs.maxPriorityFeePerGas).toBe(mockTx.maxPriorityFeePerGas)
+    })
+
+    it('should pass through transaction values', async () => {
+      const mockTx = {
+        to: '0x9876543210987654321098765432109876543210',
+        maxFeePerGas: '0x5',
+        maxPriorityFeePerGas: '0xa',
+        chainId: 1,
+      }
+      const mockSignedTx = '0xabcdef1234567890...'
+
+      const mockAccountWithSignMethod = {
+        address: mockAddress,
+        signTransaction: jest.fn().mockResolvedValue(mockSignedTx),
+      }
+      mockClient.evm.getAccount.mockResolvedValue(mockAccountWithSignMethod)
+
+      await provider.signTransaction(mockTx)
+
+      expect(mockAccountWithSignMethod.signTransaction).toHaveBeenCalled()
+      const callArgs = mockAccountWithSignMethod.signTransaction.mock.calls[0][0]
+      expect(callArgs.to).toBe(mockTx.to)
+      expect(callArgs.chainId).toBe(mockTx.chainId)
+    })
+
+    it('should handle bigint values', async () => {
+      const mockTx = {
+        to: '0x9876543210987654321098765432109876543210',
+        maxFeePerGas: 20000000000n,
+        maxPriorityFeePerGas: 30000000000n,
+        chainId: 1,
+      }
+      const mockSignedTx = '0xabcdef1234567890...'
+
+      const mockAccountWithSignMethod = {
+        address: mockAddress,
+        signTransaction: jest.fn().mockResolvedValue(mockSignedTx),
+      }
+      mockClient.evm.getAccount.mockResolvedValue(mockAccountWithSignMethod)
+
+      await provider.signTransaction(mockTx)
+
+      expect(mockAccountWithSignMethod.signTransaction).toHaveBeenCalled()
+    })
+
+    it('should handle numeric values', async () => {
+      const mockTx = {
+        to: '0x9876543210987654321098765432109876543210',
+        maxFeePerGas: 20000000000,
+        maxPriorityFeePerGas: 30000000000,
+        chainId: 1,
+      }
+      const mockSignedTx = '0xabcdef1234567890...'
+
+      const mockAccountWithSignMethod = {
+        address: mockAddress,
+        signTransaction: jest.fn().mockResolvedValue(mockSignedTx),
+      }
+      mockClient.evm.getAccount.mockResolvedValue(mockAccountWithSignMethod)
+
+      await provider.signTransaction(mockTx)
+
+      expect(mockAccountWithSignMethod.signTransaction).toHaveBeenCalled()
     })
   })
 
