@@ -126,7 +126,10 @@ export class WarpEvmOutput implements AdapterWarpOutput {
       action: actionIndex,
       user: getWarpWalletAddressFromConfig(this.config, this.chain.name),
       txHash: transactionHash,
-      tx,
+      tx: {
+        ...tx,
+        status: tx.status,
+      },
       next: null,
       values: { string: stringValues, native: rawValues, mapped: {} },
       output: {},

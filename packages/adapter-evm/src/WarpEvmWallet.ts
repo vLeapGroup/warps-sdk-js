@@ -1,7 +1,6 @@
 import {
   AdapterWarpWallet,
   getProviderConfig,
-  initializeWalletCache,
   WalletProvider,
   WarpAdapterGenericTransaction,
   WarpChainInfo,
@@ -30,7 +29,18 @@ export class WarpEvmWallet implements AdapterWarpWallet {
     const providerConfig = getProviderConfig(config, chain.name, config.env, chain.defaultApiUrl)
     this.provider = new ethers.JsonRpcProvider(providerConfig.url)
     this.walletProvider = this.createProvider()
-    this.initializeCache()
+
+    const wallet = config.user?.wallets?.[chain.name]
+    if (typeof wallet === 'string') {
+      this.cachedAddress = wallet
+    } else if (this.walletProvider instanceof PrivateKeyWalletProvider || this.walletProvider instanceof MnemonicWalletProvider) {
+      try {
+        const w = this.walletProvider.getWalletInstance()
+        this.cachedAddress = w.address
+        const pk = w.signingKey.publicKey
+        this.cachedPublicKey = pk.startsWith('0x') ? pk.slice(2) : pk
+      } catch {}
+    }
   }
 
   async signTransaction(tx: WarpAdapterGenericTransaction): Promise<WarpAdapterGenericTransaction> {
@@ -39,7 +49,7 @@ export class WarpEvmWallet implements AdapterWarpWallet {
     if (this.walletProvider instanceof ReadOnlyWalletProvider) throw new Error(`Wallet (${this.chain.name}) is read-only`)
 
     if (tx.nonce === undefined) {
-      const address = this.getAddress()
+      const address = await this.getAddressAsync()
       if (address) {
         tx.nonce = await this.provider.getTransactionCount(address, 'pending')
       }
@@ -53,7 +63,7 @@ export class WarpEvmWallet implements AdapterWarpWallet {
     if (txs.length === 0) return []
     if (!this.walletProvider) throw new Error('No wallet provider available')
 
-    const address = this.getAddress()
+    const address = await this.getAddressAsync()
     if (!address) throw new Error('No wallet address available')
 
     const currentNonce = await this.provider.getTransactionCount(address, 'pending')
@@ -164,11 +174,12 @@ export class WarpEvmWallet implements AdapterWarpWallet {
     return this.createProviderForOperation(wallet.provider)
   }
 
-  private initializeCache() {
-    initializeWalletCache(this.walletProvider).then((cache: { address: string | null; publicKey: string | null }) => {
-      this.cachedAddress = cache.address
-      this.cachedPublicKey = cache.publicKey
-    })
+  private async getAddressAsync(): Promise<string | null> {
+    if (this.cachedAddress !== null) return this.cachedAddress
+    if (!this.walletProvider) return null
+    this.cachedAddress = await this.walletProvider.getAddress()
+    if (!this.cachedPublicKey) this.cachedPublicKey = await this.walletProvider.getPublicKey()
+    return this.cachedAddress
   }
 
   private createProviderForOperation(provider: WarpWalletProvider): WalletProvider {

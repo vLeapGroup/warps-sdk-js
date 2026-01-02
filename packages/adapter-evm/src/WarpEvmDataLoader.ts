@@ -49,6 +49,13 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
     this.uniswapService = new UniswapService(this.cache, parseInt(this.chain.chainId))
   }
 
+  private getRequiredConfirmations(): number {
+    if (this.config.env === 'mainnet') {
+      return 12
+    }
+    return 1
+  }
+
   async getAccount(address: string): Promise<WarpChainAccount> {
     const balance = await this.provider.getBalance(address)
 
@@ -137,11 +144,33 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
 
       let receipt = await this.provider.getTransactionReceipt(identifier)
 
-      if (awaitCompleted && !receipt) {
-        receipt = await tx.wait()
+      if (awaitCompleted) {
+        if (!receipt) {
+          receipt = await tx.wait()
+        } else {
+          const confirmations = this.getRequiredConfirmations()
+          const currentBlock = await this.provider.getBlockNumber()
+          const receiptBlock = receipt.blockNumber
+          const confirmationsCount = currentBlock - receiptBlock
+
+          if (confirmationsCount < confirmations) {
+            await tx.wait(confirmations)
+            receipt = await this.provider.getTransactionReceipt(identifier)
+          }
+        }
       }
 
-      const block = await this.provider.getBlock(tx.blockNumber || 'latest')
+      const block = await this.provider.getBlock(receipt?.blockNumber || tx.blockNumber || 'latest')
+
+      const status = receipt
+        ? receipt.status === 1
+          ? 'success'
+          : receipt.status === 0
+            ? 'failed'
+            : 'pending'
+        : 'pending'
+
+      const error = receipt?.status === 0 ? 'Transaction failed' : null
 
       return {
         chain: this.chain.name,
@@ -150,9 +179,9 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
         sender: tx.from,
         value: tx.value,
         function: tx.data && tx.data !== '0x' ? 'contract_call' : '',
-        status: receipt?.status === 1 ? 'success' : receipt?.status === 0 ? 'failed' : 'pending',
+        status,
         createdAt: block?.timestamp ? new Date(Number(block.timestamp) * 1000).toISOString() : new Date().toISOString(),
-        error: receipt?.status === 0 ? 'Transaction failed' : null,
+        error,
         tx: {
           hash: tx.hash || '',
           from: tx.from,
@@ -164,6 +193,7 @@ export class WarpEvmDataLoader implements AdapterWarpDataLoader {
           blockNumber: tx.blockNumber || 0,
           blockHash: tx.blockHash || '',
           transactionIndex: tx.index || 0,
+          status: receipt?.status,
         } as any,
       }
     } catch (error) {
