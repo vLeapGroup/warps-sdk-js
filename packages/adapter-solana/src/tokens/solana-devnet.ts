@@ -2,7 +2,7 @@ import { WarpChainAsset, WarpChainName } from '@vleap/warps'
 
 const SolanaChain = WarpChainName.Solana
 
-export const SolanaTokens: WarpChainAsset[] = [
+export const SolanaDevnetTokens: WarpChainAsset[] = [
   {
     chain: SolanaChain,
     identifier: 'SOL',

@@ -1,11 +1,13 @@
 import { WarpChainName, WarpChainAsset, WarpChainEnv } from '@vleap/warps'
-import { SolanaTokens } from './tokens/solana'
+import { SolanaMainnetTokens } from './tokens/solana-mainnet'
+import { SolanaDevnetTokens } from './tokens/solana-devnet'
+import { SolanaTestnetTokens } from './tokens/solana-testnet'
 
-export const KnownTokens: Partial<Record<WarpChainName, Record<string, WarpChainAsset[]>>> = {
+export const KnownTokens: Partial<Record<WarpChainName, Record<WarpChainEnv, WarpChainAsset[]>>> = {
   [WarpChainName.Solana]: {
-    mainnet: SolanaTokens,
-    testnet: SolanaTokens,
-    devnet: SolanaTokens,
+    mainnet: SolanaMainnetTokens,
+    testnet: SolanaTestnetTokens,
+    devnet: SolanaDevnetTokens,
   },
 }
 
@@ -14,6 +16,6 @@ export const findKnownTokenById = (chain: WarpChainName, env: WarpChainEnv, id: 
   return chainTokens.find((token) => token.identifier === id) || null
 }
 
-export const getKnownTokensForChain = (chainName: WarpChainName, env: string = 'mainnet'): WarpChainAsset[] => {
+export const getKnownTokensForChain = (chainName: WarpChainName, env: WarpChainEnv): WarpChainAsset[] => {
   return KnownTokens[chainName]?.[env] || []
 }
