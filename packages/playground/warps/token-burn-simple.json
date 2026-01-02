@@ -1,0 +1,39 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "solana",
+  "name": "Token Program: Burn Tokens",
+  "title": "Burn SPL Tokens",
+  "description": "Burn (destroy) SPL tokens from your token account using the Token Program. This demonstrates a burn contract call.",
+  "actions": [
+    {
+      "type": "contract",
+      "label": "Burn Tokens",
+      "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "func": "burn",
+      "abi": "{\"instructions\":{\"burn\":{\"discriminator\":[8],\"args\":[{\"name\":\"amount\",\"type\":\"u64\"}]}}}",
+          "inputs": [
+            {
+              "name": "Mint Address",
+              "as": "MINT_ADDRESS",
+              "type": "address",
+              "position": "input:0",
+              "source": "field",
+              "required": true,
+              "description": "The mint address of the token to burn."
+            },
+        {
+          "name": "Amount",
+          "description": "Amount of tokens to burn.",
+          "type": "biguint",
+          "position": "arg:0",
+          "source": "field",
+          "required": true,
+          "min": 1
+        }
+      ]
+    }
+  ],
+  "messages": {
+    "success": "Tokens burned successfully."
+  }
+}
