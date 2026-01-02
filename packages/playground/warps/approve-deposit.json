@@ -1,0 +1,25 @@
+{
+  "protocol": "warp:3.0.0",
+  "name": "Token: Approve Allowance",
+  "title": "Approve token allowance",
+  "description": "Approve a token allowance for a given address.",
+  "vars": {
+    "CHAIN": "query:chain",
+    "TOKEN": "query:token",
+    "SPENDER": "query:spender",
+    "AMOUNT": "query:amount",
+    "NEXT": "query:next"
+  },
+  "actions": [
+    {
+      "chain": "{{CHAIN}}",
+      "type": "contract",
+      "label": "Approve now",
+      "address": "{{TOKEN}}",
+      "func": "approve",
+      "args": ["address:{{SPENDER}}", "uint256:{{AMOUNT}}"],
+      "gasLimit": 10000000
+    }
+  ],
+  "next": "{{NEXT}}"
+}

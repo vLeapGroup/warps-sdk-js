@@ -1,0 +1,31 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "solana",
+  "name": "SPL Token: Transfer",
+  "title": "Transfer SPL Token",
+  "description": "Transfer an SPL token from one account to another on Solana.",
+  "actions": [
+    {
+      "type": "transfer",
+      "label": "Transfer Token",
+      "inputs": [
+        {
+          "name": "Receiver",
+          "as": "receiver",
+          "type": "address",
+          "position": "receiver",
+          "source": "field",
+          "required": true
+        },
+        {
+          "name": "Token",
+          "as": "asset",
+          "type": "asset",
+          "position": "transfer",
+          "source": "field",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

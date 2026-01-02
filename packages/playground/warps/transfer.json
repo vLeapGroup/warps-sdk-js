@@ -1,0 +1,38 @@
+{
+  "protocol": "warp:3.0.0",
+  "name": "Asset: Transfer",
+  "title": "Transfer assets",
+  "description": "Transfer an asset from one account to another.",
+  "actions": [
+    {
+      "type": "transfer",
+      "label": "Transfer now",
+      "inputs": [
+        {
+          "name": "Blockchain",
+          "as": "chain",
+          "type": "string",
+          "position": "chain",
+          "source": "field",
+          "required": true
+        },
+        {
+          "name": "Receiver",
+          "as": "receiver",
+          "type": "address",
+          "position": "receiver",
+          "source": "field",
+          "required": true
+        },
+        {
+          "name": "Asset",
+          "as": "asset",
+          "type": "asset",
+          "position": "transfer",
+          "source": "field",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

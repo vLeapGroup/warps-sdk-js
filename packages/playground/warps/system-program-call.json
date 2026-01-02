@@ -1,0 +1,53 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "solana",
+  "name": "System Program: Create Account",
+  "title": "Create Account via System Program",
+  "description": "Call the Solana System Program to create a new account. This is a simple contract call example.",
+  "actions": [
+    {
+      "type": "contract",
+      "label": "Create Account",
+      "address": "11111111111111111111111111111111",
+      "func": "createAccount",
+      "abi": "{\"instructions\":{\"createAccount\":{\"discriminator\":[0],\"args\":[{\"name\":\"lamports\",\"type\":\"u64\"},{\"name\":\"space\",\"type\":\"u64\"},{\"name\":\"owner\",\"type\":\"[u8;32]\"}]}}}",
+      "accounts": [
+        "{{USER_WALLET}}",
+        "{{USER_WALLET}}",
+        "11111111111111111111111111111111"
+      ],
+      "inputs": [
+        {
+          "name": "lamports",
+          "description": "Amount of lamports to fund the account.",
+          "type": "biguint",
+          "position": "arg:0",
+          "source": "field",
+          "required": true,
+          "min": 1
+        },
+        {
+          "name": "space",
+          "description": "Space to allocate for the account.",
+          "type": "biguint",
+          "position": "arg:1",
+          "source": "field",
+          "required": true,
+          "default": "0"
+        },
+        {
+          "name": "owner",
+          "description": "Owner program ID (32 bytes).",
+          "type": "hex",
+          "position": "arg:2",
+          "source": "field",
+          "required": true,
+          "default": "11111111111111111111111111111111"
+        }
+      ]
+    }
+  ],
+  "messages": {
+    "success": "Account created successfully."
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "near",
+  "name": "Query: Get NEAR Account Balance",
+  "title": "Get Account Balance",
+  "description": "Query a NEAR account balance.",
+  "actions": [
+    {
+      "type": "query",
+      "label": "Get Balance",
+      "func": "get_account_balance",
+      "inputs": [
+        {
+          "name": "Account Address",
+          "as": "account",
+          "type": "address",
+          "position": "destination",
+          "source": "field",
+          "required": true
+        }
+      ]
+    }
+  ]
+}
+
+
+
+
+
+
+
+

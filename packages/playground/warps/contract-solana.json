@@ -1,0 +1,26 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "solana",
+  "name": "Contract: Call Solana Program",
+  "title": "Call Solana Program",
+  "description": "Call a Solana program (smart contract) on Solana.",
+  "actions": [
+    {
+      "type": "contract",
+      "label": "Call Program",
+      "func": "invoke",
+      "value": "0",
+      "gasLimit": 200000,
+      "inputs": [
+        {
+          "name": "Program Address",
+          "as": "program",
+          "type": "address",
+          "position": "destination",
+          "source": "field",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

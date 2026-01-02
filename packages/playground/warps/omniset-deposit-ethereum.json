@@ -1,0 +1,63 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "ethereum",
+  "name": "OmniSet: Deposit Ethereum",
+  "title": "Deposit assets on Ethereum to OmniSet",
+  "description": "Deposit a blockchain asset from Ethereum to OmniSet.",
+  "vars": {
+    "BRIDGE": "0xaDB4f3334825E645dD201de5CF1778a09515936f"
+  },
+  "actions": [
+    {
+      "type": "contract",
+      "label": "Approve now",
+      "address": "{{primary.asset.token}}",
+      "func": "approve",
+      "args": ["address:{{BRIDGE}}", "uint256:{{primary.asset.amount}}"],
+      "gasLimit": 200000,
+      "abi": "function approve(address spender, uint256 amount) public returns (bool)",
+      "when": "{{primary.asset.token}} !== '0x0000000000000000000000000000000000000000'"
+    },
+    {
+      "type": "contract",
+      "label": "Deposit now",
+      "address": "{{BRIDGE}}",
+      "func": "deposit",
+      "args": [],
+      "gasLimit": 200000,
+      "abi": "function deposit(address token, uint256 amount, bytes32 receiver) public payable",
+      "primary": true,
+      "inputs": [
+        {
+          "name": "Asset",
+          "as": "asset",
+          "description": "The asset to deposit.",
+          "type": "asset",
+          "position": {
+            "token": "arg:1",
+            "amount": "arg:2"
+          },
+          "source": "field",
+          "required": true,
+          "modifier": "transform:(inputs) => inputs.asset?.identifier === 'ETH' ? {identifier: '0x0000000000000000000000000000000000000000', amount: inputs.asset.amount} : inputs.asset"
+        },
+        {
+          "name": "Receiver",
+          "description": "The blockchain wallet address of the receiver.",
+          "type": "hex",
+          "position": "arg:3",
+          "source": "hidden",
+          "default": "{{USER_WALLET_PUBLICKEY:fastset}}"
+        }
+      ]
+    },
+    {
+      "type": "link",
+      "label": "Learn more about FastSet",
+      "url": "https://pi2.network"
+    }
+  ],
+  "messages": {
+    "success": "Assets deposited successfully"
+  }
+}

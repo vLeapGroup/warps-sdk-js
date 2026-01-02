@@ -1,0 +1,39 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "near",
+  "name": "Transfer NEAR",
+  "title": "Transfer NEAR Tokens",
+  "description": "Transfer NEAR tokens to another account.",
+  "actions": [
+    {
+      "type": "transfer",
+      "label": "Transfer NEAR",
+      "inputs": [
+        {
+          "name": "Receiver",
+          "as": "receiver",
+          "type": "address",
+          "position": "receiver",
+          "source": "field",
+          "required": true
+        },
+        {
+          "name": "Amount",
+          "as": "amount",
+          "type": "asset",
+          "position": "transfer",
+          "source": "field",
+          "required": true
+        }
+      ]
+    }
+  ]
+}
+
+
+
+
+
+
+
+

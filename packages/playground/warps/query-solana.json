@@ -1,0 +1,24 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "solana",
+  "name": "Query: Get Solana Account Balance",
+  "title": "Get Account Balance",
+  "description": "Query a Solana account balance.",
+  "actions": [
+    {
+      "type": "query",
+      "label": "Get Balance",
+      "func": "getBalance",
+      "inputs": [
+        {
+          "name": "Account Address",
+          "as": "account",
+          "type": "address",
+          "position": "destination",
+          "source": "field",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

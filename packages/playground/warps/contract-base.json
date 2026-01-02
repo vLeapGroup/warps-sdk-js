@@ -1,0 +1,34 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "base",
+  "name": "Base: Call Contract",
+  "title": "Call Smart Contract on Base Sepolia",
+  "description": "Call a smart contract function on Base Sepolia.",
+  "actions": [
+    {
+      "type": "contract",
+      "label": "Call Contract",
+      "func": "balanceOf",
+      "value": "0",
+      "gasLimit": 200000,
+      "inputs": [
+        {
+          "name": "Contract Address",
+          "as": "contract",
+          "type": "address",
+          "position": "destination",
+          "source": "field",
+          "required": true
+        },
+        {
+          "name": "Account Address",
+          "as": "account",
+          "type": "address",
+          "position": "argument",
+          "source": "field",
+          "required": true
+        }
+      ]
+    }
+  ]
+}
