@@ -30,3 +30,4 @@ brand-schema.json
 # environment variables
 .env
 .env.local
+.claude/settings.local.json
