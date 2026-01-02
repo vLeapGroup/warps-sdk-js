@@ -77,12 +77,17 @@ export class WarpSolanaOutput implements AdapterWarpOutput {
     }
   }
 
-  private handleWarpChainAction(warp: Warp, actionIndex: WarpActionIndex, tx: WarpChainAction, resolvedInputs: string[] = []): WarpActionExecutionResult {
+  private async handleWarpChainAction(warp: Warp, actionIndex: WarpActionIndex, tx: WarpChainAction, resolvedInputs: string[] = []): Promise<WarpActionExecutionResult> {
+    const isPending = tx.status === 'pending'
     const success = tx.status === 'success'
     const transactionHash = tx.id || tx.tx?.signature || ''
+
+    if (isPending) {
+      throw new Error(`Transaction ${transactionHash} is still pending. Execution should only proceed after finalization.`)
+    }
+
     const slot = tx.tx?.slot || 0
     const blockTime = tx.tx?.blockTime || 0
-
     const rawValues = [transactionHash, slot.toString(), blockTime.toString()]
     const stringValues = rawValues.map(String)
 

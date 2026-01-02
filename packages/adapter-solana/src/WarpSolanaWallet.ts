@@ -1,6 +1,6 @@
 /// <reference path="./types.d.ts" />
 import { createKeyPairSignerFromBytes } from '@solana/kit'
-import { Connection, Keypair, Transaction, VersionedTransaction } from '@solana/web3.js'
+import { Commitment, Connection, Keypair, Transaction, VersionedTransaction } from '@solana/web3.js'
 import {
   AdapterWarpWallet,
   getProviderConfig,
@@ -38,59 +38,30 @@ export class WarpSolanaWallet implements AdapterWarpWallet {
     if (!tx || typeof tx !== 'object') throw new Error('Invalid transaction object')
     if (!this.walletProvider) throw new Error('No wallet provider available')
     if (this.walletProvider instanceof ReadOnlyWalletProvider) throw new Error(`Wallet (${this.chain.name}) is read-only`)
-    return await this.walletProvider.signTransaction(tx)
+    return this.walletProvider.signTransaction(tx)
   }
 
   async signTransactions(txs: WarpAdapterGenericTransaction[]): Promise<WarpAdapterGenericTransaction[]> {
-    if (txs.length === 0) return []
-    const signedTxs = []
-    for (const tx of txs) {
-      signedTxs.push(await this.signTransaction(tx))
-    }
-    return signedTxs
+    return Promise.all(txs.map((tx) => this.signTransaction(tx)))
   }
 
   async signMessage(message: string): Promise<string> {
     if (!this.walletProvider) throw new Error('No wallet provider available')
     if (this.walletProvider instanceof ReadOnlyWalletProvider) throw new Error(`Wallet (${this.chain.name}) is read-only`)
-    return await this.walletProvider.signMessage(message)
+    return this.walletProvider.signMessage(message)
   }
 
   async sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string> {
     if (!tx || typeof tx !== 'object') throw new Error('Invalid transaction object')
 
-    let transaction: Transaction | VersionedTransaction
+    const transaction = this.resolveTransaction(tx)
+    const shouldSkipPreflight = await this.shouldSkipPreflight(transaction)
 
-    if (tx instanceof VersionedTransaction) {
-      transaction = tx
-    } else if (tx instanceof Transaction) {
-      transaction = tx
-    } else if (tx.transaction) {
-      if (tx.transaction instanceof Transaction) {
-        transaction = tx.transaction
-      } else if (tx.transaction instanceof VersionedTransaction) {
-        transaction = tx.transaction
-      } else if (typeof tx.transaction === 'object') {
-        try {
-          transaction = Transaction.from(tx.transaction)
-        } catch {
-          throw new Error('Invalid transaction format')
-        }
-      } else if (Buffer.isBuffer(tx.transaction) || typeof tx.transaction === 'string') {
-        transaction = Transaction.from(tx.transaction)
-      } else {
-        throw new Error('Transaction must be signed before sending')
-      }
-    } else {
-      throw new Error('Transaction must be signed before sending')
+    try {
+      return await this.sendWithRetry(transaction, shouldSkipPreflight)
+    } catch (error: any) {
+      throw new Error(`Transaction send failed: ${error?.message || String(error)}`)
     }
-
-    const signature = await this.connection.sendRawTransaction(transaction.serialize(), {
-      skipPreflight: true,
-      maxRetries: 3,
-    })
-
-    return signature
   }
 
   async sendTransactions(txs: WarpAdapterGenericTransaction[]): Promise<string[]> {
@@ -174,5 +145,86 @@ export class WarpSolanaWallet implements AdapterWarpWallet {
     if (provider === 'privateKey') return new PrivateKeyWalletProvider(this.config, this.chain)
     if (provider === 'mnemonic') return new MnemonicWalletProvider(this.config, this.chain)
     throw new Error(`Unsupported wallet provider for ${this.chain.name}: ${provider}`)
+  }
+
+  private resolveTransaction(tx: WarpAdapterGenericTransaction): VersionedTransaction {
+    if (tx instanceof VersionedTransaction) {
+      if (tx.version === undefined || tx.version === 'legacy') {
+        throw new Error('Transaction must be a VersionedTransaction (v0), not legacy')
+      }
+      return tx
+    }
+
+    if (tx instanceof Transaction) {
+      throw new Error('Legacy Transaction format is not supported. All transactions must use VersionedTransaction (v0).')
+    }
+
+    if (tx.transaction instanceof VersionedTransaction) {
+      if (tx.transaction.version === undefined || tx.transaction.version === 'legacy') {
+        throw new Error('Transaction must be a VersionedTransaction (v0), not legacy')
+      }
+      return tx.transaction
+    }
+
+    if (tx.transaction instanceof Transaction) {
+      throw new Error('Legacy Transaction format is not supported. All transactions must use VersionedTransaction (v0).')
+    }
+
+    if (!tx.transaction) {
+      throw new Error('Transaction must be signed before sending')
+    }
+
+    throw new Error('Invalid transaction format - only VersionedTransaction is supported')
+  }
+
+  private async shouldSkipPreflight(transaction: VersionedTransaction): Promise<boolean> {
+    try {
+      const simulation = await this.connection.simulateTransaction(transaction, {
+        replaceRecentBlockhash: true,
+        sigVerify: false,
+      })
+      if (simulation.value.err) {
+        const errMsg = JSON.stringify(simulation.value.err)
+        if (errMsg.includes('"Custom": 17') || errMsg.includes('"Custom":17') || errMsg.includes('0x11')) {
+          return true
+        }
+        throw new Error(`Transaction simulation failed: ${errMsg}`)
+      }
+    } catch (error: any) {
+      if (error.message?.includes('Transaction simulation failed')) throw error
+    }
+    return false
+  }
+
+  private async sendWithRetry(transaction: VersionedTransaction, skipPreflight: boolean): Promise<string> {
+    if (skipPreflight) {
+      return this.sendRawTransaction(transaction, { skipPreflight: true })
+    }
+
+    try {
+      return await this.sendRawTransaction(transaction, { skipPreflight: false, preflightCommitment: 'confirmed' })
+    } catch (error: any) {
+      if (this.isSimulationError(error)) {
+        return this.sendRawTransaction(transaction, { skipPreflight: true })
+      }
+      throw error
+    }
+  }
+
+  private async sendRawTransaction(transaction: VersionedTransaction, options: { skipPreflight: boolean; preflightCommitment?: Commitment; maxRetries?: number }): Promise<string> {
+    const signature = await this.connection.sendRawTransaction(transaction.serialize(), {
+      skipPreflight: options.skipPreflight,
+      maxRetries: options.maxRetries || 3,
+      preflightCommitment: options.preflightCommitment,
+    })
+    if (!signature || typeof signature !== 'string' || signature.length < 32) {
+      throw new Error('Invalid transaction signature received')
+    }
+    return signature
+  }
+
+  private isSimulationError(error: any): boolean {
+    const msg = error?.message?.toLowerCase() || ''
+    return msg.includes('simulation') || msg.includes('preflight') || msg.includes('0x1') || msg.includes('custom program error')
   }
 }

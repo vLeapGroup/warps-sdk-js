@@ -8,6 +8,7 @@ import {
   WarpChainAccount,
   WarpChainAction,
   WarpChainAsset,
+  WarpChainEnv,
   WarpChainInfo,
   WarpClientConfig,
   WarpDataLoaderOptions,
@@ -18,7 +19,7 @@ import { WarpSolanaConstants } from './constants'
 import { findKnownTokenById, getKnownTokensForChain } from './tokens'
 
 export class WarpSolanaDataLoader implements AdapterWarpDataLoader {
-  private connection: Connection
+  public readonly connection: Connection
   private cache: WarpCache
 
   constructor(
@@ -120,64 +121,24 @@ export class WarpSolanaDataLoader implements AdapterWarpDataLoader {
   }
 
   async getAction(identifier: string, awaitCompleted = false): Promise<WarpChainAction | null> {
+    const signature = identifier
+
+    if (awaitCompleted) {
+      const tx = await this.waitForTransaction(signature)
+      if (!tx) {
+        return this.createFailedAction(signature, 'Transaction not found after waiting for completion')
+      }
+      return this.parseTransactionToAction(tx, signature)
+    }
+
     try {
-      const signature = identifier
       const tx = await this.connection.getTransaction(signature, {
         commitment: 'confirmed',
         maxSupportedTransactionVersion: 0,
       })
-
       if (!tx) return null
-
-      const slot = tx.slot
-      const blockTime = tx.blockTime ? new Date(tx.blockTime * 1000).toISOString() : new Date().toISOString()
-
-      const message = tx.transaction.message
-      let accountKeys: PublicKey[] = []
-      if ('staticAccountKeys' in message) {
-        accountKeys = message.staticAccountKeys || []
-      } else {
-        try {
-          const allKeys = (message as any).getAccountKeys?.()
-          if (allKeys) {
-            accountKeys = allKeys.keySegments().flat() || []
-          }
-        } catch {
-          accountKeys = []
-        }
-      }
-      const sender = accountKeys[0]?.toBase58() || ''
-      const receiver = accountKeys.length > 1 ? accountKeys[1]?.toBase58() || '' : ''
-
-      const preBalances = tx.meta?.preBalances || []
-      const postBalances = tx.meta?.postBalances || []
-      const value = preBalances.length > 0 && postBalances.length > 0 ? BigInt(Math.abs(postBalances[0] - preBalances[0])) : 0n
-
-      const status = tx.meta?.err ? 'failed' : 'success'
-      let compiledInstructions: any[] = []
-      if ('compiledInstructions' in message && Array.isArray(message.compiledInstructions)) {
-        compiledInstructions = message.compiledInstructions
-      }
-      const hasInstructions = compiledInstructions.length > 0
-
-      return {
-        chain: this.chain.name,
-        id: signature,
-        receiver,
-        sender,
-        value,
-        function: hasInstructions ? (compiledInstructions[0]?.programIdIndex !== undefined ? 'contract_call' : 'transfer') : 'transfer',
-        status,
-        createdAt: blockTime,
-        error: tx.meta?.err ? JSON.stringify(tx.meta.err) : null,
-        tx: {
-          signature,
-          slot,
-          blockTime,
-          err: tx.meta?.err || null,
-        } as any,
-      }
-    } catch (error) {
+      return this.parseTransactionToAction(tx, signature)
+    } catch {
       return null
     }
   }
@@ -193,7 +154,7 @@ export class WarpSolanaDataLoader implements AdapterWarpDataLoader {
         programId: new PublicKey(WarpSolanaConstants.Programs.TokenProgram),
       })
 
-      const env = this.config.env === 'mainnet' ? 'mainnet' : this.config.env === 'devnet' ? 'devnet' : 'testnet'
+      const env: WarpChainEnv = (this.config.env === 'mainnet' ? 'mainnet' : this.config.env === 'devnet' ? 'devnet' : 'testnet') as WarpChainEnv
       const knownTokens = getKnownTokensForChain(this.chain.name, env)
 
       const balances = await Promise.all(
@@ -257,5 +218,156 @@ export class WarpSolanaDataLoader implements AdapterWarpDataLoader {
         logoUrl: '',
       }
     }
+  }
+
+  private async waitForTransaction(signature: string): Promise<any> {
+    const maxWaitTime = 300000
+    const startTime = Date.now()
+    let delay = 1000
+    let lastError: any = null
+    let attempts = 0
+
+    while (Date.now() - startTime < maxWaitTime) {
+      attempts++
+      try {
+        const tx = await this.tryFetchTransaction(signature)
+        if (tx) return tx
+      } catch (err: any) {
+        lastError = err
+      }
+      if (Date.now() - startTime < maxWaitTime) {
+        delay = this.calculateBackoffDelay(delay, attempts, lastError)
+        await new Promise((resolve) => setTimeout(resolve, delay))
+      }
+    }
+
+    try {
+      return await this.connection.getTransaction(signature, { commitment: 'confirmed', maxSupportedTransactionVersion: 0 })
+    } catch {
+      return null
+    }
+  }
+
+  private async tryFetchTransaction(signature: string): Promise<any> {
+    try {
+      const confirmation = await Promise.race([
+        this.connection.confirmTransaction(signature, 'finalized'),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 60000)),
+      ])
+      if (confirmation) {
+        const tx = await this.connection.getTransaction(signature, { commitment: 'finalized', maxSupportedTransactionVersion: 0 })
+        if (tx) return tx
+      }
+    } catch {
+      // Try direct fetch
+    }
+
+    try {
+      const tx = await this.connection.getTransaction(signature, { commitment: 'finalized', maxSupportedTransactionVersion: 0 })
+      if (tx) return tx
+    } catch {
+      // Try confirmed
+    }
+
+    try {
+      return await this.connection.getTransaction(signature, { commitment: 'confirmed', maxSupportedTransactionVersion: 0 })
+    } catch {
+      return null
+    }
+  }
+
+  private calculateBackoffDelay(currentDelay: number, attempts: number, lastError: any): number {
+    if (lastError?.message?.includes('429') || lastError?.message?.includes('rate limit')) {
+      return Math.min(currentDelay * 2, 30000)
+    }
+
+    if (attempts % 10 === 0) {
+      return 2000
+    }
+
+    return Math.min(currentDelay * 1.1, 15000)
+  }
+
+  private createFailedAction(signature: string, error: string): WarpChainAction {
+    return {
+      chain: this.chain.name,
+      id: signature,
+      receiver: '',
+      sender: '',
+      value: 0n,
+      function: '',
+      status: 'failed',
+      createdAt: new Date().toISOString(),
+      error,
+      tx: {
+        signature,
+        slot: 0,
+        blockTime: null,
+        err: { message: error },
+      } as any,
+    }
+  }
+
+  private parseTransactionToAction(tx: any, signature: string): WarpChainAction {
+    const slot = tx.slot
+    const blockTime = tx.blockTime ? new Date(tx.blockTime * 1000).toISOString() : new Date().toISOString()
+    const accountKeys = this.extractAccountKeys(tx.transaction.message)
+    const sender = accountKeys[0]?.toBase58() || ''
+    const receiver = accountKeys.length > 1 ? accountKeys[1]?.toBase58() || '' : ''
+    const value = this.calculateTransactionValue(tx.meta)
+    const status = tx.meta?.err ? 'failed' : 'success'
+    const functionName = this.determineFunctionName(tx.transaction.message)
+
+    return {
+      chain: this.chain.name,
+      id: signature,
+      receiver,
+      sender,
+      value,
+      function: functionName,
+      status,
+      createdAt: blockTime,
+      error: tx.meta?.err ? JSON.stringify(tx.meta.err) : null,
+      tx: {
+        signature,
+        slot,
+        blockTime,
+        err: tx.meta?.err || null,
+      } as any,
+    }
+  }
+
+  private extractAccountKeys(message: any): PublicKey[] {
+    if ('staticAccountKeys' in message) {
+      return message.staticAccountKeys || []
+    }
+
+    try {
+      const allKeys = (message as any).getAccountKeys?.()
+      if (allKeys) {
+        return allKeys.keySegments().flat() || []
+      }
+    } catch {
+      // Ignore
+    }
+
+    return []
+  }
+
+  private calculateTransactionValue(meta: any): bigint {
+    const preBalances = meta?.preBalances || []
+    const postBalances = meta?.postBalances || []
+    if (preBalances.length === 0 || postBalances.length === 0) return 0n
+    return BigInt(Math.abs(postBalances[0] - preBalances[0]))
+  }
+
+  private determineFunctionName(message: any): string {
+    let compiledInstructions: any[] = []
+    if ('compiledInstructions' in message && Array.isArray(message.compiledInstructions)) {
+      compiledInstructions = message.compiledInstructions
+    }
+
+    if (compiledInstructions.length === 0) return 'transfer'
+    return compiledInstructions[0]?.programIdIndex !== undefined ? 'contract_call' : 'transfer'
   }
 }

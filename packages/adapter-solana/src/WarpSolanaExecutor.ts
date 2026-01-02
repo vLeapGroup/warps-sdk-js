@@ -1,5 +1,5 @@
-import { createAssociatedTokenAccountInstruction, createTransferInstruction, getAssociatedTokenAddress } from '@solana/spl-token'
-import { ComputeBudgetProgram, Connection, PublicKey, SystemProgram, Transaction, TransactionInstruction } from '@solana/web3.js'
+import { createAssociatedTokenAccountInstruction, createTransferInstruction, getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from '@solana/spl-token'
+import { ComputeBudgetProgram, Connection, MessageV0, PublicKey, SystemProgram, TransactionInstruction, VersionedTransaction } from '@solana/web3.js'
 import {
   AdapterWarpExecutor,
   applyOutputToMessages,
@@ -34,10 +34,10 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
     this.output = new WarpSolanaOutput(config, this.chain)
   }
 
-  async createTransaction(executable: WarpExecutable): Promise<Transaction> {
+  async createTransaction(executable: WarpExecutable): Promise<VersionedTransaction> {
     const action = getWarpActionByIndex(executable.warp, executable.action)
 
-    let tx: Transaction | null = null
+    let tx: VersionedTransaction | null = null
     if (action.type === 'transfer') {
       tx = await this.createTransferTransaction(executable)
     } else if (action.type === 'contract') {
@@ -53,125 +53,138 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
     return tx
   }
 
-  async createTransferTransaction(executable: WarpExecutable): Promise<Transaction> {
+  async createTransferTransaction(executable: WarpExecutable): Promise<VersionedTransaction> {
     const userWallet = getWarpWalletAddressFromConfig(this.config, executable.chain.name)
     if (!userWallet) throw new Error('WarpSolanaExecutor: createTransfer - user address not set')
     if (!executable.destination) throw new Error('WarpSolanaExecutor: Destination address is required')
-    let destinationPubkey: PublicKey
-    try {
-      destinationPubkey = new PublicKey(executable.destination)
-    } catch (error) {
-      throw new Error('WarpSolanaExecutor: Invalid destination address')
-    }
+
+    const destinationPubkey = this.toPublicKey(executable.destination, 'Invalid destination address')
+    const fromPubkey = this.toPublicKey(userWallet, 'Invalid user wallet address')
 
     if (executable.transfers && executable.transfers.length > 0) {
       return this.createTokenTransferTransaction(executable, userWallet, destinationPubkey)
     }
 
-    const fromPubkey = new PublicKey(userWallet as string)
-    const transaction = new Transaction()
+    const instructions: TransactionInstruction[] = []
 
     if (executable.value > 0n) {
-      transaction.add(SystemProgram.transfer({ fromPubkey, toPubkey: destinationPubkey, lamports: Number(executable.value) }))
+      instructions.push(SystemProgram.transfer({ fromPubkey, toPubkey: destinationPubkey, lamports: Number(executable.value) }))
     }
 
     if (executable.data) {
       const data = this.serializer.stringToTyped(executable.data)
       if (data && typeof data === 'string') {
         const dataBuffer = Buffer.from(data, 'base64')
-        const instruction = new TransactionInstruction({
-          keys: [
-            { pubkey: fromPubkey, isSigner: true, isWritable: true },
-            { pubkey: destinationPubkey, isSigner: false, isWritable: true },
-          ],
-          programId: destinationPubkey,
-          data: dataBuffer,
-        })
-        transaction.add(instruction)
+        instructions.push(
+          new TransactionInstruction({
+            keys: [
+              { pubkey: fromPubkey, isSigner: true, isWritable: true },
+              { pubkey: destinationPubkey, isSigner: false, isWritable: true },
+            ],
+            programId: destinationPubkey,
+            data: dataBuffer,
+          })
+        )
       }
     }
 
-    return this.setTransactionDefaults(transaction, fromPubkey)
+    return this.setTransactionDefaults(instructions, fromPubkey)
   }
 
-  async createContractCallTransaction(executable: WarpExecutable): Promise<Transaction> {
+  async createContractCallTransaction(executable: WarpExecutable): Promise<VersionedTransaction> {
     const userWallet = getWarpWalletAddressFromConfig(this.config, executable.chain.name)
     if (!userWallet) throw new Error('WarpSolanaExecutor: createContractCall - user address not set')
 
     const action = getWarpActionByIndex(executable.warp, executable.action)
     if (!action || !('func' in action) || !action.func) throw new Error('WarpSolanaExecutor: Contract action must have a function name')
     if (!executable.destination) throw new Error('WarpSolanaExecutor: Contract address is required')
-    const programId = new PublicKey(executable.destination)
 
-    const fromPubkey = new PublicKey(userWallet)
-    const transaction = new Transaction()
+    const programId = this.toPublicKey(executable.destination, 'Invalid contract address')
+    const fromPubkey = this.toPublicKey(userWallet, 'Invalid user wallet address')
+    const instructions: TransactionInstruction[] = []
 
-    try {
-      const nativeArgs = executable.args.map((arg) => this.serializer.coreSerializer.stringToNative(arg)[1])
+    const argsToUse = this.extractContractArgs(executable)
+    const nativeArgs = argsToUse.map((arg) => this.serializer.coreSerializer.stringToNative(arg)[1])
+    const instructionData = this.buildInstructionData(action, nativeArgs)
 
-      let instructionData: Buffer = Buffer.alloc(0)
+    const accounts = await this.buildInstructionAccounts(action, executable, fromPubkey, programId)
+    this.ensureSystemPrograms(accounts, action)
 
-      if (action.abi && typeof action.abi === 'string') {
-        try {
-          const abi = JSON.parse(action.abi)
-          if (abi.instructions && abi.instructions[action.func]) {
-            const instructionDef = abi.instructions[action.func]
-            instructionData = this.encodeInstructionData(instructionDef, nativeArgs, action.func)
-          } else if (abi.accounts || abi.types) {
-            instructionData = this.encodeBasicInstructionData(nativeArgs, action.func)
+    await this.ensureATAs(accounts, fromPubkey, instructions)
+
+    instructions.push(new TransactionInstruction({ keys: accounts, programId, data: instructionData }))
+
+    if (executable.value > 0n) {
+      instructions.push(SystemProgram.transfer({ fromPubkey, toPubkey: programId, lamports: Number(executable.value) }))
+    }
+
+    return this.setTransactionDefaults(instructions, fromPubkey)
+  }
+
+  private async ensureATAs(
+    accounts: Array<{ pubkey: PublicKey; isSigner: boolean; isWritable: boolean }>,
+    fromPubkey: PublicKey,
+    instructions: TransactionInstruction[]
+  ): Promise<void> {
+    const createdATAs = new Set<string>()
+
+    for (const account of accounts) {
+      const accountInfo = await this.connection.getAccountInfo(account.pubkey)
+      if (!accountInfo) {
+        for (const otherAccount of accounts) {
+          if (otherAccount.pubkey.equals(account.pubkey)) continue
+
+          try {
+            const expectedAta = await getAssociatedTokenAddress(otherAccount.pubkey, fromPubkey)
+            if (expectedAta.equals(account.pubkey)) {
+              const mintPubkey = otherAccount.pubkey
+              const ataKey = expectedAta.toBase58()
+              if (!createdATAs.has(ataKey)) {
+                createdATAs.add(ataKey)
+                const ataInfo = await this.connection.getAccountInfo(expectedAta)
+                if (!ataInfo) {
+                  instructions.push(createAssociatedTokenAccountInstruction(fromPubkey, expectedAta, fromPubkey, mintPubkey))
+                }
+              }
+              break
+            }
+          } catch {
+            continue
           }
-        } catch {
-          instructionData = this.encodeBasicInstructionData(nativeArgs, action.func)
         }
-      } else {
-        instructionData = this.encodeBasicInstructionData(nativeArgs, action.func)
       }
-
-      const accounts = this.buildInstructionAccounts(action, executable, fromPubkey, programId)
-
-      const instruction = new TransactionInstruction({
-        keys: accounts,
-        programId,
-        data: instructionData,
-      })
-
-      transaction.add(instruction)
-
-      if (executable.value > 0n) {
-        transaction.add(SystemProgram.transfer({ fromPubkey, toPubkey: programId, lamports: Number(executable.value) }))
-      }
-
-      return this.setTransactionDefaults(transaction, fromPubkey)
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error)
-      throw new Error(`WarpSolanaExecutor: Failed to create contract call: ${errorMessage}`)
     }
   }
 
   private encodeInstructionData(instructionDef: any, args: any[], funcName: string): Buffer {
     try {
-      const data = Buffer.alloc(8)
-      if (instructionDef.discriminator && Buffer.isBuffer(instructionDef.discriminator)) {
-        data.set(instructionDef.discriminator.subarray(0, Math.min(8, instructionDef.discriminator.length)), 0)
+      let discriminatorBuffer: Buffer
+      if (instructionDef.discriminator) {
+        if (Buffer.isBuffer(instructionDef.discriminator)) {
+          discriminatorBuffer = instructionDef.discriminator
+        } else if (Array.isArray(instructionDef.discriminator)) {
+          discriminatorBuffer = Buffer.from(instructionDef.discriminator)
+        } else {
+          discriminatorBuffer = Buffer.from(funcName).slice(0, 8)
+        }
       } else {
-        const hash = Buffer.from(funcName).subarray(0, 8)
-        data.set(hash, 0)
+          discriminatorBuffer = Buffer.from(funcName).slice(0, 8)
       }
 
-      if (args.length > 0 && instructionDef.args) {
+      if (args.length > 0 && instructionDef.args && instructionDef.args.length > 0) {
         const encodedArgs = this.encodeArgs(args, instructionDef.args)
-        // @ts-expect-error - Buffer.concat accepts Buffer[] which extends Uint8Array[]
-        return Buffer.concat([data, encodedArgs])
+        // @ts-expect-error - Buffer.concat works correctly but TypeScript types are strict
+        return Buffer.concat([discriminatorBuffer, encodedArgs])
       }
 
-      return data
+      return discriminatorBuffer
     } catch {
       return this.encodeBasicInstructionData(args, funcName)
     }
   }
 
   private encodeBasicInstructionData(args: any[], funcName: string): Buffer {
-    const funcHash = Buffer.from(funcName).subarray(0, 8)
+        const funcHash = Buffer.from(funcName).slice(0, 8)
     const data = Buffer.alloc(8)
     data.set(funcHash, 0)
 
@@ -191,7 +204,7 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
         }
         return Buffer.from(String(arg), 'utf8')
       })
-      // @ts-expect-error - Buffer.concat accepts Buffer[] which extends Uint8Array[]
+      // @ts-expect-error - Buffer.concat works correctly but TypeScript types are strict
       return Buffer.concat([data, ...encodedArgs])
     }
 
@@ -220,7 +233,7 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
       } else if (def.type === 'publicKey' || def.type === 'pubkey') {
         try {
           const pubkey = new PublicKey(arg)
-          buffers.push(pubkey.toBuffer())
+          buffers.push(Buffer.from(pubkey.toBuffer()))
         } catch {
           buffers.push(Buffer.from(String(arg), 'utf8'))
         }
@@ -228,37 +241,32 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
         buffers.push(Buffer.from(String(arg), 'utf8'))
       }
     }
-    // @ts-expect-error - Buffer.concat accepts Buffer[] which extends Uint8Array[]
+    // @ts-expect-error - Buffer.concat works correctly but TypeScript types are strict
     return Buffer.concat(buffers)
   }
 
-  private buildInstructionAccounts(
+  private async buildInstructionAccounts(
     action: any,
     executable: WarpExecutable,
     fromPubkey: PublicKey,
     programId: PublicKey
-  ): Array<{ pubkey: PublicKey; isSigner: boolean; isWritable: boolean }> {
-    const accounts: Array<{ pubkey: PublicKey; isSigner: boolean; isWritable: boolean }> = [
-      { pubkey: fromPubkey, isSigner: true, isWritable: true },
-    ]
+  ): Promise<Array<{ pubkey: PublicKey; isSigner: boolean; isWritable: boolean }>> {
+    const accounts: Array<{ pubkey: PublicKey; isSigner: boolean; isWritable: boolean }> = []
 
-    if (action.accounts && Array.isArray(action.accounts)) {
-      for (const accountDef of action.accounts) {
-        try {
-          const pubkey = new PublicKey(accountDef.address || accountDef.pubkey || executable.destination)
-          accounts.push({
-            pubkey,
-            isSigner: accountDef.signer === true,
-            isWritable: accountDef.writable !== false,
-          })
-        } catch {
-          continue
-        }
+    if (!action.accounts || !Array.isArray(action.accounts)) return accounts
+
+    for (const accountDef of action.accounts) {
+      try {
+        const address = this.extractAccountAddress(accountDef)
+        if (!address || address === '[object Object]' || address.length === 0) continue
+
+        const pubkey = await this.resolveAccountPubkey(address, fromPubkey)
+        const { isSigner, isWritable } = this.determineAccountFlags(address, accountDef)
+
+        accounts.push({ pubkey, isSigner, isWritable })
+      } catch {
+        continue
       }
-    }
-
-    if (!accounts.some((acc) => acc.pubkey.equals(programId))) {
-      accounts.push({ pubkey: programId, isSigner: false, isWritable: false })
     }
 
     return accounts
@@ -268,34 +276,19 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
     executable: WarpExecutable,
     userWallet: string,
     destinationPubkey: PublicKey
-  ): Promise<Transaction> {
+  ): Promise<VersionedTransaction> {
     if (executable.transfers.length === 0) throw new Error('WarpSolanaExecutor: No transfers provided')
     if (!this.chain.nativeToken?.identifier) throw new Error('WarpSolanaExecutor: No native token defined for this chain')
 
-    const nativeTokenTransfers = executable.transfers.filter(
-      (transfer) =>
-        transfer.identifier === this.chain.nativeToken!.identifier || transfer.identifier === WarpSolanaConstants.NativeToken.Identifier
-    )
-    const splTokenTransfers = executable.transfers.filter(
-      (transfer) =>
-        transfer.identifier !== this.chain.nativeToken!.identifier && transfer.identifier !== WarpSolanaConstants.NativeToken.Identifier
-    )
+    const nativeId = this.chain.nativeToken.identifier
+    const nativeTokenTransfers = executable.transfers.filter((t) => t.identifier === nativeId || t.identifier === WarpSolanaConstants.NativeToken.Identifier)
+    const splTokenTransfers = executable.transfers.filter((t) => t.identifier !== nativeId && t.identifier !== WarpSolanaConstants.NativeToken.Identifier)
 
     if (nativeTokenTransfers.length === 1 && splTokenTransfers.length === 0) {
       const transfer = nativeTokenTransfers[0]
       if (transfer.amount <= 0n) throw new Error('WarpSolanaExecutor: Native token transfer amount must be positive')
-
       const fromPubkey = new PublicKey(userWallet)
-      const transaction = new Transaction()
-      transaction.add(
-        SystemProgram.transfer({
-          fromPubkey,
-          toPubkey: destinationPubkey,
-          lamports: Number(transfer.amount),
-        })
-      )
-
-      return this.setTransactionDefaults(transaction, fromPubkey)
+      return this.setTransactionDefaults([SystemProgram.transfer({ fromPubkey, toPubkey: destinationPubkey, lamports: Number(transfer.amount) })], fromPubkey)
     }
 
     if (nativeTokenTransfers.length === 0 && splTokenTransfers.length === 1) {
@@ -303,7 +296,6 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
     }
 
     if (executable.transfers.length > 1) throw new Error('WarpSolanaExecutor: Multiple token transfers not yet supported')
-
     throw new Error('WarpSolanaExecutor: Invalid transfer configuration')
   }
 
@@ -312,33 +304,23 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
     transfer: WarpChainAssetValue,
     userWallet: string,
     destinationPubkey: PublicKey
-  ): Promise<Transaction> {
-    let mintAddress: PublicKey
-    try {
-      mintAddress = new PublicKey(transfer.identifier)
-    } catch {
-      throw new Error(`WarpSolanaExecutor: Invalid token address: ${transfer.identifier}`)
-    }
-
+  ): Promise<VersionedTransaction> {
+    const mintAddress = new PublicKey(transfer.identifier)
     const fromPubkey = new PublicKey(userWallet)
-    const transaction = new Transaction()
-
     const sourceTokenAccount = await getAssociatedTokenAddress(mintAddress, fromPubkey)
     const destinationTokenAccount = await getAssociatedTokenAddress(mintAddress, destinationPubkey)
 
-    const sourceAccountInfo = await this.connection.getAccountInfo(sourceTokenAccount)
-    if (!sourceAccountInfo) {
+    if (!(await this.connection.getAccountInfo(sourceTokenAccount))) {
       throw new Error('WarpSolanaExecutor: Source token account does not exist')
     }
 
-    const destinationAccountInfo = await this.connection.getAccountInfo(destinationTokenAccount)
-    if (!destinationAccountInfo) {
-      transaction.add(createAssociatedTokenAccountInstruction(fromPubkey, destinationTokenAccount, destinationPubkey, mintAddress))
+    const instructions: TransactionInstruction[] = []
+    if (!(await this.connection.getAccountInfo(destinationTokenAccount))) {
+      instructions.push(createAssociatedTokenAccountInstruction(fromPubkey, destinationTokenAccount, destinationPubkey, mintAddress))
     }
+    instructions.push(createTransferInstruction(sourceTokenAccount, destinationTokenAccount, fromPubkey, Number(transfer.amount)))
 
-    transaction.add(createTransferInstruction(sourceTokenAccount, destinationTokenAccount, fromPubkey, Number(transfer.amount)))
-
-    return this.setTransactionDefaults(transaction, fromPubkey as PublicKey)
+    return this.setTransactionDefaults(instructions, fromPubkey)
   }
 
   async executeQuery(executable: WarpExecutable): Promise<WarpActionExecutionResult> {
@@ -346,100 +328,68 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
     if (action.type !== 'query') throw new Error(`WarpSolanaExecutor: Invalid action type for executeQuery: ${action.type}`)
     if (!action.func) throw new Error('WarpSolanaExecutor: Query action must have a function name')
 
-    let queryAddress: PublicKey
-    try {
-      if (!executable.destination) throw new Error('WarpSolanaExecutor: Query address is required')
-      queryAddress = new PublicKey(executable.destination)
-    } catch {
-      throw new Error(`WarpSolanaExecutor: Invalid address for query: ${executable.destination}`)
+    if (!executable.destination) throw new Error('WarpSolanaExecutor: Query address is required')
+    const queryAddress = new PublicKey(executable.destination)
+
+    const nativeArgs = executable.args.map((arg) => this.serializer.coreSerializer.stringToNative(arg)[1])
+
+    let decodedResult: any[] = []
+    let isSuccess = true
+
+    if (action.func === 'getAccount' || action.func === 'getAccountInfo') {
+      const accountInfo = await this.connection.getAccountInfo(queryAddress)
+      if (!accountInfo) {
+        throw new Error('Account not found')
+      }
+      decodedResult = [
+        accountInfo.lamports,
+        accountInfo.owner.toBase58(),
+        accountInfo.executable,
+        accountInfo.rentEpoch,
+        accountInfo.data.toString('base64'),
+      ]
+    } else if (action.func === 'getBalance') {
+      const balance = await this.connection.getBalance(queryAddress)
+      decodedResult = [balance.toString()]
+    } else if (action.func === 'getProgramAccounts') {
+      const accounts = await this.connection.getProgramAccounts(queryAddress)
+      decodedResult = accounts.map((acc) => ({
+        pubkey: acc.pubkey.toBase58(),
+        account: {
+          lamports: acc.account.lamports,
+          owner: acc.account.owner.toBase58(),
+          data: acc.account.data.toString('base64'),
+        },
+      }))
+    } else {
+      const accountInfo = await this.connection.getAccountInfo(queryAddress)
+      if (!accountInfo) {
+        throw new Error('Account not found')
+      }
+      decodedResult = [accountInfo.data.toString('base64')]
     }
 
-    try {
-      const nativeArgs = executable.args.map((arg) => this.serializer.coreSerializer.stringToNative(arg)[1])
+    const { values, output } = await this.output.extractQueryOutput(executable.warp, decodedResult, executable.action, executable.resolvedInputs)
 
-      let decodedResult: any[] = []
-      let isSuccess = true
+    const next = getNextInfo(this.config, [], executable.warp, executable.action, output)
 
-      if (action.func === 'getAccount' || action.func === 'getAccountInfo') {
-        const accountInfo = await this.connection.getAccountInfo(queryAddress)
-        if (!accountInfo) {
-          throw new Error('Account not found')
-        }
-        decodedResult = [
-          accountInfo.lamports,
-          accountInfo.owner.toBase58(),
-          accountInfo.executable,
-          accountInfo.rentEpoch,
-          accountInfo.data.toString('base64'),
-        ]
-      } else if (action.func === 'getBalance') {
-        const balance = await this.connection.getBalance(queryAddress)
-        decodedResult = [balance.toString()]
-      } else if (action.func === 'getProgramAccounts') {
-        const accounts = await this.connection.getProgramAccounts(queryAddress)
-        decodedResult = accounts.map((acc) => ({
-          pubkey: acc.pubkey.toBase58(),
-          account: {
-            lamports: acc.account.lamports,
-            owner: acc.account.owner.toBase58(),
-            data: acc.account.data.toString('base64'),
-          },
-        }))
-      } else {
-        const accountInfo = await this.connection.getAccountInfo(queryAddress)
-        if (!accountInfo) {
-          throw new Error('Account not found')
-        }
-        decodedResult = [accountInfo.data.toString('base64')]
-      }
+    const destinationInput = executable.resolvedInputs.find((i) => i.input.position === 'receiver' || i.input.position === 'destination')
+    const destination = destinationInput?.value || executable.destination
 
-      const { values, output } = await this.output.extractQueryOutput(
-        executable.warp,
-        decodedResult,
-        executable.action,
-        executable.resolvedInputs
-      )
-
-      const next = getNextInfo(this.config, [], executable.warp, executable.action, output)
-
-      const destinationInput = executable.resolvedInputs.find((i) => i.input.position === 'receiver' || i.input.position === 'destination')
-      const destination = destinationInput?.value || executable.destination
-
-      const resolvedInputs = extractResolvedInputValues(executable.resolvedInputs)
-      return {
-        status: isSuccess ? 'success' : 'error',
-        warp: executable.warp,
-        action: executable.action,
-        user: getWarpWalletAddressFromConfig(this.config, executable.chain.name),
-        txHash: null,
-        tx: null,
-        next,
-        values,
-        output: { ...output, _DATA: decodedResult },
-        messages: applyOutputToMessages(executable.warp, output, this.config),
-        destination,
-        resolvedInputs,
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error)
-      const destinationInput = executable.resolvedInputs.find((i) => i.input.position === 'receiver' || i.input.position === 'destination')
-      const destination = destinationInput?.value || executable.destination
-
-      const resolvedInputs = extractResolvedInputValues(executable.resolvedInputs)
-      return {
-        status: 'error',
-        warp: executable.warp,
-        action: executable.action,
-        user: getWarpWalletAddressFromConfig(this.config, executable.chain.name),
-        txHash: null,
-        tx: null,
-        next: null,
-        values: { string: [], native: [], mapped: {} },
-        output: { _DATA: errorMessage, _ERROR: errorMessage },
-        messages: {},
-        destination,
-        resolvedInputs,
-      }
+    const resolvedInputs = extractResolvedInputValues(executable.resolvedInputs)
+    return {
+      status: isSuccess ? 'success' : 'error',
+      warp: executable.warp,
+      action: executable.action,
+      user: getWarpWalletAddressFromConfig(this.config, executable.chain.name),
+      txHash: null,
+      tx: null,
+      next,
+      values,
+      output: { ...output, _DATA: decodedResult },
+      messages: applyOutputToMessages(executable.warp, output, this.config),
+      destination,
+      resolvedInputs,
     }
   }
 
@@ -447,49 +397,265 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
     try {
       const messageBytes = new TextEncoder().encode(message)
       const signatureBytes = Buffer.from(signature, 'base64')
-      // Solana message verification would require the public key
-      // This is a simplified version
       return ''
     } catch (error) {
       throw new Error(`Failed to verify message: ${error}`)
     }
   }
 
-  private async setTransactionDefaults(transaction: Transaction, fromPubkey: PublicKey | null): Promise<Transaction> {
-    try {
-      const { blockhash, lastValidBlockHeight } = await this.connection.getLatestBlockhash('confirmed')
-      transaction.recentBlockhash = blockhash
-      if (fromPubkey) {
-        transaction.feePayer = fromPubkey
-      }
+  private async setTransactionDefaults(instructions: TransactionInstruction[], fromPubkey: PublicKey | null): Promise<VersionedTransaction> {
+    const { blockhash } = await this.connection.getLatestBlockhash('confirmed')
+    const allInstructions = this.addComputeBudgetInstructions(instructions)
+    const accountMetaMap = this.buildAccountMetaMap(allInstructions, fromPubkey)
+    const { signedAccounts, unsignedAccounts } = this.sortAccounts(accountMetaMap)
+    const { staticAccountKeys, accountIndexMap } = this.buildAccountIndexMap(signedAccounts, unsignedAccounts)
+    const compiledInstructions = this.compileInstructions(allInstructions, accountIndexMap)
+    const messageV0 = this.buildMessageV0(blockhash, signedAccounts, unsignedAccounts, accountMetaMap, staticAccountKeys, compiledInstructions)
 
-      const instructions = transaction.instructions
-      const hasTransfer = instructions.some((ix) => ix.programId.equals(SystemProgram.programId) && ix.data.length === 4)
-      const hasTokenTransfer = instructions.some((ix) => ix.programId.toBase58() === WarpSolanaConstants.Programs.TokenProgram)
-
-      let computeUnits = WarpSolanaConstants.ComputeUnitLimit.Default
-      if (hasTransfer && !hasTokenTransfer) {
-        computeUnits = WarpSolanaConstants.ComputeUnitLimit.Transfer
-      } else if (hasTokenTransfer) {
-        computeUnits = WarpSolanaConstants.ComputeUnitLimit.TokenTransfer
-      } else {
-        computeUnits = WarpSolanaConstants.ComputeUnitLimit.ContractCall
-      }
-
-      const computeUnitLimitIx = ComputeBudgetProgram.setComputeUnitLimit({
-        units: computeUnits,
-      })
-
-      const computeUnitPriceIx = ComputeBudgetProgram.setComputeUnitPrice({
-        microLamports: WarpSolanaConstants.PriorityFee.Default,
-      })
-
-      transaction.instructions = [computeUnitLimitIx, computeUnitPriceIx, ...transaction.instructions]
-
-      return transaction
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error)
-      throw new Error(`WarpSolanaExecutor: Failed to set transaction defaults: ${errorMessage}`)
+    const versionedTx = new VersionedTransaction(messageV0)
+    if (versionedTx.version !== 0) {
+      throw new Error(`Expected VersionedTransaction v0, got version: ${versionedTx.version}`)
     }
+
+    return versionedTx
+  }
+
+  private toPublicKey(address: string, errorMsg: string): PublicKey {
+    try {
+      return new PublicKey(address)
+    } catch {
+      throw new Error(`WarpSolanaExecutor: ${errorMsg}`)
+    }
+  }
+
+  private extractContractArgs(executable: WarpExecutable): string[] {
+    if (executable.args.length > 0) return executable.args
+    if (executable.resolvedInputs.length === 0) return []
+
+    const argInputs = executable.resolvedInputs
+      .filter((ri) => ri.input.position?.toString().startsWith('arg:'))
+      .map((ri) => {
+        const index = Math.max(0, parseInt(ri.input.position!.toString().split(':')[1] || '0', 10) - 1)
+        return { index, value: ri.value }
+      })
+      .sort((a, b) => a.index - b.index)
+
+    const maxIndex = Math.max(...argInputs.map((a) => a.index), -1)
+    if (maxIndex < 0) return []
+
+    const args = new Array(maxIndex + 1).fill(null)
+    argInputs.forEach(({ index, value }) => {
+      if (value) args[index] = value
+    })
+    return args.filter((arg): arg is string => arg !== null && arg !== undefined)
+  }
+
+  private buildInstructionData(action: any, nativeArgs: any[]): Buffer {
+    if (!action.abi || typeof action.abi !== 'string') {
+      return this.encodeBasicInstructionData(nativeArgs, action.func)
+    }
+
+    try {
+      const abi = JSON.parse(action.abi)
+      if (abi.instructions && abi.instructions[action.func]) {
+        return this.encodeInstructionData(abi.instructions[action.func], nativeArgs, action.func)
+      }
+    } catch {
+      // Fall through to basic encoding
+    }
+
+    return this.encodeBasicInstructionData(nativeArgs, action.func)
+  }
+
+  private ensureSystemPrograms(accounts: Array<{ pubkey: PublicKey; isSigner: boolean; isWritable: boolean }>, action: any): void {
+    if (!action.accounts?.length) return
+
+    const systemProgram = SystemProgram.programId
+    const tokenProgram = TOKEN_PROGRAM_ID
+    if (!accounts.some((acc) => acc.pubkey.equals(systemProgram))) {
+      accounts.push({ pubkey: systemProgram, isSigner: false, isWritable: false })
+    }
+    if (!accounts.some((acc) => acc.pubkey.equals(tokenProgram))) {
+      accounts.push({ pubkey: tokenProgram, isSigner: false, isWritable: false })
+    }
+  }
+
+  private extractAccountAddress(accountDef: any): string | undefined {
+    if (typeof accountDef === 'string') return accountDef
+    if (!accountDef || typeof accountDef !== 'object') return undefined
+    if (JSON.stringify(accountDef).includes('USER_WALLET')) return '{{USER_WALLET}}'
+
+    const addrValue = accountDef.address || accountDef.pubkey || accountDef.value
+    if (typeof addrValue === 'string') return addrValue
+    if (addrValue?.toBase58) return addrValue.toBase58()
+    if (addrValue?.identifier) return addrValue.identifier
+    if (addrValue?.value) return addrValue.value
+
+    const keys = Object.keys(accountDef)
+    if (keys.length === 1 && typeof accountDef[keys[0]] === 'string') return accountDef[keys[0]]
+    return undefined
+  }
+
+  private async resolveAccountPubkey(address: string, fromPubkey: PublicKey): Promise<PublicKey> {
+    if (address === '{{USER_WALLET}}' || address === fromPubkey.toBase58()) {
+      return fromPubkey
+    }
+
+    if (address.startsWith('{{USER_ATA:') && address.endsWith('}}')) {
+      const mintAddress = address.slice(11, -2)
+      const mintPubkey = new PublicKey(mintAddress)
+      return await getAssociatedTokenAddress(mintPubkey, fromPubkey)
+    }
+
+    return new PublicKey(address)
+  }
+
+  private determineAccountFlags(address: string, accountDef: any): { isSigner: boolean; isWritable: boolean } {
+    const accountMeta = typeof accountDef === 'object' ? accountDef : {}
+
+    if (address === '{{USER_WALLET}}') {
+      return { isSigner: true, isWritable: true }
+    }
+
+    if (address.startsWith('{{USER_ATA:')) {
+      return { isSigner: false, isWritable: true }
+    }
+
+    let isSigner = accountMeta.signer === true
+    let isWritable = accountMeta.writable !== false
+
+    if (typeof accountDef === 'object') {
+      if (accountMeta.signer !== undefined) isSigner = accountMeta.signer === true
+      if (accountMeta.writable !== undefined) isWritable = accountMeta.writable !== false
+    }
+
+    return { isSigner, isWritable }
+  }
+
+  private addComputeBudgetInstructions(instructions: TransactionInstruction[]): TransactionInstruction[] {
+    const hasTransfer = instructions.some((ix) => ix.programId.equals(SystemProgram.programId) && ix.data.length === 4)
+    const hasTokenTransfer = instructions.some((ix) => ix.programId.toBase58() === WarpSolanaConstants.Programs.TokenProgram)
+
+    let computeUnits = WarpSolanaConstants.ComputeUnitLimit.Default
+    if (hasTransfer && !hasTokenTransfer) {
+      computeUnits = WarpSolanaConstants.ComputeUnitLimit.Transfer
+    } else if (hasTokenTransfer) {
+      computeUnits = WarpSolanaConstants.ComputeUnitLimit.TokenTransfer
+    } else {
+      computeUnits = WarpSolanaConstants.ComputeUnitLimit.ContractCall
+    }
+
+    const computeUnitLimitIx = ComputeBudgetProgram.setComputeUnitLimit({ units: computeUnits })
+    const computeUnitPriceIx = ComputeBudgetProgram.setComputeUnitPrice({ microLamports: WarpSolanaConstants.PriorityFee.Default })
+
+    return [computeUnitLimitIx, computeUnitPriceIx, ...instructions]
+  }
+
+  private buildAccountMetaMap(
+    instructions: TransactionInstruction[],
+    fromPubkey: PublicKey | null
+  ): Map<string, { pubkey: PublicKey; isSigner: boolean; isWritable: boolean }> {
+    const accountMetaMap = new Map<string, { pubkey: PublicKey; isSigner: boolean; isWritable: boolean }>()
+
+    if (fromPubkey) {
+      accountMetaMap.set(fromPubkey.toBase58(), { pubkey: fromPubkey, isSigner: true, isWritable: true })
+    }
+
+    for (const ix of instructions) {
+      const programIdStr = ix.programId.toBase58()
+      if (!accountMetaMap.has(programIdStr)) {
+        accountMetaMap.set(programIdStr, { pubkey: ix.programId, isSigner: false, isWritable: false })
+      }
+
+      for (const key of ix.keys) {
+        const keyStr = key.pubkey.toBase58()
+        const existing = accountMetaMap.get(keyStr)
+        if (existing) {
+          accountMetaMap.set(keyStr, {
+            pubkey: key.pubkey,
+            isSigner: existing.isSigner || key.isSigner,
+            isWritable: existing.isWritable || key.isWritable,
+          })
+        } else {
+          accountMetaMap.set(keyStr, {
+            pubkey: key.pubkey,
+            isSigner: key.isSigner,
+            isWritable: key.isWritable,
+          })
+        }
+      }
+    }
+
+    return accountMetaMap
+  }
+
+  private sortAccounts(accountMetaMap: Map<string, { pubkey: PublicKey; isSigner: boolean; isWritable: boolean }>): {
+    signedAccounts: PublicKey[]
+    unsignedAccounts: PublicKey[]
+  } {
+    const signedAccounts: PublicKey[] = []
+    const unsignedAccounts: PublicKey[] = []
+
+    for (const meta of accountMetaMap.values()) {
+      ;(meta.isSigner ? signedAccounts : unsignedAccounts).push(meta.pubkey)
+    }
+
+    const sortByWritable = (a: PublicKey, b: PublicKey) =>
+      (accountMetaMap.get(a.toBase58())!.isWritable ? 0 : 1) - (accountMetaMap.get(b.toBase58())!.isWritable ? 0 : 1)
+
+    signedAccounts.sort(sortByWritable)
+    unsignedAccounts.sort(sortByWritable)
+    return { signedAccounts, unsignedAccounts }
+  }
+
+  private buildAccountIndexMap(
+    signedAccounts: PublicKey[],
+    unsignedAccounts: PublicKey[]
+  ): { staticAccountKeys: PublicKey[]; accountIndexMap: Map<string, number> } {
+    const staticAccountKeys = [...signedAccounts, ...unsignedAccounts]
+    const accountIndexMap = new Map<string, number>()
+
+    staticAccountKeys.forEach((key, index) => {
+      accountIndexMap.set(key.toBase58(), index)
+    })
+
+    return { staticAccountKeys, accountIndexMap }
+  }
+
+  private compileInstructions(
+    instructions: TransactionInstruction[],
+    accountIndexMap: Map<string, number>
+  ): Array<{ programIdIndex: number; accountKeyIndexes: number[]; data: Uint8Array }> {
+    return instructions.map((ix) => {
+      const programIdIndex = accountIndexMap.get(ix.programId.toBase58())!
+      const accountKeyIndexes = ix.keys.map((key) => accountIndexMap.get(key.pubkey.toBase58())!)
+      return {
+        programIdIndex,
+        accountKeyIndexes,
+        data: Uint8Array.from(ix.data),
+      }
+    })
+  }
+
+  private buildMessageV0(
+    blockhash: string,
+    signedAccounts: PublicKey[],
+    unsignedAccounts: PublicKey[],
+    accountMetaMap: Map<string, { pubkey: PublicKey; isSigner: boolean; isWritable: boolean }>,
+    staticAccountKeys: PublicKey[],
+    compiledInstructions: Array<{ programIdIndex: number; accountKeyIndexes: number[]; data: Uint8Array }>
+  ): MessageV0 {
+    const getWritable = (key: PublicKey) => accountMetaMap.get(key.toBase58())!.isWritable
+    return new MessageV0({
+      header: {
+        numRequiredSignatures: signedAccounts.length,
+        numReadonlySignedAccounts: signedAccounts.filter((k) => !getWritable(k)).length,
+        numReadonlyUnsignedAccounts: unsignedAccounts.filter((k) => !getWritable(k)).length,
+      },
+      staticAccountKeys,
+      recentBlockhash: blockhash,
+      compiledInstructions,
+      addressTableLookups: [],
+    })
   }
 }
