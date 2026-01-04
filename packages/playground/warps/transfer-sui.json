@@ -1,0 +1,36 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "sui",
+  "name": "Transfer SUI",
+  "title": "Transfer SUI Tokens",
+  "description": "Transfer native SUI tokens to another address.",
+  "actions": [
+    {
+      "type": "transfer",
+      "label": "Transfer SUI",
+      "inputs": [
+        {
+          "name": "Receiver Address",
+          "as": "RECEIVER_ADDRESS",
+          "type": "address",
+          "position": "receiver",
+          "source": "field",
+          "required": true,
+          "description": "The address to receive the SUI tokens."
+        },
+        {
+          "name": "Amount",
+          "description": "Amount of SUI to transfer (in smallest unit).",
+          "type": "biguint",
+          "position": "value",
+          "source": "field",
+          "required": true,
+          "min": 1
+        }
+      ]
+    }
+  ],
+  "messages": {
+    "success": "SUI transferred successfully."
+  }
+}

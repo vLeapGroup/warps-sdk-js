@@ -1,0 +1,36 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "solana",
+  "name": "Transfer SOL",
+  "title": "Transfer Native SOL Tokens",
+  "description": "Transfer native SOL tokens to another address on Solana.",
+  "actions": [
+    {
+      "type": "transfer",
+      "label": "Transfer SOL",
+      "inputs": [
+        {
+          "name": "Receiver Address",
+          "as": "RECEIVER_ADDRESS",
+          "type": "address",
+          "position": "receiver",
+          "source": "field",
+          "required": true,
+          "description": "The address to receive the SOL tokens."
+        },
+        {
+          "name": "Amount",
+          "description": "Amount of SOL to transfer (in smallest unit, 9 decimals).",
+          "type": "biguint",
+          "position": "value",
+          "source": "field",
+          "required": true,
+          "min": 1
+        }
+      ]
+    }
+  ],
+  "messages": {
+    "success": "SOL transferred successfully."
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "protocol": "warp:3.0.0",
+  "name": "HTTP Request",
+  "title": { "en": "Make HTTP Request" },
+  "description": { "en": "Execute an HTTP request to any URL with a configurable method and body." },
+  "actions": [
+    {
+      "type": "collect",
+      "label": { "en": "Send Request" },
+      "destination": {
+        "url": "{{URL}}",
+        "method": "{{METHOD}}",
+        "headers": { "Content-Type": "application/json" }
+      },
+      "inputs": [
+        {
+          "name": "URL",
+          "as": "URL",
+          "description": { "en": "The full URL to make the request to, including protocol (e.g., https://api.example.com/v1/users)." },
+          "type": "string",
+          "source": "field",
+          "required": true
+        },
+        {
+          "name": "Method",
+          "as": "METHOD",
+          "description": { "en": "The HTTP method (GET, POST, PUT, DELETE)." },
+          "type": "string",
+          "options": ["GET", "POST", "PUT", "DELETE"],
+          "source": "field",
+          "required": true
+        },
+        {
+          "name": "Request Body",
+          "as": "BODY",
+          "description": { "en": "Optional request body as JSON string. Only applicable for POST, PUT, DELETE methods." },
+          "type": "string",
+          "position": "payload:body",
+          "source": "field",
+          "required": false
+        }
+      ]
+    },
+    "output": {
+      "RESPONSE": "out",
+      "STATUS_CODE": "out.status",
+      "HEADERS": "out.headers"
+    }
+}

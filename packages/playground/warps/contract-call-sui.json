@@ -1,0 +1,39 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "sui",
+  "name": "Contract Call: Move Function",
+  "title": "Call a Move Function",
+  "description": "Call a Move function on a Sui package. This example calls a simple function.",
+  "actions": [
+    {
+      "type": "contract",
+      "label": "Call Function",
+      "address": "0x2",
+      "func": "transfer::public_transfer",
+      "typeArguments": ["0x2::coin::Coin<0x2::sui::SUI>"],
+      "inputs": [
+        {
+          "name": "Object ID",
+          "as": "OBJECT_ID",
+          "type": "object",
+          "position": "arg:0",
+          "source": "field",
+          "required": true,
+          "description": "The object ID to transfer."
+        },
+        {
+          "name": "Recipient",
+          "as": "RECIPIENT",
+          "type": "address",
+          "position": "arg:1",
+          "source": "field",
+          "required": true,
+          "description": "The recipient address."
+        }
+      ]
+    }
+  ],
+  "messages": {
+    "success": "Contract call executed successfully."
+  }
+}

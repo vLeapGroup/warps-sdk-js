@@ -1,0 +1,45 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "sui",
+  "name": "Transfer SUI Token",
+  "title": "Transfer SUI Token (Coin)",
+  "description": "Transfer a SUI token/coin to another address.",
+  "actions": [
+    {
+      "type": "transfer",
+      "label": "Transfer Token",
+      "inputs": [
+        {
+          "name": "Token Type",
+          "as": "TOKEN_TYPE",
+          "type": "string",
+          "position": "asset",
+          "source": "field",
+          "required": true,
+          "description": "The token type identifier (e.g., 0x2::sui::SUI for native SUI, or a custom token type)."
+        },
+        {
+          "name": "Receiver Address",
+          "as": "RECEIVER_ADDRESS",
+          "type": "address",
+          "position": "receiver",
+          "source": "field",
+          "required": true,
+          "description": "The address to receive the tokens."
+        },
+        {
+          "name": "Amount",
+          "description": "Amount of tokens to transfer (in smallest unit).",
+          "type": "biguint",
+          "position": "value",
+          "source": "field",
+          "required": true,
+          "min": 1
+        }
+      ]
+    }
+  ],
+  "messages": {
+    "success": "Token transferred successfully."
+  }
+}

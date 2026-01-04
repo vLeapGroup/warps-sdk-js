@@ -1,0 +1,52 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "solana",
+  "name": "Contract Call: System Program",
+  "title": "Call System Program",
+  "description": "Call the Solana System Program. This demonstrates a simple contract call.",
+  "actions": [
+    {
+      "type": "contract",
+      "label": "Call System Program",
+      "address": "11111111111111111111111111111111",
+      "func": "transfer",
+      "abi": "{\"instructions\":{\"transfer\":{\"discriminator\":[2,0,0,0],\"args\":[{\"name\":\"lamports\",\"type\":\"u64\"}]}}}",
+      "accounts": [
+        { "address": "{{USER_WALLET}}", "writable": true, "signer": true },
+        { "address": "{{RECEIVER_ADDRESS}}", "writable": true, "signer": false }
+      ],
+      "inputs": [
+        {
+          "name": "Program Address",
+          "as": "PROGRAM_ADDRESS",
+          "type": "address",
+          "position": "destination",
+          "source": "field",
+          "required": true,
+          "description": "The Solana program address (System Program)."
+        },
+        {
+          "name": "Receiver Address",
+          "as": "RECEIVER_ADDRESS",
+          "type": "address",
+          "position": "account:1",
+          "source": "field",
+          "required": true,
+          "description": "The receiver address."
+        },
+        {
+          "name": "Amount",
+          "description": "Amount of lamports to transfer.",
+          "type": "biguint",
+          "position": "arg:0",
+          "source": "field",
+          "required": true,
+          "min": 1
+        }
+      ]
+    }
+  ],
+  "messages": {
+    "success": "Contract call executed successfully."
+  }
+}

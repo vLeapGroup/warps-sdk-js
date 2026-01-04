@@ -1,0 +1,45 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "solana",
+  "name": "Transfer SPL Token",
+  "title": "Transfer SPL Token on Solana",
+  "description": "Transfer an SPL token to another address on Solana.",
+  "actions": [
+    {
+      "type": "transfer",
+      "label": "Transfer SPL Token",
+      "inputs": [
+        {
+          "name": "Token Mint Address",
+          "as": "TOKEN_MINT",
+          "type": "address",
+          "position": "asset",
+          "source": "field",
+          "required": true,
+          "description": "The SPL token mint address."
+        },
+        {
+          "name": "Receiver Address",
+          "as": "RECEIVER_ADDRESS",
+          "type": "address",
+          "position": "receiver",
+          "source": "field",
+          "required": true,
+          "description": "The address to receive the tokens."
+        },
+        {
+          "name": "Amount",
+          "description": "Amount of tokens to transfer (in smallest unit).",
+          "type": "biguint",
+          "position": "value",
+          "source": "field",
+          "required": true,
+          "min": 1
+        }
+      ]
+    }
+  ],
+  "messages": {
+    "success": "SPL token transferred successfully."
+  }
+}
