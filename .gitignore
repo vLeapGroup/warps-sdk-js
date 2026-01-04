@@ -31,3 +31,7 @@ brand-schema.json
 .env
 .env.local
 .claude/settings.local.json
+
+# generated/test files
+temp/
+results.md
