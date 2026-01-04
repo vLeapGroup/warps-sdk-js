@@ -195,9 +195,129 @@ const runWarp = async (warpFile: string) => {
 
   console.log('✅ Remote transactions:', remoteTxs)
   console.log(`\n🎉 Warp completed! View on explorer: ${explorerUrl}`)
+
+  // Write results deterministically
+  writeResults({
+    warpFile: WarpToTest,
+    chain: Chain,
+    inputs: WarpInputs,
+    resolvedInputs,
+    immediateExecutions,
+    txs,
+    hashes,
+    explorerUrl,
+    executionResults,
+    remoteTxs,
+  })
 }
 
 const listWarps = () => fs.readdirSync(warpsDir).filter((f) => f.endsWith('.ts') || f.endsWith('.js') || f.endsWith('.json'))
+
+type ExecutionResult = {
+  type: 'action' | 'warp' | 'error'
+  result: any
+}
+
+type PlaygroundResults = {
+  warpFile: string
+  chain: string
+  inputs: string[]
+  resolvedInputs: any[]
+  immediateExecutions: any[]
+  txs: any[]
+  hashes: string[]
+  explorerUrl: string | null
+  executionResults: ExecutionResult[]
+  remoteTxs: any[]
+}
+
+const writeResults = (results: PlaygroundResults) => {
+  const resultsPath = path.join(__dirname, 'results.md')
+  const timestamp = new Date().toISOString()
+
+  let content = `# Playground Execution Results\n\n`
+  content += `Generated: ${timestamp}\n\n`
+  content += `## Execution Summary\n\n`
+  content += `- **Warp File**: \`${results.warpFile}\`\n`
+  content += `- **Chain**: ${results.chain}\n`
+  content += `- **Inputs**: ${results.inputs.length}\n`
+  content += `- **Resolved Inputs**: ${results.resolvedInputs.length}\n`
+  content += `- **Immediate Executions**: ${results.immediateExecutions.length}\n`
+  content += `- **Transactions**: ${results.txs.length}\n`
+  content += `- **Transaction Hashes**: ${results.hashes.length}\n\n`
+
+  if (results.inputs.length > 0) {
+    content += `### Inputs Used:\n\n`
+    results.inputs.forEach((input, index) => {
+      const type = typeof input === 'string' && input.startsWith('0x') ? 'address' : typeof input === 'string' && /^\d+$/.test(input) ? 'uint' : 'string'
+      content += `${index + 1}. \`${type}:${input}\`\n`
+    })
+    content += `\n`
+  }
+
+  if (results.resolvedInputs.length > 0) {
+    content += `### Resolved Inputs:\n\n`
+    results.resolvedInputs.forEach((ri, index) => {
+      content += `${index + 1}. **${ri.input.name || ri.input.as || `Input ${index}`}**: \`${ri.value || 'null'}\`\n`
+    })
+    content += `\n`
+  }
+
+  if (results.immediateExecutions.length > 0) {
+    content += `### Immediate Executions:\n\n`
+    results.immediateExecutions.forEach((execution, index) => {
+      content += `#### Execution ${index + 1}\n\n`
+      content += `- **Status**: ${execution.status === 'success' ? '✅ Success' : execution.status === 'error' ? '❌ Error' : '⚠️ ' + execution.status}\n`
+      if (execution.output) {
+        content += `- **Output**:\n\n\`\`\`json\n${JSON.stringify(execution.output, null, 2)}\n\`\`\`\n\n`
+      }
+      if (execution.error) {
+        content += `- **Error**: ${execution.error}\n\n`
+      }
+    })
+  }
+
+  if (results.executionResults.length > 0) {
+    content += `### Execution Callbacks:\n\n`
+    results.executionResults.forEach((er, index) => {
+      content += `#### ${er.type === 'action' ? 'Action' : er.type === 'warp' ? 'Warp' : 'Error'} ${index + 1}\n\n`
+      if (er.result.status) {
+        content += `- **Status**: ${er.result.status === 'success' ? '✅ Success' : er.result.status === 'error' ? '❌ Error' : '⚠️ ' + er.result.status}\n`
+      }
+      if (er.result.output) {
+        content += `- **Output**:\n\n\`\`\`json\n${JSON.stringify(er.result.output, null, 2)}\n\`\`\`\n\n`
+      }
+      if (er.result.error) {
+        content += `- **Error**: ${er.result.error?.message || JSON.stringify(er.result.error)}\n\n`
+      }
+    })
+  }
+
+  if (results.hashes.length > 0) {
+    content += `### Transactions:\n\n`
+    results.hashes.forEach((hash, index) => {
+      content += `#### Transaction ${index + 1}\n\n`
+      content += `- **Hash**: \`${hash}\`\n`
+      if (results.explorerUrl && index === 0) {
+        content += `- **Explorer**: [View Transaction](${results.explorerUrl})\n`
+      }
+      content += `\n`
+    })
+  }
+
+  if (results.remoteTxs.length > 0) {
+    content += `### Remote Transactions:\n\n`
+    results.remoteTxs.forEach((tx, index) => {
+      content += `#### Remote TX ${index + 1}\n\n`
+      content += `\`\`\`json\n${JSON.stringify(tx, null, 2)}\n\`\`\`\n\n`
+    })
+  }
+
+  content += `\n<!-- Generated: ${timestamp} -->\n`
+
+  fs.writeFileSync(resultsPath, content)
+  console.log(`\n📝 Results written to: ${resultsPath}`)
+}
 
 const loadWallet = async (chain: string): Promise<any> => {
   const walletPath = path.join(__dirname, 'wallets', `${chain}.json`)
