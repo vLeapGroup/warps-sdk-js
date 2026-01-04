@@ -12,3 +12,4 @@
 - Use the playground with devnet to verify that new additions or changes work without errors.
 - Iterate until warps and tests work as expected without errors.
 - Any executed transaction on the playground must be verified for success status using either a CLI tool (if available) or the Explorer. Your task is not done unless all transactions are in expected state.
+- Remove files that are not needed for commiting to the source code or nowhere referenced.
