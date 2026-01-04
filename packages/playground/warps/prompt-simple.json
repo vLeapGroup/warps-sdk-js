@@ -1,0 +1,22 @@
+{
+  "protocol": "warp:3.0.0",
+  "name": "Simple Prompt",
+  "title": "A simple prompt without inputs",
+  "description": "Demonstrates a prompt action that returns static text.",
+  "actions": [
+    {
+      "type": "prompt",
+      "label": "Get Prompt",
+      "description": "Returns a simple static prompt",
+      "prompt": "This is a simple static prompt that doesn't require any inputs.",
+      "primary": true,
+      "auto": true
+    }
+  ],
+  "output": {
+    "prompt": "$.prompt"
+  },
+  "messages": {
+    "success": "Prompt retrieved successfully!"
+  }
+}

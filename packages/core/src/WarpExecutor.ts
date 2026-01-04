@@ -30,6 +30,7 @@ import {
   WarpExecutable,
   WarpLinkAction,
   WarpMcpAction,
+  WarpPromptAction,
 } from './types'
 import { WarpFactory } from './WarpFactory'
 import { WarpInterpolator } from './WarpInterpolator'
@@ -139,6 +140,17 @@ export class WarpExecutor {
       })
 
       return { tx: null, chain: null, immediateExecution: null, executable: null }
+    }
+
+    if (action.type === 'prompt') {
+      const result = await this.executePrompt(warp, action as WarpPromptAction, actionIndex, inputs, meta)
+      if (result.status === 'success') {
+        await this.callHandler(() => this.handlers?.onActionExecuted?.({ action: actionIndex, chain: null, execution: result, tx: null }))
+        return { tx: null, chain: null, immediateExecution: result, executable: null }
+      } else {
+        this.handlers?.onError?.({ message: JSON.stringify(result.output._DATA), result })
+        return { tx: null, chain: null, immediateExecution: result, executable: null }
+      }
     }
 
     const executable = await this.factory.createExecutable(warp, actionIndex, inputs, meta)
@@ -569,6 +581,70 @@ export class WarpExecutor {
   private async callHandler<T>(handler: (() => T | Promise<T>) | undefined): Promise<T | undefined> {
     if (!handler) return undefined
     return await handler()
+  }
+
+  private async executePrompt(
+    warp: Warp,
+    action: WarpPromptAction,
+    actionIndex: number,
+    inputs: string[],
+    meta: { envs?: Record<string, any>; queries?: Record<string, any> } = {}
+  ): Promise<WarpActionExecutionResult> {
+    try {
+      const chain = await this.factory.getChainInfoForWarp(warp, inputs)
+      const adapter = findWarpAdapterForChain(chain.name, this.adapters)
+      const interpolator = new WarpInterpolator(this.config, adapter, this.adapters)
+      const preparedWarp = await interpolator.apply(warp, meta)
+      const preparedAction = getWarpActionByIndex(preparedWarp, actionIndex) as WarpPromptAction
+
+      const { action: primaryAction } = getWarpPrimaryAction(preparedWarp)
+      const primaryTypedInputs = this.factory.getStringTypedInputs(primaryAction, inputs)
+      const primaryResolved = await this.factory.getResolvedInputs(chain.name, primaryAction, primaryTypedInputs, interpolator)
+      const primaryResolvedInputs = await this.factory.getModifiedInputs(primaryResolved)
+
+      let resolvedInputs: ResolvedInput[] = primaryResolvedInputs
+      if (action.inputs && action.inputs.length > 0) {
+        const actionTypedInputs = this.factory.getStringTypedInputs(action, inputs)
+        const actionResolved = await this.factory.getResolvedInputs(chain.name, action, actionTypedInputs, interpolator)
+        resolvedInputs = await this.factory.getModifiedInputs(actionResolved)
+      }
+
+      const interpolatedPrompt = interpolator.applyInputs(preparedAction.prompt, resolvedInputs, this.factory.getSerializer(), primaryResolvedInputs)
+
+      const extractedInputs = extractResolvedInputValues(resolvedInputs)
+      const wallet = getWarpWalletAddressFromConfig(this.config, chain.name)
+
+      return {
+        status: 'success',
+        warp: preparedWarp,
+        action: actionIndex,
+        user: wallet,
+        txHash: null,
+        tx: null,
+        next: getNextInfo(this.config, this.adapters, preparedWarp, actionIndex, { prompt: interpolatedPrompt }),
+        values: { string: [interpolatedPrompt], native: [interpolatedPrompt], mapped: { prompt: interpolatedPrompt } },
+        output: { prompt: interpolatedPrompt },
+        messages: applyOutputToMessages(preparedWarp, { prompt: interpolatedPrompt }, this.config),
+        destination: null,
+        resolvedInputs: extractedInputs,
+      }
+    } catch (error) {
+      WarpLogger.error('WarpExecutor: Error executing prompt action', error)
+      return {
+        status: 'error',
+        warp,
+        action: actionIndex,
+        user: null,
+        txHash: null,
+        tx: null,
+        next: null,
+        values: { string: [], native: [], mapped: {} },
+        output: { _DATA: error },
+        messages: {},
+        destination: null,
+        resolvedInputs: [],
+      }
+    }
   }
 
   private async evaluateWhenCondition(

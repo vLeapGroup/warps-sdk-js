@@ -1,0 +1,48 @@
+{
+  "protocol": "warp:3.0.0",
+  "name": "Prompt Example",
+  "title": "Example of a prompt action with placeholders",
+  "description": "A simple VARP that demonstrates the prompt action type with input placeholders.",
+  "actions": [
+    {
+      "type": "prompt",
+      "label": "Generate Prompt",
+      "description": "Generates a prompt with personalized inputs",
+      "prompt": "Hello {{name}}! You are {{age}} years old and your favorite topic is {{topic}}. Let me tell you something interesting about {{topic}}.",
+      "inputs": [
+        {
+          "name": "Name",
+          "as": "name",
+          "type": "string",
+          "source": "field",
+          "required": true,
+          "description": "Your name"
+        },
+        {
+          "name": "Age",
+          "as": "age",
+          "type": "uint32",
+          "source": "field",
+          "required": true,
+          "description": "Your age"
+        },
+        {
+          "name": "Topic",
+          "as": "topic",
+          "type": "string",
+          "source": "field",
+          "required": true,
+          "description": "Your favorite topic"
+        }
+      ],
+      "primary": true,
+      "auto": true
+    }
+  ],
+  "output": {
+    "prompt": "$.prompt"
+  },
+  "messages": {
+    "success": "Prompt generated successfully!"
+  }
+}

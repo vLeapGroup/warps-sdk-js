@@ -59,11 +59,11 @@ export type WarpMeta = {
   createdAt: string
 }
 
-export type WarpAction = WarpTransferAction | WarpContractAction | WarpQueryAction | WarpCollectAction | WarpLinkAction | WarpMcpAction
+export type WarpAction = WarpTransferAction | WarpContractAction | WarpQueryAction | WarpCollectAction | WarpLinkAction | WarpMcpAction | WarpPromptAction
 
 export type WarpActionIndex = number
 
-export type WarpActionType = 'transfer' | 'contract' | 'query' | 'collect' | 'link' | 'mcp'
+export type WarpActionType = 'transfer' | 'contract' | 'query' | 'collect' | 'link' | 'mcp' | 'prompt'
 
 export type WarpTransferAction = {
   type: WarpActionType
@@ -160,6 +160,18 @@ export type WarpMcpDestination = {
   url: string
   tool: string
   headers?: Record<string, string>
+}
+
+export type WarpPromptAction = {
+  type: WarpActionType
+  label: WarpText
+  description?: WarpText | null
+  prompt: string
+  inputs?: WarpActionInput[]
+  primary?: boolean
+  auto?: boolean
+  next?: string
+  when?: string
 }
 
 export type WarpActionInputSource = 'field' | 'query' | 'user:wallet' | 'hidden'
