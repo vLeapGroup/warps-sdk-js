@@ -1,0 +1,36 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "polygon",
+  "name": "Transfer MATIC",
+  "title": "Transfer Polygon MATIC Tokens",
+  "description": "Transfer native MATIC tokens to another address.",
+  "actions": [
+    {
+      "type": "transfer",
+      "label": "Transfer MATIC",
+      "inputs": [
+        {
+          "name": "Receiver Address",
+          "as": "RECEIVER_ADDRESS",
+          "type": "address",
+          "position": "receiver",
+          "source": "field",
+          "required": true,
+          "description": "The address to receive the MATIC tokens."
+        },
+        {
+          "name": "Amount",
+          "description": "Amount of MATIC to transfer (in smallest unit).",
+          "type": "biguint",
+          "position": "value",
+          "source": "field",
+          "required": true,
+          "min": 1
+        }
+      ]
+    }
+  ],
+  "messages": {
+    "success": "MATIC transferred successfully."
+  }
+}

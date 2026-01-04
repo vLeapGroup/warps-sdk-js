@@ -1,0 +1,45 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "polygon",
+  "name": "Polygon: Transfer USDC Token",
+  "title": "Transfer USDC Token on Polygon Mumbai",
+  "description": "Transfer USDC tokens to another address on Polygon Mumbai testnet.",
+  "actions": [
+    {
+      "type": "transfer",
+      "label": "Transfer USDC",
+      "inputs": [
+        {
+          "name": "Token Address",
+          "as": "TOKEN_ADDRESS",
+          "type": "address",
+          "position": "asset",
+          "source": "field",
+          "required": true,
+          "description": "The USDC token contract address on Mumbai."
+        },
+        {
+          "name": "Receiver Address",
+          "as": "RECEIVER_ADDRESS",
+          "type": "address",
+          "position": "receiver",
+          "source": "field",
+          "required": true,
+          "description": "The address to receive the USDC tokens."
+        },
+        {
+          "name": "Amount",
+          "description": "Amount of USDC to transfer (in smallest unit, 6 decimals).",
+          "type": "biguint",
+          "position": "value",
+          "source": "field",
+          "required": true,
+          "min": 1
+        }
+      ]
+    }
+  ],
+  "messages": {
+    "success": "USDC transferred successfully."
+  }
+}

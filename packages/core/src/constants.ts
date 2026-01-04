@@ -7,6 +7,7 @@ export enum WarpChainName {
   Ethereum = 'ethereum',
   Base = 'base',
   Arbitrum = 'arbitrum',
+  Polygon = 'polygon',
   Somnia = 'somnia',
   Fastset = 'fastset',
   Solana = 'solana',

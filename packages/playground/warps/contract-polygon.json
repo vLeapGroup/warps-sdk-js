@@ -1,0 +1,41 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "polygon",
+  "name": "Polygon: Call Contract",
+  "title": "Call Smart Contract on Polygon Mumbai",
+  "description": "Call a smart contract function on Polygon Mumbai testnet. This example calls balanceOf on an ERC-20 token.",
+  "actions": [
+    {
+      "type": "contract",
+      "label": "Call Contract",
+      "address": "0xe11a86849d99f524cac3e7a0ec1241828e332c62",
+      "func": "balanceOf",
+      "abi": "[{\"constant\":true,\"inputs\":[{\"name\":\"_owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"balance\",\"type\":\"uint256\"}],\"type\":\"function\"}]",
+      "value": "0",
+      "gasLimit": 200000,
+      "inputs": [
+        {
+          "name": "Contract Address",
+          "as": "contract",
+          "type": "address",
+          "position": "destination",
+          "source": "field",
+          "required": true,
+          "description": "The ERC-20 token contract address."
+        },
+        {
+          "name": "Account Address",
+          "as": "account",
+          "type": "address",
+          "position": "arg:0",
+          "source": "field",
+          "required": true,
+          "description": "The account address to check balance for."
+        }
+      ]
+    }
+  ],
+  "messages": {
+    "success": "Contract call executed successfully."
+  }
+}

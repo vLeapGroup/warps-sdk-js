@@ -39,7 +39,14 @@ export enum BaseExplorers {
   BlockscoutBaseSepolia = 'blockscout_base_sepolia',
 }
 
-export type ExplorerName = EthereumExplorers | ArbitrumExplorers | BaseExplorers
+export enum PolygonExplorers {
+  Polygonscan = 'polygonscan',
+  PolygonscanMumbai = 'polygonscan_mumbai',
+  BlockscoutPolygon = 'blockscout_polygon',
+  BlockscoutPolygonMumbai = 'blockscout_polygon_mumbai',
+}
+
+export type ExplorerName = EthereumExplorers | ArbitrumExplorers | BaseExplorers | PolygonExplorers
 
 export const EvmExplorers = {
   ethereum: {
@@ -56,6 +63,11 @@ export const EvmExplorers = {
     mainnet: [BaseExplorers.Basescan, BaseExplorers.BlockscoutBase] as const,
     testnet: [BaseExplorers.BasescanSepolia, BaseExplorers.BlockscoutBaseSepolia] as const,
     devnet: [BaseExplorers.BasescanSepolia, BaseExplorers.BlockscoutBaseSepolia] as const,
+  },
+  polygon: {
+    mainnet: [PolygonExplorers.Polygonscan, PolygonExplorers.BlockscoutPolygon] as const,
+    testnet: [PolygonExplorers.PolygonscanMumbai, PolygonExplorers.BlockscoutPolygonMumbai] as const,
+    devnet: [PolygonExplorers.PolygonscanMumbai, PolygonExplorers.BlockscoutPolygonMumbai] as const,
   },
 } as const
 
@@ -75,6 +87,11 @@ export const ExplorerUrls: Record<ExplorerName, string> = {
   [BaseExplorers.BasescanSepolia]: 'https://sepolia.basescan.org',
   [BaseExplorers.BlockscoutBase]: 'https://base.blockscout.com',
   [BaseExplorers.BlockscoutBaseSepolia]: 'https://sepolia.blockscout.com',
+
+  [PolygonExplorers.Polygonscan]: 'https://polygonscan.com',
+  [PolygonExplorers.PolygonscanMumbai]: 'https://mumbai.polygonscan.com',
+  [PolygonExplorers.BlockscoutPolygon]: 'https://polygon.blockscout.com',
+  [PolygonExplorers.BlockscoutPolygonMumbai]: 'https://mumbai.blockscout.com',
 }
 
 export const EvmChainIds = {

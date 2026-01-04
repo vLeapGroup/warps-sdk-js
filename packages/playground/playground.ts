@@ -95,6 +95,13 @@ const runWarp = async (warpFile: string) => {
           walletSecret: process.env.COINBASE_WALLET_SECRET,
         }),
       },
+      polygon: {
+        coinbase: createCoinbaseWalletProvider({
+          apiKeyId: process.env.COINBASE_API_KEY_ID,
+          apiKeySecret: process.env.COINBASE_API_KEY_SECRET,
+          walletSecret: process.env.COINBASE_WALLET_SECRET,
+        }),
+      },
     },
     transform: { runner: createNodeTransformRunner() },
   }
