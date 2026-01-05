@@ -1,0 +1,38 @@
+{
+  "protocol": "warp:3.0.0",
+  "name": "json-delete",
+  "title": "JSON DELETE Request",
+  "description": "Execute a JSON HTTP DELETE request to any URL with configurable headers (defaults to JSON)",
+  "actions": [
+    {
+      "type": "collect",
+      "label": "DELETE Request",
+      "destination": {
+        "url": "{{URL}}",
+        "method": "DELETE"
+      },
+      "inputs": [
+        {
+          "name": "URL",
+          "as": "URL",
+          "description": "The full URL to make the DELETE request to (e.g., https://api.example.com/v1/users/123)",
+          "type": "string",
+          "source": "field",
+          "required": true
+        },
+        {
+          "name": "Headers",
+          "as": "HEADERS",
+          "description": "Headers as a JSON string (e.g., {\"Accept\": \"application/json\", \"Authorization\": \"Bearer token\"})",
+          "type": "string",
+          "source": "field",
+          "required": false,
+          "default": "{\"Accept\": \"application/json\"}"
+        }
+      ]
+    }
+  ],
+  "output": {
+    "response": "out"
+  }
+}

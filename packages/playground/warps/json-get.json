@@ -1,0 +1,46 @@
+{
+  "protocol": "warp:3.0.0",
+  "name": "json-get",
+  "title": "JSON GET Request",
+  "description": "Execute a JSON HTTP GET request to any URL with configurable query parameters and headers (defaults to JSON)",
+  "actions": [
+    {
+      "type": "collect",
+      "label": "GET Request",
+      "destination": {
+        "url": "{{URL}}",
+        "method": "GET"
+      },
+      "inputs": [
+        {
+          "name": "URL",
+          "as": "URL",
+          "description": "The base URL to make the GET request to (e.g., https://api.example.com/v1/users)",
+          "type": "string",
+          "source": "field",
+          "required": true
+        },
+        {
+          "name": "Queries",
+          "as": "QUERIES",
+          "description": "Query parameters as a JSON string (e.g., {\"userId\": \"123\", \"status\": \"active\"})",
+          "type": "string",
+          "source": "field",
+          "required": false
+        },
+        {
+          "name": "Headers",
+          "as": "HEADERS",
+          "description": "Headers as a JSON string (e.g., {\"Accept\": \"application/json\", \"Authorization\": \"Bearer token\"})",
+          "type": "string",
+          "source": "field",
+          "required": false,
+          "default": "{\"Accept\": \"application/json\"}"
+        }
+      ]
+    }
+  ],
+  "output": {
+    "response": "out"
+  }
+}

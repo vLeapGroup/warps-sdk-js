@@ -11,9 +11,9 @@ import {
 } from './helpers'
 import { applyOutputToMessages } from './helpers/messages'
 import { buildMappedOutput, extractResolvedInputValues } from './helpers/payload'
-import { createAuthHeaders, createAuthMessage } from './helpers/signing'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
 import { handleX402Payment } from './helpers/x402'
+import { buildHttpRequest } from './helpers/http'
 import {
   ChainAdapter,
   ResolvedInput,
@@ -148,7 +148,8 @@ export class WarpExecutor {
         await this.callHandler(() => this.handlers?.onActionExecuted?.({ action: actionIndex, chain: null, execution: result, tx: null }))
         return { tx: null, chain: null, immediateExecution: result, executable: null }
       } else {
-        this.handlers?.onError?.({ message: JSON.stringify(result.output._DATA), result })
+        const errorMessage = result.output._DATA instanceof Error ? result.output._DATA.message : JSON.stringify(result.output._DATA)
+        this.handlers?.onError?.({ message: errorMessage, result })
         return { tx: null, chain: null, immediateExecution: result, executable: null }
       }
     }
@@ -171,7 +172,8 @@ export class WarpExecutor {
         await this.callHandler(() => this.handlers?.onActionUnhandled?.({ action: actionIndex, chain: null, execution: result, tx: null }))
         return { tx: null, chain: null, immediateExecution: result, executable }
       } else {
-        this.handlers?.onError?.({ message: JSON.stringify(result.output._DATA), result })
+        const errorMessage = result.output._DATA instanceof Error ? result.output._DATA.message : JSON.stringify(result.output._DATA)
+        this.handlers?.onError?.({ message: errorMessage, result })
       }
       return { tx: null, chain: null, immediateExecution: null, executable }
     }
@@ -185,7 +187,8 @@ export class WarpExecutor {
         await this.callHandler(() => this.handlers?.onActionUnhandled?.({ action: actionIndex, chain: null, execution: result, tx: null }))
         return { tx: null, chain: null, immediateExecution: result, executable }
       } else {
-        this.handlers?.onError?.({ message: JSON.stringify(result.output._DATA), result })
+        const errorMessage = result.output._DATA instanceof Error ? result.output._DATA.message : JSON.stringify(result.output._DATA)
+        this.handlers?.onError?.({ message: errorMessage, result })
         return { tx: null, chain: null, immediateExecution: result, executable }
       }
     }
@@ -199,7 +202,8 @@ export class WarpExecutor {
           this.handlers?.onActionExecuted?.({ action: actionIndex, chain: executable.chain, execution: result, tx: null })
         )
       } else {
-        this.handlers?.onError?.({ message: JSON.stringify(result.output._DATA), result })
+        const errorMessage = result.output._DATA instanceof Error ? result.output._DATA.message : JSON.stringify(result.output._DATA)
+        this.handlers?.onError?.({ message: errorMessage, result })
       }
       return { tx: null, chain: executable.chain, immediateExecution: result, executable }
     }
@@ -308,41 +312,28 @@ export class WarpExecutor {
     extra: Record<string, any> | undefined
   ): Promise<WarpActionExecutionResult> {
     const interpolator = new WarpInterpolator(this.config, findWarpAdapterForChain(executable.chain.name, this.adapters), this.adapters)
+    const serializer = this.factory.getSerializer()
+    
+    const { url, method, headers, body } = await buildHttpRequest(
+      interpolator,
+      destination,
+      executable,
+      wallet,
+      payload,
+      serializer,
+      extra,
+      async (params) => await this.callHandler(() => this.handlers?.onSignRequest?.(params))
+    )
 
-    const headers = new Headers()
-    headers.set('Content-Type', 'application/json')
-    headers.set('Accept', 'application/json')
-
-    if (this.handlers?.onSignRequest) {
-      if (!wallet) throw new Error(`No wallet configured for chain ${executable.chain.name}`)
-      const { message, nonce, expiresAt } = await createAuthMessage(wallet, `${executable.chain.name}-adapter`)
-      const signature = await this.callHandler(() => this.handlers?.onSignRequest?.({ message, chain: executable.chain }))
-      if (signature) {
-        const authHeaders = createAuthHeaders(wallet, signature, nonce, expiresAt)
-        Object.entries(authHeaders).forEach(([key, value]) => headers.set(key, value))
-      }
-    }
-
-    if (destination.headers) {
-      Object.entries(destination.headers).forEach(([key, value]) => {
-        const interpolatedValue = interpolator.applyInputs(value as string, executable.resolvedInputs, this.factory.getSerializer())
-        headers.set(key, interpolatedValue)
-      })
-    }
-
-    const httpMethod = destination.method || 'GET'
-    const body = httpMethod === 'GET' ? undefined : JSON.stringify({ ...payload, ...extra })
-    const url = interpolator.applyInputs(destination.url, executable.resolvedInputs, this.factory.getSerializer())
-
-    WarpLogger.debug('WarpExecutor: Executing HTTP collect', { url, method: httpMethod, headers, body })
+    WarpLogger.debug('WarpExecutor: Executing HTTP collect', { url, method, headers, body })
 
     try {
-      const fetchOptions: RequestInit = { method: httpMethod, headers, body }
+      const fetchOptions: RequestInit = { method, headers, body }
       let response = await fetch(url, fetchOptions)
       WarpLogger.debug('Collect response status', { status: response.status })
 
       if (response.status === 402) {
-        response = await handleX402Payment(response, url, httpMethod, body, this.adapters)
+        response = await handleX402Payment(response, url, method, body, this.adapters)
       }
 
       const content = await response.json()

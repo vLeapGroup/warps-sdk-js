@@ -1,0 +1,46 @@
+{
+  "protocol": "warp:3.0.0",
+  "name": "json-post",
+  "title": "JSON POST Request",
+  "description": "Execute a JSON HTTP POST request to any URL with configurable payload and headers (defaults to JSON)",
+  "actions": [
+    {
+      "type": "collect",
+      "label": "POST Request",
+      "destination": {
+        "url": "{{URL}}",
+        "method": "POST"
+      },
+      "inputs": [
+        {
+          "name": "URL",
+          "as": "URL",
+          "description": "The full URL to make the POST request to (e.g., https://api.example.com/v1/users)",
+          "type": "string",
+          "source": "field",
+          "required": true
+        },
+        {
+          "name": "Payload",
+          "as": "PAYLOAD",
+          "description": "Request payload as a JSON string (e.g., {\"name\": \"John\", \"age\": 30})",
+          "type": "string",
+          "source": "field",
+          "required": false
+        },
+        {
+          "name": "Headers",
+          "as": "HEADERS",
+          "description": "Headers as a JSON string (e.g., {\"Content-Type\": \"application/json\", \"Accept\": \"application/json\"})",
+          "type": "string",
+          "source": "field",
+          "required": false,
+          "default": "{\"Content-Type\": \"application/json\", \"Accept\": \"application/json\"}"
+        }
+      ]
+    }
+  ],
+  "output": {
+    "response": "out"
+  }
+}
