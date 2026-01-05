@@ -34,4 +34,5 @@ brand-schema.json
 
 # generated/test files
 temp/
-results.md
+packages/playground/results.md
+packages/results.md
