@@ -1,21 +1,39 @@
-MIT License
+Sustainable Use License
+
+Version 1.0, December 2024
 
 Copyright (c) 2024 vLeap
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of this
+Software to use, copy, modify, merge, publish, and distribute the Software, provided
+that the following conditions are met:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. **Sustainable Use**: The Software is provided to individuals and organizations for
+   personal, educational, or internal business purposes. Use of the Software for
+   providing a commercial service to third parties, such as offering the Software as
+   a hosted or managed service, is not permitted without a separate commercial
+   agreement with vLeap. Additionally, embedding or integrating the Software into a
+   commercial product or service that you offer to third parties requires a separate
+   commercial agreement with vLeap, except for consulting or support services related
+   to the Software itself.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. **Attribution**: All copies, modifications, or distributions of the Software must
+   include the above copyright notice and this license.
+
+3. **No Warranty**: The Software is provided "as is", without warranty of any kind,
+   express or implied, including but not limited to the warranties of merchantability,
+   fitness for a particular purpose, and noninfringement. In no event shall the authors
+   or copyright holders be liable for any claim, damages, or other liability, whether
+   in an action of contract, tort, or otherwise, arising from, out of or in connection
+   with the Software or the use or other dealings in the Software.
+
+4. **Compliance with Laws**: Users of the Software must comply with all applicable
+   laws and regulations regarding the use of the Software.
+
+5. **Termination**: This license is effective until terminated. Your rights under
+   this license will terminate automatically without notice if you fail to comply with
+   any term(s) of this license. Upon termination, you must cease all use of the
+   Software and destroy all copies, full or partial, of the Software.
+
+For inquiries regarding commercial use or other licensing arrangements, please
+contact vLeap.
