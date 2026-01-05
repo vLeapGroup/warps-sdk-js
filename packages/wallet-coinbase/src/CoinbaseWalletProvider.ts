@@ -5,6 +5,7 @@ import {
   WalletProvider,
   WarpAdapterGenericTransaction,
   WarpChainInfo,
+  WarpChainName,
   WarpClientConfig,
   WarpWalletDetails,
   WarpWalletProvider,
@@ -53,7 +54,7 @@ export class CoinbaseWalletProvider implements WalletProvider {
     try {
       const account = await this.getAccount()
 
-      if (this.chain.name === 'solana') {
+      if (this.chain.name === WarpChainName.Solana) {
         const result = await this.client.solana.signTransaction({
           address: account.id,
           transaction: tx as never,
@@ -89,7 +90,7 @@ export class CoinbaseWalletProvider implements WalletProvider {
     try {
       const account = await this.getAccount()
       const result =
-        this.chain.name === 'solana'
+        this.chain.name === WarpChainName.Solana
           ? await this.client.solana.signMessage({ address: account.id, message })
           : await this.client.evm.signMessage({ address: account.id as `0x${string}`, message })
 
@@ -138,7 +139,7 @@ export class CoinbaseWalletProvider implements WalletProvider {
     try {
       const address = this.getWalletAddress()
       const privateKey =
-        this.chain.name === 'solana'
+        this.chain.name === WarpChainName.Solana
           ? await this.client.solana.exportAccount({ address })
           : await this.client.evm.exportAccount({ address: address as `0x${string}` })
 
@@ -156,7 +157,9 @@ export class CoinbaseWalletProvider implements WalletProvider {
     try {
       const name = this.getAccountName()
       const account =
-        this.chain.name === 'solana' ? await this.client.solana.createAccount({ name }) : await this.client.evm.createAccount({ name })
+        this.chain.name === WarpChainName.Solana
+          ? await this.client.solana.createAccount({ name })
+          : await this.client.evm.createAccount({ name })
 
       const walletDetails: WarpWalletDetails = {
         provider: CoinbaseWalletProvider.PROVIDER_NAME,
@@ -190,7 +193,7 @@ export class CoinbaseWalletProvider implements WalletProvider {
 
     const address = this.getWalletAddress()
     const account =
-      this.chain.name === 'solana'
+      this.chain.name === WarpChainName.Solana
         ? await this.client.solana.getAccount({ address })
         : await this.client.evm.getAccount({ address: address as `0x${string}` })
 
@@ -201,7 +204,7 @@ export class CoinbaseWalletProvider implements WalletProvider {
       ...(publicKey && { publicKey }),
     }
 
-    if (this.chain.name !== 'solana' && 'signTransaction' in account) {
+    if (this.chain.name !== WarpChainName.Solana && 'signTransaction' in account) {
       this.cachedEvmAccount = { signTransaction: account.signTransaction as (tx: unknown) => Promise<unknown> }
     }
 

@@ -1,4 +1,4 @@
-import { ChainAdapter, WarpClient, WarpClientConfig, WarpWalletDetails, withAdapterFallback } from '@vleap/warps'
+import { ChainAdapter, WarpChainName, WarpClient, WarpClientConfig, WarpWalletDetails, withAdapterFallback } from '@vleap/warps'
 import { getAllEvmAdapters } from '@vleap/warps-adapter-evm'
 import { FastsetAdapter } from '@vleap/warps-adapter-fastset'
 import { getAllMultiversxAdapters, MultiversxAdapter } from '@vleap/warps-adapter-multiversx'
@@ -18,14 +18,14 @@ const __dirname = path.dirname(__filename)
 const dotenv = await import('dotenv')
 dotenv.config({ path: path.join(__dirname, '.env') })
 
-const Chain = 'solana'
+const Chain = WarpChainName.Solana
 const WarpToTest = 'jito-liquid-stake.json'
 const WarpInputs: string[] = ['SOL|0.1']
 const warpsDir = path.join(__dirname, 'warps')
 
 const ensureCoinbaseWallet = async (
   config: WarpClientConfig,
-  chain: string,
+  chain: WarpChainName,
   chainInfo: ChainAdapter['chainInfo']
 ): Promise<WarpWalletDetails> => {
   const walletPath = path.join(__dirname, 'wallets', `${chain}.json`)
@@ -123,7 +123,7 @@ const runWarp = async (warpFile: string) => {
   }
 
   let walletForChain = filteredWallets[Chain]
-  if (!walletForChain && (Chain === 'ethereum' || Chain === 'base')) {
+  if (!walletForChain && (Chain === WarpChainName.Ethereum || Chain === WarpChainName.Base)) {
     const coinbaseWallet = await ensureCoinbaseWallet(tempConfig, Chain, chainAdapter.chainInfo)
     walletForChain = coinbaseWallet
   } else if (!walletForChain) {
@@ -249,7 +249,12 @@ const writeResults = (results: PlaygroundResults) => {
   if (results.inputs.length > 0) {
     content += `### Inputs Used:\n\n`
     results.inputs.forEach((input, index) => {
-      const type = typeof input === 'string' && input.startsWith('0x') ? 'address' : typeof input === 'string' && /^\d+$/.test(input) ? 'uint' : 'string'
+      const type =
+        typeof input === 'string' && input.startsWith('0x')
+          ? 'address'
+          : typeof input === 'string' && /^\d+$/.test(input)
+            ? 'uint'
+            : 'string'
       content += `${index + 1}. \`${type}:${input}\`\n`
     })
     content += `\n`

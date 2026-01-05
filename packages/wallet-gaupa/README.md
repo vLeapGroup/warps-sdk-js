@@ -57,14 +57,17 @@ const client = new WarpClient(config, {
 Implements the `WalletProvider` interface from `@vleap/warps`.
 
 **Constructor:**
+
 ```typescript
 new GaupaWalletProvider(config: GaupaWalletProviderConfig)
 ```
 
 **Parameters:**
+
 - `config.config`: Optional configuration object passed to the Gaupa SDK initialization
 
 **Methods:**
+
 - `getAddress(): Promise<string | null>` - Get the wallet address from Gaupa
 - `getPublicKey(): Promise<string | null>` - Get the public key from Gaupa
 - `signTransaction(tx: Transaction): Promise<Transaction>` - Sign a MultiversX transaction
@@ -73,6 +76,7 @@ new GaupaWalletProvider(config: GaupaWalletProviderConfig)
 ## Supported Chains
 
 Currently optimized for:
+
 - **MultiversX (Elrond)**
 
 The provider uses MultiversX `Transaction` types from `@multiversx/sdk-core` for type safety.
