@@ -1,10 +1,10 @@
-import { WarpChainInfo, WarpClientConfig, WarpExecutable, WarpTransferAction, WarpContractAction, WarpChainName } from '@vleap/warps'
 import { Connection, Keypair, PublicKey, VersionedTransaction } from '@solana/web3.js'
+import { WarpChainInfo, WarpChainName, WarpClientConfig, WarpContractAction, WarpExecutable, WarpTransferAction } from '@vleap/warps'
+import bs58 from 'bs58'
+import { WarpSolanaDataLoader } from './WarpSolanaDataLoader'
 import { WarpSolanaExecutor } from './WarpSolanaExecutor'
 import { WarpSolanaWallet } from './WarpSolanaWallet'
-import { WarpSolanaDataLoader } from './WarpSolanaDataLoader'
 import { NativeTokenSol } from './chains/solana'
-import bs58 from 'bs58'
 
 jest.unmock('@scure/bip39')
 
@@ -13,7 +13,7 @@ describe('WarpSolanaIntegration', () => {
   const keypair = Keypair.fromSecretKey(bs58.decode(privateKey))
   const testAddress = keypair.publicKey.toBase58()
   const receiverAddress = '11111111111111111111111111111111' // System Program (valid Solana address)
-  
+
   // Create a valid blockhash (32 bytes encoded as base58)
   const validBlockhash = bs58.encode(Buffer.alloc(32, 1))
   // Create a valid signature (64 bytes encoded as base58 - Solana transaction signatures are 64 bytes)
