@@ -1,5 +1,15 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.188
+
+### Minor Changes
+
+- aa0d529: add warp prompts
+
+### Patch Changes
+
+- d1393e9: update collect http
+
 ## 3.0.0-beta.187
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # @vleap/warps-adapter-near
 
+## 0.1.0-beta.16
+
+### Patch Changes
+
+- 75b08fe: update wallets
+- Updated dependencies [d1393e9]
+- Updated dependencies [aa0d529]
+  - @vleap/warps@3.0.0-beta.188
+
 ## 0.1.0-beta.15
 
 ### Patch Changes

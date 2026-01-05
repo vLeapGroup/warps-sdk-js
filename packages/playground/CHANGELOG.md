@@ -1,5 +1,29 @@
 # @warps/playground
 
+## 0.2.0-beta.162
+
+### Minor Changes
+
+- 845e03a: add polygon support
+- 91b298b: add local exec results logging
+- aa0d529: add warp prompts
+
+### Patch Changes
+
+- 0360be3: update wallets
+- Updated dependencies [75b08fe]
+- Updated dependencies [845e03a]
+- Updated dependencies [d1393e9]
+- Updated dependencies [aa0d529]
+- Updated dependencies [0360be3]
+  - @vleap/warps-adapter-solana@0.1.0-beta.19
+  - @vleap/warps-adapter-near@0.1.0-beta.16
+  - @vleap/warps-adapter-sui@0.2.0-beta.71
+  - @vleap/warps-adapter-evm@0.2.0-beta.71
+  - @vleap/warps@3.0.0-beta.188
+  - @vleap/warps-mcp@1.0.0-beta.22
+  - @vleap/warps-wallet-coinbase@1.0.0-beta.7
+
 ## 0.2.0-beta.161
 
 ### Patch Changes

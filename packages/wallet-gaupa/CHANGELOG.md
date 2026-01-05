@@ -1,5 +1,13 @@
 # @vleap/warps-wallet-gaupa
 
+## 1.0.0-beta.6
+
+### Patch Changes
+
+- Updated dependencies [d1393e9]
+- Updated dependencies [aa0d529]
+  - @vleap/warps@3.0.0-beta.188
+
 ## 1.0.0-beta.5
 
 ### Minor Changes
