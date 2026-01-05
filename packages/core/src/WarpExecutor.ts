@@ -9,11 +9,11 @@ import {
   isWarpActionAutoExecute,
   replacePlaceholdersInWhenExpression,
 } from './helpers'
+import { buildHttpRequest } from './helpers/http'
 import { applyOutputToMessages } from './helpers/messages'
 import { buildMappedOutput, extractResolvedInputValues } from './helpers/payload'
 import { getWarpWalletAddressFromConfig } from './helpers/wallet'
 import { handleX402Payment } from './helpers/x402'
-import { buildHttpRequest } from './helpers/http'
 import {
   ChainAdapter,
   ResolvedInput,
@@ -313,7 +313,7 @@ export class WarpExecutor {
   ): Promise<WarpActionExecutionResult> {
     const interpolator = new WarpInterpolator(this.config, findWarpAdapterForChain(executable.chain.name, this.adapters), this.adapters)
     const serializer = this.factory.getSerializer()
-    
+
     const { url, method, headers, body } = await buildHttpRequest(
       interpolator,
       destination,
@@ -474,7 +474,15 @@ export class WarpExecutor {
             toolArgs[key] = String(nativeValue)
           } else if (type === 'bool') {
             toolArgs[key] = Boolean(nativeValue)
-          } else if (type === 'uint8' || type === 'uint16' || type === 'uint32' || type === 'uint64' || type === 'uint128' || type === 'uint256' || type === 'biguint') {
+          } else if (
+            type === 'uint8' ||
+            type === 'uint16' ||
+            type === 'uint32' ||
+            type === 'uint64' ||
+            type === 'uint128' ||
+            type === 'uint256' ||
+            type === 'biguint'
+          ) {
             const numValue = typeof nativeValue === 'bigint' ? Number(nativeValue) : Number(nativeValue)
             toolArgs[key] = Number.isInteger(numValue) ? numValue : numValue
           } else {
@@ -600,7 +608,12 @@ export class WarpExecutor {
         resolvedInputs = await this.factory.getModifiedInputs(actionResolved)
       }
 
-      const interpolatedPrompt = interpolator.applyInputs(preparedAction.prompt, resolvedInputs, this.factory.getSerializer(), primaryResolvedInputs)
+      const interpolatedPrompt = interpolator.applyInputs(
+        preparedAction.prompt,
+        resolvedInputs,
+        this.factory.getSerializer(),
+        primaryResolvedInputs
+      )
 
       const extractedInputs = extractResolvedInputValues(resolvedInputs)
       const wallet = getWarpWalletAddressFromConfig(this.config, chain.name)

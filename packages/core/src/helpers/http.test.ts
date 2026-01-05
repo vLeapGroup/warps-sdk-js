@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach } from '@jest/globals'
-import { buildHttpRequest, buildHeaders, buildUrl, buildBody, getJsonFromInput, parseJsonSafely, HttpInputNames, HttpMethods } from './http'
+import { beforeEach, describe, expect, it } from '@jest/globals'
 import { WarpInterpolator } from '../WarpInterpolator'
 import { WarpSerializer } from '../WarpSerializer'
-import type { WarpExecutable, WarpCollectDestinationHttp, ResolvedInput, WarpChainInfo } from '../types'
+import type { ResolvedInput, WarpChainInfo, WarpCollectDestinationHttp, WarpExecutable } from '../types'
+import { buildBody, buildHeaders, buildHttpRequest, buildUrl, getJsonFromInput, HttpInputNames, HttpMethods, parseJsonSafely } from './http'
 
 describe('HTTP Helpers', () => {
   let serializer: WarpSerializer
@@ -205,7 +205,7 @@ describe('HTTP Helpers', () => {
       ]
 
       const config = await buildHttpRequest(interpolator, mockDestination, mockExecutable, null, {}, serializer)
-      
+
       expect(config.url).toContain('param=value')
       expect(config.method).toBe(HttpMethods.Get)
       expect(config.headers.get('X-Custom')).toBe('header')
@@ -222,7 +222,7 @@ describe('HTTP Helpers', () => {
       ]
 
       const config = await buildHttpRequest(interpolator, mockDestination, mockExecutable, null, {}, serializer)
-      
+
       expect(config.method).toBe(HttpMethods.Post)
       expect(config.body).toBe('{"data": "test"}')
     })

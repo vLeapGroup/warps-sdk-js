@@ -1,6 +1,6 @@
-import { ResolvedInput, WarpExecutable, WarpCollectDestinationHttp } from '../types'
-import { WarpSerializer } from '../WarpSerializer'
+import { ResolvedInput, WarpCollectDestinationHttp, WarpExecutable } from '../types'
 import { WarpInterpolator } from '../WarpInterpolator'
+import { WarpSerializer } from '../WarpSerializer'
 import { createAuthHeaders, createAuthMessage } from './signing'
 
 export const HttpInputNames = {
@@ -8,7 +8,6 @@ export const HttpInputNames = {
   Payload: 'PAYLOAD',
   Headers: 'HEADERS',
 } as const
-
 
 export const HttpMethods = {
   Get: 'GET',
@@ -82,7 +81,7 @@ export const buildUrl = (
   serializer: WarpSerializer
 ): string => {
   let url = interpolator.applyInputs(destination.url, executable.resolvedInputs, serializer)
-  
+
   if (method === HttpMethods.Get) {
     const queriesJson = getJsonFromInput(executable.resolvedInputs, HttpInputNames.Queries, serializer)
     if (queriesJson) {
@@ -94,7 +93,7 @@ export const buildUrl = (
       }
     }
   }
-  
+
   return url
 }
 
@@ -106,10 +105,10 @@ export const buildBody = (
   extra?: Record<string, any>
 ): string | undefined => {
   if (method === HttpMethods.Get) return undefined
-  
+
   const payloadJson = getJsonFromInput(executable.resolvedInputs, HttpInputNames.Payload, serializer)
   if (payloadJson && parseJsonSafely(payloadJson) !== null) return payloadJson
-  
+
   const { [HttpInputNames.Payload]: _, [HttpInputNames.Queries]: __, ...cleanPayload } = payload
   return JSON.stringify({ ...cleanPayload, ...extra })
 }
@@ -125,7 +124,7 @@ export const buildHttpRequest = async (
   onSignRequest?: (params: { message: string; chain: any }) => Promise<string | undefined>
 ): Promise<HttpRequestConfig> => {
   const method = destination.method || HttpMethods.Get
-  
+
   const headers = await buildHeaders(interpolator, destination, executable, wallet, serializer, onSignRequest)
   const url = buildUrl(interpolator, destination, executable, method, serializer)
   const body = buildBody(method, executable, payload, serializer, extra)
