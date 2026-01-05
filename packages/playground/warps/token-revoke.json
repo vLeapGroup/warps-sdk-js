@@ -1,0 +1,34 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "solana",
+  "name": "Token Program: Revoke Delegate",
+  "title": "Revoke Token Delegate",
+  "description": "Revoke a delegate's approval to spend tokens from your token account using the Token Program.",
+  "actions": [
+    {
+      "type": "contract",
+      "label": "Revoke Delegate",
+      "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "func": "revoke",
+      "abi": "{\"instructions\":{\"revoke\":{\"discriminator\":[5],\"args\":[]}}}",
+      "accounts": [
+        { "address": "{{USER_ATA:MINT_ADDRESS}}", "writable": true, "signer": false },
+        { "address": "{{USER_WALLET}}", "writable": false, "signer": true }
+      ],
+      "inputs": [
+        {
+          "name": "Mint Address",
+          "as": "MINT_ADDRESS",
+          "type": "address",
+          "position": "input:0",
+          "source": "field",
+          "required": true,
+          "description": "The mint address of the token."
+        }
+      ]
+    }
+  ],
+  "messages": {
+    "success": "Delegate revoked successfully."
+  }
+}

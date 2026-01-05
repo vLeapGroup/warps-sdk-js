@@ -1,0 +1,59 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "solana",
+  "name": "Token Program: Set Authority",
+  "title": "Set Token Authority",
+  "description": "Set or remove an authority on a mint or token account using the Token Program.",
+  "actions": [
+    {
+      "type": "contract",
+      "label": "Set Authority",
+      "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "func": "setAuthority",
+      "abi": "{\"instructions\":{\"setAuthority\":{\"discriminator\":[6],\"args\":[{\"name\":\"authorityType\",\"type\":\"u8\"},{\"name\":\"newAuthority\",\"type\":\"option<Pubkey>\"}]}}}",
+      "accounts": [
+        { "address": "{{ACCOUNT_ADDRESS}}", "writable": true, "signer": false },
+        { "address": "{{CURRENT_AUTHORITY}}", "writable": false, "signer": true }
+      ],
+      "inputs": [
+        {
+          "name": "Account Address",
+          "as": "ACCOUNT_ADDRESS",
+          "type": "address",
+          "position": "account:0",
+          "source": "field",
+          "required": true,
+          "description": "The mint or token account address to set authority on."
+        },
+        {
+          "name": "Current Authority",
+          "as": "CURRENT_AUTHORITY",
+          "type": "address",
+          "position": "account:1",
+          "source": "field",
+          "required": true,
+          "description": "The current authority (must be signer)."
+        },
+        {
+          "name": "Authority Type",
+          "description": "Authority type: 0=MintTokens, 1=FreezeAccount, 2=AccountOwner, 3=CloseAccount",
+          "type": "uint",
+          "position": "arg:0",
+          "source": "field",
+          "required": true
+        },
+        {
+          "name": "New Authority",
+          "description": "New authority address (leave empty to remove authority).",
+          "type": "address",
+          "position": "arg:1",
+          "source": "field",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "messages": {
+    "success": "Authority set successfully."
+  }
+}

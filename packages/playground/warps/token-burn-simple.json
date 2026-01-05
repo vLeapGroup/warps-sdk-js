@@ -11,16 +11,21 @@
       "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
       "func": "burn",
       "abi": "{\"instructions\":{\"burn\":{\"discriminator\":[8],\"args\":[{\"name\":\"amount\",\"type\":\"u64\"}]}}}",
-          "inputs": [
-            {
-              "name": "Mint Address",
-              "as": "MINT_ADDRESS",
-              "type": "address",
-              "position": "input:0",
-              "source": "field",
-              "required": true,
-              "description": "The mint address of the token to burn."
-            },
+      "accounts": [
+        { "address": "{{USER_ATA:MINT_ADDRESS}}", "writable": true, "signer": false },
+        { "address": "{{MINT_ADDRESS}}", "writable": true, "signer": false },
+        { "address": "{{USER_WALLET}}", "writable": false, "signer": true }
+      ],
+      "inputs": [
+        {
+          "name": "Mint Address",
+          "as": "MINT_ADDRESS",
+          "type": "address",
+          "position": "input:0",
+          "source": "field",
+          "required": true,
+          "description": "The mint address of the token to burn."
+        },
         {
           "name": "Amount",
           "description": "Amount of tokens to burn.",

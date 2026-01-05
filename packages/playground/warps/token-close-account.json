@@ -1,0 +1,35 @@
+{
+  "protocol": "warp:3.0.0",
+  "chain": "solana",
+  "name": "Token Program: Close Account",
+  "title": "Close Token Account",
+  "description": "Close a token account and reclaim the rent. The account must have zero balance.",
+  "actions": [
+    {
+      "type": "contract",
+      "label": "Close Account",
+      "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "func": "closeAccount",
+      "abi": "{\"instructions\":{\"closeAccount\":{\"discriminator\":[9],\"args\":[]}}}",
+      "accounts": [
+        { "address": "{{USER_ATA:MINT_ADDRESS}}", "writable": true, "signer": false },
+        { "address": "{{USER_WALLET}}", "writable": true, "signer": false },
+        { "address": "{{USER_WALLET}}", "writable": false, "signer": true }
+      ],
+      "inputs": [
+        {
+          "name": "Mint Address",
+          "as": "MINT_ADDRESS",
+          "type": "address",
+          "position": "input:0",
+          "source": "field",
+          "required": true,
+          "description": "The mint address of the token account to close."
+        }
+      ]
+    }
+  ],
+  "messages": {
+    "success": "Token account closed successfully."
+  }
+}

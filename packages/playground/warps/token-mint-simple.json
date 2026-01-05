@@ -11,25 +11,30 @@
       "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
       "func": "mintTo",
       "abi": "{\"instructions\":{\"mintTo\":{\"discriminator\":[7],\"args\":[{\"name\":\"amount\",\"type\":\"u64\"}]}}}",
-          "inputs": [
-            {
-              "name": "Mint Address",
-              "as": "MINT_ADDRESS",
-              "type": "address",
-              "position": "input:0",
-              "source": "field",
-              "required": true,
-              "description": "The mint address of the token to mint."
-            },
-            {
-              "name": "Mint Authority",
-              "as": "MINT_AUTHORITY",
-              "type": "address",
-              "position": "input:1",
-              "source": "field",
-              "required": true,
-              "description": "The mint authority address that can mint tokens."
-            },
+      "accounts": [
+        { "address": "{{MINT_ADDRESS}}", "writable": true, "signer": false },
+        { "address": "{{USER_ATA:MINT_ADDRESS}}", "writable": true, "signer": false },
+        { "address": "{{MINT_AUTHORITY}}", "writable": false, "signer": true }
+      ],
+      "inputs": [
+        {
+          "name": "Mint Address",
+          "as": "MINT_ADDRESS",
+          "type": "address",
+          "position": "input:0",
+          "source": "field",
+          "required": true,
+          "description": "The mint address of the token to mint."
+        },
+        {
+          "name": "Mint Authority",
+          "as": "MINT_AUTHORITY",
+          "type": "address",
+          "position": "account:2",
+          "source": "field",
+          "required": true,
+          "description": "The mint authority address that can mint tokens."
+        },
         {
           "name": "Amount",
           "description": "Amount of tokens to mint.",
