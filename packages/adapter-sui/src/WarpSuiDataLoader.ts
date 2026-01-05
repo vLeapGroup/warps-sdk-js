@@ -16,7 +16,7 @@ import {
 import { findKnownTokenById } from './tokens'
 
 export class WarpSuiDataLoader implements AdapterWarpDataLoader {
-  private client: SuiClient
+  public client: SuiClient
   private cache: WarpCache
 
   constructor(

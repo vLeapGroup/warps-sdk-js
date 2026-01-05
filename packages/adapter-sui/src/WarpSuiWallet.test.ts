@@ -28,6 +28,7 @@ describe('WarpSuiWallet', () => {
     // Mock the client methods to avoid real network calls
     wallet['client'] = {
       signAndExecuteTransaction: jest.fn().mockResolvedValue({ digest: 'mock-digest' }),
+      executeTransactionBlock: jest.fn().mockResolvedValue({ digest: 'mock-digest' }),
     } as any
   })
 
@@ -68,6 +69,7 @@ describe('WarpSuiWallet', () => {
         kind: 'ProgrammableTransaction',
         inputs: [],
         transactions: [],
+        bytes: new Uint8Array([1, 2, 3]),
         signature: 'mock-signature',
       }
 

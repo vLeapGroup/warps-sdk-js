@@ -55,12 +55,19 @@ export class WarpSolanaWallet implements AdapterWarpWallet {
     if (!tx || typeof tx !== 'object') throw new Error('Invalid transaction object')
 
     const transaction = this.resolveTransaction(tx)
-    const shouldSkipPreflight = await this.shouldSkipPreflight(transaction)
+
+    if (!transaction.signatures || transaction.signatures.length === 0 || !transaction.signatures.some((sig) => sig.some((b) => b !== 0))) {
+      throw new Error('Transaction must be signed before sending')
+    }
 
     try {
+      const shouldSkipPreflight = await this.shouldSkipPreflight(transaction)
       return await this.sendWithRetry(transaction, shouldSkipPreflight)
-    } catch (error: any) {
-      throw new Error(`Transaction send failed: ${error?.message || String(error)}`)
+    } catch (simError: any) {
+      if (simError.message?.includes('MissingRequiredSignature')) {
+        return await this.sendRawTransaction(transaction, { skipPreflight: true })
+      }
+      throw new Error(`Transaction send failed: ${simError?.message || String(simError)}`)
     }
   }
 
@@ -178,6 +185,10 @@ export class WarpSolanaWallet implements AdapterWarpWallet {
   }
 
   private async shouldSkipPreflight(transaction: VersionedTransaction): Promise<boolean> {
+    if (!transaction.signatures || transaction.signatures.length === 0 || !transaction.signatures.some((sig) => sig.some((b) => b !== 0))) {
+      return false
+    }
+
     try {
       const simulation = await this.connection.simulateTransaction(transaction, {
         replaceRecentBlockhash: true,

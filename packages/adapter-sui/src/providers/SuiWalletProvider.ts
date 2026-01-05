@@ -35,6 +35,9 @@ export class PrivateKeyWalletProvider implements WalletProvider {
   }
 
   async signTransaction(tx: any): Promise<any> {
+    if (tx && typeof tx === 'object' && 'sign' in tx && typeof tx.sign === 'function') {
+      return tx
+    }
     const keypair = this.getKeypair()
     const txBytes = new TextEncoder().encode(JSON.stringify(tx))
     const signature = await keypair.signPersonalMessage(txBytes)

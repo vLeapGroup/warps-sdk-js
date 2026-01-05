@@ -4,23 +4,30 @@ import { WarpSolanaExecutor } from './WarpSolanaExecutor'
 import { WarpSolanaWallet } from './WarpSolanaWallet'
 import { WarpSolanaDataLoader } from './WarpSolanaDataLoader'
 import { NativeTokenSol } from './chains/solana'
+import bs58 from 'bs58'
 
 jest.unmock('@scure/bip39')
 
 describe('WarpSolanaIntegration', () => {
   const privateKey = '5ChhuwWoBzvXFsaCBuz9woTzb7tXgV5oALFBQ9LABRbnjb9fzioHsoak1qA8SKEkDzZyqtc4cNsxdcK8gzc5iLUt'
-  const testAddress = '5KJvsngHeMoo424rH3Y1bVhjKM2f7jNsN1Tsp9i6F9XHj8qJ7vK' // This will be derived from wallet
+  const keypair = Keypair.fromSecretKey(bs58.decode(privateKey))
+  const testAddress = keypair.publicKey.toBase58()
   const receiverAddress = '11111111111111111111111111111111' // System Program (valid Solana address)
+  
+  // Create a valid blockhash (32 bytes encoded as base58)
+  const validBlockhash = bs58.encode(Buffer.alloc(32, 1))
+  // Create a valid signature (64 bytes encoded as base58 - Solana transaction signatures are 64 bytes)
+  const validSignature = bs58.encode(Buffer.alloc(64, 1))
 
   let mockConnection: any
   let mockConfig: WarpClientConfig
 
   const createMockConnection = () => ({
     getLatestBlockhash: jest.fn().mockResolvedValue({
-      blockhash: 'test-blockhash',
+      blockhash: validBlockhash,
       lastValidBlockHeight: 100,
     }),
-    sendRawTransaction: jest.fn().mockResolvedValue('test-signature'),
+    sendRawTransaction: jest.fn().mockResolvedValue(validSignature),
     getTransaction: jest.fn().mockResolvedValue(null),
     confirmTransaction: jest.fn().mockResolvedValue({ value: { err: null } }),
     getAccountInfo: jest.fn().mockResolvedValue(null),

@@ -108,10 +108,7 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
     const instructionData = this.buildInstructionData(action, nativeArgs)
 
     const accounts = await this.buildInstructionAccounts(action, executable, fromPubkey, programId)
-    this.ensureSystemPrograms(accounts, action)
-
-    await this.ensureATAs(accounts, fromPubkey, instructions)
-
+    await this.ensureATAs(action, accounts, fromPubkey, instructions)
     instructions.push(new TransactionInstruction({ keys: accounts, programId, data: instructionData }))
 
     if (executable.value > 0n) {
@@ -122,31 +119,58 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
   }
 
   private async ensureATAs(
+    action: any,
     accounts: Array<{ pubkey: PublicKey; isSigner: boolean; isWritable: boolean }>,
     fromPubkey: PublicKey,
     instructions: TransactionInstruction[]
   ): Promise<void> {
+    if (!action.accounts || !Array.isArray(action.accounts)) return
+
     const createdATAs = new Set<string>()
 
-    for (const account of accounts) {
-      const accountInfo = await this.connection.getAccountInfo(account.pubkey)
-      if (!accountInfo) {
-        for (const otherAccount of accounts) {
-          if (otherAccount.pubkey.equals(account.pubkey)) continue
+    for (let idx = 0; idx < action.accounts.length; idx++) {
+      const accountDef = action.accounts[idx]
+      const accountStr = typeof accountDef === 'string' ? accountDef : JSON.stringify(accountDef)
 
+      if (accountStr.includes('{{USER_ATA:')) {
+        const match = accountStr.match(/USER_ATA[:\s]*([^"}\s]+)/)
+        if (match) {
+          const mintAddress = match[1]
           try {
-            const expectedAta = await getAssociatedTokenAddress(otherAccount.pubkey, fromPubkey)
-            if (expectedAta.equals(account.pubkey)) {
-              const mintPubkey = otherAccount.pubkey
-              const ataKey = expectedAta.toBase58()
-              if (!createdATAs.has(ataKey)) {
-                createdATAs.add(ataKey)
-                const ataInfo = await this.connection.getAccountInfo(expectedAta)
-                if (!ataInfo) {
-                  instructions.push(createAssociatedTokenAccountInstruction(fromPubkey, expectedAta, fromPubkey, mintPubkey))
-                }
+            const mintPubkey = new PublicKey(mintAddress)
+            const expectedAta = await getAssociatedTokenAddress(mintPubkey, fromPubkey)
+            const ataKey = expectedAta.toBase58()
+
+            if (!createdATAs.has(ataKey)) {
+              createdATAs.add(ataKey)
+              const ataInfo = await this.connection.getAccountInfo(expectedAta)
+              if (!ataInfo) {
+                instructions.push(createAssociatedTokenAccountInstruction(fromPubkey, expectedAta, fromPubkey, mintPubkey))
               }
-              break
+            }
+          } catch {
+            continue
+          }
+        }
+      }
+
+      if (accountStr.includes('{{RECEIVER_ATA:')) {
+        const match = accountStr.match(/RECEIVER_ATA[:\s]*([^"}\s:]+)[:\s]*([^"}\s]+)/)
+        if (match) {
+          const mintAddress = match[1]
+          const receiverAddress = match[2]
+          try {
+            const mintPubkey = new PublicKey(mintAddress)
+            const receiverPubkey = new PublicKey(receiverAddress)
+            const expectedAta = await getAssociatedTokenAddress(mintPubkey, receiverPubkey)
+            const ataKey = expectedAta.toBase58()
+
+            if (!createdATAs.has(ataKey)) {
+              createdATAs.add(ataKey)
+              const ataInfo = await this.connection.getAccountInfo(expectedAta)
+              if (!ataInfo) {
+                instructions.push(createAssociatedTokenAccountInstruction(fromPubkey, expectedAta, receiverPubkey, mintPubkey))
+              }
             }
           } catch {
             continue
@@ -253,23 +277,129 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
   ): Promise<Array<{ pubkey: PublicKey; isSigner: boolean; isWritable: boolean }>> {
     const accounts: Array<{ pubkey: PublicKey; isSigner: boolean; isWritable: boolean }> = []
 
+    const accountInputs = this.extractAccountInputs(action, executable)
+    if (accountInputs.length > 0) {
+      for (const accountInput of accountInputs) {
+        while (accounts.length < accountInput.index) {
+          accounts.push({ pubkey: fromPubkey, isSigner: true, isWritable: true })
+        }
+        const address = await this.resolveAccountFromInput(accountInput, executable, fromPubkey)
+        const { isSigner, isWritable } = this.determineAccountFlags(accountInput.input, address, fromPubkey)
+        accounts.push({ pubkey: address, isSigner, isWritable })
+      }
+      return accounts
+    }
+
     if (!action.accounts || !Array.isArray(action.accounts)) return accounts
 
-    for (const accountDef of action.accounts) {
-      try {
-        const address = this.extractAccountAddress(accountDef)
-        if (!address || address === '[object Object]' || address.length === 0) continue
+    for (let idx = 0; idx < action.accounts.length; idx++) {
+      const accountDef = action.accounts[idx]
+      let address = this.extractAccountAddress(accountDef)
 
-        const pubkey = await this.resolveAccountPubkey(address, fromPubkey)
-        const { isSigner, isWritable } = this.determineAccountFlags(address, accountDef)
-
-        accounts.push({ pubkey, isSigner, isWritable })
-      } catch {
-        continue
+      if (address === '[object Object]' || (typeof accountDef === 'string' && accountDef === '[object Object]')) {
+        address = fromPubkey.toBase58()
+      } else if (!address || address.length === 0) {
+        throw new Error(`Invalid account definition at index ${idx}: ${JSON.stringify(accountDef)}`)
       }
+
+      if (address === '{{USER_WALLET}}' || (typeof address === 'string' && address.includes('{{USER_WALLET}}'))) {
+        address = fromPubkey.toBase58()
+      } else if (typeof address === 'string' && address.includes('{{')) {
+        const originalAddress = address
+        let maxIterations = 10
+        while (address.includes('{{') && maxIterations-- > 0) {
+          const beforeInterpolation: string = address
+          address = this.interpolateAccountAddress(address, executable.resolvedInputs)
+          if (address === beforeInterpolation) break
+        }
+        if (!address || (address.includes('{{') && !address.startsWith('{{USER_ATA:') && !address.startsWith('{{RECEIVER_ATA:'))) {
+          throw new Error(`Failed to interpolate account address at index ${idx}: ${originalAddress} -> ${address}. ResolvedInputs: ${JSON.stringify(executable.resolvedInputs.map(r => ({ as: r.input?.as, value: r.value })))}`)
+        }
+      }
+
+      const pubkey = await this.resolveAccountPubkey(address, fromPubkey)
+      const { isSigner, isWritable } = this.determineAccountFlags(accountDef, pubkey, fromPubkey)
+      accounts.push({ pubkey, isSigner, isWritable })
     }
 
     return accounts
+  }
+
+  private extractAccountInputs(action: any, executable: WarpExecutable): Array<{ input: any; index: number }> {
+    if (!action.inputs || !Array.isArray(action.inputs)) return []
+
+    const accountInputs: Array<{ input: any; index: number }> = []
+    for (const input of action.inputs) {
+      if (input.position && typeof input.position === 'string' && input.position.startsWith('account:')) {
+        const index = parseInt(input.position.split(':')[1] || '0', 10)
+        accountInputs.push({ input, index })
+      }
+    }
+    return accountInputs.sort((a, b) => a.index - b.index)
+  }
+
+  private async resolveAccountFromInput(
+    accountInput: { input: any; index: number },
+    executable: WarpExecutable,
+    fromPubkey: PublicKey
+  ): Promise<PublicKey> {
+    const resolved = executable.resolvedInputs.find((r: any) => r.input === accountInput.input || r.input?.as === accountInput.input.as)
+    if (!resolved) {
+      throw new Error(`Account input at index ${accountInput.index} not resolved: ${accountInput.input.as || accountInput.input.name}`)
+    }
+
+    let address = resolved.value
+    if (typeof address === 'string' && address.includes(':')) {
+      address = address.split(':')[1]
+    }
+
+    if (!address || typeof address !== 'string') {
+      throw new Error(`Invalid address for account input at index ${accountInput.index}: ${accountInput.input.as || accountInput.input.name}`)
+    }
+
+    if (accountInput.input.as === 'USER_WALLET') {
+      return fromPubkey
+    }
+
+    if (accountInput.input.as?.startsWith('USER_ATA:') || accountInput.input.as?.startsWith('RECEIVER_ATA:')) {
+      return await this.resolveAccountPubkey(`{{${accountInput.input.as}}}`, fromPubkey)
+    }
+
+    return new PublicKey(address)
+  }
+
+  private interpolateAccountAddress(address: string, resolvedInputs: any[]): string {
+    if (!address.includes('{{')) return address
+
+    for (const resolved of resolvedInputs) {
+      if (!resolved.input?.as) continue
+      const placeholder = `{{${resolved.input.as.toUpperCase()}}}`
+      if (address === placeholder || address.includes(placeholder)) {
+        let value = resolved.value
+        if (typeof value === 'string' && value.includes(':')) {
+          value = value.split(':')[1]
+        }
+        if (value) {
+          return address.replace(new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), String(value))
+        }
+      }
+    }
+
+    for (const resolved of resolvedInputs) {
+      if (!resolved.input?.name) continue
+      const placeholder = `{{${resolved.input.name.toUpperCase().replace(/\s+/g, '_')}}}`
+      if (address === placeholder || address.includes(placeholder)) {
+        let value = resolved.value
+        if (typeof value === 'string' && value.includes(':')) {
+          value = value.split(':')[1]
+        }
+        if (value) {
+          return address.replace(new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), String(value))
+        }
+      }
+    }
+
+    return address
   }
 
   private async createTokenTransferTransaction(
@@ -467,23 +597,18 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
     return this.encodeBasicInstructionData(nativeArgs, action.func)
   }
 
-  private ensureSystemPrograms(accounts: Array<{ pubkey: PublicKey; isSigner: boolean; isWritable: boolean }>, action: any): void {
-    if (!action.accounts?.length) return
-
-    const systemProgram = SystemProgram.programId
-    const tokenProgram = TOKEN_PROGRAM_ID
-    if (!accounts.some((acc) => acc.pubkey.equals(systemProgram))) {
-      accounts.push({ pubkey: systemProgram, isSigner: false, isWritable: false })
-    }
-    if (!accounts.some((acc) => acc.pubkey.equals(tokenProgram))) {
-      accounts.push({ pubkey: tokenProgram, isSigner: false, isWritable: false })
-    }
-  }
 
   private extractAccountAddress(accountDef: any): string | undefined {
     if (typeof accountDef === 'string') return accountDef
     if (!accountDef || typeof accountDef !== 'object') return undefined
-    if (JSON.stringify(accountDef).includes('USER_WALLET')) return '{{USER_WALLET}}'
+
+    const str = JSON.stringify(accountDef)
+    if (str.includes('USER_WALLET') || str.includes('{{USER_WALLET}}')) return '{{USER_WALLET}}'
+    if (str.includes('RECEIVER_ADDRESS') || str.includes('{{RECEIVER_ADDRESS}}')) return '{{RECEIVER_ADDRESS}}'
+    if (str.includes('USER_ATA')) {
+      const match = str.match(/USER_ATA[:\s]*([^"}\s]+)/)
+      if (match) return `{{USER_ATA:${match[1]}}}`
+    }
 
     const addrValue = accountDef.address || accountDef.pubkey || accountDef.value
     if (typeof addrValue === 'string') return addrValue
@@ -497,53 +622,55 @@ export class WarpSolanaExecutor implements AdapterWarpExecutor {
   }
 
   private async resolveAccountPubkey(address: string, fromPubkey: PublicKey): Promise<PublicKey> {
-    if (address === '{{USER_WALLET}}' || address === fromPubkey.toBase58()) {
+    if (address.includes('{{USER_WALLET}}') || address === fromPubkey.toBase58()) {
       return fromPubkey
     }
 
     if (address.startsWith('{{USER_ATA:') && address.endsWith('}}')) {
       const mintAddress = address.slice(11, -2)
+      if (!mintAddress || mintAddress.includes('{{')) {
+        throw new Error(`Invalid USER_ATA placeholder: ${address}. Mint address must be resolved first.`)
+      }
       const mintPubkey = new PublicKey(mintAddress)
       return await getAssociatedTokenAddress(mintPubkey, fromPubkey)
+    }
+
+    if (address.startsWith('{{RECEIVER_ATA:') && address.endsWith('}}')) {
+      const content = address.slice(15, -2)
+      const parts = content.split(':')
+      if (parts.length === 2) {
+        let mintAddress = parts[0]
+        let receiverAddress = parts[1]
+        if (mintAddress.includes('{{') || receiverAddress.includes('{{')) {
+          throw new Error(`Invalid RECEIVER_ATA placeholder: ${address}. Mint and receiver addresses must be resolved first.`)
+        }
+        if (mintAddress.includes(':')) mintAddress = mintAddress.split(':')[1]
+        if (receiverAddress.includes(':')) receiverAddress = receiverAddress.split(':')[1]
+        const mintPubkey = new PublicKey(mintAddress)
+        const receiverPubkey = new PublicKey(receiverAddress)
+        return await getAssociatedTokenAddress(mintPubkey, receiverPubkey)
+      }
     }
 
     return new PublicKey(address)
   }
 
-  private determineAccountFlags(address: string, accountDef: any): { isSigner: boolean; isWritable: boolean } {
+  private determineAccountFlags(accountDef: any, pubkey: PublicKey, fromPubkey: PublicKey): { isSigner: boolean; isWritable: boolean } {
     const accountMeta = typeof accountDef === 'object' ? accountDef : {}
 
-    if (address === '{{USER_WALLET}}') {
+    if (pubkey.equals(fromPubkey)) {
       return { isSigner: true, isWritable: true }
     }
 
-    if (address.startsWith('{{USER_ATA:')) {
-      return { isSigner: false, isWritable: true }
-    }
-
-    let isSigner = accountMeta.signer === true
-    let isWritable = accountMeta.writable !== false
-
-    if (typeof accountDef === 'object') {
-      if (accountMeta.signer !== undefined) isSigner = accountMeta.signer === true
-      if (accountMeta.writable !== undefined) isWritable = accountMeta.writable !== false
-    }
+    const isSigner = accountMeta.signer === true
+    const isWritable = typeof accountDef === 'object' && accountMeta.writable !== undefined ? accountMeta.writable !== false : true
 
     return { isSigner, isWritable }
   }
 
   private addComputeBudgetInstructions(instructions: TransactionInstruction[]): TransactionInstruction[] {
-    const hasTransfer = instructions.some((ix) => ix.programId.equals(SystemProgram.programId) && ix.data.length === 4)
     const hasTokenTransfer = instructions.some((ix) => ix.programId.toBase58() === WarpSolanaConstants.Programs.TokenProgram)
-
-    let computeUnits = WarpSolanaConstants.ComputeUnitLimit.Default
-    if (hasTransfer && !hasTokenTransfer) {
-      computeUnits = WarpSolanaConstants.ComputeUnitLimit.Transfer
-    } else if (hasTokenTransfer) {
-      computeUnits = WarpSolanaConstants.ComputeUnitLimit.TokenTransfer
-    } else {
-      computeUnits = WarpSolanaConstants.ComputeUnitLimit.ContractCall
-    }
+    const computeUnits = hasTokenTransfer ? WarpSolanaConstants.ComputeUnitLimit.TokenTransfer : WarpSolanaConstants.ComputeUnitLimit.Default
 
     const computeUnitLimitIx = ComputeBudgetProgram.setComputeUnitLimit({ units: computeUnits })
     const computeUnitPriceIx = ComputeBudgetProgram.setComputeUnitPrice({ microLamports: WarpSolanaConstants.PriorityFee.Default })

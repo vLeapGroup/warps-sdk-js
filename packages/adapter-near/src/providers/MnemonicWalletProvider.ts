@@ -14,7 +14,7 @@ import {
   WarpClientConfig,
 } from '@vleap/warps'
 import bs58 from 'bs58'
-import { KeyPair } from 'near-api-js'
+import { KeyPair, KeyPairString } from 'near-api-js'
 
 export class MnemonicWalletProvider implements WalletProvider {
   static readonly PROVIDER_NAME: WarpWalletProvider = 'mnemonic'
@@ -69,7 +69,7 @@ export class MnemonicWalletProvider implements WalletProvider {
     const trimmedMnemonic = normalizeAndValidateMnemonic(mnemonic)
     const seed = bip39.mnemonicToSeedSync(trimmedMnemonic)
     const secretKey = seed.slice(0, 32)
-    const keyPair = KeyPair.fromString(bs58.encode(secretKey))
+    const keyPair = KeyPair.fromString(`ed25519:${bs58.encode(secretKey)}`)
     const publicKey = keyPair.getPublicKey()
     const accountId = keyToImplicitAddress(publicKey.toString())
     const walletDetails: WarpWalletDetails = {
@@ -83,7 +83,7 @@ export class MnemonicWalletProvider implements WalletProvider {
   }
 
   async importFromPrivateKey(privateKey: string): Promise<WarpWalletDetails> {
-    const keyPair = KeyPair.fromString(privateKey)
+    const keyPair = KeyPair.fromString(privateKey.startsWith('ed25519:') ? privateKey : `ed25519:${privateKey}`)
     const publicKey = keyPair.getPublicKey()
     const accountId = keyToImplicitAddress(publicKey.toString())
     const walletDetails: WarpWalletDetails = {
@@ -116,7 +116,7 @@ export class MnemonicWalletProvider implements WalletProvider {
     validateMnemonicLength(mnemonic)
     const seed = bip39.mnemonicToSeedSync(mnemonic)
     const secretKey = seed.slice(0, 32)
-    const keyPair = KeyPair.fromString(bs58.encode(secretKey))
+    const keyPair = KeyPair.fromString(`ed25519:${bs58.encode(secretKey)}`)
     const publicKey = keyPair.getPublicKey()
     const accountId = keyToImplicitAddress(publicKey.toString())
     return {
@@ -135,7 +135,7 @@ export class MnemonicWalletProvider implements WalletProvider {
 
     const seed = bip39.mnemonicToSeedSync(mnemonic)
     const secretKey = seed.slice(0, 32)
-    this.keypair = KeyPair.fromString(bs58.encode(secretKey))
+    this.keypair = KeyPair.fromString(`ed25519:${bs58.encode(secretKey)}`)
     return this.keypair
   }
 }
