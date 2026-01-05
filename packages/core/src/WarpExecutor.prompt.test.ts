@@ -120,14 +120,14 @@ describe('WarpExecutor - Prompt Actions', () => {
 
   it('should handle errors during prompt action execution', async () => {
     const errorWarp: Warp = {
-      protocol: 'warp', // Explicitly define
-      name: 'error-test-warp', // Explicitly define
-      title: 'Error Test Warp', // Explicitly define
-      description: 'Warp for testing error handling', // Explicitly define
+      protocol: 'warp',
+      name: 'error-test-warp',
+      title: 'Error Test Warp',
+      description: 'Warp for testing error handling',
       actions: [
         {
           type: 'prompt',
-          label: 'Error Prompt', // This label will trigger the temporary error in WarpExecutor.ts
+          label: 'Error Prompt',
           prompt: 'This is a prompt.',
           primary: true,
           auto: true,
@@ -138,7 +138,10 @@ describe('WarpExecutor - Prompt Actions', () => {
       },
     }
 
-    const errorMessage = 'Simulated error during prompt execution (temporary)'
+    const errorMessage = 'Simulated error during prompt execution'
+
+    // Mock factory.getChainInfoForWarp to throw an error
+    jest.spyOn(executor['factory'], 'getChainInfoForWarp').mockRejectedValue(new Error(errorMessage))
 
     const result = await executor.execute(errorWarp, [])
 

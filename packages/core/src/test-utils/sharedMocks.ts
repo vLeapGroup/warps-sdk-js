@@ -1,12 +1,13 @@
-import { WarpClientConfig, WarpTransferAction } from '../types'
+import { WarpClientConfig, WarpTransferAction, WarpWalletProvider } from '../types'
+import { WarpChainName } from '../constants'
 
-export const createMockChainInfo = (chainName: string = 'multiversx') => ({
+export const createMockChainInfo = (chainName: WarpChainName = WarpChainName.Multiversx) => ({
   name: chainName,
-  displayName: chainName === 'multiversx' ? 'MultiversX' : chainName,
-  chainId: chainName === 'multiversx' ? 'D' : chainName,
+  displayName: chainName === WarpChainName.Multiversx ? 'MultiversX' : chainName,
+  chainId: chainName === WarpChainName.Multiversx ? 'D' : chainName,
   blockTime: 6000,
   addressHrp: 'erd',
-  defaultApiUrl: `https://${chainName === 'multiversx' ? 'devnet-api.multiversx' : chainName}.com`,
+  defaultApiUrl: `https://${chainName === WarpChainName.Multiversx ? 'devnet-api.multiversx' : chainName}.com`,
   logoUrl: 'https://example.com/chain-logo.png',
   nativeToken: {
     chain: chainName,
@@ -18,10 +19,10 @@ export const createMockChainInfo = (chainName: string = 'multiversx') => ({
   },
 })
 
-export const createMockAdapter = () => ({
-  chain: 'multiversx',
-  chainInfo: createMockChainInfo('multiversx'),
-  prefix: 'multiversx',
+export const createMockAdapter = (chainName: WarpChainName = WarpChainName.Multiversx) => ({
+  chain: chainName,
+  chainInfo: createMockChainInfo(chainName),
+  prefix: chainName,
   explorer: {
     getTransactionUrl: () => '',
     getAddressUrl: () => '',
@@ -33,7 +34,7 @@ export const createMockAdapter = () => ({
   },
   builder: () => ({
     createInscriptionTransaction() {
-      return {}
+      return Promise.resolve({})
     },
     createFromTransaction() {
       return Promise.resolve({ protocol: '', name: '', title: '', description: '', actions: [] })
@@ -65,17 +66,21 @@ export const createMockAdapter = () => ({
     addAction() {
       return this
     },
+    setOutput() {
+      return this
+    },
     build() {
       return Promise.resolve({ protocol: '', name: '', title: '', description: '', actions: [] })
     },
   }),
   abiBuilder: () => ({
+    createInscriptionTransaction: async () => Promise.resolve({}),
     createFromRaw: async () => ({}),
     createFromTransaction: async () => ({}),
     createFromTransactionHash: async () => null,
   }),
   brandBuilder: () => ({
-    createInscriptionTransaction: () => ({}),
+    createInscriptionTransaction: () => Promise.resolve({}),
     createFromTransaction: async () => ({
       protocol: 'warp',
       name: 'test-brand',
@@ -96,23 +101,25 @@ export const createMockAdapter = () => ({
     },
     executeQuery(executable: any) {
       return Promise.resolve({
-        status: 'success',
+        status: 'success' as const, // Explicitly use 'success'
         warp: { protocol: '', name: '', title: '', description: '', actions: [] },
         action: 0,
         user: null,
         txHash: null,
+        tx: null,
         next: null,
         values: { string: [], native: [], mapped: {} },
         output: {},
         messages: {},
-        tx: null,
+        destination: null, // Added missing property
+        resolvedInputs: [], // Added missing property
       })
     },
   },
   output: {
     getTransactionExecutionResults() {
       return Promise.resolve({
-        status: 'success',
+        status: 'success' as const, // Explicitly use 'success'
         warp: { protocol: '', name: '', title: '', description: '', actions: [] },
         action: 0,
         user: null,
@@ -121,13 +128,30 @@ export const createMockAdapter = () => ({
         values: { string: [], native: [], mapped: {} },
         output: {},
         messages: {},
+        destination: null, // Added missing property
+        resolvedInputs: [], // Added missing property
+      })
+    },
+    getActionExecution() {
+      return Promise.resolve({
+        status: 'success' as const,
+        warp: { protocol: '', name: '', title: '', description: '', actions: [] },
+        action: 0,
+        user: null,
+        txHash: null,
         tx: null,
+        next: null,
+        values: { string: [], native: [], mapped: {} },
+        output: {},
+        messages: {},
+        destination: null,
+        resolvedInputs: [],
       })
     },
   },
   dataLoader: {
     getAccount(address: string) {
-      return Promise.resolve({ chain: 'multiversx', address, balance: BigInt(0) })
+      return Promise.resolve({ chain: chainName, address, balance: BigInt(0) })
     },
     getAccountAssets() {
       return Promise.resolve([])
@@ -135,7 +159,7 @@ export const createMockAdapter = () => ({
     getAsset(identifier: string) {
       // Return a mock asset with 18 decimals by default
       return Promise.resolve({
-        chain: 'multiversx',
+        chain: chainName,
         identifier,
         name: `Mock ${identifier}`,
         symbol: 'MOCK',
@@ -149,6 +173,9 @@ export const createMockAdapter = () => ({
     },
     getAccountActions(address: string, options?: any) {
       return Promise.resolve([])
+    },
+    getAction(identifier: string, awaitCompleted?: boolean) {
+      return Promise.resolve(null)
     },
   },
   serializer: {
@@ -212,7 +239,7 @@ export const createMockAdapter = () => ({
     },
     getChainInfo(chain: string) {
       if (chain === 'multiversx') {
-        return Promise.resolve(createMockChainInfo('multiversx'))
+        return Promise.resolve(createMockChainInfo(WarpChainName.Multiversx))
       }
       return Promise.resolve(null)
     },
@@ -243,14 +270,16 @@ export const createMockAdapter = () => ({
       return Promise.resolve('mock-tx-hash')
     },
     create(mnemonic: string) {
-      return { provider: 'privateKey', address: 'erd1test', privateKey: 'mock-private-key' }
-    },
-    generate() {
-      return { provider: 'privateKey', address: 'erd1test', privateKey: 'mock-private-key' }
+      return Promise.resolve({ provider: 'mnemonic' as const, address: 'erd1test', mnemonic })
     },
     getAddress() {
       return 'erd1test'
     },
+    importFromMnemonic: async (mnemonic: string) => Promise.resolve({ provider: 'mnemonic' as const, address: 'mock-address', mnemonic }),
+    importFromPrivateKey: async (privateKey: string) => Promise.resolve({ provider: 'privateKey' as const, address: 'mock-address', privateKey }),
+    export: async (provider: WarpWalletProvider) => Promise.resolve({ provider, address: 'mock-address' }),
+    getPublicKey: () => 'mock-public-key',
+    generate: async (provider: WarpWalletProvider) => Promise.resolve({ provider, address: 'mock-address' }),
   },
 })
 
