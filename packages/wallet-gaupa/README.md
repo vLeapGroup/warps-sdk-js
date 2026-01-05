@@ -1,6 +1,6 @@
 # @vleap/warps-wallet-gaupa
 
-Gaupa wallet provider for Warps SDK. This package enables you to use Gaupa wallets with the Warps SDK, primarily for MultiversX (Elrond) blockchain.
+Gaupa wallet provider for Warps SDK. This package enables you to use Gaupa wallets with the Warps SDK, primarily for MultiversX blockchain.
 
 **Note: This package is currently a placeholder. Gaupa is in private beta and the implementation is pending.**
 
@@ -77,7 +77,7 @@ new GaupaWalletProvider(config: GaupaWalletProviderConfig)
 
 Currently optimized for:
 
-- **MultiversX (Elrond)**
+- **MultiversX**
 
 The provider uses MultiversX `Transaction` types from `@multiversx/sdk-core` for type safety.
 
