@@ -27,7 +27,7 @@ export const SomniaAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainName
     blockTime: 100,
     addressHrp: '0x',
     defaultApiUrl: 'https://api.infra.mainnet.somnia.network/',
-    logoUrl: 'https://joai.ai/images/chains/somnia.png',
+    logoUrl: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/somnia.png',
     nativeToken: NativeTokenSomi,
   },
   testnet: {
@@ -37,7 +37,7 @@ export const SomniaAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainName
     blockTime: 100,
     addressHrp: '0x',
     defaultApiUrl: 'https://dream-rpc.somnia.network/',
-    logoUrl: 'https://joai.ai/images/chains/somnia.png',
+    logoUrl: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/somnia.png',
     nativeToken: NativeTokenStt,
   },
   devnet: {
@@ -47,7 +47,7 @@ export const SomniaAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainName
     blockTime: 100,
     addressHrp: '0x',
     defaultApiUrl: 'https://dream-rpc.somnia.network',
-    logoUrl: 'https://joai.ai/images/chains/somnia.png',
+    logoUrl: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/somnia.png',
     nativeToken: NativeTokenStt,
   },
 })

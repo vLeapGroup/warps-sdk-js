@@ -8,8 +8,8 @@ export const NativeTokenEth: WarpChainAsset = {
   name: 'Ether',
   decimals: 18,
   logoUrl: {
-    light: 'https://joai.ai/images/tokens/eth-white.svg',
-    dark: 'https://joai.ai/images/tokens/eth-black.svg',
+    light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/tokens/logos/eth-white.svg',
+    dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/tokens/logos/eth-black.svg',
   },
 }
 
@@ -22,8 +22,8 @@ export const EthereumAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainNa
     addressHrp: '0x',
     defaultApiUrl: 'https://ethereum-rpc.publicnode.com',
     logoUrl: {
-      light: 'https://joai.ai/images/chains/ethereum-white.svg',
-      dark: 'https://joai.ai/images/chains/ethereum-black.svg',
+      light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/ethereum-white.svg',
+      dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/ethereum-black.svg',
     },
     nativeToken: NativeTokenEth,
   },
@@ -35,8 +35,8 @@ export const EthereumAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainNa
     addressHrp: '0x',
     defaultApiUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
     logoUrl: {
-      light: 'https://joai.ai/images/chains/ethereum-white.svg',
-      dark: 'https://joai.ai/images/chains/ethereum-black.svg',
+      light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/ethereum-white.svg',
+      dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/ethereum-black.svg',
     },
     nativeToken: NativeTokenEth,
   },
@@ -48,8 +48,8 @@ export const EthereumAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainNa
     addressHrp: '0x',
     defaultApiUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
     logoUrl: {
-      light: 'https://joai.ai/images/chains/ethereum-white.svg',
-      dark: 'https://joai.ai/images/chains/ethereum-black.svg',
+      light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/ethereum-white.svg',
+      dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/ethereum-black.svg',
     },
     nativeToken: NativeTokenEth,
   },

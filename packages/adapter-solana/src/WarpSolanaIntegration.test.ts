@@ -72,8 +72,8 @@ describe('WarpSolanaIntegration', () => {
         addressHrp: '',
         defaultApiUrl: 'https://api.devnet.solana.com',
         logoUrl: {
-          light: 'https://joai.ai/images/chains/solana-white.svg',
-          dark: 'https://joai.ai/images/chains/solana-black.svg',
+          light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/solana-white.svg',
+          dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/solana-black.svg',
         },
         nativeToken: NativeTokenSol,
       }

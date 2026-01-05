@@ -56,7 +56,7 @@ export const SuiAdapter: ChainAdapterFactory = createSuiAdapter(WarpChainName.Su
     blockTime: 3000,
     addressHrp: 'sui',
     defaultApiUrl: 'https://fullnode.mainnet.sui.io',
-    logoUrl: 'https://joai.ai/images/chains/sui.svg',
+    logoUrl: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/sui.svg',
     nativeToken: NativeTokenSui,
   },
   testnet: {
@@ -66,7 +66,7 @@ export const SuiAdapter: ChainAdapterFactory = createSuiAdapter(WarpChainName.Su
     blockTime: 3000,
     addressHrp: 'sui',
     defaultApiUrl: 'https://fullnode.testnet.sui.io',
-    logoUrl: 'https://joai.ai/images/chains/sui.svg',
+    logoUrl: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/sui.svg',
     nativeToken: NativeTokenSui,
   },
   devnet: {
@@ -76,7 +76,7 @@ export const SuiAdapter: ChainAdapterFactory = createSuiAdapter(WarpChainName.Su
     blockTime: 3000,
     addressHrp: 'sui',
     defaultApiUrl: 'https://fullnode.devnet.sui.io',
-    logoUrl: 'https://joai.ai/images/chains/sui.svg',
+    logoUrl: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/sui.svg',
     nativeToken: NativeTokenSui,
   },
 })

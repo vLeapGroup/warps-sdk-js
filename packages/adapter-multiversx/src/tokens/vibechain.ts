@@ -9,7 +9,7 @@ export const VibechainTokens: WarpChainAsset[] = [
     name: 'VIBE',
     symbol: 'VIBE',
     decimals: 18,
-    logoUrl: 'https://joai.ai/images/tokens/vibe.svg',
+    logoUrl: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/tokens/logos/vibe.svg',
   },
   {
     chain: VibechainChain,
@@ -17,6 +17,6 @@ export const VibechainTokens: WarpChainAsset[] = [
     name: 'VIBE',
     symbol: 'VIBE',
     decimals: 18,
-    logoUrl: 'https://joai.ai/images/tokens/vibe.svg',
+    logoUrl: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/tokens/logos/vibe.svg',
   },
 ]

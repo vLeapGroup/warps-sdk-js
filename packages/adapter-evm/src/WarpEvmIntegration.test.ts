@@ -86,8 +86,8 @@ describe('WarpEvmIntegration', () => {
         addressHrp: '0x',
         defaultApiUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
         logoUrl: {
-          light: 'https://joai.ai/images/chains/ethereum-white.svg',
-          dark: 'https://joai.ai/images/chains/ethereum-black.svg',
+          light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/ethereum-white.svg',
+          dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/ethereum-black.svg',
         },
         nativeToken: NativeTokenEth,
       }
@@ -446,8 +446,8 @@ describe('WarpEvmIntegration', () => {
         addressHrp: '0x',
         defaultApiUrl: 'https://sepolia.base.org',
         logoUrl: {
-          light: 'https://joai.ai/images/chains/base-white.svg',
-          dark: 'https://joai.ai/images/chains/base-black.svg',
+          light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/base-white.svg',
+          dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/base-black.svg',
         },
         nativeToken: NativeTokenBase,
       }
@@ -1085,8 +1085,8 @@ describe('WarpEvmIntegration', () => {
         addressHrp: '0x',
         defaultApiUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
         logoUrl: {
-          light: 'https://joai.ai/images/chains/ethereum-white.svg',
-          dark: 'https://joai.ai/images/chains/ethereum-black.svg',
+          light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/ethereum-white.svg',
+          dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/ethereum-black.svg',
         },
         nativeToken: NativeTokenEth,
       }

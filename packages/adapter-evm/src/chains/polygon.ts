@@ -8,8 +8,8 @@ export const NativeTokenPolygon: WarpChainAsset = {
   name: 'Polygon',
   decimals: 18,
   logoUrl: {
-    light: 'https://joai.ai/images/tokens/matic-white.svg',
-    dark: 'https://joai.ai/images/tokens/matic-black.svg',
+    light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/tokens/logos/matic-white.svg',
+    dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/tokens/logos/matic-black.svg',
   },
 }
 
@@ -22,8 +22,8 @@ export const PolygonAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainNam
     addressHrp: '0x',
     defaultApiUrl: 'https://polygon-rpc.com',
     logoUrl: {
-      light: 'https://joai.ai/images/chains/polygon-white.svg',
-      dark: 'https://joai.ai/images/chains/polygon-black.svg',
+      light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/polygon-white.svg',
+      dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/polygon-black.svg',
     },
     nativeToken: NativeTokenPolygon,
   },
@@ -35,8 +35,8 @@ export const PolygonAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainNam
     addressHrp: '0x',
     defaultApiUrl: 'https://rpc.ankr.com/polygon_mumbai',
     logoUrl: {
-      light: 'https://joai.ai/images/chains/polygon-white.svg',
-      dark: 'https://joai.ai/images/chains/polygon-black.svg',
+      light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/polygon-white.svg',
+      dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/polygon-black.svg',
     },
     nativeToken: NativeTokenPolygon,
   },
@@ -48,8 +48,8 @@ export const PolygonAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainNam
     addressHrp: '0x',
     defaultApiUrl: 'https://rpc.ankr.com/polygon_mumbai',
     logoUrl: {
-      light: 'https://joai.ai/images/chains/polygon-white.svg',
-      dark: 'https://joai.ai/images/chains/polygon-black.svg',
+      light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/polygon-white.svg',
+      dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/polygon-black.svg',
     },
     nativeToken: NativeTokenPolygon,
   },

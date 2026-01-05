@@ -8,8 +8,8 @@ export const NativeTokenBase: WarpChainAsset = {
   symbol: 'ETH',
   decimals: 18,
   logoUrl: {
-    light: 'https://joai.ai/images/tokens/eth-white.svg',
-    dark: 'https://joai.ai/images/tokens/eth-black.svg',
+    light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/tokens/logos/eth-white.svg',
+    dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/tokens/logos/eth-black.svg',
   },
 }
 
@@ -22,8 +22,8 @@ export const BaseAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainName.B
     addressHrp: '0x',
     defaultApiUrl: 'https://mainnet.base.org',
     logoUrl: {
-      light: 'https://joai.ai/images/chains/base-white.svg',
-      dark: 'https://joai.ai/images/chains/base-black.svg',
+      light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/base-white.svg',
+      dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/base-black.svg',
     },
     nativeToken: NativeTokenBase,
   },
@@ -35,8 +35,8 @@ export const BaseAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainName.B
     addressHrp: '0x',
     defaultApiUrl: 'https://sepolia.base.org',
     logoUrl: {
-      light: 'https://joai.ai/images/chains/base-white.svg',
-      dark: 'https://joai.ai/images/chains/base-black.svg',
+      light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/base-white.svg',
+      dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/base-black.svg',
     },
     nativeToken: NativeTokenBase,
   },
@@ -48,8 +48,8 @@ export const BaseAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainName.B
     addressHrp: '0x',
     defaultApiUrl: 'https://sepolia.base.org',
     logoUrl: {
-      light: 'https://joai.ai/images/chains/base-white.svg',
-      dark: 'https://joai.ai/images/chains/base-black.svg',
+      light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/base-white.svg',
+      dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/base-black.svg',
     },
     nativeToken: NativeTokenBase,
   },

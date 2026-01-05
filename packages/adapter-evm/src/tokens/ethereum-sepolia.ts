@@ -41,6 +41,6 @@ export const EthereumSepoliaTokens: WarpChainAsset[] = [
     name: 'Wrapped SET',
     symbol: 'WSET',
     decimals: 18,
-    logoUrl: 'https://joai.ai/images/tokens/set-black.svg',
+    logoUrl: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/tokens/logos/set-black.svg',
   },
 ]

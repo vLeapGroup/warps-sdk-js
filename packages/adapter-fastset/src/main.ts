@@ -20,7 +20,7 @@ export const NativeTokenSet: WarpChainAsset = {
   name: 'SET',
   symbol: 'SET',
   decimals: 0,
-  logoUrl: 'https://joai.ai/images/tokens/set-black.svg',
+  logoUrl: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/tokens/logos/set-black.svg',
 }
 
 function createFastsetAdapter(chainName: WarpChainName, chainInfos: Record<WarpChainEnv, WarpChainInfo>): ChainAdapterFactory {
@@ -53,7 +53,7 @@ export const FastsetAdapter: ChainAdapterFactory = createFastsetAdapter(WarpChai
     blockTime: 1000,
     addressHrp: 'set',
     defaultApiUrl: 'https://proxy.fastset.xyz',
-    logoUrl: 'https://joai.ai/images/chains/fastset-black.svg',
+    logoUrl: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/fastset-black.svg',
     nativeToken: NativeTokenSet,
   },
   testnet: {
@@ -63,7 +63,7 @@ export const FastsetAdapter: ChainAdapterFactory = createFastsetAdapter(WarpChai
     blockTime: 1000,
     addressHrp: 'set',
     defaultApiUrl: 'https://proxy.fastset.xyz',
-    logoUrl: 'https://joai.ai/images/chains/fastset-black.svg',
+    logoUrl: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/fastset-black.svg',
     nativeToken: NativeTokenSet,
   },
   devnet: {
@@ -73,7 +73,7 @@ export const FastsetAdapter: ChainAdapterFactory = createFastsetAdapter(WarpChai
     blockTime: 1000,
     addressHrp: 'set',
     defaultApiUrl: 'https://proxy.fastset.xyz',
-    logoUrl: 'https://joai.ai/images/chains/fastset-black.svg',
+    logoUrl: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/fastset-black.svg',
     nativeToken: NativeTokenSet,
   },
 })

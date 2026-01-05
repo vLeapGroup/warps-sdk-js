@@ -7,7 +7,7 @@ export const NativeTokenArb: WarpChainAsset = {
   symbol: 'ARB',
   name: 'Arbitrum',
   decimals: 18,
-  logoUrl: 'https://joai.ai/images/tokens/arb.svg',
+  logoUrl: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/tokens/logos/arb.svg',
 }
 
 export const ArbitrumAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainName.Arbitrum, {
@@ -18,7 +18,7 @@ export const ArbitrumAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainNa
     blockTime: 1000,
     addressHrp: '0x',
     defaultApiUrl: 'https://arb1.arbitrum.io/rpc',
-    logoUrl: 'https://joai.ai/images/chains/arbitrum.svg',
+    logoUrl: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/arbitrum.svg',
     nativeToken: NativeTokenArb,
   },
   testnet: {
@@ -28,7 +28,7 @@ export const ArbitrumAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainNa
     blockTime: 1000,
     addressHrp: '0x',
     defaultApiUrl: 'https://sepolia-rollup.arbitrum.io/rpc',
-    logoUrl: 'https://joai.ai/images/chains/arbitrum.svg',
+    logoUrl: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/arbitrum.svg',
     nativeToken: NativeTokenArb,
   },
   devnet: {
@@ -38,7 +38,7 @@ export const ArbitrumAdapter: ChainAdapterFactory = createEvmAdapter(WarpChainNa
     blockTime: 1000,
     addressHrp: '0x',
     defaultApiUrl: 'https://sepolia-rollup.arbitrum.io/rpc',
-    logoUrl: 'https://joai.ai/images/chains/arbitrum.svg',
+    logoUrl: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/arbitrum.svg',
     nativeToken: NativeTokenArb,
   },
 })

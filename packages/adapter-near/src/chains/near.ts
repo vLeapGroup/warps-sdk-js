@@ -8,8 +8,8 @@ export const NativeTokenNear: WarpChainAsset = {
   name: 'NEAR',
   decimals: 24,
   logoUrl: {
-    light: 'https://joai.ai/images/tokens/near-white.svg',
-    dark: 'https://joai.ai/images/tokens/near-black.svg',
+    light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/tokens/logos/near-white.svg',
+    dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/tokens/logos/near-black.svg',
   },
 }
 
@@ -22,8 +22,8 @@ export const NearAdapter: ChainAdapterFactory = createNearAdapter(WarpChainName.
     addressHrp: '',
     defaultApiUrl: 'https://rpc.mainnet.near.org',
     logoUrl: {
-      light: 'https://joai.ai/images/chains/near-white.svg',
-      dark: 'https://joai.ai/images/chains/near-black.svg',
+      light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/near-white.svg',
+      dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/near-black.svg',
     },
     nativeToken: NativeTokenNear,
   },
@@ -35,8 +35,8 @@ export const NearAdapter: ChainAdapterFactory = createNearAdapter(WarpChainName.
     addressHrp: '',
     defaultApiUrl: 'https://rpc.testnet.near.org',
     logoUrl: {
-      light: 'https://joai.ai/images/chains/near-white.svg',
-      dark: 'https://joai.ai/images/chains/near-black.svg',
+      light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/near-white.svg',
+      dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/near-black.svg',
     },
     nativeToken: NativeTokenNear,
   },
@@ -48,8 +48,8 @@ export const NearAdapter: ChainAdapterFactory = createNearAdapter(WarpChainName.
     addressHrp: '',
     defaultApiUrl: 'https://rpc.testnet.near.org',
     logoUrl: {
-      light: 'https://joai.ai/images/chains/near-white.svg',
-      dark: 'https://joai.ai/images/chains/near-black.svg',
+      light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/near-white.svg',
+      dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/chains/logos/near-black.svg',
     },
     nativeToken: NativeTokenNear,
   },

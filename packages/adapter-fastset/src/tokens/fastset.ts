@@ -8,8 +8,8 @@ export const FastsetTokens: WarpChainAsset[] = [
     symbol: 'ETH',
     decimals: 18,
     logoUrl: {
-      light: 'https://joai.ai/images/tokens/eth-white.svg',
-      dark: 'https://joai.ai/images/tokens/eth-black.svg',
+      light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/tokens/logos/eth-white.svg',
+      dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/tokens/logos/eth-black.svg',
     },
     amount: 0n,
   },
@@ -28,7 +28,7 @@ export const FastsetTokens: WarpChainAsset[] = [
     name: 'Solana',
     symbol: 'SOL',
     decimals: 9,
-    logoUrl: 'https://joai.ai/images/tokens/sol.svg',
+    logoUrl: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/tokens/logos/sol.svg',
     amount: 0n,
   },
   {
@@ -47,8 +47,8 @@ export const FastsetTokens: WarpChainAsset[] = [
     symbol: 'WSET',
     decimals: 18,
     logoUrl: {
-      light: 'https://joai.ai/images/tokens/set-white.svg',
-      dark: 'https://joai.ai/images/tokens/set-black.svg',
+      light: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/tokens/logos/set-white.svg',
+      dark: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/tokens/logos/set-black.svg',
     },
     amount: 0n,
   },
