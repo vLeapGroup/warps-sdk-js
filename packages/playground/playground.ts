@@ -202,11 +202,11 @@ const runWarp = async (warpFile: string) => {
     chain: Chain,
     inputs: WarpInputs,
     resolvedInputs,
-    immediateExecutions,
+    immediateExecutions: [],
     txs,
     hashes,
     explorerUrl,
-    executionResults,
+    executionResults: [],
     remoteTxs,
   })
 }
