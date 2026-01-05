@@ -27,23 +27,27 @@ Once the Gaupa SDK is available, usage will be:
 ```typescript
 import { GaupaWalletProvider } from '@vleap/warps-wallet-gaupa'
 import { WarpClient } from '@vleap/warps'
-import { getMultiversxAdapter } from '@vleap/warps-adapter-multiversx'
+import { getAllMultiversxAdapters } from '@vleap/warps-adapter-multiversx'
 
 const config = {
   env: 'mainnet',
   walletProviders: {
-    multiversx: () => {
-      return new GaupaWalletProvider({
-        config: {
-          // TODO: Gaupa SDK configuration
-          // Will be defined once SDK is available
-        },
-      })
+    multiversx: {
+      gaupa: () => {
+        return new GaupaWalletProvider({
+          config: {
+            // TODO: Gaupa SDK configuration
+            // Will be defined once SDK is available
+          },
+        })
+      },
     },
   },
 }
 
-const client = new WarpClient(config, [getMultiversxAdapter(config)])
+const client = new WarpClient(config, {
+  chains: getAllMultiversxAdapters(),
+})
 ```
 
 ## API
