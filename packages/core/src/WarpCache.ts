@@ -26,18 +26,18 @@ export const WarpCacheKey = {
 
 export class WarpCache {
   private strategy: CacheStrategy
-  private dir?: string
+  private path?: string
 
-  constructor(type?: WarpCacheType, dir?: string) {
-    this.dir = dir
+  constructor(type?: WarpCacheType, path?: string) {
+    this.path = path
     this.strategy = this.selectStrategy(type)
   }
 
   private selectStrategy(type?: WarpCacheType): CacheStrategy {
     if (type === 'localStorage') return new LocalStorageCacheStrategy()
     if (type === 'memory') return new MemoryCacheStrategy()
-    if (type === 'static') return new StaticCacheStrategy(this.dir)
-    if (type === 'filesystem') return new FileSystemCacheStrategy(this.dir)
+    if (type === 'static') return new StaticCacheStrategy(this.path)
+    if (type === 'filesystem') return new FileSystemCacheStrategy(this.path)
 
     // Default to localStorage in browser environments
     if (typeof window !== 'undefined' && window.localStorage) return new LocalStorageCacheStrategy()

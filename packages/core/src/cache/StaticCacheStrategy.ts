@@ -12,18 +12,19 @@ export class StaticCacheStrategy implements CacheStrategy {
   private manifestPath: string
   private cache: Map<string, CacheEntry<any>>
 
-  constructor(manifestPath = 'warps-manifest.json') {
-    this.manifestPath = resolve(process.cwd(), manifestPath)
+  constructor(path?: string) {
+    this.manifestPath = path ? resolve(path) : resolve(process.cwd(), 'warps-manifest.json')
+    console.log('StaticCacheStrategy path', path)
     console.log('StaticCacheStrategy manifestPath', this.manifestPath)
+    console.log('StaticCacheStrategy process.cwd()', process.cwd())
     this.cache = this.loadManifest()
   }
 
   private loadManifest(): Map<string, CacheEntry<any>> {
     try {
       const data = readFileSync(this.manifestPath, 'utf-8')
-      const parsed = JSON.parse(data, valueReviver)
-      return new Map(Object.entries(parsed))
-    } catch (error) {
+      return new Map(Object.entries(JSON.parse(data, valueReviver)))
+    } catch {
       return new Map()
     }
   }
@@ -35,14 +36,13 @@ export class StaticCacheStrategy implements CacheStrategy {
 
   get<T>(key: string): T | null {
     const entry = this.cache.get(key)
-    if (!entry) return null
-
-    if (Date.now() > entry.expiresAt) {
-      this.cache.delete(key)
-      this.saveManifest()
+    if (!entry || Date.now() > entry.expiresAt) {
+      if (entry) {
+        this.cache.delete(key)
+        this.saveManifest()
+      }
       return null
     }
-
     return entry.value
   }
 
@@ -54,8 +54,7 @@ export class StaticCacheStrategy implements CacheStrategy {
   }
 
   forget(key: string): void {
-    if (this.cache.has(key)) {
-      this.cache.delete(key)
+    if (this.cache.delete(key)) {
       this.saveManifest()
     }
   }

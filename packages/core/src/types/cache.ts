@@ -1,7 +1,7 @@
 export type ClientCacheConfig = {
   ttl?: number
   type?: WarpCacheType
-  dir?: string
+  path?: string
 }
 
 export type WarpCacheType = 'memory' | 'localStorage' | 'static' | 'filesystem'

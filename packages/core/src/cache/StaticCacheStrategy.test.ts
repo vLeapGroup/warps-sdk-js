@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'fs'
+import { existsSync, mkdirSync, readFileSync, unlinkSync } from 'fs'
 import { join, resolve } from 'path'
 import { StaticCacheStrategy } from './StaticCacheStrategy'
 
