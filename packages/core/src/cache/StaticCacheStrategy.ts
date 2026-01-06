@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from 'fs'
-import { extname, resolve } from 'path'
+import { resolve } from 'path'
 import { WarpChainEnv } from '../types'
 import { ClientCacheConfig } from '../types/cache'
 import { CacheStrategy } from './CacheStrategy'
@@ -15,7 +15,7 @@ export class StaticCacheStrategy implements CacheStrategy {
   private cache: Map<string, CacheEntry<any>>
 
   constructor(env: WarpChainEnv, config?: ClientCacheConfig) {
-    this.manifestPath = this.resolveManifestPath(env, config)
+    this.manifestPath = config?.path ? resolve(config.path) : resolve(process.cwd(), `warps-manifest-${env}.json`)
     this.cache = this.loadManifest()
   }
 
@@ -61,16 +61,5 @@ export class StaticCacheStrategy implements CacheStrategy {
   clear(): void {
     this.cache.clear()
     this.saveManifest()
-  }
-
-  private resolveManifestPath(env: WarpChainEnv, config?: ClientCacheConfig): string {
-    const path = config?.path
-    if (path) {
-      const resolvedPath = resolve(path)
-      const ext = extname(resolvedPath)
-      const base = ext ? resolvedPath.slice(0, -ext.length) : resolvedPath
-      return `${base}-${env}${ext || '.json'}`
-    }
-    return resolve(process.cwd(), `warps-manifest-${env}.json`)
   }
 }

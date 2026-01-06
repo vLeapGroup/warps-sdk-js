@@ -4,7 +4,6 @@ import { StaticCacheStrategy } from './StaticCacheStrategy'
 
 describe('StaticCacheStrategy', () => {
   let manifestPath: string
-  let basePath: string
   let strategy: StaticCacheStrategy
 
   beforeEach(() => {
@@ -12,9 +11,8 @@ describe('StaticCacheStrategy', () => {
     if (!existsSync(testCacheRoot)) {
       mkdirSync(testCacheRoot, { recursive: true })
     }
-    basePath = join(testCacheRoot, 'test-manifest-' + Date.now() + '.json')
-    manifestPath = basePath.replace('.json', '-devnet.json')
-    strategy = new StaticCacheStrategy('devnet', { path: basePath })
+    manifestPath = join(testCacheRoot, 'test-manifest-' + Date.now() + '.json')
+    strategy = new StaticCacheStrategy('devnet', { path: manifestPath })
     strategy.clear()
   })
 
@@ -48,7 +46,7 @@ describe('StaticCacheStrategy', () => {
 
   it('should load values from existing manifest file', () => {
     strategy.set('foo', 'bar', 10)
-    const newStrategy = new StaticCacheStrategy('devnet', { path: basePath })
+    const newStrategy = new StaticCacheStrategy('devnet', { path: manifestPath })
     expect(newStrategy.get('foo')).toBe('bar')
   })
 
