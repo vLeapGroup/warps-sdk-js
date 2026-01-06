@@ -9,6 +9,7 @@ import {
   isWarpActionAutoExecute,
   replacePlaceholdersInWhenExpression,
 } from './helpers'
+import { extractPromptOutput } from './helpers/output'
 import { buildHttpRequest } from './helpers/http'
 import { applyOutputToMessages } from './helpers/messages'
 import { buildMappedOutput, extractResolvedInputValues } from './helpers/payload'
@@ -617,6 +618,16 @@ export class WarpExecutor {
 
       const extractedInputs = extractResolvedInputValues(resolvedInputs)
       const wallet = getWarpWalletAddressFromConfig(this.config, chain.name)
+      const serializer = this.factory.getSerializer()
+
+      const { values, output } = await extractPromptOutput(
+        preparedWarp,
+        interpolatedPrompt,
+        actionIndex,
+        resolvedInputs,
+        serializer,
+        this.config
+      )
 
       return {
         status: 'success',
@@ -625,10 +636,10 @@ export class WarpExecutor {
         user: wallet,
         txHash: null,
         tx: null,
-        next: getNextInfo(this.config, this.adapters, preparedWarp, actionIndex, { prompt: interpolatedPrompt }),
-        values: { string: [interpolatedPrompt], native: [interpolatedPrompt], mapped: { prompt: interpolatedPrompt } },
-        output: { prompt: interpolatedPrompt },
-        messages: applyOutputToMessages(preparedWarp, { prompt: interpolatedPrompt }, this.config),
+        next: getNextInfo(this.config, this.adapters, preparedWarp, actionIndex, output),
+        values,
+        output,
+        messages: applyOutputToMessages(preparedWarp, output, this.config),
         destination: null,
         resolvedInputs: extractedInputs,
       }

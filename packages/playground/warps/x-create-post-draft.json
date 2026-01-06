@@ -1,0 +1,49 @@
+{
+  "protocol": "warp:3.0.0",
+  "name": "X: Create Post Draft",
+  "title": {
+    "en": "Create X.com Post Draft",
+    "de": "X.com Post-Entwurf erstellen"
+  },
+  "description": {
+    "en": "Generate a draft post for X.com (Twitter) based on your notes and ideas.",
+    "de": "Generiere einen Post-Entwurf für X.com (Twitter) basierend auf deinen Notizen und Ideen."
+  },
+  "actions": [
+    {
+      "type": "prompt",
+      "label": {
+        "en": "Generate Draft",
+        "de": "Entwurf generieren"
+      },
+      "description": {
+        "en": "Creates an X.com post draft based on your notes",
+        "de": "Erstellt einen X.com Post-Entwurf basierend auf deinen Notizen"
+      },
+      "prompt": "create a x.com post draft based on the following notes: {{NOTES}}",
+      "inputs": [
+        {
+          "name": "Notes",
+          "as": "NOTES",
+          "type": "string",
+          "source": "field",
+          "required": true,
+          "description": {
+            "en": "Your notes, ideas, or content to turn into an X.com post draft",
+            "de": "Deine Notizen, Ideen oder Inhalte, die in einen X.com Post-Entwurf umgewandelt werden sollen"
+          }
+        }
+      ]
+    }
+  ],
+  "output": {
+    "DRAFT": "out"
+  },
+  "messages": {
+    "success": {
+      "en": "Post draft generated successfully!",
+      "de": "Post-Entwurf erfolgreich generiert!"
+    },
+    "content": "{{DRAFT}}"
+  }
+}

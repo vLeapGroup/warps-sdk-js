@@ -34,13 +34,11 @@
           "required": true,
           "description": "Your favorite topic"
         }
-      ],
-      "primary": true,
-      "auto": true
+      ]
     }
   ],
   "output": {
-    "prompt": "$.prompt"
+    "PROMPT": "out"
   },
   "messages": {
     "success": "Prompt generated successfully!"

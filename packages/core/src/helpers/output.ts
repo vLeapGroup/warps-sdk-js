@@ -3,8 +3,41 @@ import { ResolvedInput, TransformRunner, Warp, WarpClientConfig } from '../types
 import { WarpExecutionOutput } from '../types/output'
 import { WarpLogger } from '../WarpLogger'
 import { WarpSerializer } from '../WarpSerializer'
-import { buildMappedOutput } from './payload'
 import { getWarpActionByIndex } from './general'
+import { buildMappedOutput } from './payload'
+
+const extractOutputValues = (
+  warp: Warp,
+  actionIndex: number,
+  extractValue: (pathParts: string[]) => any
+): { stringValues: string[]; nativeValues: any[]; output: WarpExecutionOutput } => {
+  const stringValues: string[] = []
+  const nativeValues: any[] = []
+  let output: WarpExecutionOutput = {}
+
+  if (warp.output) {
+    for (const [outputName, outputPath] of Object.entries(warp.output)) {
+      if (outputPath.startsWith(WarpConstants.Transform.Prefix)) continue
+      const currentActionIndex = parseOutputOutIndex(outputPath)
+      if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
+        output[outputName] = null
+        continue
+      }
+      const [outputType, ...pathParts] = outputPath.split('.')
+
+      if (outputType === 'out' || outputType.startsWith('out[') || outputType === '$') {
+        const value = extractValue(pathParts)
+        stringValues.push(String(value))
+        nativeValues.push(value)
+        output[outputName] = value
+      } else {
+        output[outputName] = outputPath
+      }
+    }
+  }
+
+  return { stringValues, nativeValues, output }
+}
 
 export const extractCollectOutput = async (
   warp: Warp,
@@ -14,35 +47,16 @@ export const extractCollectOutput = async (
   serializer: WarpSerializer,
   config: WarpClientConfig
 ): Promise<{ values: { string: string[]; native: any[]; mapped: Record<string, any> }; output: WarpExecutionOutput }> => {
-  const stringValues: string[] = []
-  const nativeValues: any[] = []
-  let output: WarpExecutionOutput = {}
-  for (const [outputName, outputPath] of Object.entries(warp.output || {})) {
-    if (outputPath.startsWith(WarpConstants.Transform.Prefix)) continue
-    const currentActionIndex = parseOutputOutIndex(outputPath)
-    if (currentActionIndex !== null && currentActionIndex !== actionIndex) {
-      output[outputName] = null
-      continue
-    }
-    const [outputType, ...pathParts] = outputPath.split('.')
+  const getNestedValueFromObject = (obj: any, path: string[]): any =>
+    path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : null), obj)
 
-    const getNestedValueFromObject = (obj: any, path: string[]): any =>
-      path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : null), obj)
+  const extractValue = (pathParts: string[]): any =>
+    pathParts.length === 0 ? response?.data || response : getNestedValueFromObject(response, pathParts)
 
-    if (outputType === 'out' || outputType.startsWith('out[')) {
-      const value = pathParts.length === 0 ? response?.data || response : getNestedValueFromObject(response, pathParts)
-      stringValues.push(String(value))
-      nativeValues.push(value)
-      output[outputName] = value
-    } else {
-      output[outputName] = outputPath
-    }
-  }
-
-  const mapped = buildMappedOutput(inputs, serializer)
+  const { stringValues, nativeValues, output } = extractOutputValues(warp, actionIndex, extractValue)
 
   return {
-    values: { string: stringValues, native: nativeValues, mapped },
+    values: { string: stringValues, native: nativeValues, mapped: buildMappedOutput(inputs, serializer) },
     output: await evaluateOutputCommon(warp, output, actionIndex, inputs, serializer, config),
   }
 }
@@ -109,6 +123,29 @@ const evaluateTransformOutput = async (
   }
 
   return modifiable
+}
+
+export const extractPromptOutput = async (
+  warp: Warp,
+  promptValue: string,
+  actionIndex: number,
+  inputs: ResolvedInput[],
+  serializer: WarpSerializer,
+  config: WarpClientConfig
+): Promise<{ values: { string: string[]; native: any[]; mapped: Record<string, any> }; output: WarpExecutionOutput }> => {
+  const responseData = { prompt: promptValue }
+  const extractValue = (pathParts: string[]): any => {
+    if (pathParts.length === 0) return promptValue
+    // Handle $.prompt for backwards compatibility
+    return pathParts.reduce((acc: any, key) => (acc && acc[key] !== undefined ? acc[key] : null), responseData)
+  }
+
+  const { stringValues, nativeValues, output } = extractOutputValues(warp, actionIndex, extractValue)
+
+  return {
+    values: { string: stringValues, native: nativeValues, mapped: buildMappedOutput(inputs, serializer) },
+    output: await evaluateOutputCommon(warp, output, actionIndex, inputs, serializer, config),
+  }
 }
 
 export const parseOutputOutIndex = (outputPath: string): number | null => {

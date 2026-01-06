@@ -51,7 +51,7 @@ describe('WarpExecutor - Prompt Actions', () => {
     expect(execution.output.prompt).toBe('This is a simple static prompt.')
     expect(execution.values.string).toEqual(['This is a simple static prompt.'])
     expect(execution.values.native).toEqual(['This is a simple static prompt.'])
-    expect(execution.values.mapped).toEqual({ prompt: 'This is a simple static prompt.' })
+    expect(execution.values.mapped).toEqual({})
     expect(handlers.onActionExecuted).toHaveBeenCalledWith(
       expect.objectContaining({
         action: 1,
@@ -106,13 +106,62 @@ describe('WarpExecutor - Prompt Actions', () => {
     expect(execution.output.prompt).toBe('Hello John Doe! You are 30 years old.')
     expect(execution.values.string).toEqual(['Hello John Doe! You are 30 years old.'])
     expect(execution.values.native).toEqual(['Hello John Doe! You are 30 years old.'])
-    expect(execution.values.mapped).toEqual({ prompt: 'Hello John Doe! You are 30 years old.' })
+    expect(execution.values.mapped).toEqual({ name: 'John Doe', age: 30 })
     expect(handlers.onActionExecuted).toHaveBeenCalledWith(
       expect.objectContaining({
         action: 1,
         execution: expect.objectContaining({
           status: 'success',
           output: { prompt: 'Hello John Doe! You are 30 years old.' },
+        }),
+      })
+    )
+  })
+
+  it('should properly map output using out path', async () => {
+    const outPromptWarp: Warp = {
+      ...warp,
+      actions: [
+        {
+          type: 'prompt',
+          label: 'Generate Draft',
+          prompt: 'create a x.com post draft based on the following notes: {{NOTES}}',
+          inputs: [
+            {
+              name: 'Notes',
+              as: 'NOTES',
+              type: 'string',
+              source: 'field',
+              required: true,
+            },
+          ],
+          primary: true,
+          auto: true,
+        },
+      ],
+      output: {
+        DRAFT: 'out',
+      },
+    }
+
+    const inputs = ['string:Exciting news! We just launched a new feature.']
+    const result = await executor.execute(outPromptWarp, inputs)
+
+    expect(result).toBeDefined()
+    expect(result.immediateExecutions).toHaveLength(1)
+    const execution = result.immediateExecutions[0]
+    expect(execution.status).toBe('success')
+    expect(execution.output.DRAFT).toBe('create a x.com post draft based on the following notes: Exciting news! We just launched a new feature.')
+    expect(execution.values.string).toEqual(['create a x.com post draft based on the following notes: Exciting news! We just launched a new feature.'])
+    expect(execution.values.native).toEqual(['create a x.com post draft based on the following notes: Exciting news! We just launched a new feature.'])
+    expect(handlers.onActionExecuted).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 1,
+        execution: expect.objectContaining({
+          status: 'success',
+          output: expect.objectContaining({
+            DRAFT: 'create a x.com post draft based on the following notes: Exciting news! We just launched a new feature.',
+          }),
         }),
       })
     )

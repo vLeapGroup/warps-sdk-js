@@ -8,13 +8,11 @@
       "type": "prompt",
       "label": "Get Prompt",
       "description": "Returns a simple static prompt",
-      "prompt": "This is a simple static prompt that doesn't require any inputs.",
-      "primary": true,
-      "auto": true
+      "prompt": "This is a simple static prompt that doesn't require any inputs."
     }
   ],
   "output": {
-    "prompt": "$.prompt"
+    "PROMPT": "out"
   },
   "messages": {
     "success": "Prompt retrieved successfully!"
