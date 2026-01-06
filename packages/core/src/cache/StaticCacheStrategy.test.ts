@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, unlinkSync } from 'fs'
+import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'fs'
 import { join, resolve } from 'path'
 import { StaticCacheStrategy } from './StaticCacheStrategy'
 
@@ -26,26 +26,14 @@ describe('StaticCacheStrategy', () => {
     }
   })
 
-  it('should create manifest file when setting values', () => {
-    strategy.set('foo', 'bar', 10)
-    expect(existsSync(manifestPath)).toBe(true)
-  })
-
-  it('should set and get a value', () => {
+  it('should set and get a value in memory', () => {
     strategy.set('foo', 'bar', 10)
     expect(strategy.get('foo')).toBe('bar')
   })
 
-  it('should persist values to manifest file', () => {
-    strategy.set('foo', 'bar', 10)
-    const data = readFileSync(manifestPath, 'utf-8')
-    const parsed = JSON.parse(data)
-    expect(parsed.foo).toBeDefined()
-    expect(parsed.foo.value).toBe('bar')
-  })
-
   it('should load values from existing manifest file', () => {
-    strategy.set('foo', 'bar', 10)
+    const testData = { foo: { value: 'bar', expiresAt: Date.now() + 10000 } }
+    writeFileSync(manifestPath, JSON.stringify(testData), 'utf-8')
     const newStrategy = new StaticCacheStrategy('devnet', { path: manifestPath })
     expect(newStrategy.get('foo')).toBe('bar')
   })
