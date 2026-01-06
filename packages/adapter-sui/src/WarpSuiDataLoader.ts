@@ -25,7 +25,7 @@ export class WarpSuiDataLoader implements AdapterWarpDataLoader {
   ) {
     const providerConfig = getProviderConfig(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
     this.client = new SuiClient({ url: providerConfig.url })
-    this.cache = new WarpCache(config.cache?.type)
+    this.cache = new WarpCache(config.env, config.cache)
   }
 
   async getAccount(address: string): Promise<WarpChainAccount> {

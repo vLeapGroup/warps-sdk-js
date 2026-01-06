@@ -39,7 +39,7 @@ export class WarpNearOutput implements AdapterWarpOutput {
       nodeUrl: providerConfig.url,
       keyStore: new keyStores.InMemoryKeyStore(),
     }
-    this.cache = new WarpCache(config.cache?.type)
+    this.cache = new WarpCache(config.env, config.cache)
   }
 
   async getActionExecution(

@@ -25,16 +25,16 @@ describe('WarpCache', () => {
             mkdirSync(testCacheRoot, { recursive: true })
           }
           testDir = join(testCacheRoot, 'warp-cache-' + Date.now())
-          cache = new WarpCache(type as WarpCacheType, testDir)
+          cache = new WarpCache('devnet', { type: type as WarpCacheType, path: testDir })
         } else if (type === 'static') {
           const testCacheRoot = resolve(process.cwd(), '.test-cache')
           if (!existsSync(testCacheRoot)) {
             mkdirSync(testCacheRoot, { recursive: true })
           }
           testDir = join(testCacheRoot, 'warp-manifest-' + Date.now() + '.json')
-          cache = new WarpCache(type as WarpCacheType, testDir)
+          cache = new WarpCache('devnet', { type: type as WarpCacheType, path: testDir })
         } else {
-          cache = new WarpCache(type as WarpCacheType)
+          cache = new WarpCache('devnet', { type: type as WarpCacheType })
         }
         cache.clear()
       })

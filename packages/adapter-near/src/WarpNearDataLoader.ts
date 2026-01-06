@@ -23,7 +23,7 @@ export class WarpNearDataLoader implements AdapterWarpDataLoader {
     private readonly config: WarpClientConfig,
     private readonly chain: WarpChainInfo
   ) {
-    this.cache = new WarpCache(config.cache?.type)
+    this.cache = new WarpCache(config.env, config.cache)
     const providerConfig = getProviderConfig(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
 
     this.nearConfig = {

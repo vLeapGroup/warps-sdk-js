@@ -35,7 +35,7 @@ export class WarpEvmOutput implements AdapterWarpOutput {
     const providerConfig = getProviderConfig(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
     const network = new ethers.Network(this.chain.name, parseInt(this.chain.chainId))
     this.provider = new ethers.JsonRpcProvider(providerConfig.url, network)
-    this.cache = new WarpCache(config.cache?.type)
+    this.cache = new WarpCache(config.env, config.cache)
   }
 
   async getActionExecution(

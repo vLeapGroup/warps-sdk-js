@@ -1,3 +1,5 @@
+import { WarpChainEnv } from '../types'
+import { ClientCacheConfig } from '../types/cache'
 import { CacheStrategy } from './CacheStrategy'
 import { valueReviver, valueReplacer } from './helpers'
 
@@ -9,8 +11,8 @@ type CacheEntry<T> = {
 export class LocalStorageCacheStrategy implements CacheStrategy {
   private readonly prefix: string
 
-  constructor(prefix = 'warp-cache') {
-    this.prefix = prefix
+  constructor(env: WarpChainEnv, config?: ClientCacheConfig) {
+    this.prefix = 'warp-cache'
   }
 
   private getKey(key: string): string {

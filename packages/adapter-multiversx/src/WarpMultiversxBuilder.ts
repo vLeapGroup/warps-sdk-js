@@ -24,7 +24,7 @@ export class WarpMultiversxBuilder extends WarpBuilder implements AdapterWarpBui
     private readonly chain: WarpChainInfo
   ) {
     super(config)
-    this.cache = new WarpCache(config.cache?.type)
+    this.cache = new WarpCache(config.env, config.cache)
     this.core = new WarpBuilder(config)
   }
 

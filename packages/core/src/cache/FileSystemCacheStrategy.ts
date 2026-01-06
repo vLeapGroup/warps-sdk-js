@@ -1,5 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'fs'
 import { join, resolve } from 'path'
+import { WarpChainEnv } from '../types'
+import { ClientCacheConfig } from '../types/cache'
 import { CacheStrategy } from './CacheStrategy'
 import { valueReviver, valueReplacer } from './helpers'
 
@@ -11,7 +13,8 @@ type CacheEntry<T> = {
 export class FileSystemCacheStrategy implements CacheStrategy {
   private cacheDir: string
 
-  constructor(cacheDir?: string) {
+  constructor(env: WarpChainEnv, config?: ClientCacheConfig) {
+    const cacheDir = config?.path
     this.cacheDir = cacheDir ? resolve(cacheDir) : resolve(process.cwd(), '.warp-cache')
     this.ensureCacheDir()
   }

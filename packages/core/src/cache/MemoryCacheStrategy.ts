@@ -1,3 +1,5 @@
+import { WarpChainEnv } from '../types'
+import { ClientCacheConfig } from '../types/cache'
 import { CacheStrategy } from './CacheStrategy'
 
 type CacheEntry<T> = {
@@ -7,6 +9,8 @@ type CacheEntry<T> = {
 
 export class MemoryCacheStrategy implements CacheStrategy {
   private static cache: Map<string, CacheEntry<any>> = new Map()
+
+  constructor(env: WarpChainEnv, config?: ClientCacheConfig) {}
 
   get<T>(key: string): T | null {
     const entry = MemoryCacheStrategy.cache.get(key)

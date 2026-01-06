@@ -4,7 +4,7 @@ import { LocalStorageCacheStrategy } from './cache/LocalStorageCacheStrategy'
 import { MemoryCacheStrategy } from './cache/MemoryCacheStrategy'
 import { StaticCacheStrategy } from './cache/StaticCacheStrategy'
 import { WarpChainEnv } from './types'
-import { WarpCacheType } from './types/cache'
+import { ClientCacheConfig } from './types/cache'
 
 export const CacheTtl = {
   OneMinute: 60,
@@ -26,23 +26,21 @@ export const WarpCacheKey = {
 
 export class WarpCache {
   private strategy: CacheStrategy
-  private path?: string
 
-  constructor(type?: WarpCacheType, path?: string) {
-    this.path = path
-    this.strategy = this.selectStrategy(type)
+  constructor(env: WarpChainEnv, config?: ClientCacheConfig) {
+    this.strategy = this.selectStrategy(env, config)
   }
 
-  private selectStrategy(type?: WarpCacheType): CacheStrategy {
-    if (type === 'localStorage') return new LocalStorageCacheStrategy()
-    if (type === 'memory') return new MemoryCacheStrategy()
-    if (type === 'static') return new StaticCacheStrategy(this.path)
-    if (type === 'filesystem') return new FileSystemCacheStrategy(this.path)
+  private selectStrategy(env: WarpChainEnv, config?: ClientCacheConfig): CacheStrategy {
+    if (config?.type === 'localStorage') return new LocalStorageCacheStrategy(env, config)
+    if (config?.type === 'memory') return new MemoryCacheStrategy(env, config)
+    if (config?.type === 'static') return new StaticCacheStrategy(env, config)
+    if (config?.type === 'filesystem') return new FileSystemCacheStrategy(env, config)
 
     // Default to localStorage in browser environments
-    if (typeof window !== 'undefined' && window.localStorage) return new LocalStorageCacheStrategy()
+    if (typeof window !== 'undefined' && window.localStorage) return new LocalStorageCacheStrategy(env, config)
 
-    return new MemoryCacheStrategy()
+    return new MemoryCacheStrategy(env, config)
   }
 
   set<T>(key: string, value: T, ttl: number): void {

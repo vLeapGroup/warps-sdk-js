@@ -29,7 +29,7 @@ export class WarpMultiversxAbiBuilder implements AdapterWarpAbiBuilder {
     private readonly chain: WarpChainInfo
   ) {
     this.contractLoader = new WarpMultiversxContractLoader(this.config)
-    this.cache = new WarpCache(this.config.cache?.type)
+    this.cache = new WarpCache(this.config.env, this.config.cache)
   }
 
   async createInscriptionTransaction(abi: WarpAbiContents): Promise<WarpAdapterGenericTransaction> {

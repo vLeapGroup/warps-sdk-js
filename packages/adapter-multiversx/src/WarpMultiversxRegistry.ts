@@ -36,7 +36,7 @@ export class WarpMultiversxRegistry implements AdapterWarpRegistry {
     private config: WarpClientConfig,
     private chain: WarpChainInfo
   ) {
-    this.cache = new WarpCache(config.cache?.type)
+    this.cache = new WarpCache(config.env, config.cache)
     this.registryConfig = {
       unitPrice: BigInt(0),
       admins: [],

@@ -32,7 +32,7 @@ export class WarpSuiRegistry implements AdapterWarpRegistry {
   ) {
     const providerConfig = getProviderConfig(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
     this.client = new SuiClient({ url: providerConfig.url })
-    this.cache = new WarpCache(config.cache?.type)
+    this.cache = new WarpCache(config.env, config.cache)
     this.userWallet = getWarpWalletAddressFromConfig(this.config, this.chain.name)
   }
 

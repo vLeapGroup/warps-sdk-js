@@ -60,7 +60,7 @@ const mockAdapter = {
 
 describe('WarpInterpolator', () => {
   beforeEach(() => {
-    new WarpCache('memory').clear()
+    new WarpCache('devnet', { type: 'memory' }).clear()
   })
 
   describe('apply', () => {
@@ -453,7 +453,7 @@ describe('WarpInterpolator', () => {
 
 describe('WarpInterpolator per-action chain info', () => {
   beforeEach(() => {
-    new WarpCache('memory').clear()
+    new WarpCache('devnet', { type: 'memory' }).clear()
   })
 
   it('interpolates actions with different chain info', async () => {
@@ -798,7 +798,7 @@ describe('WarpInterpolator applyInputs with primary inputs', () => {
 
 describe('WarpInterpolator chain-specific placeholders', () => {
   beforeEach(() => {
-    new WarpCache('memory').clear()
+    new WarpCache('devnet', { type: 'memory' }).clear()
   })
 
   const createMockAdapterForChain = (chainName: string, walletAddress?: string, publicKey?: string) => {

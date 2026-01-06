@@ -1,5 +1,7 @@
 import { readFileSync, writeFileSync } from 'fs'
-import { resolve } from 'path'
+import { extname, resolve } from 'path'
+import { WarpChainEnv } from '../types'
+import { ClientCacheConfig } from '../types/cache'
 import { CacheStrategy } from './CacheStrategy'
 import { valueReplacer, valueReviver } from './helpers'
 
@@ -12,11 +14,8 @@ export class StaticCacheStrategy implements CacheStrategy {
   private manifestPath: string
   private cache: Map<string, CacheEntry<any>>
 
-  constructor(path?: string) {
-    this.manifestPath = path ? resolve(path) : resolve(process.cwd(), 'warps-manifest.json')
-    console.log('StaticCacheStrategy path', path)
-    console.log('StaticCacheStrategy manifestPath', this.manifestPath)
-    console.log('StaticCacheStrategy process.cwd()', process.cwd())
+  constructor(env: WarpChainEnv, config?: ClientCacheConfig) {
+    this.manifestPath = this.resolveManifestPath(env, config)
     this.cache = this.loadManifest()
   }
 
@@ -62,5 +61,16 @@ export class StaticCacheStrategy implements CacheStrategy {
   clear(): void {
     this.cache.clear()
     this.saveManifest()
+  }
+
+  private resolveManifestPath(env: WarpChainEnv, config?: ClientCacheConfig): string {
+    const path = config?.path
+    if (path) {
+      const resolvedPath = resolve(path)
+      const ext = extname(resolvedPath)
+      const base = ext ? resolvedPath.slice(0, -ext.length) : resolvedPath
+      return `${base}-${env}${ext || '.json'}`
+    }
+    return resolve(process.cwd(), `warps-manifest-${env}.json`)
   }
 }

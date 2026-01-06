@@ -28,7 +28,7 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
     private chain: WarpChainInfo
   ) {
     this.entry = getMultiversxEntrypoint(chain, config.env, config)
-    this.cache = new WarpCache(config.cache?.type)
+    this.cache = new WarpCache(config.env, config.cache)
     this.walletProvider = this.createProvider()
     this.initializeCache()
   }

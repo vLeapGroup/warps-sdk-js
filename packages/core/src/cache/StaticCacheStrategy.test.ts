@@ -4,6 +4,7 @@ import { StaticCacheStrategy } from './StaticCacheStrategy'
 
 describe('StaticCacheStrategy', () => {
   let manifestPath: string
+  let basePath: string
   let strategy: StaticCacheStrategy
 
   beforeEach(() => {
@@ -11,8 +12,9 @@ describe('StaticCacheStrategy', () => {
     if (!existsSync(testCacheRoot)) {
       mkdirSync(testCacheRoot, { recursive: true })
     }
-    manifestPath = join(testCacheRoot, 'test-manifest-' + Date.now() + '.json')
-    strategy = new StaticCacheStrategy(manifestPath)
+    basePath = join(testCacheRoot, 'test-manifest-' + Date.now() + '.json')
+    manifestPath = basePath.replace('.json', '-devnet.json')
+    strategy = new StaticCacheStrategy('devnet', { path: basePath })
     strategy.clear()
   })
 
@@ -46,7 +48,7 @@ describe('StaticCacheStrategy', () => {
 
   it('should load values from existing manifest file', () => {
     strategy.set('foo', 'bar', 10)
-    const newStrategy = new StaticCacheStrategy(manifestPath)
+    const newStrategy = new StaticCacheStrategy('devnet', { path: basePath })
     expect(newStrategy.get('foo')).toBe('bar')
   })
 
@@ -106,15 +108,15 @@ describe('StaticCacheStrategy', () => {
   })
 
   it('should use default manifest path when not provided', () => {
-    const defaultStrategy = new StaticCacheStrategy()
+    const defaultStrategy = new StaticCacheStrategy('devnet')
     expect(defaultStrategy).toBeDefined()
     defaultStrategy.clear()
   })
 
   it('should handle missing manifest file gracefully', () => {
     const testCacheRoot = resolve(process.cwd(), '.test-cache')
-    const nonExistentPath = join(testCacheRoot, 'non-existent-manifest.json')
-    const newStrategy = new StaticCacheStrategy(nonExistentPath)
+    const nonExistentBasePath = join(testCacheRoot, 'non-existent-manifest.json')
+    const newStrategy = new StaticCacheStrategy('devnet', { path: nonExistentBasePath })
     expect(newStrategy.get('foo')).toBeNull()
   })
 })

@@ -34,7 +34,7 @@ export class WarpSolanaOutput implements AdapterWarpOutput {
     this.serializer = new WarpSolanaSerializer()
     const providerConfig = getProviderConfig(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
     this.connection = new Connection(providerConfig.url, 'confirmed')
-    this.cache = new WarpCache(config.cache?.type)
+    this.cache = new WarpCache(config.env, config.cache)
   }
 
   async getActionExecution(

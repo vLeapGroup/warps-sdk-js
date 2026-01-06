@@ -24,7 +24,7 @@ export class WarpSuiBuilder extends WarpBuilder implements AdapterWarpBuilder {
     private readonly chain: WarpChainInfo
   ) {
     super(config)
-    this.cache = new WarpCache(config.cache?.type)
+    this.cache = new WarpCache(config.env, config.cache)
     const providerConfig = getProviderConfig(this.config, this.chain.name, this.config.env, this.chain.defaultApiUrl)
     this.client = new SuiClient({ url: providerConfig.url })
     this.userWallet = getWarpWalletAddressFromConfig(this.config, this.chain.name)

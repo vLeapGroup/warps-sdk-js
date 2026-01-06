@@ -22,7 +22,7 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
     private readonly config: WarpClientConfig,
     private readonly chain: WarpChainInfo
   ) {
-    this.cache = new WarpCache(config.cache?.type)
+    this.cache = new WarpCache(config.env, config.cache)
   }
 
   async getAccount(address: string): Promise<WarpChainAccount> {
