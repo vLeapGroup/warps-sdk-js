@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.195
+
+### Minor Changes
+
+- 6f02004: add prompt action outputs
+
 ## 3.0.0-beta.194
 
 ### Patch Changes
