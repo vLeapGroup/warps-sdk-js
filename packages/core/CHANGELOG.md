@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.194
+
+### Patch Changes
+
+- d639fab: update static cache strategy
+
 ## 3.0.0-beta.193
 
 ### Patch Changes
