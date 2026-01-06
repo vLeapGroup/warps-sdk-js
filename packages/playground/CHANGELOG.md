@@ -1,5 +1,12 @@
 # @warps/playground
 
+## 0.2.0-beta.164
+
+### Patch Changes
+
+- Updated dependencies [1ee3790]
+  - @vleap/warps@3.0.0-beta.190
+
 ## 0.2.0-beta.163
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.190
+
+### Patch Changes
+
+- 1ee3790: add logging
+
 ## 3.0.0-beta.189
 
 ### Minor Changes
