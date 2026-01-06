@@ -166,7 +166,7 @@ const runWarp = async (warpFile: string) => {
 
   const executionResults: ExecutionResult[] = []
 
-  const { txs, chain, evaluateOutput, resolvedInputs } = await client.executeWarp(warp, WarpInputs, {
+  const { txs, chain, evaluateOutput, resolvedInputs, immediateExecutions } = await client.executeWarp(warp, WarpInputs, {
     onActionExecuted: (result) => {
       console.log('✅ Single action executed:', result)
       executionResults.push({ type: 'action', result })
@@ -205,7 +205,7 @@ const runWarp = async (warpFile: string) => {
       chain: Chain,
       inputs: WarpInputs,
       resolvedInputs,
-      immediateExecutions: [],
+      immediateExecutions,
       txs,
       hashes,
       explorerUrl,
@@ -214,7 +214,11 @@ const runWarp = async (warpFile: string) => {
     })
 
     console.log(`\n🎉 Warp completed! View on explorer: ${explorerUrl}`)
+
+    return
   }
+
+  console.log('🔍 Execution results:', JSON.stringify(executionResults, null, 2))
 }
 
 const listWarps = () => fs.readdirSync(warpsDir).filter((f) => f.endsWith('.ts') || f.endsWith('.js') || f.endsWith('.json'))
