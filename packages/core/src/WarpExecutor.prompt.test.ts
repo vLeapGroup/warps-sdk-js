@@ -33,12 +33,10 @@ describe('WarpExecutor - Prompt Actions', () => {
           type: 'prompt',
           label: 'Get Simple Prompt',
           prompt: 'This is a simple static prompt.',
-          primary: true,
-          auto: true,
         },
       ],
       output: {
-        prompt: 'out',
+        RESULT: 'out',
       },
     }
 
@@ -48,7 +46,8 @@ describe('WarpExecutor - Prompt Actions', () => {
     expect(result.immediateExecutions).toHaveLength(1)
     const execution = result.immediateExecutions[0]
     expect(execution.status).toBe('success')
-    expect(execution.output.prompt).toBe('This is a simple static prompt.')
+    expect(execution.output.RESULT).toBe('This is a simple static prompt.')
+    expect(execution.output.PROMPT).toBe('This is a simple static prompt.')
     expect(execution.values.string).toEqual(['This is a simple static prompt.'])
     expect(execution.values.native).toEqual(['This is a simple static prompt.'])
     expect(execution.values.mapped).toEqual({})
@@ -57,7 +56,10 @@ describe('WarpExecutor - Prompt Actions', () => {
         action: 1,
         execution: expect.objectContaining({
           status: 'success',
-          output: { prompt: 'This is a simple static prompt.' },
+          output: expect.objectContaining({
+            RESULT: 'This is a simple static prompt.',
+            PROMPT: 'This is a simple static prompt.',
+          }),
         }),
       })
     )
@@ -87,12 +89,10 @@ describe('WarpExecutor - Prompt Actions', () => {
               required: true,
             },
           ],
-          primary: true,
-          auto: true,
         },
       ],
       output: {
-        prompt: 'out',
+        RESULT: 'out',
       },
     }
 
@@ -103,7 +103,8 @@ describe('WarpExecutor - Prompt Actions', () => {
     expect(result.immediateExecutions).toHaveLength(1)
     const execution = result.immediateExecutions[0]
     expect(execution.status).toBe('success')
-    expect(execution.output.prompt).toBe('Hello John Doe! You are 30 years old.')
+    expect(execution.output.RESULT).toBe('Hello John Doe! You are 30 years old.')
+    expect(execution.output.PROMPT).toBe('Hello John Doe! You are 30 years old.')
     expect(execution.values.string).toEqual(['Hello John Doe! You are 30 years old.'])
     expect(execution.values.native).toEqual(['Hello John Doe! You are 30 years old.'])
     expect(execution.values.mapped).toEqual({ name: 'John Doe', age: 30 })
@@ -112,7 +113,10 @@ describe('WarpExecutor - Prompt Actions', () => {
         action: 1,
         execution: expect.objectContaining({
           status: 'success',
-          output: { prompt: 'Hello John Doe! You are 30 years old.' },
+          output: expect.objectContaining({
+            RESULT: 'Hello John Doe! You are 30 years old.',
+            PROMPT: 'Hello John Doe! You are 30 years old.',
+          }),
         }),
       })
     )
@@ -135,8 +139,6 @@ describe('WarpExecutor - Prompt Actions', () => {
               required: true,
             },
           ],
-          primary: true,
-          auto: true,
         },
       ],
       output: {
@@ -152,6 +154,7 @@ describe('WarpExecutor - Prompt Actions', () => {
     const execution = result.immediateExecutions[0]
     expect(execution.status).toBe('success')
     expect(execution.output.DRAFT).toBe('create a x.com post draft based on the following notes: Exciting news! We just launched a new feature.')
+    expect(execution.output.PROMPT).toBe('create a x.com post draft based on the following notes: Exciting news! We just launched a new feature.')
     expect(execution.values.string).toEqual(['create a x.com post draft based on the following notes: Exciting news! We just launched a new feature.'])
     expect(execution.values.native).toEqual(['create a x.com post draft based on the following notes: Exciting news! We just launched a new feature.'])
     expect(handlers.onActionExecuted).toHaveBeenCalledWith(
@@ -161,10 +164,86 @@ describe('WarpExecutor - Prompt Actions', () => {
           status: 'success',
           output: expect.objectContaining({
             DRAFT: 'create a x.com post draft based on the following notes: Exciting news! We just launched a new feature.',
+            PROMPT: 'create a x.com post draft based on the following notes: Exciting news! We just launched a new feature.',
           }),
         }),
       })
     )
+  })
+
+  it('should always include PROMPT output even when no output is defined', async () => {
+    const noOutputWarp: Warp = {
+      ...warp,
+      actions: [
+        {
+          type: 'prompt',
+          label: 'Prompt Without Output',
+          prompt: 'This prompt has no output defined.',
+        },
+      ],
+      // No output defined
+    }
+
+    const result = await executor.execute(noOutputWarp, [])
+
+    expect(result).toBeDefined()
+    expect(result.immediateExecutions).toHaveLength(1)
+    const execution = result.immediateExecutions[0]
+    expect(execution.status).toBe('success')
+    expect(execution.output.PROMPT).toBe('This prompt has no output defined.')
+    expect(execution.output).toEqual({ PROMPT: 'This prompt has no output defined.' })
+  })
+
+  it('should not override PROMPT output if explicitly defined in warp output', async () => {
+    const customPromptWarp: Warp = {
+      ...warp,
+      actions: [
+        {
+          type: 'prompt',
+          label: 'Prompt With Custom PROMPT',
+          prompt: 'Original prompt text',
+        },
+      ],
+      output: {
+        PROMPT: 'out',
+        CUSTOM: 'out',
+      },
+    }
+
+    const result = await executor.execute(customPromptWarp, [])
+
+    expect(result).toBeDefined()
+    expect(result.immediateExecutions).toHaveLength(1)
+    const execution = result.immediateExecutions[0]
+    expect(execution.status).toBe('success')
+    // PROMPT should be the evaluated output value (from 'out'), not the default
+    expect(execution.output.PROMPT).toBe('Original prompt text')
+    expect(execution.output.CUSTOM).toBe('Original prompt text')
+  })
+
+  it('should not override PROMPT output even if it evaluates to null', async () => {
+    const nullPromptWarp: Warp = {
+      ...warp,
+      actions: [
+        {
+          type: 'prompt',
+          label: 'Prompt With Null PROMPT',
+          prompt: 'Original prompt text',
+        },
+      ],
+      output: {
+        PROMPT: 'in.nonexistent', // This will evaluate to null
+      },
+    }
+
+    const result = await executor.execute(nullPromptWarp, [])
+
+    expect(result).toBeDefined()
+    expect(result.immediateExecutions).toHaveLength(1)
+    const execution = result.immediateExecutions[0]
+    expect(execution.status).toBe('success')
+    // PROMPT should be null (as defined), not the default prompt value
+    expect(execution.output.PROMPT).toBeNull()
   })
 
   it('should handle errors during prompt action execution', async () => {
@@ -178,12 +257,10 @@ describe('WarpExecutor - Prompt Actions', () => {
           type: 'prompt',
           label: 'Error Prompt',
           prompt: 'This is a prompt.',
-          primary: true,
-          auto: true,
         },
       ],
       output: {
-        prompt: 'out',
+        RESULT: 'out',
       },
     }
 

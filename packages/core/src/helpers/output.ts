@@ -137,9 +137,16 @@ export const extractPromptOutput = async (
 
   const { stringValues, nativeValues, output } = extractOutputValues(warp, actionIndex, extractValue)
 
+  const evaluatedOutput = await evaluateOutputCommon(warp, output, actionIndex, inputs, serializer, config)
+
+  // Always add PROMPT output with the prompt value, unless it's already defined
+  if (!('PROMPT' in evaluatedOutput)) {
+    evaluatedOutput.PROMPT = promptValue
+  }
+
   return {
     values: { string: stringValues, native: nativeValues, mapped: buildMappedOutput(inputs, serializer) },
-    output: await evaluateOutputCommon(warp, output, actionIndex, inputs, serializer, config),
+    output: evaluatedOutput,
   }
 }
 
