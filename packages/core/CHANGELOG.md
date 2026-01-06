@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.196
+
+### Minor Changes
+
+- d54c656: add prompts default output
+
 ## 3.0.0-beta.195
 
 ### Minor Changes

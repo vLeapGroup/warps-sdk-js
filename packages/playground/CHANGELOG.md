@@ -1,5 +1,14 @@
 # @warps/playground
 
+## 0.2.0-beta.170
+
+### Patch Changes
+
+- Updated dependencies [d54c656]
+  - @vleap/warps@3.0.0-beta.196
+  - @vleap/warps-mcp@1.0.0-beta.25
+  - @vleap/warps-wallet-coinbase@1.0.0-beta.10
+
 ## 0.2.0-beta.169
 
 ### Patch Changes
