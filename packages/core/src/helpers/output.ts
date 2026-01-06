@@ -133,12 +133,7 @@ export const extractPromptOutput = async (
   serializer: WarpSerializer,
   config: WarpClientConfig
 ): Promise<{ values: { string: string[]; native: any[]; mapped: Record<string, any> }; output: WarpExecutionOutput }> => {
-  const responseData = { prompt: promptValue }
-  const extractValue = (pathParts: string[]): any => {
-    if (pathParts.length === 0) return promptValue
-    // Handle $.prompt for backwards compatibility
-    return pathParts.reduce((acc: any, key) => (acc && acc[key] !== undefined ? acc[key] : null), responseData)
-  }
+  const extractValue = (pathParts: string[]): any => (pathParts.length === 0 ? promptValue : null)
 
   const { stringValues, nativeValues, output } = extractOutputValues(warp, actionIndex, extractValue)
 

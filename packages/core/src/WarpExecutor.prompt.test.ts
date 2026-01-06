@@ -38,7 +38,7 @@ describe('WarpExecutor - Prompt Actions', () => {
         },
       ],
       output: {
-        prompt: '$.prompt',
+        prompt: 'out',
       },
     }
 
@@ -92,7 +92,7 @@ describe('WarpExecutor - Prompt Actions', () => {
         },
       ],
       output: {
-        prompt: '$.prompt',
+        prompt: 'out',
       },
     }
 
@@ -183,7 +183,7 @@ describe('WarpExecutor - Prompt Actions', () => {
         },
       ],
       output: {
-        prompt: '$.prompt',
+        prompt: 'out',
       },
     }
 
