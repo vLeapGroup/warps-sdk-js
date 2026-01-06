@@ -1,5 +1,14 @@
 # @vleap/warps-adapter-near
 
+## 0.1.0-beta.17
+
+### Patch Changes
+
+- 4056843: update logo urls
+- Updated dependencies [0016189]
+- Updated dependencies [57685fc]
+  - @vleap/warps@3.0.0-beta.189
+
 ## 0.1.0-beta.16
 
 ### Patch Changes

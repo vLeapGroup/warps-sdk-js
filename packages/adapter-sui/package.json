@@ -1,6 +1,6 @@
 {
   "name": "@vleap/warps-adapter-sui",
-  "version": "0.2.0-beta.71",
+  "version": "0.2.0-beta.72",
   "description": "",
   "type": "module",
   "types": "./dist/index.d.ts",
@@ -39,6 +39,6 @@
   "dependencies": {
     "@mysten/sui": "^1.46.0",
     "@scure/bip39": "^2.0.1",
-    "@vleap/warps": "^3.0.0-beta.188"
+    "@vleap/warps": "^3.0.0-beta.189"
   }
 }

@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.189
+
+### Minor Changes
+
+- 0016189: add cache static strategy
+- 57685fc: add cache file strategy
+
 ## 3.0.0-beta.188
 
 ### Minor Changes
