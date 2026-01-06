@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-sui
 
+## 0.2.0-beta.73
+
+### Patch Changes
+
+- 050ec48: update caching
+- Updated dependencies [050ec48]
+  - @vleap/warps@3.0.0-beta.192
+
 ## 0.2.0-beta.72
 
 ### Patch Changes

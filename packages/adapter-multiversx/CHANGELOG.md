@@ -1,5 +1,13 @@
 # @vleap/warps-adapter-multiversx
 
+## 0.2.0-beta.98
+
+### Patch Changes
+
+- 050ec48: update caching
+- Updated dependencies [050ec48]
+  - @vleap/warps@3.0.0-beta.192
+
 ## 0.2.0-beta.97
 
 ### Patch Changes

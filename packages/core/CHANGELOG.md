@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.192
+
+### Patch Changes
+
+- 050ec48: update caching
+
 ## 3.0.0-beta.191
 
 ### Patch Changes
