@@ -23,10 +23,9 @@ export class StaticCacheStrategy implements CacheStrategy {
     try {
       const data = readFileSync(manifestPath, 'utf-8')
       const cache = new Map(Object.entries(JSON.parse(data, valueReviver))) as Map<string, CacheEntry<any>>
-      WarpLogger.debug(`StaticCacheStrategy (loadManifest): Loaded ${cache.size} entries from ${manifestPath}`)
       return cache
     } catch (error) {
-      WarpLogger.debug(`StaticCacheStrategy (loadManifest): Failed to load manifest from ${manifestPath}:`, error)
+      WarpLogger.warn(`StaticCacheStrategy (loadManifest): Failed to load manifest from ${manifestPath}:`, error)
       return new Map()
     }
   }
