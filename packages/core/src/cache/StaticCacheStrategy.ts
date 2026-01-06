@@ -14,6 +14,7 @@ export class StaticCacheStrategy implements CacheStrategy {
 
   constructor(manifestPath = 'warps-manifest.json') {
     this.manifestPath = resolve(process.cwd(), manifestPath)
+    console.log('StaticCacheStrategy manifestPath', this.manifestPath)
     this.cache = this.loadManifest()
   }
 
