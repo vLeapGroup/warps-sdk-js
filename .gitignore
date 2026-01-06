@@ -34,5 +34,9 @@ brand-schema.json
 
 # generated/test files
 temp/
+.test-cache/
+**/test-cache-*/
+**/test-manifest-*.json
 packages/playground/results.md
 packages/results.md
+packages/core/warps-manifest.json

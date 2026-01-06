@@ -1,5 +1,5 @@
-import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs'
-import { resolve } from 'path'
+import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'fs'
+import { join, resolve } from 'path'
 import { StaticCacheStrategy } from './StaticCacheStrategy'
 
 describe('StaticCacheStrategy', () => {
@@ -7,7 +7,11 @@ describe('StaticCacheStrategy', () => {
   let strategy: StaticCacheStrategy
 
   beforeEach(() => {
-    manifestPath = resolve(__dirname, 'test-manifest-' + Date.now() + '.json')
+    const testCacheRoot = resolve(process.cwd(), '.test-cache')
+    if (!existsSync(testCacheRoot)) {
+      mkdirSync(testCacheRoot, { recursive: true })
+    }
+    manifestPath = join(testCacheRoot, 'test-manifest-' + Date.now() + '.json')
     strategy = new StaticCacheStrategy(manifestPath)
     strategy.clear()
   })
@@ -108,7 +112,8 @@ describe('StaticCacheStrategy', () => {
   })
 
   it('should handle missing manifest file gracefully', () => {
-    const nonExistentPath = resolve(__dirname, 'non-existent-manifest.json')
+    const testCacheRoot = resolve(process.cwd(), '.test-cache')
+    const nonExistentPath = join(testCacheRoot, 'non-existent-manifest.json')
     const newStrategy = new StaticCacheStrategy(nonExistentPath)
     expect(newStrategy.get('foo')).toBeNull()
   })

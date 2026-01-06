@@ -1,5 +1,5 @@
-import { existsSync, readdirSync, rmdirSync, unlinkSync } from 'fs'
-import { join } from 'path'
+import { existsSync, mkdirSync, readdirSync, rmdirSync, unlinkSync } from 'fs'
+import { join, resolve } from 'path'
 import { WarpCacheType } from './types/cache'
 import { WarpCache } from './WarpCache'
 
@@ -19,8 +19,19 @@ describe('WarpCache', () => {
       let testDir: string | undefined
 
       beforeEach(() => {
-        if (type === 'filesystem' || type === 'static') {
-          testDir = join(__dirname, 'test-cache-' + Date.now())
+        if (type === 'filesystem') {
+          const testCacheRoot = resolve(process.cwd(), '.test-cache')
+          if (!existsSync(testCacheRoot)) {
+            mkdirSync(testCacheRoot, { recursive: true })
+          }
+          testDir = join(testCacheRoot, 'warp-cache-' + Date.now())
+          cache = new WarpCache(type as WarpCacheType, testDir)
+        } else if (type === 'static') {
+          const testCacheRoot = resolve(process.cwd(), '.test-cache')
+          if (!existsSync(testCacheRoot)) {
+            mkdirSync(testCacheRoot, { recursive: true })
+          }
+          testDir = join(testCacheRoot, 'warp-manifest-' + Date.now() + '.json')
           cache = new WarpCache(type as WarpCacheType, testDir)
         } else {
           cache = new WarpCache(type as WarpCacheType)
@@ -29,11 +40,15 @@ describe('WarpCache', () => {
       })
 
       afterEach(() => {
-        if (testDir && existsSync(testDir)) {
+        if (testDir) {
           try {
-            const files = readdirSync(testDir)
-            files.forEach((file) => unlinkSync(join(testDir!, file)))
-            rmdirSync(testDir)
+            if (type === 'filesystem' && existsSync(testDir)) {
+              const files = readdirSync(testDir)
+              files.forEach((file) => unlinkSync(join(testDir!, file)))
+              rmdirSync(testDir)
+            } else if (type === 'static' && existsSync(testDir)) {
+              unlinkSync(testDir)
+            }
           } catch {
             // Ignore cleanup errors
           }

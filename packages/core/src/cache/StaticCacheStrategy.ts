@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync } from 'fs'
 import { resolve } from 'path'
 import { CacheStrategy } from './CacheStrategy'
+import { valueReplacer, valueReviver } from './helpers'
 
 type CacheEntry<T> = {
   value: T
@@ -19,7 +20,7 @@ export class StaticCacheStrategy implements CacheStrategy {
   private loadManifest(): Map<string, CacheEntry<any>> {
     try {
       const data = readFileSync(this.manifestPath, 'utf-8')
-      const parsed = JSON.parse(data)
+      const parsed = JSON.parse(data, valueReviver)
       return new Map(Object.entries(parsed))
     } catch (error) {
       return new Map()
@@ -27,7 +28,7 @@ export class StaticCacheStrategy implements CacheStrategy {
   }
 
   private saveManifest(): void {
-    const data = JSON.stringify(Object.fromEntries(this.cache.entries()))
+    const data = JSON.stringify(Object.fromEntries(this.cache.entries()), valueReplacer)
     writeFileSync(this.manifestPath, data, 'utf-8')
   }
 

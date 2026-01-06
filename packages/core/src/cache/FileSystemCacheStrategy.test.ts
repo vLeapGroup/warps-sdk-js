@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmdirSync, unlinkSync } from 'fs'
-import { join } from 'path'
+import { join, resolve } from 'path'
 import { FileSystemCacheStrategy } from './FileSystemCacheStrategy'
 
 describe('FileSystemCacheStrategy', () => {
@@ -7,7 +7,11 @@ describe('FileSystemCacheStrategy', () => {
   let strategy: FileSystemCacheStrategy
 
   beforeEach(() => {
-    cacheDir = join(__dirname, 'test-cache-' + Date.now())
+    const testCacheRoot = resolve(process.cwd(), '.test-cache')
+    if (!existsSync(testCacheRoot)) {
+      mkdirSync(testCacheRoot, { recursive: true })
+    }
+    cacheDir = join(testCacheRoot, 'filesystem-cache-' + Date.now())
     strategy = new FileSystemCacheStrategy(cacheDir)
   })
 
