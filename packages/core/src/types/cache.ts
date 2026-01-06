@@ -4,7 +4,7 @@ export type ClientCacheConfig = {
   dir?: string
 }
 
-export type WarpCacheType = 'memory' | 'localStorage' | 'static'
+export type WarpCacheType = 'memory' | 'localStorage' | 'static' | 'filesystem'
 
 export type WarpCache = {
   get(key: string): Promise<any>

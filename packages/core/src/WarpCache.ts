@@ -1,6 +1,8 @@
 import { CacheStrategy } from './cache/CacheStrategy'
+import { FileSystemCacheStrategy } from './cache/FileSystemCacheStrategy'
 import { LocalStorageCacheStrategy } from './cache/LocalStorageCacheStrategy'
 import { MemoryCacheStrategy } from './cache/MemoryCacheStrategy'
+import { StaticCacheStrategy } from './cache/StaticCacheStrategy'
 import { WarpChainEnv } from './types'
 import { WarpCacheType } from './types/cache'
 
@@ -34,6 +36,8 @@ export class WarpCache {
   private selectStrategy(type?: WarpCacheType): CacheStrategy {
     if (type === 'localStorage') return new LocalStorageCacheStrategy()
     if (type === 'memory') return new MemoryCacheStrategy()
+    if (type === 'static') return new StaticCacheStrategy(this.dir)
+    if (type === 'filesystem') return new FileSystemCacheStrategy(this.dir)
 
     // Default to localStorage in browser environments
     if (typeof window !== 'undefined' && window.localStorage) return new LocalStorageCacheStrategy()

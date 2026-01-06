@@ -1,19 +1,43 @@
+import { existsSync, readdirSync, rmdirSync, unlinkSync } from 'fs'
+import { join } from 'path'
 import { WarpCacheType } from './types/cache'
 import { WarpCache } from './WarpCache'
 
 describe('WarpCache', () => {
-  let cacheTypes = ['memory']
+  let cacheTypes: string[] = ['memory']
   if (typeof window !== 'undefined' && window.localStorage) {
     cacheTypes.push('localStorage')
+  }
+  // File system strategies only work in Node.js
+  if (typeof require !== 'undefined') {
+    cacheTypes.push('static', 'filesystem')
   }
 
   cacheTypes.forEach((type) => {
     describe(`${type} cache`, () => {
       let cache: any
+      let testDir: string | undefined
 
       beforeEach(() => {
-        cache = new WarpCache(type as WarpCacheType)
+        if (type === 'filesystem' || type === 'static') {
+          testDir = join(__dirname, 'test-cache-' + Date.now())
+          cache = new WarpCache(type as WarpCacheType, testDir)
+        } else {
+          cache = new WarpCache(type as WarpCacheType)
+        }
         cache.clear()
+      })
+
+      afterEach(() => {
+        if (testDir && existsSync(testDir)) {
+          try {
+            const files = readdirSync(testDir)
+            files.forEach((file) => unlinkSync(join(testDir!, file)))
+            rmdirSync(testDir)
+          } catch {
+            // Ignore cleanup errors
+          }
+        }
       })
 
       it('should set and get a value', () => {
@@ -33,6 +57,13 @@ describe('WarpCache', () => {
         cache.forget('foo')
         expect(cache.get('foo')).toBeNull()
         expect(cache.get('baz')).toBe('qux')
+      })
+
+      it('should handle BigInt values', () => {
+        const bigValue = BigInt('12345678901234567890')
+        cache.set('bigint', bigValue, 10)
+        const retrieved = cache.get('bigint')
+        expect(retrieved).toBe(bigValue)
       })
     })
   })
