@@ -24,8 +24,10 @@ export const WarpCacheKey = {
 
 export class WarpCache {
   private strategy: CacheStrategy
+  private dir?: string
 
-  constructor(type?: WarpCacheType) {
+  constructor(type?: WarpCacheType, dir?: string) {
+    this.dir = dir
     this.strategy = this.selectStrategy(type)
   }
 

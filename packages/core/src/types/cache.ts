@@ -1,9 +1,10 @@
 export type ClientCacheConfig = {
   ttl?: number
   type?: WarpCacheType
+  dir?: string
 }
 
-export type WarpCacheType = 'memory' | 'localStorage'
+export type WarpCacheType = 'memory' | 'localStorage' | 'static'
 
 export type WarpCache = {
   get(key: string): Promise<any>

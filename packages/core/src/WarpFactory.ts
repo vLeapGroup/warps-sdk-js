@@ -36,7 +36,7 @@ export class WarpFactory {
     if (!config.currentUrl) throw new Error('WarpFactory: currentUrl config not set')
     this.url = new URL(config.currentUrl)
     this.serializer = new WarpSerializer()
-    this.cache = new WarpCache(config.cache?.type)
+    this.cache = new WarpCache(config.cache?.type, config.cache?.dir)
   }
 
   getSerializer(): WarpSerializer {
