@@ -5,6 +5,7 @@ Development playground for testing and experimenting with the Warps SDK. This pa
 ## Overview
 
 The playground provides a local development environment for:
+
 - Testing Warp execution
 - Debugging adapter implementations
 - Experimenting with new features

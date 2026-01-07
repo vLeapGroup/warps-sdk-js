@@ -394,11 +394,7 @@ const ensureCoinbaseWallet = async (
   return walletDetails
 }
 
-const ensureGaupaWallet = async (
-  config: WarpClientConfig,
-  chain: WarpChainName,
-  chainInfo: WarpChainInfo
-): Promise<WarpWalletDetails> => {
+const ensureGaupaWallet = async (config: WarpClientConfig, chain: WarpChainName, chainInfo: WarpChainInfo): Promise<WarpWalletDetails> => {
   const walletPath = path.join(__dirname, 'wallets', `${chain}.json`)
 
   if (fs.existsSync(walletPath)) {
