@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.0-beta.22
+
+### Patch Changes
+
+- 571ffe1: update solana native token name
+- Updated dependencies [68b361c]
+  - @vleap/warps@3.0.0-beta.197
+
 ## 0.1.0-beta.21
 
 ### Patch Changes

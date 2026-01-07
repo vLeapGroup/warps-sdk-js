@@ -1,5 +1,14 @@
 # @warps/playground
 
+## 0.2.0-beta.171
+
+### Patch Changes
+
+- Updated dependencies [68b361c]
+- Updated dependencies [571ffe1]
+  - @vleap/warps@3.0.0-beta.197
+  - @vleap/warps-adapter-solana@0.1.0-beta.22
+
 ## 0.2.0-beta.170
 
 ### Patch Changes

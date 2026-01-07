@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.197
+
+### Patch Changes
+
+- 68b361c: update remote warp detection
+
 ## 3.0.0-beta.196
 
 ### Minor Changes
