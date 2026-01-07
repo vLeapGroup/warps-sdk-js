@@ -15,7 +15,7 @@ export enum WarpChainName {
 }
 
 export const WarpConstants = {
-  HttpProtocolPrefix: 'http',
+  HttpProtocolPrefix: 'https://',
 
   IdentifierParamName: 'warp',
 
