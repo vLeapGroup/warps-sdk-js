@@ -59,7 +59,8 @@ const runWarp = async (warpFile: string) => {
     walletProviders: {
       multiversx: {
         gaupa: createGaupaWalletProvider({
-          apiKey: process.env.GAUPA_API_KEY,
+          apiKey: process.env.GAUPA_API_KEY || '',
+          publicKey: process.env.GAUPA_PUBLIC_KEY,
         }),
       },
       ethereum: {
@@ -94,6 +95,9 @@ const runWarp = async (warpFile: string) => {
   if (!walletForChain && (chainNameForWalletCheck === WarpChainName.Ethereum || chainNameForWalletCheck === WarpChainName.Base)) {
     const coinbaseWallet = await ensureCoinbaseWallet(tempConfig, Chain, chainAdapter.chainInfo)
     walletForChain = coinbaseWallet
+  } else if (!walletForChain && chainNameForWalletCheck === WarpChainName.Multiversx) {
+    const gaupaWallet = await ensureGaupaWallet(tempConfig, Chain, chainAdapter.chainInfo)
+    walletForChain = gaupaWallet
   } else if (!walletForChain) {
     throw new Error(`Wallet not found for chain: ${Chain}. Please create a wallet file at wallets/${Chain}.json`)
   }
@@ -152,7 +156,14 @@ const runWarp = async (warpFile: string) => {
 
   if (chain) {
     const signedTxs = await client.getWallet(chain.name).signTransactions(txs)
-    const hashes = await client.getWallet(chain.name).sendTransactions(signedTxs)
+    const hashes = await Promise.all(
+      signedTxs.map(async (tx) => {
+        if ((tx as any).transactionHash) {
+          return (tx as any).transactionHash
+        }
+        return await client.getWallet(chain.name).sendTransaction(tx)
+      })
+    )
 
     console.log('📤 Transaction hashes:', hashes)
 
@@ -335,7 +346,7 @@ const loadAllWallets = async (): Promise<Record<string, any>> => {
     const chainName = walletFile.replace('.json', '')
     try {
       const walletData = await loadWallet(chainName)
-      if (walletData.provider === 'coinbase') {
+      if (walletData.provider === 'coinbase' || walletData.provider === 'gaupa') {
         wallets[chainName] = walletData
       } else {
         const privateKey = walletData.privateKey || (await loadFile(chainName))
@@ -379,6 +390,36 @@ const ensureCoinbaseWallet = async (
 
   fs.writeFileSync(walletPath, JSON.stringify(walletDetails, null, 2))
   console.log(`✅ Created and saved Coinbase wallet: ${walletDetails.address}`)
+
+  return walletDetails
+}
+
+const ensureGaupaWallet = async (config: WarpClientConfig, chain: WarpChainName, chainInfo: WarpChainInfo): Promise<WarpWalletDetails> => {
+  const walletPath = path.join(__dirname, 'wallets', `${chain}.json`)
+
+  if (fs.existsSync(walletPath)) {
+    const existingWallet = JSON.parse(fs.readFileSync(walletPath, 'utf-8'))
+    if (existingWallet.provider === 'gaupa' && existingWallet.address && existingWallet.externalId) {
+      console.log(`✅ Reusing existing Gaupa wallet: ${existingWallet.address}`)
+      return existingWallet
+    }
+  }
+
+  console.log('🔄 Creating new Gaupa wallet...')
+  const walletProviderFactory = config.walletProviders?.[chain as string]?.gaupa
+  if (!walletProviderFactory) {
+    throw new Error(`Gaupa wallet provider not configured for chain: ${chain}`)
+  }
+
+  const walletProvider = walletProviderFactory(config, chainInfo)
+  if (!walletProvider) {
+    throw new Error(`Failed to create Gaupa wallet provider for chain: ${chain}`)
+  }
+
+  const walletDetails = await walletProvider.generate()
+
+  fs.writeFileSync(walletPath, JSON.stringify(walletDetails, null, 2))
+  console.log(`✅ Created and saved Gaupa wallet: ${walletDetails.address} (externalId: ${walletDetails.externalId})`)
 
   return walletDetails
 }
