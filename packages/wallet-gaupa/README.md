@@ -1,8 +1,6 @@
 # @vleap/warps-wallet-gaupa
 
-Gaupa wallet provider for Warps SDK. This package enables you to use Gaupa wallets with the Warps SDK, primarily for MultiversX blockchain.
-
-**Note: This package is currently a placeholder. Gaupa is in private beta and the implementation is pending.**
+Gaupa wallet provider for Warps SDK. This package enables you to use Gaupa agentic wallets with the Warps SDK.
 
 ## Installation
 
@@ -13,40 +11,30 @@ npm install @vleap/warps-wallet-gaupa
 ## Prerequisites
 
 - `@vleap/warps` core package installed
-- `@multiversx/sdk-core` (for MultiversX transaction types)
-- Gaupa SDK (when available)
-
-## Status
-
-⚠️ **Implementation Pending**: Gaupa is currently in private beta. This package provides the interface structure but methods will throw errors until the actual Gaupa SDK is integrated.
+- Appropriate chain adapter package(s) for your target blockchain(s)
+- Gaupa API credentials (API key and public key)
 
 ## Usage
 
-Once the Gaupa SDK is available, usage will be:
-
 ```typescript
-import { GaupaWalletProvider } from '@vleap/warps-wallet-gaupa'
+import { createGaupaWalletProvider } from '@vleap/warps-wallet-gaupa'
 import { WarpClient } from '@vleap/warps'
-import { getAllMultiversxAdapters } from '@vleap/warps-adapter-multiversx'
+import { getAllChainAdapters } from '@vleap/warps-adapter-<chain>'
 
 const config = {
-  env: 'mainnet',
+  env: 'devnet', // or 'mainnet'
   walletProviders: {
-    multiversx: {
-      gaupa: () => {
-        return new GaupaWalletProvider({
-          config: {
-            // TODO: Gaupa SDK configuration
-            // Will be defined once SDK is available
-          },
-        })
-      },
+    <chain>: {
+      gaupa: createGaupaWalletProvider({
+        apiKey: 'your-api-key',
+        publicKey: 'your-public-key',
+      }),
     },
   },
 }
 
 const client = new WarpClient(config, {
-  chains: getAllMultiversxAdapters(),
+  chains: getAllChainAdapters(),
 })
 ```
 
@@ -56,50 +44,44 @@ const client = new WarpClient(config, {
 
 Implements the `WalletProvider` interface from `@vleap/warps`.
 
-**Constructor:**
-
-```typescript
-new GaupaWalletProvider(config: GaupaWalletProviderConfig)
-```
-
-**Parameters:**
-
-- `config.config`: Optional configuration object passed to the Gaupa SDK initialization
-
 **Methods:**
 
-- `getAddress(): Promise<string | null>` - Get the wallet address from Gaupa
-- `getPublicKey(): Promise<string | null>` - Get the public key from Gaupa
-- `signTransaction(tx: Transaction): Promise<Transaction>` - Sign a MultiversX transaction
-- `signMessage(message: string): Promise<string>` - Sign a message
+- `getAddress(): Promise<string | null>` - Get the wallet address from configuration
+- `getPublicKey(): Promise<string | null>` - Derive public key from the wallet address
+- `signTransaction(tx: Transaction): Promise<Transaction>` - Sign a transaction using the Gaupa API's `sign-agentic-message` endpoint. The transaction is serialized as JSON and signed as a message.
+- `signMessage(message: string): Promise<string>` - Sign a message using the Gaupa API
+- `generate(): Promise<WarpWalletDetails>` - Create a new agentic wallet via the Gaupa API
 
-## Supported Chains
+**Unsupported Methods:**
 
-Currently optimized for:
+- `importFromMnemonic()` - Not supported. Use `generate()` to create wallets via Gaupa API.
+- `importFromPrivateKey()` - Not supported. Use `generate()` to create wallets via Gaupa API.
+- `export()` - Not supported. Private keys are managed by Gaupa and cannot be exported.
 
-- **MultiversX**
+## How It Works
 
-The provider uses MultiversX `Transaction` types from `@multiversx/sdk-core` for type safety.
+1. **API Configuration**: The API URL is automatically configured based on the environment:
+   - `devnet`: `https://devnet-login.gaupa.xyz/api`
+   - `mainnet` or other: `https://login.gaupa.xyz/api`
 
-## Implementation Status
+2. **Wallet Creation**: Use `generate()` to create a new agentic wallet via the Gaupa API. The wallet address is stored in your Warps configuration.
 
-All methods currently throw errors indicating that implementation is pending:
+3. **Transaction Signing**: When signing a transaction, the provider:
+   - Serializes the transaction data as JSON
+   - Calls the Gaupa API's `sign-agentic-message` endpoint with the serialized transaction
+   - Converts the returned hex signature to a `Uint8Array` and applies it to the transaction
 
-- `getAddress()` - TODO: Implement using Gaupa SDK
-- `getPublicKey()` - TODO: Implement using Gaupa SDK
-- `signTransaction()` - TODO: Implement using Gaupa SDK
-- `signMessage()` - TODO: Implement using Gaupa SDK
+4. **Message Signing**: Messages are signed directly via the `sign-agentic-message` endpoint.
 
-## TODO
+## Configuration
 
-Once Gaupa SDK is available, implement:
+The wallet configuration is stored in your Warps config under `user.wallets.<chain>`:
 
-1. **SDK Initialization**: Initialize Gaupa client with configuration
-2. **getAddress()**: Retrieve wallet address from Gaupa
-3. **getPublicKey()**: Retrieve public key from Gaupa
-4. **signTransaction()**: Sign MultiversX transactions using Gaupa
-   - Handle signature format conversion (hex string to Uint8Array)
-   - Apply signature to transaction object
-5. **signMessage()**: Sign messages using Gaupa
+```json
+{
+  "provider": "gaupa",
+  "address": "erd1..."
+}
+```
 
-The implementation should follow the actual Gaupa SDK API once it becomes available.
+The address is set automatically when you call `generate()` or can be configured manually.
