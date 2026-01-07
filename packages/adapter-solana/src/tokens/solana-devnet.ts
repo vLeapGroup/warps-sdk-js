@@ -6,7 +6,7 @@ export const SolanaDevnetTokens: WarpChainAsset[] = [
   {
     chain: SolanaChain,
     identifier: 'SOL',
-    name: 'Solana',
+    name: 'SOL',
     symbol: 'SOL',
     decimals: 9,
     logoUrl: 'https://assets.coingecko.com/coins/images/4128/small/solana.png',

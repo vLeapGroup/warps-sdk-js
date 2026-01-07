@@ -5,7 +5,7 @@ export const NativeTokenSol: WarpChainAsset = {
   chain: WarpChainName.Solana,
   identifier: 'SOL',
   symbol: 'SOL',
-  name: 'Solana',
+  name: 'SOL',
   decimals: 9,
   logoUrl: 'https://raw.githubusercontent.com/JoAiHQ/assets/refs/heads/main/tokens/logos/sol.svg',
 }
