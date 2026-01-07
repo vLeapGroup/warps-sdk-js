@@ -1,69 +1,116 @@
-import { Transaction } from '@multiversx/sdk-core'
+import { Address, Transaction } from '@multiversx/sdk-core'
 import {
-  getWarpWalletExternalIdFromConfigOrFail,
+  getWarpWalletAddressFromConfig,
+  setWarpWalletInConfig,
   WalletProvider,
   WarpChainInfo,
   WarpClientConfig,
   WarpWalletDetails,
   WarpWalletProvider,
 } from '@vleap/warps'
+import { getGaupaApiUrl } from './config'
+import { GaupaApiClient } from './GaupaApiClient'
 import { ProviderConfig } from './types'
 
 export class GaupaWalletProvider implements WalletProvider {
   static readonly PROVIDER_NAME: WarpWalletProvider = 'gaupa'
+  private readonly client: GaupaApiClient
+  private cachedAddress: string | null = null
+
   constructor(
     private readonly config: WarpClientConfig,
     private readonly chain: WarpChainInfo,
     private readonly gaupaConfig: ProviderConfig
-  ) {}
+  ) {
+    const apiUrl = getGaupaApiUrl(config.env)
+    this.client = new GaupaApiClient(gaupaConfig.apiKey, apiUrl, gaupaConfig.publicKey)
+  }
 
   async getAddress(): Promise<string | null> {
-    const _externalId = getWarpWalletExternalIdFromConfigOrFail(this.config, this.chain.name)
-
-    // TODO: Implement
-    throw new Error('GaupaWalletProvider: getAddress not yet implemented')
+    if (this.cachedAddress) return this.cachedAddress
+    const address = getWarpWalletAddressFromConfig(this.config, this.chain.name)
+    if (!address) return null
+    this.cachedAddress = address
+    return address
   }
 
   async getPublicKey(): Promise<string | null> {
-    const _externalId = getWarpWalletExternalIdFromConfigOrFail(this.config, this.chain.name)
-
-    // TODO: Implement
-    throw new Error('GaupaWalletProvider: getPublicKey not yet implemented')
+    const address = await this.getAddress()
+    if (!address) return null
+    const pubKey = Address.newFromBech32(address).getPublicKey().toString('hex')
+    return pubKey
   }
 
   async signTransaction(tx: Transaction): Promise<Transaction> {
-    const _externalId = getWarpWalletExternalIdFromConfigOrFail(this.config, this.chain.name)
+    const walletAddress = await this.getAddress()
+    if (!walletAddress) throw new Error('GaupaWalletProvider: Wallet address not found')
 
-    // TODO: Implement
-    throw new Error('GaupaWalletProvider: signTransaction not yet implemented')
+    const transactionData = this.formatTransactionForApi(tx)
+    const message = JSON.stringify(transactionData)
+
+    const result = await this.client.signMessage({
+      message,
+      walletAddress,
+    })
+
+    tx.signature = new Uint8Array(Buffer.from(result.signature, 'hex'))
+
+    return tx
   }
 
   async signMessage(message: string): Promise<string> {
-    const _externalId = getWarpWalletExternalIdFromConfigOrFail(this.config, this.chain.name)
+    const walletAddress = await this.getAddress()
+    if (!walletAddress) throw new Error('GaupaWalletProvider: Wallet address not found')
 
-    // TODO: Implement
-    throw new Error('GaupaWalletProvider: signMessage not yet implemented')
+    const result = await this.client.signMessage({
+      message,
+      walletAddress,
+    })
+
+    if (!result.signature) throw new Error('Gaupa API did not return signature')
+
+    return result.signature
   }
 
   async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
-    throw new Error('GaupaWalletProvider: importFromMnemonic not yet implemented')
+    throw new Error('GaupaWalletProvider: importFromMnemonic() is not supported. Use generate() to create a new wallet via Gaupa API.')
   }
 
   async importFromPrivateKey(privateKey: string): Promise<WarpWalletDetails> {
-    throw new Error('GaupaWalletProvider: importFromPrivateKey not yet implemented')
+    throw new Error('GaupaWalletProvider: importFromPrivateKey() is not supported. Use generate() to create a new wallet via Gaupa API.')
   }
 
   async export(): Promise<WarpWalletDetails> {
-    throw new Error('GaupaWalletProvider: export not yet implemented')
+    throw new Error('GaupaWalletProvider: export() is not supported. Private keys are managed by Gaupa and cannot be exported.')
   }
 
   async generate(): Promise<WarpWalletDetails> {
-    // TODO: Implement
-    throw new Error('GaupaWalletProvider: generate not yet implemented')
+    try {
+      const wallet = await this.client.createAgenticWallet({})
+      if (!wallet.success || !wallet.wallet.address_multiversx) throw new Error('Gaupa API did not return a valid wallet')
 
-    const externalId = 'TODO'
-    const address = 'TODO'
+      const walletDetails: WarpWalletDetails = {
+        provider: GaupaWalletProvider.PROVIDER_NAME,
+        address: wallet.wallet.address_multiversx,
+      }
 
-    return { provider: GaupaWalletProvider.PROVIDER_NAME, address, externalId }
+      setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
+      this.cachedAddress = wallet.wallet.address_multiversx
+
+      return walletDetails
+    } catch (error) {
+      throw new Error(`GaupaWalletProvider: Failed to generate wallet: ${error}`)
+    }
+  }
+
+  private formatTransactionForApi(tx: Transaction) {
+    return {
+      receiver: tx.receiver.toBech32(),
+      value: tx.value.toString(),
+      ...(tx.data?.length && { data: Buffer.from(tx.data).toString('base64') }),
+      gasLimit: Number(tx.gasLimit),
+      gasPrice: Number(tx.gasPrice),
+      ...(tx.nonce !== undefined && { nonce: Number(tx.nonce) }),
+    }
   }
 }
