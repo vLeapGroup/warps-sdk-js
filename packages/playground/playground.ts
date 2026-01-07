@@ -1,4 +1,5 @@
-import { WarpChainInfo, WarpChainName, WarpClient, WarpClientConfig, WarpWalletDetails, withAdapterFallback } from '@vleap/warps'
+import type { WarpChainInfo, WarpClientConfig, WarpWalletDetails } from '@vleap/warps'
+import { WarpChainName, WarpClient, withAdapterFallback } from '@vleap/warps'
 import { getAllEvmAdapters } from '@vleap/warps-adapter-evm'
 import { FastsetAdapter } from '@vleap/warps-adapter-fastset'
 import { getAllMultiversxAdapters, MultiversxAdapter } from '@vleap/warps-adapter-multiversx'
@@ -19,46 +20,21 @@ const __dirname = path.dirname(__filename)
 const dotenv = await import('dotenv')
 dotenv.config({ path: path.join(__dirname, '.env') })
 
-const Chain = WarpChainName.Solana
-const WarpToTest = 'x-create-post-draft.json'
+const Chain: WarpChainName = WarpChainName.Multiversx
+const WarpToTest = 'transfer.json'
 const WarpInputs: string[] = [
-  'Exciting news! We just launched a new feature that makes it easier for developers to build amazing applications. Check it out!',
+  'string:multiversx',
+  'address:erd1kc7v0lhqu0sclywkgeg4um8ea5nvch9psf2lf8t96j3w622qss8sav2zl8',
+  'asset:EGLD|0.000001',
 ]
 const warpsDir = path.join(__dirname, 'warps')
 
-const ensureCoinbaseWallet = async (
-  config: WarpClientConfig,
-  chain: WarpChainName,
-  chainInfo: WarpChainInfo
-): Promise<WarpWalletDetails> => {
-  const walletPath = path.join(__dirname, 'wallets', `${chain}.json`)
-
-  if (fs.existsSync(walletPath)) {
-    const existingWallet = JSON.parse(fs.readFileSync(walletPath, 'utf-8'))
-    if (existingWallet.provider === 'coinbase' && existingWallet.address) {
-      console.log(`✅ Reusing existing Coinbase wallet: ${existingWallet.address}`)
-      return existingWallet
-    }
-  }
-
-  console.log('🔄 Creating new Coinbase wallet...')
-  const walletProviderFactory = config.walletProviders?.[chain as string]?.coinbase
-  if (!walletProviderFactory) {
-    throw new Error(`Coinbase wallet provider not configured for chain: ${chain}`)
-  }
-
-  const walletProvider = walletProviderFactory(config, chainInfo)
-  if (!walletProvider) {
-    throw new Error(`Failed to create Coinbase wallet provider for chain: ${chain}`)
-  }
-
-  const walletDetails = await walletProvider.generate()
-
-  fs.writeFileSync(walletPath, JSON.stringify(walletDetails, null, 2))
-  console.log(`✅ Created and saved Coinbase wallet: ${walletDetails.address}`)
-
-  return walletDetails
-}
+// Shared Coinbase provider factory (reuse across EVM chains)
+const coinbaseWalletFactory = createCoinbaseWalletProvider({
+  apiKeyId: process.env.COINBASE_API_KEY_ID || '',
+  apiKeySecret: process.env.COINBASE_API_KEY_SECRET || '',
+  walletSecret: process.env.COINBASE_WALLET_SECRET || '',
+})
 
 const runWarp = async (warpFile: string) => {
   const warpPath = path.join(warpsDir, warpFile)
@@ -82,28 +58,18 @@ const runWarp = async (warpFile: string) => {
     },
     walletProviders: {
       multiversx: {
-        gaupa: createGaupaWalletProvider({ apiKey: 'demo-api-key' }),
+        gaupa: createGaupaWalletProvider({
+          apiKey: process.env.GAUPA_API_KEY,
+        }),
       },
       ethereum: {
-        coinbase: createCoinbaseWalletProvider({
-          apiKeyId: process.env.COINBASE_API_KEY_ID,
-          apiKeySecret: process.env.COINBASE_API_KEY_SECRET,
-          walletSecret: process.env.COINBASE_WALLET_SECRET,
-        }),
+        coinbase: coinbaseWalletFactory,
       },
       base: {
-        coinbase: createCoinbaseWalletProvider({
-          apiKeyId: process.env.COINBASE_API_KEY_ID,
-          apiKeySecret: process.env.COINBASE_API_KEY_SECRET,
-          walletSecret: process.env.COINBASE_WALLET_SECRET,
-        }),
+        coinbase: coinbaseWalletFactory,
       },
       polygon: {
-        coinbase: createCoinbaseWalletProvider({
-          apiKeyId: process.env.COINBASE_API_KEY_ID,
-          apiKeySecret: process.env.COINBASE_API_KEY_SECRET,
-          walletSecret: process.env.COINBASE_WALLET_SECRET,
-        }),
+        coinbase: coinbaseWalletFactory,
       },
     },
     transform: { runner: createNodeTransformRunner() },
@@ -124,7 +90,8 @@ const runWarp = async (warpFile: string) => {
   if (!chainAdapter) throw new Error(`Chain adapter not found for: ${Chain}`)
 
   let walletForChain = filteredWallets[Chain]
-  if (!walletForChain && (Chain === WarpChainName.Ethereum || Chain === WarpChainName.Base)) {
+  const chainNameForWalletCheck = chainAdapter.chainInfo.name.toLowerCase()
+  if (!walletForChain && (chainNameForWalletCheck === WarpChainName.Ethereum || chainNameForWalletCheck === WarpChainName.Base)) {
     const coinbaseWallet = await ensureCoinbaseWallet(tempConfig, Chain, chainAdapter.chainInfo)
     walletForChain = coinbaseWallet
   } else if (!walletForChain) {
@@ -155,7 +122,7 @@ const runWarp = async (warpFile: string) => {
   const walletAddress = walletForChain.address
   console.log(`💰 Wallet address: ${walletAddress}`)
 
-  const address = client.getWallet(Chain).getAddress()
+  const address = walletAddress
   const dataLoader = client.getDataLoader(Chain)
   const accountAssets = await dataLoader.getAccountAssets(address)
 
@@ -195,7 +162,11 @@ const runWarp = async (warpFile: string) => {
     console.log('🔍 Transaction explorer URL:', explorerUrl)
 
     const remoteTxs = await client.getActions(chain.name, hashes, true)
-    await evaluateOutput(remoteTxs)
+    try {
+      await evaluateOutput(remoteTxs)
+    } catch (err) {
+      console.warn('⚠️ evaluateOutput failed:', (err as Error)?.message || err)
+    }
 
     console.log('✅ Remote transactions:', remoteTxs)
     console.log(`\n🎉 Warp completed! View on explorer: ${explorerUrl}`)
@@ -273,7 +244,12 @@ const writeResults = (results: PlaygroundResults) => {
   if (results.resolvedInputs.length > 0) {
     content += `### Resolved Inputs:\n\n`
     results.resolvedInputs.forEach((ri, index) => {
-      content += `${index + 1}. **${ri.input.name || ri.input.as || `Input ${index}`}**: \`${ri.value || 'null'}\`\n`
+      if (ri && typeof ri === 'object' && 'input' in ri) {
+        const anyRi = ri as any
+        content += `${index + 1}. **${anyRi.input.name || anyRi.input.as || `Input ${index}`}**: \`${anyRi.value || 'null'}\`\n`
+      } else {
+        content += `${index + 1}. \`${String(ri)}\`\n`
+      }
     })
     content += `\n`
   }
@@ -371,6 +347,40 @@ const loadAllWallets = async (): Promise<Record<string, any>> => {
   }
 
   return wallets
+}
+
+const ensureCoinbaseWallet = async (
+  config: WarpClientConfig,
+  chain: WarpChainName,
+  chainInfo: WarpChainInfo
+): Promise<WarpWalletDetails> => {
+  const walletPath = path.join(__dirname, 'wallets', `${chain}.json`)
+
+  if (fs.existsSync(walletPath)) {
+    const existingWallet = JSON.parse(fs.readFileSync(walletPath, 'utf-8'))
+    if (existingWallet.provider === 'coinbase' && existingWallet.address) {
+      console.log(`✅ Reusing existing Coinbase wallet: ${existingWallet.address}`)
+      return existingWallet
+    }
+  }
+
+  console.log('🔄 Creating new Coinbase wallet...')
+  const walletProviderFactory = config.walletProviders?.[chain as string]?.coinbase
+  if (!walletProviderFactory) {
+    throw new Error(`Coinbase wallet provider not configured for chain: ${chain}`)
+  }
+
+  const walletProvider = walletProviderFactory(config, chainInfo)
+  if (!walletProvider) {
+    throw new Error(`Failed to create Coinbase wallet provider for chain: ${chain}`)
+  }
+
+  const walletDetails = await walletProvider.generate()
+
+  fs.writeFileSync(walletPath, JSON.stringify(walletDetails, null, 2))
+  console.log(`✅ Created and saved Coinbase wallet: ${walletDetails.address}`)
+
+  return walletDetails
 }
 
 const warps = listWarps()
