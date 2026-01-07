@@ -1,5 +1,11 @@
 # @vleap/warps-wallet-gaupa
 
+## 1.0.0-beta.10
+
+### Minor Changes
+
+- c27f59a: implement wallet gaupa provider
+
 ## 1.0.0-beta.9
 
 ### Patch Changes
