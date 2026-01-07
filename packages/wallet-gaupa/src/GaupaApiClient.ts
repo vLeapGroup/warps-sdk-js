@@ -9,9 +9,9 @@ type SignMessageResponse = { address: string; signature: string; message: string
 export class GaupaApiClient {
   private readonly baseUrl: string
   private readonly apiKey: string
-  private readonly publicKey?: string
+  private readonly publicKey: string
 
-  constructor(apiKey: string, apiUrl: string, publicKey?: string) {
+  constructor(apiKey: string, apiUrl: string, publicKey: string) {
     this.apiKey = apiKey
     this.publicKey = publicKey
     this.baseUrl = apiUrl.replace(/\/$/, '')
@@ -36,10 +36,7 @@ export class GaupaApiClient {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'x-api-key': this.apiKey,
-    }
-
-    if (this.publicKey) {
-      headers['Public-Key'] = this.publicKey
+      'Public-Key': this.publicKey,
     }
 
     const response = await fetch(url, {
