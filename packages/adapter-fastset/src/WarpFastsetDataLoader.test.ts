@@ -1,4 +1,4 @@
-import { WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@joai/warps'
 import { WarpFastsetDataLoader } from './WarpFastsetDataLoader'
 
 describe('WarpFastsetDataLoader', () => {

@@ -1,17 +1,17 @@
-# @vleap/warps-react
+# @joai/warps-react
 
 React integration for the Warps SDK. Provides React hooks and components for building Warp-enabled applications.
 
 ## Installation
 
 ```bash
-npm install @vleap/warps-react
+npm install @joai/warps-react
 ```
 
 ## Prerequisites
 
 - React 18.0.0 or higher
-- `@vleap/warps` core package
+- `@joai/warps` core package
 
 ## Status
 

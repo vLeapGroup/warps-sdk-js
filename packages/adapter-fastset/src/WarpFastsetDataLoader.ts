@@ -7,7 +7,7 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpDataLoaderOptions,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { getConfiguredFastsetClient, hexToUint8Array } from './helpers'
 import { FastsetClient } from './sdk/FastsetClient'
 import { findKnownTokenById, findKnownTokenBySymbol } from './tokens'

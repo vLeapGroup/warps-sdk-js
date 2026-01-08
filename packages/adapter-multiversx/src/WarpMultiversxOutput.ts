@@ -27,7 +27,7 @@ import {
   WarpConstants,
   WarpContractAction,
   WarpExecutionOutput,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { WarpMultiversxAbiBuilder } from './WarpMultiversxAbiBuilder'
 import { WarpMultiversxSerializer } from './WarpMultiversxSerializer'
 

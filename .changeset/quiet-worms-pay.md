@@ -1,5 +1,5 @@
 ---
-'@vleap/warps-adapter-solana': patch
+'@joai/warps-adapter-solana': patch
 ---
 
 update solana

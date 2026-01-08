@@ -1,5 +1,5 @@
 ---
-'@vleap/warps-adapter-multiversx': patch
+'@joai/warps-adapter-multiversx': patch
 ---
 
 expose mvx chain names

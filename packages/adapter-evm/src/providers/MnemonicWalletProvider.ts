@@ -1,4 +1,4 @@
-import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
+import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@joai/warps'
 import { ethers, HDNodeWallet } from 'ethers'
 import * as bip39 from '@scure/bip39'
 import { wordlist } from '@scure/bip39/wordlists/english.js'
@@ -11,7 +11,7 @@ import {
   validateMnemonicLength,
   WarpChainInfo,
   WarpClientConfig,
-} from '@vleap/warps'
+} from '@joai/warps'
 
 export class MnemonicWalletProvider implements WalletProvider {
   static readonly PROVIDER_NAME: WarpWalletProvider = 'mnemonic'

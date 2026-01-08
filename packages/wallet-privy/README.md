@@ -1,16 +1,16 @@
-# @vleap/warps-wallet-privy
+# @joai/warps-wallet-privy
 
 Privy wallet provider for Warps SDK. This package enables you to use Privy wallets with the Warps SDK across multiple blockchain networks. **Designed for Node.js environments** - no React dependencies required.
 
 ## Installation
 
 ```bash
-npm install @vleap/warps-wallet-privy
+npm install @joai/warps-wallet-privy
 ```
 
 ## Prerequisites
 
-- `@vleap/warps` core package installed
+- `@joai/warps` core package installed
 - Privy SDK installed and configured (`@privy-io/server-sdk` for Node.js)
 
 ## Usage
@@ -21,9 +21,9 @@ Use Privy's server SDK to create a client:
 
 ```typescript
 import { PrivyClient } from '@privy-io/server-sdk'
-import { PrivyWalletProvider } from '@vleap/warps-wallet-privy'
-import { WarpClient } from '@vleap/warps'
-import { getEvmAdapter } from '@vleap/warps-adapter-evm'
+import { PrivyWalletProvider } from '@joai/warps-wallet-privy'
+import { WarpClient } from '@joai/warps'
+import { getEvmAdapter } from '@joai/warps-adapter-evm'
 
 const privyServerClient = new PrivyClient(process.env.PRIVY_APP_ID, process.env.PRIVY_APP_SECRET)
 
@@ -59,9 +59,9 @@ const address = await wallet.getAddress()
 If you're using Privy in a React application, you can create a client adapter:
 
 ```typescript
-import { PrivyWalletProvider } from '@vleap/warps-wallet-privy'
-import { WarpClient } from '@vleap/warps'
-import { getEvmAdapter } from '@vleap/warps-adapter-evm'
+import { PrivyWalletProvider } from '@joai/warps-wallet-privy'
+import { WarpClient } from '@joai/warps'
+import { getEvmAdapter } from '@joai/warps-adapter-evm'
 
 // Create a Privy client adapter from your React Privy instance
 const privyClient = {
@@ -116,7 +116,7 @@ const client = new WarpClient(config, [
 
 ## API
 
-Implements the `WalletProvider` interface from `@vleap/warps`.
+Implements the `WalletProvider` interface from `@joai/warps`.
 
 **Constructor:**
 ```typescript

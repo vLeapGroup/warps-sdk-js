@@ -6,7 +6,7 @@
 
 - 571ffe1: update solana native token name
 - Updated dependencies [68b361c]
-  - @vleap/warps@3.0.0-beta.197
+  - @joai/warps@3.0.0-beta.197
 
 ## 0.1.0-beta.21
 
@@ -14,7 +14,7 @@
 
 - 050ec48: update caching
 - Updated dependencies [050ec48]
-  - @vleap/warps@3.0.0-beta.192
+  - @joai/warps@3.0.0-beta.192
 
 ## 0.1.0-beta.20
 
@@ -23,7 +23,7 @@
 - 4056843: update logo urls
 - Updated dependencies [0016189]
 - Updated dependencies [57685fc]
-  - @vleap/warps@3.0.0-beta.189
+  - @joai/warps@3.0.0-beta.189
 
 ## 0.1.0-beta.19
 
@@ -33,7 +33,7 @@
 - 0360be3: update wallets
 - Updated dependencies [d1393e9]
 - Updated dependencies [aa0d529]
-  - @vleap/warps@3.0.0-beta.188
+  - @joai/warps@3.0.0-beta.188
 
 ## 0.1.0-beta.18
 
@@ -41,7 +41,7 @@
 
 - fa98f00: update wallets
 - Updated dependencies [fa98f00]
-  - @vleap/warps@3.0.0-beta.187
+  - @joai/warps@3.0.0-beta.187
 
 ## 0.1.0-beta.17
 
@@ -57,7 +57,7 @@
 - fcea985: update chain names
 - Updated dependencies [c390d84]
 - Updated dependencies [fcea985]
-  - @vleap/warps@3.0.0-beta.185
+  - @joai/warps@3.0.0-beta.185
 
 ## 0.1.0-beta.15
 
@@ -70,7 +70,7 @@
 - f67aea4: update wallet gen to async
 - Updated dependencies [f67aea4]
 - Updated dependencies [3e86317]
-  - @vleap/warps@3.0.0-beta.184
+  - @joai/warps@3.0.0-beta.184
 
 ## 0.1.0-beta.14
 
@@ -78,7 +78,7 @@
 
 - 4ce5b8c: add chain + token logo themes
 - Updated dependencies [4ce5b8c]
-  - @vleap/warps@3.0.0-beta.182
+  - @joai/warps@3.0.0-beta.182
 
 ## 0.1.0-beta.13
 
@@ -86,7 +86,7 @@
 
 - ba2711c: further wallet updates
 - Updated dependencies [ba2711c]
-  - @vleap/warps@3.0.0-beta.181
+  - @joai/warps@3.0.0-beta.181
 
 ## 0.1.0-beta.12
 
@@ -100,7 +100,7 @@
 
 - 3cbdf74: further wallet updates
 - Updated dependencies [3cbdf74]
-  - @vleap/warps@3.0.0-beta.180
+  - @joai/warps@3.0.0-beta.180
 
 ## 0.1.0-beta.10
 
@@ -108,7 +108,7 @@
 
 - 9a4d7b7: further wallet updates
 - Updated dependencies [9a4d7b7]
-  - @vleap/warps@3.0.0-beta.179
+  - @joai/warps@3.0.0-beta.179
 
 ## 0.1.0-beta.9
 
@@ -116,7 +116,7 @@
 
 - b66881b: add readonly wallets
 - Updated dependencies [b66881b]
-  - @vleap/warps@3.0.0-beta.178
+  - @joai/warps@3.0.0-beta.178
 
 ## 0.1.0-beta.8
 
@@ -124,7 +124,7 @@
 
 - b7bd1d6: upgrade deps
 - Updated dependencies [b7bd1d6]
-  - @vleap/warps@3.0.0-beta.176
+  - @joai/warps@3.0.0-beta.176
 
 ## 0.1.0-beta.7
 
@@ -137,7 +137,7 @@
 - 552fe5e: improve external wallet provider support
 - Updated dependencies [552fe5e]
 - Updated dependencies [e97ec34]
-  - @vleap/warps@3.0.0-beta.175
+  - @joai/warps@3.0.0-beta.175
 
 ## 0.1.0-beta.6
 
@@ -148,7 +148,7 @@
 ### Patch Changes
 
 - Updated dependencies [90f1a05]
-  - @vleap/warps@3.0.0-beta.174
+  - @joai/warps@3.0.0-beta.174
 
 ## 0.1.0-beta.5
 
@@ -163,7 +163,7 @@
 - ec843d9: update solana
 - cea5da8: update solana
 - Updated dependencies [5d02aa5]
-  - @vleap/warps@3.0.0-beta.172
+  - @joai/warps@3.0.0-beta.172
 
 ## 0.1.0-beta.3
 
@@ -172,7 +172,7 @@
 - 6016b18: upgrade deps
 - Updated dependencies [6016b18]
 - Updated dependencies [496987c]
-  - @vleap/warps@3.0.0-beta.169
+  - @joai/warps@3.0.0-beta.169
 
 ## 0.1.0-beta.2
 
@@ -180,7 +180,7 @@
 
 - 1f7ba22: update solana - wip
 - Updated dependencies [1f7ba22]
-  - @vleap/warps@3.0.0-beta.167
+  - @joai/warps@3.0.0-beta.167
 
 ## [0.2.0-beta.1] - 2024-01-01
 

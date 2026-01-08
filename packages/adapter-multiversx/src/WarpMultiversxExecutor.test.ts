@@ -1,4 +1,4 @@
-import { Warp, WarpChainEnv, WarpClientConfig as WarpConfig, WarpTransferAction, WarpTypeRegistry } from '@vleap/warps'
+import { Warp, WarpChainEnv, WarpClientConfig as WarpConfig, WarpTransferAction, WarpTypeRegistry } from '@joai/warps'
 import { promises as fs, PathLike } from 'fs'
 import { WarpMultiversxExecutor } from './WarpMultiversxExecutor'
 import { MultiversxAdapter } from './chains'

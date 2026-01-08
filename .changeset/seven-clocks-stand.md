@@ -1,6 +1,6 @@
 ---
-'@vleap/warps-adapter-solana': patch
-'@vleap/warps': patch
+'@joai/warps-adapter-solana': patch
+'@joai/warps': patch
 ---
 
 update solana - wip

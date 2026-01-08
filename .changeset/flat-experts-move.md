@@ -1,5 +1,5 @@
 ---
-'@vleap/warps-adapter-sui': minor
+'@joai/warps-adapter-sui': minor
 ---
 
 add sui adapter

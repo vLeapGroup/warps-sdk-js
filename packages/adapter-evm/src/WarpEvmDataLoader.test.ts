@@ -1,4 +1,4 @@
-import { WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@joai/warps'
 import { ethers } from 'ethers'
 import { WarpEvmDataLoader } from './WarpEvmDataLoader'
 

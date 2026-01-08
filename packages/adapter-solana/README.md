@@ -1,19 +1,19 @@
-# @vleap/warps-adapter-solana
+# @joai/warps-adapter-solana
 
 Solana blockchain adapter for the Warps SDK. Enables Warp execution on Solana mainnet, testnet, and devnet.
 
 ## Installation
 
 ```bash
-npm install @vleap/warps-adapter-solana
+npm install @joai/warps-adapter-solana
 ```
 
 ## Usage
 
 ```typescript
-import { WarpClient, withAdapterFallback } from '@vleap/warps'
-import { SolanaAdapter } from '@vleap/warps-adapter-solana'
-import { MultiversxAdapter } from '@vleap/warps-adapter-multiversx'
+import { WarpClient, withAdapterFallback } from '@joai/warps'
+import { SolanaAdapter } from '@joai/warps-adapter-solana'
+import { MultiversxAdapter } from '@joai/warps-adapter-multiversx'
 
 // Solana adapter requires a fallback adapter
 const client = new WarpClient(config, {

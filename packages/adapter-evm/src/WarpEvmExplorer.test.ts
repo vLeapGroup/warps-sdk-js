@@ -1,4 +1,4 @@
-import { WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { WarpChainInfo, WarpClientConfig } from '@joai/warps'
 import { WarpEvmExplorer } from './WarpEvmExplorer'
 import { ArbitrumExplorers, BaseExplorers, EthereumExplorers } from './constants'
 

@@ -1,6 +1,6 @@
 ---
-'@vleap/warps-vm-browser': minor
-'@vleap/warps-vm-node': minor
+'@joai/warps-vm-browser': minor
+'@joai/warps-vm-node': minor
 ---
 
 extract vm packages

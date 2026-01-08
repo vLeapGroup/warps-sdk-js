@@ -1,4 +1,4 @@
-import { ChainAdapterFactory, WarpChainAsset, WarpChainName } from '@vleap/warps'
+import { ChainAdapterFactory, WarpChainAsset, WarpChainName } from '@joai/warps'
 import { createEvmAdapter } from './common'
 
 export const NativeTokenEth: WarpChainAsset = {

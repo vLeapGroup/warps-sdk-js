@@ -12,7 +12,7 @@ import {
   WarpClientConfig,
   WarpExecutable,
   WarpQueryAction,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { connect, keyStores } from 'near-api-js'
 import { WarpNearConstants } from './constants'
 import { WarpNearOutput } from './WarpNearOutput'

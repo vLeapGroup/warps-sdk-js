@@ -1,6 +1,6 @@
 ---
 '@warps/playground': minor
-'@vleap/warps': minor
+'@joai/warps': minor
 ---
 
 add warp prompts

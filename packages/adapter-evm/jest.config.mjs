@@ -20,7 +20,7 @@ export default {
   },
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
-    '^@vleap/warps$': '<rootDir>/../core/src/index.ts',
+    '^@joai/warps$': '<rootDir>/../core/src/index.ts',
   },
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],

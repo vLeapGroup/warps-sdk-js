@@ -1,4 +1,4 @@
-import { WarpChainInfo, WarpClientConfig, WarpExecutable, WarpTransferAction, WarpContractAction, WarpChainName } from '@vleap/warps'
+import { WarpChainInfo, WarpClientConfig, WarpExecutable, WarpTransferAction, WarpContractAction, WarpChainName } from '@joai/warps'
 import { ethers } from 'ethers'
 import { WarpEvmExecutor } from './WarpEvmExecutor'
 import { WarpEvmWallet } from './WarpEvmWallet'

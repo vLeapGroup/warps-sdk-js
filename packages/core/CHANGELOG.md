@@ -1091,7 +1091,7 @@
 - 7885ddd: further rearch
 - Updated dependencies [dca45d6]
 - Updated dependencies [7885ddd]
-  - @vleap/warps@0.2.0-alpha.5
+  - @joai/warps@0.2.0-alpha.5
 
 ## 3.0.0-alpha.32
 
@@ -1103,8 +1103,8 @@
 
 - Updated dependencies [5321a6b]
 - Updated dependencies [a707263]
-  - @vleap/warps@0.2.0-alpha.4
-  - @vleap/warps-adapter-multiversx@0.2.0-alpha.3
+  - @joai/warps@0.2.0-alpha.4
+  - @joai/warps-adapter-multiversx@0.2.0-alpha.3
 
 ## 3.0.0-alpha.31
 
@@ -1119,8 +1119,8 @@
 - 29942ac: add warp brand prefixes
 - Updated dependencies [60574d5]
 - Updated dependencies [29942ac]
-  - @vleap/warps-adapter-multiversx@0.2.0-alpha.2
-  - @vleap/warps@0.2.0-alpha.3
+  - @joai/warps-adapter-multiversx@0.2.0-alpha.2
+  - @joai/warps@0.2.0-alpha.3
 
 ## 3.0.0-alpha.29
 
@@ -1128,7 +1128,7 @@
 
 - e354f53: update dependencies
 - Updated dependencies [e354f53]
-  - @vleap/warps@0.2.0-alpha.1
+  - @joai/warps@0.2.0-alpha.1
 
 ## 3.0.0-alpha.28
 
@@ -1136,7 +1136,7 @@
 
 - d9bb08c: fix executor
 - Updated dependencies [1042334]
-  - @vleap/warps-adapter-multiversx@0.2.0-alpha.1
+  - @joai/warps-adapter-multiversx@0.2.0-alpha.1
 
 ## 3.0.0-alpha.27
 
@@ -1158,8 +1158,8 @@
 ### Patch Changes
 
 - Updated dependencies [40e8470]
-  - @vleap/warps-adapter-multiversx@0.2.0-alpha.0
-  - @vleap/warps@0.2.0-alpha.0
+  - @joai/warps-adapter-multiversx@0.2.0-alpha.0
+  - @joai/warps@0.2.0-alpha.0
 
 ## 3.0.0-alpha.25
 

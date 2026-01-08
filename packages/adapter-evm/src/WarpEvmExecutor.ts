@@ -12,7 +12,7 @@ import {
   WarpClientConfig,
   WarpExecutable,
   WarpQueryAction,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { ethers } from 'ethers'
 import { WarpEvmConstants } from './constants'
 import { WarpEvmOutput } from './WarpEvmOutput'

@@ -1,4 +1,4 @@
-import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
+import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@joai/warps'
 import { Account, Message, Mnemonic, Transaction, UserSecretKey } from '@multiversx/sdk-core'
 import {
   getWarpWalletAddressFromConfig,
@@ -7,7 +7,7 @@ import {
   setWarpWalletInConfig,
   WarpChainInfo,
   WarpClientConfig,
-} from '@vleap/warps'
+} from '@joai/warps'
 
 export class PrivateKeyWalletProvider implements WalletProvider {
   static readonly PROVIDER_NAME: WarpWalletProvider = 'privateKey'

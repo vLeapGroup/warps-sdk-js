@@ -11,7 +11,7 @@ import {
   WarpCacheConfig,
   WarpChainInfo,
   WarpClientConfig,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { toRegistryMoveTarget } from './helpers/registry'
 
 export class WarpSuiBuilder extends WarpBuilder implements AdapterWarpBuilder {

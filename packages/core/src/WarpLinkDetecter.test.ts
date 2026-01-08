@@ -3,7 +3,7 @@ import { Warp, WarpBrand, WarpClientConfig, WarpRegistryInfo } from './types'
 import { WarpLinkDetecter } from './WarpLinkDetecter'
 
 jest.mock('./WarpBuilder')
-jest.mock('@vleap/warps-adapter-multiversx')
+jest.mock('@joai/warps-adapter-multiversx')
 
 const minimalWarp = {
   protocol: 'warp',

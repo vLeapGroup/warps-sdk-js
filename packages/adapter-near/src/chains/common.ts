@@ -1,4 +1,4 @@
-import { ChainAdapter, ChainAdapterFactory, WarpChainName, WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { ChainAdapter, ChainAdapterFactory, WarpChainName, WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@joai/warps'
 import { WarpNearDataLoader } from '../WarpNearDataLoader'
 import { WarpNearExecutor } from '../WarpNearExecutor'
 import { WarpNearExplorer } from '../WarpNearExplorer'

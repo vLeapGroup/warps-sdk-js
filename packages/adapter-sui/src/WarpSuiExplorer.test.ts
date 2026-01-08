@@ -1,4 +1,4 @@
-import { WarpClientConfig } from '@vleap/warps'
+import { WarpClientConfig } from '@joai/warps'
 import { SuiExplorers } from './constants'
 import { WarpSuiExplorer } from './WarpSuiExplorer'
 

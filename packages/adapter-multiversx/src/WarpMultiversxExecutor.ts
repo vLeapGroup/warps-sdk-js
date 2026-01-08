@@ -22,8 +22,8 @@ import {
   WarpClientConfig,
   WarpExecutable,
   WarpQueryAction,
-} from '@vleap/warps'
-import { AdapterTypeRegistry } from '@vleap/warps/src/types'
+} from '@joai/warps'
+import { AdapterTypeRegistry } from '@joai/warps/src/types'
 import { getMultiversxEntrypoint } from './helpers/general'
 import { WarpMultiversxAbiBuilder } from './WarpMultiversxAbiBuilder'
 import { WarpMultiversxOutput } from './WarpMultiversxOutput'

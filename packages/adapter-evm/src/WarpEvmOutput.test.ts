@@ -1,4 +1,4 @@
-import { WarpClientConfig } from '@vleap/warps'
+import { WarpClientConfig } from '@joai/warps'
 import { WarpEvmOutput } from './WarpEvmOutput'
 
 describe('WarpEvmOutput', () => {

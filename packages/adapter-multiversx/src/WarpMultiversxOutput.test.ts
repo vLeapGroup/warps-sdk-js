@@ -8,7 +8,7 @@ import {
   WarpContractAction,
   WarpSerializer,
   WarpTypeRegistry,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { promises as fs, PathLike } from 'fs'
 import fetchMock from 'jest-fetch-mock'
 import path from 'path'
@@ -67,7 +67,7 @@ afterEach(() => {
   global.fetch = originalFetch
 })
 
-jest.mock('@vleap/warps-vm-node', () => ({
+jest.mock('@joai/warps-vm-node', () => ({
   runInVm: async (code: string, result: any) => {
     const codeStr = code.startsWith('transform:') ? code.slice('transform:'.length) : code
     // eslint-disable-next-line no-new-func

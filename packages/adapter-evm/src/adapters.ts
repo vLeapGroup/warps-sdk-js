@@ -1,4 +1,4 @@
-import { ChainAdapterFactory, withAdapterFallback } from '@vleap/warps'
+import { ChainAdapterFactory, withAdapterFallback } from '@joai/warps'
 import { ArbitrumAdapter } from './chains/arbitrum'
 import { BaseAdapter } from './chains/base'
 import { EthereumAdapter } from './chains/ethereum'

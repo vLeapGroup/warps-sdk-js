@@ -1,18 +1,18 @@
-# @vleap/warps-adapter-multiversx
+# @joai/warps-adapter-multiversx
 
 MultiversX (formerly Elrond) blockchain adapter for the Warps SDK. Enables Warp execution on MultiversX mainnet and testnet.
 
 ## Installation
 
 ```bash
-npm install @vleap/warps-adapter-multiversx
+npm install @joai/warps-adapter-multiversx
 ```
 
 ## Usage
 
 ```typescript
-import { WarpClient } from '@vleap/warps'
-import { getAllMultiversxAdapters } from '@vleap/warps-adapter-multiversx'
+import { WarpClient } from '@joai/warps'
+import { getAllMultiversxAdapters } from '@joai/warps-adapter-multiversx'
 
 // Use all MultiversX networks (includes MultiversX and Vibechain)
 const client = new WarpClient(config, {
@@ -25,7 +25,7 @@ const client = new WarpClient(config, {
 You can also import individual chain adapters:
 
 ```typescript
-import { MultiversxAdapter, VibechainAdapter } from '@vleap/warps-adapter-multiversx'
+import { MultiversxAdapter, VibechainAdapter } from '@joai/warps-adapter-multiversx'
 
 const client = new WarpClient(config, {
   chains: [MultiversxAdapter],

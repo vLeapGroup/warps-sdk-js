@@ -1,18 +1,18 @@
-# @vleap/warps-vm-browser
+# @joai/warps-vm-browser
 
 Browser VM runtime for Warps SDK output transformations. Safely executes transformation code in a Web Worker sandbox.
 
 ## Installation
 
 ```bash
-npm install @vleap/warps-vm-browser
+npm install @joai/warps-vm-browser
 ```
 
 ## Usage
 
 ```typescript
-import { createBrowserTransformRunner } from '@vleap/warps-vm-browser'
-import { WarpClient } from '@vleap/warps'
+import { createBrowserTransformRunner } from '@joai/warps-vm-browser'
+import { WarpClient } from '@joai/warps'
 
 const config = {
   env: 'mainnet',

@@ -1,4 +1,4 @@
-import { AdapterWarpExplorer, WarpChainName, WarpClientConfig } from '@vleap/warps'
+import { AdapterWarpExplorer, WarpChainName, WarpClientConfig } from '@joai/warps'
 import { ExplorerName, ExplorerUrls, MultiversxExplorersConfig } from './constants'
 
 export class WarpMultiversxExplorer implements AdapterWarpExplorer {

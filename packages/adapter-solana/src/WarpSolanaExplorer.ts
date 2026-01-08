@@ -1,4 +1,4 @@
-import { AdapterWarpExplorer, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { AdapterWarpExplorer, WarpChainInfo, WarpClientConfig } from '@joai/warps'
 import { ExplorerName, SolanaExplorers, SolanaExplorerNames, SolanaExplorerUrls } from './constants'
 
 export class WarpSolanaExplorer implements AdapterWarpExplorer {

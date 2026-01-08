@@ -1,6 +1,6 @@
 ---
-'@vleap/warps-adapter-evm': patch
-'@vleap/warps': patch
+'@joai/warps-adapter-evm': patch
+'@joai/warps': patch
 ---
 
 add fallback adapters

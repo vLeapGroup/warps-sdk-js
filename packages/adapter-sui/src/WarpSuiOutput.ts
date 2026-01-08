@@ -16,7 +16,7 @@ import {
   WarpClientConfig,
   WarpConstants,
   WarpExecutionOutput,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
 
 export class WarpSuiOutput implements AdapterWarpOutput {

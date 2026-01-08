@@ -7,7 +7,7 @@ import {
   WarpClientConfig,
   WarpWalletDetails,
   WarpWalletProvider,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { getGaupaApiUrl } from './config'
 import { GaupaApiClient } from './GaupaApiClient'
 import { ProviderConfig } from './types'

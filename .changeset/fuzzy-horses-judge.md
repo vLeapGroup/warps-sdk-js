@@ -1,5 +1,5 @@
 ---
-'@vleap/warps': patch
+'@joai/warps': patch
 ---
 
 add warp primary actions

@@ -14,7 +14,7 @@ import {
   WarpClientConfig,
   WarpWalletDetails,
   WarpWalletProvider,
-} from '@vleap/warps'
+} from '@joai/warps'
 
 export class MnemonicWalletProvider implements WalletProvider {
   static readonly PROVIDER_NAME: WarpWalletProvider = 'mnemonic'

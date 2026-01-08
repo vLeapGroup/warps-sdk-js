@@ -1,4 +1,4 @@
-import { WarpChainName } from '@vleap/warps'
+import { WarpChainName } from '@joai/warps'
 import { WarpSolanaWallet } from './WarpSolanaWallet'
 
 describe('WarpSolanaWallet', () => {

@@ -1,11 +1,11 @@
-import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
+import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@joai/warps'
 import {
   getWarpWalletMnemonicFromConfig,
   getWarpWalletPrivateKeyFromConfig,
   setWarpWalletInConfig,
   WarpChainInfo,
   WarpClientConfig,
-} from '@vleap/warps'
+} from '@joai/warps'
 import * as bip39 from '@scure/bip39'
 import { hexToUint8Array, uint8ArrayToHex } from '../helpers'
 import { FastsetClient } from '../sdk'

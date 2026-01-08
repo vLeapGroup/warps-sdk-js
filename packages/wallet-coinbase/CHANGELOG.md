@@ -1,18 +1,18 @@
-# @vleap/warps-wallet-coinbase
+# @joai/warps-wallet-coinbase
 
 ## 1.0.0-beta.10
 
 ### Patch Changes
 
 - Updated dependencies [d54c656]
-  - @vleap/warps@3.0.0-beta.196
+  - @joai/warps@3.0.0-beta.196
 
 ## 1.0.0-beta.9
 
 ### Patch Changes
 
 - Updated dependencies [6f02004]
-  - @vleap/warps@3.0.0-beta.195
+  - @joai/warps@3.0.0-beta.195
 
 ## 1.0.0-beta.8
 
@@ -20,7 +20,7 @@
 
 - Updated dependencies [0016189]
 - Updated dependencies [57685fc]
-  - @vleap/warps@3.0.0-beta.189
+  - @joai/warps@3.0.0-beta.189
 
 ## 1.0.0-beta.7
 
@@ -28,7 +28,7 @@
 
 - Updated dependencies [d1393e9]
 - Updated dependencies [aa0d529]
-  - @vleap/warps@3.0.0-beta.188
+  - @joai/warps@3.0.0-beta.188
 
 ## 1.0.0-beta.6
 
@@ -36,7 +36,7 @@
 
 - fa98f00: update wallets
 - Updated dependencies [fa98f00]
-  - @vleap/warps@3.0.0-beta.187
+  - @joai/warps@3.0.0-beta.187
 
 ## 1.0.0-beta.5
 
@@ -68,7 +68,7 @@
 - 600b777: update wallets
 - Updated dependencies [f67aea4]
 - Updated dependencies [3e86317]
-  - @vleap/warps@3.0.0-beta.184
+  - @joai/warps@3.0.0-beta.184
 
 ## 1.0.0-beta.1
 
@@ -88,4 +88,4 @@
 
 ### Dependencies
 
-- @vleap/warps@^3.0.0-beta.181
+- @joai/warps@^3.0.0-beta.181

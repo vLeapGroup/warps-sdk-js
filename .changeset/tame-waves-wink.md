@@ -1,5 +1,5 @@
 ---
-'@vleap/warps-wallet-coinbase': minor
+'@joai/warps-wallet-coinbase': minor
 ---
 
 add coinbase wallet

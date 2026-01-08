@@ -1,5 +1,5 @@
 ---
-'@vleap/warps-adapter-fastset': minor
+'@joai/warps-adapter-fastset': minor
 ---
 
 add fastset scaffolding

@@ -1,7 +1,7 @@
 ---
-'@vleap/warps-adapter-multiversx': patch
-'@vleap/warps-adapter-evm': patch
-'@vleap/warps-adapter-sui': patch
+'@joai/warps-adapter-multiversx': patch
+'@joai/warps-adapter-evm': patch
+'@joai/warps-adapter-sui': patch
 ---
 
 expose query results raw data

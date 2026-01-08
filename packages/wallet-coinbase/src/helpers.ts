@@ -1,4 +1,4 @@
-import { WalletProviderFactory, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { WalletProviderFactory, WarpChainInfo, WarpClientConfig } from '@joai/warps'
 import { CoinbaseWalletProvider } from './CoinbaseWalletProvider'
 import { CoinbaseProviderConfig } from './types'
 

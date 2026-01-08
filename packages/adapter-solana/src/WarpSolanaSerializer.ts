@@ -6,7 +6,7 @@ import {
   WarpConstants,
   WarpNativeValue,
   WarpSerializer,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { PublicKey } from '@solana/web3.js'
 import bs58 from 'bs58'
 

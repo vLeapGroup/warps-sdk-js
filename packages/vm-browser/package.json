@@ -1,5 +1,5 @@
 {
-  "name": "@vleap/warps-vm-browser",
+  "name": "@joai/warps-vm-browser",
   "version": "0.1.0-beta.9",
   "type": "module",
   "types": "dist/runInVm.d.ts",
@@ -7,7 +7,7 @@
     "dist"
   ],
   "dependencies": {
-    "@vleap/warps": "^3.0.0-beta.169"
+    "@joai/warps": "^3.0.0-beta.169"
   },
   "license": "MIT",
   "scripts": {

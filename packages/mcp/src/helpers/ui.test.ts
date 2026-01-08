@@ -1,4 +1,4 @@
-import { Warp, WarpChainName } from '@vleap/warps'
+import { Warp, WarpChainName } from '@joai/warps'
 import fetchMock from 'jest-fetch-mock'
 import { createAppResource } from './ui'
 

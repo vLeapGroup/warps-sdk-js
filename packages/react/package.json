@@ -1,5 +1,5 @@
 {
-  "name": "@vleap/warps-react",
+  "name": "@joai/warps-react",
   "version": "0.1.0-beta.195",
   "type": "module",
   "types": "./src/index.tsx",
@@ -17,7 +17,7 @@
     "test": "npm run lint"
   },
   "dependencies": {
-    "@vleap/warps": "3.0.0-beta.197"
+    "@joai/warps": "3.0.0-beta.197"
   },
   "peerDependencies": {
     "react": ">=18.0.0",

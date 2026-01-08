@@ -1,4 +1,4 @@
-import { WarpChainAsset, WarpChainInfo, WarpChainName } from '@vleap/warps'
+import { WarpChainAsset, WarpChainInfo, WarpChainName } from '@joai/warps'
 import { createMultiversxAdapter } from './common'
 
 export const NativeTokenVibe: WarpChainAsset = {

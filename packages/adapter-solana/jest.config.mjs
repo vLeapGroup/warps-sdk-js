@@ -20,7 +20,7 @@ export default {
   },
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
-    '^@vleap/warps$': '<rootDir>/../core/src/index.ts',
+    '^@joai/warps$': '<rootDir>/../core/src/index.ts',
     '^@solana/kit$': '<rootDir>/jest.setup.ts',
     '^@x402/svm/exact/client$': '<rootDir>/jest.setup.ts',
     '^@scure/bip39/wordlists/(.*)\\.js$': '@scure/bip39/wordlists/$1.js',

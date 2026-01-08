@@ -18,7 +18,7 @@ import {
   WarpConstants,
   WarpExecutionOutput,
   WarpNativeValue,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { connect, keyStores } from 'near-api-js'
 import { WarpNearSerializer } from './WarpNearSerializer'
 

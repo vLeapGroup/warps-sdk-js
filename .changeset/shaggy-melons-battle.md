@@ -1,5 +1,5 @@
 ---
-'@vleap/warps-adapter-near': patch
+'@joai/warps-adapter-near': patch
 ---
 
 update near

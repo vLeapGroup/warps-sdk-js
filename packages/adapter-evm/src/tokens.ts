@@ -1,4 +1,4 @@
-import { WarpChainName, WarpChainAsset, WarpChainEnv } from '@vleap/warps'
+import { WarpChainName, WarpChainAsset, WarpChainEnv } from '@joai/warps'
 import { ArbitrumTokens } from './tokens/arbitrum'
 import { ArbitrumSepoliaTokens } from './tokens/arbitrum-sepolia'
 import { BaseTokens } from './tokens/base'

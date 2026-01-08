@@ -1,19 +1,19 @@
-# @vleap/warps-adapter-fastset
+# @joai/warps-adapter-fastset
 
 Fastset blockchain adapter for the Warps SDK. Enables Warp execution on the Fastset network.
 
 ## Installation
 
 ```bash
-npm install @vleap/warps-adapter-fastset
+npm install @joai/warps-adapter-fastset
 ```
 
 ## Usage
 
 ```typescript
-import { WarpClient, withAdapterFallback } from '@vleap/warps'
-import { FastsetAdapter } from '@vleap/warps-adapter-fastset'
-import { MultiversxAdapter } from '@vleap/warps-adapter-multiversx'
+import { WarpClient, withAdapterFallback } from '@joai/warps'
+import { FastsetAdapter } from '@joai/warps-adapter-fastset'
+import { MultiversxAdapter } from '@joai/warps-adapter-multiversx'
 
 // Fastset adapter requires a fallback adapter
 const client = new WarpClient(config, {

@@ -1,4 +1,4 @@
-import { Warp, WarpClientConfig, WarpLogger } from '@vleap/warps'
+import { Warp, WarpClientConfig, WarpLogger } from '@joai/warps'
 import type { WarpMcpResource } from '../types'
 import { extractTextOrUndefined } from './warps'
 

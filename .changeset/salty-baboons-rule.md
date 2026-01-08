@@ -1,6 +1,6 @@
 ---
-'@vleap/warps-adapter-evm': minor
-'@vleap/warps': minor
+'@joai/warps-adapter-evm': minor
+'@joai/warps': minor
 ---
 
 add evm somnia network

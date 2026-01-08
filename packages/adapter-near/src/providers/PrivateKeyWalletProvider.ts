@@ -1,4 +1,4 @@
-import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
+import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@joai/warps'
 import { keyToImplicitAddress } from '@near-js/crypto'
 import * as bip39 from '@scure/bip39'
 import {
@@ -8,7 +8,7 @@ import {
   setWarpWalletInConfig,
   WarpChainInfo,
   WarpClientConfig,
-} from '@vleap/warps'
+} from '@joai/warps'
 import bs58 from 'bs58'
 import { KeyPair } from 'near-api-js'
 

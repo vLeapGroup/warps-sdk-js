@@ -1,5 +1,5 @@
 ---
-'@vleap/warps-adapter-multiversx': minor
+'@joai/warps-adapter-multiversx': minor
 ---
 
 implement mvx transfers

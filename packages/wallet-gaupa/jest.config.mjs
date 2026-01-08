@@ -13,7 +13,7 @@ export default {
   transformIgnorePatterns: ['node_modules/(?!(uuid|@multiversx|.*\\.mjs$))'],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
-    '^@vleap/warps$': '<rootDir>/../../core/src/index.ts',
+    '^@joai/warps$': '<rootDir>/../../core/src/index.ts',
   },
   testPathIgnorePatterns: ['<rootDir>/dist/'],
   passWithNoTests: true,

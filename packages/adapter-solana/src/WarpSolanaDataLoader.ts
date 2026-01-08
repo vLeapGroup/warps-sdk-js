@@ -12,7 +12,7 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpDataLoaderOptions,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { Connection, PublicKey } from '@solana/web3.js'
 import { getAccount, getMint } from '@solana/spl-token'
 import { WarpSolanaConstants } from './constants'

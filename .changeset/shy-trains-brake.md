@@ -1,6 +1,6 @@
 ---
-'@vleap/warps-adapter-multiversx': minor
-'@vleap/warps': minor
+'@joai/warps-adapter-multiversx': minor
+'@joai/warps': minor
 ---
 
 add further struct support

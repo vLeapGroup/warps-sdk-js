@@ -1,5 +1,5 @@
 import { Connection, Keypair, PublicKey, VersionedTransaction } from '@solana/web3.js'
-import { WarpChainInfo, WarpChainName, WarpClientConfig, WarpContractAction, WarpExecutable, WarpTransferAction } from '@vleap/warps'
+import { WarpChainInfo, WarpChainName, WarpClientConfig, WarpContractAction, WarpExecutable, WarpTransferAction } from '@joai/warps'
 import bs58 from 'bs58'
 import { WarpSolanaDataLoader } from './WarpSolanaDataLoader'
 import { WarpSolanaExecutor } from './WarpSolanaExecutor'

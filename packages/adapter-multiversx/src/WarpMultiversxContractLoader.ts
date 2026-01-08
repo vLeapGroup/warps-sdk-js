@@ -1,4 +1,4 @@
-import { WarpChainInfo, WarpClientConfig, WarpContract, WarpContractVerification, WarpLogger } from '@vleap/warps'
+import { WarpChainInfo, WarpClientConfig, WarpContract, WarpContractVerification, WarpLogger } from '@joai/warps'
 import { getMultiversxEntrypoint } from './helpers/general'
 
 export class WarpMultiversxContractLoader {

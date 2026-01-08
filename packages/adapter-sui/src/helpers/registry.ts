@@ -1,4 +1,4 @@
-import { WarpChainEnv, WarpRegistryInfo, WarpTrustStatus } from '@vleap/warps'
+import { WarpChainEnv, WarpRegistryInfo, WarpTrustStatus } from '@joai/warps'
 import { getSuiRegistryPackageId } from '../config'
 
 export const toRegistryMoveTarget = (env: WarpChainEnv, module: string) => `${getSuiRegistryPackageId(env)}::${module}`

@@ -1,4 +1,4 @@
-import { ChainAdapterFactory } from '@vleap/warps'
+import { ChainAdapterFactory } from '@joai/warps'
 import { MultiversxAdapter } from './chains/multiversx'
 import { VibechainAdapter } from './chains/vibechain'
 

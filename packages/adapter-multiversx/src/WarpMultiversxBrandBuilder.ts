@@ -7,7 +7,7 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpLogger,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { Buffer } from 'buffer'
 import { getMultiversxEntrypoint } from './helpers/general'
 

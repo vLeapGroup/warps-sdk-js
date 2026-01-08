@@ -1,19 +1,19 @@
-# @vleap/warps-adapter-evm
+# @joai/warps-adapter-evm
 
 EVM-compatible blockchain adapter for the Warps SDK. Supports Ethereum, Base, Polygon, Arbitrum, Optimism, and other EVM chains.
 
 ## Installation
 
 ```bash
-npm install @vleap/warps-adapter-evm
+npm install @joai/warps-adapter-evm
 ```
 
 ## Usage
 
 ```typescript
-import { WarpClient } from '@vleap/warps'
-import { getAllEvmAdapters } from '@vleap/warps-adapter-evm'
-import { MultiversxAdapter } from '@vleap/warps-adapter-multiversx'
+import { WarpClient } from '@joai/warps'
+import { getAllEvmAdapters } from '@joai/warps-adapter-evm'
+import { MultiversxAdapter } from '@joai/warps-adapter-multiversx'
 
 // Use all EVM chains (requires a fallback adapter)
 const client = new WarpClient(config, {
@@ -26,9 +26,9 @@ const client = new WarpClient(config, {
 You can also import individual chain adapters:
 
 ```typescript
-import { EthereumAdapter, BaseAdapter, PolygonAdapter } from '@vleap/warps-adapter-evm'
-import { withAdapterFallback } from '@vleap/warps'
-import { MultiversxAdapter } from '@vleap/warps-adapter-multiversx'
+import { EthereumAdapter, BaseAdapter, PolygonAdapter } from '@joai/warps-adapter-evm'
+import { withAdapterFallback } from '@joai/warps'
+import { MultiversxAdapter } from '@joai/warps-adapter-multiversx'
 
 const client = new WarpClient(config, {
   chains: [

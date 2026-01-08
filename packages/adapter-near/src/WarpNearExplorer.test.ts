@@ -1,4 +1,4 @@
-import { WarpChainEnv, WarpChainInfo, WarpChainName, WarpClientConfig } from '@vleap/warps'
+import { WarpChainEnv, WarpChainInfo, WarpChainName, WarpClientConfig } from '@joai/warps'
 import { WarpNearExplorer } from './WarpNearExplorer'
 import { NativeTokenNear } from './chains/near'
 

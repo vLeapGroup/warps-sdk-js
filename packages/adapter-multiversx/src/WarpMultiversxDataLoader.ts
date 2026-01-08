@@ -11,7 +11,7 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpDataLoaderOptions,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { getMultiversxEntrypoint, getNormalizedTokenIdentifier, isNativeToken } from './helpers/general'
 import { findKnownTokenById } from './tokens'
 

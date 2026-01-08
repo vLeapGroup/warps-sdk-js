@@ -6,7 +6,7 @@ import {
   WarpConstants,
   WarpNativeValue,
   WarpSerializer,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { ethers } from 'ethers'
 
 const SplitParamsRegex = new RegExp(`${WarpConstants.ArgParamsSeparator}(.*)`)

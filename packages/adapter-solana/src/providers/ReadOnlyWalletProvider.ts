@@ -1,5 +1,5 @@
-import { WalletProvider, WarpWalletDetails } from '@vleap/warps'
-import { getWarpWalletAddressFromConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { WalletProvider, WarpWalletDetails } from '@joai/warps'
+import { getWarpWalletAddressFromConfig, WarpChainInfo, WarpClientConfig } from '@joai/warps'
 
 export class ReadOnlyWalletProvider implements WalletProvider {
   constructor(

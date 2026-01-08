@@ -1,4 +1,4 @@
-import { AdapterWarpExplorer, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { AdapterWarpExplorer, WarpChainInfo, WarpClientConfig } from '@joai/warps'
 import { ExplorerName, NearExplorerNames, NearExplorers, NearExplorerUrls } from './constants'
 
 export class WarpNearExplorer implements AdapterWarpExplorer {

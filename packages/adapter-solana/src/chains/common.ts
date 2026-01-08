@@ -1,4 +1,4 @@
-import { ChainAdapter, ChainAdapterFactory, WarpChainName, WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { ChainAdapter, ChainAdapterFactory, WarpChainName, WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@joai/warps'
 import { WarpSolanaDataLoader } from '../WarpSolanaDataLoader'
 import { WarpSolanaExecutor } from '../WarpSolanaExecutor'
 import { WarpSolanaExplorer } from '../WarpSolanaExplorer'

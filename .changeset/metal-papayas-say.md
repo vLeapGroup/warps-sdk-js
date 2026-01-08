@@ -1,11 +1,11 @@
 ---
 'eslint-config-custom': patch
-'@vleap/warps-adapter-solana': patch
-'@vleap/warps-wallet-gaupa': patch
-'@vleap/warps-wallet-privy': patch
+'@joai/warps-adapter-solana': patch
+'@joai/warps-wallet-gaupa': patch
+'@joai/warps-wallet-privy': patch
 '@warps/playground': patch
-'@vleap/warps': patch
-'@vleap/warps-mcp': patch
+'@joai/warps': patch
+'@joai/warps-mcp': patch
 ---
 
 upgrade deps

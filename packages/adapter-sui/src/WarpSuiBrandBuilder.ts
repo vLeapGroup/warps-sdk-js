@@ -1,6 +1,6 @@
 import { SuiClient } from '@mysten/sui/client'
 import { Transaction } from '@mysten/sui/transactions'
-import { AdapterWarpBrandBuilder, getProviderConfig, WarpBrand, WarpCacheConfig, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { AdapterWarpBrandBuilder, getProviderConfig, WarpBrand, WarpCacheConfig, WarpChainInfo, WarpClientConfig } from '@joai/warps'
 
 export class WarpSuiBrandBuilder implements AdapterWarpBrandBuilder {
   private readonly client: SuiClient

@@ -1,6 +1,6 @@
 ---
 '@warps/playground': minor
-'@vleap/warps-mcp': minor
+'@joai/warps-mcp': minor
 ---
 
 update mcp

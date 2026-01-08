@@ -1,4 +1,4 @@
-import { Warp } from '@vleap/warps'
+import { Warp } from '@joai/warps'
 import { convertMcpArgsToWarpInputs } from './execution'
 
 describe('convertMcpArgsToWarpInputs', () => {

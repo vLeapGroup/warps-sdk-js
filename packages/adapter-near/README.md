@@ -1,19 +1,19 @@
-# @vleap/warps-adapter-near
+# @joai/warps-adapter-near
 
 NEAR Protocol adapter for the Warps SDK. Enables Warp execution on NEAR mainnet and testnet.
 
 ## Installation
 
 ```bash
-npm install @vleap/warps-adapter-near
+npm install @joai/warps-adapter-near
 ```
 
 ## Usage
 
 ```typescript
-import { WarpClient, withAdapterFallback } from '@vleap/warps'
-import { NearAdapter } from '@vleap/warps-adapter-near'
-import { MultiversxAdapter } from '@vleap/warps-adapter-multiversx'
+import { WarpClient, withAdapterFallback } from '@joai/warps'
+import { NearAdapter } from '@joai/warps-adapter-near'
+import { MultiversxAdapter } from '@joai/warps-adapter-multiversx'
 
 // NEAR adapter requires a fallback adapter
 const client = new WarpClient(config, {

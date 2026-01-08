@@ -1,4 +1,4 @@
-import { WarpChainName } from '@vleap/warps'
+import { WarpChainName } from '@joai/warps'
 
 export const getAllEvmChainNames = (): WarpChainName[] => [
   WarpChainName.Ethereum,

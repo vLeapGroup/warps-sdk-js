@@ -1,4 +1,4 @@
-# @vleap/warps-adapter-near
+# @joai/warps-adapter-near
 
 ## 0.1.0-beta.18
 
@@ -6,7 +6,7 @@
 
 - 050ec48: update caching
 - Updated dependencies [050ec48]
-  - @vleap/warps@3.0.0-beta.192
+  - @joai/warps@3.0.0-beta.192
 
 ## 0.1.0-beta.17
 
@@ -15,7 +15,7 @@
 - 4056843: update logo urls
 - Updated dependencies [0016189]
 - Updated dependencies [57685fc]
-  - @vleap/warps@3.0.0-beta.189
+  - @joai/warps@3.0.0-beta.189
 
 ## 0.1.0-beta.16
 
@@ -24,7 +24,7 @@
 - 75b08fe: update wallets
 - Updated dependencies [d1393e9]
 - Updated dependencies [aa0d529]
-  - @vleap/warps@3.0.0-beta.188
+  - @joai/warps@3.0.0-beta.188
 
 ## 0.1.0-beta.15
 
@@ -32,7 +32,7 @@
 
 - fa98f00: update wallets
 - Updated dependencies [fa98f00]
-  - @vleap/warps@3.0.0-beta.187
+  - @joai/warps@3.0.0-beta.187
 
 ## 0.1.0-beta.14
 
@@ -48,7 +48,7 @@
 - fcea985: update chain names
 - Updated dependencies [c390d84]
 - Updated dependencies [fcea985]
-  - @vleap/warps@3.0.0-beta.185
+  - @joai/warps@3.0.0-beta.185
 
 ## 0.1.0-beta.12
 
@@ -61,7 +61,7 @@
 - f67aea4: update wallet gen to async
 - Updated dependencies [f67aea4]
 - Updated dependencies [3e86317]
-  - @vleap/warps@3.0.0-beta.184
+  - @joai/warps@3.0.0-beta.184
 
 ## 0.1.0-beta.11
 
@@ -69,7 +69,7 @@
 
 - 4ce5b8c: add chain + token logo themes
 - Updated dependencies [4ce5b8c]
-  - @vleap/warps@3.0.0-beta.182
+  - @joai/warps@3.0.0-beta.182
 
 ## 0.1.0-beta.10
 
@@ -77,7 +77,7 @@
 
 - ba2711c: further wallet updates
 - Updated dependencies [ba2711c]
-  - @vleap/warps@3.0.0-beta.181
+  - @joai/warps@3.0.0-beta.181
 
 ## 0.1.0-beta.9
 
@@ -91,7 +91,7 @@
 
 - 3cbdf74: further wallet updates
 - Updated dependencies [3cbdf74]
-  - @vleap/warps@3.0.0-beta.180
+  - @joai/warps@3.0.0-beta.180
 
 ## 0.1.0-beta.7
 
@@ -99,7 +99,7 @@
 
 - 9a4d7b7: further wallet updates
 - Updated dependencies [9a4d7b7]
-  - @vleap/warps@3.0.0-beta.179
+  - @joai/warps@3.0.0-beta.179
 
 ## 0.1.0-beta.6
 
@@ -107,7 +107,7 @@
 
 - b66881b: add readonly wallets
 - Updated dependencies [b66881b]
-  - @vleap/warps@3.0.0-beta.178
+  - @joai/warps@3.0.0-beta.178
 
 ## 0.1.0-beta.5
 
@@ -120,7 +120,7 @@
 - 552fe5e: improve external wallet provider support
 - Updated dependencies [552fe5e]
 - Updated dependencies [e97ec34]
-  - @vleap/warps@3.0.0-beta.175
+  - @joai/warps@3.0.0-beta.175
 
 ## 0.1.0-beta.4
 
@@ -143,4 +143,4 @@
 ### Patch Changes
 
 - Updated dependencies [5d02aa5]
-  - @vleap/warps@3.0.0-beta.172
+  - @joai/warps@3.0.0-beta.172

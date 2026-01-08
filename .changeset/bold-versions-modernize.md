@@ -1,14 +1,14 @@
 ---
-'@vleap/warps-adapter-evm': patch
-'@vleap/warps-adapter-fastset': patch
-'@vleap/warps-mcp': patch
-'@vleap/warps-adapter-multiversx': patch
-'@vleap/warps-adapter-solana': patch
-'@vleap/warps-adapter-sui': patch
-'@vleap/warps': patch
-'@vleap/warps-react': patch
-'@vleap/warps-vm-browser': patch
-'@vleap/warps-vm-node': patch
+'@joai/warps-adapter-evm': patch
+'@joai/warps-adapter-fastset': patch
+'@joai/warps-mcp': patch
+'@joai/warps-adapter-multiversx': patch
+'@joai/warps-adapter-solana': patch
+'@joai/warps-adapter-sui': patch
+'@joai/warps': patch
+'@joai/warps-react': patch
+'@joai/warps-vm-browser': patch
+'@joai/warps-vm-node': patch
 'eslint-config-custom': patch
 ---
 

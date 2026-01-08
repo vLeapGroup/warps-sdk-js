@@ -1,4 +1,4 @@
-import { AdapterWarpExplorer, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { AdapterWarpExplorer, WarpChainInfo, WarpClientConfig } from '@joai/warps'
 
 const HEX_PREFIX = '0x'
 

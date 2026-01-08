@@ -1,4 +1,4 @@
-import { CacheTtl, WarpCache } from '@vleap/warps'
+import { CacheTtl, WarpCache } from '@joai/warps'
 import { UniswapToken, UniswapTokenList } from '../types'
 
 export class UniswapService {

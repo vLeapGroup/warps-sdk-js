@@ -14,7 +14,7 @@ import {
   WarpContractAction,
   WarpExecutable,
   WarpQueryAction,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { WarpSuiOutput } from './WarpSuiOutput'
 import { WarpSuiSerializer } from './WarpSuiSerializer'
 

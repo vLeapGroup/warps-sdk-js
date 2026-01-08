@@ -1,5 +1,5 @@
 ---
-'@vleap/warps-wallet-gaupa': minor
+'@joai/warps-wallet-gaupa': minor
 ---
 
 implement wallet gaupa provider

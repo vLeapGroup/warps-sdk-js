@@ -9,7 +9,7 @@ import {
   WarpClientConfig,
   WarpWalletDetails,
   WarpWalletProvider,
-} from '@vleap/warps'
+} from '@joai/warps'
 
 export class PrivateKeyWalletProvider implements WalletProvider {
   static readonly PROVIDER_NAME: WarpWalletProvider = 'privateKey'

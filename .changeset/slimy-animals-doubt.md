@@ -1,5 +1,5 @@
 ---
-'@vleap/warps-wallet-coinbase': patch
+'@joai/warps-wallet-coinbase': patch
 ---
 
 update coinbase account names

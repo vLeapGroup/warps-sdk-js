@@ -1,4 +1,4 @@
-# @vleap/warps-mcp
+# @joai/warps-mcp
 
 ## 1.0.0-beta.26
 
@@ -11,14 +11,14 @@
 ### Patch Changes
 
 - Updated dependencies [d54c656]
-  - @vleap/warps@3.0.0-beta.196
+  - @joai/warps@3.0.0-beta.196
 
 ## 1.0.0-beta.24
 
 ### Patch Changes
 
 - Updated dependencies [6f02004]
-  - @vleap/warps@3.0.0-beta.195
+  - @joai/warps@3.0.0-beta.195
 
 ## 1.0.0-beta.23
 
@@ -26,7 +26,7 @@
 
 - Updated dependencies [0016189]
 - Updated dependencies [57685fc]
-  - @vleap/warps@3.0.0-beta.189
+  - @joai/warps@3.0.0-beta.189
 
 ## 1.0.0-beta.22
 
@@ -34,7 +34,7 @@
 
 - Updated dependencies [d1393e9]
 - Updated dependencies [aa0d529]
-  - @vleap/warps@3.0.0-beta.188
+  - @joai/warps@3.0.0-beta.188
 
 ## 1.0.0-beta.21
 
@@ -42,7 +42,7 @@
 
 - Updated dependencies [f67aea4]
 - Updated dependencies [3e86317]
-  - @vleap/warps@3.0.0-beta.184
+  - @joai/warps@3.0.0-beta.184
 
 ## 1.0.0-beta.20
 
@@ -50,7 +50,7 @@
 
 - b7bd1d6: upgrade deps
 - Updated dependencies [b7bd1d6]
-  - @vleap/warps@3.0.0-beta.176
+  - @joai/warps@3.0.0-beta.176
 
 ## 1.0.0-beta.19
 
@@ -58,14 +58,14 @@
 
 - Updated dependencies [552fe5e]
 - Updated dependencies [e97ec34]
-  - @vleap/warps@3.0.0-beta.175
+  - @joai/warps@3.0.0-beta.175
 
 ## 1.0.0-beta.18
 
 ### Patch Changes
 
 - Updated dependencies [90f1a05]
-  - @vleap/warps@3.0.0-beta.174
+  - @joai/warps@3.0.0-beta.174
 
 ## 1.0.0-beta.17
 
@@ -93,7 +93,7 @@
 - 91f4117: update mcp
 - 91f4117: add warp uis"
 - Updated dependencies [91f4117]
-  - @vleap/warps@3.0.0-beta.173
+  - @joai/warps@3.0.0-beta.173
 
 ## 1.0.0-beta.13
 
@@ -155,7 +155,7 @@
 
 - cea5da8: update mcp
 - Updated dependencies [5d02aa5]
-  - @vleap/warps@3.0.0-beta.172
+  - @joai/warps@3.0.0-beta.172
 
 ## 1.0.0-beta.3
 
@@ -169,7 +169,7 @@
 
 - 9953e4b: update mcp
 - Updated dependencies [9953e4b]
-  - @vleap/warps@3.0.0-beta.171
+  - @joai/warps@3.0.0-beta.171
 
 ## 1.0.0-beta.1
 
@@ -177,7 +177,7 @@
 
 - 5eadd0f: update mcp
 - Updated dependencies [68ef882]
-  - @vleap/warps@3.0.0-beta.170
+  - @joai/warps@3.0.0-beta.170
 
 ## 1.0.0-beta.0
 
@@ -190,4 +190,4 @@
 - 6016b18: upgrade deps
 - Updated dependencies [6016b18]
 - Updated dependencies [496987c]
-  - @vleap/warps@3.0.0-beta.169
+  - @joai/warps@3.0.0-beta.169

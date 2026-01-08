@@ -1,4 +1,4 @@
-import { getWarpPrimaryAction, Warp, WarpActionInput, WarpSerializer } from '@vleap/warps'
+import { getWarpPrimaryAction, Warp, WarpActionInput, WarpSerializer } from '@joai/warps'
 
 export const convertMcpArgsToWarpInputs = (warp: Warp, args: Record<string, any>): string[] => {
   const { action } = getWarpPrimaryAction(warp)

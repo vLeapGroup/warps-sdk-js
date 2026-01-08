@@ -1,9 +1,9 @@
 ---
-'@vleap/warps-adapter-multiversx': minor
-'@vleap/warps-adapter-fastset': minor
-'@vleap/warps-adapter-evm': minor
-'@vleap/warps-adapter-sui': minor
-'@vleap/warps': minor
+'@joai/warps-adapter-multiversx': minor
+'@joai/warps-adapter-fastset': minor
+'@joai/warps-adapter-evm': minor
+'@joai/warps-adapter-sui': minor
+'@joai/warps': minor
 ---
 
 update adapter data loaders

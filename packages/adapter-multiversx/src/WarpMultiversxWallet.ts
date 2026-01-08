@@ -10,7 +10,7 @@ import {
   WarpClientConfig,
   WarpWalletDetails,
   WarpWalletProvider,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { getMultiversxEntrypoint } from './helpers/general'
 import { MnemonicWalletProvider } from './providers/MnemonicWalletProvider'
 import { PrivateKeyWalletProvider } from './providers/PrivateKeyWalletProvider'

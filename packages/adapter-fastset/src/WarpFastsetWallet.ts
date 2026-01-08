@@ -7,7 +7,7 @@ import {
   WarpClientConfig,
   WarpWalletDetails,
   WarpWalletProvider,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { getConfiguredFastsetClient } from './helpers/general'
 import { FastsetClient } from './sdk'
 import { MnemonicWalletProvider } from './providers/MnemonicWalletProvider'

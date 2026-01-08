@@ -1,5 +1,5 @@
 ---
-'@vleap/warps': minor
+'@joai/warps': minor
 ---
 
 add primary input references

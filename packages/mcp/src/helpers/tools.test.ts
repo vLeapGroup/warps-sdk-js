@@ -1,4 +1,4 @@
-import { Warp, WarpActionInput, WarpMcpAction, WarpTransferAction } from '@vleap/warps'
+import { Warp, WarpActionInput, WarpMcpAction, WarpTransferAction } from '@joai/warps'
 import { z } from 'zod'
 import { buildZodInputSchema, convertActionToTool, convertMcpActionToTool } from './tools'
 

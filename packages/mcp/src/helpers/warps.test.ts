@@ -1,4 +1,4 @@
-import { Warp, WarpChainName, WarpMcpAction } from '@vleap/warps'
+import { Warp, WarpChainName, WarpMcpAction } from '@joai/warps'
 import fetchMock from 'jest-fetch-mock'
 import { z } from 'zod'
 import { convertMcpToolToWarp, convertWarpToMcpCapabilities } from './warps'

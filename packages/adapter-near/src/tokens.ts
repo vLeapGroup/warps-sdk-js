@@ -1,4 +1,4 @@
-import { WarpChainName, WarpChainAsset, WarpChainEnv } from '@vleap/warps'
+import { WarpChainName, WarpChainAsset, WarpChainEnv } from '@joai/warps'
 
 export const NearTokens: WarpChainAsset[] = []
 

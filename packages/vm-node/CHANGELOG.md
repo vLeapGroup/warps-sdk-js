@@ -1,4 +1,4 @@
-# @vleap/warps-vm-node
+# @joai/warps-vm-node
 
 ## 0.1.0-beta.9
 
@@ -7,7 +7,7 @@
 - 6016b18: upgrade deps
 - Updated dependencies [6016b18]
 - Updated dependencies [496987c]
-  - @vleap/warps@3.0.0-beta.169
+  - @joai/warps@3.0.0-beta.169
 
 ## 0.1.0-alpha.8
 
@@ -25,7 +25,7 @@
 
 - Updated dependencies [a0c17ea]
 - Updated dependencies [f243b65]
-  - @vleap/warps@3.0.0-alpha.131
+  - @joai/warps@3.0.0-alpha.131
 
 ## 0.1.0-alpha.6
 
@@ -37,7 +37,7 @@
 
 - Updated dependencies [8c61537]
 - Updated dependencies [455faa2]
-  - @vleap/warps@3.0.0-alpha.87
+  - @joai/warps@3.0.0-alpha.87
 
 ## 0.1.0-alpha.5
 
@@ -48,7 +48,7 @@
 ### Patch Changes
 
 - Updated dependencies [06ad967]
-  - @vleap/warps@3.0.0-alpha.75
+  - @joai/warps@3.0.0-alpha.75
 
 ## 0.1.0-alpha.4
 
@@ -56,7 +56,7 @@
 
 - 7445aa3: exclude test files from builds
 - Updated dependencies [7445aa3]
-  - @vleap/warps@3.0.0-alpha.74
+  - @joai/warps@3.0.0-alpha.74
 
 ## 0.1.0-alpha.3
 
@@ -67,7 +67,7 @@
 ### Patch Changes
 
 - Updated dependencies [19db0e8]
-  - @vleap/warps@3.0.0-alpha.73
+  - @joai/warps@3.0.0-alpha.73
 
 ## 0.1.0-alpha.2
 
@@ -78,7 +78,7 @@
 ### Patch Changes
 
 - Updated dependencies [fc92560]
-  - @vleap/warps@3.0.0-alpha.66
+  - @joai/warps@3.0.0-alpha.66
 
 ## 0.1.0-alpha.1
 

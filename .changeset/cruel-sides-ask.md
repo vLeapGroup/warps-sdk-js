@@ -1,5 +1,5 @@
 ---
-'@vleap/warps-adapter-fastset': patch
+'@joai/warps-adapter-fastset': patch
 ---
 
 add fastset token support

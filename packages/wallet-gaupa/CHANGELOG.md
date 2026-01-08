@@ -1,4 +1,4 @@
-# @vleap/warps-wallet-gaupa
+# @joai/warps-wallet-gaupa
 
 ## 1.0.0-beta.10
 
@@ -11,14 +11,14 @@
 ### Patch Changes
 
 - Updated dependencies [d54c656]
-  - @vleap/warps@3.0.0-beta.196
+  - @joai/warps@3.0.0-beta.196
 
 ## 1.0.0-beta.8
 
 ### Patch Changes
 
 - Updated dependencies [6f02004]
-  - @vleap/warps@3.0.0-beta.195
+  - @joai/warps@3.0.0-beta.195
 
 ## 1.0.0-beta.7
 
@@ -26,7 +26,7 @@
 
 - Updated dependencies [0016189]
 - Updated dependencies [57685fc]
-  - @vleap/warps@3.0.0-beta.189
+  - @joai/warps@3.0.0-beta.189
 
 ## 1.0.0-beta.6
 
@@ -34,7 +34,7 @@
 
 - Updated dependencies [d1393e9]
 - Updated dependencies [aa0d529]
-  - @vleap/warps@3.0.0-beta.188
+  - @joai/warps@3.0.0-beta.188
 
 ## 1.0.0-beta.5
 
@@ -47,7 +47,7 @@
 - f67aea4: update wallet gen to async
 - Updated dependencies [f67aea4]
 - Updated dependencies [3e86317]
-  - @vleap/warps@3.0.0-beta.184
+  - @joai/warps@3.0.0-beta.184
 
 ## 1.0.0-beta.4
 
@@ -55,7 +55,7 @@
 
 - ba2711c: further wallet updates
 - Updated dependencies [ba2711c]
-  - @vleap/warps@3.0.0-beta.181
+  - @joai/warps@3.0.0-beta.181
 
 ## 1.0.0-beta.3
 
@@ -63,7 +63,7 @@
 
 - 9a4d7b7: further wallet updates
 - Updated dependencies [9a4d7b7]
-  - @vleap/warps@3.0.0-beta.179
+  - @joai/warps@3.0.0-beta.179
 
 ## 1.0.0-beta.2
 
@@ -71,7 +71,7 @@
 
 - b7bd1d6: upgrade deps
 - Updated dependencies [b7bd1d6]
-  - @vleap/warps@3.0.0-beta.176
+  - @joai/warps@3.0.0-beta.176
 
 ## 1.0.0-beta.1
 
@@ -84,11 +84,11 @@
 - 552fe5e: improve external wallet provider support
 - Updated dependencies [552fe5e]
 - Updated dependencies [e97ec34]
-  - @vleap/warps@3.0.0-beta.175
+  - @joai/warps@3.0.0-beta.175
 
 ## 1.0.0-beta.0
 
 ### Patch Changes
 
 - Updated dependencies [90f1a05]
-  - @vleap/warps@3.0.0-beta.174
+  - @joai/warps@3.0.0-beta.174

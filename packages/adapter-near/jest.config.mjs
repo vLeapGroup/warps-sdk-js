@@ -20,7 +20,7 @@ export default {
   },
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
-    '^@vleap/warps$': '<rootDir>/../core/src/index.ts',
+    '^@joai/warps$': '<rootDir>/../core/src/index.ts',
     '^@scure/bip39/wordlists/(.*)\\.js$': '@scure/bip39/wordlists/$1.js',
     '^@scure/bip39/wordlists/(.*)$': '@scure/bip39/wordlists/$1.js',
   },

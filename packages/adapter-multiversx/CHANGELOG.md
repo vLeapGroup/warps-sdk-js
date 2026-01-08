@@ -1,4 +1,4 @@
-# @vleap/warps-adapter-multiversx
+# @joai/warps-adapter-multiversx
 
 ## 0.2.0-beta.98
 
@@ -6,7 +6,7 @@
 
 - 050ec48: update caching
 - Updated dependencies [050ec48]
-  - @vleap/warps@3.0.0-beta.192
+  - @joai/warps@3.0.0-beta.192
 
 ## 0.2.0-beta.97
 
@@ -15,7 +15,7 @@
 - 4056843: update logo urls
 - Updated dependencies [0016189]
 - Updated dependencies [57685fc]
-  - @vleap/warps@3.0.0-beta.189
+  - @joai/warps@3.0.0-beta.189
 
 ## 0.2.0-beta.96
 
@@ -23,7 +23,7 @@
 
 - fa98f00: update wallets
 - Updated dependencies [fa98f00]
-  - @vleap/warps@3.0.0-beta.187
+  - @joai/warps@3.0.0-beta.187
 
 ## 0.2.0-beta.95
 
@@ -51,7 +51,7 @@
 - fcea985: update chain names
 - Updated dependencies [c390d84]
 - Updated dependencies [fcea985]
-  - @vleap/warps@3.0.0-beta.185
+  - @joai/warps@3.0.0-beta.185
 
 ## 0.2.0-beta.91
 
@@ -64,7 +64,7 @@
 - f67aea4: update wallet gen to async
 - Updated dependencies [f67aea4]
 - Updated dependencies [3e86317]
-  - @vleap/warps@3.0.0-beta.184
+  - @joai/warps@3.0.0-beta.184
 
 ## 0.2.0-beta.90
 
@@ -72,7 +72,7 @@
 
 - ba2711c: further wallet updates
 - Updated dependencies [ba2711c]
-  - @vleap/warps@3.0.0-beta.181
+  - @joai/warps@3.0.0-beta.181
 
 ## 0.2.0-beta.89
 
@@ -80,7 +80,7 @@
 
 - 3cbdf74: further wallet updates
 - Updated dependencies [3cbdf74]
-  - @vleap/warps@3.0.0-beta.180
+  - @joai/warps@3.0.0-beta.180
 
 ## 0.2.0-beta.88
 
@@ -88,7 +88,7 @@
 
 - 9a4d7b7: further wallet updates
 - Updated dependencies [9a4d7b7]
-  - @vleap/warps@3.0.0-beta.179
+  - @joai/warps@3.0.0-beta.179
 
 ## 0.2.0-beta.87
 
@@ -96,7 +96,7 @@
 
 - b66881b: add readonly wallets
 - Updated dependencies [b66881b]
-  - @vleap/warps@3.0.0-beta.178
+  - @joai/warps@3.0.0-beta.178
 
 ## 0.2.0-beta.86
 
@@ -109,7 +109,7 @@
 - 552fe5e: improve external wallet provider support
 - Updated dependencies [552fe5e]
 - Updated dependencies [e97ec34]
-  - @vleap/warps@3.0.0-beta.175
+  - @joai/warps@3.0.0-beta.175
 
 ## 0.2.0-beta.85
 
@@ -120,7 +120,7 @@
 ### Patch Changes
 
 - Updated dependencies [90f1a05]
-  - @vleap/warps@3.0.0-beta.174
+  - @joai/warps@3.0.0-beta.174
 
 ## 0.2.0-beta.84
 
@@ -135,7 +135,7 @@
 - 6016b18: upgrade deps
 - Updated dependencies [6016b18]
 - Updated dependencies [496987c]
-  - @vleap/warps@3.0.0-beta.169
+  - @joai/warps@3.0.0-beta.169
 
 ## 0.2.0-beta.82
 
@@ -143,7 +143,7 @@
 
 - c3b3728: add resolved inputs to exec results
 - Updated dependencies [c3b3728]
-  - @vleap/warps@3.0.0-beta.161
+  - @joai/warps@3.0.0-beta.161
 
 ## 0.2.0-beta.81
 
@@ -161,7 +161,7 @@
 
 - Updated dependencies [6a4249c]
 - Updated dependencies [7173aa3]
-  - @vleap/warps@3.0.0-beta.159
+  - @joai/warps@3.0.0-beta.159
 
 ## 0.2.0-beta.79
 
@@ -169,7 +169,7 @@
 
 - 0378c4e: update collect exec payloads
 - Updated dependencies [0378c4e]
-  - @vleap/warps@3.0.0-beta.157
+  - @joai/warps@3.0.0-beta.157
 
 ## 0.2.0-beta.78
 
@@ -177,7 +177,7 @@
 
 - 9f92c0d: add destination to exec results
 - Updated dependencies [9f92c0d]
-  - @vleap/warps@3.0.0-beta.156
+  - @joai/warps@3.0.0-beta.156
 
 ## 0.2.0-beta.77
 
@@ -185,7 +185,7 @@
 
 - 4f0d6a7: further message localization updates
 - Updated dependencies [4f0d6a7]
-  - @vleap/warps@3.0.0-beta.153
+  - @joai/warps@3.0.0-beta.153
 
 ## 0.2.0-alpha.76
 
@@ -194,7 +194,7 @@
 - 4731910: update opt dest
 - Updated dependencies [4731910]
 - Updated dependencies [38bb15f]
-  - @vleap/warps@3.0.0-alpha.152
+  - @joai/warps@3.0.0-alpha.152
 
 ## 0.2.0-alpha.75
 
@@ -208,7 +208,7 @@
 - Updated dependencies [c919e13]
 - Updated dependencies [53f5231]
 - Updated dependencies [f0fccb0]
-  - @vleap/warps@3.0.0-alpha.148
+  - @joai/warps@3.0.0-alpha.148
 
 ## 0.2.0-alpha.74
 
@@ -222,7 +222,7 @@
 
 - 4aab0b2: update transforms
 - Updated dependencies [4aab0b2]
-  - @vleap/warps@3.0.0-alpha.146
+  - @joai/warps@3.0.0-alpha.146
 
 ## 0.2.0-alpha.72
 
@@ -239,7 +239,7 @@
 ### Patch Changes
 
 - Updated dependencies
-  - @vleap/warps@3.0.0-alpha.142
+  - @joai/warps@3.0.0-alpha.142
 
 ## 0.2.0-alpha.70
 
@@ -250,7 +250,7 @@
 ### Patch Changes
 
 - Updated dependencies [795b560]
-  - @vleap/warps@3.0.0-alpha.139
+  - @joai/warps@3.0.0-alpha.139
 
 ## 0.2.0-alpha.69
 
@@ -274,7 +274,7 @@
 
 - Updated dependencies [a0c17ea]
 - Updated dependencies [f243b65]
-  - @vleap/warps@3.0.0-alpha.131
+  - @joai/warps@3.0.0-alpha.131
 
 ## 0.2.0-alpha.66
 
@@ -295,7 +295,7 @@
 - Updated dependencies [735334a]
 - Updated dependencies [3bd42a7]
 - Updated dependencies [d919b6e]
-  - @vleap/warps@3.0.0-alpha.118
+  - @joai/warps@3.0.0-alpha.118
 
 ## 0.2.0-alpha.64
 
@@ -306,7 +306,7 @@
 ### Patch Changes
 
 - Updated dependencies [d005120]
-  - @vleap/warps@3.0.0-alpha.116
+  - @joai/warps@3.0.0-alpha.116
 
 ## 0.2.0-alpha.63
 
@@ -314,7 +314,7 @@
 
 - 53ac884: update complex type serialization
 - Updated dependencies [53ac884]
-  - @vleap/warps@3.0.0-alpha.115
+  - @joai/warps@3.0.0-alpha.115
 
 ## 0.2.0-alpha.62
 
@@ -325,7 +325,7 @@
 ### Patch Changes
 
 - Updated dependencies [0d22c03]
-  - @vleap/warps@3.0.0-alpha.114
+  - @joai/warps@3.0.0-alpha.114
 
 ## 0.2.0-alpha.61
 
@@ -339,7 +339,7 @@
 
 - 4e09d48: improve complex struct serialization
 - Updated dependencies [4e09d48]
-  - @vleap/warps@3.0.0-alpha.113
+  - @joai/warps@3.0.0-alpha.113
 
 ## 0.2.0-alpha.59
 
@@ -352,7 +352,7 @@
 - Updated dependencies [caf0979]
 - Updated dependencies [df20c26]
 - Updated dependencies [4af1b7d]
-  - @vleap/warps@3.0.0-alpha.112
+  - @joai/warps@3.0.0-alpha.112
 
 ## 0.2.0-alpha.58
 
@@ -363,7 +363,7 @@
 ### Patch Changes
 
 - Updated dependencies [627badf]
-  - @vleap/warps@3.0.0-alpha.110
+  - @joai/warps@3.0.0-alpha.110
 
 ## 0.2.0-alpha.57
 
@@ -374,7 +374,7 @@
 ### Patch Changes
 
 - Updated dependencies [74eaaca]
-  - @vleap/warps@3.0.0-alpha.108
+  - @joai/warps@3.0.0-alpha.108
 
 ## 0.2.0-alpha.56
 
@@ -390,7 +390,7 @@
 - 5f93802: refactor mvx tokens
 - 5af41e0: add further mvx tokens
 - Updated dependencies [0956fc2]
-  - @vleap/warps@3.0.0-alpha.107
+  - @joai/warps@3.0.0-alpha.107
 
 ## 0.2.0-alpha.54
 
@@ -399,7 +399,7 @@
 - 0dfbec0: update wallets
 - 8a3c7c5: update chain prefixs
 - Updated dependencies [8a3c7c5]
-  - @vleap/warps@3.0.0-alpha.105
+  - @joai/warps@3.0.0-alpha.105
 
 ## 0.2.0-alpha.53
 
@@ -407,7 +407,7 @@
 
 - eb57e0d: add chain logos
 - Updated dependencies [eb57e0d]
-  - @vleap/warps@3.0.0-alpha.104
+  - @joai/warps@3.0.0-alpha.104
 
 ## 0.2.0-alpha.52
 
@@ -416,7 +416,7 @@
 - 36fce86: add mvx helper exports
 - 92c2d54: add further chain asset info
 - Updated dependencies [92c2d54]
-  - @vleap/warps@3.0.0-alpha.103
+  - @joai/warps@3.0.0-alpha.103
 
 ## 0.2.0-alpha.51
 
@@ -428,7 +428,7 @@
 
 - Updated dependencies [c721f10]
 - Updated dependencies [93fbd3d]
-  - @vleap/warps@3.0.0-alpha.102
+  - @joai/warps@3.0.0-alpha.102
 
 ## 0.2.0-alpha.50
 
@@ -436,7 +436,7 @@
 
 - ac6195b: update brand meta
 - Updated dependencies [ac6195b]
-  - @vleap/warps@3.0.0-alpha.97
+  - @joai/warps@3.0.0-alpha.97
 
 ## 0.2.0-alpha.49
 
@@ -452,7 +452,7 @@
 - Updated dependencies [5b50409]
 - Updated dependencies [a7696aa]
 - Updated dependencies [1613364]
-  - @vleap/warps@3.0.0-alpha.95
+  - @joai/warps@3.0.0-alpha.95
 
 ## 0.2.0-alpha.47
 
@@ -466,7 +466,7 @@
 - Updated dependencies [cf418e1]
 - Updated dependencies [d48e19b]
 - Updated dependencies [588aaf3]
-  - @vleap/warps@3.0.0-alpha.92
+  - @joai/warps@3.0.0-alpha.92
 
 ## 0.2.0-alpha.46
 
@@ -481,7 +481,7 @@
 - Updated dependencies [29b84b6]
 - Updated dependencies [7a96317]
 - Updated dependencies [4d143d7]
-  - @vleap/warps@3.0.0-alpha.91
+  - @joai/warps@3.0.0-alpha.91
 
 ## 0.2.0-alpha.45
 
@@ -489,7 +489,7 @@
 
 - af8225c: update assets
 - Updated dependencies [af8225c]
-  - @vleap/warps@3.0.0-alpha.90
+  - @joai/warps@3.0.0-alpha.90
 
 ## 0.2.0-alpha.44
 
@@ -512,7 +512,7 @@
 ### Patch Changes
 
 - Updated dependencies [bf84508]
-  - @vleap/warps@3.0.0-alpha.89
+  - @joai/warps@3.0.0-alpha.89
 
 ## 0.2.0-alpha.41
 
@@ -529,7 +529,7 @@
 ### Patch Changes
 
 - Updated dependencies [13b6127]
-  - @vleap/warps@3.0.0-alpha.88
+  - @joai/warps@3.0.0-alpha.88
 
 ## 0.2.0-alpha.39
 
@@ -541,7 +541,7 @@
 
 - Updated dependencies [8c61537]
 - Updated dependencies [455faa2]
-  - @vleap/warps@3.0.0-alpha.87
+  - @joai/warps@3.0.0-alpha.87
 
 ## 0.2.0-alpha.38
 
@@ -555,7 +555,7 @@
 - c9eb27c: update adapter chain configs
 - abf215f: fix mvx queries
 - Updated dependencies [eff7bda]
-  - @vleap/warps@3.0.0-alpha.86
+  - @joai/warps@3.0.0-alpha.86
 
 ## 0.2.0-alpha.37
 
@@ -573,7 +573,7 @@
 
 - 42de588: add mvx egld multi-transfer support
 - Updated dependencies [c680090]
-  - @vleap/warps@3.0.0-alpha.85
+  - @joai/warps@3.0.0-alpha.85
 
 ## 0.2.0-alpha.35
 
@@ -582,7 +582,7 @@
 - dd226b9: add generic tx to warp executions
 - 6d787ae: add further mvx token transfer support
 - Updated dependencies [dd226b9]
-  - @vleap/warps@3.0.0-alpha.84
+  - @joai/warps@3.0.0-alpha.84
 
 ## 0.2.0-alpha.34
 
@@ -594,7 +594,7 @@
 
 - bcce744: update executable transfers type
 - Updated dependencies [bcce744]
-  - @vleap/warps@3.0.0-alpha.83
+  - @joai/warps@3.0.0-alpha.83
 
 ## 0.2.0-alpha.33
 
@@ -602,7 +602,7 @@
 
 - 5b91c62: update mvx preprocessing
 - Updated dependencies [f2a9fa4]
-  - @vleap/warps@3.0.0-alpha.81
+  - @joai/warps@3.0.0-alpha.81
 
 ## 0.2.0-alpha.32
 
@@ -610,7 +610,7 @@
 
 - 836d6a8: update custom types
 - Updated dependencies [836d6a8]
-  - @vleap/warps@3.0.0-alpha.78
+  - @joai/warps@3.0.0-alpha.78
 
 ## 0.2.0-alpha.31
 
@@ -623,7 +623,7 @@
 
 - Updated dependencies [02ce817]
 - Updated dependencies [7299456]
-  - @vleap/warps@3.0.0-alpha.77
+  - @joai/warps@3.0.0-alpha.77
 
 ## 0.2.0-alpha.30
 
@@ -634,7 +634,7 @@
 ### Patch Changes
 
 - Updated dependencies [b8988d5]
-  - @vleap/warps@3.0.0-alpha.76
+  - @joai/warps@3.0.0-alpha.76
 
 ## 0.2.0-alpha.29
 
@@ -645,7 +645,7 @@
 ### Patch Changes
 
 - Updated dependencies [06ad967]
-  - @vleap/warps@3.0.0-alpha.75
+  - @joai/warps@3.0.0-alpha.75
 
 ## 0.2.0-alpha.28
 
@@ -656,7 +656,7 @@
 ### Patch Changes
 
 - Updated dependencies [19db0e8]
-  - @vleap/warps@3.0.0-alpha.73
+  - @joai/warps@3.0.0-alpha.73
 
 ## 0.2.0-alpha.27
 
@@ -664,7 +664,7 @@
 
 - cff4951: upgrade deps
 - Updated dependencies [cff4951]
-  - @vleap/warps@3.0.0-alpha.72
+  - @joai/warps@3.0.0-alpha.72
 
 ## 0.2.0-alpha.26
 
@@ -678,7 +678,7 @@
 
 - d139b82: add further explorer endpoints
 - Updated dependencies [d139b82]
-  - @vleap/warps@3.0.0-alpha.70
+  - @joai/warps@3.0.0-alpha.70
 
 ## 0.2.0-alpha.24
 
@@ -689,7 +689,7 @@
 ### Patch Changes
 
 - Updated dependencies [73c3a6e]
-  - @vleap/warps@3.0.0-alpha.68
+  - @joai/warps@3.0.0-alpha.68
 
 ## 0.2.0-alpha.23
 
@@ -698,7 +698,7 @@
 - 440b74e: update chain infos
 - 2ed4c75: fix circular dep
 - Updated dependencies [440b74e]
-  - @vleap/warps@3.0.0-alpha.63
+  - @joai/warps@3.0.0-alpha.63
 
 ## 0.2.0-alpha.22
 
@@ -706,7 +706,7 @@
 
 - 47a02a1: add name to chain configs
 - Updated dependencies [47a02a1]
-  - @vleap/warps@3.0.0-alpha.62
+  - @joai/warps@3.0.0-alpha.62
 
 ## 0.2.0-alpha.21
 
@@ -723,7 +723,7 @@
 ### Patch Changes
 
 - Updated dependencies [9b46d12]
-  - @vleap/warps@3.0.0-alpha.61
+  - @joai/warps@3.0.0-alpha.61
 
 ## 0.2.0-alpha.19
 
@@ -735,7 +735,7 @@
 
 - Updated dependencies [dfaea22]
 - Updated dependencies [2c038bf]
-  - @vleap/warps@3.0.0-alpha.60
+  - @joai/warps@3.0.0-alpha.60
 
 ## 0.2.0-alpha.18
 
@@ -752,7 +752,7 @@
 ### Patch Changes
 
 - Updated dependencies [a6d698b]
-  - @vleap/warps@3.0.0-alpha.58
+  - @joai/warps@3.0.0-alpha.58
 
 ## 0.2.0-alpha.16
 
@@ -771,7 +771,7 @@
 
 - Updated dependencies [4a5076c]
 - Updated dependencies [9518f3f]
-  - @vleap/warps@3.0.0-alpha.56
+  - @joai/warps@3.0.0-alpha.56
 
 ## 0.2.0-alpha.14
 
@@ -779,7 +779,7 @@
 
 - 3dbc599: add chain to warp meta
 - Updated dependencies [3dbc599]
-  - @vleap/warps@3.0.0-alpha.54
+  - @joai/warps@3.0.0-alpha.54
 
 ## 0.2.0-alpha.13
 
@@ -787,7 +787,7 @@
 
 - 8e3d840: add registry config accessor
 - Updated dependencies [8e3d840]
-  - @vleap/warps@3.0.0-alpha.53
+  - @joai/warps@3.0.0-alpha.53
 
 ## 0.2.0-alpha.12
 
@@ -798,7 +798,7 @@
 ### Patch Changes
 
 - Updated dependencies [1f9aa05]
-  - @vleap/warps@3.0.0-alpha.48
+  - @joai/warps@3.0.0-alpha.48
 
 ## 0.2.0-alpha.11
 
@@ -810,7 +810,7 @@
 
 - Updated dependencies [67223b1]
 - Updated dependencies [0cf15c7]
-  - @vleap/warps@3.0.0-alpha.47
+  - @joai/warps@3.0.0-alpha.47
 
 ## 0.2.0-alpha.10
 
@@ -821,7 +821,7 @@
 ### Patch Changes
 
 - Updated dependencies [66cd2fd]
-  - @vleap/warps@3.0.0-alpha.46
+  - @joai/warps@3.0.0-alpha.46
 
 ## 0.2.0-alpha.9
 
@@ -832,7 +832,7 @@
 ### Patch Changes
 
 - Updated dependencies [1a32114]
-  - @vleap/warps@3.0.0-alpha.45
+  - @joai/warps@3.0.0-alpha.45
 
 ## 0.2.0-alpha.8
 
@@ -849,7 +849,7 @@
 ### Patch Changes
 
 - Updated dependencies [924b053]
-  - @vleap/warps@3.0.0-alpha.44
+  - @joai/warps@3.0.0-alpha.44
 
 ## 0.2.0-alpha.6
 
@@ -860,7 +860,7 @@
 ### Patch Changes
 
 - Updated dependencies [cc79e6b]
-  - @vleap/warps@3.0.0-alpha.40
+  - @joai/warps@3.0.0-alpha.40
 
 ## 0.2.0-alpha.5
 
@@ -869,7 +869,7 @@
 - 0d85c51: further rearch
 - Updated dependencies [3ad6ca0]
 - Updated dependencies [0d85c51]
-  - @vleap/warps@3.0.0-alpha.34
+  - @joai/warps@3.0.0-alpha.34
 
 ## 0.2.0-alpha.4
 
@@ -879,7 +879,7 @@
 - 7885ddd: further rearch
 - Updated dependencies [dca45d6]
 - Updated dependencies [7885ddd]
-  - @vleap/warps@0.2.0-alpha.5
+  - @joai/warps@0.2.0-alpha.5
 
 ## 0.2.0-alpha.3
 
@@ -891,7 +891,7 @@
 
 - Updated dependencies [5321a6b]
 - Updated dependencies [a707263]
-  - @vleap/warps@0.2.0-alpha.4
+  - @joai/warps@0.2.0-alpha.4
 
 ## 0.2.0-alpha.2
 
@@ -900,7 +900,7 @@
 - 60574d5: fix brand references
 - Updated dependencies [60574d5]
 - Updated dependencies [29942ac]
-  - @vleap/warps@0.2.0-alpha.3
+  - @joai/warps@0.2.0-alpha.3
 
 ## 0.2.0-alpha.1
 
@@ -917,4 +917,4 @@
 ### Patch Changes
 
 - Updated dependencies [40e8470]
-  - @vleap/warps@0.2.0-alpha.0
+  - @joai/warps@0.2.0-alpha.0

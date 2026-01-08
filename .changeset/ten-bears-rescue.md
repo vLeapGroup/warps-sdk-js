@@ -1,8 +1,8 @@
 ---
 '@warps/playground': patch
-'@vleap/warps-adapter-evm': patch
-'@vleap/warps-adapter-solana': patch
-'@vleap/warps-adapter-sui': patch
+'@joai/warps-adapter-evm': patch
+'@joai/warps-adapter-solana': patch
+'@joai/warps-adapter-sui': patch
 ---
 
 update wallets

@@ -8,8 +8,8 @@ export const WarpProtocolVersions = {
 }
 
 export const WarpConfig = {
-  LatestWarpSchemaUrl: `https://raw.githubusercontent.com/vLeapGroup/warps-specs/refs/heads/main/schemas/v${WarpProtocolVersions.Warp}.schema.json`,
-  LatestBrandSchemaUrl: `https://raw.githubusercontent.com/vLeapGroup/warps-specs/refs/heads/main/schemas/brand/v${WarpProtocolVersions.Brand}.schema.json`,
+  LatestWarpSchemaUrl: `https://raw.githubusercontent.com/JoAiHQ/warps-specs/refs/heads/main/schemas/v${WarpProtocolVersions.Warp}.schema.json`,
+  LatestBrandSchemaUrl: `https://raw.githubusercontent.com/JoAiHQ/warps-specs/refs/heads/main/schemas/brand/v${WarpProtocolVersions.Brand}.schema.json`,
 
   DefaultClientUrl: (env: WarpChainEnv) => {
     if (env === 'devnet') return 'https://devnet.usewarp.to'

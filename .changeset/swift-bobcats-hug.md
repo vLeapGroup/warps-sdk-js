@@ -1,11 +1,11 @@
 ---
-'@vleap/warps-adapter-multiversx': minor
-'@vleap/warps-adapter-fastset': minor
-'@vleap/warps-adapter-evm': minor
-'@vleap/warps-adapter-sui': minor
-'@vleap/warps-vm-browser': minor
-'@vleap/warps-vm-node': minor
-'@vleap/warps': minor
+'@joai/warps-adapter-multiversx': minor
+'@joai/warps-adapter-fastset': minor
+'@joai/warps-adapter-evm': minor
+'@joai/warps-adapter-sui': minor
+'@joai/warps-vm-browser': minor
+'@joai/warps-vm-node': minor
+'@joai/warps': minor
 ---
 
 update builds

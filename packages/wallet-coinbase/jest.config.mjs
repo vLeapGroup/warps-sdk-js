@@ -15,7 +15,7 @@ export default {
   ],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
-    '^@vleap/warps$': '<rootDir>/../../packages/core/src/index.ts',
+    '^@joai/warps$': '<rootDir>/../../packages/core/src/index.ts',
   },
   testPathIgnorePatterns: ['<rootDir>/dist/'],
   passWithNoTests: true,

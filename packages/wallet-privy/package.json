@@ -1,5 +1,5 @@
 {
-  "name": "@vleap/warps-wallet-privy",
+  "name": "@joai/warps-wallet-privy",
   "version": "1.0.0-beta.8",
   "description": "Privy wallet provider for multiple chains - Node.js compatible, no React dependencies",
   "type": "module",
@@ -34,6 +34,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@vleap/warps": "^3.0.0-beta.196"
+    "@joai/warps": "^3.0.0-beta.196"
   }
 }

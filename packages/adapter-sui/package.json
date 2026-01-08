@@ -1,5 +1,5 @@
 {
-  "name": "@vleap/warps-adapter-sui",
+  "name": "@joai/warps-adapter-sui",
   "version": "0.2.0-beta.73",
   "description": "",
   "type": "module",
@@ -38,6 +38,6 @@
   "dependencies": {
     "@mysten/sui": "^1.45.2",
     "@scure/bip39": "^2.0.1",
-    "@vleap/warps": "^3.0.0-beta.192"
+    "@joai/warps": "^3.0.0-beta.192"
   }
 }

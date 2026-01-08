@@ -16,7 +16,7 @@ import {
   WarpContractAction,
   WarpLogger,
   WarpQueryAction,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { getMultiversxEntrypoint } from './helpers/general'
 import { WarpMultiversxContractLoader } from './WarpMultiversxContractLoader'
 

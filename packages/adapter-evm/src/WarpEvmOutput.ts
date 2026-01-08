@@ -18,7 +18,7 @@ import {
   WarpNativeValue,
   WarpCache,
   WarpCacheKey,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { ethers } from 'ethers'
 import { WarpEvmSerializer } from './WarpEvmSerializer'
 

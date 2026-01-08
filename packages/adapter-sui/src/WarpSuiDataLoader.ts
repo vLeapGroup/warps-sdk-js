@@ -12,7 +12,7 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpDataLoaderOptions,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { findKnownTokenById } from './tokens'
 
 export class WarpSuiDataLoader implements AdapterWarpDataLoader {

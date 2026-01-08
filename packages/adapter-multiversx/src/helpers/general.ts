@@ -1,5 +1,5 @@
 import { DevnetEntrypoint, MainnetEntrypoint, NetworkEntrypoint, TestnetEntrypoint } from '@multiversx/sdk-core'
-import { getProviderConfig, WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { getProviderConfig, WarpChainEnv, WarpChainInfo, WarpClientConfig } from '@joai/warps'
 
 // Native tokens have identifiers that do not follow the ESDT token format, e.g. EGLD, VIBE
 export const isNativeToken = (identifier: string): boolean => !identifier.includes('-')

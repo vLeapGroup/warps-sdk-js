@@ -18,7 +18,7 @@ import {
   WarpNativeValue,
   WarpCache,
   WarpCacheKey,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { Connection, TransactionSignature } from '@solana/web3.js'
 import { WarpSolanaSerializer } from './WarpSolanaSerializer'
 

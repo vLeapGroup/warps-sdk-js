@@ -1,6 +1,6 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
-import { WarpMcpAction } from '@vleap/warps'
+import { WarpMcpAction } from '@joai/warps'
 import { WarpMcp } from './WarpMcp'
 
 jest.mock('@modelcontextprotocol/sdk/client/index.js')

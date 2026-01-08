@@ -1,6 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { normalizeObjectSchema } from '@modelcontextprotocol/sdk/server/zod-compat.js'
-import { Warp } from '@vleap/warps'
+import { Warp } from '@joai/warps'
 import { z } from 'zod'
 import { convertMcpArgsToWarpInputs } from './helpers/execution'
 import { interpolatePromptWithArgs } from './helpers/prompts'

@@ -1,4 +1,4 @@
-import { WarpChainName, WarpChainAsset, WarpChainEnv } from '@vleap/warps'
+import { WarpChainName, WarpChainAsset, WarpChainEnv } from '@joai/warps'
 import { MultiversxDevnetTokens } from './tokens/multiversx-devnet'
 import { MultiversxMainnetTokens } from './tokens/multiversx-mainnet'
 import { MultiversxTestnetTokens } from './tokens/multiversx-testnet'

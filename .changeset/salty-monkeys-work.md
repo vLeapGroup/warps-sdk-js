@@ -1,9 +1,9 @@
 ---
-'@vleap/warps-adapter-multiversx': patch
-'@vleap/warps-adapter-fastset': patch
-'@vleap/warps-adapter-evm': patch
-'@vleap/warps-adapter-sui': patch
-'@vleap/warps': patch
+'@joai/warps-adapter-multiversx': patch
+'@joai/warps-adapter-fastset': patch
+'@joai/warps-adapter-evm': patch
+'@joai/warps-adapter-sui': patch
+'@joai/warps': patch
 ---
 
 add generic tx to warp executions

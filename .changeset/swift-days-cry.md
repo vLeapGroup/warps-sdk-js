@@ -1,5 +1,5 @@
 ---
-'@vleap/warps-adapter-sui': patch
+'@joai/warps-adapter-sui': patch
 ---
 
 update sui executor

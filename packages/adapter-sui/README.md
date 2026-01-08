@@ -1,19 +1,19 @@
-# @vleap/warps-adapter-sui
+# @joai/warps-adapter-sui
 
 Sui blockchain adapter for the Warps SDK. Enables Warp execution on the Sui network.
 
 ## Installation
 
 ```bash
-npm install @vleap/warps-adapter-sui
+npm install @joai/warps-adapter-sui
 ```
 
 ## Usage
 
 ```typescript
-import { WarpClient, withAdapterFallback } from '@vleap/warps'
-import { SuiAdapter } from '@vleap/warps-adapter-sui'
-import { MultiversxAdapter } from '@vleap/warps-adapter-multiversx'
+import { WarpClient, withAdapterFallback } from '@joai/warps'
+import { SuiAdapter } from '@joai/warps-adapter-sui'
+import { MultiversxAdapter } from '@joai/warps-adapter-multiversx'
 
 // Sui adapter requires a fallback adapter
 const client = new WarpClient(config, {

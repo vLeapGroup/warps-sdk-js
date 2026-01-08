@@ -9,7 +9,7 @@ import {
   WarpClientConfig,
   WarpWalletDetails,
   WarpWalletProvider,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { formatTransactionForCoinbase } from './helpers/evm'
 import { CoinbaseProviderConfig } from './types'
 

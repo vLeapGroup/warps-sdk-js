@@ -11,7 +11,7 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpDataLoaderOptions,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { ethers } from 'ethers'
 import { UniswapService } from './providers'
 import { findKnownTokenById, getKnownTokensForChain } from './tokens'

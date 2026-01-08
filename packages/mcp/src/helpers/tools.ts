@@ -9,7 +9,7 @@ import {
   WarpQueryAction,
   WarpText,
   WarpTransferAction,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { z } from 'zod'
 import { WarpMcpResource, WarpMcpTool } from '../types'
 import { extractTextOrUndefined } from './warps'

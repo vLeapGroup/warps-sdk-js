@@ -1,4 +1,4 @@
-import { WarpChainAsset, WarpChainEnv } from '@vleap/warps'
+import { WarpChainAsset, WarpChainEnv } from '@joai/warps'
 import { FastsetTokens } from './tokens/fastset'
 
 export const KnownTokens: Record<string, WarpChainAsset[]> = {

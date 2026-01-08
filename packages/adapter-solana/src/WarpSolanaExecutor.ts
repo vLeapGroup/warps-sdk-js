@@ -14,7 +14,7 @@ import {
   WarpClientConfig,
   WarpExecutable,
   WarpQueryAction,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { WarpSolanaConstants } from './constants'
 import { WarpSolanaOutput } from './WarpSolanaOutput'
 import { WarpSolanaSerializer } from './WarpSolanaSerializer'

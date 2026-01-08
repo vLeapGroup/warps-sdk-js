@@ -1,25 +1,25 @@
-# @vleap/warps-wallet-gaupa
+# @joai/warps-wallet-gaupa
 
 Gaupa wallet provider for Warps SDK. This package enables you to use Gaupa agentic wallets with the Warps SDK.
 
 ## Installation
 
 ```bash
-npm install @vleap/warps-wallet-gaupa
+npm install @joai/warps-wallet-gaupa
 ```
 
 ## Prerequisites
 
-- `@vleap/warps` core package installed
+- `@joai/warps` core package installed
 - Appropriate chain adapter package(s) for your target blockchain(s)
 - Gaupa API credentials (API key and public key)
 
 ## Usage
 
 ```typescript
-import { createGaupaWalletProvider } from '@vleap/warps-wallet-gaupa'
-import { WarpClient } from '@vleap/warps'
-import { getAllChainAdapters } from '@vleap/warps-adapter-<chain>'
+import { createGaupaWalletProvider } from '@joai/warps-wallet-gaupa'
+import { WarpClient } from '@joai/warps'
+import { getAllChainAdapters } from '@joai/warps-adapter-<chain>'
 
 const config = {
   env: 'devnet', // or 'mainnet'
@@ -42,7 +42,7 @@ const client = new WarpClient(config, {
 
 ### `GaupaWalletProvider`
 
-Implements the `WalletProvider` interface from `@vleap/warps`.
+Implements the `WalletProvider` interface from `@joai/warps`.
 
 **Methods:**
 

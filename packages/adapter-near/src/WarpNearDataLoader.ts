@@ -10,7 +10,7 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpDataLoaderOptions,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { connect, keyStores } from 'near-api-js'
 import { WarpNearConstants } from './constants'
 import { findKnownTokenById, getKnownTokensForChain } from './tokens'

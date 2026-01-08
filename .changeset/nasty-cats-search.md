@@ -1,7 +1,7 @@
 ---
-'@vleap/warps-vm-browser': patch
-'@vleap/warps-vm-node': patch
-'@vleap/warps': patch
+'@joai/warps-vm-browser': patch
+'@joai/warps-vm-node': patch
+'@joai/warps': patch
 ---
 
 further rearch

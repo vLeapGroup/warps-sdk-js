@@ -1,7 +1,7 @@
 ---
-'@vleap/warps-adapter-multiversx': patch
-'@vleap/warps-adapter-sui': patch
-'@vleap/warps': patch
+'@joai/warps-adapter-multiversx': patch
+'@joai/warps-adapter-sui': patch
+'@joai/warps': patch
 ---
 
 update chain infos

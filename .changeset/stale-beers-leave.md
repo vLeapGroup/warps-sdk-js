@@ -1,6 +1,6 @@
 ---
-'@vleap/warps': patch
-'@vleap/warps-mcp': patch
+'@joai/warps': patch
+'@joai/warps-mcp': patch
 ---
 
 add warp uis"

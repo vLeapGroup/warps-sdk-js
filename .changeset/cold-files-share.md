@@ -1,6 +1,6 @@
 ---
-'@vleap/warps-adapter-multiversx': minor
-'@vleap/warps': patch
+'@joai/warps-adapter-multiversx': minor
+'@joai/warps': patch
 ---
 
 update codec

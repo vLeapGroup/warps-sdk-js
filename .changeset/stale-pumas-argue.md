@@ -1,5 +1,5 @@
 ---
-'@vleap/warps': minor
+'@joai/warps': minor
 ---
 
 update i18n

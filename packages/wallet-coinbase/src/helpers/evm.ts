@@ -1,4 +1,4 @@
-import { WarpAdapterGenericTransaction } from '@vleap/warps'
+import { WarpAdapterGenericTransaction } from '@joai/warps'
 
 const formatBigInt = (value: bigint | string | number | undefined): string | undefined => {
   if (value === undefined || value === null) return undefined

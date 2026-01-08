@@ -21,7 +21,7 @@ import {
   WarpLogger,
   WarpRegistryConfigInfo,
   WarpRegistryInfo,
-} from '@vleap/warps'
+} from '@joai/warps'
 import RegistryAbi from './abis/registry.abi.json'
 import { getMultiversxRegistryAddress } from './config'
 import { getMultiversxEntrypoint } from './helpers/general'

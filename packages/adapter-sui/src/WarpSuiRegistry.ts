@@ -13,7 +13,7 @@ import {
   WarpLogger,
   WarpRegistryConfigInfo,
   WarpRegistryInfo,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { getSuiRegistryPackageId } from './config'
 import { toRegistryMoveTarget, toTypedRegistryInfo } from './helpers/registry'
 

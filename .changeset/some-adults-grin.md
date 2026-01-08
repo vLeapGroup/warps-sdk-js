@@ -1,7 +1,7 @@
 ---
-'@vleap/warps-adapter-near': minor
+'@joai/warps-adapter-near': minor
 '@warps/playground': minor
-'@vleap/warps': minor
+'@joai/warps': minor
 ---
 
 add near adapter

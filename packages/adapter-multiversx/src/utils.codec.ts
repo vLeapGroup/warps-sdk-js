@@ -1,4 +1,4 @@
-import { WarpConstants, WarpNativeValue, WarpSerializer } from '@vleap/warps'
+import { WarpConstants, WarpNativeValue, WarpSerializer } from '@joai/warps'
 import { WarpMultiversxInputTypes } from './constants'
 
 export const token = (value: WarpNativeValue): string => {

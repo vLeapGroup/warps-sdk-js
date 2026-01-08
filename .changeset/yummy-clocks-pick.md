@@ -1,5 +1,5 @@
 ---
-'@vleap/warps-mcp': patch
+'@joai/warps-mcp': patch
 ---
 
 update build

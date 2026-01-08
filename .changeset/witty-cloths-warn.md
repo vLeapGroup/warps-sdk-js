@@ -1,7 +1,7 @@
 ---
 'eslint-config-custom': patch
-'@vleap/warps-adapter-sui': patch
-'@vleap/warps-react': patch
+'@joai/warps-adapter-sui': patch
+'@joai/warps-react': patch
 ---
 
 upgrade deps

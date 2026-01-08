@@ -1,5 +1,5 @@
 ---
-'@vleap/warps-adapter-evm': patch
+'@joai/warps-adapter-evm': patch
 ---
 
 add evm base tokens

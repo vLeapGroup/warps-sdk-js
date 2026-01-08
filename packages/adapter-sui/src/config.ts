@@ -1,4 +1,4 @@
-import { WarpChainEnv } from '@vleap/warps'
+import { WarpChainEnv } from '@joai/warps'
 
 export const getSuiRegistryPackageId = (env: WarpChainEnv): string => {
   if (env === 'devnet') throw new Error('Sui registry package id is not available for devnet')

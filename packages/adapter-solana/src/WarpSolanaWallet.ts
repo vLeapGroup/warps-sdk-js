@@ -11,7 +11,7 @@ import {
   WarpClientConfig,
   WarpWalletDetails,
   WarpWalletProvider,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { registerExactSvmScheme } from '@x402/svm/exact/client'
 import { SupportedX402SolanaNetworks } from './constants'
 import { MnemonicWalletProvider } from './providers/MnemonicWalletProvider'

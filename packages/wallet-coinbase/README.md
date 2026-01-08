@@ -1,16 +1,16 @@
-# @vleap/warps-wallet-coinbase
+# @joai/warps-wallet-coinbase
 
 Coinbase Server Wallet v2 provider for Warps SDK. This package enables you to use Coinbase Server Wallet v2 with the Warps SDK for EVM and Solana blockchains.
 
 ## Installation
 
 ```bash
-npm install @vleap/warps-wallet-coinbase
+npm install @joai/warps-wallet-coinbase
 ```
 
 ## Prerequisites
 
-- `@vleap/warps` core package installed
+- `@joai/warps` core package installed
 - Coinbase Developer Platform account with Server Wallet v2 access
 - Wallet Secret from Coinbase CDP Portal
 
@@ -27,9 +27,9 @@ npm install @vleap/warps-wallet-coinbase
 ### Basic Setup
 
 ```typescript
-import { WarpClient } from '@vleap/warps'
-import { getAllEvmAdapters } from '@vleap/warps-adapter-evm'
-import { createCoinbaseWalletProvider } from '@vleap/warps-wallet-coinbase'
+import { WarpClient } from '@joai/warps'
+import { getAllEvmAdapters } from '@joai/warps-adapter-evm'
+import { createCoinbaseWalletProvider } from '@joai/warps-wallet-coinbase'
 
 const config = {
   env: 'testnet',
@@ -103,7 +103,7 @@ You can override the network ID by providing it in the config.
 
 ### `CoinbaseWalletProvider`
 
-Implements the `WalletProvider` interface from `@vleap/warps`.
+Implements the `WalletProvider` interface from `@joai/warps`.
 
 **Methods:**
 

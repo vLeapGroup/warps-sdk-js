@@ -6,7 +6,7 @@ import {
   WarpConstants,
   WarpNativeValue,
   WarpSerializer,
-} from '@vleap/warps'
+} from '@joai/warps'
 
 export class WarpNearSerializer implements AdapterWarpSerializer {
   public readonly coreSerializer: WarpSerializer

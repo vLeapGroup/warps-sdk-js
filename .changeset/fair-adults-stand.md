@@ -1,6 +1,6 @@
 ---
-'@vleap/warps-adapter-fastset': patch
-'@vleap/warps-adapter-sui': patch
+'@joai/warps-adapter-fastset': patch
+'@joai/warps-adapter-sui': patch
 ---
 
 upgrade deps

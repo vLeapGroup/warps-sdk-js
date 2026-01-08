@@ -1,6 +1,6 @@
 ---
-'@vleap/warps-adapter-multiversx': patch
-'@vleap/warps': patch
+'@joai/warps-adapter-multiversx': patch
+'@joai/warps': patch
 ---
 
 update chain prefixs

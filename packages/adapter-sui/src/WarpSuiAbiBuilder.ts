@@ -7,7 +7,7 @@ import {
   WarpCacheConfig,
   WarpChainInfo,
   WarpClientConfig,
-} from '@vleap/warps'
+} from '@joai/warps'
 
 export class WarpSuiAbiBuilder implements AdapterWarpAbiBuilder {
   private readonly client: SuiClient

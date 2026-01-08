@@ -1,5 +1,5 @@
 ---
-'@vleap/warps-adapter-fastset': patch
+'@joai/warps-adapter-fastset': patch
 ---
 
 update fastset adapter

@@ -1,7 +1,7 @@
 ---
-'@vleap/warps-adapter-fastset': patch
-'@vleap/warps-adapter-evm': patch
-'@vleap/warps': patch
+'@joai/warps-adapter-fastset': patch
+'@joai/warps-adapter-evm': patch
+'@joai/warps': patch
 ---
 
 update warp builders

@@ -1,4 +1,4 @@
-import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@vleap/warps'
+import { WalletProvider, WarpWalletDetails, WarpWalletProvider } from '@joai/warps'
 
 export interface PrivyClient {
   getAddress(): Promise<string | null>

@@ -1,4 +1,4 @@
-import { ChainAdapter, ChainAdapterFactory, WarpChainName, WarpChainEnv, WarpChainInfo, WarpClientConfig, WarpTypeRegistry } from '@vleap/warps'
+import { ChainAdapter, ChainAdapterFactory, WarpChainName, WarpChainEnv, WarpChainInfo, WarpClientConfig, WarpTypeRegistry } from '@joai/warps'
 import { WarpMultiversxAbiBuilder } from '../WarpMultiversxAbiBuilder'
 import { WarpMultiversxBrandBuilder } from '../WarpMultiversxBrandBuilder'
 import { WarpMultiversxBuilder } from '../WarpMultiversxBuilder'

@@ -11,8 +11,8 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpLogger,
-} from '@vleap/warps'
-import { WarpAdapterGenericTransaction } from '@vleap/warps/src/types'
+} from '@joai/warps'
+import { WarpAdapterGenericTransaction } from '@joai/warps/src/types'
 import { getMultiversxEntrypoint } from './helpers/general'
 
 export class WarpMultiversxBuilder extends WarpBuilder implements AdapterWarpBuilder {

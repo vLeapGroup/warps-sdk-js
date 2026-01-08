@@ -1,4 +1,4 @@
-import { WarpChainInfo, WarpClientConfig, getProviderConfig } from '@vleap/warps'
+import { WarpChainInfo, WarpClientConfig, getProviderConfig } from '@joai/warps'
 import { FastsetClient } from '../sdk'
 
 export const getConfiguredFastsetClient = (config: WarpClientConfig, chain: WarpChainInfo) => {

@@ -1,4 +1,4 @@
-import { getWarpWalletPrivateKeyFromConfig } from '@vleap/warps'
+import { getWarpWalletPrivateKeyFromConfig } from '@joai/warps'
 import { Transaction } from './sdk'
 import { WarpFastsetWallet } from './WarpFastsetWallet'
 
@@ -54,8 +54,8 @@ jest.mock('./sdk/ed25519-setup', () => ({
 }))
 
 // Mock getWarpWalletPrivateKeyFromConfig to return undefined for uninitialized wallet tests
-jest.mock('@vleap/warps', () => ({
-  ...jest.requireActual('@vleap/warps'),
+jest.mock('@joai/warps', () => ({
+  ...jest.requireActual('@joai/warps'),
   getWarpWalletPrivateKeyFromConfig: jest.fn(),
 }))
 

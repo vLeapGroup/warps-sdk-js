@@ -1,7 +1,7 @@
 ---
-'@vleap/warps-adapter-solana': patch
-'@vleap/warps-adapter-near': patch
-'@vleap/warps-adapter-sui': patch
+'@joai/warps-adapter-solana': patch
+'@joai/warps-adapter-near': patch
+'@joai/warps-adapter-sui': patch
 ---
 
 update wallets

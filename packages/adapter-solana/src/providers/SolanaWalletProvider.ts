@@ -8,7 +8,7 @@ import {
   WarpClientConfig,
   WarpWalletDetails,
   WarpWalletProvider,
-} from '@vleap/warps'
+} from '@joai/warps'
 import * as bip39 from '@scure/bip39'
 import bs58 from 'bs58'
 

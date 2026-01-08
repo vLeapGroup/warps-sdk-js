@@ -1,5 +1,5 @@
 ---
-'@vleap/warps-vm-browser': minor
+'@joai/warps-vm-browser': minor
 ---
 
 update browser vm

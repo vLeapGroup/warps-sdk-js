@@ -1,11 +1,11 @@
-# @vleap/warps
+# @joai/warps
 
 Core Warps SDK package providing the foundation for building and executing Warps across multiple blockchain networks.
 
 ## Installation
 
 ```bash
-npm install @vleap/warps
+npm install @joai/warps
 ```
 
 ## Overview
@@ -22,9 +22,9 @@ The core package provides:
 ## Usage
 
 ```typescript
-import { WarpClient } from '@vleap/warps'
-import { getAllEvmAdapters } from '@vleap/warps-adapter-evm'
-import { MultiversxAdapter } from '@vleap/warps-adapter-multiversx'
+import { WarpClient } from '@joai/warps'
+import { getAllEvmAdapters } from '@joai/warps-adapter-evm'
+import { MultiversxAdapter } from '@joai/warps-adapter-multiversx'
 
 const config = {
   env: 'mainnet',

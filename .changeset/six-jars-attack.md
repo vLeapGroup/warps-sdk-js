@@ -1,5 +1,5 @@
 ---
-'@vleap/warps-adapter-multiversx': patch
+'@joai/warps-adapter-multiversx': patch
 ---
 
 fix tx signing

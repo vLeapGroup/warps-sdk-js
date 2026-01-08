@@ -1,4 +1,4 @@
-import type { TransformRunner } from '@vleap/warps'
+import type { TransformRunner } from '@joai/warps'
 
 export const runInVm = async (code: string, results: any): Promise<any> => {
   // Handle browser environment by creating a Web Worker

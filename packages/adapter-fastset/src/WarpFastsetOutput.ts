@@ -12,7 +12,7 @@ import {
   WarpClientConfig,
   WarpConstants,
   WarpExecutionOutput,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { WarpFastsetSerializer } from './WarpFastsetSerializer'
 
 export class WarpFastsetOutput implements AdapterWarpOutput {

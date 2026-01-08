@@ -1,11 +1,11 @@
-# @vleap/warps-vm-node
+# @joai/warps-vm-node
 
 Node.js VM runtime for Warps SDK output transformations. Safely executes transformation code using vm2 in a sandboxed environment.
 
 ## Installation
 
 ```bash
-npm install @vleap/warps-vm-node
+npm install @joai/warps-vm-node
 ```
 
 **Note:** This package requires `vm2` as an optional dependency. Install it separately:
@@ -17,8 +17,8 @@ npm install vm2
 ## Usage
 
 ```typescript
-import { createNodeTransformRunner } from '@vleap/warps-vm-node'
-import { WarpClient } from '@vleap/warps'
+import { createNodeTransformRunner } from '@joai/warps-vm-node'
+import { WarpClient } from '@joai/warps'
 
 const config = {
   env: 'mainnet',

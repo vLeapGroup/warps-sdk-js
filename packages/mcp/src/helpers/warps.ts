@@ -9,7 +9,7 @@ import {
   WarpText,
   getWarpPrimaryAction,
   resolveWarpText,
-} from '@vleap/warps'
+} from '@joai/warps'
 import type { WarpMcpCapabilities, WarpMcpPrompt, WarpMcpResource, WarpMcpTool } from '../types'
 import { convertPromptActionToPrompt } from './prompts'
 import { convertActionToTool, convertMcpActionToTool } from './tools'

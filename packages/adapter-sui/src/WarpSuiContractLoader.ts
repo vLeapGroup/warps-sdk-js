@@ -1,4 +1,4 @@
-import { WarpChainInfo, WarpClientConfig } from '@vleap/warps'
+import { WarpChainInfo, WarpClientConfig } from '@joai/warps'
 import { WarpSuiAbiBuilder } from './WarpSuiAbiBuilder'
 
 export class WarpSuiContractLoader {

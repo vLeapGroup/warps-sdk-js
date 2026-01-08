@@ -6,7 +6,7 @@ import {
   WarpChainInfo,
   WarpChainName,
   WarpClientConfig,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { WarpFastsetDataLoader } from './WarpFastsetDataLoader'
 import { WarpFastsetExecutor } from './WarpFastsetExecutor'
 import { WarpFastsetExplorer } from './WarpFastsetExplorer'

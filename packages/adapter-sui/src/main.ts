@@ -6,7 +6,7 @@ import {
   WarpChainInfo,
   WarpChainName,
   WarpClientConfig,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { WarpSuiAbiBuilder } from './WarpSuiAbiBuilder'
 import { WarpSuiBrandBuilder } from './WarpSuiBrandBuilder'
 import { WarpSuiBuilder } from './WarpSuiBuilder'

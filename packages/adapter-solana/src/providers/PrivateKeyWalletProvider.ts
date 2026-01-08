@@ -9,7 +9,7 @@ import {
   WarpClientConfig,
   WarpWalletDetails,
   WarpWalletProvider,
-} from '@vleap/warps'
+} from '@joai/warps'
 import bs58 from 'bs58'
 
 export class PrivateKeyWalletProvider implements WalletProvider {

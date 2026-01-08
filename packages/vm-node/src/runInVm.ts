@@ -1,4 +1,4 @@
-import type { TransformRunner } from '@vleap/warps'
+import type { TransformRunner } from '@joai/warps'
 
 let vm2Module: typeof import('vm2') | null = null
 

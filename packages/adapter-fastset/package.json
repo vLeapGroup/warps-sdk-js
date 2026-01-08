@@ -1,5 +1,5 @@
 {
-  "name": "@vleap/warps-adapter-fastset",
+  "name": "@joai/warps-adapter-fastset",
   "version": "0.1.0-beta.57",
   "description": "Fastset adapter for Warps SDK",
   "type": "module",
@@ -40,7 +40,7 @@
     "@noble/ed25519": "^3.0.0",
     "@noble/hashes": "^2.0.1",
     "@scure/bip39": "^2.0.1",
-    "@vleap/warps": "^3.0.0-beta.189",
+    "@joai/warps": "^3.0.0-beta.189",
     "bech32": "^2.0.0",
     "buffer": "^6.0.3"
   }

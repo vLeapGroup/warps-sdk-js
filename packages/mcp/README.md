@@ -1,23 +1,23 @@
-# @vleap/warps-mcp
+# @joai/warps-mcp
 
 Model Context Protocol (MCP) integration for the Warps SDK. Enables fetching and converting MCP tools into Warps.
 
 ## Installation
 
 ```bash
-npm install @vleap/warps-mcp
+npm install @joai/warps-mcp
 ```
 
 ## Prerequisites
 
-- `@vleap/warps` core package
+- `@joai/warps` core package
 - `@modelcontextprotocol/sdk` (peer dependency)
 
 ## Usage
 
 ```typescript
-import { WarpMcp } from '@vleap/warps-mcp'
-import { WarpClient } from '@vleap/warps'
+import { WarpMcp } from '@joai/warps-mcp'
+import { WarpClient } from '@joai/warps'
 
 const config = {
   env: 'mainnet',

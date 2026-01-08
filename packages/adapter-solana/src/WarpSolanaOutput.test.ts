@@ -1,4 +1,4 @@
-import { WarpChainInfo, WarpChainName, WarpClientConfig } from '@vleap/warps'
+import { WarpChainInfo, WarpChainName, WarpClientConfig } from '@joai/warps'
 import { WarpSolanaOutput } from './WarpSolanaOutput'
 import { NativeTokenSol } from './chains/solana'
 

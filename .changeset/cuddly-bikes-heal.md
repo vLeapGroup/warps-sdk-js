@@ -1,6 +1,6 @@
 ---
-'@vleap/warps-wallet-coinbase': patch
-'@vleap/warps-adapter-evm': patch
+'@joai/warps-wallet-coinbase': patch
+'@joai/warps-adapter-evm': patch
 ---
 
 fix coinbase txs

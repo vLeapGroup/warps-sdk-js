@@ -1,4 +1,4 @@
-import { WarpChainEnv } from '@vleap/warps'
+import { WarpChainEnv } from '@joai/warps'
 
 export const getMultiversxRegistryAddress = (env: WarpChainEnv) => {
   if (env === 'devnet') return 'erd1qqqqqqqqqqqqqpgqje2f99vr6r7sk54thg03c9suzcvwr4nfl3tsfkdl36'

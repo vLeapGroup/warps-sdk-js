@@ -1,6 +1,6 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
-import { Warp, WarpClientConfig } from '@vleap/warps'
+import { Warp, WarpClientConfig } from '@joai/warps'
 import { convertMcpToolToWarp } from './helpers/warps'
 
 export class WarpMcp {

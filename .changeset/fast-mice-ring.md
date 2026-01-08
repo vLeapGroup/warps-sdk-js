@@ -1,8 +1,8 @@
 ---
-'@vleap/warps-adapter-multiversx': minor
-'@vleap/warps-adapter-sui': minor
+'@joai/warps-adapter-multiversx': minor
+'@joai/warps-adapter-sui': minor
 '@warps/playground': minor
-'@vleap/warps': minor
+'@joai/warps': minor
 ---
 
 further rearch

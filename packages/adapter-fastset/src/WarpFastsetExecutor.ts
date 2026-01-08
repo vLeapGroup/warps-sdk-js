@@ -6,7 +6,7 @@ import {
   WarpChainInfo,
   WarpClientConfig,
   WarpExecutable,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { getConfiguredFastsetClient, hexToUint8Array } from './helpers'
 import { FastsetClient } from './sdk'
 

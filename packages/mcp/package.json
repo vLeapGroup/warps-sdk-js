@@ -1,5 +1,5 @@
 {
-  "name": "@vleap/warps-mcp",
+  "name": "@joai/warps-mcp",
   "version": "1.0.0-beta.26",
   "description": "MCP adapter for Warps SDK",
   "type": "module",
@@ -41,6 +41,6 @@
     "zod": "^4.3.5"
   },
   "peerDependencies": {
-    "@vleap/warps": "^3.0.0-beta.196"
+    "@joai/warps": "^3.0.0-beta.196"
   }
 }

@@ -7,7 +7,7 @@ import {
   WarpClientConfig,
   WarpWalletDetails,
   WarpWalletProvider,
-} from '@vleap/warps'
+} from '@joai/warps'
 import { registerExactEvmScheme } from '@x402/evm/exact/client'
 import { ethers } from 'ethers'
 import { privateKeyToAccount } from 'viem/accounts'

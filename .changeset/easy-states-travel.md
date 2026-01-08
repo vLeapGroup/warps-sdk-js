@@ -1,5 +1,5 @@
 ---
-'@vleap/warps-vm-browser': patch
+'@joai/warps-vm-browser': patch
 ---
 
 update browser vm

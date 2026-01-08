@@ -1,4 +1,4 @@
-import { Warp, WarpActionInput, WarpPromptAction } from '@vleap/warps'
+import { Warp, WarpActionInput, WarpPromptAction } from '@joai/warps'
 import { convertPromptActionToPrompt, interpolatePromptWithArgs } from './prompts'
 
 describe('interpolatePromptWithArgs', () => {

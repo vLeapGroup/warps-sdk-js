@@ -1,4 +1,4 @@
-import { Warp, WarpActionInput, WarpClientConfig, WarpPromptAction } from '@vleap/warps'
+import { Warp, WarpActionInput, WarpClientConfig, WarpPromptAction } from '@joai/warps'
 import { WarpMcpPrompt, WarpMcpPromptArgument } from '../types'
 import { extractTextOrUndefined } from './warps'
 
