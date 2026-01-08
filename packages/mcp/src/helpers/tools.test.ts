@@ -158,8 +158,8 @@ describe('buildZodInputSchema', () => {
       {
         name: 'other_input',
         type: 'string',
-        position: 'other:other_input',
-        source: 'other',
+        position: 'payload:other_input',
+        source: 'query',
         required: true,
       },
     ]
@@ -272,7 +272,7 @@ describe('convertActionToTool', () => {
     }
 
     const action = warp.actions[0] as WarpTransferAction
-    const tool = convertActionToTool(warp, action, 'Test description', undefined, undefined, mockConfig)
+    const tool = convertActionToTool(warp, action, 'Test description', undefined, null, mockConfig)
 
     expect(tool.name).toBe('test_warp')
     expect(tool.description).toBe('Test description')
@@ -297,7 +297,7 @@ describe('convertActionToTool', () => {
     }
 
     const action = warp.actions[0] as WarpTransferAction
-    const tool = convertActionToTool(warp, action, undefined, undefined, 'ui://widget/test_warp', mockConfig)
+    const tool = convertActionToTool(warp, action, undefined, undefined, { uri: 'ui://widget/test_warp' }, mockConfig)
 
     expect(tool._meta).toBeDefined()
     expect(tool._meta!['openai/widgetAccessible']).toBe(true)
@@ -324,7 +324,7 @@ describe('convertActionToTool', () => {
     }
 
     const action = warp.actions[0] as WarpTransferAction
-    const tool = convertActionToTool(warp, action, undefined, undefined, 'ui://widget/test_warp', mockConfig)
+    const tool = convertActionToTool(warp, action, undefined, undefined, { uri: 'ui://widget/test_warp' }, mockConfig)
 
     expect(tool._meta).toBeDefined()
     expect(tool._meta!['openai/widgetAccessible']).toBe(true)
@@ -353,7 +353,7 @@ describe('convertActionToTool', () => {
     }
 
     const action = warp.actions[0] as WarpTransferAction
-    const tool = convertActionToTool(warp, action, undefined, undefined, 'ui://widget/test_warp', mockConfig)
+    const tool = convertActionToTool(warp, action, undefined, undefined, { uri: 'ui://widget/test_warp' }, mockConfig)
 
     expect(tool._meta).toBeDefined()
     expect(tool._meta!['openai/widgetAccessible']).toBe(true)
@@ -382,7 +382,7 @@ describe('convertActionToTool', () => {
     }
 
     const action = warp.actions[0] as WarpTransferAction
-    const tool = convertActionToTool(warp, action, undefined, undefined, undefined, mockConfig)
+    const tool = convertActionToTool(warp, action, undefined, undefined, null, mockConfig)
 
     expect(tool._meta).toBeDefined()
     expect(tool._meta!['openai/widgetAccessible']).toBe(true)
@@ -406,7 +406,7 @@ describe('convertActionToTool', () => {
     }
 
     const action = warp.actions[0] as WarpTransferAction
-    const tool = convertActionToTool(warp, action, undefined, undefined, undefined, mockConfig)
+    const tool = convertActionToTool(warp, action, undefined, undefined, null, mockConfig)
 
     expect(tool.name).toBe('test-warp_with_spaces')
   })
@@ -427,7 +427,7 @@ describe('convertActionToTool', () => {
     }
 
     const action = warp.actions[0] as WarpTransferAction
-    const tool = convertActionToTool(warp, action, undefined, undefined, undefined, mockConfig)
+    const tool = convertActionToTool(warp, action, undefined, undefined, null, mockConfig)
 
     expect(tool.name).toBe('staking_undelegate')
   })
@@ -467,7 +467,7 @@ describe('convertActionToTool', () => {
       },
     ]
 
-    const tool = convertActionToTool(warp, action, undefined, primaryInputs, undefined, mockConfig)
+    const tool = convertActionToTool(warp, action, undefined, primaryInputs, null, mockConfig)
 
     expect(tool.inputSchema).toBeDefined()
     expect(tool.inputSchema!.custom_amount).toBeDefined()
@@ -505,7 +505,7 @@ describe('convertMcpActionToTool', () => {
       ],
     }
 
-    const tool = convertMcpActionToTool(warp, action, 'MCP description', undefined, undefined, mockConfig)
+    const tool = convertMcpActionToTool(warp, action, 'MCP description', undefined, null, mockConfig)
 
     expect(tool.name).toBe('mcp_tool_name')
     expect(tool.description).toBe('MCP description')
@@ -533,7 +533,7 @@ describe('convertMcpActionToTool', () => {
       inputs: [],
     }
 
-    const tool = convertMcpActionToTool(warp, action, undefined, undefined, 'ui://widget/mcp_tool', mockConfig)
+    const tool = convertMcpActionToTool(warp, action, undefined, undefined, { uri: 'ui://widget/mcp_tool' }, mockConfig)
 
     expect(tool._meta).toBeDefined()
     expect(tool._meta!['openai/widgetAccessible']).toBe(true)
@@ -560,7 +560,7 @@ describe('convertMcpActionToTool', () => {
       inputs: [],
     }
 
-    const tool = convertMcpActionToTool(warp, action, undefined, undefined, undefined, mockConfig)
+    const tool = convertMcpActionToTool(warp, action, undefined, undefined, null, mockConfig)
 
     expect(tool.name).toBe('mcp_tool_with_spaces')
   })
@@ -589,7 +589,7 @@ describe('convertMcpActionToTool', () => {
       inputs: [],
     }
 
-    const tool = convertMcpActionToTool(warp, action, undefined, undefined, 'ui://widget/mcp_tool', mockConfig)
+    const tool = convertMcpActionToTool(warp, action, undefined, undefined, { uri: 'ui://widget/mcp_tool' }, mockConfig)
 
     expect(tool._meta).toBeDefined()
     expect(tool._meta!['openai/widgetAccessible']).toBe(true)
@@ -622,7 +622,7 @@ describe('convertMcpActionToTool', () => {
       inputs: [],
     }
 
-    const tool = convertMcpActionToTool(warp, action, undefined, undefined, 'ui://widget/mcp_tool', mockConfig)
+    const tool = convertMcpActionToTool(warp, action, undefined, undefined, { uri: 'ui://widget/mcp_tool' }, mockConfig)
 
     expect(tool._meta).toBeDefined()
     expect(tool._meta!['openai/widgetAccessible']).toBe(true)
@@ -654,7 +654,7 @@ describe('convertMcpActionToTool', () => {
       inputs: [],
     }
 
-    const tool = convertMcpActionToTool(warp, action, undefined, undefined, undefined, mockConfig)
+    const tool = convertMcpActionToTool(warp, action, undefined, undefined, null, mockConfig)
 
     expect(tool._meta).toBeDefined()
     expect(tool._meta!['openai/widgetAccessible']).toBe(true)

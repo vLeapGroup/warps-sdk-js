@@ -1,4 +1,4 @@
-import { Warp } from '@vleap/warps'
+import { Warp, WarpChainName } from '@vleap/warps'
 import fetchMock from 'jest-fetch-mock'
 import { createAppResource } from './ui'
 
@@ -24,7 +24,12 @@ describe('createAppResource', () => {
       ],
       ui: 'https://example.com/app.html',
       meta: {
+        chain: 'multiversx' as WarpChainName,
         identifier: 'test_app',
+        query: null,
+        hash: 'test_hash',
+        creator: 'test_creator',
+        createdAt: '2024-01-01T00:00:00Z',
       },
     }
 
@@ -59,7 +64,12 @@ describe('createAppResource', () => {
       ],
       ui: 'https://example.com/app.html',
       meta: {
+        chain: 'multiversx' as WarpChainName,
         identifier: 'css_test',
+        query: null,
+        hash: 'test_hash',
+        creator: 'test_creator',
+        createdAt: '2024-01-01T00:00:00Z',
       },
     }
 
@@ -92,7 +102,12 @@ describe('createAppResource', () => {
       ],
       ui: 'https://example.com/app.html',
       meta: {
+        chain: 'multiversx' as WarpChainName,
         identifier: 'js_test',
+        query: null,
+        hash: 'test_hash',
+        creator: 'test_creator',
+        createdAt: '2024-01-01T00:00:00Z',
       },
     }
 
@@ -125,7 +140,12 @@ describe('createAppResource', () => {
       ],
       ui: 'https://example.com/path/app.html',
       meta: {
+        chain: 'multiversx' as WarpChainName,
         identifier: 'relative_url_test',
+        query: null,
+        hash: 'test_hash',
+        creator: 'test_creator',
+        createdAt: '2024-01-01T00:00:00Z',
       },
     }
 
@@ -159,7 +179,12 @@ describe('createAppResource', () => {
       ],
       ui: 'https://example.com/app.html',
       meta: {
+        chain: 'multiversx' as WarpChainName,
         identifier: 'failed_resource_test',
+        query: null,
+        hash: 'test_hash',
+        creator: 'test_creator',
+        createdAt: '2024-01-01T00:00:00Z',
       },
     }
 
@@ -173,7 +198,7 @@ describe('createAppResource', () => {
     const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
       warp: { name: 'failed_resource_test', title: 'Failed Resource Test' },
     })}</script>`
-    expect(result!.content.trim()).toBe(dataScript)
+    expect(result?.content?.trim()).toBe(dataScript)
   })
 
   it('handles multiple CSS and JS resources in parallel', async () => {
@@ -191,7 +216,12 @@ describe('createAppResource', () => {
       ],
       ui: 'https://example.com/app.html',
       meta: {
+        chain: 'multiversx' as WarpChainName,
         identifier: 'multiple_resources_test',
+        query: null,
+        hash: 'test_hash',
+        creator: 'test_creator',
+        createdAt: '2024-01-01T00:00:00Z',
       },
     }
 
@@ -230,7 +260,12 @@ describe('createAppResource', () => {
       ],
       ui: 'https://example.com/app.html',
       meta: {
+        chain: 'multiversx' as WarpChainName,
         identifier: 'strip_test',
+        query: null,
+        hash: 'test_hash',
+        creator: 'test_creator',
+        createdAt: '2024-01-01T00:00:00Z',
       },
     }
 
@@ -284,7 +319,12 @@ describe('createAppResource', () => {
       ],
       ui: 'https://example.com/app.html',
       meta: {
+        chain: 'multiversx' as WarpChainName,
         identifier: 'metadata_test',
+        query: null,
+        hash: 'test_hash',
+        creator: 'test_creator',
+        createdAt: '2024-01-01T00:00:00Z',
       },
     }
 

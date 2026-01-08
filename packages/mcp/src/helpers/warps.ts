@@ -1,5 +1,6 @@
 import {
   Warp,
+  WarpActionInput,
   WarpActionInputType,
   WarpBuilder,
   WarpClientConfig,
@@ -8,49 +9,43 @@ import {
   getWarpPrimaryAction,
   resolveWarpText,
 } from '@vleap/warps'
-import type { McpResource } from '../types'
+import type { WarpMcpCapabilities, WarpMcpResource, WarpMcpTool } from '../types'
 import { convertActionToTool, convertMcpActionToTool } from './tools'
 import { createAppResource } from './ui'
 
-export const extractText = (text: WarpText | null | undefined, config: WarpClientConfig): string | undefined => {
-  if (!text) return undefined
-  const resolved = resolveWarpText(text, config)
-  return resolved || undefined
-}
-
-export const convertWarpToMcpCapabilities = async (warp: Warp, config: WarpClientConfig): Promise<{ tools: any[]; resources?: McpResource[] }> => {
-  const tools: any[] = []
-  let appResource: McpResource | null = null
+export const convertWarpToMcpCapabilities = async (warp: Warp, config: WarpClientConfig): Promise<WarpMcpCapabilities> => {
+  let tool: WarpMcpTool | null = null
+  let resource: WarpMcpResource | null = null
 
   if (warp.ui && warp.ui !== 'table') {
-    appResource = await createAppResource(warp, warp.ui, config)
+    resource = await createAppResource(warp, warp.ui, config)
+  }
+
+  if (warp.actions.length === 0) {
+    return { tool: null, resource }
   }
 
   try {
     const { action: primaryAction } = getWarpPrimaryAction(warp)
+    const description = extractTextOrUndefined(warp.description, config) || extractTextOrUndefined(primaryAction.description, config)
+
     if (primaryAction.type === 'mcp') {
       const mcpAction = primaryAction as WarpMcpAction
       if (mcpAction.destination) {
-        const description = extractText(warp.description, config) || extractText(primaryAction.description, config)
-        const tool = convertMcpActionToTool(warp, mcpAction, description, primaryAction.inputs, appResource?.uri, config)
-        tools.push(tool)
+        tool = convertMcpActionToTool(warp, mcpAction, description, primaryAction.inputs, resource, config)
       }
     } else {
-      const description = extractText(warp.description, config) || extractText(primaryAction.description, config)
-      const tool = convertActionToTool(warp, primaryAction, description, primaryAction.inputs, appResource?.uri, config)
-      tools.push(tool)
+      tool = convertActionToTool(warp, primaryAction, description, primaryAction.inputs, resource, config)
     }
   } catch (error) {
-    console.log(`[MCP] ${warp.name} - failed to get primary action:`, error)
+    // If getWarpPrimaryAction fails or tool conversion fails, return null tool
+    return { tool: null, resource }
   }
 
-  return {
-    tools,
-    ...(appResource && { resources: [appResource] }),
-  }
+  return { tool, resource }
 }
 
-export const convertWarpsToMcpCapabilities = async (warps: Warp[], config: WarpClientConfig): Promise<{ tools: any[]; resources?: McpResource[] }[]> => {
+export const convertWarpsToMcpCapabilities = async (warps: Warp[], config: WarpClientConfig): Promise<WarpMcpCapabilities[]> => {
   return Promise.all(warps.map((warp) => convertWarpToMcpCapabilities(warp, config)))
 }
 
@@ -65,31 +60,48 @@ const convertJsonSchemaTypeToWarpType = (type: string, format?: string): WarpAct
   return 'string'
 }
 
+type JsonSchemaProperty = {
+  type?: string
+  format?: string
+  title?: string
+  description?: string
+  default?: unknown
+}
+
+type JsonSchema = {
+  properties?: Record<string, JsonSchemaProperty>
+  required?: string[]
+}
+
 export const convertMcpToolToWarp = async (
   config: WarpClientConfig,
-  tool: { name: string; description?: string; inputSchema?: any; outputSchema?: any },
+  tool: { name: string; description?: string; inputSchema?: JsonSchema; outputSchema?: JsonSchema },
   url: string,
   headers?: Record<string, string>
 ): Promise<Warp> => {
-  const inputs: any[] = []
+  const inputs: WarpActionInput[] = []
 
   if (tool.inputSchema?.properties) {
     const properties = tool.inputSchema.properties
     const required = tool.inputSchema.required || []
 
-    Object.entries(properties).forEach(([key, value]: [string, any]) => {
+    Object.entries(properties).forEach(([key, value]: [string, JsonSchemaProperty]) => {
       const isRequired = required.includes(key)
-      const inputType = convertJsonSchemaTypeToWarpType(value.type, value.format)
+      const inputType = convertJsonSchemaTypeToWarpType(value.type || 'string', value.format)
 
-      const inputDef = {
+      const inputDef: WarpActionInput = {
         name: key,
-        label: value.title || { en: key },
+        label: typeof value.title === 'string' ? { en: value.title } : value.title || { en: key },
         description: value.description ? { en: value.description.trim() } : null,
         type: inputType,
-        position: `payload:${key}`,
+        position: `payload:${key}` as WarpActionInput['position'],
         source: 'field',
         required: isRequired,
-        default: value.default,
+        ...((value.default !== undefined && typeof value.default === 'string') ||
+        typeof value.default === 'number' ||
+        typeof value.default === 'boolean'
+          ? { default: value.default as string | number | boolean }
+          : {}),
       }
 
       inputs.push(inputDef)
@@ -112,10 +124,16 @@ export const convertMcpToolToWarp = async (
   }
 
   return await new WarpBuilder(config)
-    .setName(tool.name)
-    .setTitle({ en: tool.name })
+    .setName(tool.name || 'unnamed_tool')
+    .setTitle({ en: tool.name || 'Unnamed Tool' })
     .setDescription(tool.description ? { en: tool.description.trim() } : null)
     .addAction(mcpAction)
     .setOutput(Object.keys(output).length > 0 ? output : null)
     .build(false)
+}
+
+export const extractTextOrUndefined = (text: WarpText | null | undefined, config: WarpClientConfig): string | undefined => {
+  if (!text) return undefined
+  const resolved = resolveWarpText(text, config)
+  return resolved || undefined
 }

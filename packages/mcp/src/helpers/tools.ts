@@ -4,13 +4,15 @@ import {
   WarpClientConfig,
   WarpCollectAction,
   WarpContractAction,
+  WarpLogger,
   WarpMcpAction,
   WarpQueryAction,
   WarpText,
   WarpTransferAction,
 } from '@vleap/warps'
 import { z } from 'zod'
-import { extractText } from './warps'
+import { WarpMcpResource, WarpMcpTool } from '../types'
+import { extractTextOrUndefined } from './warps'
 
 const extractEnumValues = (options: string[] | { [key: string]: WarpText } | undefined): string[] | undefined => {
   if (!options) return undefined
@@ -88,14 +90,14 @@ const buildZodSchemaFromInput = (input: WarpActionInput, config: WarpClientConfi
   }
 
   const descriptionParts: string[] = []
-  const inputDescription = extractText(input.description, config)
+  const inputDescription = extractTextOrUndefined(input.description, config)
   if (inputDescription) descriptionParts.push(inputDescription)
   if (input.bot) descriptionParts.push(input.bot)
   descriptionParts.push(`Type: ${input.type}`)
   descriptionParts.push(input.required ? 'Required' : 'Optional')
   if (enumValues && enumValues.length > 0) descriptionParts.push(`Options: ${enumValues.join(', ')}`)
 
-  const patternDesc = extractText(input.patternDescription, config)
+  const patternDesc = extractTextOrUndefined(input.patternDescription, config)
   if (patternDesc) descriptionParts.push(patternDesc)
 
   const fullDescription = descriptionParts.join('. ')
@@ -116,7 +118,7 @@ export const buildZodInputSchema = (inputs: WarpActionInput[], config: WarpClien
     shape[key] = buildZodSchemaFromInput(input, config)
   }
 
-  console.log('[MCP] buildZodInputSchema - inputs:', inputs.length, 'shape keys:', Object.keys(shape))
+  WarpLogger.info('[MCP] buildZodInputSchema - inputs:', inputs.length, 'shape keys:', Object.keys(shape))
   return Object.keys(shape).length > 0 ? shape : undefined
 }
 
@@ -125,41 +127,26 @@ export const convertActionToTool = (
   action: WarpTransferAction | WarpContractAction | WarpCollectAction | WarpQueryAction,
   description: string | undefined,
   primaryActionInputs: WarpActionInput[] | undefined,
-  outputTemplateUri: string | undefined,
+  resource: WarpMcpResource | null,
   config: WarpClientConfig
-): any => {
+): WarpMcpTool => {
   const inputsToUse = primaryActionInputs || action.inputs || []
   const inputSchema = buildZodInputSchema(inputsToUse, config)
   const name = sanitizeMcpName(warp.name)
 
-  console.log(
+  WarpLogger.info(
     `[MCP] convertActionToTool - tool: ${name}, inputsToUse: ${inputsToUse.length}, inputSchema keys:`,
     inputSchema ? Object.keys(inputSchema) : 'undefined'
   )
 
-  const tool: any = {
+  const tool: WarpMcpTool = {
     name,
     description,
     inputSchema,
+    _meta: buildToolMeta(warp, resource, config),
   }
 
-  const meta: Record<string, string | boolean> = {
-    'openai/widgetAccessible': true,
-  }
-
-  if (outputTemplateUri) {
-    meta['openai/outputTemplate'] = outputTemplateUri
-  }
-
-  if (warp.messages) {
-    const invoking = extractText(warp.messages.invoking, config)
-    const invoked = extractText(warp.messages.invoked, config)
-    if (invoking) meta['openai/toolInvocation/invoking'] = invoking
-    if (invoked) meta['openai/toolInvocation/invoked'] = invoked
-  }
-
-  tool._meta = meta
-  console.log(`[MCP] convertActionToTool - tool: ${name}, meta:`, JSON.stringify(meta, null, 2))
+  WarpLogger.info(`[MCP] convertActionToTool - tool: ${name}, meta:`, JSON.stringify(tool._meta, null, 2))
 
   return tool
 }
@@ -169,35 +156,41 @@ export const convertMcpActionToTool = (
   action: WarpMcpAction,
   description: string | undefined,
   primaryActionInputs: WarpActionInput[] | undefined,
-  outputTemplateUri: string | undefined,
+  resource: WarpMcpResource | null,
   config: WarpClientConfig
-): any => {
+): WarpMcpTool => {
   const inputsToUse = primaryActionInputs || action.inputs || []
   const inputSchema = buildZodInputSchema(inputsToUse, config)
   const toolName = action.destination!.tool
+  const name = sanitizeMcpName(toolName)
 
-  const tool: any = {
-    name: sanitizeMcpName(toolName),
+  const tool: WarpMcpTool = {
+    name,
     description,
     inputSchema,
+    _meta: buildToolMeta(warp, resource, config),
   }
 
-  const meta: Record<string, string | boolean> = {
+  WarpLogger.info(`[MCP] convertMcpActionToTool - tool: ${name}, meta:`, JSON.stringify(tool._meta, null, 2))
+
+  return tool
+}
+
+const buildToolMeta = (warp: Warp, resource: WarpMcpResource | null, config: WarpClientConfig): WarpMcpTool['_meta'] => {
+  const meta: NonNullable<WarpMcpTool['_meta']> = {
     'openai/widgetAccessible': true,
   }
-  if (outputTemplateUri) {
-    meta['openai/outputTemplate'] = outputTemplateUri
+
+  if (resource) {
+    meta['openai/outputTemplate'] = resource.uri
   }
 
   if (warp.messages) {
-    const invoking = extractText(warp.messages.invoking, config)
-    const invoked = extractText(warp.messages.invoked, config)
+    const invoking = extractTextOrUndefined(warp.messages.invoking, config)
+    const invoked = extractTextOrUndefined(warp.messages.invoked, config)
     if (invoking) meta['openai/toolInvocation/invoking'] = invoking
     if (invoked) meta['openai/toolInvocation/invoked'] = invoked
   }
 
-  tool._meta = meta
-  console.log(`[MCP] convertMcpActionToTool - tool: ${sanitizeMcpName(toolName)}, meta:`, JSON.stringify(meta, null, 2))
-
-  return tool
+  return meta
 }

@@ -1,4 +1,4 @@
-import { Warp, WarpMcpAction } from '@vleap/warps'
+import { Warp, WarpChainName, WarpMcpAction } from '@vleap/warps'
 import fetchMock from 'jest-fetch-mock'
 import { z } from 'zod'
 import { convertMcpToolToWarp, convertWarpToMcpCapabilities } from './warps'
@@ -336,12 +336,13 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-    expect(result.tools).toHaveLength(1)
-    expect(result.tools[0].name).toBe('test_tool')
-    expect(result.tools[0].description).toBe('Test tool description')
-    expect(result.tools[0].inputSchema).toBeDefined()
-    expect(result.tools[0].inputSchema).toHaveProperty('name')
-    const nameSchema = result.tools[0].inputSchema.name as z.ZodTypeAny
+    expect(result.tool).toBeDefined()
+    expect(result.tool!).toBeDefined()
+    expect(result.tool!.name).toBe('test_tool')
+    expect(result.tool!.description).toBe('Test tool description')
+    expect(result.tool!.inputSchema).toBeDefined()
+    expect(result.tool!.inputSchema).toHaveProperty('name')
+    const nameSchema = result.tool!.inputSchema!.name as z.ZodTypeAny
     expect(isZodString(nameSchema)).toBe(true)
     const description = getZodDescription(nameSchema)
     if (description) {
@@ -391,14 +392,14 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-    expect(result.tools[0].inputSchema).toBeDefined()
-    expect(result.tools[0].inputSchema).toHaveProperty('str')
-    expect(result.tools[0].inputSchema).toHaveProperty('num')
-    expect(result.tools[0].inputSchema).toHaveProperty('bool')
-    expect(result.tools[0].inputSchema.str).toBeInstanceOf(z.ZodType)
-    expect(result.tools[0].inputSchema.num).toBeInstanceOf(z.ZodType)
-    expect(result.tools[0].inputSchema.bool).toBeInstanceOf(z.ZodType)
-    const numSchema = result.tools[0].inputSchema.num as z.ZodTypeAny
+    expect(result.tool!.inputSchema).toBeDefined()
+    expect(result.tool!.inputSchema).toHaveProperty('str')
+    expect(result.tool!.inputSchema).toHaveProperty('num')
+    expect(result.tool!.inputSchema).toHaveProperty('bool')
+    expect(result.tool!.inputSchema!.str).toBeInstanceOf(z.ZodType)
+    expect(result.tool!.inputSchema!.num).toBeInstanceOf(z.ZodType)
+    expect(result.tool!.inputSchema!.bool).toBeInstanceOf(z.ZodType)
+    const numSchema = result.tool!.inputSchema!.num as z.ZodTypeAny
     expect(isZodOptional(numSchema)).toBe(false)
   })
 
@@ -428,8 +429,8 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-    expect(result.tools[0].name).toBe('output_test')
-    expect(result.tools[0].inputSchema).toBeUndefined()
+    expect(result.tool!.name).toBe('output_test')
+    expect(result.tool!.inputSchema).toBeUndefined()
   })
 
   it('handles Warp without inputs', async () => {
@@ -453,7 +454,7 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-    expect(result.tools[0].inputSchema).toBeUndefined()
+    expect(result.tool!.inputSchema).toBeUndefined()
   })
 
   it('handles Warp without output', async () => {
@@ -484,7 +485,7 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-    expect(result.tools[0].outputSchema).toBeUndefined()
+    expect(result.tool!.outputSchema).toBeUndefined()
   })
 
   it('handles default values in inputs', async () => {
@@ -530,10 +531,10 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-    expect(result.tools[0].inputSchema).toBeDefined()
-    expect(result.tools[0].inputSchema).toHaveProperty('name')
-    expect(result.tools[0].inputSchema).toHaveProperty('count')
-    expect(result.tools[0].inputSchema).toHaveProperty('active')
+    expect(result.tool!.inputSchema).toBeDefined()
+    expect(result.tool!.inputSchema).toHaveProperty('name')
+    expect(result.tool!.inputSchema).toHaveProperty('count')
+    expect(result.tool!.inputSchema).toHaveProperty('active')
   })
 
   it('handles Warp without description', async () => {
@@ -557,7 +558,7 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-    expect(result.tools[0].description).toBeUndefined()
+    expect(result.tool!.description).toBeUndefined()
   })
 
   it('uses action description when warp description is missing', async () => {
@@ -582,7 +583,7 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-    expect(result.tools[0].description).toBe('Action description')
+    expect(result.tool!.description).toBe('Action description')
   })
 
   it('handles Warp without headers', async () => {
@@ -641,9 +642,9 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-    expect(result.tools[0].inputSchema).toBeDefined()
-    expect(result.tools[0].inputSchema).toHaveProperty('payload_input')
-    expect(result.tools[0].inputSchema).toHaveProperty('non_payload_input')
+    expect(result.tool!.inputSchema).toBeDefined()
+    expect(result.tool!.inputSchema).toHaveProperty('payload_input')
+    expect(result.tool!.inputSchema).toHaveProperty('non_payload_input')
   })
 
   it('returns empty arrays when Warp has no actions', async () => {
@@ -656,7 +657,7 @@ describe('convertWarpToMcpCapabilities', () => {
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
-    expect(result.tools).toEqual([])
+    expect(result.tool).toBeNull()
   })
 
   it('skips MCP action when it has no destination', async () => {
@@ -674,7 +675,7 @@ describe('convertWarpToMcpCapabilities', () => {
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
-    expect(result.tools).toEqual([])
+    expect(result.tool).toBeNull()
   })
 
   it('converts all Warp input types to JSON Schema types', async () => {
@@ -729,12 +730,12 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-    expect(result.tools[0].inputSchema).toBeDefined()
-    expect(result.tools[0].inputSchema.str).toBeInstanceOf(z.ZodType)
-    expect(result.tools[0].inputSchema.bool).toBeInstanceOf(z.ZodType)
-    expect(result.tools[0].inputSchema.uint8).toBeInstanceOf(z.ZodType)
-    expect(result.tools[0].inputSchema.uint256).toBeInstanceOf(z.ZodType)
-    expect(result.tools[0].inputSchema.biguint).toBeInstanceOf(z.ZodType)
+    expect(result.tool!.inputSchema).toBeDefined()
+    expect(result.tool!.inputSchema!.str).toBeInstanceOf(z.ZodType)
+    expect(result.tool!.inputSchema!.bool).toBeInstanceOf(z.ZodType)
+    expect(result.tool!.inputSchema!.uint8).toBeInstanceOf(z.ZodType)
+    expect(result.tool!.inputSchema!.uint256).toBeInstanceOf(z.ZodType)
+    expect(result.tool!.inputSchema!.biguint).toBeInstanceOf(z.ZodType)
   })
 
   it('converts transfer action to tool', async () => {
@@ -761,9 +762,9 @@ describe('convertWarpToMcpCapabilities', () => {
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
-    expect(result.tools).toHaveLength(1)
-    expect(result.tools[0].name).toBe('transfer_test')
-    expect(result.tools[0].description).toBe('Transfer action')
+    expect(result.tool).toBeDefined()
+    expect(result.tool!.name).toBe('transfer_test')
+    expect(result.tool!.description).toBe('Transfer action')
   })
 
   it('converts contract action to tool', async () => {
@@ -792,8 +793,8 @@ describe('convertWarpToMcpCapabilities', () => {
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
-    expect(result.tools).toHaveLength(1)
-    expect(result.tools[0].name).toBe('contract_test')
+    expect(result.tool).toBeDefined()
+    expect(result.tool!.name).toBe('contract_test')
   })
 
   it('converts query action to tool', async () => {
@@ -813,9 +814,9 @@ describe('convertWarpToMcpCapabilities', () => {
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
-    expect(result.tools).toHaveLength(1)
-    expect(result.tools[0].name).toBe('query_test')
-    expect(result.tools[0].description).toBe('Query action')
+    expect(result.tool).toBeDefined()
+    expect(result.tool!.name).toBe('query_test')
+    expect(result.tool!.description).toBe('Query action')
   })
 
   it('converts collect action with POST to tool', async () => {
@@ -846,8 +847,8 @@ describe('convertWarpToMcpCapabilities', () => {
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
-    expect(result.tools).toHaveLength(1)
-    expect(result.tools[0].name).toBe('collect_post_test')
+    expect(result.tool).toBeDefined()
+    expect(result.tool!.name).toBe('collect_post_test')
   })
 
   it('converts collect action with PUT to tool', async () => {
@@ -869,7 +870,7 @@ describe('convertWarpToMcpCapabilities', () => {
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
-    expect(result.tools).toHaveLength(1)
+    expect(result.tool).toBeDefined()
   })
 
   it('converts collect action with DELETE to tool', async () => {
@@ -891,7 +892,7 @@ describe('convertWarpToMcpCapabilities', () => {
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
-    expect(result.tools).toHaveLength(1)
+    expect(result.tool).toBeDefined()
   })
 
   it('converts collect action with GET to tool', async () => {
@@ -914,9 +915,9 @@ describe('convertWarpToMcpCapabilities', () => {
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
-    expect(result.tools).toHaveLength(1)
-    expect(result.tools[0].name).toBe('collect_get_test')
-    expect(result.tools[0].description).toBe('Collect GET action')
+    expect(result.tool).toBeDefined()
+    expect(result.tool!.name).toBe('collect_get_test')
+    expect(result.tool!.description).toBe('Collect GET action')
   })
 
   it('converts collect action without method to tool', async () => {
@@ -937,8 +938,8 @@ describe('convertWarpToMcpCapabilities', () => {
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
-    expect(result.tools).toHaveLength(1)
-    expect(result.tools[0].name).toBe('collect_no_method_test')
+    expect(result.tool).toBeDefined()
+    expect(result.tool!.name).toBe('collect_no_method_test')
   })
 
   it('converts collect action with string destination to tool', async () => {
@@ -957,8 +958,8 @@ describe('convertWarpToMcpCapabilities', () => {
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
-    expect(result.tools).toHaveLength(1)
-    expect(result.tools[0].name).toBe('collect_string_test')
+    expect(result.tool).toBeDefined()
+    expect(result.tool!.name).toBe('collect_string_test')
   })
 
   it('handles multiple actions of different types', async () => {
@@ -998,8 +999,8 @@ describe('convertWarpToMcpCapabilities', () => {
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
-    expect(result.tools).toHaveLength(1)
-    expect(result.tools[0].name).toBe('multiple_actions_test')
+    expect(result.tool).toBeDefined()
+    expect(result.tool!.name).toBe('multiple_actions_test')
   })
 
   it('sanitizes tool names with spaces and colons', async () => {
@@ -1019,8 +1020,8 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-    expect(result.tools[0].name).toBe('delegate')
-    expect(result.tools[0].name).toMatch(/^[A-Za-z0-9_.-]+$/)
+    expect(result.tool!.name).toBe('delegate')
+    expect(result.tool!.name).toMatch(/^[A-Za-z0-9_.-]+$/)
   })
 
   it('sanitizes tool names with invalid characters for query actions', async () => {
@@ -1040,8 +1041,8 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-    expect(result.tools[0].name).toBe('get_balance_test')
-    expect(result.tools[0].name).toMatch(/^[A-Za-z0-9_.-]+$/)
+    expect(result.tool!.name).toBe('get_balance_test')
+    expect(result.tool!.name).toMatch(/^[A-Za-z0-9_.-]+$/)
   })
 
   it('sanitizes MCP tool names with special characters', async () => {
@@ -1064,8 +1065,8 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-    expect(result.tools[0].name).toBe('with_colons')
-    expect(result.tools[0].name).toMatch(/^[A-Za-z0-9_.-]+$/)
+    expect(result.tool!.name).toBe('with_colons')
+    expect(result.tool!.name).toMatch(/^[A-Za-z0-9_.-]+$/)
   })
 
   it('handles names with multiple consecutive invalid characters', async () => {
@@ -1085,8 +1086,8 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-    expect(result.tools[0].name).toBe('tool_with_spaces')
-    expect(result.tools[0].name).not.toContain('__')
+    expect(result.tool!.name).toBe('tool_with_spaces')
+    expect(result.tool!.name).not.toContain('__')
   })
 
   it('maps min and max constraints to JSON Schema', async () => {
@@ -1119,8 +1120,8 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-    expect(result.tools[0].inputSchema).toBeDefined()
-    expect(result.tools[0].inputSchema.amount).toBeInstanceOf(z.ZodType)
+    expect(result.tool!.inputSchema).toBeDefined()
+    expect(result.tool!.inputSchema!.amount).toBeInstanceOf(z.ZodType)
   })
 
   it('maps pattern and patternDescription to JSON Schema', async () => {
@@ -1153,9 +1154,9 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-    expect(result.tools[0].inputSchema).toBeDefined()
-    expect(result.tools[0].inputSchema.email).toBeInstanceOf(z.ZodType)
-    const emailSchema = result.tools[0].inputSchema.email as z.ZodTypeAny
+    expect(result.tool!.inputSchema).toBeDefined()
+    expect(result.tool!.inputSchema!.email).toBeInstanceOf(z.ZodType)
+    const emailSchema = result.tool!.inputSchema!.email as z.ZodTypeAny
     const description = getZodDescription(emailSchema)
     if (description) {
       expect(description).toContain('Must be a valid email address')
@@ -1191,8 +1192,8 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-    expect(result.tools[0].inputSchema).toBeDefined()
-    expect(result.tools[0].inputSchema.status).toBeInstanceOf(z.ZodType)
+    expect(result.tool!.inputSchema).toBeDefined()
+    expect(result.tool!.inputSchema!.status).toBeInstanceOf(z.ZodType)
   })
 
   it('maps options object to enum with keys', async () => {
@@ -1227,8 +1228,8 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-    expect(result.tools[0].inputSchema).toBeDefined()
-    expect(result.tools[0].inputSchema.choice).toBeInstanceOf(z.ZodType)
+    expect(result.tool!.inputSchema).toBeDefined()
+    expect(result.tool!.inputSchema!.choice).toBeInstanceOf(z.ZodType)
   })
 
   it('maps all input properties together', async () => {
@@ -1268,9 +1269,9 @@ describe('convertWarpToMcpCapabilities', () => {
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-    expect(result.tools[0].inputSchema).toBeDefined()
-    expect(result.tools[0].inputSchema.full_input).toBeInstanceOf(z.ZodType)
-    const fullInputSchema = result.tools[0].inputSchema.full_input as z.ZodTypeAny
+    expect(result.tool!.inputSchema).toBeDefined()
+    expect(result.tool!.inputSchema!.full_input).toBeInstanceOf(z.ZodType)
+    const fullInputSchema = result.tool!.inputSchema!.full_input as z.ZodTypeAny
     const description = getZodDescription(fullInputSchema)
     if (description) {
       expect(description).toContain('Full input description')
@@ -1299,7 +1300,12 @@ describe('convertWarpToMcpCapabilities', () => {
         ],
         ui: 'https://example.com/app.html',
         meta: {
+          chain: 'multiversx' as WarpChainName,
           identifier: 'app_test',
+          query: null,
+          hash: 'test_hash',
+          creator: 'test_creator',
+          createdAt: '2024-01-01T00:00:00Z',
         },
       }
 
@@ -1308,16 +1314,15 @@ describe('convertWarpToMcpCapabilities', () => {
 
       const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-      expect(result.tools).toHaveLength(1)
-      expect(result.resources).toBeDefined()
-      expect(result.resources).toHaveLength(1)
-      expect(result.resources![0].name).toBe('app_test')
-      expect(result.resources![0].uri).toBe('ui://widget/app_test')
-      expect(result.resources![0].mimeType).toBe('text/html+skybridge')
+      expect(result.tool).toBeDefined()
+      expect(result.resource).toBeDefined()
+      expect(result.resource?.name).toBe('app_test')
+      expect(result.resource?.uri).toBe('ui://widget/app_test')
+      expect(result.resource?.mimeType).toBe('text/html+skybridge')
       const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
         warp: { name: 'app_test', title: 'App Test', description: 'Test app' },
       })}</script>`
-      expect(result.resources![0].content).toBe(`${dataScript}\nTest App`)
+      expect(result.resource?.content).toBe(`${dataScript}\nTest App`)
     })
 
     it('inlines CSS resources', async () => {
@@ -1335,7 +1340,12 @@ describe('convertWarpToMcpCapabilities', () => {
         ],
         ui: 'https://example.com/app.html',
         meta: {
+          chain: 'multiversx' as WarpChainName,
           identifier: 'css_test',
+          query: null,
+          hash: 'test_hash',
+          creator: 'test_creator',
+          createdAt: '2024-01-01T00:00:00Z',
         },
       }
 
@@ -1346,12 +1356,11 @@ describe('convertWarpToMcpCapabilities', () => {
 
       const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-      expect(result.resources).toBeDefined()
-      expect(result.resources).toHaveLength(1)
+      expect(result.resource).toBeDefined()
       const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
         warp: { name: 'css_test', title: 'CSS Test' },
       })}</script>`
-      expect(result.resources![0].content).toBe(`${dataScript}\n<style>body { color: red; }</style>`)
+      expect(result.resource?.content).toBe(`${dataScript}\n<style>body { color: red; }</style>`)
     })
 
     it('inlines JavaScript resources', async () => {
@@ -1369,7 +1378,12 @@ describe('convertWarpToMcpCapabilities', () => {
         ],
         ui: 'https://example.com/app.html',
         meta: {
+          chain: 'multiversx' as WarpChainName,
           identifier: 'js_test',
+          query: null,
+          hash: 'test_hash',
+          creator: 'test_creator',
+          createdAt: '2024-01-01T00:00:00Z',
         },
       }
 
@@ -1380,12 +1394,11 @@ describe('convertWarpToMcpCapabilities', () => {
 
       const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-      expect(result.resources).toBeDefined()
-      expect(result.resources).toHaveLength(1)
+      expect(result.resource).toBeDefined()
       const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
         warp: { name: 'js_test', title: 'JS Test' },
       })}</script>`
-      expect(result.resources![0].content).toBe(`${dataScript}\n<script>console.log('test');</script>`)
+      expect(result.resource?.content).toBe(`${dataScript}\n<script>console.log('test');</script>`)
     })
 
     it('handles relative URLs in resources', async () => {
@@ -1403,7 +1416,12 @@ describe('convertWarpToMcpCapabilities', () => {
         ],
         ui: 'https://example.com/path/app.html',
         meta: {
+          chain: 'multiversx' as WarpChainName,
           identifier: 'relative_url_test',
+          query: null,
+          hash: 'test_hash',
+          creator: 'test_creator',
+          createdAt: '2024-01-01T00:00:00Z',
         },
       }
 
@@ -1415,12 +1433,11 @@ describe('convertWarpToMcpCapabilities', () => {
       const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
       expect(fetchMock).toHaveBeenCalledWith('https://example.com/styles.css')
-      expect(result.resources).toBeDefined()
-      expect(result.resources).toHaveLength(1)
+      expect(result.resource).toBeDefined()
       const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
         warp: { name: 'relative_url_test', title: 'Relative URL Test' },
       })}</script>`
-      expect(result.resources![0].content).toBe(`${dataScript}\n<style>body { margin: 0; }</style>`)
+      expect(result.resource?.content).toBe(`${dataScript}\n<style>body { margin: 0; }</style>`)
     })
 
     it('handles failed resource downloads gracefully', async () => {
@@ -1438,7 +1455,12 @@ describe('convertWarpToMcpCapabilities', () => {
         ],
         ui: 'https://example.com/app.html',
         meta: {
+          chain: 'multiversx' as WarpChainName,
           identifier: 'failed_resource_test',
+          query: null,
+          hash: 'test_hash',
+          creator: 'test_creator',
+          createdAt: '2024-01-01T00:00:00Z',
         },
       }
 
@@ -1448,12 +1470,11 @@ describe('convertWarpToMcpCapabilities', () => {
 
       const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-      expect(result.resources).toBeDefined()
-      expect(result.resources).toHaveLength(1)
+      expect(result.resource).toBeDefined()
       const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
         warp: { name: 'failed_resource_test', title: 'Failed Resource Test' },
       })}</script>`
-      expect(result.resources?.[0].content?.trim()).toBe(dataScript)
+      expect(result.resource?.content?.trim()).toBe(dataScript)
     })
 
     it('skips app when set to table', async () => {
@@ -1474,8 +1495,8 @@ describe('convertWarpToMcpCapabilities', () => {
 
       const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-      expect(result.tools).toHaveLength(1)
-      expect(result.resources).toBeUndefined()
+      expect(result.tool).toBeDefined()
+      expect(result.resource).toBeNull()
       expect(fetchMock).not.toHaveBeenCalled()
     })
 
@@ -1499,8 +1520,8 @@ describe('convertWarpToMcpCapabilities', () => {
 
       const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-      expect(result.tools).toHaveLength(1)
-      expect(result.resources).toBeUndefined()
+      expect(result.tool).toBeDefined()
+      expect(result.resource).toBeNull()
     })
 
     it('injects warp metadata into app', async () => {
@@ -1518,7 +1539,12 @@ describe('convertWarpToMcpCapabilities', () => {
         ],
         ui: 'https://example.com/app.html',
         meta: {
+          chain: 'multiversx' as WarpChainName,
           identifier: 'metadata_test',
+          query: null,
+          hash: 'test_hash',
+          creator: 'test_creator',
+          createdAt: '2024-01-01T00:00:00Z',
         },
       }
 
@@ -1530,7 +1556,7 @@ describe('convertWarpToMcpCapabilities', () => {
       const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
         warp: { name: 'metadata_test', title: 'Metadata Test', description: 'Test description' },
       })}</script>`
-      expect(result.resources?.[0].content).toBe(`${dataScript}\nTest`)
+      expect(result.resource?.content).toBe(`${dataScript}\nTest`)
     })
 
     it('handles multiple CSS and JS resources in parallel', async () => {
@@ -1548,7 +1574,12 @@ describe('convertWarpToMcpCapabilities', () => {
         ],
         ui: 'https://example.com/app.html',
         meta: {
+          chain: 'multiversx' as WarpChainName,
           identifier: 'multiple_resources_test',
+          query: null,
+          hash: 'test_hash',
+          creator: 'test_creator',
+          createdAt: '2024-01-01T00:00:00Z',
         },
       }
 
@@ -1564,13 +1595,12 @@ describe('convertWarpToMcpCapabilities', () => {
 
       const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
-      expect(result.resources).toBeDefined()
-      expect(result.resources).toHaveLength(1)
+      expect(result.resource).toBeDefined()
       const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
         warp: { name: 'multiple_resources_test', title: 'Multiple Resources Test' },
       })}</script>`
       const expectedContent = `${dataScript}\n<style>body { color: red; }</style><style>body { margin: 0; }</style><script>console.log('app1');</script><script>console.log('app2');</script>`
-      expect(result.resources![0].content).toBe(expectedContent)
+      expect(result.resource?.content).toBe(expectedContent)
     })
   })
 })

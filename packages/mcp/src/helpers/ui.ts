@@ -1,6 +1,6 @@
-import { Warp, WarpClientConfig } from '@vleap/warps'
-import type { McpResource } from '../types'
-import { extractText } from './warps'
+import { Warp, WarpClientConfig, WarpLogger } from '@vleap/warps'
+import type { WarpMcpResource } from '../types'
+import { extractTextOrUndefined } from './warps'
 
 const downloadApp = async (url: string): Promise<string> => {
   const res = await fetch(url)
@@ -68,13 +68,17 @@ const injectData = (html: string, data: Record<string, any>): string => {
   return `${script}\n${stripped}`
 }
 
-export const createAppResource = async (warp: Warp, appUrl: string, config: WarpClientConfig): Promise<McpResource | null> => {
+export const createAppResource = async (warp: Warp, appUrl: string, config: WarpClientConfig): Promise<WarpMcpResource | null> => {
   if (!warp.meta?.identifier) return null
   try {
     let html = await downloadApp(appUrl)
     html = await inlineResources(html, appUrl)
     const data = {
-      warp: { name: warp.name, title: extractText(warp.title, config), description: extractText(warp.description, config) },
+      warp: {
+        name: warp.name,
+        title: extractTextOrUndefined(warp.title, config),
+        description: extractTextOrUndefined(warp.description, config),
+      },
     }
     return {
       name: warp.name,
@@ -86,9 +90,9 @@ export const createAppResource = async (warp: Warp, appUrl: string, config: Warp
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
     const errorStack = error instanceof Error ? error.stack : undefined
-    console.error(`[MCP] Failed to create app resource for warp "${warp.name}" (url: ${appUrl}):`, errorMessage)
+    WarpLogger.error(`[MCP] Failed to create app resource for warp "${warp.name}" (url: ${appUrl}):`, errorMessage)
     if (errorStack) {
-      console.error(`[MCP] Error stack:`, errorStack)
+      WarpLogger.error(`[MCP] Error stack:`, errorStack)
     }
     return null
   }
