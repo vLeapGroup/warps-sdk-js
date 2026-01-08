@@ -4,7 +4,15 @@ import { Warp } from '@vleap/warps'
 import { z } from 'zod'
 import { convertMcpArgsToWarpInputs } from './helpers/execution'
 import { interpolatePromptWithArgs } from './helpers/prompts'
-import { McpToolArgs, McpToolResult, ToolInputSchema, WarpMcpCapabilities, WarpMcpExecutor, WarpMcpPrompt, WarpMcpServerConfig } from './types'
+import {
+  McpToolArgs,
+  McpToolResult,
+  ToolInputSchema,
+  WarpMcpCapabilities,
+  WarpMcpExecutor,
+  WarpMcpPrompt,
+  WarpMcpServerConfig,
+} from './types'
 
 const processInputSchema = (inputSchema: ToolInputSchema): z.ZodTypeAny | Record<string, z.ZodTypeAny> | undefined => {
   if (!inputSchema) return undefined
