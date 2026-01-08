@@ -1,5 +1,16 @@
 # @joai/warps-adapter-fastset
 
+## 1.0.0-beta.58
+
+### Major Changes
+
+- 1608055: migrate to joai org
+
+### Patch Changes
+
+- Updated dependencies [1608055]
+  - @joai/warps@3.0.0-beta.198
+
 ## 0.1.0-beta.57
 
 ### Patch Changes

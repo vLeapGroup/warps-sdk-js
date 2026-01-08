@@ -1,5 +1,16 @@
 # @joai/warps-adapter-near
 
+## 1.0.0-beta.19
+
+### Major Changes
+
+- 1608055: migrate to joai org
+
+### Patch Changes
+
+- Updated dependencies [1608055]
+  - @joai/warps@3.0.0-beta.198
+
 ## 0.1.0-beta.18
 
 ### Patch Changes

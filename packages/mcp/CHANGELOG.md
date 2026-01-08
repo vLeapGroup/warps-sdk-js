@@ -1,5 +1,21 @@
 # @joai/warps-mcp
 
+## 1.0.0-beta.27
+
+### Major Changes
+
+- 1608055: migrate to joai org
+
+### Minor Changes
+
+- d6e3b78: add mcp prompts
+
+### Patch Changes
+
+- 3f2ec79: update mcp
+- Updated dependencies [1608055]
+  - @joai/warps@3.0.0-beta.198
+
 ## 1.0.0-beta.26
 
 ### Patch Changes

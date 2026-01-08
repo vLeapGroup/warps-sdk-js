@@ -1,5 +1,11 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.198
+
+### Major Changes
+
+- 1608055: migrate to joai org
+
 ## 3.0.0-beta.197
 
 ### Patch Changes

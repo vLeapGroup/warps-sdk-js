@@ -1,5 +1,27 @@
 # @warps/playground
 
+## 1.0.0-beta.173
+
+### Major Changes
+
+- 1608055: migrate to joai org
+
+### Patch Changes
+
+- Updated dependencies [3f2ec79]
+- Updated dependencies [d6e3b78]
+- Updated dependencies [1608055]
+  - @joai/warps-mcp@1.0.0-beta.27
+  - @joai/warps-adapter-multiversx@1.0.0-beta.99
+  - @joai/warps-adapter-fastset@1.0.0-beta.58
+  - @joai/warps-wallet-coinbase@1.0.0-beta.11
+  - @joai/warps-adapter-solana@1.0.0-beta.23
+  - @joai/warps-adapter-near@1.0.0-beta.19
+  - @joai/warps-adapter-evm@1.0.0-beta.74
+  - @joai/warps-adapter-sui@1.0.0-beta.74
+  - @joai/warps-vm-node@1.0.0-beta.10
+  - @joai/warps@3.0.0-beta.198
+
 ## 0.2.0-beta.172
 
 ### Patch Changes

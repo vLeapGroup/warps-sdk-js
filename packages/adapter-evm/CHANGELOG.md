@@ -1,5 +1,16 @@
 # @joai/warps-adapter-evm
 
+## 1.0.0-beta.74
+
+### Major Changes
+
+- 1608055: migrate to joai org
+
+### Patch Changes
+
+- Updated dependencies [1608055]
+  - @joai/warps@3.0.0-beta.198
+
 ## 0.2.0-beta.73
 
 ### Patch Changes
