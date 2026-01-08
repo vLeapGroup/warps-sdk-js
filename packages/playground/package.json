@@ -1,6 +1,6 @@
 {
   "name": "@warps/playground",
-  "version": "0.2.0-beta.171",
+  "version": "0.2.0-beta.172",
   "description": "Playground for testing Warps SDK",
   "private": true,
   "type": "module",
@@ -13,7 +13,7 @@
     "@vleap/warps": "3.0.0-beta.197",
     "@vleap/warps-adapter-evm": "0.2.0-beta.73",
     "@vleap/warps-adapter-fastset": "0.1.0-beta.57",
-    "@vleap/warps-mcp": "1.0.0-beta.25",
+    "@vleap/warps-mcp": "1.0.0-beta.26",
     "@vleap/warps-adapter-near": "0.1.0-beta.18",
     "@vleap/warps-adapter-multiversx": "0.2.0-beta.98",
     "@vleap/warps-adapter-solana": "0.1.0-beta.22",
