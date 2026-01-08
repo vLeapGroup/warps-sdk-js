@@ -1,5 +1,5 @@
-import { z } from 'zod'
 import { Warp } from '@vleap/warps'
+import { z } from 'zod'
 
 export type WarpMcpServerConfig = {
   name: string
@@ -18,7 +18,7 @@ export type WarpMcpTool = {
   description?: string
   inputSchema?: ToolInputSchema
   outputSchema?: ToolOutputSchema
-  _meta?: ToolMeta
+  meta?: ToolMeta
 }
 
 export type WarpMcpResource = {

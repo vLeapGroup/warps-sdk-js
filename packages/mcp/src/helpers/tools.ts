@@ -143,10 +143,10 @@ export const convertActionToTool = (
     name,
     description,
     inputSchema,
-    _meta: buildToolMeta(warp, resource, config),
+    meta: buildToolMeta(warp, resource, config),
   }
 
-  WarpLogger.info(`[MCP] convertActionToTool - tool: ${name}, meta:`, JSON.stringify(tool._meta, null, 2))
+  WarpLogger.info(`[MCP] convertActionToTool - tool: ${name}, meta:`, JSON.stringify(tool.meta, null, 2))
 
   return tool
 }
@@ -168,16 +168,16 @@ export const convertMcpActionToTool = (
     name,
     description,
     inputSchema,
-    _meta: buildToolMeta(warp, resource, config),
+    meta: buildToolMeta(warp, resource, config),
   }
 
-  WarpLogger.info(`[MCP] convertMcpActionToTool - tool: ${name}, meta:`, JSON.stringify(tool._meta, null, 2))
+  WarpLogger.info(`[MCP] convertMcpActionToTool - tool: ${name}, meta:`, JSON.stringify(tool.meta, null, 2))
 
   return tool
 }
 
-const buildToolMeta = (warp: Warp, resource: WarpMcpResource | null, config: WarpClientConfig): WarpMcpTool['_meta'] => {
-  const meta: NonNullable<WarpMcpTool['_meta']> = {
+const buildToolMeta = (warp: Warp, resource: WarpMcpResource | null, config: WarpClientConfig): WarpMcpTool['meta'] => {
+  const meta: NonNullable<WarpMcpTool['meta']> = {
     'openai/widgetAccessible': true,
   }
 

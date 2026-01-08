@@ -1,12 +1,4 @@
-import {
-  Warp,
-  WarpActionInput,
-  WarpCollectAction,
-  WarpContractAction,
-  WarpMcpAction,
-  WarpQueryAction,
-  WarpTransferAction,
-} from '@vleap/warps'
+import { Warp, WarpActionInput, WarpMcpAction, WarpTransferAction } from '@vleap/warps'
 import { z } from 'zod'
 import { buildZodInputSchema, convertActionToTool, convertMcpActionToTool } from './tools'
 
@@ -115,7 +107,8 @@ describe('buildZodInputSchema', () => {
     const schema = result!.name
     // Check if it's wrapped in ZodOptional by checking the inner type
     const innerType = (schema as any)._def?.innerType
-    const isOptional = isZodOptional(schema) || (schema as any)._def?.typeName === 'ZodOptional' || (innerType && innerType instanceof z.ZodString)
+    const isOptional =
+      isZodOptional(schema) || (schema as any)._def?.typeName === 'ZodOptional' || (innerType && innerType instanceof z.ZodString)
     // Actually, let's just verify it can parse undefined
     const parseResult = schema.safeParse(undefined)
     expect(parseResult.success).toBe(true)
@@ -277,8 +270,8 @@ describe('convertActionToTool', () => {
     expect(tool.name).toBe('test_warp')
     expect(tool.description).toBe('Test description')
     expect(tool.inputSchema).toBeUndefined()
-    expect(tool._meta).toBeDefined()
-    expect(tool._meta!['openai/widgetAccessible']).toBe(true)
+    expect(tool.meta).toBeDefined()
+    expect(tool.meta!['openai/widgetAccessible']).toBe(true)
   })
 
   it('includes output template URI in _meta when provided', () => {
@@ -299,9 +292,9 @@ describe('convertActionToTool', () => {
     const action = warp.actions[0] as WarpTransferAction
     const tool = convertActionToTool(warp, action, undefined, undefined, { uri: 'ui://widget/test_warp' }, mockConfig)
 
-    expect(tool._meta).toBeDefined()
-    expect(tool._meta!['openai/widgetAccessible']).toBe(true)
-    expect(tool._meta!['openai/outputTemplate']).toBe('ui://widget/test_warp')
+    expect(tool.meta).toBeDefined()
+    expect(tool.meta!['openai/widgetAccessible']).toBe(true)
+    expect(tool.meta!['openai/outputTemplate']).toBe('ui://widget/test_warp')
   })
 
   it('includes invoking and invoked messages with localization (en) in _meta when provided', () => {
@@ -326,11 +319,11 @@ describe('convertActionToTool', () => {
     const action = warp.actions[0] as WarpTransferAction
     const tool = convertActionToTool(warp, action, undefined, undefined, { uri: 'ui://widget/test_warp' }, mockConfig)
 
-    expect(tool._meta).toBeDefined()
-    expect(tool._meta!['openai/widgetAccessible']).toBe(true)
-    expect(tool._meta!['openai/outputTemplate']).toBe('ui://widget/test_warp')
-    expect(tool._meta!['openai/toolInvocation/invoking']).toBe('Processing transfer')
-    expect(tool._meta!['openai/toolInvocation/invoked']).toBe('Transfer completed')
+    expect(tool.meta).toBeDefined()
+    expect(tool.meta!['openai/widgetAccessible']).toBe(true)
+    expect(tool.meta!['openai/outputTemplate']).toBe('ui://widget/test_warp')
+    expect(tool.meta!['openai/toolInvocation/invoking']).toBe('Processing transfer')
+    expect(tool.meta!['openai/toolInvocation/invoked']).toBe('Transfer completed')
   })
 
   it('includes invoking and invoked messages with localization (de) in _meta when provided', () => {
@@ -355,11 +348,11 @@ describe('convertActionToTool', () => {
     const action = warp.actions[0] as WarpTransferAction
     const tool = convertActionToTool(warp, action, undefined, undefined, { uri: 'ui://widget/test_warp' }, mockConfig)
 
-    expect(tool._meta).toBeDefined()
-    expect(tool._meta!['openai/widgetAccessible']).toBe(true)
-    expect(tool._meta!['openai/outputTemplate']).toBe('ui://widget/test_warp')
-    expect(tool._meta!['openai/toolInvocation/invoking']).toBe('Übertragung wird verarbeitet')
-    expect(tool._meta!['openai/toolInvocation/invoked']).toBe('Übertragung abgeschlossen')
+    expect(tool.meta).toBeDefined()
+    expect(tool.meta!['openai/widgetAccessible']).toBe(true)
+    expect(tool.meta!['openai/outputTemplate']).toBe('ui://widget/test_warp')
+    expect(tool.meta!['openai/toolInvocation/invoking']).toBe('Übertragung wird verarbeitet')
+    expect(tool.meta!['openai/toolInvocation/invoked']).toBe('Übertragung abgeschlossen')
   })
 
   it('handles string format messages (non-localized)', () => {
@@ -384,10 +377,10 @@ describe('convertActionToTool', () => {
     const action = warp.actions[0] as WarpTransferAction
     const tool = convertActionToTool(warp, action, undefined, undefined, null, mockConfig)
 
-    expect(tool._meta).toBeDefined()
-    expect(tool._meta!['openai/widgetAccessible']).toBe(true)
-    expect(tool._meta!['openai/toolInvocation/invoking']).toBe('Starting')
-    expect(tool._meta!['openai/toolInvocation/invoked']).toBe('Done')
+    expect(tool.meta).toBeDefined()
+    expect(tool.meta!['openai/widgetAccessible']).toBe(true)
+    expect(tool.meta!['openai/toolInvocation/invoking']).toBe('Starting')
+    expect(tool.meta!['openai/toolInvocation/invoked']).toBe('Done')
   })
 
   it('sanitizes warp name correctly', () => {
@@ -535,9 +528,9 @@ describe('convertMcpActionToTool', () => {
 
     const tool = convertMcpActionToTool(warp, action, undefined, undefined, { uri: 'ui://widget/mcp_tool' }, mockConfig)
 
-    expect(tool._meta).toBeDefined()
-    expect(tool._meta!['openai/widgetAccessible']).toBe(true)
-    expect(tool._meta!['openai/outputTemplate']).toBe('ui://widget/mcp_tool')
+    expect(tool.meta).toBeDefined()
+    expect(tool.meta!['openai/widgetAccessible']).toBe(true)
+    expect(tool.meta!['openai/outputTemplate']).toBe('ui://widget/mcp_tool')
   })
 
   it('sanitizes tool name correctly', () => {
@@ -591,11 +584,11 @@ describe('convertMcpActionToTool', () => {
 
     const tool = convertMcpActionToTool(warp, action, undefined, undefined, { uri: 'ui://widget/mcp_tool' }, mockConfig)
 
-    expect(tool._meta).toBeDefined()
-    expect(tool._meta!['openai/widgetAccessible']).toBe(true)
-    expect(tool._meta!['openai/outputTemplate']).toBe('ui://widget/mcp_tool')
-    expect(tool._meta!['openai/toolInvocation/invoking']).toBe('Displaying the board')
-    expect(tool._meta!['openai/toolInvocation/invoked']).toBe('Displayed the board')
+    expect(tool.meta).toBeDefined()
+    expect(tool.meta!['openai/widgetAccessible']).toBe(true)
+    expect(tool.meta!['openai/outputTemplate']).toBe('ui://widget/mcp_tool')
+    expect(tool.meta!['openai/toolInvocation/invoking']).toBe('Displaying the board')
+    expect(tool.meta!['openai/toolInvocation/invoked']).toBe('Displayed the board')
   })
 
   it('includes invoking and invoked messages with localization (de) in _meta when provided', () => {
@@ -624,11 +617,11 @@ describe('convertMcpActionToTool', () => {
 
     const tool = convertMcpActionToTool(warp, action, undefined, undefined, { uri: 'ui://widget/mcp_tool' }, mockConfig)
 
-    expect(tool._meta).toBeDefined()
-    expect(tool._meta!['openai/widgetAccessible']).toBe(true)
-    expect(tool._meta!['openai/outputTemplate']).toBe('ui://widget/mcp_tool')
-    expect(tool._meta!['openai/toolInvocation/invoking']).toBe('Board wird angezeigt')
-    expect(tool._meta!['openai/toolInvocation/invoked']).toBe('Board wurde angezeigt')
+    expect(tool.meta).toBeDefined()
+    expect(tool.meta!['openai/widgetAccessible']).toBe(true)
+    expect(tool.meta!['openai/outputTemplate']).toBe('ui://widget/mcp_tool')
+    expect(tool.meta!['openai/toolInvocation/invoking']).toBe('Board wird angezeigt')
+    expect(tool.meta!['openai/toolInvocation/invoked']).toBe('Board wurde angezeigt')
   })
 
   it('handles partial messages with localization (only invoking)', () => {
@@ -656,9 +649,9 @@ describe('convertMcpActionToTool', () => {
 
     const tool = convertMcpActionToTool(warp, action, undefined, undefined, null, mockConfig)
 
-    expect(tool._meta).toBeDefined()
-    expect(tool._meta!['openai/widgetAccessible']).toBe(true)
-    expect(tool._meta!['openai/toolInvocation/invoking']).toBe('Starting process')
-    expect(tool._meta!['openai/toolInvocation/invoked']).toBeUndefined()
+    expect(tool.meta).toBeDefined()
+    expect(tool.meta!['openai/widgetAccessible']).toBe(true)
+    expect(tool.meta!['openai/toolInvocation/invoking']).toBe('Starting process')
+    expect(tool.meta!['openai/toolInvocation/invoked']).toBeUndefined()
   })
 })

@@ -1,9 +1,9 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { normalizeObjectSchema } from '@modelcontextprotocol/sdk/server/zod-compat.js'
-import { z } from 'zod'
 import { Warp } from '@vleap/warps'
+import { z } from 'zod'
 import { convertMcpArgsToWarpInputs } from './helpers/execution'
-import { WarpMcpCapabilities, WarpMcpExecutor, WarpMcpServerConfig, ToolInputSchema, McpToolArgs, McpToolResult } from './types'
+import { McpToolArgs, McpToolResult, ToolInputSchema, WarpMcpCapabilities, WarpMcpExecutor, WarpMcpServerConfig } from './types'
 
 const processInputSchema = (inputSchema: ToolInputSchema): z.ZodTypeAny | Record<string, z.ZodTypeAny> | undefined => {
   if (!inputSchema) return undefined
@@ -32,19 +32,23 @@ export const createMcpServerFromWarps = (
 
     if (tool) {
       const inputSchema = processInputSchema(tool.inputSchema)
-      const toolDefinition = { 
-        description: tool.description || '', 
+      const toolDefinition = {
+        description: tool.description || '',
         inputSchema,
-        ...(tool._meta && { _meta: tool._meta })
+        ...(tool.meta && { _meta: tool.meta }),
       }
-      server.registerTool(tool.name, toolDefinition as Parameters<typeof server.registerTool>[1], async (args: McpToolArgs): Promise<McpToolResult> => {
-        if (defaultExecutor) {
-          const inputs = convertMcpArgsToWarpInputs(warp, args || {})
-          const result = await defaultExecutor(warp, inputs)
-          return result
+      server.registerTool(
+        tool.name,
+        toolDefinition as Parameters<typeof server.registerTool>[1],
+        async (args: McpToolArgs): Promise<McpToolResult> => {
+          if (defaultExecutor) {
+            const inputs = convertMcpArgsToWarpInputs(warp, args || {})
+            const result = await defaultExecutor(warp, inputs)
+            return result
+          }
+          return { content: [{ type: 'text' as const, text: `Tool ${tool.name} executed successfully` }] }
         }
-        return { content: [{ type: 'text' as const, text: `Tool ${tool.name} executed successfully` }] }
-      })
+      )
     }
 
     if (resource) {
