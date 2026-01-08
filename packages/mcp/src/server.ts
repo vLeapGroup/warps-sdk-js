@@ -3,7 +3,8 @@ import { normalizeObjectSchema } from '@modelcontextprotocol/sdk/server/zod-comp
 import { Warp } from '@vleap/warps'
 import { z } from 'zod'
 import { convertMcpArgsToWarpInputs } from './helpers/execution'
-import { McpToolArgs, McpToolResult, ToolInputSchema, WarpMcpCapabilities, WarpMcpExecutor, WarpMcpServerConfig } from './types'
+import { interpolatePromptWithArgs } from './helpers/prompts'
+import { McpToolArgs, McpToolResult, ToolInputSchema, WarpMcpCapabilities, WarpMcpExecutor, WarpMcpPrompt, WarpMcpServerConfig } from './types'
 
 const processInputSchema = (inputSchema: ToolInputSchema): z.ZodTypeAny | Record<string, z.ZodTypeAny> | undefined => {
   if (!inputSchema) return undefined
@@ -17,6 +18,19 @@ const processInputSchema = (inputSchema: ToolInputSchema): z.ZodTypeAny | Record
   return inputSchema as z.ZodTypeAny | Record<string, z.ZodTypeAny>
 }
 
+const buildPromptArgsSchema = (prompt: WarpMcpPrompt): Record<string, z.ZodTypeAny> | undefined => {
+  if (!prompt.arguments || prompt.arguments.length === 0) return undefined
+
+  const schema: Record<string, z.ZodTypeAny> = {}
+  for (const arg of prompt.arguments) {
+    let argSchema: z.ZodTypeAny = z.string()
+    if (arg.description) argSchema = argSchema.describe(arg.description)
+    if (!arg.required) argSchema = argSchema.optional()
+    schema[arg.name] = argSchema
+  }
+  return schema
+}
+
 export const createMcpServerFromWarps = (
   config: WarpMcpServerConfig,
   warps: Warp[],
@@ -27,7 +41,7 @@ export const createMcpServerFromWarps = (
   const defaultExecutor = config.executor || executor
 
   for (let i = 0; i < capabilities.length; i++) {
-    const { tool, resource } = capabilities[i]
+    const { tool, resource, prompt } = capabilities[i]
     const warp = warps[i]
 
     if (tool) {
@@ -64,6 +78,23 @@ export const createMcpServerFromWarps = (
           }
           if (resource.meta) content._meta = resource.meta as Record<string, unknown>
           return { contents: [content] }
+        }
+      )
+    }
+
+    if (prompt) {
+      const argsSchemaRaw = buildPromptArgsSchema(prompt)
+      server.registerPrompt(
+        prompt.name,
+        {
+          description: prompt.description || '',
+          argsSchema: argsSchemaRaw as Parameters<typeof server.registerPrompt>[1]['argsSchema'],
+        },
+        (args: Record<string, string>) => {
+          const interpolatedPrompt = interpolatePromptWithArgs(prompt.prompt, args)
+          return {
+            messages: [{ role: 'user' as const, content: { type: 'text' as const, text: interpolatedPrompt } }],
+          }
         }
       )
     }

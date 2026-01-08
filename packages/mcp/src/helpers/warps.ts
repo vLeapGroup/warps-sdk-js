@@ -5,31 +5,37 @@ import {
   WarpBuilder,
   WarpClientConfig,
   WarpMcpAction,
+  WarpPromptAction,
   WarpText,
   getWarpPrimaryAction,
   resolveWarpText,
 } from '@vleap/warps'
-import type { WarpMcpCapabilities, WarpMcpResource, WarpMcpTool } from '../types'
+import type { WarpMcpCapabilities, WarpMcpPrompt, WarpMcpResource, WarpMcpTool } from '../types'
+import { convertPromptActionToPrompt } from './prompts'
 import { convertActionToTool, convertMcpActionToTool } from './tools'
 import { createAppResource } from './ui'
 
 export const convertWarpToMcpCapabilities = async (warp: Warp, config: WarpClientConfig): Promise<WarpMcpCapabilities> => {
   let tool: WarpMcpTool | null = null
   let resource: WarpMcpResource | null = null
+  let prompt: WarpMcpPrompt | null = null
 
   if (warp.ui && warp.ui !== 'table') {
     resource = await createAppResource(warp, warp.ui, config)
   }
 
   if (warp.actions.length === 0) {
-    return { tool: null, resource }
+    return { tool: null, resource, prompt: null }
   }
 
   try {
     const { action: primaryAction } = getWarpPrimaryAction(warp)
     const description = extractTextOrUndefined(warp.description, config) || extractTextOrUndefined(primaryAction.description, config)
 
-    if (primaryAction.type === 'mcp') {
+    if (primaryAction.type === 'prompt') {
+      const promptAction = primaryAction as WarpPromptAction
+      prompt = convertPromptActionToPrompt(warp, promptAction, description, config)
+    } else if (primaryAction.type === 'mcp') {
       const mcpAction = primaryAction as WarpMcpAction
       if (mcpAction.destination) {
         tool = convertMcpActionToTool(warp, mcpAction, description, primaryAction.inputs, resource, config)
@@ -38,11 +44,11 @@ export const convertWarpToMcpCapabilities = async (warp: Warp, config: WarpClien
       tool = convertActionToTool(warp, primaryAction, description, primaryAction.inputs, resource, config)
     }
   } catch (error) {
-    // If getWarpPrimaryAction fails or tool conversion fails, return null tool
-    return { tool: null, resource }
+    // If getWarpPrimaryAction fails or conversion fails, return null capabilities
+    return { tool: null, resource, prompt: null }
   }
 
-  return { tool, resource }
+  return { tool, resource, prompt }
 }
 
 export const convertWarpsToMcpCapabilities = async (warps: Warp[], config: WarpClientConfig): Promise<WarpMcpCapabilities[]> => {

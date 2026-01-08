@@ -1603,4 +1603,104 @@ describe('convertWarpToMcpCapabilities', () => {
       expect(result.resource?.content).toBe(expectedContent)
     })
   })
+
+  describe('prompt action conversion', () => {
+    it('converts Warp with prompt action to MCP prompt', async () => {
+      const warp: Warp = {
+        protocol: 'warp:3.0.0',
+        name: 'Prompt Test',
+        title: { en: 'Prompt Test' },
+        description: { en: 'Test prompt description' },
+        actions: [
+          {
+            type: 'prompt',
+            label: { en: 'Generate' },
+            description: { en: 'Generate a prompt' },
+            prompt: 'Hello {{name}}!',
+            inputs: [
+              {
+                name: 'name',
+                type: 'string',
+                source: 'field',
+                required: true,
+                description: { en: 'Your name' },
+              },
+            ],
+          },
+        ],
+      }
+
+      const result = await convertWarpToMcpCapabilities(warp, mockConfig)
+
+      expect(result.prompt).toBeDefined()
+      expect(result.prompt!.name).toBe('prompt_test')
+      expect(result.prompt!.description).toBe('Test prompt description')
+      expect(result.prompt!.prompt).toBe('Hello {{name}}!')
+      expect(result.prompt!.arguments).toHaveLength(1)
+      expect(result.prompt!.arguments![0].name).toBe('name')
+      expect(result.prompt!.arguments![0].description).toBe('Your name')
+      expect(result.prompt!.arguments![0].required).toBe(true)
+      expect(result.tool).toBeNull()
+    })
+
+    it('converts Warp with prompt action without inputs', async () => {
+      const warp: Warp = {
+        protocol: 'warp:3.0.0',
+        name: 'Static Prompt',
+        title: { en: 'Static Prompt' },
+        description: { en: 'A static prompt' },
+        actions: [
+          {
+            type: 'prompt',
+            label: { en: 'Get Prompt' },
+            prompt: 'This is a static prompt with no placeholders.',
+          },
+        ],
+      }
+
+      const result = await convertWarpToMcpCapabilities(warp, mockConfig)
+
+      expect(result.prompt).toBeDefined()
+      expect(result.prompt!.name).toBe('static_prompt')
+      expect(result.prompt!.prompt).toBe('This is a static prompt with no placeholders.')
+      expect(result.prompt!.arguments).toBeUndefined()
+      expect(result.tool).toBeNull()
+    })
+
+    it('uses action description when warp description is null', async () => {
+      const warp: Warp = {
+        protocol: 'warp:3.0.0',
+        name: 'No Description',
+        title: { en: 'No Description' },
+        description: null,
+        actions: [
+          {
+            type: 'prompt',
+            label: { en: 'Test' },
+            description: { en: 'Action level description' },
+            prompt: 'Test prompt',
+          },
+        ],
+      }
+
+      const result = await convertWarpToMcpCapabilities(warp, mockConfig)
+
+      expect(result.prompt).toBeDefined()
+      expect(result.prompt!.description).toBe('Action level description')
+    })
+
+    it('returns null prompt for empty actions array', async () => {
+      const warp: Warp = {
+        protocol: 'warp:3.0.0',
+        name: 'Empty Actions',
+        title: { en: 'Empty Actions' },
+        actions: [],
+      }
+
+      const result = await convertWarpToMcpCapabilities(warp, mockConfig)
+
+      expect(result.prompt).toBeNull()
+      expect(result.tool).toBeNull()
+    })
+  })
 })

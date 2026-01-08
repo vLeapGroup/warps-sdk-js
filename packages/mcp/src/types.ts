@@ -30,9 +30,23 @@ export type WarpMcpResource = {
   meta?: ResourceMeta
 }
 
+export type WarpMcpPromptArgument = {
+  name: string
+  description?: string
+  required?: boolean
+}
+
+export type WarpMcpPrompt = {
+  name: string
+  description?: string
+  arguments?: WarpMcpPromptArgument[]
+  prompt: string
+}
+
 export type WarpMcpCapabilities = {
   tool?: WarpMcpTool | null
   resource?: WarpMcpResource | null
+  prompt?: WarpMcpPrompt | null
 }
 
 export type McpToolArgs = Record<string, unknown>
