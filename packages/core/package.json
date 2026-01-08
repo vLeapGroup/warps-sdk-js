@@ -17,7 +17,6 @@
     "build": "tsup",
     "test": "jest --config jest.config.mjs",
     "lint": "tsc --noEmit",
-    "prepare": "npm run build",
     "preversion": "npm run lint && npm run build"
   },
   "author": "",
@@ -38,7 +37,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@x402/core": "^2.0.0",
+    "@x402/core": "^2.1.0",
     "ajv": "^8.17.1",
     "protobufjs": "^8.0.0",
     "qr-code-styling": "^1.9.2"
