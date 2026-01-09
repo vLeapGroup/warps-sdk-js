@@ -60,7 +60,7 @@ export class WarpMultiversxOutput implements AdapterWarpOutput {
 
     const resolvedInputs = extractResolvedInputValues(inputs)
     return {
-      status: tx.status.isSuccessful() ? 'success' : 'error',
+      status: tx.status?.isSuccessful?.() ? 'success' : 'error',
       warp,
       action: actionIndex,
       user: getWarpWalletAddressFromConfig(this.config, this.chain.name),

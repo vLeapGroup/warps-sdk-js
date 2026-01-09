@@ -163,8 +163,8 @@ export class WarpMultiversxDataLoader implements AdapterWarpDataLoader {
   }
 
   private toActionStatus(tx: TransactionOnNetwork): WarpChainActionStatus {
-    if (tx.status.isSuccessful()) return 'success'
-    if (tx.status.isFailed()) return 'failed'
+    if (tx.status?.isSuccessful?.()) return 'success'
+    if (tx.status?.isFailed?.()) return 'failed'
     return 'pending'
   }
 

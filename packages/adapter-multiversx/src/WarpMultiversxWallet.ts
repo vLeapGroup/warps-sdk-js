@@ -1,4 +1,4 @@
-import { Address, NetworkEntrypoint } from '@multiversx/sdk-core'
+import { Address, NetworkEntrypoint, Transaction } from '@multiversx/sdk-core'
 import {
   AdapterWarpWallet,
   CacheTtl,
@@ -34,34 +34,35 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
   }
 
   async signTransaction(tx: WarpAdapterGenericTransaction): Promise<WarpAdapterGenericTransaction> {
-    if (!tx || typeof tx !== 'object') throw new Error('Invalid transaction object')
+    const castedTx = tx as Transaction
+    if (!castedTx || typeof castedTx !== 'object') throw new Error('Invalid transaction object')
     if (!this.walletProvider) throw new Error('No wallet provider available')
     if (this.walletProvider instanceof ReadOnlyWalletProvider) throw new Error(`Wallet (${this.chain.name}) is read-only`)
 
     if (this.walletProvider instanceof PrivateKeyWalletProvider || this.walletProvider instanceof MnemonicWalletProvider) {
       const account = this.walletProvider.getAccountInstance()
-      if (tx.nonce === 0n) {
+      if (castedTx.nonce === 0n) {
         const nonceOnNetwork = await this.entry.recallAccountNonce(account.address)
         const nonceInCache = this.cache.get<number>(`nonce:${account.address.toBech32()}`) || 0
         const highestNonce = BigInt(Math.max(nonceInCache, Number(nonceOnNetwork)))
-        tx.nonce = highestNonce
+        castedTx.nonce = highestNonce
       }
-    } else if (tx.nonce === 0n && this.cachedAddress) {
+    } else if (castedTx.nonce === 0n && this.cachedAddress) {
       const address = Address.newFromBech32(this.cachedAddress)
       const nonceOnNetwork = await this.entry.recallAccountNonce(address)
       const nonceInCache = this.cache.get<number>(`nonce:${this.cachedAddress}`) || 0
       const highestNonce = BigInt(Math.max(nonceInCache, Number(nonceOnNetwork)))
-      tx.nonce = highestNonce
+      castedTx.nonce = highestNonce
     }
 
-    const signedTx = await this.walletProvider.signTransaction(tx)
+    const signedTx = await this.walletProvider.signTransaction(castedTx)
 
     if (this.walletProvider instanceof PrivateKeyWalletProvider || this.walletProvider instanceof MnemonicWalletProvider) {
       const account = this.walletProvider.getAccountInstance()
       const newNonce = Number(account.nonce) + 1
       this.cache.set(`nonce:${account.address.toBech32()}`, newNonce, CacheTtl.OneMinute)
     } else if (this.cachedAddress) {
-      const currentNonce = tx.nonce ? Number(tx.nonce) : 0
+      const currentNonce = castedTx.nonce ? Number(castedTx.nonce) : 0
       this.cache.set(`nonce:${this.cachedAddress}`, currentNonce + 1, CacheTtl.OneMinute)
     }
 
@@ -87,9 +88,10 @@ export class WarpMultiversxWallet implements AdapterWarpWallet {
   }
 
   async sendTransaction(tx: WarpAdapterGenericTransaction): Promise<string> {
-    if (!tx || typeof tx !== 'object') throw new Error('Invalid transaction object')
-    if (!tx.signature || tx.signature.length === 0) throw new Error('Transaction must be signed before sending')
-    return await this.entry.sendTransaction(tx)
+    const castedTx = tx as Transaction
+    if (!castedTx || typeof castedTx !== 'object') throw new Error('Invalid transaction object')
+    if (!castedTx.signature || castedTx.signature.length === 0) throw new Error('Transaction must be signed before sending')
+    return await this.entry.sendTransaction(castedTx)
   }
 
   async importFromMnemonic(mnemonic: string): Promise<WarpWalletDetails> {
