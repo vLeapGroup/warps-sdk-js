@@ -5,20 +5,61 @@ type CreateAgenticWalletResponse = {
 }
 type SignMessageRequest = { message: string; walletAddress: string }
 type SignMessageResponse = { address: string; signature: string; message: string; version: number; signer: string; txHash?: string }
+type SignTransactionRequest = {
+  userId?: string
+  walletAddress?: string
+  send?: boolean
+  relay?: boolean
+  transaction: {
+    sender?: string
+    receiver: string
+    value: string
+    data?: string
+    gasLimit: number
+    gasPrice: number
+    nonce?: number
+  }
+}
+type SignTransactionResponse = {
+  status: string
+  data: {
+    transaction: {
+      nonce: number
+      value: string
+      receiver: string
+      sender: string
+      gasPrice: number
+      gasLimit: number
+      chainID: string
+      version: number
+      signature: string
+    }
+    sender: string
+    receiver: string
+    timestamp: string
+  }
+}
 
 export class GaupaApiClient {
-  private readonly baseUrl: string
-  private readonly apiKey: string
   private readonly publicKey: string
+  private readonly apiKey: string
+  private readonly baseUrl: string
 
-  constructor(apiKey: string, apiUrl: string, publicKey: string) {
-    this.apiKey = apiKey
+  constructor(publicKey: string, apiKey: string, apiUrl: string) {
     this.publicKey = publicKey
+    this.apiKey = apiKey
     this.baseUrl = apiUrl.replace(/\/$/, '')
   }
 
   async createAgenticWallet(request: CreateAgenticWalletRequest): Promise<CreateAgenticWalletResponse> {
     return this.request<CreateAgenticWalletResponse>('/manage/create-agentic-wallet', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    })
+  }
+
+  async signTransaction(request: SignTransactionRequest): Promise<SignTransactionResponse> {
+    return await this.request<SignTransactionResponse>('/manage/submit-agentic-transaction', {
       method: 'POST',
       body: JSON.stringify(request),
     })
@@ -44,11 +85,23 @@ export class GaupaApiClient {
       headers,
     })
 
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => 'Unknown error')
-      throw new Error(`Gaupa API error (${response.status}): ${errorText}`)
+    const responseStatus = response.status
+    let responseBody: string | undefined
+
+    try {
+      responseBody = await response.text()
+    } catch (error) {
+      responseBody = `Failed to read response body: ${error}`
     }
 
-    return response.json()
+    if (!response.ok) {
+      throw new Error(`Gaupa API error (${responseStatus}): ${responseBody || 'Unknown error'}`)
+    }
+
+    try {
+      return JSON.parse(responseBody || '{}')
+    } catch (error) {
+      throw new Error(`Failed to parse response JSON: ${error}. Response: ${responseBody}`)
+    }
   }
 }

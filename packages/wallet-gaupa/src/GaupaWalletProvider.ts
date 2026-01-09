@@ -1,4 +1,3 @@
-import { Address, Transaction } from '@multiversx/sdk-core'
 import {
   getWarpWalletAddressFromConfig,
   setWarpWalletInConfig,
@@ -8,6 +7,7 @@ import {
   WarpWalletDetails,
   WarpWalletProvider,
 } from '@joai/warps'
+import { Address, Transaction } from '@multiversx/sdk-core'
 import { getGaupaApiUrl } from './config'
 import { GaupaApiClient } from './GaupaApiClient'
 import { ProviderConfig } from './types'
@@ -22,8 +22,7 @@ export class GaupaWalletProvider implements WalletProvider {
     private readonly chain: WarpChainInfo,
     private readonly gaupaConfig: ProviderConfig
   ) {
-    const apiUrl = getGaupaApiUrl(config.env)
-    this.client = new GaupaApiClient(gaupaConfig.apiKey, apiUrl, gaupaConfig.publicKey)
+    this.client = new GaupaApiClient(gaupaConfig.publicKey, gaupaConfig.apiKey, getGaupaApiUrl(config.env))
   }
 
   async getAddress(): Promise<string | null> {
@@ -45,15 +44,11 @@ export class GaupaWalletProvider implements WalletProvider {
     const walletAddress = await this.getAddress()
     if (!walletAddress) throw new Error('GaupaWalletProvider: Wallet address not found')
 
-    const transactionData = this.formatTransactionForApi(tx)
-    const message = JSON.stringify(transactionData)
+    tx.sender = Address.newFromBech32(walletAddress)
+    const result = await this.client.signTransaction(this.formatTransactionForApi(tx))
+    if (!result.data?.transaction?.signature) throw new Error('Gaupa API did not return a valid transaction signature')
 
-    const result = await this.client.signMessage({
-      message,
-      walletAddress,
-    })
-
-    tx.signature = new Uint8Array(Buffer.from(result.signature, 'hex'))
+    tx.signature = new Uint8Array(Buffer.from(result.data.transaction.signature, 'hex'))
 
     return tx
   }
@@ -62,11 +57,7 @@ export class GaupaWalletProvider implements WalletProvider {
     const walletAddress = await this.getAddress()
     if (!walletAddress) throw new Error('GaupaWalletProvider: Wallet address not found')
 
-    const result = await this.client.signMessage({
-      message,
-      walletAddress,
-    })
-
+    const result = await this.client.signMessage({ message, walletAddress })
     if (!result.signature) throw new Error('Gaupa API did not return signature')
 
     return result.signature
@@ -104,13 +95,20 @@ export class GaupaWalletProvider implements WalletProvider {
   }
 
   private formatTransactionForApi(tx: Transaction) {
+    const walletAddress = tx.sender.toBech32()
     return {
-      receiver: tx.receiver.toBech32(),
-      value: tx.value.toString(),
-      ...(tx.data?.length && { data: Buffer.from(tx.data).toString('base64') }),
-      gasLimit: Number(tx.gasLimit),
-      gasPrice: Number(tx.gasPrice),
-      ...(tx.nonce !== undefined && { nonce: Number(tx.nonce) }),
+      walletAddress,
+      send: false,
+      relay: false,
+      transaction: {
+        sender: walletAddress,
+        receiver: tx.receiver.toBech32(),
+        value: tx.value.toString(),
+        gasLimit: Number(tx.gasLimit),
+        gasPrice: Number(tx.gasPrice),
+        ...(tx.nonce !== undefined && { nonce: Number(tx.nonce) }),
+        ...(tx.data?.length && { data: Buffer.from(tx.data).toString('base64') }),
+      },
     }
   }
 }
