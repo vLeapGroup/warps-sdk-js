@@ -1,5 +1,11 @@
 # @joai/warps-wallet-gaupa
 
+## 1.0.0-beta.12
+
+### Patch Changes
+
+- 404df12: update wallet gaupa provider
+
 ## 1.0.0-beta.11
 
 ### Major Changes

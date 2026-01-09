@@ -1,5 +1,11 @@
 # @joai/warps-adapter-multiversx
 
+## 1.0.0-beta.100
+
+### Patch Changes
+
+- 5850188: update mvx tx handling
+
 ## 1.0.0-beta.99
 
 ### Major Changes
