@@ -1,4 +1,4 @@
-type CreateAgenticWalletRequest = { shard?: number }
+type CreateAgenticWalletRequest = { shard?: number; userId?: string }
 type CreateAgenticWalletResponse = {
   success: boolean
   wallet: { address_multiversx: string; address_evm?: string; shard?: number | null }
