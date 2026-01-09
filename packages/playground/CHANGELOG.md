@@ -1,5 +1,15 @@
 # @warps/playground
 
+## 1.0.0-beta.175
+
+### Patch Changes
+
+- Updated dependencies [51ab733]
+- Updated dependencies [1e420bd]
+- Updated dependencies [fb14dd2]
+  - @joai/warps@3.0.0-beta.199
+  - @joai/warps-adapter-solana@1.0.0-beta.24
+
 ## 1.0.0-beta.174
 
 ### Patch Changes

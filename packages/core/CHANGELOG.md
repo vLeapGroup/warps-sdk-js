@@ -1,5 +1,12 @@
 # @vleap/warp-sdk-core
 
+## 3.0.0-beta.199
+
+### Patch Changes
+
+- 51ab733: add warp user
+- 1e420bd: add evm chain names constant
+
 ## 3.0.0-beta.198
 
 ### Major Changes
