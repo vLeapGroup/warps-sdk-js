@@ -1298,7 +1298,7 @@ describe('convertWarpToMcpCapabilities', () => {
             address: 'erd1test',
           },
         ],
-        ui: 'https://example.com/app.html',
+        ui: 'https://example.com/component.js',
         meta: {
           chain: 'multiversx' as WarpChainName,
           identifier: 'app_test',
@@ -1309,8 +1309,8 @@ describe('convertWarpToMcpCapabilities', () => {
         },
       }
 
-      const mockHtml = '<html><head></head><body>Test App</body></html>'
-      fetchMock.mockResponseOnce(mockHtml)
+      const mockComponentCode = 'console.log("test");'
+      fetchMock.mockResponseOnce(mockComponentCode)
 
       const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
@@ -1319,13 +1319,12 @@ describe('convertWarpToMcpCapabilities', () => {
       expect(result.resource?.name).toBe('app_test')
       expect(result.resource?.uri).toBe('ui://widget/app_test')
       expect(result.resource?.mimeType).toBe('text/html+skybridge')
-      const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
-        warp: { name: 'app_test', title: 'App Test', description: 'Test app' },
-      })}</script>`
-      expect(result.resource?.content).toBe(`${dataScript}\nTest App`)
+      expect(result.resource?.content).toBe(
+        `<div id="root"></div>\n<script type="module">console.log("test");</script>`,
+      )
     })
 
-    it('inlines CSS resources', async () => {
+    it('creates app resource with bundled component', async () => {
       const warp: Warp = {
         protocol: 'warp:3.0.0',
         name: 'css_test',
@@ -1338,7 +1337,7 @@ describe('convertWarpToMcpCapabilities', () => {
             address: 'erd1test',
           },
         ],
-        ui: 'https://example.com/app.html',
+        ui: 'https://example.com/component.js',
         meta: {
           chain: 'multiversx' as WarpChainName,
           identifier: 'css_test',
@@ -1349,21 +1348,18 @@ describe('convertWarpToMcpCapabilities', () => {
         },
       }
 
-      const mockHtml = '<html><head><link rel="stylesheet" href="styles.css"></head><body></body></html>'
-      const mockCss = 'body { color: red; }'
-
-      fetchMock.mockResponseOnce(mockHtml).mockResponseOnce(mockCss)
+      const mockComponentCode = 'import React from "react"; console.log("test");'
+      fetchMock.mockResponseOnce(mockComponentCode)
 
       const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
       expect(result.resource).toBeDefined()
-      const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
-        warp: { name: 'css_test', title: 'CSS Test' },
-      })}</script>`
-      expect(result.resource?.content).toBe(`${dataScript}\n<style>body { color: red; }</style>`)
+      expect(result.resource?.content).toBe(
+        `<div id="root"></div>\n<script type="module">import React from "react"; console.log("test");</script>`,
+      )
     })
 
-    it('inlines JavaScript resources', async () => {
+    it('creates app resource with JavaScript component', async () => {
       const warp: Warp = {
         protocol: 'warp:3.0.0',
         name: 'js_test',
@@ -1376,7 +1372,7 @@ describe('convertWarpToMcpCapabilities', () => {
             address: 'erd1test',
           },
         ],
-        ui: 'https://example.com/app.html',
+        ui: 'https://example.com/component.js',
         meta: {
           chain: 'multiversx' as WarpChainName,
           identifier: 'js_test',
@@ -1387,58 +1383,17 @@ describe('convertWarpToMcpCapabilities', () => {
         },
       }
 
-      const mockHtml = '<html><head></head><body><script src="app.js"></script></body></html>'
-      const mockJs = "console.log('test');"
-
-      fetchMock.mockResponseOnce(mockHtml).mockResponseOnce(mockJs)
+      const mockComponentCode = "console.log('test');"
+      fetchMock.mockResponseOnce(mockComponentCode)
 
       const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
       expect(result.resource).toBeDefined()
-      const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
-        warp: { name: 'js_test', title: 'JS Test' },
-      })}</script>`
-      expect(result.resource?.content).toBe(`${dataScript}\n<script>console.log('test');</script>`)
+      expect(result.resource?.content).toBe(
+        `<div id="root"></div>\n<script type="module">console.log('test');</script>`,
+      )
     })
 
-    it('handles relative URLs in resources', async () => {
-      const warp: Warp = {
-        protocol: 'warp:3.0.0',
-        name: 'relative_url_test',
-        title: { en: 'Relative URL Test' },
-        description: null,
-        actions: [
-          {
-            type: 'transfer',
-            label: { en: 'Transfer' },
-            address: 'erd1test',
-          },
-        ],
-        ui: 'https://example.com/path/app.html',
-        meta: {
-          chain: 'multiversx' as WarpChainName,
-          identifier: 'relative_url_test',
-          query: null,
-          hash: 'test_hash',
-          creator: 'test_creator',
-          createdAt: '2024-01-01T00:00:00Z',
-        },
-      }
-
-      const mockHtml = '<html><head><link rel="stylesheet" href="../styles.css"></head><body></body></html>'
-      const mockCss = 'body { margin: 0; }'
-
-      fetchMock.mockResponseOnce(mockHtml).mockResponseOnce(mockCss)
-
-      const result = await convertWarpToMcpCapabilities(warp, mockConfig)
-
-      expect(fetchMock).toHaveBeenCalledWith('https://example.com/styles.css')
-      expect(result.resource).toBeDefined()
-      const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
-        warp: { name: 'relative_url_test', title: 'Relative URL Test' },
-      })}</script>`
-      expect(result.resource?.content).toBe(`${dataScript}\n<style>body { margin: 0; }</style>`)
-    })
 
     it('handles failed resource downloads gracefully', async () => {
       const warp: Warp = {
@@ -1466,15 +1421,12 @@ describe('convertWarpToMcpCapabilities', () => {
 
       const mockHtml = '<html><head><link rel="stylesheet" href="missing.css"></head><body></body></html>'
 
-      fetchMock.mockResponseOnce(mockHtml).mockResponseOnce('', { status: 404 })
+      fetchMock.mockResponseOnce(mockHtml)
 
       const result = await convertWarpToMcpCapabilities(warp, mockConfig)
 
       expect(result.resource).toBeDefined()
-      const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
-        warp: { name: 'failed_resource_test', title: 'Failed Resource Test' },
-      })}</script>`
-      expect(result.resource?.content?.trim()).toBe(dataScript)
+      expect(result.resource?.content?.trim()).toBe(mockHtml)
     })
 
     it('skips app when set to table', async () => {
@@ -1552,56 +1504,9 @@ describe('convertWarpToMcpCapabilities', () => {
       fetchMock.mockResponseOnce(mockHtml)
 
       const result = await convertWarpToMcpCapabilities(warp, mockConfig)
-
-      const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
-        warp: { name: 'metadata_test', title: 'Metadata Test', description: 'Test description' },
-      })}</script>`
-      expect(result.resource?.content).toBe(`${dataScript}\nTest`)
+      expect(result.resource?.content).toBe(mockHtml)
     })
 
-    it('handles multiple CSS and JS resources in parallel', async () => {
-      const warp: Warp = {
-        protocol: 'warp:3.0.0',
-        name: 'multiple_resources_test',
-        title: { en: 'Multiple Resources Test' },
-        description: null,
-        actions: [
-          {
-            type: 'transfer',
-            label: { en: 'Transfer' },
-            address: 'erd1test',
-          },
-        ],
-        ui: 'https://example.com/app.html',
-        meta: {
-          chain: 'multiversx' as WarpChainName,
-          identifier: 'multiple_resources_test',
-          query: null,
-          hash: 'test_hash',
-          creator: 'test_creator',
-          createdAt: '2024-01-01T00:00:00Z',
-        },
-      }
-
-      const mockHtml =
-        '<html><head><link rel="stylesheet" href="style1.css"><link rel="stylesheet" href="style2.css"></head><body><script src="app1.js"></script><script src="app2.js"></script></body></html>'
-
-      fetchMock
-        .mockResponseOnce(mockHtml)
-        .mockResponseOnce('body { color: red; }')
-        .mockResponseOnce('body { margin: 0; }')
-        .mockResponseOnce("console.log('app1');")
-        .mockResponseOnce("console.log('app2');")
-
-      const result = await convertWarpToMcpCapabilities(warp, mockConfig)
-
-      expect(result.resource).toBeDefined()
-      const dataScript = `<script type="application/json" id="warp-app-data">${JSON.stringify({
-        warp: { name: 'multiple_resources_test', title: 'Multiple Resources Test' },
-      })}</script>`
-      const expectedContent = `${dataScript}\n<style>body { color: red; }</style><style>body { margin: 0; }</style><script>console.log('app1');</script><script>console.log('app2');</script>`
-      expect(result.resource?.content).toBe(expectedContent)
-    })
   })
 
   describe('prompt action conversion', () => {
