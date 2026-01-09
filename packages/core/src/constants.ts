@@ -14,6 +14,14 @@ export enum WarpChainName {
   Near = 'near',
 }
 
+export const EvmWalletChainNames: WarpChainName[] = [
+  WarpChainName.Ethereum,
+  WarpChainName.Base,
+  WarpChainName.Arbitrum,
+  WarpChainName.Polygon,
+  WarpChainName.Somnia,
+]
+
 export const WarpConstants = {
   HttpProtocolPrefix: 'https://',
 
