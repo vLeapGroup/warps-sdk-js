@@ -3,6 +3,8 @@ declare module '@solana/kit' {
     signMessage: (message: Uint8Array) => Promise<Uint8Array>
     signTransaction: (transaction: unknown) => Promise<unknown>
   }>
+  
+  export function isDurableNonceTransaction(transaction: any): boolean
 }
 
 declare module '@x402/svm/exact/client' {
