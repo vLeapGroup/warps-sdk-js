@@ -32,6 +32,13 @@ export type WarpWalletDetails = {
   externalId?: string | null
 }
 
+export type WarpUser = {
+  id?: string
+  name?: string
+  email?: string
+  wallets?: WarpUserWallets
+}
+
 export type WarpUserWallets = Partial<Record<WarpChainName, WarpWalletDetails | string | null>>
 
 export type WarpProviderPreferences = Partial<Record<WarpChainEnv, string | WarpProviderConfig>>
@@ -46,10 +53,7 @@ export type WarpClientConfig = {
   clientUrl?: string
   currentUrl?: string
   vars?: Record<string, string | number>
-  user?: {
-    id?: string
-    wallets?: WarpUserWallets
-  }
+  user?: WarpUser
   preferences?: {
     locale?: WarpLocale
     theme?: WarpTheme
