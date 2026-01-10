@@ -12,7 +12,7 @@ describe('createAppResource', () => {
     fetchMock.resetMocks()
   })
 
-  it('creates app resource with bundled component from URL', async () => {
+  it('creates app resource with HTML component from URL', async () => {
     const warp: Warp = {
       protocol: 'warp:3.0.0',
       name: 'test_app',
@@ -25,7 +25,7 @@ describe('createAppResource', () => {
           address: 'erd1test',
         },
       ],
-      ui: 'https://example.com/component.js',
+      ui: 'https://example.com/app.html',
       meta: {
         chain: 'multiversx' as WarpChainName,
         identifier: 'test_app',
@@ -36,17 +36,23 @@ describe('createAppResource', () => {
       },
     }
 
-    const mockComponentCode = `import React from 'react';
-import { createRoot } from 'react-dom/client';
+    const mockHtmlContent = `<!DOCTYPE html>
+<html data-theme="auto">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<style>body { margin: 0; }</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="module">
+console.log('Hello World');
+</script>
+</body>
+</html>`
 
-function App() {
-  return React.createElement('div', null, 'Hello World');
-}
-
-const root = createRoot(document.getElementById('root'));
-root.render(React.createElement(App));`
-
-    fetchMock.mockResponseOnce(mockComponentCode)
+    fetchMock.mockResponseOnce(mockHtmlContent)
 
     const result = await createAppResource(warp, warp.ui!, mockConfig)
 
@@ -55,8 +61,7 @@ root.render(React.createElement(App));`
     expect(result!.uri).toBe('ui://widget/test_app')
     expect(result!.mimeType).toBe('text/html+skybridge')
     expect(result!.description).toBe('ChatGPT app for test_app')
-    expect(result!.content).toBe(`<div id="root"></div>
-<script type="module">${mockComponentCode}</script>`.trim())
+    expect(result!.content).toBe(mockHtmlContent)
   })
 
   it('handles component download failure', async () => {
@@ -72,7 +77,7 @@ root.render(React.createElement(App));`
           address: 'erd1test',
         },
       ],
-      ui: 'https://example.com/missing.js',
+      ui: 'https://example.com/missing.html',
       meta: {
         chain: 'multiversx' as WarpChainName,
         identifier: 'download_fail_test',
@@ -90,7 +95,7 @@ root.render(React.createElement(App));`
     expect(result).toBeNull()
   })
 
-  it('creates widget template with minimal structure', async () => {
+  it('loads HTML content directly', async () => {
     const warp: Warp = {
       protocol: 'warp:3.0.0',
       name: 'structure_test',
@@ -103,7 +108,7 @@ root.render(React.createElement(App));`
           address: 'erd1test',
         },
       ],
-      ui: 'https://example.com/component.js',
+      ui: 'https://example.com/app.html',
       meta: {
         chain: 'multiversx' as WarpChainName,
         identifier: 'structure_test',
@@ -114,17 +119,22 @@ root.render(React.createElement(App));`
       },
     }
 
-    const mockComponentCode = 'console.log("test");'
-    fetchMock.mockResponseOnce(mockComponentCode)
+    const mockHtmlContent = `<!DOCTYPE html>
+<html>
+<body>
+<div id="root"></div>
+<script type="module">console.log("test");</script>
+</body>
+</html>`
+    fetchMock.mockResponseOnce(mockHtmlContent)
 
     const result = await createAppResource(warp, warp.ui!, mockConfig)
 
     expect(result).toBeDefined()
-    expect(result!.content).toBe(`<div id="root"></div>
-<script type="module">${mockComponentCode}</script>`.trim())
+    expect(result!.content).toBe(mockHtmlContent)
     expect(result!.content).toMatch(/<div id="root"><\/div>/)
     expect(result!.content).toMatch(/<script type="module">/)
-    expect(result!.content).toContain(mockComponentCode)
+    expect(result!.content).toContain('console.log("test");')
   })
 
   it('returns null when warp has no meta identifier', async () => {
@@ -140,18 +150,18 @@ root.render(React.createElement(App));`
           address: 'erd1test',
         },
       ],
-      ui: 'https://example.com/component.js',
+      ui: 'https://example.com/app.html',
     }
 
-    const mockComponentCode = 'console.log("test");'
-    fetchMock.mockResponseOnce(mockComponentCode)
+    const mockHtmlContent = '<!DOCTYPE html><html><body><div id="root"></div></body></html>'
+    fetchMock.mockResponseOnce(mockHtmlContent)
 
     const result = await createAppResource(warp, warp.ui!, mockConfig)
 
     expect(result).toBeNull()
   })
 
-  it('loads component from local file path', async () => {
+  it('rejects non-URL paths', async () => {
     const warp: Warp = {
       protocol: 'warp:3.0.0',
       name: 'local_file_test',
@@ -164,7 +174,7 @@ root.render(React.createElement(App));`
           address: 'erd1test',
         },
       ],
-      ui: './dist/component.js',
+      ui: './dist/app.html',
       meta: {
         chain: 'multiversx' as WarpChainName,
         identifier: 'local_file_test',
@@ -175,23 +185,8 @@ root.render(React.createElement(App));`
       },
     }
 
-    // Create a temporary file for testing
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'warp-test-'))
-    const componentPath = path.join(tempDir, 'component.js')
-    const componentCode = 'console.log("local component");'
-    fs.writeFileSync(componentPath, componentCode)
+    const result = await createAppResource(warp, warp.ui!, mockConfig)
 
-    try {
-      const result = await createAppResource(warp, componentPath, mockConfig)
-
-      expect(result).toBeDefined()
-      expect(result!.name).toBe('local_file_test')
-      expect(result!.content).toBe(`<div id="root"></div>
-<script type="module">${componentCode}</script>`.trim())
-    } finally {
-      // Cleanup
-      fs.unlinkSync(componentPath)
-      fs.rmdirSync(tempDir)
-    }
+    expect(result).toBeNull()
   })
 })
