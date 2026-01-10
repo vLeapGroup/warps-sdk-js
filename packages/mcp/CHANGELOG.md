@@ -1,5 +1,11 @@
 # @joai/warps-mcp
 
+## 1.0.0-beta.31
+
+### Patch Changes
+
+- 5dd8d65: update mcp tool names
+
 ## 1.0.0-beta.30
 
 ### Patch Changes
