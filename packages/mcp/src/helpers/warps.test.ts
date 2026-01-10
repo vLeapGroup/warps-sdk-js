@@ -1376,9 +1376,8 @@ describe('convertWarpToMcpCapabilities', () => {
       expect(result.resource?.uri).toBe('ui://widget/app_test')
       expect(result.resource?.mimeType).toBe('text/html+skybridge')
       expect(result.resource?.content).toBe(
-        `<div id="root"></div>\n<script type="module">console.log("test");</script>`,
+        `<html><head></head><body><div id="root"></div>\n<script type="module">${mockComponentCode}</script></body></html>`,
       )
-    })
 
     it('creates app resource with bundled component', async () => {
       const warp: Warp = {
@@ -1411,7 +1410,7 @@ describe('convertWarpToMcpCapabilities', () => {
 
       expect(result.resource).toBeDefined()
       expect(result.resource?.content).toBe(
-        `<div id="root"></div>\n<script type="module">import React from "react"; console.log("test");</script>`,
+        `<html><head></head><body><div id="root"></div>\n<script type="module">${mockComponentCode}</script></body></html>`,
       )
     })
 
@@ -1446,7 +1445,7 @@ describe('convertWarpToMcpCapabilities', () => {
 
       expect(result.resource).toBeDefined()
       expect(result.resource?.content).toBe(
-        `<div id="root"></div>\n<script type="module">console.log('test');</script>`,
+        `<html><head></head><body><div id="root"></div>\n<script type="module">${mockComponentCode}</script></body></html>`,
       )
     })
 
@@ -1499,6 +1498,10 @@ describe('convertWarpToMcpCapabilities', () => {
           },
         ],
         ui: 'table',
+        meta: {
+          identifier: 'table_test',
+          source: 'https://example.com/warp.json',
+        },
       }
 
       const result = await convertWarpToMcpCapabilities(warp, mockConfig)
@@ -1522,6 +1525,10 @@ describe('convertWarpToMcpCapabilities', () => {
           },
         ],
         ui: 'https://example.com/missing.html',
+        meta: {
+          identifier: 'download_fail_test',
+          source: 'https://example.com/warp.json',
+        },
       }
 
       fetchMock.mockResponseOnce('', { status: 404 })
