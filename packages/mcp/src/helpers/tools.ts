@@ -22,18 +22,6 @@ const extractEnumValues = (options: string[] | { [key: string]: WarpText } | und
   return undefined
 }
 
-const sanitizeMcpName = (name: string): string => {
-  return (name.includes(':') ? name.split(':').slice(1).join(':') : name)
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, '_')
-    .replace(/:/g, '_')
-    .replace(/[^a-z0-9_.-]/g, '_')
-    .replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, '')
-    .replace(/[_-]+/g, (match) => (match.includes('_') ? '_' : match))
-    .replace(/_+/g, '_')
-}
-
 const buildZodSchemaFromInput = (input: WarpActionInput, config: WarpClientConfig): z.ZodTypeAny => {
   let schema: z.ZodTypeAny
 
@@ -131,9 +119,7 @@ export const convertActionToTool = (
   resource: WarpMcpResource | null,
   config: WarpClientConfig
 ): WarpMcpTool => {
-  const warpIdentifier = warp.meta?.identifier
-  if (!warpIdentifier) throw new Error(`Warp identifier for warp ${warp.name} is required`)
-  const name = cleanWarpIdentifier(warpIdentifier)
+  const name = deriveToolNameFromWarp(warp)
   const inputsToUse = primaryActionInputs || action.inputs || []
   const inputSchema = buildZodInputSchema(inputsToUse, config)
 
@@ -164,8 +150,8 @@ export const convertMcpActionToTool = (
 ): WarpMcpTool => {
   const inputsToUse = primaryActionInputs || action.inputs || []
   const inputSchema = buildZodInputSchema(inputsToUse, config)
-  const toolName = action.destination!.tool
-  const name = sanitizeMcpName(toolName)
+  const name = action.destination?.tool
+  if (!name) throw new Error(`Tool name is required for MCP action ${action.type}`)
 
   const tool: WarpMcpTool = {
     name,
@@ -196,4 +182,12 @@ const buildToolMeta = (warp: Warp, resource: WarpMcpResource | null, config: War
   }
 
   return meta
+}
+
+const deriveToolNameFromWarp = (warp: Warp): string => {
+  const warpIdentifier = warp.meta?.identifier
+  if (!warpIdentifier) throw new Error(`Warp identifier for warp ${warp.name} is required`)
+  const cleanedIdentifier = cleanWarpIdentifier(warpIdentifier)
+  const validIdentifier = cleanedIdentifier.replace(':', '.') // Colons are not allowed per MCP specification
+  return validIdentifier
 }
