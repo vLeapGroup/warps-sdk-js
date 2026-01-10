@@ -105,6 +105,9 @@ const runWarp = async (warpFile: string) => {
   const config: WarpClientConfig = {
     ...tempConfig,
     user: {
+      id: '123',
+      email: 'test@test.com',
+      name: 'Test Agent',
       wallets: {
         ...filteredWallets,
         [Chain]: walletForChain,
