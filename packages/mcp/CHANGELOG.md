@@ -1,5 +1,11 @@
 # @joai/warps-mcp
 
+## 1.0.0-beta.29
+
+### Patch Changes
+
+- d27f2b9: update warp ui templating
+
 ## 1.0.0-beta.28
 
 ### Patch Changes
