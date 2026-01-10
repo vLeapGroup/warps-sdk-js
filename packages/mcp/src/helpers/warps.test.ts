@@ -759,6 +759,10 @@ describe('convertWarpToMcpCapabilities', () => {
           ],
         },
       ],
+      meta: {
+        identifier: 'transfer_test',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
@@ -790,6 +794,10 @@ describe('convertWarpToMcpCapabilities', () => {
           ],
         },
       ],
+      meta: {
+        identifier: 'contract_test',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
@@ -811,6 +819,10 @@ describe('convertWarpToMcpCapabilities', () => {
           func: 'getBalance',
         },
       ],
+      meta: {
+        identifier: 'query_test',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
@@ -844,6 +856,10 @@ describe('convertWarpToMcpCapabilities', () => {
           ],
         },
       ],
+      meta: {
+        identifier: 'collect_post_test',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
@@ -867,6 +883,10 @@ describe('convertWarpToMcpCapabilities', () => {
           },
         },
       ],
+      meta: {
+        identifier: 'collect_put_test',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
@@ -889,6 +909,10 @@ describe('convertWarpToMcpCapabilities', () => {
           },
         },
       ],
+      meta: {
+        identifier: 'collect_delete_test',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
@@ -912,6 +936,10 @@ describe('convertWarpToMcpCapabilities', () => {
           },
         },
       ],
+      meta: {
+        identifier: 'collect_get_test',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
@@ -935,6 +963,10 @@ describe('convertWarpToMcpCapabilities', () => {
           },
         },
       ],
+      meta: {
+        identifier: 'collect_no_method_test',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
@@ -955,6 +987,10 @@ describe('convertWarpToMcpCapabilities', () => {
           destination: 'https://api.example.com/data',
         },
       ],
+      meta: {
+        identifier: 'collect_string_test',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
@@ -996,6 +1032,10 @@ describe('convertWarpToMcpCapabilities', () => {
           },
         },
       ],
+      meta: {
+        identifier: 'multiple_actions_test',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
@@ -1016,6 +1056,10 @@ describe('convertWarpToMcpCapabilities', () => {
           address: 'erd1test',
         },
       ],
+      meta: {
+        identifier: 'delegate',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
@@ -1037,6 +1081,10 @@ describe('convertWarpToMcpCapabilities', () => {
           address: 'erd1query',
         },
       ],
+      meta: {
+        identifier: 'get_balance_test',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
@@ -1061,6 +1109,10 @@ describe('convertWarpToMcpCapabilities', () => {
           },
         },
       ],
+      meta: {
+        identifier: 'with_colons',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
@@ -1082,6 +1134,10 @@ describe('convertWarpToMcpCapabilities', () => {
           address: 'erd1test',
         },
       ],
+      meta: {
+        identifier: 'tool_with_spaces',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const result = await convertWarpToMcpCapabilities(warp, mockConfig)
@@ -1533,6 +1589,10 @@ describe('convertWarpToMcpCapabilities', () => {
             ],
           },
         ],
+        meta: {
+          identifier: 'prompt_test',
+          source: 'https://example.com/warp.json',
+        },
       }
 
       const result = await convertWarpToMcpCapabilities(warp, mockConfig)
@@ -1561,6 +1621,10 @@ describe('convertWarpToMcpCapabilities', () => {
             prompt: 'This is a static prompt with no placeholders.',
           },
         ],
+        meta: {
+          identifier: 'static_prompt',
+          source: 'https://example.com/warp.json',
+        },
       }
 
       const result = await convertWarpToMcpCapabilities(warp, mockConfig)

@@ -262,6 +262,10 @@ describe('convertActionToTool', () => {
           address: 'erd1test',
         },
       ],
+      meta: {
+        identifier: 'test_warp',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const action = warp.actions[0] as WarpTransferAction
@@ -287,6 +291,10 @@ describe('convertActionToTool', () => {
           address: 'erd1test',
         },
       ],
+      meta: {
+        identifier: 'test_warp',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const action = warp.actions[0] as WarpTransferAction
@@ -313,6 +321,10 @@ describe('convertActionToTool', () => {
       messages: {
         invoking: { en: 'Processing transfer' },
         invoked: { en: 'Transfer completed' },
+      },
+      meta: {
+        identifier: 'test_warp',
+        source: 'https://example.com/warp.json',
       },
     }
 
@@ -343,6 +355,10 @@ describe('convertActionToTool', () => {
         invoking: { de: 'Übertragung wird verarbeitet' },
         invoked: { de: 'Übertragung abgeschlossen' },
       },
+      meta: {
+        identifier: 'test_warp',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const action = warp.actions[0] as WarpTransferAction
@@ -372,6 +388,10 @@ describe('convertActionToTool', () => {
         invoking: 'Starting',
         invoked: 'Done',
       },
+      meta: {
+        identifier: 'test_warp',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const action = warp.actions[0] as WarpTransferAction
@@ -396,6 +416,10 @@ describe('convertActionToTool', () => {
           address: 'erd1test',
         },
       ],
+      meta: {
+        identifier: 'test-warp_with_spaces',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const action = warp.actions[0] as WarpTransferAction
@@ -417,6 +441,10 @@ describe('convertActionToTool', () => {
           address: 'erd1test',
         },
       ],
+      meta: {
+        identifier: 'staking_undelegate',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const action = warp.actions[0] as WarpTransferAction
@@ -447,6 +475,10 @@ describe('convertActionToTool', () => {
           ],
         },
       ],
+      meta: {
+        identifier: 'test_warp',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const action = warp.actions[0] as WarpTransferAction
@@ -477,6 +509,10 @@ describe('convertMcpActionToTool', () => {
       title: { en: 'Test Warp' },
       description: null,
       actions: [],
+      meta: {
+        identifier: 'test_warp',
+        source: 'https://example.com/warp.json',
+      },
     }
 
     const action: WarpMcpAction = {

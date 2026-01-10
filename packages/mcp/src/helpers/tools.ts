@@ -1,4 +1,5 @@
 import {
+  cleanWarpIdentifier,
   Warp,
   WarpActionInput,
   WarpClientConfig,
@@ -130,9 +131,11 @@ export const convertActionToTool = (
   resource: WarpMcpResource | null,
   config: WarpClientConfig
 ): WarpMcpTool => {
+  const warpIdentifier = warp.meta?.identifier
+  if (!warpIdentifier) throw new Error(`Warp identifier for warp ${warp.name} is required`)
+  const name = cleanWarpIdentifier(warpIdentifier)
   const inputsToUse = primaryActionInputs || action.inputs || []
   const inputSchema = buildZodInputSchema(inputsToUse, config)
-  const name = sanitizeMcpName(warp.name)
 
   WarpLogger.info(
     `[MCP] convertActionToTool - tool: ${name}, inputsToUse: ${inputsToUse.length}, inputSchema keys:`,
