@@ -1,7 +1,8 @@
-type CreateAgenticWalletRequest = { shard?: number; userId?: string }
+type CreateAgenticWalletRequest = { email: string; name?: string; shard?: number; userId?: string }
 type CreateAgenticWalletResponse = {
   success: boolean
-  wallet: { address_multiversx: string; address_evm?: string; shard?: number | null }
+  userId: string
+  wallet: WalletResponse
 }
 type SignMessageRequest = { message: string; walletAddress: string }
 type SignMessageResponse = { address: string; signature: string; message: string; version: number; signer: string; txHash?: string }
@@ -38,6 +39,11 @@ type SignTransactionResponse = {
     receiver: string
     timestamp: string
   }
+}
+export type WalletResponse = {
+  address_multiversx: string
+  address_evm?: string
+  shard?: number | null
 }
 
 export class GaupaApiClient {

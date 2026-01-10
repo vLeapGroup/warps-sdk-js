@@ -1,15 +1,17 @@
 import {
+  EvmWalletChainNames,
   getWarpWalletAddressFromConfig,
   setWarpWalletInConfig,
   WalletProvider,
   WarpChainInfo,
+  WarpChainName,
   WarpClientConfig,
   WarpWalletDetails,
   WarpWalletProvider,
 } from '@joai/warps'
 import { Address, Transaction } from '@multiversx/sdk-core'
 import { getGaupaApiUrl } from './config'
-import { GaupaApiClient } from './GaupaApiClient'
+import { GaupaApiClient, WalletResponse } from './GaupaApiClient'
 import { ProviderConfig } from './types'
 
 export class GaupaWalletProvider implements WalletProvider {
@@ -76,22 +78,32 @@ export class GaupaWalletProvider implements WalletProvider {
   }
 
   async generate(): Promise<WarpWalletDetails> {
+    if (!this.config.user?.email) throw new Error('GaupaWalletProvider: Email is required to generate a wallet')
     try {
-      const wallet = await this.client.createAgenticWallet({})
-      if (!wallet.success || !wallet.wallet.address_multiversx) throw new Error('Gaupa API did not return a valid wallet')
+      const remoteWallet = await this.client.createAgenticWallet({ email: this.config.user.email, name: this.config.user.name })
+      if (!remoteWallet.success) throw new Error('Gaupa API did not return a valid wallet')
+      const address = this.getWalletForChainOrFail(remoteWallet.wallet)
+      if (!address) throw new Error('Gaupa API did not return a valid wallet')
 
       const walletDetails: WarpWalletDetails = {
         provider: GaupaWalletProvider.PROVIDER_NAME,
-        address: wallet.wallet.address_multiversx,
+        address,
+        externalId: remoteWallet.userId,
       }
 
       setWarpWalletInConfig(this.config, this.chain.name, walletDetails)
-      this.cachedAddress = wallet.wallet.address_multiversx
+      this.cachedAddress = walletDetails.address
 
       return walletDetails
     } catch (error) {
       throw new Error(`GaupaWalletProvider: Failed to generate wallet: ${error}`)
     }
+  }
+
+  private getWalletForChainOrFail(wallet: WalletResponse): string {
+    if (this.chain.name === WarpChainName.Multiversx && wallet.address_multiversx) return wallet.address_multiversx
+    if (EvmWalletChainNames.includes(this.chain.name) && wallet.address_evm) return wallet.address_evm
+    throw new Error(`GaupaWalletProvider: Unsupported chain: ${this.chain.name}`)
   }
 
   private formatTransactionForApi(tx: Transaction) {
